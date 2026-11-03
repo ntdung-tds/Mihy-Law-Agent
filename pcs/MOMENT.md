@@ -1,25 +1,26 @@
 # AI Law — PCS Chat Solo MOMENT
 
-- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public; canonical branch `main`)
-- **State revision:** `3` (source of truth: `pcs/STATE.json`)
-- **Updated:** `2026-11-03T02:32:12.860Z`
-- **Phase:** POC; Owner acceptance pending
-- **SRS:** v1.1.15 candidate, Owner-supplied archive checksums verified; source package remains outside Public GitHub.
+- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public; canonical branch `main` after checkpoint PR merges)
+- **State revision:** `4` (source: `pcs/STATE.json`)
+- **Updated:** `2026-11-03T02:37:29.333Z`
+- **Phase:** POC; no Owner acceptance or production release
+- **SRS:** v1.1.15 owner-supplied candidate; archive checksums verified; original SRS stays outside public GitHub.
 
-## Verified technical work
+## Last merged technical change
 
-- `AL-POC1-001`: Three pre-fix failures reproduced (cached Word Field result, cross-paragraph field, missing preexisting revision ID); fail-closed protections implemented.
-- Regression **16/16 PASS locally**; SRS static contracts `STATIC_CONTRACT_AND_WORD_PASS`; **79 app test cases NOT_RUN**.
-- LibreOffice rendered a one-page synthetic DOCX; visual QA inspected header, footer and table. **Microsoft Word UI was NOT_RUN.**
-- GitHub Actions run `41566803416` on earlier PR head `2e8049b...` completed with `success`. Latest PR head CI must be checked separately before any merge.
-- Public-safe test metadata: `tests/evidence/AL-POC1-R3-2026-11-03.json`. Raw synthetic DOCX and images are not on GitHub.
+- PR #1, POC1 DOCX field/revision hardening: merged into main at `18e5e809d1380e7cab161a907d34059fea5e9836`.
+- On PR #1 final head `d193392834f64732c5fa8cbf61bff26446ad7582`, GitHub Actions run `41567063066` finished `success`. Local unittest **16/16 PASS**.
+- Three unsafe cases were reproduced before patch then prevented: cached Word Field result, cross-paragraph Word Field, existing revision missing ID. Synthetic header/footer/table preserved. SRS static contract checker PASS.
+- Synthetic DOCX rendered one page with LibreOffice and inspected. No actual Microsoft Word UI validation.
+- Public-safe test metadata: `tests/evidence/AL-POC1-R3-2026-11-03.json`.
 
-## Active task / remaining gates
+## Current task and next action
 
-- `AL-POC1-002` remains **BLOCKED** until real Microsoft Word Accept/Reject and application `TC02C`, `TC07C`, `TCE2E-02` can be executed; no Owner acceptance, no production.
-- The canonical status is the revision read from `main`, not a branch or open PR. Verify the merged SHA and read both PCS files on `main` before claiming persistence.
-- POC2 legal PDF ingestion and POC3 actual PostgreSQL RLS remain PLANNED.
+- `AL-POC1-002` remains **BLOCKED**: Microsoft Word UI Accept/Reject and application tests `TC02C`, `TC07C`, `TCE2E-02` are **NOT_RUN**.
+- Next: Owner reviews controlled fixture; create/execute actual Word UI and approval invalidation E2E evidence when supported. POC1 is not Owner-accepted.
+- POC2 ten authorized PDFs and POC3 real PostgreSQL RLS remain **PLANNED**; not yet tested.
+- `main` is canonical only after this PCS metadata PR is merged and both files are read back at matching revision 4.
 
 ## Publication boundary
 
-Only non-sensitive POC source code, synthetic tests and metadata may be published. No original SRS contents, customer/legal documents, credentials, or screenshots in this Public repository.
+Only public-safe code, synthetic tests and non-sensitive metadata; never commit original SRS text, actual legal/customer documents, secrets or screenshots.
