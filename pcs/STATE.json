@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
   "revision": 19,
-  "updated_at": "2026-11-03T14:49:08.746Z",
+  "updated_at": "2026-11-03T14:53:48.322Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -291,7 +291,7 @@
       {
         "id": "AL-R0-UI-001",
         "title": "Create mobile-first AI Law R0 interactive visual preview shell (no backend)",
-        "status": "IN_PROGRESS",
+        "status": "REVIEW_READY",
         "priority": "P0",
         "scope": "Public-safe demo UI only; overview, synthetic documents, assistant shell, legal research shell, responsive mobile and desktop navigation; no new workflow backend",
         "acceptance": [
@@ -303,17 +303,18 @@
         "tests": {
           "static_local": "PASS_6_OF_6",
           "node_syntax": "PASS",
-          "browser_real": "BLOCKED_LOCAL_BROWSER_NAVIGATION_POLICY",
-          "github_ci": "NOT_RUN",
-          "preview_live": "NOT_DEPLOYED"
+          "browser_real": "PARTIAL_REMOTE_MOBILE_DOM_PASS_FULL_INTERACTION_AND_SCREENSHOT_NOT_RUN_RATE_LIMIT_429",
+          "github_ci": "PASS_111_OF_111_RUN_41657621653_FINAL_HEAD_b7aa76fb70e82ea9b4b54bbb39a60bda0c6167db",
+          "preview_live": "PASS_ISOLATED_CLOUDFLARE_WORKER_BROWSER_RENDERING_MOBILE_DOM"
         },
         "owner_acceptance": "NOT_REQUESTED",
         "evidence": [
           "web/r0-preview/*",
           "tests/test_r0_preview.py",
-          "No real data; static-only UI prototype"
+          "No real data; static-only UI prototype",
+          "Cloudflare isolated Worker ai-law-r0-preview; Workers.dev subdomain enabled/readback; Cloudflare Browser Rendering returned rendered mobile DOM containing synthetic recent-docs rows"
         ],
-        "notes": "Task is solely UI preview for Owner visual review; not real R0 application integration and not completion of SRS workflows."
+        "notes": "Task is solely UI preview for Owner visual review; not real R0 application integration and not completion of SRS workflows. Actual screenshot test blocked by Cloudflare Browser Rendering rate-limit 429. Owner visual sign-off pending."
       }
     ],
     "features": [
@@ -348,7 +349,7 @@
       {
         "id": "R0-UI",
         "name": "Responsive application shell — demonstration-only",
-        "status": "IN_PROGRESS",
+        "status": "IN_REVIEW",
         "tasks": [
           "AL-R0-UI-001"
         ]
@@ -616,11 +617,11 @@
     ],
     "current": {
       "active_task": "AL-R0-UI-001",
-      "last_completed_step": "R0 responsive demo shell implemented locally and local 6/6 static tests plus JS syntax checks PASS; local Chromium navigation is blocked by environment policy, so no actual browser E2E evidence yet. POC1 remains ON_HOLD.",
-      "next_action": "Run GitHub CI, publish isolated Cloudflare preview (not production), verify serving/visibility, request Owner visual feedback. Do not claim real workflows or deploy production.",
+      "last_completed_step": "R0 synthetic responsive visual shell deployed to an isolated nonproduction Cloudflare Worker. GitHub CI 111/111 PASS including Node syntax; Cloudflare Browser Rendering mobile DOM PASS. Screenshot test rate-limited HTTP 429 and complete interactive browser E2E still NOT_RUN; Owner UI feedback pending.",
+      "next_action": "Owner reviews live R0 UI preview on desktop/mobile and gives visual feedback; revise within current SRS scope. Then plan small authenticated R0 application tasks separately without implying backend readiness.",
       "blockers": [
-        "Local Chromium navigation to file/http loopback is BLOCKED_BY_ADMINISTRATOR; actual interactive-browser verification not yet available",
-        "Backend/auth/AI/legal data integration out of UI-shell slice and not tested"
+        "Full visual screenshots and interactive browser E2E NOT_RUN (Cloudflare screenshot API 429; local Chromium loopback/file access blocked).",
+        "Application backend and authenticated SRS workflows not implemented in this demo-only R0 UI shell."
       ]
     },
     "policy": {
