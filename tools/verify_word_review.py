@@ -294,6 +294,15 @@ def check_results(tracked: bytes, accepted: bytes, rejected: bytes, edit: dict) 
     if index >= len(source):
         raise ReviewError("Target paragraph outside source document")
     _assert_only_one_pair(roots["tracked"], source, index, old, new, author, stamp)
+    # This scoped POC accepts exactly one revision pair in document.xml. A
+    # pending revision in a header/footer/other story cannot silently survive
+    # acceptance even if the same part appears unchanged in all three files.
+    for outcome, package in file_parts.items():
+        for part_name, data in package.items():
+            if not (part_name.startswith("word/") and part_name.endswith(".xml")) or part_name == DOC_PART:
+                continue
+            if any(node.tag in REVISIONS for node in _xml(data).iter()):
+                raise ReviewError(f"{outcome}: unresolved revision in {part_name}")
     for outcome, accept in (("accepted", True), ("rejected", False)):
         target = paragraphs[outcome]
         if len(source) != len(target):
