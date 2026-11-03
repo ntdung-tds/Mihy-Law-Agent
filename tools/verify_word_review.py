@@ -96,6 +96,95 @@ def _numbering_signature(paragraphs: list[ET.Element]) -> list[tuple[str | None,
     return result
 
 
+def _normalized_xml(node: ET.Element | None) -> tuple | None:
+    """Prefix-independent signature; ignore serializer-only indentation and Word rsid."""
+    if node is None:
+        return None
+    attrs = tuple(sorted((key, value) for key, value in node.attrib.items()
+                         if not key.startswith(w("rsid"))))
+    raw_text = node.text or ""
+    if not raw_text.strip() and node.tag not in {w("t"), w("delText"), w("instrText")}:
+        raw_text = ""
+    return (node.tag, attrs, raw_text, tuple(_normalized_xml(child) for child in node))
+
+
+def _run_format_signature(paragraph: ET.Element, accept: bool | None = None) -> tuple:
+    """Compare run formatting even when Word splits/merges same-format runs."""
+    segments: list[tuple[str, tuple | None]] = []
+
+    def visit(node: ET.Element) -> None:
+        if node.tag == w("del") and accept is not False:
+            return
+        if node.tag == w("ins") and accept is not True:
+            return
+        if node.tag == w("r"):
+            text = "".join(n.text or "" for n in node if n.tag in {w("t"), w("delText")})
+            if text:
+                signature = _normalized_xml(node.find(w("rPr")))
+                if segments and segments[-1][1] == signature:
+                    previous, fmt = segments[-1]
+                    segments[-1] = (previous + text, fmt)
+                else:
+                    segments.append((text, signature))
+            return
+        for child in node:
+            visit(child)
+
+    visit(paragraph)
+    return (_normalized_xml(paragraph.find(w("pPr"))), tuple(segments))
+
+
+def _paragraph_nontext_signature(paragraph: ET.Element, accept: bool | None = None) -> tuple:
+    """Preserve tab/break/drawing/bookmark/hyperlink markers and their text offsets."""
+    markers: list[tuple] = []
+    offset = 0
+
+    def visit(node: ET.Element) -> None:
+        nonlocal offset
+        if node.tag == w("del") and accept is not False:
+            return
+        if node.tag == w("ins") and accept is not True:
+            return
+        if node.tag in {w("t"), w("delText")}:
+            offset += len(node.text or "")
+            return
+        if node.tag in {w("pPr"), w("rPr")}:
+            return
+        if node.tag in {w("p"), w("r"), w("ins"), w("del")}:
+            for child in node:
+                visit(child)
+            return
+        if node.tag in {w("hyperlink"), w("sdtContent")}:
+            markers.append((offset, node.tag, tuple(sorted(node.attrib.items()))))
+            for child in node:
+                visit(child)
+            return
+        markers.append((offset, _normalized_xml(node)))
+
+    visit(paragraph)
+    return tuple(markers)
+
+
+def _assert_nontext_content_safe(source_parts: dict[str, bytes], result_parts: dict[str, bytes],
+                                 outcome: str) -> None:
+    """Fail closed on changed styles, numbering, theme, fonts, links and media."""
+    def guarded(name: str) -> bool:
+        return (name in {"word/styles.xml", "word/numbering.xml", "word/fontTable.xml", "[Content_Types].xml"}
+                or name.startswith("word/theme/") or name.startswith("word/media/")
+                or (name.startswith("word/") and name.endswith(".rels")))
+
+    for part in sorted(set(source_parts) | set(result_parts)):
+        if not guarded(part):
+            continue
+        if part not in source_parts or part not in result_parts:
+            raise ReviewError(f"{outcome}: protected package part missing/added: {part}")
+        if part.startswith("word/media/"):
+            if source_parts[part] != result_parts[part]:
+                raise ReviewError(f"{outcome}: media payload changed: {part}")
+        elif _normalized_xml(_xml(source_parts[part])) != _normalized_xml(_xml(result_parts[part])):
+            raise ReviewError(f"{outcome}: protected package definition changed: {part}")
+
+
 def _assert_only_one_pair(source: ET.Element, paragraphs: list[ET.Element], index: int,
                           old: str, new: str) -> None:
     revs = [e for e in source.iter() if e.tag in REVISIONS]
@@ -141,13 +230,19 @@ def check_results(tracked: bytes, accepted: bytes, rejected: bytes, edit: dict) 
             actual = _paragraph_text(output_p)
             if actual != expected:
                 raise ReviewError(f"{outcome}: paragraph {para_index} differs from expected content")
-        for kind in ("header", "footer"):
+        if _numbering_signature(source) != _numbering_signature(target):
+            raise ReviewError(f"{outcome}: paragraph style or numbering changed")
+        for para_index, (source_p, output_p) in enumerate(zip(source, target)):
+            if _run_format_signature(source_p, accept=accept) != _run_format_signature(output_p):
+                raise ReviewError(f"{outcome}: paragraph {para_index} run/paragraph formatting changed")
+            if _paragraph_nontext_signature(source_p, accept=accept) != _paragraph_nontext_signature(output_p):
+                raise ReviewError(f"{outcome}: paragraph {para_index} non-text structure changed")
+        _assert_nontext_content_safe(file_parts["tracked"], file_parts[outcome], outcome)
+        for kind in ("header", "footer", "footnotes", "endnotes", "comments"):
             if _other_story_text(file_parts["tracked"], kind) != _other_story_text(file_parts[outcome], kind):
                 raise ReviewError(f"{outcome}: {kind} text changed")
         if _structure_signature(roots["tracked"]) != _structure_signature(roots[outcome]):
             raise ReviewError(f"{outcome}: table structure changed")
-        if _numbering_signature(source) != _numbering_signature(target):
-            raise ReviewError(f"{outcome}: paragraph style or numbering changed")
     return {
         "static_docx_content": "PASS",
         "word_ui_accept_reject": "NOT_VERIFIED_BY_THIS_TOOL",
