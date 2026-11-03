@@ -1,34 +1,32 @@
 # AI Law — PCS Chat Solo MOMENT
 
-- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public; `main` canonical after checkpoint merge).
-- **State revision:** `16` (canonical: `pcs/STATE.json`).
-- **Updated:** `2026-11-03T12:27:25Z`.
-- **Phase:** POC1 technical QA, no Owner acceptance and no production deployment.
-- **SRS:** Owner-supplied v1.1.15 private and unchanged. Original archive checksum previously verified.
+- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public; canonical `main` after checkpoint PR merge).
+- **State revision:** `17` (source: `pcs/STATE.json`).
+- **Updated:** `2026-11-03T12:57:27.089Z`.
+- **Phase:** POC1 real Word Desktop acceptance-gate preparation, not Owner accepted, not production.
+- **SRS:** Owner-provided v1.1.15, checksum-verified; private baseline unchanged.
 
-## R16 bounded reproduce → fix → test → review loop
+## R17 — real Microsoft Word Desktop test-run gate prepared
 
-- Started at PCS revision 15 / GitHub main `243f874fc8e9480eb78bfd1351edf9d93781a62c` with 91/91 synthetic tests PASS.
-- Cycle 1: **96 tests, eight expected failures before fix** (incomplete packages in all three inputs, forged revision author/date, hidden deletion tab, paragraph ID drift, lost space preservation). Corrected single Word-result verifier; **96/96 PASS**.
-- Cycle 2: **99 tests, six expected failures** (pending header revision and invalid revision timestamp). Corrected Word-result gate and generator timestamp validation; **99/99 PASS**.
-- Cycle 3: **103 tests, ten expected failures** (unsupported property/move revisions and newlines/tabs/returns inside text-only runs). Reject unsafe inputs; **103/103 PASS**.
-- Cycle 4: **105 tests, two expected failures** (single/batch generators accepted an existing header revision). Added fail-closed checks of non-target Word parts; **105/105 PASS**.
-- Final bounded cross-check: no new reproducible defect in the tested scope, GitHub Actions run `41635542044` final PR head `dbffb4cc022b298c1d627c3f1b511319d01ce7ae` completed **success**, raw unit log **`Ran 105 tests` / `OK`**. PR #23 merged as `696f7876d1a7d9db9e4c37b970e44623602b68e2`.
-- Controlled R12 test kit: both ZIPs CRC PASS; tracked DOCX contains 3 deletion/insertion pairs; simulated review contains none. Rendered both to one page using LibreOffice; PNGs visually inspected; reviewed content `30 ngày`, `B`, `C`, header/list/table retained. **No Microsoft Word UI was run.**
-- Public-safe evidence: `tests/evidence/AL-POC1-REVIEW-LOOP-R16-2026-11-03.json`.
-- Private Drive test evidence: `AI Law Test Evidence / POC-DOCX-20261103-02 / AL-POC1-TR-20261103-R16_Loop_Test_Evidence.zip`, **104,161 bytes**, metadata read back, file not shared. No private Drive ID in GitHub.
+- **Active task:** `AL-POC1-002` remains **BLOCKED**, not TECH_DONE.
+- Verified prior main at `2ad3ca7a55c7218f74b800b58fb7e769a46c55b8` and PCS revision 16.
+- Inspected authoritative private SRS `POC/POC_PROTOCOL.md`: POC1 PASS requires actual Word open/Accept/Reject/reopen, correct content, header/table/numbering, input/output SHA-256, screenshots before/after, tester and test_run_id; synthetic OOXML alone does not qualify.
+- Prepared private human-executable test run `AL-POC1-TR-20261103-WORD-UI-01` with **two independent scenarios**: one-edit Accept-All / Reject-All on separate copies; selected 3-edit batch Accept [0,1], Reject [2]. Inputs are **synthetic only**.
+- Verified original R5 single and R12 mixed tracked fixture hashes. Prepared execution ZIP `AI_Law_POC1_Word_Desktop_Execution_Gate_R17.zip`, **75,332 bytes**, CRC PASS. LibreOffice rendered each tracked fixture as one page; image inspected. This rendering is **not Microsoft Word UI evidence**.
+- Created a dedicated subfolder in existing authorized **private** Drive test-evidence tree; uploaded operator ZIP and verified its size/parent/visibility via metadata readback. Private folder/file IDs remain outside GitHub.
+- Public-safe preparation record: `tests/evidence/AL-POC1-WORD-UI-GATE-PREP-R17-2026-11-03.json`. Contains no private file URL, legal text, screenshots or credentials.
 
-## Gates still open
+## Open acceptance gates
 
-- `AL-POC1-002`: **BLOCKED**. Actual Microsoft Word Desktop Accept/Reject, Word-saved/reopened files, reviewer/Word version/test_run_id and UI screenshots **NOT_RUN**.
-- Application `TC02C`, `TC07C`, `TC14B`, `TCE2E-02`: **NOT_RUN**; authenticated review/approval runtime unavailable.
-- POC2 (10 authorized legal PDFs) and POC3 (real PostgreSQL RLS) remain PLANNED.
-- No Owner acceptance, production deployment or SRS baseline update. A clean bounded code review is not proof of full system correctness.
+- **Word Desktop:** NOT_RUN; three actual Word-saved/reopened results, GUI screenshots, Word version/build and tester not collected. Cannot claim success from LibreOffice or static simulations.
+- **SRS application cases:** `TC02C`, `TC07C`, `TC14B`, `TCE2E-02` NOT_RUN (actual authenticated application review/approval runtime unavailable).
+- **AL-POC1-002:** BLOCKED; POC1 NOT_ACCEPTED. POC2 real authorized PDFs and POC3 real PostgreSQL RLS remain PLANNED.
+- No production deployment or SRS baseline change.
 
 ## Next action
 
-Run the controlled Microsoft Word Desktop review, retain genuine files and visual evidence in private Drive, verify actual Word-saved outputs with offline QA and execute application E2E after SRS-compliant runtime exists. Only Owner accepts the finished POC.
+Use Microsoft Word Desktop to run the three source-to-result review paths, save/reopen and place genuine outputs/screenshots/test-run record in the dedicated private Drive run folder. Run existing static validators on the actual Word files and manually adjudicate benign Word resave metadata differences. Only then revisit Word UI gate; app E2E and Owner final acceptance remain independent.
 
-## Public data boundary
+## Publication boundary
 
-Never publish original SRS, customer/legal documents, private Drive file IDs, credentials or screenshots to Public GitHub.
+Original SRS, client/legal data, private Drive file IDs/URLs, credentials and screenshots are never published to Public GitHub.
