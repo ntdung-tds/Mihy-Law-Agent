@@ -30,3 +30,11 @@ The technical sample can create three real `w:del` + `w:ins` pairs with unique I
 A batch must reject an incomplete DOCX package, including missing \`[Content_Types].xml\` or \`_rels/.rels\`, malformed package roots and a missing Word document content-type declaration. The single-edit entrypoint applies the same package checks.
 
 These are negative-path controls, not a declaration of complete ECMA-376 conformance. Offline mixed Accept/Reject testing remains simulation only.
+
+## R11: bounded review loop for OOXML relationship integrity
+
+Review sequence for this technical POC: **reproduce with a failing negative test → correct only the failing contract → rerun all tests → independently probe adjacent malformed cases**. The R11 test run used three fix cycles (54/54, 56/56, 58/58) followed by one clean bounded cross-check (58/58).
+
+Both single and 1–5 selected batch edits now fail closed if the DOCX main officeDocument relationship is missing, incorrect or external; if the settings relationship is missing/misdirected; or if the main/settings `[Content_Types].xml` overrides are missing, duplicated or have wrong types. These checks are intentionally restricted to the touched DOCX parts and are **not a general-purpose Office package validator**.
+
+Stopping a clean review loop does **not** prove all remaining defects have been found. Actual Word Desktop Accept/Reject, application TC02C/TC07C/TCE2E-02, and final Owner acceptance are still separate NOT_RUN/BLOCKED gates. Original SRS stays unchanged and outside Public GitHub.
