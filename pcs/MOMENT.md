@@ -1,29 +1,31 @@
 # AI Law — PCS Chat Solo MOMENT
 
-- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public, Owner-selected; `main` is canonical **after checkpoint PR merge**).
-- **State revision:** `6` (canonical: `pcs/STATE.json`).
-- **Updated:** `2026-11-03T03:03:03Z`.
-- **Phase:** POC1 technical preparation, **not** full POC acceptance or production.
-- **SRS:** Owner-supplied v1.1.15 archive verified; original SRS and all non-public documents excluded from GitHub.
+- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public; `main` canonical after PR merge)
+- **State revision:** `7` (source of truth: `pcs/STATE.json`)
+- **Updated:** `2026-11-03T04:02:00Z`
+- **Phase:** POC1 technical QA; **not** full POC1 acceptance or production
+- **SRS:** Owner-supplied v1.1.15 verified by package hashes; original SRS remains private and unchanged
 
-## Verified progress
+## Two review rounds — technical result
 
-- PR #3 **merged** as `7bd3787a16c63ed3d40623afe6dd582054dde270` after GitHub Actions **final-head** run `41569562446` completed/success (unit job and install/test steps passed).
-- POC1 single-run tracked patcher 16 original unit tests + nine independent offline Word result-gate unit tests: **25/25 local PASS**. CLI on **simulated** accepted/rejected DOCX returned `STATIC_PASS`. Synthetic DOCX LibreOffice one-page render visually inspected.
-- Static verifier and guide: `tools/verify_word_review.py`, `tests/test_word_gate.py`, `tests/WORD_REVIEW_GATE.md`. Public-safe test metadata: `tests/evidence/AL-POC1-R5-2026-11-03.json`.
-- **Drive storage verified:** private folder `AI Law Test Evidence / POC-DOCX-20261103-02`, `AL-POC1-TR-20261103-R5_synthetic_word_review_kit.zip` (37,007 bytes, readback confirmed). Store actual UI screenshot evidence there when available. Private Drive file/folder IDs are intentionally absent from this Public repo.
+- Round 1 reproduced two false `STATIC_PASS` cases in offline Word review QA: modified style definitions and non-target run bold formatting.
+- Round 2 reproduced two further false `STATIC_PASS` cases: modified theme and injected tab in unrelated paragraph.
+- These four cases now fail safely; a relationship target mutation is rejected, and harmless XML reindentation is permitted.
+- **Local suite:** 31/31 PASS (25 prior + 6 new tests). Controlled synthetic Word kit offline Accept/Reject simulation: `STATIC_PASS`, **not** a Word UI test.
+- **PR #5:** merged as `db794f86fa5f5cc0101167c743c6c322adf8c29a`. GitHub Actions run `41575457423` at final PR head `bfbe3ef28fb0402aef1068904dcdd45ab35a6e90` completed `success`; `unit` job passed.
+- Test run: `tests/evidence/AL-POC1-TWO-ROUND-R7-2026-11-03.json`.
 
-## Unfinished gates
+## Remaining acceptance gates
 
-- `AL-POC1-002` remains **BLOCKED**: Actual Microsoft Word desktop Accept/Reject and screenshots, tester/version/test_run_id **NOT_RUN**. Offline validator is **not** Word UI evidence.
-- `TC02C`, `TC07C`, `TCE2E-02`: **NOT_RUN** (application review/approval invalidation flow unavailable).
-- POC2 ten authorized legal PDFs and POC3 real PostgreSQL RLS: **PLANNED**, not executed.
+- `AL-POC1-002` stays **BLOCKED**. Actual Microsoft Word Desktop Accept/Reject, screenshots, reviewer/Word version/test_run_id: **NOT_RUN**.
+- `TC02C`, `TC07C`, `TCE2E-02`: **NOT_RUN**, application workflow unavailable.
+- POC2 (10 authorized legal PDFs) and POC3 (real PostgreSQL RLS): **PLANNED**.
 - No Owner acceptance and no production deployment.
 
-## Next step
+## Next action
 
-Run Word desktop Accept/Reject on the supplied synthetic kit, save/reopen and capture screenshot+reviewer/test run evidence into Drive, verify Word-saved files with offline script, then test application flows. Owner makes final acceptance decision.
+Use controlled Word test kit for real Word Desktop Accept/Reject, save/reopen originals, gather test-run evidence in authorized private Drive folder and validate resulting DOCX with offline checker. A strict static rejection may require manual review of Word's benign save changes; never label it a GUI PASS.
 
 ## Publication boundary
 
-No SRS originals, sensitive case files, private Drive IDs or test screenshots are published in this repository.
+No original SRS, legal/customer data, private Drive IDs, credentials or screenshots committed to Public GitHub.
