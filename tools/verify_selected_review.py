@@ -8,23 +8,60 @@ from __future__ import annotations
 import argparse
 from copy import deepcopy
 from hashlib import sha256
+from io import BytesIO
 import json
 from pathlib import Path
 from typing import Any
+from zipfile import ZipFile
 
 from lxml import etree as ET
 
-from poc_docx.track_changes import _validate_edit, w, DOC_PART
+from poc_docx.track_changes import _validate_edit, _validate_package_basics, EditError, w, DOC_PART
 from tools.verify_word_review import (
     REVISIONS, ReviewError, _parts, _xml, _paragraphs, _paragraph_text,
     _run_format_signature, _paragraph_nontext_signature, _numbering_signature,
     _document_envelope_signature, _other_story_signature,
-    _assert_nontext_content_safe, _structure_signature,
+    _assert_nontext_content_safe, _structure_signature, _normalized_xml,
 )
 
 
 def _pair_text(node: ET.Element, tag: str) -> str:
     return "".join(text.text or "" for text in node.iter(w(tag)))
+
+
+def _checked_parts(blob: bytes) -> dict[str, bytes]:
+    """Fail closed if either supplied DOCX is missing required Office structure.
+
+    Result comparison against an equally damaged source must not earn PASS.
+    This reuses the package contract of the controlled POC1 generator.
+    """
+    found = _parts(blob)
+    try:
+        with ZipFile(BytesIO(blob)) as archive:
+            _validate_package_basics(archive, list(found))
+    except (EditError, ET.XMLSyntaxError) as exc:
+        raise ReviewError("Malformed DOCX package: missing or invalid Office relationships/types") from exc
+    return found
+
+
+def _paragraph_identity_signature(paragraph: ET.Element) -> tuple:
+    """Protect nonvolatile paragraph attributes, such as Word paragraph IDs."""
+    return tuple(sorted((key, value) for key, value in paragraph.attrib.items()
+                        if not key.startswith(w("rsid"))))
+
+
+def _display_text_with_xml_space(paragraph: ET.Element) -> str:
+    """Compare the visible space semantics of w:t, not only raw text strings.
+
+    A leading/trailing space in a w:t is preserved only with xml:space="preserve".
+    Word may split or merge runs, so compare the effective stream, not runs.
+    """
+    xml_space = "{http://www.w3.org/XML/1998/namespace}space"
+    pieces: list[str] = []
+    for node in paragraph.iter(w("t")):
+        value = node.text or ""
+        pieces.append(value if node.get(xml_space) == "preserve" else value.strip())
+    return "".join(pieces)
 
 
 def check_selected_review(tracked: bytes, reviewed: bytes,
@@ -42,7 +79,7 @@ def check_selected_review(tracked: bytes, reviewed: bytes,
         raise ReviewError("accepted_indices must be unique, valid zero-based edit indices")
     accepted = set(accepted_indices)
     blobs = {"tracked": tracked, "reviewed": reviewed}
-    parts = {key: _parts(value) for key, value in blobs.items()}
+    parts = {key: _checked_parts(value) for key, value in blobs.items()}
     tracked_root = _xml(parts["tracked"][DOC_PART])
     reviewed_root = _xml(parts["reviewed"][DOC_PART])
     tracked_paragraphs = _paragraphs(tracked_root)
@@ -77,6 +114,16 @@ def check_selected_review(tracked: bytes, reviewed: bytes,
                 if (len(deletion) != 1 or len(insertion) != 1 or
                         deletion[0].tag != w("r") or insertion[0].tag != w("r")):
                     raise ReviewError("Unsupported tracked revision body")
+                # The scoped generator changes only the text of one run. A
+                # different insertion style or hidden extra nodes in a source
+                # revision must not be accepted as part of a trustworthy edit.
+                for revision, text_tag in ((deletion, w("delText")),
+                                           (insertion, w("t"))):
+                    child_tags = [child.tag for child in revision[0]]
+                    if child_tags not in ([text_tag], [w("rPr"), text_tag]):
+                        raise ReviewError("Tracked revision run contains unsupported content")
+                if _normalized_xml(deletion[0].find(w("rPr"))) != _normalized_xml(insertion[0].find(w("rPr"))):
+                    raise ReviewError("Tracked revision pair run formatting differs")
                 matches.append((deletion, insertion))
         if len(matches) != 1:
             raise ReviewError("Expected one adjacent tracked pair per selected edit")
@@ -88,8 +135,12 @@ def check_selected_review(tracked: bytes, reviewed: bytes,
         pairs.append((del_id, ins_id, selected_index in accepted))
     if len(occupied) != len(revs):
         raise ReviewError("Tracked DOCX has unselected or unsupported revisions")
-    if any(node.tag in REVISIONS for node in reviewed_root.iter()):
-        raise ReviewError("Reviewed DOCX contains unresolved revisions")
+    # Check all Word story parts, not just document.xml: an unresolved
+    # insertion in a header must not be silently labelled fully reviewed.
+    for part_name, raw in parts["reviewed"].items():
+        if part_name.startswith("word/") and part_name.endswith(".xml"):
+            if any(node.tag in REVISIONS for node in _xml(raw).iter()):
+                raise ReviewError(f"Reviewed DOCX contains unresolved revisions in {part_name}")
     expected_root = deepcopy(tracked_root)
     # Construct the expected mixed outcome independently, preserving formatting.
     for del_id, ins_id, keep_insertion in pairs:
@@ -116,6 +167,10 @@ def check_selected_review(tracked: bytes, reviewed: bytes,
     for index, (left, right) in enumerate(zip(expected, actual)):
         if _paragraph_text(left) != _paragraph_text(right):
             raise ReviewError(f"Reviewed paragraph {index} differs from selected decisions")
+        if _paragraph_identity_signature(left) != _paragraph_identity_signature(right):
+            raise ReviewError(f"Reviewed paragraph {index} identity attributes changed")
+        if _display_text_with_xml_space(left) != _display_text_with_xml_space(right):
+            raise ReviewError(f"Reviewed paragraph {index} whitespace preservation changed")
         if _run_format_signature(left) != _run_format_signature(right):
             raise ReviewError(f"Reviewed paragraph {index} formatting changed")
         if _paragraph_nontext_signature(left) != _paragraph_nontext_signature(right):

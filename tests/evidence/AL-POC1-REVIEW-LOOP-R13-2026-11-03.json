@@ -1,0 +1,95 @@
+{
+  "test_run_id": "AL-POC1-TR-20261103-R13-LOOP",
+  "task_id": "AL-POC1-004",
+  "related_task_id": "AL-POC1-002",
+  "baseline": {
+    "repository": "ntdung-tds/Mihy-Law-Agent",
+    "main_commit": "61444745c6e9db070f9e46b21bf57433cea88c35",
+    "pcs_revision": 12,
+    "srs_version": "1.1.15",
+    "srs_status": "OWNER_SUPPLIED_VERIFIED_PRIVATE_UNCHANGED"
+  },
+  "scope": "Synthetic offline mixed Accept/Reject verifier only; 1-5 selected whole-run replacements",
+  "cycles": [
+    {
+      "cycle": 1,
+      "before": "PASS_66_OF_66_BUT_THREE_FALSE_STATIC_PASS_REPRODUCED",
+      "findings": [
+        "Revision insertion run formatting drift",
+        "Hidden tab in deleted revision body",
+        "Unresolved revision in unchanged header"
+      ],
+      "fix": "Validate exact revision run shape, equal format of tracked replacement pair, and no pending revisions in Word XML parts",
+      "after": "PASS_69_OF_69"
+    },
+    {
+      "cycle": 2,
+      "before": "TWO_FALSE_STATIC_PASS_REPRODUCED",
+      "findings": [
+        "Changed paragraph identity paraId outside selection",
+        "Lost xml:space preserve with unchanged raw text"
+      ],
+      "fix": "Compare nonvolatile paragraph identity attributes and whitespace semantics",
+      "after": "PASS_71_OF_71"
+    },
+    {
+      "cycle": 3,
+      "before": "THREE_FALSE_STATIC_PASS_REPRODUCED",
+      "findings": [
+        "Both DOCX missing _rels/.rels",
+        "Both DOCX missing word/_rels/document.xml.rels",
+        "Both DOCX missing word/settings.xml"
+      ],
+      "fix": "Validate both tracked and reviewed DOCX against existing POC1 mandatory package relationship and content-type contract",
+      "after": "PASS_72_OF_72"
+    },
+    {
+      "cycle": 4,
+      "focus": "Independent final bounded regression and controlled R12 fixture",
+      "new_reproducible_defects": 0,
+      "local_unittest": "PASS_72_OF_72",
+      "compileall": "PASS",
+      "r12_synthetic_kit": "STATIC_PASS_SIMULATION_ONLY",
+      "reviewed_decisions": {
+        "accepted_indices": [
+          0,
+          1
+        ],
+        "rejected_indices": [
+          2
+        ]
+      },
+      "word_desktop": "NOT_RUN"
+    }
+  ],
+  "kit_integrity": {
+    "name": "AI_Law_POC1_Mixed_Review_Kit_R12.zip",
+    "tracked_docx_sha256": "d02582fc8ca51229ecef9f92d3c179afa2b22bdeed8312c52c02d516e5c689ae",
+    "simulated_reviewed_docx_sha256": "dd35acc22cd318e86479ccc0ec5c84f33e9572e9af90dc9729a60779bba719f7",
+    "zip_crc": "PASS",
+    "checked_edits": 3
+  },
+  "commands": [
+    "python -m unittest discover -s tests -v",
+    "python -m compileall -q tools tests poc_docx",
+    "python -m tools.verify_selected_review tracked_three.docx mixed_accept_2_reject_1_SIMULATED.docx selected_edits.json decisions.json"
+  ],
+  "statuses": {
+    "local_unit": "PASS_72_OF_72",
+    "source_kit_static": "PASS_SIMULATED_ONLY",
+    "github_ci": "NOT_YET_VERIFIED",
+    "word_desktop": "NOT_RUN",
+    "tc02c": "NOT_RUN",
+    "tc07c": "NOT_RUN",
+    "tce2e_02": "NOT_RUN",
+    "owner_acceptance": "NOT_REQUESTED",
+    "production": "NOT_DEPLOYED"
+  },
+  "boundaries": [
+    "This is a bounded review with a zero-new-error pass, NOT proof of exhaustive DOCX correctness",
+    "Real Microsoft Word UI action has not been verified",
+    "Genuine Word resave may require manual review of metadata and paragraph identifiers",
+    "Original SRS and real customer/legal data not committed to public GitHub"
+  ],
+  "classification": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY"
+}
