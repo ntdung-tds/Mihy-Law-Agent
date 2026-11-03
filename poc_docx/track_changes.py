@@ -66,6 +66,46 @@ def _next_id(root: ET.Element) -> int:
     return max(ids, default=0) + 1
 
 
+def _check_existing_revisions(root: ET.Element) -> None:
+    """Do not carry invalid tracked insert/delete IDs into a newly edited document."""
+    seen: set[int] = set()
+    for element in root.iter():
+        if element.tag not in {w("ins"), w("del")}:
+            continue
+        identifier = element.get(w("id"))
+        if identifier is None or not identifier.isascii() or not identifier.isdecimal():
+            raise EditError("Existing tracked revision has missing/invalid w:id")
+        number = int(identifier)
+        if number in seen:
+            raise EditError("Existing tracked revision has duplicate w:id")
+        seen.add(number)
+
+
+def _check_field_context(paragraphs: list[ET.Element], target: ET.Element) -> None:
+    """Reject field results/instructions, including fields spanning paragraphs.
+
+    Editing the cached display text of a field may be overwritten on recalculation.
+    This narrow POC cannot reliably rewrite field semantics, so it fails closed.
+    """
+    field_depth = 0
+    for paragraph in paragraphs:
+        # A field that begins/ends in the selected paragraph, or a simple field
+        # next to the selected run, is unsupported even if the run is outside it.
+        if paragraph is target:
+            if field_depth or any(
+                child.tag in {w("fldChar"), w("instrText"), w("fldSimple")}
+                for child in paragraph.iter()
+            ):
+                raise EditError("Cannot edit a paragraph in Word field context")
+            return
+        for node in paragraph.iter(w("fldChar")):
+            kind = node.get(w("fldCharType"))
+            if kind == "begin":
+                field_depth += 1
+            elif kind == "end":
+                field_depth = max(0, field_depth - 1)
+
+
 def _patch_document(data: bytes, index: int, old: str, new: str, author: str, stamp: str) -> bytes:
     root = ET.fromstring(data, parser=ET.XMLParser(resolve_entities=False, no_network=True))
     body = root.find(w("body"))
@@ -76,6 +116,8 @@ def _patch_document(data: bytes, index: int, old: str, new: str, author: str, st
     if index >= len(paragraphs):
         raise EditError("paragraph_index is outside the document")
     paragraph = paragraphs[index]
+    _check_existing_revisions(root)
+    _check_field_context(paragraphs, paragraph)
     matches: list[tuple[int, ET.Element]] = []
     for run_index, run in enumerate(list(paragraph)):
         if run.tag != w("r"):
