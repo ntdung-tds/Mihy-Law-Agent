@@ -38,3 +38,9 @@ Review sequence for this technical POC: **reproduce with a failing negative test
 Both single and 1–5 selected batch edits now fail closed if the DOCX main officeDocument relationship is missing, incorrect or external; if the settings relationship is missing/misdirected; or if the main/settings `[Content_Types].xml` overrides are missing, duplicated or have wrong types. These checks are intentionally restricted to the touched DOCX parts and are **not a general-purpose Office package validator**.
 
 Stopping a clean review loop does **not** prove all remaining defects have been found. Actual Word Desktop Accept/Reject, application TC02C/TC07C/TCE2E-02, and final Owner acceptance are still separate NOT_RUN/BLOCKED gates. Original SRS stays unchanged and outside Public GitHub.
+
+## R16 alignment of generator and review safety contracts
+
+One-edit and 1–5 selected-edit POC generation share the following new fail-closed controls: revision timestamps must use supported RFC3339 `date-time` syntax; a text-only run must not encode tab/newline/carriage return as raw `w:t`; unsupported preexisting tracked formatting/move revisions, and pending revisions in non-document Word stories, are rejected. Previously these could generate output that the downstream review checker could not safely certify.
+
+Synthetic regressions and final GitHub Actions 105/105 PASS; controlled R12 existing kit retains the same tracked and reviewed checksums. This implementation is limited to direct whole-run replacement; it does not implement complex Word editing, interactive Word acceptance or an application approval workflow.
