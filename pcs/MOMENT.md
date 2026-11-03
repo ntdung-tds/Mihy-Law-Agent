@@ -1,31 +1,31 @@
 # AI Law — PCS Chat Solo MOMENT
 
-- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public; `main` canonical after PR merge)
-- **State revision:** `7` (source of truth: `pcs/STATE.json`)
-- **Updated:** `2026-11-03T04:02:00Z`
-- **Phase:** POC1 technical QA; **not** full POC1 acceptance or production
-- **SRS:** Owner-supplied v1.1.15 verified by package hashes; original SRS remains private and unchanged
+- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public, Owner-selected); canonical branch `main` **only after checkpoint PR merge**.
+- **State revision:** `8` (authoritative: `pcs/STATE.json`).
+- **Updated:** `2026-11-03T05:40:31.916Z`.
+- **Phase:** POC1 technical preparation; no Owner acceptance or production.
+- **SRS:** Owner-supplied v1.1.15 package verified by checksums; original materials are private and unchanged.
 
-## Two review rounds — technical result
+## New technical slice — TC02C prerequisite
 
-- Round 1 reproduced two false `STATIC_PASS` cases in offline Word review QA: modified style definitions and non-target run bold formatting.
-- Round 2 reproduced two further false `STATIC_PASS` cases: modified theme and injected tab in unrelated paragraph.
-- These four cases now fail safely; a relationship target mutation is rejected, and harmless XML reindentation is permitted.
-- **Local suite:** 31/31 PASS (25 prior + 6 new tests). Controlled synthetic Word kit offline Accept/Reject simulation: `STATIC_PASS`, **not** a Word UI test.
-- **PR #5:** merged as `db794f86fa5f5cc0101167c743c6c322adf8c29a`. GitHub Actions run `41575457423` at final PR head `bfbe3ef28fb0402aef1068904dcdd45ab35a6e90` completed `success`; `unit` job passed.
-- Test run: `tests/evidence/AL-POC1-TWO-ROUND-R7-2026-11-03.json`.
+- PR #7 merged into `main` at `5ecd5629931ba541d110f27d374d9bd3f05f7aa3`.
+- Selected 1–5 exact whole-run DOCX replacements are applied **atomically** to a synthetic fixture. Duplicate, ambiguous, missing, protected or field-context targets fail closed; no change to the original single-edit POC CLI.
+- Local unit regression **42/42 PASS** (31 existing + 11 new). SRS static checker `STATIC_CONTRACT_AND_WORD_PASS`.
+- GitHub Actions PR #7 run `41585067220` at head `4c4f00780c66f4c22a68f06d979aa50b4f57ad2d` completed **success**; job `unit` passed.
+- Synthetic DOCX produced 3 distinct real `w:ins`/`w:del` pairs. Offline XML mixed review: accept two / reject one gave expected content; LibreOffice rendered one page and image was checked. **Not** a Microsoft Word GUI test.
+- Evidence: `tests/evidence/AL-POC1-BATCH-R8-2026-11-03.json`; guide: `tests/POC1_BATCH_GATE.md`.
 
-## Remaining acceptance gates
+## Remaining gates
 
-- `AL-POC1-002` stays **BLOCKED**. Actual Microsoft Word Desktop Accept/Reject, screenshots, reviewer/Word version/test_run_id: **NOT_RUN**.
-- `TC02C`, `TC07C`, `TCE2E-02`: **NOT_RUN**, application workflow unavailable.
-- POC2 (10 authorized legal PDFs) and POC3 (real PostgreSQL RLS): **PLANNED**.
-- No Owner acceptance and no production deployment.
+- Active `AL-POC1-002` **BLOCKED**: real Microsoft Word Desktop review (Accept/Reject), screenshots, reviewer, Word version and test run evidence **NOT_RUN**.
+- Application acceptance `TC02C`, `TC07C`, `TCE2E-02`: **NOT_RUN**; approval-invalidation app flow unavailable. 79 SRS application cases not completed.
+- POC2 authorized legal PDF ingestion and POC3 real PostgreSQL RLS remain PLANNED.
+- No POC1 Owner acceptance and no production deployment.
 
 ## Next action
 
-Use controlled Word test kit for real Word Desktop Accept/Reject, save/reopen originals, gather test-run evidence in authorized private Drive folder and validate resulting DOCX with offline checker. A strict static rejection may require manual review of Word's benign save changes; never label it a GUI PASS.
+Use the controlled Word kit to run actual Word Desktop mixed Accept/Reject; save/reopen files and secure evidence, verify Word-saved DOCX, then run full application-level cases when the workflow is testable. Do not equate offline XML simulation or unit/CI PASS with POC1 acceptance.
 
 ## Publication boundary
 
-No original SRS, legal/customer data, private Drive IDs, credentials or screenshots committed to Public GitHub.
+Public repository contains only synthetic code/tests and safe metadata; no original SRS contents, legal/customer data, credentials, private Drive IDs or UI screenshots.
