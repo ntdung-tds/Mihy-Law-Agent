@@ -1,0 +1,56 @@
+{
+  "test_run_id": "AL-POC1-TR-20261103-WORD-UI-01",
+  "source": {
+    "repo": "ntdung-tds/Mihy-Law-Agent",
+    "head_before_checkpoint": "2ad3ca7a55c7218f74b800b58fb7e769a46c55b8",
+    "pcs_revision": 16,
+    "srs_baseline": "v1.1.15",
+    "srs_status": "PRIVATE_UNCHANGED"
+  },
+  "task_id": "AL-POC1-002",
+  "purpose": "Prepare genuine Microsoft Word Desktop single and mixed Accept/Reject operator run; not a synthetic result and not an application E2E claim",
+  "input_fixture": {
+    "single_docx_sha256": "76406fb61bd0e2cf73584986909d764d2207a107d211bf9385fead79d56ed4fa",
+    "mixed_docx_sha256": "d02582fc8ca51229ecef9f92d3c179afa2b22bdeed8312c52c02d516e5c689ae",
+    "mixed_accepted_indices": [
+      0,
+      1
+    ],
+    "mixed_rejected_indices": [
+      2
+    ],
+    "fixture_data": "SYNTHETIC_ONLY"
+  },
+  "package": {
+    "name": "AI_Law_POC1_Word_Desktop_Execution_Gate_R17.zip",
+    "sha256": "1243857638d09dde7f077d8c0ebaa9fd3340bfeea0672282b943614f73ccc46e",
+    "size_bytes": 75332,
+    "zip_crc": "PASS",
+    "scenario_files": "two tracked DOCX sources, edit/decision JSON, Word Desktop instructions and pending test-run form",
+    "libreoffice_render": "PASS_ONE_PAGE_EACH_VISUALLY_INSPECTED_NOT_WORD"
+  },
+  "drive": {
+    "test_run_folder": "CREATED_IN_EXISTING_AUTHORIZED_PRIVATE_EVIDENCE_PARENT",
+    "execution_kit": "UPLOAD_AND_METADATA_READBACK_PASS",
+    "kit_size_bytes": 75332,
+    "visibility": "PRIVATE_NOT_SHARED",
+    "file_id_and_url": "WITHHELD_FROM_PUBLIC_REPOSITORY"
+  },
+  "status": {
+    "word_single_accept": "NOT_RUN",
+    "word_single_reject": "NOT_RUN",
+    "word_mixed_accept_2_reject_1": "NOT_RUN",
+    "microsoft_word_version": "NOT_COLLECTED",
+    "word_saved_reopened_docs": "NOT_COLLECTED",
+    "screenshot_evidence": "NOT_COLLECTED",
+    "static_check_on_actual_word_files": "NOT_RUN",
+    "TC02C": "NOT_RUN",
+    "TC07C": "NOT_RUN",
+    "TC14B": "NOT_RUN",
+    "TCE2E_02": "NOT_RUN",
+    "owner_acceptance": "NOT_REQUESTED",
+    "production": "NOT_DEPLOYED"
+  },
+  "acceptance_rule": "Word Desktop PASS only after a human/authorized operator opens, accepts/rejects, saves and reopens files, captures screenshots/tester/Word build and passes or manually adjudicates the static gate. App E2E and Owner approval are separate.",
+  "publication": "PUBLIC_SAFE_TEST_METADATA_ONLY"
+}
