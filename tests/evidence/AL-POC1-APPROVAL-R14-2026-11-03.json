@@ -32,7 +32,7 @@
     "policy_version_change": "PASS",
     "approval_record_immutable": "PASS",
     "in_place_version_mutation": "REJECTED",
-    "github_ci": "PENDING_PR"
+    "github_ci": "PASS_PR19_RUN_41624122919_FINAL_HEAD_2aafc93aa623277a6684257dd3d2ae5fe20e49ad"
   },
   "not_run": {
     "microsoft_word_desktop": "NOT_RUN",
@@ -43,5 +43,16 @@
     "production": "NOT_DEPLOYED"
   },
   "owner_acceptance": "NOT_REQUESTED",
-  "publication": "PUBLIC_SAFE_SYNTHETIC_CODE_AND_QA_METADATA_ONLY"
+  "publication": "PUBLIC_SAFE_SYNTHETIC_CODE_AND_QA_METADATA_ONLY",
+  "github_merge": {
+    "pr": 19,
+    "merge_commit": "6d98d0ddb7d43cc4bcafa3f083825fec67bffc64",
+    "status": "MERGED"
+  },
+  "private_drive_evidence": {
+    "file_name": "AL-POC1-TR-20261103-R14_approval_invalidation_synthetic_evidence.zip",
+    "size_bytes": 71890,
+    "readback": "METADATA_VERIFIED",
+    "visibility": "NOT_SHARED"
+  }
 }
