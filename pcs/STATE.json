@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 2,
-  "updated_at": "2026-11-03T02:08:30Z",
+  "revision": 3,
+  "updated_at": "2026-11-03T02:32:12.860Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -50,14 +50,16 @@
           "Enforced Word documentProtection blocks edit; malformed document XML fails closed"
         ],
         "tests": {
-          "local_unittest": "PASS_10_OF_10_2026_11_03",
+          "local_unittest": "PASS_16_OF_16_2026_11_03_R3",
           "local_render": "PASS_LIBREOFFICE_SYNTHETIC_SINGLE_PAGE",
           "microsoft_word": "NOT_RUN",
           "integration_e2e": "NOT_RUN",
-          "github_ci": "NOT_VERIFIED",
+          "github_ci": "PASS_PR_HEAD_2e8049b3b645fd3ffad5e533af2a80e5184435d2_RUN_41566803416; VERIFY_FINAL_HEAD_BEFORE_MERGE",
           "local_negative_protected_doc": "PASS_AFTER_REPRODUCED_BUG_FIX",
           "package_static_contract": "PASS_2026_11_03",
-          "package_offline_xml_accept_reject": "PASS_SIMULATION_ONLY_WORD_UI_NOT_RUN"
+          "package_offline_xml_accept_reject": "PASS_SIMULATION_ONLY_WORD_UI_NOT_RUN",
+          "field_negative_cases": "PASS_2026_11_03_R3",
+          "header_footer_part_preservation": "PASS_2026_11_03_R3"
         },
         "evidence": [
           "tests/test_track_changes.py (7 local cases, 2026-11-03)",
@@ -66,10 +68,12 @@
           "Owner-supplied SRS archive SHA256 bda7199181060f178f6ba6f6008a029c1b9ff576392c66792b93d822e74d932f (private, not committed)",
           "SRS static checker PASS on 2026-11-03; 157/157 + 145/145 checksum entries",
           "10/10 Python unittest cases, incl. protected document and malformed XML",
-          "Offline XML accept/reject of synthetic fixture rendered in LibreOffice; not Word UI test"
+          "Offline XML accept/reject of synthetic fixture rendered in LibreOffice; not Word UI test",
+          "tests/evidence/AL-POC1-R3-2026-11-03.json: 16/16 unit PASS; 3 reproduced pre-fix issues; synthetic LO 1-page render",
+          "GitHub Actions workflow run 41566803416: completed/success on PR head 2e8049b3b645fd3ffad5e533af2a80e5184435d2; steps incl. dependency install and unittest"
         ],
         "owner_acceptance": "NOT_REQUESTED",
-        "notes": "TECH_DONE is limited to this technical slice; it is not POC1 completion or acceptance."
+        "notes": "TECH_DONE only for single-run scoped POC; field-context edits including cross-paragraph fields and invalid preexisting revision IDs now fail closed. Word GUI/E2E/Owner acceptance pending."
       },
       {
         "id": "AL-POC1-002",
@@ -180,7 +184,7 @@
         "id": "RISK-002",
         "level": "HIGH",
         "title": "Microsoft Word Accept/Reject not executed",
-        "mitigation": "Run Microsoft Word UI review plus TCE2E-01 before POC1 acceptance"
+        "mitigation": "Run Microsoft Word UI and application tests TC02C, TC07C, TCE2E-02 before POC1 acceptance."
       },
       {
         "id": "RISK-003",
@@ -194,6 +198,13 @@
         "title": "DOCX protected files were not initially rejected",
         "status": "MITIGATED",
         "mitigation": "POC patch now fails closed when documentProtection enforcement is on; regression tests 10/10. Other locked-region/edit permission combinations remain outside narrow POC."
+      },
+      {
+        "id": "RISK-005",
+        "level": "HIGH",
+        "title": "Patcher previously changed cached Word Field results and propagated invalid tracked revision IDs",
+        "status": "MITIGATED_IN_SCOPED_POC",
+        "mitigation": "Fail closed on Word Field context, including cross-paragraph complex fields; reject missing/invalid/duplicate insertion/deletion IDs; 16/16 regression unit tests pass; real Word GUI still NOT_RUN."
       }
     ],
     "artifacts": [
@@ -216,15 +227,19 @@
       {
         "path": "requirements-dev.txt",
         "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": "tests/evidence/AL-POC1-R3-2026-11-03.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
       }
     ],
     "current": {
       "active_task": "AL-POC1-002",
-      "last_completed_step": "Verified Owner SRS v1.1.15 archive (ZIP 157/157, contracts 145/145; static checker PASS); corrected test mapping to TCE2E-02; fixed protected-document negative case (10/10 local unit); ran offline XML accept/reject and visually inspected two LibreOffice renders",
-      "next_action": "Validate real Microsoft Word Accept/Reject on controlled synthetic fixture, then build/test TC02C, TC07C and TCE2E-02 with owner-signed scope; no POC is accepted yet",
+      "last_completed_step": "R3: reproduced 3 unsafe DOCX cases before fix; blocked field edits including cross-paragraph context and invalid existing revision IDs; 16/16 unittest PASS; rendered synthetic DOCX in LibreOffice (1 page) and inspected; SRS static checker PASS.",
+      "next_action": "Verify CI on the final PR head, merge technical bugfix if branch checks permit, read back canonical PCS revision 3; real Word GUI and app TC02C/TC07C/TCE2E-02 still outstanding.",
       "blockers": [
-        "No Microsoft Word GUI verification in current execution environment",
-        "No tested application review/approval flow for TCE2E-02; baseline Owner signoff pending"
+        "Actual Microsoft Word GUI unavailable in current execution environment",
+        "Application approval invalidation flow not implemented/testable; Owner SRS baseline signoff pending"
       ]
     },
     "policy": {

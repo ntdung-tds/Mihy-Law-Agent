@@ -179,6 +179,113 @@ class TrackedChangesTest(unittest.TestCase):
         with self.assertRaises(EditError):
             apply_edit(b"not a docx", EDIT)
 
+    def test_complex_field_result_is_not_silently_overwritten(self):
+        # A field result is a cached view, not editable source text.
+        doc = Document()
+        para = doc.add_paragraph()
+        begin = OxmlElement("w:r")
+        fld = OxmlElement("w:fldChar")
+        fld.set(qn("w:fldCharType"), "begin")
+        begin.append(fld)
+        para._p.append(begin)
+        inst = OxmlElement("w:r")
+        instr = OxmlElement("w:instrText")
+        instr.text = " DATE "
+        inst.append(instr)
+        para._p.append(inst)
+        sep = OxmlElement("w:r")
+        sepchar = OxmlElement("w:fldChar")
+        sepchar.set(qn("w:fldCharType"), "separate")
+        sep.append(sepchar)
+        para._p.append(sep)
+        para.add_run("Original")
+        end = OxmlElement("w:r")
+        endchar = OxmlElement("w:fldChar")
+        endchar.set(qn("w:fldCharType"), "end")
+        end.append(endchar)
+        para._p.append(end)
+        buf = BytesIO()
+        doc.save(buf)
+        with self.assertRaisesRegex(EditError, "field"):
+            apply_edit(buf.getvalue(), EDIT)
+
+    def test_cross_paragraph_field_result_rejected(self):
+        doc = Document()
+        first = doc.add_paragraph()
+        begin = OxmlElement("w:r")
+        fld = OxmlElement("w:fldChar")
+        fld.set(qn("w:fldCharType"), "begin")
+        begin.append(fld)
+        first._p.append(begin)
+        second = doc.add_paragraph("Original")
+        end = OxmlElement("w:r")
+        endchar = OxmlElement("w:fldChar")
+        endchar.set(qn("w:fldCharType"), "end")
+        end.append(endchar)
+        doc.add_paragraph()._p.append(end)
+        buf = BytesIO()
+        doc.save(buf)
+        edit = {**EDIT, "paragraph_index": 1}
+        with self.assertRaisesRegex(EditError, "field"):
+            apply_edit(buf.getvalue(), edit)
+
+    def test_unrelated_field_does_not_block_safe_paragraph(self):
+        doc = Document()
+        first = doc.add_paragraph()
+        field = OxmlElement("w:fldSimple")
+        field.set(qn("w:instr"), "DATE")
+        first._p.append(field)
+        doc.add_paragraph("Original")
+        buf = BytesIO()
+        doc.save(buf)
+        edited = apply_edit(buf.getvalue(), {**EDIT, "paragraph_index": 1})
+        paragraph = list(ET.fromstring(parts(edited)["word/document.xml"]).iter(w("p")))[1]
+        self.assertEqual(next(paragraph.iter(w("ins"))).find(w("r")).find(w("t")).text, "Updated")
+
+    def test_simple_field_in_target_paragraph_rejected(self):
+        doc = Document()
+        para = doc.add_paragraph("Original")
+        simple = OxmlElement("w:fldSimple")
+        simple.set(qn("w:instr"), "PAGE")
+        para._p.append(simple)
+        buf = BytesIO()
+        doc.save(buf)
+        with self.assertRaisesRegex(EditError, "field"):
+            apply_edit(buf.getvalue(), EDIT)
+
+    def test_header_footer_and_untouched_parts_are_identical(self):
+        doc = Document()
+        doc.add_paragraph("Original")
+        doc.sections[0].header.paragraphs[0].text = "HEADER — SYNTHETIC"
+        doc.sections[0].footer.paragraphs[0].text = "FOOTER — SYNTHETIC"
+        buf = BytesIO()
+        doc.save(buf)
+        before = parts(buf.getvalue())
+        after = parts(apply_edit(buf.getvalue(), EDIT))
+        for name in before:
+            if name not in {"word/document.xml", "word/settings.xml"}:
+                self.assertEqual(before[name], after[name], name)
+        self.assertTrue(any("word/header" in x for x in before))
+        self.assertTrue(any("word/footer" in x for x in before))
+
+    def test_malformed_existing_revision_id_rejected(self):
+        # Existing tracked revisions lacking an ID must not be silently propagated.
+        doc = Document()
+        para = doc.add_paragraph("Original")
+        insertion = OxmlElement("w:ins")
+        insertion.set(qn("w:author"), "Reviewer")
+        rev_run = OxmlElement("w:r")
+        rev_text = OxmlElement("w:t")
+        rev_text.text = "review"
+        rev_run.append(rev_text)
+        insertion.append(rev_run)
+        para._p.append(insertion)
+        buf = BytesIO()
+        doc.save(buf)
+        with self.assertRaisesRegex(EditError, "revision"):
+            apply_edit(buf.getvalue(), EDIT)
+
+
 
 if __name__ == "__main__":
     unittest.main()

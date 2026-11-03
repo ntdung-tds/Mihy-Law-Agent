@@ -32,3 +32,9 @@ Local tests need `python-docx` to construct synthetic `.docx` fixtures. The runt
 ## Project continuity
 
 Canonical state: [`pcs/STATE.json`](pcs/STATE.json). Quick handoff: [`pcs/MOMENT.md`](pcs/MOMENT.md). All changes follow PCS Chat Solo. `TECH_DONE` does **not** mean Owner acceptance; no production deployment has been performed.
+
+## Field/revision safety (R3 bugfix)
+
+The scoped patcher deliberately rejects edits to paragraphs containing Word Fields (complex or simple), and results within complex Fields that span paragraphs. Existing `w:ins` and `w:del` elements must carry unique, non-negative numeric `w:id` values. Other paragraphs without Field context remain editable. Unsupported field semantics are **not** silently rewritten. Test evidence metadata is recorded at `tests/evidence/AL-POC1-R3-2026-11-03.json`.
+
+Unit/XML and LibreOffice rendering checks are **not** proof of actual Microsoft Word Accept/Reject behavior or application approval invalidation; the real Word UI and `TC02C`, `TC07C`, `TCE2E-02` remain NOT_RUN.

@@ -1,0 +1,30 @@
+{
+  "test_run_id": "AL-POC1-TR-20261103-R3",
+  "repo": "ntdung-tds/Mihy-Law-Agent",
+  "task_id": "AL-POC1-001",
+  "reference_srs_version": "1.1.15",
+  "reference_srs_sha256": "bda7199181060f178f6ba6f6008a029c1b9ff576392c66792b93d822e74d932f",
+  "scope": "Single whole-run DOCX tracked replacement; synthetic fixtures only",
+  "pre_fix_reproduced": [
+    "Word Field cached result silently changed",
+    "Cross-paragraph complex Word Field result silently changed",
+    "Existing w:ins revision without w:id silently preserved"
+  ],
+  "post_fix": {
+    "unittest": "PASS_16_OF_16",
+    "srs_contracts": "STATIC_CONTRACT_AND_WORD_PASS",
+    "libreoffice_render": "PASS_SYNTHETIC_ONE_PAGE_VISUALLY_INSPECTED",
+    "header_footer_zip_part_integrity": "PASS_BYTE_IDENTICAL"
+  },
+  "not_run": {
+    "microsoft_word_gui_accept_reject": "NOT_RUN",
+    "tc02c": "NOT_RUN",
+    "tc07c": "NOT_RUN",
+    "tce2e_02": "NOT_RUN",
+    "github_ci": "NOT_VERIFIED"
+  },
+  "evidence_note": "Only public-safe synthetic test metadata stored; DOCX/PDF/PNG remain outside public GitHub. GUI Word and application E2E remain required.",
+  "owner_acceptance": "NOT_REQUESTED",
+  "synthetic_input_sha256": "89260cc352fc4ac70c0a7e6cee41576ec7e22a736e1cc958c2ab1a50cced616c",
+  "synthetic_output_sha256": "895b857e2aa09e9733337517341c49b8a425c7165765e31e4f1a1ac905361ff1"
+}
