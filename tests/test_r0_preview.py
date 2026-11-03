@@ -200,11 +200,11 @@ class R0PreviewTests(unittest.TestCase):
     def test_r25_preserve_existing_catalog_scope(self):
         """Visual refinement must not create new workflows or fake capability."""
         import re
-        ids = re.findall(r'data-feature="(UC\\d{2})"', self.html)
+        ids = re.findall(r'data-feature="(UC\d{2})"', self.html)
         self.assertEqual(len(ids), 11)
         self.assertEqual(len(set(ids)), 11)
         self.assertEqual(
-            set(re.findall(r'data-feature="(UC\\d{2})" data-stage="r0"', self.html)),
+            set(re.findall(r'data-feature="(UC\d{2})" data-stage="r0"', self.html)),
             {"UC03", "UC04", "UC07"},
         )
         self.assertIn("Chưa có nghiệp vụ AI nào hoạt động", self.html)
