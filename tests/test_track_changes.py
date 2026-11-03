@@ -276,6 +276,28 @@ class TrackedChangesTest(unittest.TestCase):
             with self.subTest(text=repr(new_text)), self.assertRaisesRegex(EditError, "unsupported control"):
                 apply_edit(fixture(), {**EDIT, "new_text": new_text})
 
+    def test_existing_header_revision_rejected_before_new_tracked_edit(self):
+        d = Document()
+        d.add_paragraph("Original")
+        d.sections[0].header.paragraphs[0].text = "Header baseline"
+        stream = BytesIO(); d.save(stream)
+        output = BytesIO()
+        with ZipFile(BytesIO(stream.getvalue())) as source, ZipFile(output, "w") as target:
+            for info in source.infolist():
+                data = source.read(info)
+                if info.filename == "word/header1.xml":
+                    root = ET.fromstring(data)
+                    paragraph = next(root.iter(w("p")))
+                    insertion = ET.SubElement(paragraph, w("ins"), {
+                        w("id"): "123", w("author"): "Existing",
+                        w("date"): "2026-11-03T01:00:00Z"})
+                    run = ET.SubElement(insertion, w("r"))
+                    ET.SubElement(run, w("t")).text = "Unresolved"
+                    data = ET.tostring(root)
+                target.writestr(info, data)
+        with self.assertRaisesRegex(EditError, "outside main document"):
+            apply_edit(output.getvalue(), EDIT)
+
     def test_bad_zip_fails_closed(self):
         with self.assertRaises(EditError):
             apply_edit(b"not a docx", EDIT)
