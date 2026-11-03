@@ -91,6 +91,23 @@ def _structure_signature(root: ET.Element) -> list[tuple]:
     ]
 
 
+def _document_envelope_signature(root: ET.Element) -> tuple:
+    """Protect section/page setup and other content outside paragraph/table bodies."""
+    outer = []
+    for child in root:
+        if child.tag != w("body"):
+            outer.append(_normalized_xml(child))
+            continue
+        body_attrs = tuple(sorted((key, value) for key, value in child.attrib.items()
+                                  if not key.startswith(w("rsid"))))
+        extras = tuple(_normalized_xml(node) for node in child
+                       if node.tag not in {w("p"), w("tbl")})
+        outer.append((w("body"), body_attrs, extras))
+    root_attrs = tuple(sorted((key, value) for key, value in root.attrib.items()
+                              if not key.startswith(w("rsid"))))
+    return (root.tag, root_attrs, tuple(outer))
+
+
 def _numbering_signature(paragraphs: list[ET.Element]) -> list[tuple[str | None, str | None, str | None]]:
     result = []
     for p in paragraphs:
@@ -174,22 +191,33 @@ def _paragraph_nontext_signature(paragraph: ET.Element, accept: bool | None = No
 
 def _assert_nontext_content_safe(source_parts: dict[str, bytes], result_parts: dict[str, bytes],
                                  outcome: str) -> None:
-    """Fail closed on changed styles, numbering, theme, fonts, links and media."""
-    def guarded(name: str) -> bool:
-        return (name in {"word/styles.xml", "word/numbering.xml", "word/fontTable.xml", "[Content_Types].xml"}
-                or name.startswith("word/theme/") or name.startswith("word/media/")
-                or (name.startswith("word/") and name.endswith(".rels")))
+    """Strictly guard every non-document part, including metadata and app settings.
 
+    Word may legitimately update metadata on save. In that case the result needs
+    manual review; an unexplained changed ZIP part must never earn STATIC_PASS.
+    """
+    known_definitions = lambda name: (
+        name in {"word/styles.xml", "word/numbering.xml", "word/fontTable.xml", "[Content_Types].xml"}
+        or name.startswith("word/theme/")
+        or name.startswith("word/media/")
+        or (name.startswith("word/") and name.endswith(".rels"))
+    )
     for part in sorted(set(source_parts) | set(result_parts)):
-        if not guarded(part):
-            continue
+        if part == DOC_PART:
+            continue  # DOC_PART is verified by the paragraph and envelope checks.
         if part not in source_parts or part not in result_parts:
             raise ReviewError(f"{outcome}: protected package part missing/added: {part}")
-        if part.startswith("word/media/"):
-            if source_parts[part] != result_parts[part]:
-                raise ReviewError(f"{outcome}: media payload changed: {part}")
-        elif _normalized_xml(_xml(source_parts[part])) != _normalized_xml(_xml(result_parts[part])):
-            raise ReviewError(f"{outcome}: protected package definition changed: {part}")
+        old, new = source_parts[part], result_parts[part]
+        if old == new:
+            continue
+        if part.endswith((".xml", ".rels")):
+            changed = _normalized_xml(_xml(old)) != _normalized_xml(_xml(new))
+        else:
+            changed = old != new
+        if changed:
+            reason = ("protected package definition changed" if known_definitions(part)
+                      else "protected package part changed")
+            raise ReviewError(f"{outcome}: {reason}: {part}")
 
 
 def _assert_only_one_pair(source: ET.Element, paragraphs: list[ET.Element], index: int,
@@ -237,6 +265,8 @@ def check_results(tracked: bytes, accepted: bytes, rejected: bytes, edit: dict) 
             actual = _paragraph_text(output_p)
             if actual != expected:
                 raise ReviewError(f"{outcome}: paragraph {para_index} differs from expected content")
+        if _document_envelope_signature(roots["tracked"]) != _document_envelope_signature(roots[outcome]):
+            raise ReviewError(f"{outcome}: document envelope changed (section/page setup)")
         if _numbering_signature(source) != _numbering_signature(target):
             raise ReviewError(f"{outcome}: paragraph style or numbering changed")
         for para_index, (source_p, output_p) in enumerate(zip(source, target)):
@@ -244,10 +274,10 @@ def check_results(tracked: bytes, accepted: bytes, rejected: bytes, edit: dict) 
                 raise ReviewError(f"{outcome}: paragraph {para_index} run/paragraph formatting changed")
             if _paragraph_nontext_signature(source_p, accept=accept) != _paragraph_nontext_signature(output_p):
                 raise ReviewError(f"{outcome}: paragraph {para_index} non-text structure changed")
-        _assert_nontext_content_safe(file_parts["tracked"], file_parts[outcome], outcome)
         for kind in ("header", "footer", "footnotes", "endnotes", "comments"):
             if _other_story_signature(file_parts["tracked"], kind) != _other_story_signature(file_parts[outcome], kind):
                 raise ReviewError(f"{outcome}: {kind} story XML changed (text or formatting)")
+        _assert_nontext_content_safe(file_parts["tracked"], file_parts[outcome], outcome)
         if _structure_signature(roots["tracked"]) != _structure_signature(roots[outcome]):
             raise ReviewError(f"{outcome}: table structure changed")
     return {

@@ -208,6 +208,64 @@ class OfflineWordGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ReviewError, "table structure changed"):
             check_results(self.tracked, altered, self.rejected, EDIT)
 
+    def test_section_page_setup_changed_rejected(self):
+        def alter(root):
+            section = next(root.iter(w("sectPr")))
+            width = section.find(w("pgSz"))
+            if width is None:
+                width = ET.SubElement(section, w("pgSz"))
+            width.set(w("w"), "10000")
+        altered = _review_xml(self.tracked, True, alter=alter)
+        with self.assertRaisesRegex(ReviewError, "document envelope changed"):
+            check_results(self.tracked, altered, self.rejected, EDIT)
+
+    def test_settings_protection_changed_rejected(self):
+        result = BytesIO()
+        with ZipFile(BytesIO(self.accepted)) as source, ZipFile(result, "w") as out:
+            for item in source.infolist():
+                data = source.read(item)
+                if item.filename == "word/settings.xml":
+                    root = ET.fromstring(data)
+                    ET.SubElement(root, w("documentProtection"), {
+                        w("enforcement"): "1", w("edit"): "readOnly"})
+                    data = ET.tostring(root)
+                out.writestr(item, data)
+        with self.assertRaisesRegex(ReviewError, "protected package part changed"):
+            check_results(self.tracked, result.getvalue(), self.rejected, EDIT)
+
+    def test_metadata_modified_rejected(self):
+        result = BytesIO()
+        with ZipFile(BytesIO(self.accepted)) as source, ZipFile(result, "w") as out:
+            for item in source.infolist():
+                data = source.read(item)
+                if item.filename == "docProps/core.xml":
+                    root = ET.fromstring(data)
+                    root.set("tampered", "1")
+                    data = ET.tostring(root)
+                out.writestr(item, data)
+        with self.assertRaisesRegex(ReviewError, "protected package part changed"):
+            check_results(self.tracked, result.getvalue(), self.rejected, EDIT)
+
+    def test_added_untracked_package_part_rejected(self):
+        result = BytesIO()
+        with ZipFile(BytesIO(self.accepted)) as source, ZipFile(result, "w") as out:
+            for item in source.infolist():
+                out.writestr(item, source.read(item))
+            out.writestr("customXml/extra.xml", "<extra>unexpected content</extra>")
+        with self.assertRaisesRegex(ReviewError, "protected package part missing/added"):
+            check_results(self.tracked, result.getvalue(), self.rejected, EDIT)
+
+    def test_metadata_reindent_is_accepted(self):
+        result = BytesIO()
+        with ZipFile(BytesIO(self.accepted)) as source, ZipFile(result, "w") as out:
+            for item in source.infolist():
+                data = source.read(item)
+                if item.filename == "docProps/core.xml":
+                    parser = ET.XMLParser(remove_blank_text=True)
+                    data = ET.tostring(ET.fromstring(data, parser), pretty_print=True)
+                out.writestr(item, data)
+        self.assertEqual(check_results(self.tracked, result.getvalue(), self.rejected, EDIT)["static_docx_content"], "PASS")
+
     def test_corrupt_package_rejected(self):
         with self.assertRaisesRegex(ReviewError, "DOCX ZIP"):
             check_results(self.tracked, b"not ZIP", self.rejected, EDIT)

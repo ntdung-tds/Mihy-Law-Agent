@@ -26,3 +26,9 @@ Strict validation may flag benign Word reserialization for manual review. This i
 The offline checker compares related story OOXML (headers, footers, footnotes, endnotes and comments), not just their visible text. It also checks table layout/style properties (table, row and cell) as well as table topology. A change to header boldness or a table width must be reported as \`STATIC_FAIL\`, even if visible text and row counts are unchanged.
 
 This is intentionally strict: a legitimate Word resave may trigger manual inspection if XML semantics differ. A static PASS never proves actual Word desktop review, and the three SRS application cases remain NOT_RUN.
+
+## R10: section and package integrity review
+
+The offline gate now compares document-level page/section configuration and **every non-document ZIP part** (package membership, XML semantics or binary bytes), including `word/settings.xml` and `docProps/`. These checks reject unintended changes that otherwise appeared as `STATIC_PASS`. Formatting-only XML reindentation is treated as equivalent.
+
+**Strict-save caveat:** Microsoft Word may legitimately update metadata or settings while saving. If that happens, the gate reports a static difference requiring **manual investigation**, not automatic success; original files and tester evidence must be retained. Do not bypass this protection by deleting metadata from files. Even `STATIC_PASS` does **not** establish that Word Desktop UI was used. `TC02C`, `TC07C`, `TCE2E-02` and Owner acceptance remain separate gates.
