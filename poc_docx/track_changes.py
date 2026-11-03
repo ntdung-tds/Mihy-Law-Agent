@@ -46,6 +46,10 @@ def _validate_edit(edit: dict[str, Any]) -> tuple[int, str, str, str, str]:
     old, new = edit.get("old_text"), edit.get("new_text")
     if not isinstance(old, str) or not old or not isinstance(new, str) or not new or old == new:
         raise EditError("old_text and new_text must be different non-empty strings")
+    # A Word line break/tab is a separate w:br/w:tab, not a character inside w:t.
+    # The whole-run POC cannot encode structured control runs safely.
+    if any(character in text for text in (old, new) for character in "\t\r\n"):
+        raise EditError("Whole-run replacement contains unsupported control characters")
     author = edit.get("author", "AI Law POC")
     if not isinstance(author, str) or not author.strip() or len(author) > 100:
         raise EditError("author must be a non-empty string of at most 100 characters")
@@ -75,9 +79,24 @@ def _next_id(root: ET.Element) -> int:
 
 
 def _check_existing_revisions(root: ET.Element) -> None:
-    """Do not carry invalid tracked insert/delete IDs into a newly edited document."""
+    """Fail closed on unsupported Word revision kinds and invalid insert/delete IDs."""
+    unsupported = {
+        w(tag) for tag in (
+            "rPrChange", "pPrChange", "tblPrChange", "trPrChange",
+            "tcPrChange", "sectPrChange", "numberingChange",
+            "moveFrom", "moveTo", "moveFromRangeStart", "moveFromRangeEnd",
+            "moveToRangeStart", "moveToRangeEnd",
+            "cellIns", "cellDel", "cellMerge",
+            "customXmlInsRangeStart", "customXmlInsRangeEnd",
+            "customXmlDelRangeStart", "customXmlDelRangeEnd",
+            "customXmlMoveFromRangeStart", "customXmlMoveFromRangeEnd",
+            "customXmlMoveToRangeStart", "customXmlMoveToRangeEnd",
+        )
+    }
     seen: set[int] = set()
     for element in root.iter():
+        if element.tag in unsupported:
+            raise EditError("Document contains unsupported tracked revision kind")
         if element.tag not in {w("ins"), w("del")}:
             continue
         identifier = element.get(w("id"))
