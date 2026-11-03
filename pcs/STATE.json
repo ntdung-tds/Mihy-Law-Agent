@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 5,
-  "updated_at": "2026-11-03T02:59:30Z",
+  "revision": 6,
+  "updated_at": "2026-11-03T03:03:03Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -94,7 +94,9 @@
           "offline_review_validator": "PASS_9_OF_9_LOCAL_SYNTHETIC",
           "offline_review_validator_e2e": "PASS_SIMULATED_INPUT_ONLY",
           "local_suite": "PASS_25_OF_25",
-          "pr3_initial_ci": "PASS_RUN_41569272520_ON_HEAD_4e105d800b03a5a19c03a7988ace16bca05f8429"
+          "pr3_initial_ci": "PASS_RUN_41569272520_ON_HEAD_4e105d800b03a5a19c03a7988ace16bca05f8429",
+          "pr3_final_head_ci": "PASS_RUN_41569562446_HEAD_77dfbda614916765fc1467ea920f1b21be1df503",
+          "github_pr3": "MERGED_MAIN_7bd3787a16c63ed3d40623afe6dd582054dde270"
         },
         "owner_acceptance": "NOT_REQUESTED",
         "traceability": [
@@ -110,7 +112,8 @@
           "tests/evidence/AL-POC1-R5-2026-11-03.json (public-safe local static test metadata)",
           "tests/test_word_gate.py: nine synthetic result-verifier regression tests PASS",
           "GitHub Actions PR #3 initial head 4e105d800...: run 41569272520 completed/success",
-          "Synthetic Word review kit generated locally; not committed to public GitHub"
+          "Synthetic Word review kit generated locally; not committed to public GitHub",
+          "PRIVATE_DRIVE_READBACK_CONFIRMED: folder AI Law Test Evidence/POC-DOCX-20261103-02, file AL-POC1-TR-20261103-R5_synthetic_word_review_kit.zip, size 37007 bytes, synthetic-only, no UI screenshots"
         ],
         "notes": "Offline validator statically checks tracked/accepted/rejected DOCX semantic content, tables, numbering, headers/footers and hashes. It does not perform Word UI or substitute for user acceptance."
       },
@@ -274,11 +277,11 @@
     ],
     "current": {
       "active_task": "AL-POC1-002",
-      "last_completed_step": "POC1 offline Word result QA gate implemented: 9 new synthetic tests and 25/25 overall local PASS; PR #3 initial head CI run 41569272520 success. Word UI still NOT_RUN.",
-      "next_action": "On Microsoft Word desktop, review controlled synthetic tracked.docx, Accept All/Reject All on separate copies, save/reopen/screenshots and use offline verifier; then test TC02C, TC07C and TCE2E-02 against application flow. Owner retains final acceptance.",
+      "last_completed_step": "PR #3 offline Word-result static QA gate merged to main commit 7bd3787a; GitHub Actions final PR head run 41569562446 success. Local 25/25 PASS, Word desktop NOT_RUN. Synthetic Word test kit uploaded and metadata read back in authorized Drive test-evidence folder.",
+      "next_action": "Run actual Microsoft Word desktop Accept/Reject on supplied synthetic test kit and save screenshots, reviewer, version and test_run_id in Drive; apply offline validator to genuine Word-saved files; run TC02C, TC07C, TCE2E-02 application E2E when available. Owner final acceptance only.",
       "blockers": [
-        "Actual Microsoft Word UI screenshots/reviewer/test-run absent",
-        "Application review/approval invalidation flow for TCE2E-02 not implemented or independently tested"
+        "Microsoft Word UI manual/automated test not run; Drive contains synthetic kit only, not UI evidence",
+        "Application review/approval invalidation flow for TC02C, TC07C, TCE2E-02 has no runtime test evidence"
       ]
     },
     "policy": {

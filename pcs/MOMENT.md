@@ -1,29 +1,29 @@
 # AI Law — PCS Chat Solo MOMENT
 
-- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public; PCS canonical on `main` **after PR merge**).
-- **State revision:** `5` (canonical: `pcs/STATE.json`).
-- **Updated:** `2026-11-03T02:59:30Z`.
-- **Phase:** POC1; not production; **no Owner acceptance**.
-- **SRS:** v1.1.15 owner-supplied baseline package verified by prior checks; original private archive stays outside Public GitHub.
+- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public, Owner-selected; `main` is canonical **after checkpoint PR merge**).
+- **State revision:** `6` (canonical: `pcs/STATE.json`).
+- **Updated:** `2026-11-03T03:03:03Z`.
+- **Phase:** POC1 technical preparation, **not** full POC acceptance or production.
+- **SRS:** Owner-supplied v1.1.15 archive verified; original SRS and all non-public documents excluded from GitHub.
 
-## Latest bounded progress (AL-POC1-002)
+## Verified progress
 
-- PR #3 adds offline static Word Accept/Reject results validator `tools/verify_word_review.py`, nine synthetic unit tests, procedure `tests/WORD_REVIEW_GATE.md` and public-safe evidence `tests/evidence/AL-POC1-R5-2026-11-03.json`.
-- Local Python unittest **25/25 PASS** (16 original patcher + nine QA-gate cases). Offline CLI test with **simulated** accepted/rejected DOCX returned `STATIC_PASS`; rendered synthetic tracked DOCX using LibreOffice and inspected one page.
-- **PR #3 initial head CI:** GitHub Actions run `41569272520` completed/success on commit `4e105d800b03a5a19c03a7988ace16bca05f8429`. Check **final** PR head CI again after this PCS metadata update, before merge.
-- The offline verifier deliberately emits `word_ui_accept_reject=NOT_VERIFIED_BY_THIS_TOOL`; no Word desktop UI actions have been performed here.
+- PR #3 **merged** as `7bd3787a16c63ed3d40623afe6dd582054dde270` after GitHub Actions **final-head** run `41569562446` completed/success (unit job and install/test steps passed).
+- POC1 single-run tracked patcher 16 original unit tests + nine independent offline Word result-gate unit tests: **25/25 local PASS**. CLI on **simulated** accepted/rejected DOCX returned `STATIC_PASS`. Synthetic DOCX LibreOffice one-page render visually inspected.
+- Static verifier and guide: `tools/verify_word_review.py`, `tests/test_word_gate.py`, `tests/WORD_REVIEW_GATE.md`. Public-safe test metadata: `tests/evidence/AL-POC1-R5-2026-11-03.json`.
+- **Drive storage verified:** private folder `AI Law Test Evidence / POC-DOCX-20261103-02`, `AL-POC1-TR-20261103-R5_synthetic_word_review_kit.zip` (37,007 bytes, readback confirmed). Store actual UI screenshot evidence there when available. Private Drive file/folder IDs are intentionally absent from this Public repo.
 
-## Remaining acceptance gates
+## Unfinished gates
 
-- `AL-POC1-002`: **BLOCKED** — Microsoft Word UI Accept/Reject, screenshot/reviewer/test_run_id, save/reopen and independent result review remain **NOT_RUN**.
-- `TC02C`, `TC07C`, `TCE2E-02` application approval invalidation flows: **NOT_RUN** (application flow unavailable).
-- POC2 10 authorized PDFs and POC3 real PostgreSQL RLS: **PLANNED**, not executed.
-- No production deployment or Owner acceptance.
+- `AL-POC1-002` remains **BLOCKED**: Actual Microsoft Word desktop Accept/Reject and screenshots, tester/version/test_run_id **NOT_RUN**. Offline validator is **not** Word UI evidence.
+- `TC02C`, `TC07C`, `TCE2E-02`: **NOT_RUN** (application review/approval invalidation flow unavailable).
+- POC2 ten authorized legal PDFs and POC3 real PostgreSQL RLS: **PLANNED**, not executed.
+- No Owner acceptance and no production deployment.
 
-## Next action
+## Next step
 
-Use the synthetic test kit locally in actual Microsoft Word, save `accepted.docx` and `rejected.docx`, collect screenshots in authorized Drive test-evidence folder, run `python -m tools.verify_word_review`, then evaluate application E2E gates when available. Only Owner can accept the POC.
+Run Word desktop Accept/Reject on the supplied synthetic kit, save/reopen and capture screenshot+reviewer/test run evidence into Drive, verify Word-saved files with offline script, then test application flows. Owner makes final acceptance decision.
 
 ## Publication boundary
 
-Public repository contains only synthetic POC code/tests and non-sensitive metadata; no internal SRS, actual legal/customer case files or screenshots.
+No SRS originals, sensitive case files, private Drive IDs or test screenshots are published in this repository.
