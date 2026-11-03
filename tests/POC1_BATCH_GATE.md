@@ -24,3 +24,9 @@ python -m unittest discover -s tests -v
 Indices refer to paragraphs in `word/document.xml` order (including tables), starting at zero. Each selected target must be the **only** direct, whole-run exact text match in the indexed paragraph. Cross-run ranges, partial replacements, field-context edits and protected files are rejected. Distinct selected edits may target distinct runs of the same paragraph; the same run cannot be selected twice. All edits resolve against the **original** DOCX before any mutation; one failing edit rejects the whole batch.
 
 The technical sample can create three real `w:del` + `w:ins` pairs with unique IDs. Tests simulate mixed Accept/Reject on XML to check expected content. **These simulations do not prove Microsoft Word behavior**. Actual POC1 PASS still requires Word Desktop review, screenshots, reviewer, test run, saved/reopened outputs, and SRS test cases with Owner acceptance. No real legal/customer documents should be used without permission; the repository is Public.
+
+## Two-round R9 hardening (synthetic POC)
+
+A batch must reject an incomplete DOCX package, including missing \`[Content_Types].xml\` or \`_rels/.rels\`, malformed package roots and a missing Word document content-type declaration. The single-edit entrypoint applies the same package checks.
+
+These are negative-path controls, not a declaration of complete ECMA-376 conformance. Offline mixed Accept/Reject testing remains simulation only.

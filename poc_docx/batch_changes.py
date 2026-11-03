@@ -25,6 +25,7 @@ from poc_docx.track_changes import (
     _next_id,
     _patch_settings,
     _validate_edit,
+    _validate_package_basics,
     w,
 )
 
@@ -114,8 +115,7 @@ def apply_batch(source_docx: bytes, edits: list[dict[str, Any]]) -> bytes:
             names = [item.filename for item in items]
             if len(set(names)) != len(names):
                 raise EditError("DOCX has duplicate ZIP entries")
-            if DOC_PART not in names or SETTINGS_PART not in names:
-                raise EditError("DOCX must contain document.xml and settings.xml")
+            _validate_package_basics(source, names)
             new_settings = _patch_settings(source.read(SETTINGS_PART))
             new_document = _patch_document_batch(source.read(DOC_PART), specs)
             output = BytesIO()

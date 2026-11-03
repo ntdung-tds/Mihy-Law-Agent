@@ -20,3 +20,9 @@ If Word silently alters formatting, numbering or fields, mark `FAIL` and preserv
 The offline verifier now **fails closed** for unexpected paragraph/run formatting, non-text markers (tabs, breaks, drawings, bookmarks, hyperlinks), style/numbering/font/theme definitions, relationships, media and known story text. XML indentation-only reserialization is ignored; splitting adjacent runs with unchanged formatting does not change the semantic signature.
 
 Strict validation may flag benign Word reserialization for manual review. This is never proof that Microsoft Word UI was used: retain original Word-saved files, screenshots, reviewer, Word version, and `test_run_id`. **STATIC_PASS is not POC1 acceptance.**
+
+## Two-round R9 review gate hardening
+
+The offline checker compares related story OOXML (headers, footers, footnotes, endnotes and comments), not just their visible text. It also checks table layout/style properties (table, row and cell) as well as table topology. A change to header boldness or a table width must be reported as \`STATIC_FAIL\`, even if visible text and row counts are unchanged.
+
+This is intentionally strict: a legitimate Word resave may trigger manual inspection if XML semantics differ. A static PASS never proves actual Word desktop review, and the three SRS application cases remain NOT_RUN.

@@ -171,6 +171,26 @@ def _patch_settings(data: bytes) -> bytes:
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
 
+def _validate_package_basics(archive: ZipFile, names: list[str]) -> None:
+    """Reject incomplete or falsely labelled OOXML containers before patching."""
+    required = {DOC_PART, SETTINGS_PART, "[Content_Types].xml", "_rels/.rels"}
+    missing = sorted(required.difference(names))
+    if missing:
+        raise EditError("DOCX missing required package part(s): " + ", ".join(missing))
+    content_ns = "http://schemas.openxmlformats.org/package/2006/content-types"
+    relation_ns = "http://schemas.openxmlformats.org/package/2006/relationships"
+    parser = ET.XMLParser(resolve_entities=False, no_network=True)
+    types = ET.fromstring(archive.read("[Content_Types].xml"), parser=parser)
+    rels = ET.fromstring(archive.read("_rels/.rels"), parser=parser)
+    if types.tag != f"{{{content_ns}}}Types" or rels.tag != f"{{{relation_ns}}}Relationships":
+        raise EditError("DOCX package has invalid content-type or relationship root")
+    main_content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"
+    if not any(node.tag == f"{{{content_ns}}}Override" and
+               node.get("PartName") == "/word/document.xml" and
+               node.get("ContentType") == main_content_type for node in types):
+        raise EditError("DOCX does not declare a Word document main part")
+
+
 def apply_edit(source_docx: bytes, edit: dict[str, Any]) -> bytes:
     """Return a DOCX with one exact whole-run replacement tracked in OOXML.
 
@@ -185,8 +205,7 @@ def apply_edit(source_docx: bytes, edit: dict[str, Any]) -> bytes:
             names = [item.filename for item in items]
             if len(set(names)) != len(names):
                 raise EditError("DOCX has duplicate ZIP entries")
-            if DOC_PART not in names or SETTINGS_PART not in names:
-                raise EditError("DOCX must contain document.xml and settings.xml")
+            _validate_package_basics(source, names)
             # Validate protection and XML before any output is written.
             new_settings = _patch_settings(source.read(SETTINGS_PART))
             new_document = _patch_document(source.read(DOC_PART), index, old, new, author, stamp)

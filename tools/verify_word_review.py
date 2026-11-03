@@ -69,19 +69,26 @@ def _paragraph_text(paragraph: ET.Element, *, accept: bool | None = None) -> str
     return "".join(tokens)
 
 
-def _other_story_text(parts: dict[str, bytes], kind: str) -> list[str]:
-    result = []
-    for name in sorted(parts):
-        if name.startswith("word/" + kind) and name.endswith(".xml"):
-            result.append("".join(node.text or "" for node in _xml(parts[name]).iter(w("t"))))
-    return result
+def _other_story_signature(parts: dict[str, bytes], kind: str) -> dict[str, tuple | None]:
+    """Check the complete OOXML of related stories, not only their visible text."""
+    return {name: _normalized_xml(_xml(data)) for name, data in parts.items()
+            if name.startswith("word/" + kind) and name.endswith(".xml")}
 
 
-def _structure_signature(root: ET.Element) -> list[tuple[tuple[int, ...], ...]]:
-    """Table rows/cells/paragraph counts; compare structure, not Word's layout metrics."""
-    return [tuple(tuple(len(list(cell.iter(w("p")))) for cell in row.findall(w("tc")))
-                  for row in table.findall(w("tr")))
-            for table in root.iter(w("tbl"))]
+def _structure_signature(root: ET.Element) -> list[tuple]:
+    """Compare table topology *and* styling/layout; a width change is not harmless."""
+    return [
+        (
+            tuple(tuple(len(list(cell.iter(w("p")))) for cell in row.findall(w("tc")))
+                  for row in table.findall(w("tr"))),
+            _normalized_xml(table.find(w("tblPr"))),
+            _normalized_xml(table.find(w("tblGrid"))),
+            tuple((_normalized_xml(row.find(w("trPr"))),
+                   tuple(_normalized_xml(cell.find(w("tcPr"))) for cell in row.findall(w("tc"))))
+                  for row in table.findall(w("tr"))),
+        )
+        for table in root.iter(w("tbl"))
+    ]
 
 
 def _numbering_signature(paragraphs: list[ET.Element]) -> list[tuple[str | None, str | None, str | None]]:
@@ -239,8 +246,8 @@ def check_results(tracked: bytes, accepted: bytes, rejected: bytes, edit: dict) 
                 raise ReviewError(f"{outcome}: paragraph {para_index} non-text structure changed")
         _assert_nontext_content_safe(file_parts["tracked"], file_parts[outcome], outcome)
         for kind in ("header", "footer", "footnotes", "endnotes", "comments"):
-            if _other_story_text(file_parts["tracked"], kind) != _other_story_text(file_parts[outcome], kind):
-                raise ReviewError(f"{outcome}: {kind} text changed")
+            if _other_story_signature(file_parts["tracked"], kind) != _other_story_signature(file_parts[outcome], kind):
+                raise ReviewError(f"{outcome}: {kind} story XML changed (text or formatting)")
         if _structure_signature(roots["tracked"]) != _structure_signature(roots[outcome]):
             raise ReviewError(f"{outcome}: table structure changed")
     return {
