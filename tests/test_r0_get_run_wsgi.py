@@ -367,6 +367,15 @@ class RunReadBatchTests(unittest.TestCase):
                 self.assertEqual(code, 503)
                 self.assertNotIn("secret_admin_flag", json.dumps(result))
 
+    def test_openapi_optional_objects_cannot_be_explicit_null(self):
+        # TaskRun.coverage and TaskRun.usage are optional objects, not nullable.
+        for key in ("coverage", "usage"):
+            with self.subTest(key=key):
+                self.run = RunSnapshot(tenant_id=A, run_id=RUN1,
+                                       data={**PAYLOAD, key: None})
+                code, _, _ = self.request()
+                self.assertEqual(code, 503)
+
     def test_valid_succeeded_and_partial_contracts(self):
         valid = [
             {**PAYLOAD, "status":"succeeded", "result_version_id":"result-v1",
