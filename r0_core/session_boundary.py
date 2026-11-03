@@ -45,12 +45,19 @@ class VerifiedBearerIdentity:
     expires_at: int
 
 
+@dataclass(frozen=True, slots=True)
+class AuthenticatedSession:
+    """Internal principal and server-verified session id; never from client data."""
+    principal: AuthenticatedPrincipal
+    session_id: str
+
+
 TokenVerifier = Callable[[str], VerifiedBearerIdentity]
 IdentityLookup = Callable[[str, str], AuthenticatedPrincipal | None]
 SessionIsActive = Callable[[str, str], bool]
 
 
-def authenticate_bearer_principal(
+def authenticate_bearer_session(
     *,
     authorization_header: str | None,
     token_verifier: TokenVerifier,
@@ -59,8 +66,8 @@ def authenticate_bearer_principal(
     expected_issuer: str,
     expected_audience: str,
     now_epoch: int,
-) -> AuthenticatedPrincipal:
-    """Resolve authenticated bearer request into internal, active user identity.
+) -> AuthenticatedSession:
+    """Resolve authenticated bearer request into a verified internal session.
 
     Every request rechecks the server session status and internal principal.
     External `sub` is NOT the internal user_id. JWT verification and state
@@ -118,10 +125,32 @@ def authenticate_bearer_principal(
         if session_is_active(internal_id, claims.session_id) is not True:
             raise SessionRejected(_DENIED)
 
-        return AuthenticatedPrincipal(user_id=internal_id, status="active")
+        return AuthenticatedSession(principal=AuthenticatedPrincipal(user_id=internal_id, status="active"), session_id=claims.session_id)
     except Exception:
         # Prevent exposing provider errors, raw credentials, or membership data.
         raise SessionRejected(_DENIED) from None
+
+
+def authenticate_bearer_principal(
+    *,
+    authorization_header: str | None,
+    token_verifier: TokenVerifier,
+    identity_lookup: IdentityLookup,
+    session_is_active: SessionIsActive,
+    expected_issuer: str,
+    expected_audience: str,
+    now_epoch: int,
+) -> AuthenticatedPrincipal:
+    """Backward-compatible principal-only access, always rechecking the session."""
+    return authenticate_bearer_session(
+        authorization_header=authorization_header,
+        token_verifier=token_verifier,
+        identity_lookup=identity_lookup,
+        session_is_active=session_is_active,
+        expected_issuer=expected_issuer,
+        expected_audience=expected_audience,
+        now_epoch=now_epoch,
+    ).principal
 
 
 def select_tenant_for_bearer_request(
