@@ -1,0 +1,11 @@
+# R0 tenant context — read-only membership adapter
+
+Scope: `FR12-01` / `TC12A`, plus an internal guard for `IF01-01` in the **private SRS v1.1.15**. This is a server-side application-core seam, **not a login feature, HTTP API route or a deployed IAM service**.
+
+`r0_core.tenant_context.select_tenant` already handles context resets. `r0_core.membership_repository.PostgresMembershipRepository` supplies its fresh `Membership` from one parameterized DB-API read that checks the current user, selected tenant, active membership, active principal, role registry version, allowed roles, join time and absence of revocation timestamp. Use `select_tenant_from_store` only after **trusted authentication middleware** has verified the session and issued `AuthenticatedPrincipal`; never construct that principal or the connection factory from request JSON.
+
+The SQL uses the proposed `principals`, `tenants`, `memberships`, `membership_roles` and `role_catalog` schema from the SRS contract. `approved_registry_version` must come from controlled server configuration after approval, not client input. `open_connection` must produce a new least-privilege read-only connection using application credentials, without bypassing PostgreSQL RLS. The adapter closes the connection per lookup. Unknown, revoked, future-effective or roleless membership is denied. A new request performs a new DB lookup.
+
+**Not proven or deployed:** actual identity-provider verification, session invalidation and MFA; PostgreSQL schema migrations, triggers, role catalog approval/seed parity, tenant-scoped RLS, audit, MatterACL, document ACL, API binding, concurrent revocation during content access, real database integration, production. The synthetic unit tests execute the relational SELECT against isolated SQLite with a test-only placeholder translator. They do not substitute for PostgreSQL/RLS and browser/API E2E tests. RLS and ACL must be rechecked on all retrieval/job/export operations at point of use. Do not enable this adapter as a live auth boundary until these gates are satisfied.
+
+No new HTTP endpoint was added because the approved OpenAPI lists its own `/v1` resources; an unsupported tenant-switch endpoint must not be invented without SRS change approval. The R25 UI preview remains static, uses only synthetic data and does not call this module.
