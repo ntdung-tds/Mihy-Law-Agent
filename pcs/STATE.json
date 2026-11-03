@@ -122,7 +122,8 @@
           "github_pr21": "MERGED_MAIN_9aeb4ce42e4b762d8d5ab33de0b8a97bea316bc3",
           "github_pr21_ci": "PASS_RUN_41631578039_FINAL_HEAD_9c4e42e21857e49c75a984e2b33d99a9899a52a3",
           "github_pr23": "MERGED_MAIN_696f7876d1a7d9db9e4c37b970e44623602b68e2",
-          "github_pr23_ci": "PASS_RUN_41635542044_FINAL_HEAD_dbffb4cc022b298c1d627c3f1b511319d01ce7ae"
+          "github_pr23_ci": "PASS_RUN_41635542044_FINAL_HEAD_dbffb4cc022b298c1d627c3f1b511319d01ce7ae",
+          "private_drive_r16_evidence": "PASS_METADATA_READBACK_104161_BYTES_NONSHARED"
         },
         "owner_acceptance": "NOT_REQUESTED",
         "traceability": [
@@ -149,7 +150,8 @@
           "tests/evidence/AL-POC1-REVIEW-LOOP-R13-2026-11-03.json; static mixed check 72/72 local and PR #17 CI success; actual Word UI still NOT_RUN",
           "FR14-03 domain event proof in AL-POC1-005, but TCE2E-02 application approval invalidation still NOT_RUN",
           "tests/evidence/AL-POC1-APPROVAL-REVIEW-LOOP-R15-2026-11-03.json: FR14-03 domain review loop; full CI 91/91, not app E2E",
-          "tests/evidence/AL-POC1-REVIEW-LOOP-R16-2026-11-03.json: 4 red-green cycles and final clean bounded review, final PR23 CI run 41635542044 105/105 PASS"
+          "tests/evidence/AL-POC1-REVIEW-LOOP-R16-2026-11-03.json: 4 red-green cycles and final clean bounded review, final PR23 CI run 41635542044 105/105 PASS",
+          "Private Drive AI Law Test Evidence / POC-DOCX-20261103-02: AL-POC1-TR-20261103-R16_Loop_Test_Evidence.zip (104161 bytes, metadata readback, not shared); private identifiers intentionally absent from public repo"
         ],
         "notes": "Two-stage QA review reproduced and fixed four offline verifier false-PASS classes (style definition, non-target run format, theme and tabs); verified relationship checks and XML indentation-only reserialization. Strict verifier may require manual review on benign Word resaves. Actual Word UI/TC02C/TC07C/TCE2E-02 remain NOT_RUN; task BLOCKED. R9 hardening: offline validator now rejects related-story formatting and table layout changes; still NOT_RUN in Microsoft Word. R10: Static verifier now checks page/section envelope and all non-document package parts; genuine Word metadata changes may legitimately require manual review. R11: DOCX root/settings relationship and MIME integrity negative cases fixed; bounded final review found no new reproductions. Real Word UI/app E2E remain blocked. R13 bounded mixed-review QA loop complete within synthetic scope; static PASS does not imply Word Desktop or application E2E acceptance. R16: improved single static review and shared generator fail-closed validation; real Microsoft Word Desktop still NOT_RUN. No Owner acceptance."
       },
@@ -558,7 +560,7 @@
     ],
     "current": {
       "active_task": "AL-POC1-002",
-      "last_completed_step": "R16 POC1 bounded review: 4 red-green safety cycles corrected 10 false-PASS/unsupported edit classes with negative variants; 105/105 GitHub Actions unit PASS (run 41635542044), merged PR #23 at 696f7876; R12 kit rendered and CRC/OOXML checked.",
+      "last_completed_step": "R16 POC1 bounded review: 4 red-green safety cycles corrected 10 false-PASS/unsupported edit classes with negative variants; 105/105 GitHub Actions unit PASS (run 41635542044), merged PR #23 at 696f7876; R12 kit rendered and CRC/OOXML checked. Private R16 evidence ZIP (104161 bytes) uploaded to authorized Drive folder and metadata readback confirmed.",
       "next_action": "Run real Microsoft Word Desktop Accept/Reject on controlled R12 kit, retain Word-saved/reopened DOCX, screenshots, tester/version/test_run_id in private Drive; test TC02C/TC07C/TC14B/TCE2E-02 application E2E only when authorized runtime exists. Owner final acceptance.",
       "blockers": [
         "Real Microsoft Word Desktop Accept/Reject not executed; no genuine Word UI outputs or reviewer/version/test_run_id screenshots",
