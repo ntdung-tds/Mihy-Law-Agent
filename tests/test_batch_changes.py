@@ -160,6 +160,27 @@ class SelectedTrackChangesTest(unittest.TestCase):
         with self.assertRaisesRegex(EditError, "field context"):
             apply_batch(dst.getvalue(), self.selected)
 
+    def test_missing_content_types_rejected_before_write(self):
+        original = zip_parts(self.source)
+        invalid = BytesIO()
+        with ZipFile(invalid, "w") as archive:
+            for part, data in original.items():
+                if part != "[Content_Types].xml":
+                    archive.writestr(part, data)
+        with self.assertRaisesRegex(EditError, "required package part"):
+            apply_batch(invalid.getvalue(), self.selected)
+
+    def test_wrong_content_types_root_rejected(self):
+        original = zip_parts(self.source)
+        invalid = BytesIO()
+        with ZipFile(invalid, "w") as archive:
+            for part, data in original.items():
+                if part == "[Content_Types].xml":
+                    data = b"<not-types/>"
+                archive.writestr(part, data)
+        with self.assertRaisesRegex(EditError, "content-type or relationship root"):
+            apply_batch(invalid.getvalue(), self.selected)
+
     def test_malformed_package_rejected(self):
         with self.assertRaises(EditError):
             apply_batch(b"junk", self.selected[:1])
