@@ -173,7 +173,7 @@ def _patch_settings(data: bytes) -> bytes:
 
 def _validate_package_basics(archive: ZipFile, names: list[str]) -> None:
     """Reject incomplete or falsely labelled OOXML containers before patching."""
-    required = {DOC_PART, SETTINGS_PART, "[Content_Types].xml", "_rels/.rels"}
+    required = {DOC_PART, SETTINGS_PART, "[Content_Types].xml", "_rels/.rels", "word/_rels/document.xml.rels"}
     missing = sorted(required.difference(names))
     if missing:
         raise EditError("DOCX missing required package part(s): " + ", ".join(missing))
@@ -184,11 +184,46 @@ def _validate_package_basics(archive: ZipFile, names: list[str]) -> None:
     rels = ET.fromstring(archive.read("_rels/.rels"), parser=parser)
     if types.tag != f"{{{content_ns}}}Types" or rels.tag != f"{{{relation_ns}}}Relationships":
         raise EditError("DOCX package has invalid content-type or relationship root")
-    main_content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"
-    if not any(node.tag == f"{{{content_ns}}}Override" and
-               node.get("PartName") == "/word/document.xml" and
-               node.get("ContentType") == main_content_type for node in types):
-        raise EditError("DOCX does not declare a Word document main part")
+    office_rel_type = (
+        "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
+    )
+    main_links = [
+        link for link in rels
+        if link.tag == f"{{{relation_ns}}}Relationship"
+        and link.get("Type") == office_rel_type
+    ]
+    if (len(main_links) != 1
+            or main_links[0].get("Target") not in {"word/document.xml", "/word/document.xml"}
+            or main_links[0].get("TargetMode", "Internal") != "Internal"):
+        raise EditError("DOCX must have one internal officeDocument relationship to word/document.xml")
+    document_rels = ET.fromstring(archive.read("word/_rels/document.xml.rels"), parser=parser)
+    if document_rels.tag != f"{{{relation_ns}}}Relationships":
+        raise EditError("DOCX has invalid document.xml relationship root")
+    settings_rel_type = (
+        "http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings"
+    )
+    settings_links = [link for link in document_rels
+                      if link.tag == f"{{{relation_ns}}}Relationship"
+                      and link.get("Type") == settings_rel_type]
+    if (len(settings_links) != 1
+            or settings_links[0].get("Target") not in {"settings.xml", "/word/settings.xml"}
+            or settings_links[0].get("TargetMode", "Internal") != "Internal"):
+        raise EditError("DOCX must have one internal settings relationship")
+    def require_unique_type(part_name: str, content_type: str) -> None:
+        declarations = [node for node in types
+                        if node.tag == f"{{{content_ns}}}Override"
+                        and node.get("PartName") == part_name]
+        if len(declarations) != 1 or declarations[0].get("ContentType") != content_type:
+            raise EditError(f"DOCX must have one correct content type for {part_name}")
+
+    require_unique_type(
+        "/word/document.xml",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml",
+    )
+    require_unique_type(
+        "/word/settings.xml",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml",
+    )
 
 
 def apply_edit(source_docx: bytes, edit: dict[str, Any]) -> bytes:
