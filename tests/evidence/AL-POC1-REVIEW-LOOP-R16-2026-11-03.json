@@ -1,0 +1,131 @@
+{
+  "test_run_id": "AL-POC1-TR-20261103-R16-LOOP",
+  "repo": "ntdung-tds/Mihy-Law-Agent",
+  "baseline_main_sha": "243f874fc8e9480eb78bfd1351edf9d93781a62c",
+  "baseline_pcs_revision": 15,
+  "srs": "v1.1.15 OWNER_SUPPLIED_PRIVATE_UNCHANGED",
+  "scope": "POC1 DOCX single/batch whole-run generator and offline Accept/Reject static gate; synthetic files only",
+  "method": "test first -> GitHub CI red -> targeted fix -> GitHub CI green -> independent negative probe; bounded stop on clean round",
+  "cycles": [
+    {
+      "cycle": 1,
+      "red": {
+        "run_id": 41633506035,
+        "run": "FAIL",
+        "tests": 96,
+        "failures": 8
+      },
+      "issues": [
+        "Three equally incomplete tracked/accepted/rejected DOCX packages erroneously STATIC_PASS",
+        "Forged tracked w:author or w:date",
+        "Hidden tab inside deletion run",
+        "Unrelated paragraph paraId change",
+        "Lost xml:space preserve"
+      ],
+      "green": {
+        "run_id": 41633770894,
+        "run": "PASS",
+        "tests": 96
+      }
+    },
+    {
+      "cycle": 2,
+      "red": {
+        "run_id": 41633991446,
+        "run": "FAIL",
+        "tests": 99,
+        "failures": 6
+      },
+      "issues": [
+        "Pending tracked revision in header identical across all three files",
+        "Non-RFC3339 w:date accepted by single and batch generator"
+      ],
+      "green": {
+        "run_id": 41634152153,
+        "run": "PASS",
+        "tests": 99
+      }
+    },
+    {
+      "cycle": 3,
+      "red": {
+        "run_id": 41634413539,
+        "run": "FAIL",
+        "tests": 103,
+        "failures": 10
+      },
+      "issues": [
+        "Unsupported preexisting property/move revisions accepted by patchers and static gate",
+        "Raw tab/newline/carriage return inserted in w:t rather than fail-closed"
+      ],
+      "green": {
+        "run_id": 41634595479,
+        "run": "PASS",
+        "tests": 103
+      }
+    },
+    {
+      "cycle": 4,
+      "red": {
+        "run_id": 41634782234,
+        "run": "FAIL",
+        "tests": 105,
+        "failures": 2
+      },
+      "issues": [
+        "Single and batch generators accepted preexisting pending tracked revision in Word header"
+      ],
+      "green": {
+        "run_id": 41634962566,
+        "run": "PASS",
+        "tests": 105
+      }
+    },
+    {
+      "cycle": 5,
+      "focus": "bounded independent final cross-check; no new reproducible defect in tested scope",
+      "green": {
+        "run_id": 41634962566,
+        "run": "PASS",
+        "tests": 105
+      },
+      "controlled_r12_kit": "CRC_PASS; tracked 3 w:ins+3 w:del; simulated reviewed 0 revisions; both one page LibreOffice render, visually inspected"
+    }
+  ],
+  "final_ci": {
+    "run_id": 41634962566,
+    "job": "unit",
+    "result": "completed_success",
+    "raw_log": "Ran 105 tests in 3.675s; OK; no FAIL/ERROR",
+    "new_reproducible_defects_in_final_review": 0
+  },
+  "controlled_kit": {
+    "source": "AI_Law_POC1_Mixed_Review_Kit_R12.zip",
+    "zip_crc": "PASS",
+    "tracked_sha256": "d02582fc8ca51229ecef9f92d3c179afa2b22bdeed8312c52c02d516e5c689ae",
+    "simulated_review_sha256": "dd35acc22cd318e86479ccc0ec5c84f33e9572e9af90dc9729a60779bba719f7",
+    "tracked_revision_pairs": 3,
+    "simulated_result_remaining_revisions": 0,
+    "expected_content": [
+      "30 ngày",
+      "B",
+      "C"
+    ],
+    "libreoffice_render": {
+      "tracked_pages": 1,
+      "reviewed_pages": 1,
+      "visual_review": "PASS"
+    }
+  },
+  "not_run": {
+    "microsoft_word_desktop": "NOT_RUN",
+    "tc02c": "NOT_RUN",
+    "tc07c": "NOT_RUN",
+    "tc14b": "NOT_RUN",
+    "tce2e_02": "NOT_RUN",
+    "owner_acceptance": "NOT_REQUESTED",
+    "production": "NOT_DEPLOYED"
+  },
+  "risk": "A clean bounded test cycle is not proof of exhaustive OOXML interoperability or application correctness. Word Desktop and authenticated app E2E remain blocked.",
+  "classification": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY"
+}
