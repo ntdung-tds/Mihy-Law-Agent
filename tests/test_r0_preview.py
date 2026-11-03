@@ -165,5 +165,59 @@ class R0PreviewTests(unittest.TestCase):
         self.assertIn('aria-label="Danh sách 11 nghiệp vụ pháp lý"', self.html)
 
 
+
+    def test_r25_flat_catalog_blocks(self):
+        """Only catalog work tiles use flatter, stable block geometry."""
+        marker = '/* R25 flat blocks:'
+        self.assertIn(marker, self.css)
+        rules = self.css.split(marker, 1)[1]
+        for expected in (
+            '.catalog .catalog-group{background:#f3f6fa;',
+            '.catalog .catalog-card{background:#fff;border:1px solid #cfd8e5;',
+            'box-shadow:none;transform:none;',
+            '.catalog .catalog-card:hover{transform:none;box-shadow:none;',
+            '.catalog .catalog-card:focus-visible{outline:3px solid #5746b5;',
+            '.catalog .catalog-card[data-stage="r0"]{',
+            'border-left:4px solid #6759cf;',
+        ):
+            self.assertIn(expected, rules)
+
+    def test_r25_flat_catalog_responsive_readability(self):
+        """Cards must fit phone, tablet and desktop without shrinking labels."""
+        rules = self.css.split('/* R25 flat blocks:', 1)[1]
+        for expected in (
+            '@media(max-width:620px)',
+            '.catalog .catalog-group .services-grid{grid-template-columns:1fr;',
+            '.catalog .catalog-card strong{font-size:16px;',
+            '.catalog .catalog-card p{font-size:14px;',
+            '@media(min-width:621px) and (max-width:1120px)',
+            'grid-template-columns:repeat(2,minmax(0,1fr))',
+            '@media(min-width:1121px)',
+            '.catalog .catalog-group[data-catalog-group="B"] .services-grid{grid-template-columns:repeat(3,minmax(0,1fr))',
+        ):
+            self.assertIn(expected, rules)
+
+    def test_r25_preserve_existing_catalog_scope(self):
+        """Visual refinement must not create new workflows or fake capability."""
+        import re
+        ids = re.findall(r'data-feature="(UC\d{2})"', self.html)
+        self.assertEqual(len(ids), 11)
+        self.assertEqual(len(set(ids)), 11)
+        self.assertEqual(
+            set(re.findall(r'data-feature="(UC\d{2})" data-stage="r0"', self.html)),
+            {"UC03", "UC04", "UC07"},
+        )
+        self.assertIn("Chưa có nghiệp vụ AI nào hoạt động", self.html)
+        self.assertNotIn("fetch(", self.js)
+
+
+
+    def test_r25_every_catalog_tile_binds_info_modal(self):
+        """A single element .forEach would throw and abort all later JS binding."""
+        self.assertIn("$$('[data-demo-action]').forEach", self.js)
+        self.assertIn("openModal(n.dataset.demoAction, description", self.js)
+        self.assertIn("n.dataset.stage === 'r0'", self.js)
+
+
 if __name__ == '__main__':
     unittest.main()
