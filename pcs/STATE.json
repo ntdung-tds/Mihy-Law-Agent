@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 11,
-  "updated_at": "2026-11-03T09:45:46Z",
+  "revision": 12,
+  "updated_at": "2026-11-03T10:18:43Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -96,7 +96,7 @@
           "tce2e_02": "NOT_RUN",
           "offline_review_validator": "PASS_SYNTHETIC_STORY_AND_TABLE_LAYOUT_REGRESSIONS_R9",
           "offline_review_validator_e2e": "PASS_SIMULATED_INPUT_ONLY",
-          "local_suite": "PASS_58_OF_58_R11_SYNTHETIC",
+          "local_suite": "PASS_66_OF_66_R12_SYNTHETIC",
           "pr3_initial_ci": "PASS_RUN_41569272520_ON_HEAD_4e105d800b03a5a19c03a7988ace16bca05f8429",
           "pr3_final_head_ci": "PASS_RUN_41569562446_HEAD_77dfbda614916765fc1467ea920f1b21be1df503",
           "github_pr3": "MERGED_MAIN_7bd3787a16c63ed3d40623afe6dd582054dde270",
@@ -109,7 +109,10 @@
           "github_pr11": "MERGED_MAIN_eb4708b470838dd2aba9e005ed03711d07c42cde",
           "github_pr11_ci": "PASS_RUN_41611158138_FINAL_HEAD_597290b42e39873f1d5838565caea800eb40f264",
           "github_pr13": "MERGED_MAIN_8700ba4e16139a10c5c7af8e2ad83619e08281a6",
-          "github_pr13_ci": "PASS_RUN_41613522374_FINAL_HEAD_17290aae0cec83361da4b02dbe7b7ff451787806"
+          "github_pr13_ci": "PASS_RUN_41613522374_FINAL_HEAD_17290aae0cec83361da4b02dbe7b7ff451787806",
+          "mixed_offline_review": "PASS_8_OF_8_SYNTHETIC_GUARD_NOT_WORD_UI",
+          "github_pr15": "MERGED_MAIN_4b1e7a47cffe23002acb0e1f24aa001344c1dfb5",
+          "github_pr15_ci": "PASS_RUN_41618024600_FINAL_HEAD_0e92a6dc427db24b76f3c731e92d9a2d282e0986"
         },
         "owner_acceptance": "NOT_REQUESTED",
         "traceability": [
@@ -131,7 +134,8 @@
           "Local Python unittest 31/31 PASS; GitHub Actions job unit success on run 41575457423 (PR #5, final head)",
           "tests/evidence/AL-POC1-TWO-ROUND-R9-2026-11-03.json; 47/47 local PASS; GitHub CI PR #9 run 41609586567 success",
           "tests/evidence/AL-POC1-REVIEW-R10-2026-11-03.json: four reproduced false STATIC_PASS cases; five added regressions; local 52/52 PASS; PR #11 final-head GitHub Actions unit job run 41611158138 completed/success",
-          "tests/evidence/AL-POC1-REVIEW-LOOP-R11-2026-11-03.json: 3 reproduce-fix-test loops (52→54→56→58) + final clean bounded review"
+          "tests/evidence/AL-POC1-REVIEW-LOOP-R11-2026-11-03.json: 3 reproduce-fix-test loops (52→54→56→58) + final clean bounded review",
+          "tests/evidence/AL-POC1-MIXED-R12-2026-11-03.json: synthetic mixed review QA 8 new cases, total 66/66; Word UI still NOT_RUN"
         ],
         "notes": "Two-stage QA review reproduced and fixed four offline verifier false-PASS classes (style definition, non-target run format, theme and tabs); verified relationship checks and XML indentation-only reserialization. Strict verifier may require manual review on benign Word resaves. Actual Word UI/TC02C/TC07C/TCE2E-02 remain NOT_RUN; task BLOCKED. R9 hardening: offline validator now rejects related-story formatting and table layout changes; still NOT_RUN in Microsoft Word. R10: Static verifier now checks page/section envelope and all non-document package parts; genuine Word metadata changes may legitimately require manual review. R11: DOCX root/settings relationship and MIME integrity negative cases fixed; bounded final review found no new reproductions. Real Word UI/app E2E remain blocked."
       },
@@ -183,6 +187,40 @@
         ],
         "owner_acceptance": "NOT_REQUESTED",
         "notes": "TECH_DONE refers only to batch generator prerequisite. No TC02C acceptance or app workflow, Word GUI NOT_RUN."
+      },
+      {
+        "id": "AL-POC1-004",
+        "title": "Statically verify mixed Word Accept/Reject results for 1–5 selected DOCX tracked replacements",
+        "status": "TECH_DONE",
+        "priority": "P0",
+        "scope": "Synthetic offline QA helper supporting TC02C; no Word GUI automation or application approval/export flow",
+        "acceptance": [
+          "Every source w:del/w:ins pair matches one selected edit, author/date and distinct revision IDs",
+          "Given accepted_indices, checked mixed output matches all accepted/rejected decisions with no remaining revisions",
+          "Unrelated paragraphs, formatting, header/footer, tables, page setup and OOXML package parts are unchanged in controlled synthetic fixtures",
+          "Invalid decisions, missing/unselected revisions, altered results fail closed and prior unit regression remains green"
+        ],
+        "tests": {
+          "local_unittest": "PASS_66_OF_66_2026_11_03_R12",
+          "added_cases": "PASS_8_OF_8_SYNTHETIC",
+          "controlled_r8_kit": "PASS_STATIC_SIMULATED_TWO_ACCEPT_ONE_REJECT",
+          "libreoffice": "PASS_ONE_PAGE_VISUALLY_CHECKED",
+          "microsoft_word_ui": "NOT_RUN",
+          "application_tc02c": "NOT_RUN",
+          "github_ci": "PASS_RUN_41618024600_PR15_FINAL_HEAD_0e92a6dc427db24b76f3c731e92d9a2d282e0986_MERGED_MAIN_4b1e7a47cffe23002acb0e1f24aa001344c1dfb5"
+        },
+        "evidence": [
+          "tests/evidence/AL-POC1-MIXED-R12-2026-11-03.json",
+          "GitHub PR #15, final-head Actions run 41618024600 completed/success; merged 4b1e7a47",
+          "Controlled R8 synthetic tracked SHA256 d02582fc8ca51229ecef9f92d3c179afa2b22bdeed8312c52c02d516e5c689ae; mixed simulation SHA256 dd35acc22cd318e86479ccc0ec5c84f33e9572e9af90dc9729a60779bba719f7",
+          "Private Drive synthetic-only R12 review kit verified via metadata readback (71182 bytes); no genuine Word UI screenshots"
+        ],
+        "owner_acceptance": "NOT_REQUESTED",
+        "traceability": [
+          "FR02-04",
+          "FR07-04",
+          "TC02C"
+        ]
       }
     ],
     "features": [
@@ -193,7 +231,8 @@
         "tasks": [
           "AL-POC1-001",
           "AL-POC1-002",
-          "AL-POC1-003"
+          "AL-POC1-003",
+          "AL-POC1-004"
         ]
       },
       {
@@ -387,15 +426,31 @@
       {
         "path": "tests/evidence/AL-POC1-REVIEW-LOOP-R11-2026-11-03.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
+      },
+      {
+        "path": "tools/verify_selected_review.py",
+        "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": "tests/test_selected_review.py",
+        "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": "tests/SELECTED_WORD_REVIEW_GATE.md",
+        "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": "tests/evidence/AL-POC1-MIXED-R12-2026-11-03.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
       }
     ],
     "current": {
       "active_task": "AL-POC1-002",
-      "last_completed_step": "R11 POC1 scoped review loop: 3 reproduced issue groups resolved (root relationship/settings relationship/content types), local regression 58/58 PASS, R8 controlled DOCX byte-identical and LO render, PR #13 CI run 41613522374 PASS and merged at 8700ba4e.",
-      "next_action": "Run Microsoft Word Desktop Accept/Reject on controlled DOCX fixture; preserve genuine Word-saved/reopened files, screenshot/version/test_run_id in private Drive; perform TC02C/TC07C/TCE2E-02 app E2E when test runtime exists. Owner final acceptance.",
+      "last_completed_step": "POC1 R12 small technical prerequisite: mixed Accept/Reject static verifier with 8 regression cases; total 66/66 local PASS; R8 synthetic kit 2 accept/1 reject STATIC_PASS; LibreOffice one-page visual check; PR #15 CI run 41618024600 PASS and merged 4b1e7a47; private Drive R12 synthetic kit upload readback.",
+      "next_action": "Use controlled tracked file in actual Microsoft Word Desktop: accept two and reject one, save/reopen and capture real Word-saved DOCX, tester/version/test_run_id and screenshots to private Drive; apply R12 offline verifier to those real files; then run TC02C/TC07C/TCE2E-02 app E2E when runtime exists. Owner final acceptance.",
       "blockers": [
-        "Microsoft Word Desktop UI Accept/Reject test NOT_RUN; actual Word-saved files/screenshots/reviewer/version missing",
-        "Application review/approval invalidation E2E not implemented or testable; TC02C/TC07C/TCE2E-02 NOT_RUN"
+        "Microsoft Word Desktop mixed Accept/Reject has not been executed; genuine Word UI test files and evidence missing",
+        "Application review/proofread/export/approval invalidation workflow not testable; TC02C/TC07C/TCE2E-02 remain NOT_RUN"
       ]
     },
     "policy": {
