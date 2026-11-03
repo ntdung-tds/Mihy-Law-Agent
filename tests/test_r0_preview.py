@@ -37,5 +37,35 @@ class R0PreviewTests(unittest.TestCase):
             self.assertIn(s, self.html)
         self.assertIn("event.key === 'Escape'", self.js)
 
+
+    def test_mobile_readability_r20_contract(self):
+        """Regression guard for R20 mobile type and touch sizing (CSS contract only)."""
+        marker = '/* R0 mobile legibility review R20:'
+        self.assertIn(marker, self.css)
+        overrides = self.css.split(marker, 1)[1]
+        self.assertIn('@media(max-width:620px)', overrides)
+        self.assertIn('@media(max-width:820px)', overrides)
+        for selector, expected in (
+            ('.hero p', 'font-size:14px'),
+            ('.service-card p', 'font-size:13px'),
+            ('.service-card strong', 'font-size:14px'),
+            ('.recent-name', 'font-size:14px'),
+            ('.recent-meta', 'font-size:12px'),
+            ('.document-detail strong', 'font-size:14px'),
+            ('.section-title', 'font-size:18px'),
+            ('.mobile-demo-label', 'font-size:12px'),
+            ('.bottom-item', 'font-size:12px'),
+            ('.chat-composer textarea', 'font-size:16px'),
+            ('.research-input input', 'font-size:16px'),
+            ('.list-search input', 'font-size:16px'),
+        ):
+            import re
+            self.assertRegex(overrides, rf'{re.escape(selector)}\s*\{{[^}}]*{re.escape(expected)}',
+                             f'Missing readable mobile rule: {selector}')
+        self.assertIn('.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))', overrides)
+        for required in ('min-height:44px', 'width:44px;height:44px',
+                         'safe-area-inset-bottom'):
+            self.assertIn(required, overrides)
+
 if __name__ == '__main__':
     unittest.main()
