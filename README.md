@@ -38,3 +38,7 @@ Canonical state: [`pcs/STATE.json`](pcs/STATE.json). Quick handoff: [`pcs/MOMENT
 The scoped patcher deliberately rejects edits to paragraphs containing Word Fields (complex or simple), and results within complex Fields that span paragraphs. Existing `w:ins` and `w:del` elements must carry unique, non-negative numeric `w:id` values. Other paragraphs without Field context remain editable. Unsupported field semantics are **not** silently rewritten. Test evidence metadata is recorded at `tests/evidence/AL-POC1-R3-2026-11-03.json`.
 
 Unit/XML and LibreOffice rendering checks are **not** proof of actual Microsoft Word Accept/Reject behavior or application approval invalidation; the real Word UI and `TC02C`, `TC07C`, `TCE2E-02` remain NOT_RUN.
+
+## R0 · Mobile-first UI preview
+
+The Owner requested R0 UI work on 2026-11-03; POC1 remains temporarily ON_HOLD and unaccepted. A visually interactive, **demo-only** R0 frontend shell is under [`web/r0-preview/`](web/r0-preview/). It uses synthetic data and no backend, legal sources, AI model or document uploads. See [`web/r0-preview/README.md`](web/r0-preview/README.md) for local run instructions and boundaries. It is not a production application.
