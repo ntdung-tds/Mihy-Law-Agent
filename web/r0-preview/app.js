@@ -100,7 +100,7 @@
   }
   $$('[data-view]').forEach(n => n.addEventListener('click', () => goto(n.dataset.view)));
   $$('[data-go]').forEach(n => n.addEventListener('click', () => goto(n.dataset.go)));
-  $('[data-demo-action]').forEach(n => n.addEventListener('click', () => {
+  $$('[data-demo-action]').forEach(n => n.addEventListener('click', () => {
     const isR0 = n.dataset.stage === 'r0';
     const description = isR0
       ? 'Tác vụ này đang được ưu tiên phát triển trong R0 theo SRS. Chưa thể thực hiện tác vụ, tải hồ sơ hay nhận kết quả từ AI trên bản xem trước.'
