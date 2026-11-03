@@ -1,10 +1,18 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `21` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-03T15:37:38.791Z`.
-- **Phase:** R0 mobile-first UI preview; design **SAVED AS REFERENCE** on Owner request, **not** full R0 application acceptance.
+- **PCS revision:** `22` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-03T16:28:00.000Z`.
+- **Phase:** R0 mobile-first UI preview. R20 design **SAVED AS REFERENCE**; R22 scoped mobile filter fix deployed to isolated preview, **not** full application acceptance.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R22 — document filter visibility repair, live preview verified
+
+- **PR #30 merged:** `94c5fdc75b1ed68064db7bc483d75f90d0d2501a`. R22 targets only 320–390px document filter strip clipping and its unittest; 2×2 buttons at <=620px. Main CSS was deployed to isolated `ai-law-r0-preview` Worker; HTML and JavaScript unchanged.
+- **Test-first:** initial new regression test intentionally failed CI run `41672607713`; final PR-head CI `41673660703` passed **116/116 tests** and JS syntax. Cloudflare Chromium branch static render and actual live preview at **320px** and **390px** show all four filter choices without clipping, with synthetic document rows in live render. Live Worker CSS readback exactly equals main.
+- **Screenshot evidence:** images were inspected during tool execution, but raw bytes have **not** been uploaded to Drive. Private Drive test-run folder was created, but must not be linked from this public repo.
+- **Not verified:** physical mobile Owner visual acceptance, full authenticated app/AI/legal workflows, exhaustive accessibility and interaction E2E. User-selected R20 snapshot `snapshot/r0-ui-mobile-r20-20261103` is untouched; SRS v1.1.15 remains private/unchanged.
+- **Next:** Owner reviews `https://ai-law-r0-preview.iaict-platform.workers.dev/#documents` on physical mobile. Do not treat this as R0 application or design final acceptance.
 
 ## R21 — saved R0 UI visual reference
 

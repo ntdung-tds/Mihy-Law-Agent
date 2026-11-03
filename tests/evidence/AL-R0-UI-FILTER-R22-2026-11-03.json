@@ -8,7 +8,8 @@
   "pr": 30,
   "source": {
     "red_head": "58cf132ecc104550439ddcfcbfe8e3ad58797edc",
-    "fix_head": "2fe0445eefd59dfd5e124dd460062d9f425573d4"
+    "fix_head": "2fe0445eefd59dfd5e124dd460062d9f425573d4",
+    "merged_main": "94c5fdc75b1ed68064db7bc483d75f90d0d2501a"
   },
   "defect": {
     "observed": "Live Chromium screenshot at 320x740, #documents: horizontal filter strip cut 'Bản nháp' and hid 'Hoàn tất'.",
@@ -47,7 +48,8 @@
     {
       "id": "R22-LIVE",
       "method": "Updated live worker + actual interactions",
-      "result": "NOT_RUN_YET"
+      "result": "PASS_SCOPED",
+      "details": "Isolated preview Worker redeployed. Live Chromium 320x740 #documents screenshot shows all 4 filters 2x2 and synthetic document rows. All source HTML/JS assets remained unchanged. Not full click E2E."
     },
     {
       "id": "R22-PHYSICAL",
@@ -58,9 +60,33 @@
       "id": "R22-FULL-E2E",
       "method": "Authenticated app/backend legal workflows",
       "result": "NOT_RUN_NOT_IN_UI_PREVIEW_SCOPE"
+    },
+    {
+      "id": "R22-LIVE-390",
+      "method": "Cloudflare Chromium screenshot, deployed nonproduction Worker #documents",
+      "viewport": "390x844",
+      "result": "PASS_SCOPED",
+      "details": "Four filter labels visible in two rows; search and synthetic document rows rendered."
+    },
+    {
+      "id": "R22-READBACK",
+      "method": "Cloudflare Worker source readback",
+      "result": "PASS",
+      "details": "Worker styles.css exactly equals merged main; same index.html and app.js were preserved at deployment; no production Worker touched."
     }
   ],
-  "screenshot_storage": "PRIVATE_DRIVE_TEST_RUN_FOLDER_CREATED; raw image upload not completed. Never place screenshots or private Drive URL in public GitHub.",
+  "screenshot_storage": "PRIVATE_DRIVE_TEST_RUN_FOLDER_CREATED; raw screenshot bytes inspected in this session but NOT uploaded to Drive due to connector file-uri limitation. Never place screenshot bytes or private folder URL in public GitHub.",
   "publication": "PUBLIC_SAFE_SYNTHETIC_METADATA_ONLY",
-  "owner_acceptance": "PENDING"
+  "owner_acceptance": "PENDING",
+  "ci_final_head": {
+    "head": "86af64fb9cb2c200a53c0842edefee9ddfcf07e0",
+    "run_id": 41673660703,
+    "result": "PASS_116_OF_116_AND_NODE_SYNTAX"
+  },
+  "preview_worker": {
+    "name": "ai-law-r0-preview",
+    "url": "https://ai-law-r0-preview.iaict-platform.workers.dev/",
+    "deployment_id": "5000bf7adbb14a068f3e09d516d8979b",
+    "result": "NONPRODUCTION_PASS"
+  }
 }
