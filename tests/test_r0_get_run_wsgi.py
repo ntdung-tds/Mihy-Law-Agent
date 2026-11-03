@@ -13,7 +13,7 @@ from wsgiref.simple_server import make_server, WSGIRequestHandler
 from r0_core.membership_repository import PostgresMembershipRepository
 from r0_core.run_read_wsgi import GetRunWSGI, RunSnapshot
 from r0_core.session_boundary import (
-    VerifiedBearerIdentity, authenticate_bearer_session,
+    VerifiedBearerIdentity, SessionDependencyUnavailable, authenticate_bearer_session,
 )
 from r0_core.tenant_context import AuthenticatedPrincipal
 
@@ -90,15 +90,21 @@ class RunReadBatchTests(unittest.TestCase):
 
     def verify(self, token):
         self.verifier_count += 1
+        if self.fail_dependency == "known_idp":
+            raise SessionDependencyUnavailable("provider secret outage")
         if self.fail_dependency == "verify" or token != "synthetic-signed":
             raise RuntimeError("secret idp error")
         return self.verified
 
     def resolve(self, issuer, subject):
+        if self.fail_dependency == "known_identity_store":
+            raise SessionDependencyUnavailable("identity store secret")
         self.assertEqual((issuer, subject), (ISS, "ext-subject"))
         return self.principal
 
     def session_check(self, uid, sid):
+        if self.fail_dependency == "known_session_store":
+            raise SessionDependencyUnavailable("session db secret")
         self.assertEqual(sid, SID)
         self.assertEqual(uid, U)
         return self.session_live
@@ -152,7 +158,7 @@ class RunReadBatchTests(unittest.TestCase):
         )
 
     def request(self, app=None, path="/v1/runs/run-123",
-                method="GET", header="Bearer synthetic-signed", query=""):
+                method="GET", header="Bearer synthetic-signed", query="", extra_env=None):
         from io import BytesIO
         status_box = {}
         env = {
@@ -164,6 +170,8 @@ class RunReadBatchTests(unittest.TestCase):
         }
         if header is not None:
             env["HTTP_AUTHORIZATION"] = header
+        if extra_env:
+            env.update(extra_env)
         def start(status, headers, _exc_info=None):
             status_box["status"] = int(status.split()[0])
             status_box["headers"] = dict(headers)
@@ -312,6 +320,38 @@ class RunReadBatchTests(unittest.TestCase):
         code, body, _ = self.request()
         self.assertEqual(code, 404)
         self.assertIs(body["retryable"], False)
+
+    def test_known_upstream_auth_outage_returns_retryable_503(self):
+        # Generic invalid-token errors remain 401; only an explicitly typed
+        # trusted service outage is a 503 (does not expose backend details).
+        for kind in ("known_idp", "known_identity_store", "known_session_store"):
+            with self.subTest(kind=kind):
+                self.fail_dependency = kind
+                code, body, _ = self.request()
+                self.assertEqual(code, 503)
+                self.assertEqual(body["code"], "DEPENDENCY_UNAVAILABLE")
+                self.assertIs(body["retryable"], True)
+                self.assertNotIn("secret", json.dumps(body))
+                self.assertEqual(self.connection_count, 0)
+        self.fail_dependency = None
+
+    def test_untrusted_tenant_header_cannot_change_server_session_scope(self):
+        code, body, _ = self.request(
+            extra_env={"HTTP_X_TENANT_ID": B, "HTTP_X_USER_ID": OTHER}
+        )
+        self.assertEqual(code, 200)
+        self.assertEqual(body["run_id"], RUN1)
+        self.assertEqual((self.connection_count, self.acl_count), (1, 1))
+        self.active_tenant = B
+        code, _, _ = self.request(extra_env={"HTTP_X_TENANT_ID": A})
+        self.assertEqual(code, 404)
+
+    def test_fresh_membership_on_each_request_no_cached_access(self):
+        self.assertEqual(self.request()[0], 200)
+        self.roles_live = False
+        self.assertEqual(self.request()[0], 404)
+        self.assertEqual(self.connection_count, 2)
+        self.assertEqual(self.load_count, 1)
 
     def test_invalid_run_response_fails_closed(self):
         for payload in (
