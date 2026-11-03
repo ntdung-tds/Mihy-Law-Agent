@@ -14,3 +14,9 @@
 5. Keep POC1 status **BLOCKED / not Owner accepted** until a real Word UI test satisfies the POC protocol, and separate `TC02C`, `TC07C`, `TCE2E-02` application flows are tested. Do not claim the offline simulated Accept/Reject unit tests prove Word behavior.
 
 If Word silently alters formatting, numbering or fields, mark `FAIL` and preserve the original inputs and evidence; do not override the validator result. Never publish actual legal/customer documents or screenshots to the public repository.
+
+## Two-round QA hardening (2026-11-03)
+
+The offline verifier now **fails closed** for unexpected paragraph/run formatting, non-text markers (tabs, breaks, drawings, bookmarks, hyperlinks), style/numbering/font/theme definitions, relationships, media and known story text. XML indentation-only reserialization is ignored; splitting adjacent runs with unchanged formatting does not change the semantic signature.
+
+Strict validation may flag benign Word reserialization for manual review. This is never proof that Microsoft Word UI was used: retain original Word-saved files, screenshots, reviewer, Word version, and `test_run_id`. **STATIC_PASS is not POC1 acceptance.**
