@@ -1,27 +1,32 @@
 # AI Law — PCS Chat Solo MOMENT
 
-- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public; `main` is canonical after PCS PR merge).
-- **State revision:** `12` (canonical `pcs/STATE.json`).
-- **Updated:** `2026-11-03T10:18:43Z`.
-- **Phase:** POC1 technical preparation, no Owner acceptance or production.
-- **SRS:** Owner-provided v1.1.15 verified by source package hashes; original baseline unchanged/private.
+- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public, Owner-selected; `main` canonical after checkpoint PR merge).
+- **State revision:** `13` (source of truth: `pcs/STATE.json`).
+- **Updated:** `2026-11-03T10:44:29Z`.
+- **Phase:** POC1 synthetic technical QA, not Owner accepted and not production.
+- **SRS baseline:** Owner-supplied v1.1.15 archive checksum-verified, private and unchanged.
 
-## Small technical task — R12
+## R13 bounded mixed-review QA loop
 
-- **AL-POC1-004 TECH_DONE:** Independent offline verifier of selected mixed DOCX revisions, 1–5 selected replacements; intended only as TC02C support, not full application/Word acceptance.
-- The R8 synthetic fixture has 3 revision pairs. Offline acceptance of edit indices 0 and 1, rejection of index 2 produced expected content (`30 ngày`, `B`, `C`) with `STATIC_PASS`; resulting SHA256 `dd35acc22cd318e86479ccc0ec5c84f33e9572e9af90dc9729a60779bba719f7`.
-- 8 independent synthetic negative/positive tests added. Local Python suite **66/66 PASS** (58 earlier tests plus 8). LibreOffice rendered simulated result on one page; PNG visually checked. **No actual Microsoft Word UI was run**.
-- **PR #15** merged as `4b1e7a47cffe23002acb0e1f24aa001344c1dfb5`; GitHub Actions run `41618024600` completed **success** on PR head `0e92a6dc427db24b76f3c731e92d9a2d282e0986`; `unit` job PASS.
-- R12 synthetic test kit uploaded to pre-existing private Drive evidence folder; file size 71,182 bytes read back. No private file ID/URL or screenshots published.
-- Public-safe evidence: `tests/evidence/AL-POC1-MIXED-R12-2026-11-03.json`; guide: `tests/SELECTED_WORD_REVIEW_GATE.md`.
+- Base R12: **66/66** synthetic tests PASS; scoped tool `tools/verify_selected_review.py`.
+- Cycle 1: reproduced **three false STATIC_PASS** cases (insertion/deletion run formatting mismatch, hidden tab in deletion, unresolved header revision). Fixed exact-run revision validation and all-Word-story revision scan: **69/69 PASS**.
+- Cycle 2: reproduced **two false STATIC_PASS** cases (paragraph identity `paraId` altered and `xml:space="preserve"` lost while raw text unchanged). Fixed paragraph attribute and effective whitespace comparison: **71/71 PASS**.
+- Cycle 3: reproduced **three false STATIC_PASS** cases (both supplied DOCX packages missing mandatory root relationships, document relationships or settings file). Reused POC1 package validator for both inputs: **72/72 PASS**.
+- Cycle 4: clean bounded cross-check; 72/72 local tests PASS, compileall PASS. R12 controlled synthetic kit `STATIC_PASS` for accept edits `[0,1]`, reject edit `[2]`; tracked and simulated result SHA-256 unchanged. **This is not a Word Desktop UI test.**
+- **PR #17** merged as `1479a05035c0965ff261cb36502a5e04b3358b40`; GitHub Actions final PR head `fb1869e1e3adf7d7faf73f320caacbf093614663`, run `41621686945` completed `success` (`unit` job and unittest step passed).
+- Evidence: `tests/evidence/AL-POC1-REVIEW-LOOP-R13-2026-11-03.json` (public-safe synthetic metadata).
 
-## Open gates and next action
+## Acceptance blockers remain
 
-- **AL-POC1-002 BLOCKED:** real Microsoft Word Desktop mixed Accept/Reject, Word-saved/reopened output, screenshots, tester, Word version and test_run_id all **NOT_RUN**.
-- Application `TC02C`, `TC07C`, `TCE2E-02` **NOT_RUN**; application review/approval flow unavailable. POC2 PDF ingestion and POC3 PostgreSQL RLS remain PLANNED.
-- Next: run genuine Word Desktop review on controlled kit and save private evidence, verify Word-saved DOCX using static gate, then test app E2E. Final Owner acceptance only.
-- No production deployment, no SRS baseline edits.
+- `AL-POC1-002` **BLOCKED**: real Microsoft Word Desktop Accept/Reject, Word-saved/reopened files, screenshots, Word version, reviewer/test_run_id: **NOT_RUN**.
+- Application SRS `TC02C`, `TC07C`, `TCE2E-02`: **NOT_RUN**; application approval workflow unavailable for E2E testing.
+- POC2 authorized legal PDF ingestion / POC3 actual PostgreSQL RLS: **PLANNED**.
+- No Owner acceptance, production deployment or SRS baseline changes.
+
+## Next action
+
+Test mixed Accept/Reject in actual Microsoft Word Desktop with the authorized controlled R12 kit; save UI evidence privately and verify genuine Word-saved outputs. Investigate metadata differences manually; never replace UI evidence with offline simulation. Only Owner decides final POC1 acceptance.
 
 ## Publication boundary
 
-No original SRS, customer/legal data, secrets, private Drive IDs or UI screenshots in Public GitHub.
+Do not publish original SRS, real legal/customer data, credentials, private Drive identifiers or test screenshots to the Public repository.
