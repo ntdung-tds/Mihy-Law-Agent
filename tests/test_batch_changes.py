@@ -252,6 +252,22 @@ class SelectedTrackChangesTest(unittest.TestCase):
             with self.subTest(text=repr(new_text)), self.assertRaisesRegex(EditError, "unsupported control"):
                 apply_batch(self.source, [{**self.selected[0], "new_text": new_text}])
 
+    def test_batch_rejects_preexisting_header_revision(self):
+        original = zip_parts(self.source)
+        root = ET.fromstring(original["word/header1.xml"])
+        paragraph = next(root.iter(w("p")))
+        revision = ET.SubElement(paragraph, w("ins"), {
+            w("id"): "123", w("author"): "Existing",
+            w("date"): "2026-11-03T01:00:00Z"})
+        run = ET.SubElement(revision, w("r"))
+        ET.SubElement(run, w("t")).text = "Unresolved"
+        buffer = BytesIO()
+        with ZipFile(buffer, "w") as output:
+            for path, data in original.items():
+                output.writestr(path, ET.tostring(root) if path == "word/header1.xml" else data)
+        with self.assertRaisesRegex(EditError, "outside main document"):
+            apply_batch(buffer.getvalue(), self.selected)
+
     def test_malformed_package_rejected(self):
         with self.assertRaises(EditError):
             apply_batch(b"junk", self.selected[:1])
