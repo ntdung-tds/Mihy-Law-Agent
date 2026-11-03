@@ -58,13 +58,53 @@
     },
     {
       "id": "R25-LIVE",
-      "result": "NOT_RUN_YET",
-      "method": "Deployed nonproduction preview after merge"
+      "result": "PASS_SCOPED",
+      "method": "Deployed nonproduction preview after merge",
+      "details": "Isolated nonproduction preview deployed, source readback all three assets exactly matched merged main; live 320px Chromium accessibility saw 11 items (3 R0, 8 R1)."
     },
     {
       "id": "R25-BACKEND",
       "result": "NOT_RUN_OUT_OF_SCOPE",
       "method": "Actual authenticated legal/AI workflow E2E"
+    },
+    {
+      "id": "R25-LIVE-320-A11Y",
+      "result": "PASS_SCOPED",
+      "method": "Deployed nonproduction Cloudflare Chromium accessibilityTree",
+      "viewport": "320x740",
+      "details": "Exactly 11 accessible workflow buttons: 3 status 'Đang triển khai' and 8 'Sắp triển khai'."
+    },
+    {
+      "id": "R25-LIVE-320-VIS",
+      "result": "PASS_SCOPED",
+      "method": "Deployed nonproduction Chromium screenshot",
+      "viewport": "320x740",
+      "details": "Group A flat blocks, titles and statuses visible; fixed bottom bar partially overlays last card only in element-capture screenshot."
+    },
+    {
+      "id": "R25-SOURCE-320-DOM",
+      "result": "PASS_SCOPED",
+      "method": "Chromium rendered merged source HTML/CSS/JS with DOM metrics",
+      "viewport": "320x740",
+      "details": "documentElement.clientWidth=320, scrollWidth=320; boxShadow=none; group A grid 1 column."
+    },
+    {
+      "id": "R25-ASSET-READBACK",
+      "result": "PASS",
+      "method": "Cloudflare Worker GET readback",
+      "details": "index.html, styles.css, app.js all exactly equal GitHub main post PR36 merge."
+    },
+    {
+      "id": "R25-LIVE-CLICK",
+      "result": "NOT_VERIFIED",
+      "method": "Deployed worker browser script injection",
+      "details": "Live snapshot did not expose the expected marker, so no real live click E2E assertion; source-equivalent 11/11 interactive Chromium test passed."
+    },
+    {
+      "id": "R25-DRIVE-IMAGE",
+      "result": "NOT_UPLOADED",
+      "method": "Private Drive artifact storage",
+      "details": "Dedicated run folder was created. Screenshot bytes inspected during the tool run but not uploaded by the available connector."
     }
   ],
   "security": {
@@ -82,6 +122,17 @@
     "raw_browser_images": "INSPECTED_IN_TOOL_SESSION_NOT_UPLOADED_TO_DRIVE",
     "sensitive_data_on_github": false
   },
-  "status": "REVIEW_READY_PENDING_DEPLOYED_PREVIEW_SMOKE",
-  "owner_final_acceptance": "PENDING"
+  "status": "REVIEW_READY_PENDING_OWNER_VISUAL_ACCEPTANCE",
+  "owner_final_acceptance": "PENDING",
+  "source": {
+    "pr": 36,
+    "merge_main": "3cecb226632121fb4eb709aa2d922fe1e451d0fc",
+    "final_ci_run": 41734140720
+  },
+  "deployment": {
+    "name": "ai-law-r0-preview",
+    "id": "378da38b575246da88449eb8faf3129d",
+    "result": "NONPRODUCTION_PASS",
+    "production": "NOT_DEPLOYED"
+  }
 }

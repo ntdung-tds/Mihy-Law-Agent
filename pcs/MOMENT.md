@@ -1,10 +1,19 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `24` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T04:58:00+07:00`.
-- **Phase:** R0 preview UI now displays 11 status-only entry points grouped A/B/C. Owner's final visual acceptance pending; backend remains an isolated FR12-01 core slice without login/API.
+- **PCS revision:** `25` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-03T22:54:49.848Z`.
+- **Phase:** R25 flat-block R0 Overview now deployed to nonproduction preview with 11 status-only UC tiles; source Chromium and CI passed. Owner final visual acceptance pending; real legal workflows remain unimplemented.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R25 — flat 11-UC blocks, informational modal click repaired
+
+- **Owner direction DEC-010:** Approved styling refinement, not expansion. Same 11 UCs in three A/B/C categories; UC03/04/07 remain R0 developing, eight remain R1 planned. No private SRS v1.1.15 baseline edits, no backend or production.
+- **PR #36 merged** at `3cecb226632121fb4eb709aa2d922fe1e451d0fc`. Minimal catalog CSS creates flat section/block grids, stronger border, stable hover/focus, highlighted R0 stripe; one-line JS selector fix lets all 11 info-only buttons function. Immutable R20 snapshot intact.
+- **Tests:** pre-fix CSS red CI run `41732615109`; final code CI `41734140720` **137/137 PASS**. Source-branch actual Chromium verified **11/11** information-modal open/close; 390px group A and 1280px group B screenshots visually checked. 320px source Chromium: clientWidth=scrollWidth=320, box shadow none, single-column catalog. Deployed 320px Chromium: all 11 accessible labels in correct 3 R0 + 8 R1 split, group A screenshot visually checked.
+- **Preview:** isolated `ai-law-r0-preview` Worker deployed with source readback of HTML/CSS/JS exactly matching merged main; production unaffected. Private Drive test-run folder prepared, but raw screenshots were not uploaded.
+- **Open gates:** physical Owner visual acceptance NOT_RUN; live Worker click script-injection probe NOT_VERIFIED (source-equivalent Chromium interaction did PASS); actual AI/document/backend E2E NOT_RUN. No screenshot bytes in public GitHub.
+- **Next:** Owner reviews R25 visual preview; then proceed to small SRS-aligned R0 authenticated principal/membership/API integration without expanding R1 workflows.
 
 ## R24 — 11 UC catalog on R0 nonproduction preview
 
@@ -42,7 +51,7 @@
 
 ## Follow-up
 
-Continue functional R0 slices on separate task branches while retaining the saved R20 design and R24 updated preview. Owner is final project acceptor; POC1 stays ON_HOLD, POC2 and POC3 remain PLANNED.
+Continue functional R0 slices on separate task branches while retaining the saved R20 design and R25 updated preview. Owner is final project acceptor; POC1 stays ON_HOLD, POC2 and POC3 remain PLANNED.
 
 ## Publication boundary
 
