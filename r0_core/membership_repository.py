@@ -19,8 +19,8 @@ from dataclasses import dataclass
 from typing import Any, Callable
 
 from .tenant_context import (
-    AuthenticatedPrincipal, Membership, TenantContextDenied, TenantView,
-    _canonical_uuid, select_tenant,
+    AuthenticatedPrincipal, Membership, TenantContextDenied,
+    TenantMembershipUnavailable, TenantView, _canonical_uuid, select_tenant,
 )
 
 _DENIAL = "Tenant context not authorized"
@@ -84,9 +84,10 @@ class PostgresMembershipRepository:
                         (uid, tid, self.approved_registry_version),
                     )
                     rows = tuple(cur.fetchall())
-        except Exception as exc:
-            # Avoid exposing SQL errors, credentials, table presence or other IDs.
-            raise TenantContextDenied(_DENIAL) from None
+        except Exception:
+            # Keep the public message generic, but differentiate an internal
+            # dependency outage from an absent/revoked membership.
+            raise TenantMembershipUnavailable(_DENIAL) from None
 
         if not rows:
             return None
