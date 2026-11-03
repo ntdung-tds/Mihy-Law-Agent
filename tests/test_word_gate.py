@@ -180,6 +180,34 @@ class OfflineWordGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ReviewError, "protected package definition changed"):
             check_results(self.tracked, dst.getvalue(), self.rejected, EDIT)
 
+    def test_header_format_mutation_rejected(self):
+        def change(data):
+            root = ET.fromstring(data)
+            run = next(root.iter(w("r")))
+            props = ET.Element(w("rPr"))
+            props.append(ET.Element(w("b")))
+            run.insert(0, props)
+            return ET.tostring(root, encoding="utf-8", xml_declaration=True)
+
+        result = BytesIO()
+        with ZipFile(BytesIO(self.accepted)) as source, ZipFile(result, "w") as out:
+            for item in source.infolist():
+                data = source.read(item)
+                if item.filename == "word/header1.xml":
+                    data = change(data)
+                out.writestr(item, data)
+        with self.assertRaisesRegex(ReviewError, "header .*changed"):
+            check_results(self.tracked, result.getvalue(), self.rejected, EDIT)
+
+    def test_table_width_mutation_rejected(self):
+        def change(root):
+            table = next(root.iter(w("tbl")))
+            table.find(w("tblPr")).find(w("tblW")).set(w("w"), "9999")
+
+        altered = _review_xml(self.tracked, True, alter=change)
+        with self.assertRaisesRegex(ReviewError, "table structure changed"):
+            check_results(self.tracked, altered, self.rejected, EDIT)
+
     def test_corrupt_package_rejected(self):
         with self.assertRaisesRegex(ReviewError, "DOCX ZIP"):
             check_results(self.tracked, b"not ZIP", self.rejected, EDIT)
