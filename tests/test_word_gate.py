@@ -335,6 +335,27 @@ class OfflineWordGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ReviewError, "whitespace preservation"):
             check_results(tracked, broken_accepted, rejected, spec)
 
+    def test_unresolved_header_revision_equal_in_all_three_files_rejected(self):
+        def add_unresolved(blob):
+            result = BytesIO()
+            with ZipFile(BytesIO(blob)) as source, ZipFile(result, "w") as target:
+                for info in source.infolist():
+                    data = source.read(info)
+                    if info.filename == "word/header1.xml":
+                        root = ET.fromstring(data)
+                        paragraph = next(root.iter(w("p")))
+                        revision = ET.SubElement(paragraph, w("ins"), {
+                            w("id"): "888", w("author"): "QA",
+                            w("date"): "2026-11-03T01:00:00Z"})
+                        run = ET.SubElement(revision, w("r"))
+                        ET.SubElement(run, w("t")).text = "UNRESOLVED"
+                        data = ET.tostring(root)
+                    target.writestr(info, data)
+            return result.getvalue()
+        with self.assertRaisesRegex(ReviewError, "unresolved revision in"):
+            check_results(add_unresolved(self.tracked),
+                          add_unresolved(self.accepted), add_unresolved(self.rejected), EDIT)
+
     def test_corrupt_package_rejected(self):
         with self.assertRaisesRegex(ReviewError, "DOCX ZIP"):
             check_results(self.tracked, b"not ZIP", self.rejected, EDIT)
