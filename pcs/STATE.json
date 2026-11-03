@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 6,
-  "updated_at": "2026-11-03T03:03:03Z",
+  "revision": 7,
+  "updated_at": "2026-11-03T04:02:00Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -91,12 +91,16 @@
           "tc02c": "NOT_RUN",
           "tc07c": "NOT_RUN",
           "tce2e_02": "NOT_RUN",
-          "offline_review_validator": "PASS_9_OF_9_LOCAL_SYNTHETIC",
+          "offline_review_validator": "PASS_15_OF_15_LOCAL_SYNTHETIC_TWO_ROUNDS",
           "offline_review_validator_e2e": "PASS_SIMULATED_INPUT_ONLY",
-          "local_suite": "PASS_25_OF_25",
+          "local_suite": "PASS_31_OF_31_LOCAL",
           "pr3_initial_ci": "PASS_RUN_41569272520_ON_HEAD_4e105d800b03a5a19c03a7988ace16bca05f8429",
           "pr3_final_head_ci": "PASS_RUN_41569562446_HEAD_77dfbda614916765fc1467ea920f1b21be1df503",
-          "github_pr3": "MERGED_MAIN_7bd3787a16c63ed3d40623afe6dd582054dde270"
+          "github_pr3": "MERGED_MAIN_7bd3787a16c63ed3d40623afe6dd582054dde270",
+          "github_pr5": "MERGED_MAIN_db794f86fa5f5cc0101167c743c6c322adf8c29a",
+          "github_pr5_ci": "PASS_RUN_41575457423_FINAL_HEAD_bfbe3ef28fb0402aef1068904dcdd45ab35a6e90",
+          "review_round_1": "PASS_AFTER_REPRODUCED_FALSE_STATIC_PASS_STYLE_AND_NON_TARGET_RUN_FORMAT",
+          "review_round_2": "PASS_AFTER_REPRODUCED_FALSE_STATIC_PASS_THEME_AND_TAB"
         },
         "owner_acceptance": "NOT_REQUESTED",
         "traceability": [
@@ -113,9 +117,11 @@
           "tests/test_word_gate.py: nine synthetic result-verifier regression tests PASS",
           "GitHub Actions PR #3 initial head 4e105d800...: run 41569272520 completed/success",
           "Synthetic Word review kit generated locally; not committed to public GitHub",
-          "PRIVATE_DRIVE_READBACK_CONFIRMED: folder AI Law Test Evidence/POC-DOCX-20261103-02, file AL-POC1-TR-20261103-R5_synthetic_word_review_kit.zip, size 37007 bytes, synthetic-only, no UI screenshots"
+          "PRIVATE_DRIVE_READBACK_CONFIRMED: folder AI Law Test Evidence/POC-DOCX-20261103-02, file AL-POC1-TR-20261103-R5_synthetic_word_review_kit.zip, size 37007 bytes, synthetic-only, no UI screenshots",
+          "tests/evidence/AL-POC1-TWO-ROUND-R7-2026-11-03.json",
+          "Local Python unittest 31/31 PASS; GitHub Actions job unit success on run 41575457423 (PR #5, final head)"
         ],
-        "notes": "Offline validator statically checks tracked/accepted/rejected DOCX semantic content, tables, numbering, headers/footers and hashes. It does not perform Word UI or substitute for user acceptance."
+        "notes": "Two-stage QA review reproduced and fixed four offline verifier false-PASS classes (style definition, non-target run format, theme and tabs); verified relationship checks and XML indentation-only reserialization. Strict verifier may require manual review on benign Word resaves. Actual Word UI/TC02C/TC07C/TCE2E-02 remain NOT_RUN; task BLOCKED."
       },
       {
         "id": "AL-POC2-001",
@@ -163,7 +169,7 @@
       {
         "id": "DOCX-TRACKED-REPLACE",
         "status": "PARTIAL",
-        "evidence": "POC1 16 patcher + 9 offline Word-result QA unit tests PASS; independent PR #3 CI initial run success; true Word UI/E2E NOT_RUN"
+        "evidence": "31 local synthetic regression checks PASS; independent GitHub Actions run 41575457423 succeeded on PR #5; actual Word UI and application E2E NOT_RUN"
       }
     ],
     "releases": [],
@@ -227,6 +233,13 @@
         "title": "Static Word result validation may be mistaken for actual Word GUI review",
         "status": "CONTROLLED_NOT_CLOSED",
         "mitigation": "Tester must open Word desktop, save/reopen both outcomes, provide screenshots, version, test_run_id and separate Owner acceptance; offline verifier labels UI NOT_VERIFIED."
+      },
+      {
+        "id": "RISK-007",
+        "level": "MEDIUM",
+        "title": "Offline QA had false STATIC_PASS for formatting/theme/non-text mutations",
+        "status": "MITIGATED_FOR_SCOPED_SYNTHETIC_FIXTURES",
+        "mitigation": "Two review rounds, 4 reproduced bypasses fixed, 6 additional tests, total 31/31 local PASS and PR #5 CI success; strict semantics may cause a manual-review FAIL on benign Word reserialization; actual Microsoft Word UI still NOT_RUN."
       }
     ],
     "artifacts": [
@@ -273,15 +286,19 @@
       {
         "path": "tests/evidence/AL-POC1-R5-2026-11-03.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-POC1-TWO-ROUND-R7-2026-11-03.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
       }
     ],
     "current": {
       "active_task": "AL-POC1-002",
-      "last_completed_step": "PR #3 offline Word-result static QA gate merged to main commit 7bd3787a; GitHub Actions final PR head run 41569562446 success. Local 25/25 PASS, Word desktop NOT_RUN. Synthetic Word test kit uploaded and metadata read back in authorized Drive test-evidence folder.",
-      "next_action": "Run actual Microsoft Word desktop Accept/Reject on supplied synthetic test kit and save screenshots, reviewer, version and test_run_id in Drive; apply offline validator to genuine Word-saved files; run TC02C, TC07C, TCE2E-02 application E2E when available. Owner final acceptance only.",
+      "last_completed_step": "Two QA review rounds fixed 4 reproduced false STATIC_PASS cases, 31/31 local unit tests, synthetic kit offline STATIC_PASS, PR #5 merged as db794f86 with CI run 41575457423 success.",
+      "next_action": "Obtain actual Word desktop Accept/Reject saved files and screenshot/test_run_id/reviewer/Word version for synthetic kit; check them with offline verifier. Then implement and execute SRS application TC02C, TC07C, TCE2E-02 once the app flow is available. Owner accepts at the final gate.",
       "blockers": [
-        "Microsoft Word UI manual/automated test not run; Drive contains synthetic kit only, not UI evidence",
-        "Application review/approval invalidation flow for TC02C, TC07C, TCE2E-02 has no runtime test evidence"
+        "Actual Microsoft Word GUI Accept/Reject has not been executed; no Word UI screenshots",
+        "Approval invalidation application flow for TC02C/TC07C/TCE2E-02 not deployed/testable"
       ]
     },
     "policy": {
