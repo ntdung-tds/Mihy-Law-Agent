@@ -1,5 +1,34 @@
-# AI Law
+# AI Law — early POC workspace
 
-Initial public repository checkpoint for the Owner-selected AI Law project. Do not commit internal SRS files, legal documents, personal data, credentials, or other restricted materials.
+This repository is the **Owner-selected public project repository**. Only non-sensitive project metadata and public-safe proof-of-concept code belong here. **Do not commit** original internal SRS files, client/legal case files, credentials, personal information, or real legal PDFs without explicit classification and authorization.
 
-The PCS Chat Solo state, technical POC code, and test information are added in subsequent verified commits.
+Current focus: **DOCX Track Changes POC (small initial technical slice)**. The authoritative SRS is reported as `v1.1.15` (2026-11-03), but its actual package has **not yet been verified inside this repository**. The code is experimental; it is **not** an accepted Word integration, a completed POC, or a production service.
+
+## Single-run tracked replacement (POC)
+
+Supported: a JSON `replace` operation targeting exactly one `w:t` text element in one direct paragraph run. It emits actual OOXML `w:del` and `w:ins` elements and enables revision tracking. It preserves other ZIP parts and untouched paragraphs/tables. A paragraph index is zero-based in WordprocessingML document order, including paragraphs inside tables. Unsupported cases **fail closed** rather than guessing.
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m poc_docx.track_changes input.docx edit.json output.docx
+python -m unittest discover -s tests -v
+```
+
+Example `edit.json` (synthetic text only):
+
+```json
+{
+  "operation": "replace",
+  "paragraph_index": 0,
+  "old_text": "Original",
+  "new_text": "Updated",
+  "author": "AI Law POC",
+  "changed_at": "2026-11-03T01:40:00Z"
+}
+```
+
+Local tests need `python-docx` to construct synthetic `.docx` fixtures. The runtime patcher requires `lxml` to preserve namespace declarations and compatibility prefixes. Checks that XML correctly represents insert/delete and that a synthetic accept/reject simulation produces expected text **do not** substitute for opening/accepting/rejecting the document in actual Microsoft Word. The current implementation does not handle multi-run text, insert-only/delete-only operations, hyperlinks, headers/footers, nested revisions, or arbitrary change ranges; those remain outside this initial small task.
+
+## Project continuity
+
+Canonical state: [`pcs/STATE.json`](pcs/STATE.json). Quick handoff: [`pcs/MOMENT.md`](pcs/MOMENT.md). All changes follow PCS Chat Solo. `TECH_DONE` does **not** mean Owner acceptance; no production deployment has been performed.

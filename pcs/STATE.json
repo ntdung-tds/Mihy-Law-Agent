@@ -1,0 +1,207 @@
+{
+  "schema": "pcs.solo.v1",
+  "revision": 1,
+  "updated_at": "2026-11-03T01:52:33Z",
+  "state": {
+    "schema": "pcs.solo.project.v1",
+    "version": "0.1.0",
+    "slug": "mihy-law-agent",
+    "name": "AI Law — Mihy Law Agent",
+    "phase": "POC",
+    "source_refs": [
+      {
+        "name": "AI Law SRS v1.1.15",
+        "date": "2026-11-03",
+        "kind": "owner-referenced baseline",
+        "status": "NOT_VERIFIED_IN_PROJECT_REPOSITORY",
+        "note": "Do not publish original SRS in this public repository without classification/authorization"
+      },
+      {
+        "name": "PCS Chat Solo",
+        "url": "https://github.com/ntdung-tds/pcs-chat-solo/blob/main/START_HERE.md",
+        "status": "READ"
+      }
+    ],
+    "product_map": {
+      "status": "PARTIAL",
+      "summary": "AI assistant for Vietnam legal practice, 11 SRS workflows; no scope expansion. Exact locked v1.1.15 artifact not accessible for contract-level verification."
+    },
+    "architecture_map": {
+      "status": "POC_ONLY",
+      "summary": "Isolated Python DOCX OOXML replacement proof-of-concept. No assumption about production architecture, API or service deployment."
+    },
+    "tasks": [
+      {
+        "id": "AL-POC1-001",
+        "title": "Emit one true DOCX tracked replacement from JSON (single whole-run target)",
+        "status": "TECH_DONE",
+        "priority": "P0",
+        "scope": "One replace operation only; fail closed on ambiguous or unsupported edits; synthetic files only",
+        "acceptance": [
+          "Tracked deletion is w:del with w:delText, insertion is w:ins with w:t, distinct w:id and author/date",
+          "Non-target ZIP parts, table structure and numbering unchanged for tested synthetic fixture",
+          "Unsupported or ambiguous exact-run edit rejects without silently producing a modified file",
+          "Core XML compatibility prefix mappings retained and inserted leading/trailing spaces preserved"
+        ],
+        "tests": {
+          "local_unittest": "PASS_7_OF_7",
+          "local_render": "PASS_LIBREOFFICE_SYNTHETIC_SINGLE_PAGE",
+          "microsoft_word": "NOT_RUN",
+          "integration_e2e": "NOT_RUN",
+          "github_ci": "PENDING_FIRST_COMMIT"
+        },
+        "evidence": [
+          "tests/test_track_changes.py (7 local cases, 2026-11-03)",
+          "Local synthetic DOCX rendered with LibreOffice; not committed to public repository",
+          "poc_docx/track_changes.py"
+        ],
+        "owner_acceptance": "NOT_REQUESTED",
+        "notes": "TECH_DONE is limited to this technical slice; it is not POC1 completion or acceptance."
+      },
+      {
+        "id": "AL-POC1-002",
+        "title": "Verify tracked accept/reject using Microsoft Word and locked TCE2E-01",
+        "status": "BLOCKED",
+        "priority": "P0",
+        "blockers": [
+          "Authoritative SRS v1.1.15 and TCE2E-01 acceptance artifact unavailable to this tool session",
+          "Microsoft Word application verification not available in this execution environment"
+        ],
+        "tests": {
+          "microsoft_word_accept": "NOT_RUN",
+          "microsoft_word_reject": "NOT_RUN"
+        },
+        "owner_acceptance": "NOT_REQUESTED"
+      },
+      {
+        "id": "AL-POC2-001",
+        "title": "Ingest 10 authorized legal PDFs — POC2",
+        "status": "PLANNED",
+        "priority": "P1",
+        "notes": "Do not ingest or publish real source PDFs until authorized SRS fixtures and source rights are available."
+      },
+      {
+        "id": "AL-POC3-001",
+        "title": "Exercise tenant-isolation in real PostgreSQL RLS — POC3",
+        "status": "PLANNED",
+        "priority": "P1",
+        "notes": "Real database tests required; no claim of RLS assurance from mock tests."
+      }
+    ],
+    "features": [
+      {
+        "id": "POC1",
+        "name": "DOCX Track Changes",
+        "status": "IN_PROGRESS",
+        "tasks": [
+          "AL-POC1-001",
+          "AL-POC1-002"
+        ]
+      },
+      {
+        "id": "POC2",
+        "name": "10 legal PDFs ingestion",
+        "status": "PLANNED",
+        "tasks": [
+          "AL-POC2-001"
+        ]
+      },
+      {
+        "id": "POC3",
+        "name": "PostgreSQL multi-tenant RLS",
+        "status": "PLANNED",
+        "tasks": [
+          "AL-POC3-001"
+        ]
+      }
+    ],
+    "flows": [
+      {
+        "id": "DOCX-TRACKED-REPLACE",
+        "status": "PARTIAL",
+        "evidence": "Synthetic one-run replacement and 7 automated tests; real Word review pending"
+      }
+    ],
+    "releases": [],
+    "decisions": [
+      {
+        "id": "DEC-001",
+        "topic": "Project repository",
+        "value": "ntdung-tds/Mihy-Law-Agent, existing public repository",
+        "authority": "Owner selected 2026-11-03"
+      },
+      {
+        "id": "DEC-002",
+        "topic": "Scope",
+        "value": "Locked SRS v1.1.15; 3 POC sequence DOCX -> PDFs -> PostgreSQL RLS; no SRS expansion",
+        "authority": "Prior Owner decisions; baseline package not inspected in this session"
+      },
+      {
+        "id": "DEC-003",
+        "topic": "Public data classification",
+        "value": "Publish only explicitly public-safe project metadata, synthetic non-sensitive POC code and tests; do not publish SRS contents or customer/legal documents without separate approval",
+        "authority": "PCS project instruction applied to public repo"
+      }
+    ],
+    "risks": [
+      {
+        "id": "RISK-001",
+        "level": "HIGH",
+        "title": "SRS baseline v1.1.15 is not available in current source tools",
+        "mitigation": "Do not mark POC compliance or implement broader scope until source/contract is verified"
+      },
+      {
+        "id": "RISK-002",
+        "level": "HIGH",
+        "title": "Microsoft Word Accept/Reject not executed",
+        "mitigation": "Run Microsoft Word UI review plus TCE2E-01 before POC1 acceptance"
+      },
+      {
+        "id": "RISK-003",
+        "level": "MEDIUM",
+        "title": "Public repository",
+        "mitigation": "Synthetic tests/code and metadata only; never commit restricted artifacts"
+      }
+    ],
+    "artifacts": [
+      {
+        "path": "README.md",
+        "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": "poc_docx/track_changes.py",
+        "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": "tests/test_track_changes.py",
+        "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": ".github/workflows/tests.yml",
+        "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": "requirements-dev.txt",
+        "visibility": "PUBLIC_SAFE"
+      }
+    ],
+    "current": {
+      "active_task": "AL-POC1-002",
+      "last_completed_step": "Technical slice AL-POC1-001 implemented and locally verified (7/7; LO render); no Microsoft Word acceptance",
+      "next_action": "Verify CI on GitHub; obtain or locate locked v1.1.15 TCE2E-01 source and run Microsoft Word accept/reject with actual fixture",
+      "blockers": [
+        "Locked SRS v1.1.15 artifact not accessible in current sources",
+        "Microsoft Word verification not performed"
+      ]
+    },
+    "policy": {
+      "production": "EXPLICIT_VERIFIED_OWNER_APPROVAL",
+      "destructive": "EXPLICIT_VERIFIED_OWNER_APPROVAL",
+      "source_of_truth": "PROJECT_GITHUB_WHEN_CONNECTED",
+      "secrets": "NEVER_COMMIT",
+      "repository_visibility": "PUBLIC_OWNER_SELECTED_EXISTING",
+      "content_classification": "PUBLIC_SAFE_METADATA_SYNTHETIC_POC_CODE_ONLY",
+      "public_content_reviewed": true
+    }
+  }
+}

@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.docx
+*.pdf
+*.zip
+*.db
+*.sqlite3
+.DS_Store
