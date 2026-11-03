@@ -242,6 +242,11 @@ class SelectedTrackChangesTest(unittest.TestCase):
             with self.subTest(part_name=part_name), self.assertRaisesRegex(EditError, "content type"):
                 apply_batch(blob, self.selected)
 
+    def test_selected_batch_rejects_non_rfc3339_revision_timestamp(self):
+        for stamp in ("2026-W45-2T10:00:00Z", "2026-11-03 10:00:00Z"):
+            with self.subTest(stamp=stamp), self.assertRaisesRegex(EditError, "RFC 3339"):
+                apply_batch(self.source, [{**self.selected[0], "changed_at": stamp}])
+
     def test_malformed_package_rejected(self):
         with self.assertRaises(EditError):
             apply_batch(b"junk", self.selected[:1])
