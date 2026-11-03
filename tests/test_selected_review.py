@@ -42,6 +42,20 @@ def simulate(tracked: bytes, accepted: set[int], alter=None) -> bytes:
     return dest.getvalue()
 
 
+def rewrite_part(blob: bytes, part_name: str, modify) -> bytes:
+    """Synthetic package mutation for negative testing only."""
+    output = BytesIO()
+    with ZipFile(BytesIO(blob)) as source, ZipFile(output, "w") as target:
+        for item in source.infolist():
+            data = source.read(item)
+            if item.filename == part_name:
+                root = ET.fromstring(data)
+                modify(root)
+                data = ET.tostring(root)
+            target.writestr(item, data)
+    return output.getvalue()
+
+
 class MixedReviewGateTests(unittest.TestCase):
     def setUp(self):
         self.edits = proposals()
@@ -82,6 +96,84 @@ class MixedReviewGateTests(unittest.TestCase):
             list(root.iter(w("p")))[3].find(w("r")).find(w("t")).text = "MUTATED"
         with self.assertRaisesRegex(ReviewError, "paragraph 3 differs"):
             check_selected_review(self.tracked, simulate(self.tracked, {0,1}, alter), self.edits, [0,1])
+
+    def test_tracked_revision_format_mismatch_rejected(self):
+        def altered_insertion(root):
+            insertion = next(root.iter(w("ins")))
+            run = insertion.find(w("r"))
+            fmt = ET.Element(w("rPr"))
+            ET.SubElement(fmt, w("b"))
+            run.insert(0, fmt)
+
+        corrupted_source = rewrite_part(self.tracked, "word/document.xml", altered_insertion)
+        corrupted_review = simulate(corrupted_source, {0, 1})
+        with self.assertRaisesRegex(ReviewError, "pair run formatting differs"):
+            check_selected_review(corrupted_source, corrupted_review, self.edits, [0, 1])
+
+    def test_tracked_revision_hidden_tab_rejected(self):
+        def extra_deletion_tab(root):
+            deletion = list(root.iter(w("del")))[2]
+            ET.SubElement(deletion.find(w("r")), w("tab"))
+
+        corrupted_source = rewrite_part(self.tracked, "word/document.xml", extra_deletion_tab)
+        corrupted_review = simulate(corrupted_source, {0, 1})
+        with self.assertRaisesRegex(ReviewError, "run contains unsupported content"):
+            check_selected_review(corrupted_source, corrupted_review, self.edits, [0, 1])
+
+    def test_unresolved_revision_in_header_rejected(self):
+        def add_unresolved_header_revision(root):
+            paragraph = next(root.iter(w("p")))
+            revision = ET.SubElement(paragraph, w("ins"), {
+                w("id"): "999", w("author"): "Synthetic QA",
+                w("date"): "2026-11-03T01:00:00Z"})
+            run = ET.SubElement(revision, w("r"))
+            ET.SubElement(run, w("t")).text = "UNREVIEWED"
+
+        source = rewrite_part(self.tracked, "word/header1.xml", add_unresolved_header_revision)
+        result = rewrite_part(self.reviewed, "word/header1.xml", add_unresolved_header_revision)
+        with self.assertRaisesRegex(ReviewError, "unresolved revisions in word/header1.xml"):
+            check_selected_review(source, result, self.edits, [0, 1])
+
+    def test_paragraph_identity_change_rejected(self):
+        def replace_paragraph_id(root):
+            paragraph = list(root.iter(w("p")))[3]
+            paragraph.set("{http://schemas.microsoft.com/office/word/2010/wordml}paraId", "BBCD1234")
+
+        changed = rewrite_part(self.reviewed, "word/document.xml", replace_paragraph_id)
+        with self.assertRaisesRegex(ReviewError, "paragraph 3 identity attributes changed"):
+            check_selected_review(self.tracked, changed, self.edits, [0, 1])
+
+    def test_missing_xml_space_preserve_rejected(self):
+        xml_space = "{http://www.w3.org/XML/1998/namespace}space"
+
+        def add_preserved_space(root):
+            text_node = list(root.iter(w("p")))[3].find(w("r")).find(w("t"))
+            text_node.text = " Unchanged "
+            text_node.set(xml_space, "preserve")
+
+        modified_tracked = rewrite_part(self.tracked, "word/document.xml", add_preserved_space)
+        reviewed = simulate(modified_tracked, {0, 1})
+
+        def drop_space_preservation(root):
+            text_node = list(root.iter(w("p")))[3].find(w("r")).find(w("t"))
+            text_node.attrib.pop(xml_space)
+
+        reviewed = rewrite_part(reviewed, "word/document.xml", drop_space_preservation)
+        with self.assertRaisesRegex(ReviewError, "paragraph 3 whitespace preservation changed"):
+            check_selected_review(modified_tracked, reviewed, self.edits, [0, 1])
+
+    def test_incomplete_ooxml_packages_rejected_even_if_both_match(self):
+        for missing in ("_rels/.rels", "word/_rels/document.xml.rels", "word/settings.xml"):
+            def stripped(blob):
+                output = BytesIO()
+                with ZipFile(BytesIO(blob)) as source, ZipFile(output, "w") as result:
+                    for item in source.infolist():
+                        if item.filename != missing:
+                            result.writestr(item, source.read(item))
+                return output.getvalue()
+
+            with self.subTest(part=missing), self.assertRaisesRegex(ReviewError, "Malformed DOCX package"):
+                check_selected_review(stripped(self.tracked), stripped(self.reviewed), self.edits, [0, 1])
 
     def test_mixed_in_same_paragraph(self):
         from docx import Document
