@@ -65,8 +65,13 @@
     "tc07c": "NOT_RUN",
     "tce2e_02": "NOT_RUN",
     "owner_acceptance": "NOT_REQUESTED",
-    "github_ci": "PENDING_PR"
+    "github_ci": "PASS_RUN_41613522374_FINAL_HEAD_17290aae0cec83361da4b02dbe7b7ff451787806"
   },
   "stopping_rule": "End this bounded review after a final independent pass produces no new reproducible errors; do NOT equate with exhaustive DOCX compliance or POC acceptance",
-  "classification": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY"
+  "classification": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY",
+  "github_merge": {
+    "pr": 13,
+    "merge_commit": "8700ba4e16139a10c5c7af8e2ad83619e08281a6",
+    "status": "MERGED"
+  }
 }
