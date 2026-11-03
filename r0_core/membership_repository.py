@@ -46,6 +46,8 @@ WHERE m.user_id = CAST(%s AS UUID)
   AND m.tenant_id = CAST(%s AS UUID)
   AND m.role_registry_version = %s
   AND m.status = 'active'
+  AND m.revoked_at IS NULL
+  AND m.joined_at <= CURRENT_TIMESTAMP
   AND p.status = 'active'
 ORDER BY mr.role_key
 """
