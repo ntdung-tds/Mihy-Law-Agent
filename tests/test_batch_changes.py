@@ -181,6 +181,67 @@ class SelectedTrackChangesTest(unittest.TestCase):
         with self.assertRaisesRegex(EditError, "content-type or relationship root"):
             apply_batch(invalid.getvalue(), self.selected)
 
+    def test_root_office_document_relationship_must_be_valid(self):
+        rel_type = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
+        original = zip_parts(self.source)
+        for mode in ("missing", "wrong_target", "external"):
+            root = ET.fromstring(original["_rels/.rels"])
+            matches = [x for x in root if x.get("Type") == rel_type]
+            self.assertEqual(len(matches), 1)
+            if mode == "missing":
+                root.remove(matches[0])
+            elif mode == "wrong_target":
+                matches[0].set("Target", "word/does-not-exist.xml")
+            else:
+                matches[0].set("Target", "https://example.invalid/remote.docx")
+                matches[0].set("TargetMode", "External")
+            invalid = BytesIO()
+            with ZipFile(invalid, "w") as archive:
+                for part, data in original.items():
+                    archive.writestr(part, ET.tostring(root) if part == "_rels/.rels" else data)
+            with self.subTest(mode=mode), self.assertRaisesRegex(EditError, "officeDocument relationship"):
+                apply_batch(invalid.getvalue(), self.selected)
+
+    def test_settings_relationship_and_content_type_required(self):
+        original = zip_parts(self.source)
+        for mode in ("missing_settings_rel", "wrong_settings_target", "missing_settings_type"):
+            parts = dict(original)
+            if mode == "missing_settings_type":
+                root = ET.fromstring(parts["[Content_Types].xml"])
+                matching = [node for node in root if node.get("PartName") == "/word/settings.xml"]
+                self.assertEqual(len(matching), 1)
+                root.remove(matching[0])
+                parts["[Content_Types].xml"] = ET.tostring(root)
+            else:
+                root = ET.fromstring(parts["word/_rels/document.xml.rels"])
+                matching = [node for node in root if (node.get("Type") or "").endswith("/settings")]
+                self.assertEqual(len(matching), 1)
+                if mode == "missing_settings_rel":
+                    root.remove(matching[0])
+                else:
+                    matching[0].set("Target", "missing.xml")
+                parts["word/_rels/document.xml.rels"] = ET.tostring(root)
+            output = BytesIO()
+            with ZipFile(output, "w") as zipfile:
+                for part, data in parts.items():
+                    zipfile.writestr(part, data)
+            with self.subTest(mode=mode), self.assertRaisesRegex(EditError, "settings"):
+                apply_batch(output.getvalue(), self.selected)
+
+    def test_duplicate_conflicting_content_types_rejected(self):
+        original = zip_parts(self.source)
+        for part_name in ("/word/document.xml", "/word/settings.xml"):
+            types = ET.fromstring(original["[Content_Types].xml"])
+            ns = "{http://schemas.openxmlformats.org/package/2006/content-types}Override"
+            ET.SubElement(types, ns, {"PartName": part_name, "ContentType": "text/plain"})
+            output = BytesIO()
+            with ZipFile(output, "w") as archive:
+                for name, data in original.items():
+                    archive.writestr(name, ET.tostring(types) if name == "[Content_Types].xml" else data)
+            blob = output.getvalue()
+            with self.subTest(part_name=part_name), self.assertRaisesRegex(EditError, "content type"):
+                apply_batch(blob, self.selected)
+
     def test_malformed_package_rejected(self):
         with self.assertRaises(EditError):
             apply_batch(b"junk", self.selected[:1])
