@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 8,
-  "updated_at": "2026-11-03T05:40:31.916Z",
+  "revision": 9,
+  "updated_at": "2026-11-03T09:16:37Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -59,7 +59,8 @@
           "package_static_contract": "PASS_2026_11_03",
           "package_offline_xml_accept_reject": "PASS_SIMULATION_ONLY_WORD_UI_NOT_RUN",
           "field_negative_cases": "PASS_2026_11_03_R3",
-          "header_footer_part_preservation": "PASS_2026_11_03_R3"
+          "header_footer_part_preservation": "PASS_2026_11_03_R3",
+          "package_ooxml_integrity": "PASS_R9_REQUIRED_PARTS_AND_TYPES_NEGATIVE"
         },
         "evidence": [
           "tests/test_track_changes.py (7 local cases, 2026-11-03)",
@@ -71,7 +72,8 @@
           "Offline XML accept/reject of synthetic fixture rendered in LibreOffice; not Word UI test",
           "tests/evidence/AL-POC1-R3-2026-11-03.json: 16/16 unit PASS; 3 reproduced pre-fix issues; synthetic LO 1-page render",
           "GitHub Actions workflow run 41566803416: completed/success on PR head 2e8049b3b645fd3ffad5e533af2a80e5184435d2; steps incl. dependency install and unittest",
-          "PR #1 merged as 18e5e809d1380e7cab161a907d34059fea5e9836, final-head CI run 41567063066 completed/success (checked 2026-11-03)"
+          "PR #1 merged as 18e5e809d1380e7cab161a907d34059fea5e9836, final-head CI run 41567063066 completed/success (checked 2026-11-03)",
+          "PR #9: shared DOCX package integrity validator tested in single-edit path"
         ],
         "owner_acceptance": "NOT_REQUESTED",
         "notes": "TECH_DONE only for single-run scoped POC; field-context edits including cross-paragraph fields and invalid preexisting revision IDs now fail closed. Word GUI/E2E/Owner acceptance pending."
@@ -91,16 +93,18 @@
           "tc02c": "NOT_RUN",
           "tc07c": "NOT_RUN",
           "tce2e_02": "NOT_RUN",
-          "offline_review_validator": "PASS_15_OF_15_LOCAL_SYNTHETIC_TWO_ROUNDS",
+          "offline_review_validator": "PASS_SYNTHETIC_STORY_AND_TABLE_LAYOUT_REGRESSIONS_R9",
           "offline_review_validator_e2e": "PASS_SIMULATED_INPUT_ONLY",
-          "local_suite": "PASS_31_OF_31_LOCAL",
+          "local_suite": "PASS_47_OF_47_R9",
           "pr3_initial_ci": "PASS_RUN_41569272520_ON_HEAD_4e105d800b03a5a19c03a7988ace16bca05f8429",
           "pr3_final_head_ci": "PASS_RUN_41569562446_HEAD_77dfbda614916765fc1467ea920f1b21be1df503",
           "github_pr3": "MERGED_MAIN_7bd3787a16c63ed3d40623afe6dd582054dde270",
           "github_pr5": "MERGED_MAIN_db794f86fa5f5cc0101167c743c6c322adf8c29a",
           "github_pr5_ci": "PASS_RUN_41575457423_FINAL_HEAD_bfbe3ef28fb0402aef1068904dcdd45ab35a6e90",
           "review_round_1": "PASS_AFTER_REPRODUCED_FALSE_STATIC_PASS_STYLE_AND_NON_TARGET_RUN_FORMAT",
-          "review_round_2": "PASS_AFTER_REPRODUCED_FALSE_STATIC_PASS_THEME_AND_TAB"
+          "review_round_2": "PASS_AFTER_REPRODUCED_FALSE_STATIC_PASS_THEME_AND_TAB",
+          "github_pr9": "MERGED_MAIN_53279eabb03bd5a80ddb668fda2db21ca0c8244b",
+          "github_pr9_ci": "PASS_RUN_41609586567_FINAL_HEAD_ac94370d114d8d222e60ada04ff4bb095020e03a"
         },
         "owner_acceptance": "NOT_REQUESTED",
         "traceability": [
@@ -119,9 +123,10 @@
           "Synthetic Word review kit generated locally; not committed to public GitHub",
           "PRIVATE_DRIVE_READBACK_CONFIRMED: folder AI Law Test Evidence/POC-DOCX-20261103-02, file AL-POC1-TR-20261103-R5_synthetic_word_review_kit.zip, size 37007 bytes, synthetic-only, no UI screenshots",
           "tests/evidence/AL-POC1-TWO-ROUND-R7-2026-11-03.json",
-          "Local Python unittest 31/31 PASS; GitHub Actions job unit success on run 41575457423 (PR #5, final head)"
+          "Local Python unittest 31/31 PASS; GitHub Actions job unit success on run 41575457423 (PR #5, final head)",
+          "tests/evidence/AL-POC1-TWO-ROUND-R9-2026-11-03.json; 47/47 local PASS; GitHub CI PR #9 run 41609586567 success"
         ],
-        "notes": "Two-stage QA review reproduced and fixed four offline verifier false-PASS classes (style definition, non-target run format, theme and tabs); verified relationship checks and XML indentation-only reserialization. Strict verifier may require manual review on benign Word resaves. Actual Word UI/TC02C/TC07C/TCE2E-02 remain NOT_RUN; task BLOCKED."
+        "notes": "Two-stage QA review reproduced and fixed four offline verifier false-PASS classes (style definition, non-target run format, theme and tabs); verified relationship checks and XML indentation-only reserialization. Strict verifier may require manual review on benign Word resaves. Actual Word UI/TC02C/TC07C/TCE2E-02 remain NOT_RUN; task BLOCKED. R9 hardening: offline validator now rejects related-story formatting and table layout changes; still NOT_RUN in Microsoft Word."
       },
       {
         "id": "AL-POC2-001",
@@ -150,21 +155,23 @@
           "All prior regression tests and independent PR CI pass"
         ],
         "tests": {
-          "local_unittest": "PASS_42_OF_42_2026_11_03_R8",
+          "local_unittest": "PASS_47_OF_47_R9_ALL_POC1_SUITES",
           "added_cases": "PASS_11_OF_11_SYNTHETIC",
           "srs_static": "STATIC_CONTRACT_AND_WORD_PASS",
           "libreoffice_render": "PASS_SINGLE_PAGE_VISUALLY_CHECKED",
           "offline_accept_two_reject_one": "PASS_XML_SIMULATION_ONLY",
           "microsoft_word": "NOT_RUN",
           "tc02c_app": "NOT_RUN",
-          "github_ci": "PASS_PR7_RUN_41585067220_HEAD_4c4f00780c66f4c22a68f06d979aa50b4f57ad2d_MERGED_MAIN_5ecd5629931ba541d110f27d374d9bd3f05f7aa3"
+          "github_ci": "PASS_PR9_RUN_41609586567_FINAL_HEAD_ac94370d114d8d222e60ada04ff4bb095020e03a_MERGED_MAIN_53279eabb03bd5a80ddb668fda2db21ca0c8244b",
+          "package_ooxml_basics": "PASS_REQUIRED_PARTS_AND_MAIN_CONTENT_TYPE_NEGATIVE"
         },
         "evidence": [
           "PR #7 merged as 5ecd5629931ba541d110f27d374d9bd3f05f7aa3",
           "GitHub Actions PR #7 run 41585067220: completed/success; unit job and test step success",
           "tests/evidence/AL-POC1-BATCH-R8-2026-11-03.json",
           "poc_docx/batch_changes.py and tests/test_batch_changes.py (11 synthetic cases)",
-          "Synthetic DOCX generated and one-page LibreOffice render inspected locally; no Word GUI evidence"
+          "Synthetic DOCX generated and one-page LibreOffice render inspected locally; no Word GUI evidence",
+          "PR #9 merge 53279eabb03bd5a80ddb668fda2db21ca0c8244b; batch must reject malformed package roots and missing content types"
         ],
         "owner_acceptance": "NOT_REQUESTED",
         "notes": "TECH_DONE refers only to batch generator prerequisite. No TC02C acceptance or app workflow, Word GUI NOT_RUN."
@@ -202,7 +209,7 @@
       {
         "id": "DOCX-TRACKED-REPLACE",
         "status": "PARTIAL",
-        "evidence": "Single replacement and selected atomic batch of 1–5 synthetic whole-run edits; 42/42 local unit PASS, PR7 CI PASS; Word UI and application TC02C/TC07C/TCE2E-02 NOT_RUN"
+        "evidence": "R8 batch + R9 integrity hardening: 47 local unit tests PASS, PR #9 CI SUCCESS, R8 sample LO rendered one page; real Word UI and application E2E NOT_RUN"
       }
     ],
     "releases": [],
@@ -273,6 +280,13 @@
         "title": "Offline QA had false STATIC_PASS for formatting/theme/non-text mutations",
         "status": "MITIGATED_FOR_SCOPED_SYNTHETIC_FIXTURES",
         "mitigation": "Two review rounds, 4 reproduced bypasses fixed, 6 additional tests, total 31/31 local PASS and PR #5 CI success; strict semantics may cause a manual-review FAIL on benign Word reserialization; actual Microsoft Word UI still NOT_RUN."
+      },
+      {
+        "id": "RISK-007",
+        "level": "MEDIUM",
+        "title": "Batch generated tracked changes from incomplete DOCX; static checker missed story format and table layout changes",
+        "status": "MITIGATED_IN_SCOPED_POC",
+        "mitigation": "Two review rounds reproduced 3 false safety results; package checks for single and batch added; related story XML and table layout compared; 47/47 local and final-head PR CI PASS; Word UI remains NOT_RUN."
       }
     ],
     "artifacts": [
@@ -339,12 +353,16 @@
       {
         "path": "tests/evidence/AL-POC1-BATCH-R8-2026-11-03.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-POC1-TWO-ROUND-R9-2026-11-03.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
       }
     ],
     "current": {
       "active_task": "AL-POC1-002",
-      "last_completed_step": "Merged technical PR #7 for selected atomic DOCX batch (5ecd5629); GitHub Actions 41585067220 success; local 42/42 unit PASS; synthetic 2-accept-1-reject XML simulation and LibreOffice render PASS.",
-      "next_action": "Continue AL-POC1-002: perform real Microsoft Word Desktop mixed Accept/Reject with evidence and validate Word-saved outputs; then test TC02C/TC07C/TCE2E-02 at application level when runtime exists. Owner acceptance remains pending.",
+      "last_completed_step": "Two independent R9 POC1 reviews: 3 reproduced issues fixed; 47/47 local unittest; synthetic R8 Word kit ZIP and LibreOffice one-page render PASS; PR #9 CI run 41609586567 success; merged commit 53279eab.",
+      "next_action": "Run real Microsoft Word Desktop mixed Accept/Reject on controlled kit, capture original saved/reopened Word files, screenshots, reviewer, version and test_run_id into private Drive; then application TC02C/TC07C/TCE2E-02 when runtime exists. Owner final acceptance required.",
       "blockers": [
         "Microsoft Word GUI Accept/Reject evidence remains NOT_RUN",
         "No deployed application review/approval invalidation E2E; TC02C, TC07C, TCE2E-02 remain NOT_RUN"
