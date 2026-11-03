@@ -1,0 +1,217 @@
+{
+  "test_run_id": "AL-R0-R28-GETRUN-TR-20261104-01",
+  "date": "2026-11-04",
+  "batch_id": "AL-R0-BATCH-028",
+  "scope": "Approved GET /v1/runs/{id} only (SRS v1.1.15 OpenAPI operationId getRun), internal WSGI seam and synthetic local HTTP tests. No actual service deployment.",
+  "tasks": [
+    {
+      "id": "AL-R0-FN-004",
+      "scope": "Server-verified session identity available to authorization seam",
+      "status": "TECH_DONE_SYNTHETIC"
+    },
+    {
+      "id": "AL-R0-FN-005",
+      "scope": "One SRS-approved GET run handler and ErrorResponse/TaskRun mapping",
+      "status": "TECH_DONE_SYNTHETIC"
+    },
+    {
+      "id": "AL-R0-FN-006",
+      "scope": "Tenant re-authorization, run ACL fail-closed, local HTTP and security regression",
+      "status": "TECH_DONE_SYNTHETIC"
+    }
+  ],
+  "srs_refs": [
+    "FR12-01",
+    "TC12A",
+    "IF01-01",
+    "SEC01-01",
+    "GET /v1/runs/{id} (operationId getRun)"
+  ],
+  "source": "Private AI Law SRS v1.1.15, contracts/openapi.yaml; exact 12 API operations design-only, not runtime proof. No SRS baseline change.",
+  "repo": "ntdung-tds/Mihy-Law-Agent",
+  "pr": 42,
+  "review_cycles": [
+    {
+      "phase": "TEST_FIRST",
+      "commit": "147eb8a01a4068e15377eb6792fc4e5da2065e39",
+      "ci": 41740005496,
+      "actual": "EXPECTED_FAIL",
+      "reason": "New WSGI tests import unavailable handler before implementation."
+    },
+    {
+      "phase": "LOOP_1_IMPLEMENT",
+      "commit": "518eed9c9b87fb4b6c0c8939e5ddc4d3791054c2",
+      "ci": 41740214759,
+      "actual": "PASS_178_OF_178",
+      "reason": "Initial request boundary, local loopback GET and synthetic IAM/ACL tests green."
+    },
+    {
+      "phase": "LOOP_2_ADVERSARIAL_TESTS",
+      "commit": "4d8728bfeec8834b94ab897982d712db4daf0bba",
+      "ci": 41740427360,
+      "actual": "EXPECTED_FAIL_3_CASES",
+      "reason": "SRS 503 database outage was masked as 404, unapproved max run ID, and test stub failed to expose a truthy-non-boolean ACL bug."
+    },
+    {
+      "phase": "LOOP_2_REPAIR",
+      "commit": "b55080b8937dd1dc3a58bcdf16cc079c4cdec0c3",
+      "ci": 41740593484,
+      "actual": "PASS_182_OF_182",
+      "reason": "Typed infrastructure outage, SRS-compliant run ID shape, strict bool ACL test harness corrected."
+    },
+    {
+      "phase": "LOOP_3_SECURITY_TESTS",
+      "commit": "2f7fa393aa64f0e0efcc9be9ee2503685b22c005",
+      "ci": 41740822438,
+      "actual": "EXPECTED_FAIL",
+      "reason": "Typed trusted authentication provider outage not yet distinguished from invalid-token 401."
+    },
+    {
+      "phase": "LOOP_3_REPAIR",
+      "commit": "8f7dd8eaab9a4975ed6a32a6793826828fad4a3f",
+      "ci": 41740932757,
+      "actual": "PASS_185_OF_185",
+      "reason": "Explicitly typed IdP/identity/session dependency errors return retryable 503 without leaking exception; spoofed header and fresh membership tests pass."
+    },
+    {
+      "phase": "LOOP_4_OPENAPI_NULL_TEST",
+      "commit": "2b237a6670dc4dc2ed250dd87f813455f07a3678",
+      "ci": 41741265332,
+      "actual": "EXPECTED_FAIL_2_SUBTESTS",
+      "reason": "Optional coverage/usage fields appeared explicitly null; OpenAPI only allows an object when provided."
+    },
+    {
+      "phase": "LOOP_4_REPAIR",
+      "commit": "3cfc0000c2e40d407ab6974f2b5d45bbb10c5198",
+      "ci": 41741367541,
+      "actual": "PASS_186_OF_186",
+      "reason": "Both nullable-object violations fail closed with generic 503, other tests green."
+    }
+  ],
+  "qa_cases": [
+    {
+      "id": "R28-01",
+      "result": "PASS_LOCAL_WSGI",
+      "description": "Approved GET /v1/runs/{id} valid synthetic run returns TaskRun 200"
+    },
+    {
+      "id": "R28-02",
+      "result": "PASS_LOCAL_HTTP",
+      "description": "Real loopback HTTP request 200 with fake verifier and store"
+    },
+    {
+      "id": "R28-03",
+      "result": "PASS_LOCAL_HTTP",
+      "description": "Real loopback HTTP revoked session returns 401"
+    },
+    {
+      "id": "R28-04",
+      "result": "PASS_LOCAL_HTTP",
+      "description": "Real loopback HTTP ACL denied returns 404"
+    },
+    {
+      "id": "R28-05",
+      "result": "PASS_UNIT",
+      "description": "Missing/malformed/expired/wrong-audience token ->401 before tenant or run access"
+    },
+    {
+      "id": "R28-06",
+      "result": "PASS_UNIT",
+      "description": "Server-owned active tenant; X-Tenant-ID and X-User-ID header spoofing ignored"
+    },
+    {
+      "id": "R28-07",
+      "result": "PASS_UNIT",
+      "description": "Missing or incorrect tenant membership ->404, no ACL/read call"
+    },
+    {
+      "id": "R28-08",
+      "result": "PASS_UNIT",
+      "description": "ACL explicitly true only; unauthorized/unknown IDs indistinguishable 404"
+    },
+    {
+      "id": "R28-09",
+      "result": "PASS_UNIT",
+      "description": "Wrong-tenant/wrong-ID run snapshot never exposed"
+    },
+    {
+      "id": "R28-10",
+      "result": "PASS_UNIT",
+      "description": "Membership freshly read per request, revocation denies after previously allowed"
+    },
+    {
+      "id": "R28-11",
+      "result": "PASS_UNIT",
+      "description": "Known DB/IdP/session/ACL dependency outage returns 503 without raw secrets"
+    },
+    {
+      "id": "R28-12",
+      "result": "PASS_UNIT",
+      "description": "Unknown/malformed routes do not create new endpoints"
+    },
+    {
+      "id": "R28-13",
+      "result": "PASS_UNIT",
+      "description": "ErrorResponse has code, message, unique correlation_id, retryable boolean"
+    },
+    {
+      "id": "R28-14",
+      "result": "PASS_UNIT",
+      "description": "Invalid TaskRun shape, extra sensitive fields, missing complete/partial coverage denied"
+    },
+    {
+      "id": "R28-15",
+      "result": "PASS_UNIT",
+      "description": "Valid succeeded/partial TaskRun with required coverage/usage accepted"
+    },
+    {
+      "id": "R28-16",
+      "result": "PASS_UNIT",
+      "description": "SRS valid long nonblank run ID no unsupported maximum"
+    },
+    {
+      "id": "R28-17",
+      "result": "PASS_UNIT",
+      "description": "No-store cache header emitted for all status responses"
+    },
+    {
+      "id": "R28-IDP",
+      "result": "NOT_RUN",
+      "description": "Real JWT cryptographic verification / JWKS rotation / OIDC and MFA"
+    },
+    {
+      "id": "R28-PG",
+      "result": "NOT_RUN",
+      "description": "Real PostgreSQL RLS/FORCE RLS/migrations and revoke race"
+    },
+    {
+      "id": "R28-ACL",
+      "result": "NOT_RUN",
+      "description": "Real MatterACL/run permission store and audits"
+    },
+    {
+      "id": "R28-DEPLOY",
+      "result": "NOT_DEPLOYED",
+      "description": "Actual isolated staging, public internet or production endpoint"
+    },
+    {
+      "id": "R28-FULL-E2E",
+      "result": "NOT_RUN",
+      "description": "Signed-in physical browser E2E, real legal data or jobs"
+    },
+    {
+      "id": "R28-18",
+      "result": "PASS_UNIT",
+      "description": "Optional TaskRun coverage and usage cannot be explicit null, as per SRS schema."
+    }
+  ],
+  "final_ci_status": "FOUR_REVIEW_LOOPS_GREEN_BEFORE_FINAL_METADATA_WRITE; verify PR last commit CI before merge",
+  "secrets_in_repo": false,
+  "sensitive_data_used": false,
+  "file_artifacts": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY",
+  "drive_artifacts": "Private test run folder planned; raw CI logs unavailable as Drive upload file_uri.",
+  "srs_changed": "NONE",
+  "owner_acceptance": "PENDING",
+  "security_status": "INTEGRATION_GATES_OPEN",
+  "final_test_count": 186
+}
