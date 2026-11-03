@@ -156,5 +156,37 @@ class TenantContextTests(unittest.TestCase):
                     self.select(value)
 
 
+    def test_revoked_membership_denies_reusing_same_tenant_context(self):
+        old = self.select(TENANT_A)
+        self.memberships[(USER, TENANT_A)] = membership(
+            TENANT_A, tenant_type="personal", status="revoked", version=2
+        )
+        with self.assertRaises(TenantContextDenied):
+            self.select(TENANT_A, current=old)
+
+    def test_membership_lookup_outage_fails_closed(self):
+        def unavailable(_user_id, _tenant_id):
+            raise RuntimeError("transient database outage")
+        with self.assertRaises(TenantContextDenied) as caught:
+            select_tenant(
+                principal=self.principal,
+                current=None,
+                target_tenant_id=TENANT_A,
+                membership_lookup=unavailable,
+            )
+        self.assertNotIn("database", str(caught.exception).lower())
+
+    def test_membership_lookup_wrong_tenant_or_invalid_type_denied(self):
+        self.memberships[(USER, TENANT_B)] = membership(TENANT_A)
+        with self.assertRaises(TenantContextDenied):
+            self.select(TENANT_B)
+        self.memberships[(USER, TENANT_B)] = membership(
+            TENANT_B, tenant_type="unknown"
+        )
+        with self.assertRaises(TenantContextDenied):
+            self.select(TENANT_B)
+
+
+
 if __name__ == "__main__":
     unittest.main()
