@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 20,
-  "updated_at": "2026-11-03T15:31:52.263Z",
+  "revision": 21,
+  "updated_at": "2026-11-03T15:37:38.791Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -433,6 +433,12 @@
         "topic": "R0 mobile design review and legibility improvement",
         "value": "Owner requested iterative R0 visual review with larger, more comfortable mobile typography; limit scope to visual legibility, contrast and touch targets in synthetic UI preview. No SRS baseline change, backend implementation or production release.",
         "authority": "Owner message 2026-11-03: 'Tạo vòng lặp rà soát + điều chỉnh font chữ hợp lý hơn ở mobile, hơi nhỏ, ví dụ vậy'"
+      },
+      {
+        "id": "DEC-007",
+        "topic": "Owner saves the current R0 mobile UI as a reference",
+        "value": "Preserve the exact visually reviewed R0 UI preview (mobile typography R20) as a recoverable design checkpoint. Source commit 19f02b9e53ce9a2db733d2cfeb92c62eac01b26f; fixed snapshot branch snapshot/r0-ui-mobile-r20-20261103; UI source web/r0-preview/index.html, styles.css and app.js. Future UI work may proceed independently but must not overwrite this saved reference. Existing live Cloudflare worker preview is mutable, so only Git commit/snapshot is the preserved version. This user instruction means SAVE DESIGN REFERENCE, not final R0 functional acceptance or production/deployment approval.",
+        "authority": "Owner explicit 2026-11-03 instruction: 'Lưu giao diện này lại'"
       }
     ],
     "risks": [
@@ -661,8 +667,8 @@
     ],
     "current": {
       "active_task": "AL-R0-UI-002",
-      "last_completed_step": "R0 UI mobile review R20: three reproduce/fix/test iterations (two expected red CI revisions); final 115/115 CI PASS and actual Chromium checks at widths 320/390/768 PASS for scoped fonts/contrast/overflow/sample interactions; isolated Cloudflare preview updated and mobile DOM readback PASS. Owner visual acceptance pending.",
-      "next_action": "Owner reviews updated isolated R0 UI preview on actual phone and desktop; record feedback, then continue next small R0 SRS task only after direction. Leave POC1 ON_HOLD, POC2 and POC3 PLANNED.",
+      "last_completed_step": "Owner requested to save current R0 mobile UI design. Pinned source commit 19f02b9e53ce9a2db733d2cfeb92c62eac01b26f to Git snapshot branch snapshot/r0-ui-mobile-r20-20261103 and verified R20 CSS there; R0 UI remains demonstration-only. Existing CI 115/115 PASS. No app production or SRS edits.",
+      "next_action": "Use saved R0 UI snapshot as visual reference for future narrow SRS-aligned tasks. Owner retains final application acceptance; POC1 remains ON_HOLD, POC2/POC3 PLANNED.",
       "blockers": [
         "Human visual review on physical devices and screenshot-by-screenshot evidence NOT_VERIFIED; Cloudflare Screenshot API did not provide inspectable screenshot bytes.",
         "No authenticated backend/API/AI/legal workflow in static demo UI; related application E2E NOT_RUN."
