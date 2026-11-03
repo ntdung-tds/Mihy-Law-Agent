@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 7,
-  "updated_at": "2026-11-03T04:02:00Z",
+  "revision": 8,
+  "updated_at": "2026-11-03T05:40:31.916Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -136,6 +136,38 @@
         "status": "PLANNED",
         "priority": "P1",
         "notes": "Real database tests required; no claim of RLS assurance from mock tests."
+      },
+      {
+        "id": "AL-POC1-003",
+        "title": "Generate an atomic selected batch of 1–5 true DOCX tracked replacements (TC02C technical prerequisite)",
+        "status": "TECH_DONE",
+        "priority": "P0",
+        "scope": "Synthetic controlled POC only; whole-run exact targets, no partial multi-run edits, no approval workflow or Microsoft Word UI",
+        "acceptance": [
+          "Selected runs match uniquely in original document before any write; invalid later edit aborts the full batch",
+          "Every selected edit emits distinct genuine w:del/w:ins IDs; 2 accept and 1 reject offline XML simulation has expected content",
+          "Untouched DOCX package parts remain byte-identical; unsupported protected/field/ambiguous targets fail closed",
+          "All prior regression tests and independent PR CI pass"
+        ],
+        "tests": {
+          "local_unittest": "PASS_42_OF_42_2026_11_03_R8",
+          "added_cases": "PASS_11_OF_11_SYNTHETIC",
+          "srs_static": "STATIC_CONTRACT_AND_WORD_PASS",
+          "libreoffice_render": "PASS_SINGLE_PAGE_VISUALLY_CHECKED",
+          "offline_accept_two_reject_one": "PASS_XML_SIMULATION_ONLY",
+          "microsoft_word": "NOT_RUN",
+          "tc02c_app": "NOT_RUN",
+          "github_ci": "PASS_PR7_RUN_41585067220_HEAD_4c4f00780c66f4c22a68f06d979aa50b4f57ad2d_MERGED_MAIN_5ecd5629931ba541d110f27d374d9bd3f05f7aa3"
+        },
+        "evidence": [
+          "PR #7 merged as 5ecd5629931ba541d110f27d374d9bd3f05f7aa3",
+          "GitHub Actions PR #7 run 41585067220: completed/success; unit job and test step success",
+          "tests/evidence/AL-POC1-BATCH-R8-2026-11-03.json",
+          "poc_docx/batch_changes.py and tests/test_batch_changes.py (11 synthetic cases)",
+          "Synthetic DOCX generated and one-page LibreOffice render inspected locally; no Word GUI evidence"
+        ],
+        "owner_acceptance": "NOT_REQUESTED",
+        "notes": "TECH_DONE refers only to batch generator prerequisite. No TC02C acceptance or app workflow, Word GUI NOT_RUN."
       }
     ],
     "features": [
@@ -145,7 +177,8 @@
         "status": "IN_PROGRESS",
         "tasks": [
           "AL-POC1-001",
-          "AL-POC1-002"
+          "AL-POC1-002",
+          "AL-POC1-003"
         ]
       },
       {
@@ -169,7 +202,7 @@
       {
         "id": "DOCX-TRACKED-REPLACE",
         "status": "PARTIAL",
-        "evidence": "31 local synthetic regression checks PASS; independent GitHub Actions run 41575457423 succeeded on PR #5; actual Word UI and application E2E NOT_RUN"
+        "evidence": "Single replacement and selected atomic batch of 1–5 synthetic whole-run edits; 42/42 local unit PASS, PR7 CI PASS; Word UI and application TC02C/TC07C/TCE2E-02 NOT_RUN"
       }
     ],
     "releases": [],
@@ -290,15 +323,31 @@
       {
         "path": "tests/evidence/AL-POC1-TWO-ROUND-R7-2026-11-03.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
+      },
+      {
+        "path": "poc_docx/batch_changes.py",
+        "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": "tests/test_batch_changes.py",
+        "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": "tests/POC1_BATCH_GATE.md",
+        "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": "tests/evidence/AL-POC1-BATCH-R8-2026-11-03.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
       }
     ],
     "current": {
       "active_task": "AL-POC1-002",
-      "last_completed_step": "Two QA review rounds fixed 4 reproduced false STATIC_PASS cases, 31/31 local unit tests, synthetic kit offline STATIC_PASS, PR #5 merged as db794f86 with CI run 41575457423 success.",
-      "next_action": "Obtain actual Word desktop Accept/Reject saved files and screenshot/test_run_id/reviewer/Word version for synthetic kit; check them with offline verifier. Then implement and execute SRS application TC02C, TC07C, TCE2E-02 once the app flow is available. Owner accepts at the final gate.",
+      "last_completed_step": "Merged technical PR #7 for selected atomic DOCX batch (5ecd5629); GitHub Actions 41585067220 success; local 42/42 unit PASS; synthetic 2-accept-1-reject XML simulation and LibreOffice render PASS.",
+      "next_action": "Continue AL-POC1-002: perform real Microsoft Word Desktop mixed Accept/Reject with evidence and validate Word-saved outputs; then test TC02C/TC07C/TCE2E-02 at application level when runtime exists. Owner acceptance remains pending.",
       "blockers": [
-        "Actual Microsoft Word GUI Accept/Reject has not been executed; no Word UI screenshots",
-        "Approval invalidation application flow for TC02C/TC07C/TCE2E-02 not deployed/testable"
+        "Microsoft Word GUI Accept/Reject evidence remains NOT_RUN",
+        "No deployed application review/approval invalidation E2E; TC02C, TC07C, TCE2E-02 remain NOT_RUN"
       ]
     },
     "policy": {
