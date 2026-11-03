@@ -39,12 +39,13 @@
     "local_unittest": "PASS_52_OF_52",
     "old_suite_regression": "PASS_47_OF_47",
     "xml_reindent_of_unchanged_metadata": "PASS",
-    "github_ci": "PENDING_PR_CREATION",
+    "github_ci": "PASS_PR11_RUN_41611158138_FINAL_HEAD_597290b42e39873f1d5838565caea800eb40f264",
     "microsoft_word_desktop": "NOT_RUN",
     "tc02c": "NOT_RUN",
     "tc07c": "NOT_RUN",
     "tce2e_02": "NOT_RUN",
-    "owner_acceptance": "NOT_REQUESTED"
+    "owner_acceptance": "NOT_REQUESTED",
+    "github_pr": "MERGED_MAIN_eb4708b470838dd2aba9e005ed03711d07c42cde"
   },
   "risk_note": "Strict comparison may flag benign Word metadata changes, requiring manual review rather than falsely passing.",
   "evidence_classification": "PUBLIC_SAFE_SYNTHETIC_ONLY",
