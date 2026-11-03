@@ -13,6 +13,8 @@ python -m http.server 8765 --directory web/r0-preview
 
 - Responsive layout: desktop navigation, phone bottom navigation, safe-area, four views (overview, documents, AI assistant, legal research).
 - Purely synthetic document metadata and user interactions: navigation, filters, search, document-detail modal, sample prompts, and file-selection notice (filename only).
+- **Eleven-workflow discovery catalog (R24):** The Overview presents all 11 legal work items grouped as A (document drafting/review/translation/grammar), B (summaries/analysis/multiple-file dossiers), and C (legal Q&A/judgments/rules/statutory comparison). Only UC03 translation, UC04 summary, and UC07 grammar correction are labeled **R0 · Đang triển khai**; the other eight are **R1 · Sắp triển khai**. These are **status/info-only tiles**, not callable legal services: clicking one explains that the operation is unavailable. No client data is processed.
+
 - Honest empty/placeholder states: no simulated legal answer, fabricated citations or backend success.
 - No content/credentials/real customer data. No persistence, API, file upload or external model invocation. Font stylesheet may be fetched from Google Fonts; system-font fallback is built in.
 - Keyboard shortcuts: Ctrl/⌘+K for document search, Esc to close dialogs.
