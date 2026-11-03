@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 27,
-  "updated_at": "2026-11-03T23:23:20.676Z",
+  "revision": 28,
+  "updated_at": "2026-11-03T23:45:50.144Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -563,6 +563,80 @@
         ],
         "owner_acceptance": "PENDING_FUNCTIONAL_E2E_OWNER",
         "notes": "Only synthetic test gate complete; the JWT verifier is an injected stub contract, not implemented crypto or an authorized provider. Per SRS D01 remains pending; no SRS baseline change or production release."
+      },
+      {
+        "id": "AL-R0-FN-004",
+        "title": "Expose server-verified session context for SRS API request binding",
+        "priority": "P0",
+        "status": "TECH_DONE",
+        "scope": "In-process R27 backward-compatible authenticated session accessor, preserving signed-verifier external dependency and server-authoritative principal; no live IdP/JWT implementation.",
+        "acceptance": [
+          "R27 original principal accessor remains compatible and tests pass",
+          "Session ID available only after trusted JWT verifier, internal identity and live session gate",
+          "Known trusted upstream outage is distinguishable from invalid credentials without leaking errors"
+        ],
+        "tests": {
+          "auth": "PASS_SYNTHETIC",
+          "github_ci": "PASS_186_OF_186_RUN_41741449670",
+          "real_idp": "NOT_RUN"
+        },
+        "evidence": [
+          "tests/evidence/AL-R0-R28-GETRUN-TR-2026-11-04.json",
+          "PR #42 merged to main 46a284940c624d0fba4ab69b45699e61a19d770f",
+          "GitHub Actions 41741449670 (186/186 PASS)"
+        ],
+        "owner_acceptance": "PENDING_REAL_INTEGRATION_AND_OWNER",
+        "notes": "Part of R28 single batched PR; not a deployed product API or a real JWT/RLS/ACL implementation."
+      },
+      {
+        "id": "AL-R0-FN-005",
+        "title": "Implement SRS getRun GET /v1/runs/{id} synthetic HTTP integration",
+        "priority": "P0",
+        "status": "TECH_DONE",
+        "scope": "Standalone WSGI one-route read-only handler, matching approved OpenAPI getRun, with ErrorResponse and TaskRun shape contracts; no deployed API or new routes.",
+        "acceptance": [
+          "Only GET /v1/runs/{id} returns synthetic TaskRun 200 after authentication",
+          "401 invalid sessions; 404 not found/not authorized; 400 framing; 503 dependency unavailability",
+          "No new tenant-switch route or production integration; contract-invalid results fail closed"
+        ],
+        "tests": {
+          "loopback_http": "PASS_SYNTHETIC_200_401_404",
+          "github_ci": "PASS_186_OF_186_RUN_41741449670",
+          "staging_e2e": "NOT_RUN"
+        },
+        "evidence": [
+          "tests/evidence/AL-R0-R28-GETRUN-TR-2026-11-04.json",
+          "PR #42 merged to main 46a284940c624d0fba4ab69b45699e61a19d770f",
+          "GitHub Actions 41741449670 (186/186 PASS)"
+        ],
+        "owner_acceptance": "PENDING_REAL_INTEGRATION_AND_OWNER",
+        "notes": "Part of R28 single batched PR; not a deployed product API or a real JWT/RLS/ACL implementation."
+      },
+      {
+        "id": "AL-R0-FN-006",
+        "title": "Guard run read by server session tenant, active membership, ACL and four iterative QA loops",
+        "priority": "P0",
+        "status": "TECH_DONE",
+        "scope": "Server-owned session tenant resolver, fresh R26 membership, explicit run ACL and tenant-scoped run snapshot; synthetic tests and four closed red-green QA loops.",
+        "acceptance": [
+          "Never accept X-Tenant-ID/X-User-ID as authority; cross-tenant run and mismatched run IDs masked",
+          "Membership, ACL and session rechecked per request; error and response schema checked",
+          "Four test-first/review cycles close all reproduced defects within scoped synthetic suite, no live security proof claimed"
+        ],
+        "tests": {
+          "security_negative": "PASS_SYNTHETIC",
+          "review_loops": "PASS_4_COMPLETED",
+          "github_ci": "PASS_186_OF_186_RUN_41741449670",
+          "postgres_rls": "NOT_RUN",
+          "real_acl": "NOT_RUN"
+        },
+        "evidence": [
+          "tests/evidence/AL-R0-R28-GETRUN-TR-2026-11-04.json",
+          "PR #42 merged to main 46a284940c624d0fba4ab69b45699e61a19d770f",
+          "GitHub Actions 41741449670 (186/186 PASS)"
+        ],
+        "owner_acceptance": "PENDING_REAL_INTEGRATION_AND_OWNER",
+        "notes": "Part of R28 single batched PR; not a deployed product API or a real JWT/RLS/ACL implementation."
       }
     ],
     "features": [
@@ -613,7 +687,10 @@
         "tasks": [
           "AL-R0-FN-001",
           "AL-R0-FN-002",
-          "AL-R0-FN-003"
+          "AL-R0-FN-003",
+          "AL-R0-FN-004",
+          "AL-R0-FN-005",
+          "AL-R0-FN-006"
         ]
       }
     ],
@@ -933,17 +1010,22 @@
       {
         "path": "tests/evidence/AL-R0-SESSION-BOUNDARY-R27-2026-11-04.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-R0-R28-GETRUN-TR-2026-11-04.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
       }
     ],
     "current": {
-      "active_task": "AL-R0-FN-003",
-      "last_completed_step": "R27 PR40 verified bearer request seam merged after expected red CI then full 161/161 PASS. 12 synthetic session/auth boundary tests cover failed token, issuer/audience/time, internal identity map, revoked session, tenant membership and data reset. No IdP or deployed API.",
-      "next_action": "Next bounded R0 task: choose an approved existing /v1 API operation for authenticated request integration, implement its server handler only after session/tenant/ACL policy and D01 technical assumptions are established. Real IdP, PostgreSQL RLS and E2E remain gated; preserve preview and SRS.",
+      "active_task": "AL-R0-FN-006",
+      "last_completed_step": "R28 batch PR42 merged: verified session seam + SRS-approved GET /v1/runs/{id} WSGI handler + tenant/ACL fail-closed read + loopback HTTP tests. Four red-green review loops, final GitHub Actions 186/186 PASS (41741449670). No live IdP, actual PostgreSQL/RLS, real ACL or production API.",
+      "next_action": "Next gated release: establish D01 security approvals and selected real IdP/session provider; provision isolated PostgreSQL/RLS/MatterACL and approved application backend; only then connect getRun to staging and perform authentic 401/403/404/503, cross-tenant and concurrent-revocation browser/API E2E. Preserve R25 UI and SRS baseline.",
       "blockers": [
-        "D01 remains PENDING_APPROVAL for real-data Pilot. R0 synthetic fixtures only; no verified production identity provider or security authority.",
-        "No real JWT signature verifier, OIDC/JWKS integration, token rotation, MFA/step-up, persisted session revocation or audit; R27 uses test stubs and trust contract.",
-        "PostgreSQL schema migrations, FORCE RLS, document MatterACL, real /v1 route and cross-tenant browser/API E2E NOT_RUN.",
-        "Private Drive test-run folder exists, but raw test logs/screenshots were not uploaded because Google Drive connector upload requires authenticated file_uri."
+        "D01 security/role/IAM approval still pending and SRS remains read-only.",
+        "JWT signature verification, actual IdP and session store/MFA remain NOT_RUN; tests use injected fake verifier.",
+        "PostgreSQL schema/migrations/FORCE RLS, true MatterACL and run storage are NOT_RUN; tenant/ACL callbacks in R28 are test fixtures.",
+        "R28 WSGI ran on ephemeral loopback test server only; no staging/production API deploy or physical browser E2E.",
+        "Private Drive test-run folder created, raw GitHub CI logs not uploaded because connector requires file_uri."
       ]
     },
     "policy": {
