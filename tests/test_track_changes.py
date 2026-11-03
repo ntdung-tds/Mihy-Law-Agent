@@ -249,6 +249,33 @@ class TrackedChangesTest(unittest.TestCase):
             with self.subTest(stamp=stamp), self.assertRaisesRegex(EditError, "RFC 3339"):
                 apply_edit(fixture(), {**EDIT, "changed_at": stamp})
 
+    def test_existing_unsupported_format_or_move_revision_rejected(self):
+        original = parts(fixture())
+        for kind in ("rPrChange", "pPrChange", "moveFrom"):
+            root = ET.fromstring(original["word/document.xml"])
+            para = next(root.iter(w("p")))
+            if kind == "rPrChange":
+                run = next(para.iter(w("r")))
+                props = run.find(w("rPr"))
+                ET.SubElement(props, w("rPrChange"), {w("id"): "27"})
+            elif kind == "pPrChange":
+                props = ET.Element(w("pPr"))
+                ET.SubElement(props, w("pPrChange"), {w("id"): "27"})
+                para.insert(0, props)
+            else:
+                ET.SubElement(para, w("moveFrom"), {w("id"): "27"})
+            output = BytesIO()
+            with ZipFile(output, "w") as archive:
+                for part, data in original.items():
+                    archive.writestr(part, ET.tostring(root) if part == "word/document.xml" else data)
+            with self.subTest(kind=kind), self.assertRaisesRegex(EditError, "unsupported tracked revision"):
+                apply_edit(output.getvalue(), EDIT)
+
+    def test_new_run_control_characters_rejected(self):
+        for new_text in ("Updated\nNext", "Updated\tNext", "Updated\rNext"):
+            with self.subTest(text=repr(new_text)), self.assertRaisesRegex(EditError, "unsupported control"):
+                apply_edit(fixture(), {**EDIT, "new_text": new_text})
+
     def test_bad_zip_fails_closed(self):
         with self.assertRaises(EditError):
             apply_edit(b"not a docx", EDIT)
