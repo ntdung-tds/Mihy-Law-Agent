@@ -126,7 +126,7 @@ class R0PreviewTests(unittest.TestCase):
             "B": ("UC04", "UC05", "UC08"),
             "C": ("UC09", "UC10", "UC11", "UC06"),
         }
-        matched = re.findall(r'<button\\b[^>]*data-feature="(UC\\d{2})"[^>]*>', self.html)
+        matched = re.findall(r'<button\b[^>]*data-feature="(UC\d{2})"[^>]*>', self.html)
         self.assertEqual(len(matched), 11)
         self.assertEqual(set(matched), set(sum(groups.values(), ())))
         self.assertEqual(len(set(matched)), len(matched))
@@ -137,7 +137,7 @@ class R0PreviewTests(unittest.TestCase):
                 re.DOTALL,
             )
             self.assertIsNotNone(section, f"Missing catalog group {group}")
-            actual = re.findall(r'data-feature="(UC\\d{2})"', section.group(1))
+            actual = re.findall(r'data-feature="(UC\d{2})"', section.group(1))
             self.assertEqual(actual, list(ids), group)
 
     def test_r24_truthful_r0_statuses_and_no_fake_workflow(self):
