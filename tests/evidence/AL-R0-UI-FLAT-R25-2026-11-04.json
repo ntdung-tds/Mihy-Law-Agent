@@ -1,0 +1,87 @@
+{
+  "test_run_id": "AL-R0-UI-TR-20261104-R25",
+  "task_id": "AL-R0-UI-005",
+  "date": "2026-11-04",
+  "baseline": "AI Law SRS v1.1.15 — private, unmodified",
+  "owner_decision": "Owner agreed to R25 flat-block refinement of the approved R0 visual catalog; final Owner acceptance pending.",
+  "repository": "ntdung-tds/Mihy-Law-Agent",
+  "scope": "Only overview 11-UC flat block CSS; one-line information-modal binding defect fix in static demo JS; README and tests. No auth, AI inference, file upload, new UCs, backend or production.",
+  "srs_delta": "NONE",
+  "checks": [
+    {
+      "id": "R25-RED-CSS",
+      "result": "EXPECTED_FAIL",
+      "method": "GitHub Actions synthetic contract suite before CSS change",
+      "run_id": 41732615109
+    },
+    {
+      "id": "R25-GREEN-CODE",
+      "result": "PASS",
+      "method": "GitHub Actions Python unittest and Node JS syntax",
+      "run_id": 41733321337,
+      "assertions": "137/137"
+    },
+    {
+      "id": "R25-VIS-MOBILE",
+      "result": "PASS_SCOPED",
+      "method": "Cloudflare Chromium branch HTML/CSS screenshot",
+      "viewport": "390x844",
+      "view": "Overview group A",
+      "details": "Flat bordered blocks, legible labels, distinct R0 left accent; no visually clipped card titles in captured group."
+    },
+    {
+      "id": "R25-VIS-DESKTOP",
+      "result": "PASS_SCOPED",
+      "method": "Cloudflare Chromium branch HTML/CSS screenshot",
+      "viewport": "1280x900",
+      "view": "Overview group B",
+      "details": "Three equal-width cards across B group; no shadows; aligned headers and status labels."
+    },
+    {
+      "id": "R25-CARD-CLICK",
+      "result": "PASS_SCOPED",
+      "method": "Cloudflare Chromium branch HTML/JS (scripts executed after DOM), accessibility-tree probe",
+      "viewport": "390x844",
+      "details": "11/11 catalog buttons opened correct availability-only modal and closed it; no AI output."
+    },
+    {
+      "id": "R25-320-MEASURE",
+      "result": "BLOCKED",
+      "method": "Cloudflare Chromium snapshot",
+      "viewport": "320x740",
+      "details": "Browser Rendering API returned HTTP 429 while measuring document overflow and card layout. CSS contract test covers single-column mobile but no new 320 browser PASS asserted."
+    },
+    {
+      "id": "R25-PHYSICAL",
+      "result": "NOT_RUN",
+      "method": "Real smartphone/tablet owner visual inspection"
+    },
+    {
+      "id": "R25-LIVE",
+      "result": "NOT_RUN_YET",
+      "method": "Deployed nonproduction preview after merge"
+    },
+    {
+      "id": "R25-BACKEND",
+      "result": "NOT_RUN_OUT_OF_SCOPE",
+      "method": "Actual authenticated legal/AI workflow E2E"
+    }
+  ],
+  "security": {
+    "new_network_calls": false,
+    "real_documents": false,
+    "credentials": false,
+    "production": false,
+    "new_backend": false,
+    "status_only_tiles": true,
+    "original_r20_snapshot": "MUST_PRESERVE"
+  },
+  "evidence_storage": {
+    "public_repo": "Only public-safe synthetic test metadata",
+    "private_drive_test_folder": "CREATED",
+    "raw_browser_images": "INSPECTED_IN_TOOL_SESSION_NOT_UPLOADED_TO_DRIVE",
+    "sensitive_data_on_github": false
+  },
+  "status": "REVIEW_READY_PENDING_DEPLOYED_PREVIEW_SMOKE",
+  "owner_final_acceptance": "PENDING"
+}
