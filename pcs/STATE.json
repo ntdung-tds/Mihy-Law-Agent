@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 4,
-  "updated_at": "2026-11-03T02:37:29.333Z",
+  "revision": 5,
+  "updated_at": "2026-11-03T02:59:30Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -82,15 +82,19 @@
         "status": "BLOCKED",
         "priority": "P0",
         "blockers": [
-          "Actual Microsoft Word GUI Accept/Reject validation not available in this execution environment",
-          "Application end-to-end review/proofread/export/approval invalidation flow not implemented or verified; fixture_version=TO_BE_CREATED in SRS test_register"
+          "Microsoft Word desktop Accept/Reject not run; screenshots and reviewer/test_run_id missing",
+          "Application review/approval invalidation flow not deployed or verified; TC02C, TC07C, TCE2E-02 NOT_RUN"
         ],
         "tests": {
           "word_accept": "NOT_RUN",
           "word_reject": "NOT_RUN",
           "tc02c": "NOT_RUN",
           "tc07c": "NOT_RUN",
-          "tce2e_02": "NOT_RUN"
+          "tce2e_02": "NOT_RUN",
+          "offline_review_validator": "PASS_9_OF_9_LOCAL_SYNTHETIC",
+          "offline_review_validator_e2e": "PASS_SIMULATED_INPUT_ONLY",
+          "local_suite": "PASS_25_OF_25",
+          "pr3_initial_ci": "PASS_RUN_41569272520_ON_HEAD_4e105d800b03a5a19c03a7988ace16bca05f8429"
         },
         "owner_acceptance": "NOT_REQUESTED",
         "traceability": [
@@ -101,7 +105,14 @@
           "TC02C",
           "TC07C",
           "TCE2E-02"
-        ]
+        ],
+        "evidence": [
+          "tests/evidence/AL-POC1-R5-2026-11-03.json (public-safe local static test metadata)",
+          "tests/test_word_gate.py: nine synthetic result-verifier regression tests PASS",
+          "GitHub Actions PR #3 initial head 4e105d800...: run 41569272520 completed/success",
+          "Synthetic Word review kit generated locally; not committed to public GitHub"
+        ],
+        "notes": "Offline validator statically checks tracked/accepted/rejected DOCX semantic content, tables, numbering, headers/footers and hashes. It does not perform Word UI or substitute for user acceptance."
       },
       {
         "id": "AL-POC2-001",
@@ -149,7 +160,7 @@
       {
         "id": "DOCX-TRACKED-REPLACE",
         "status": "PARTIAL",
-        "evidence": "Single-run synthetic replacement, 10 automated unit tests, offline XML accept/reject visual rendering; Word UI + TCE2E-02 not run"
+        "evidence": "POC1 16 patcher + 9 offline Word-result QA unit tests PASS; independent PR #3 CI initial run success; true Word UI/E2E NOT_RUN"
       }
     ],
     "releases": [],
@@ -206,6 +217,13 @@
         "title": "Patcher previously changed cached Word Field results and propagated invalid tracked revision IDs",
         "status": "MITIGATED_IN_SCOPED_POC",
         "mitigation": "Fail closed on Word Field context, including cross-paragraph complex fields; reject missing/invalid/duplicate insertion/deletion IDs; 16/16 regression unit tests pass; real Word GUI still NOT_RUN."
+      },
+      {
+        "id": "RISK-006",
+        "level": "MEDIUM",
+        "title": "Static Word result validation may be mistaken for actual Word GUI review",
+        "status": "CONTROLLED_NOT_CLOSED",
+        "mitigation": "Tester must open Word desktop, save/reopen both outcomes, provide screenshots, version, test_run_id and separate Owner acceptance; offline verifier labels UI NOT_VERIFIED."
       }
     ],
     "artifacts": [
@@ -232,15 +250,35 @@
       {
         "path": "tests/evidence/AL-POC1-R3-2026-11-03.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
+      },
+      {
+        "path": "tools/verify_word_review.py",
+        "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": "tools/__init__.py",
+        "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": "tests/test_word_gate.py",
+        "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": "tests/WORD_REVIEW_GATE.md",
+        "visibility": "PUBLIC_SAFE"
+      },
+      {
+        "path": "tests/evidence/AL-POC1-R5-2026-11-03.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
       }
     ],
     "current": {
       "active_task": "AL-POC1-002",
-      "last_completed_step": "PR #1 technical POC1 bugfix merged into main (18e5e809...) after CI run 41567063066 success; 16/16 local unittest, static SRS check and LibreOffice synthetic render PASS; Word GUI NOT_RUN.",
-      "next_action": "Owner reviews controlled DOCX fixture; run actual Microsoft Word Accept/Reject and build/run SRS TC02C, TC07C, TCE2E-02 application approval invalidation flow; no POC1 acceptance yet.",
+      "last_completed_step": "POC1 offline Word result QA gate implemented: 9 new synthetic tests and 25/25 overall local PASS; PR #3 initial head CI run 41569272520 success. Word UI still NOT_RUN.",
+      "next_action": "On Microsoft Word desktop, review controlled synthetic tracked.docx, Accept All/Reject All on separate copies, save/reopen/screenshots and use offline verifier; then test TC02C, TC07C and TCE2E-02 against application flow. Owner retains final acceptance.",
       "blockers": [
-        "No actual Microsoft Word GUI Accept/Reject evidence",
-        "No deployed/testable application review/approval invalidation flow; TCE2E-02 NOT_RUN"
+        "Actual Microsoft Word UI screenshots/reviewer/test-run absent",
+        "Application review/approval invalidation flow for TCE2E-02 not implemented or independently tested"
       ]
     },
     "policy": {

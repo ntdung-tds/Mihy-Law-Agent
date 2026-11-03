@@ -1,0 +1,18 @@
+{
+  "test_run_id": "AL-POC1-TR-20261103-R5",
+  "scope": "Static verifier for Word Accept/Reject results of one synthetic tracked DOCX",
+  "srs_version": "1.1.15",
+  "tasks": [
+    "AL-POC1-002"
+  ],
+  "local_python_unit_tests": "PASS_25_OF_25",
+  "new_static_verifier_unit_tests": "PASS_9_OF_9",
+  "limitations": "Offline XML tests simulate Word post-review documents; NOT an actual Word GUI run",
+  "word_ui": "NOT_RUN",
+  "tc02c": "NOT_RUN",
+  "tc07c": "NOT_RUN",
+  "tce2e_02": "NOT_RUN",
+  "owner_accepted": false,
+  "remote_ci": "NOT_VERIFIED_AS_OF_LOCAL_RUN",
+  "data_classification": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA_ONLY"
+}
