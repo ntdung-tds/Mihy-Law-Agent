@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 25,
-  "updated_at": "2026-11-03T22:54:49.848Z",
+  "revision": 26,
+  "updated_at": "2026-11-03T23:11:26.745Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -490,6 +490,43 @@
         ],
         "owner_acceptance": "PENDING_VISUAL_CONFIRMATION",
         "notes": "Owner authorized a flat visual redesign of the existing UC catalog but has not approved this specific deployed R25 revision yet. No production, credential, legal or client data use. Old R20 immutable design snapshot preserved."
+      },
+      {
+        "id": "AL-R0-FN-002",
+        "title": "Read current membership/role registry for server-side tenant context from relational storage",
+        "priority": "P0",
+        "status": "TECH_DONE",
+        "scope": "Read-only PostgreSQL DB-API SELECT adapter plugged into existing FR12-01 tenant core, with synthetic SQLite relational tests. No HTTP endpoint, real sign-in, migrations, RLS, MatterACL, data processing or production.",
+        "acceptance": [
+          "Read active principal, tenant, membership and registered role values from one server-parameterized query using immutable trusted user/tenant context",
+          "Deny missing/wrong tenant, revoked, disabled, future joined_at, stale revoked_at, missing/unapproved roles and registry mismatch",
+          "Authorization version change invalidates tenant-sensitive cached context",
+          "No client-supplied user identity or server registry accepted; no new /v1 endpoint without SRS change",
+          "Unit suite and GitHub CI pass, real PostgreSQL/RLS/IdP/API E2E gates accurately remain unverified"
+        ],
+        "tests": {
+          "initial_red": "EXPECTED_FAIL_CI_41736074780_MODULE_NOT_YET_DEFINED",
+          "adversarial_red": "EXPECTED_FAIL_CI_41736459846_2_TEMPORAL_MEMBERSHIP_CASES",
+          "synthetic_relational": "PASS_12_OF_12_SQLITE_TEST_ADAPTER_ONLY",
+          "github_ci": "PASS_149_OF_149_FINAL_PR_HEAD_CI_41736855153",
+          "merge": "PASS_PR38_MAIN_a638d73d09e96c279e4705ea8e52e7c761772376",
+          "real_postgresql": "NOT_RUN",
+          "postgres_rls": "NOT_RUN",
+          "real_identity_provider": "NOT_RUN",
+          "api_browser_e2e": "NOT_RUN",
+          "production": "NOT_DEPLOYED"
+        },
+        "evidence": [
+          "r0_core/membership_repository.py",
+          "r0_core/README.md",
+          "tests/test_r0_membership_repository.py",
+          "tests/evidence/AL-R0-FR12-01-DBREAD-2026-11-04.json",
+          "PR #38 merged to main (squash) a638d73d09e96c279e4705ea8e52e7c761772376",
+          "GitHub Actions run 41736855153, 149 tests PASS",
+          "Private Drive test-run folder created; raw logs not uploaded via connector file_uri"
+        ],
+        "owner_acceptance": "PENDING_FUNCTIONAL_E2E_OWNER",
+        "notes": "This is NOT real authentication or complete TC12A. D01 approval, IAM DB migrations/RLS/audit and IdP integration remain blocked. User OK to proceed after R25 did not grant data/production permissions."
       }
     ],
     "features": [
@@ -538,7 +575,8 @@
         "name": "R0 functional application-core slices — initial tenant isolation",
         "status": "IN_PROGRESS",
         "tasks": [
-          "AL-R0-FN-001"
+          "AL-R0-FN-001",
+          "AL-R0-FN-002"
         ]
       }
     ],
@@ -850,17 +888,21 @@
       {
         "path": "tests/evidence/AL-R0-UI-FLAT-R25-2026-11-04.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-R0-FR12-01-DBREAD-2026-11-04.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
       }
     ],
     "current": {
-      "active_task": "AL-R0-UI-005",
-      "last_completed_step": "R25 flat catalog PR36 merged and isolated preview deployed; code final CI 137/137 PASS, source Chromium 11/11 availability-modal interactions PASS, live 320 shows 11 correct statuses and flat cards, 320 branch runtime width=scrollWidth=320, Worker asset readback matches merged main. No production.",
-      "next_action": "Owner visually reviews R25 flat-block Overview on phone/desktop. If accepted, return to R0 functional trusted auth/tenant membership/API integration per FR12-01/TC12A before linking UC03/04/07 to real workflows; keep R1 UCs as planned.",
+      "active_task": "AL-R0-FN-002",
+      "last_completed_step": "R26: PR #38 read-only membership relational adapter merged on main after expected red tests and 149/149 final CI PASS. 12 isolated synthetic SQL fixture tests cover cross-tenant, version, revocation, role registry and timestamps; R25 preview unchanged.",
+      "next_action": "Next R0 task: verified-session principal adapter and application request boundary using approved SRS contracts; then PostgreSQL RLS/migrations in isolated test env after D01 decision. Do not invent a new /v1 tenant-switch endpoint or claim real login/TC12A until all E2E gates pass.",
       "blockers": [
-        "Owner physical-device visual approval of deployed R25 design is pending.",
-        "Live Worker information-modal click/close E2E was not verified by browser script injection; source-equivalent Chromium 11/11 test PASS.",
-        "Private Drive test folder created but raw Chromium screenshot assets were not uploaded.",
-        "Real authenticated legal workflows, AI tasks and backend E2E still NOT_RUN; no production."
+        "D01 ownership/role/security decision remains PENDING_APPROVAL in SRS; real data/production not authorized.",
+        "No real IdP/session verification, PostgreSQL database migration/trigger/RLS or audit implemented; TESTS ONLY on synthetic SQLite translation.",
+        "IF01 authenticated API/per-endpoint security, concurrent revocation at read time, document/MatterACL and full TC12A/browser E2E NOT_RUN.",
+        "Raw test artifact was not uploaded to private Drive due connector file_uri requirement, despite dedicated test-run folder preparation."
       ]
     },
     "policy": {
