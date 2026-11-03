@@ -16,6 +16,7 @@
 - Final bounded cross-check: no new reproducible defect in the tested scope, GitHub Actions run `41635542044` final PR head `dbffb4cc022b298c1d627c3f1b511319d01ce7ae` completed **success**, raw unit log **`Ran 105 tests` / `OK`**. PR #23 merged as `696f7876d1a7d9db9e4c37b970e44623602b68e2`.
 - Controlled R12 test kit: both ZIPs CRC PASS; tracked DOCX contains 3 deletion/insertion pairs; simulated review contains none. Rendered both to one page using LibreOffice; PNGs visually inspected; reviewed content `30 ngày`, `B`, `C`, header/list/table retained. **No Microsoft Word UI was run.**
 - Public-safe evidence: `tests/evidence/AL-POC1-REVIEW-LOOP-R16-2026-11-03.json`.
+- Private Drive test evidence: `AI Law Test Evidence / POC-DOCX-20261103-02 / AL-POC1-TR-20261103-R16_Loop_Test_Evidence.zip`, **104,161 bytes**, metadata read back, file not shared. No private Drive ID in GitHub.
 
 ## Gates still open
 
