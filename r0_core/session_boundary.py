@@ -26,6 +26,14 @@ class SessionRejected(PermissionError):
     """Generic denial; does not reveal token validity, subject, or session state."""
 
 
+class SessionDependencyUnavailable(SessionRejected):
+    """Trusted upstream only: identity/session verification dependency is down.
+
+    Only server-controlled adapters may raise this, never a decoded JWT claim
+    or request parameter. The public message remains generic.
+    """
+
+
 @dataclass(frozen=True, slots=True)
 class VerifiedBearerIdentity:
     """Claims ALREADY checked cryptographically by a trusted external verifier.
@@ -126,6 +134,10 @@ def authenticate_bearer_session(
             raise SessionRejected(_DENIED)
 
         return AuthenticatedSession(principal=AuthenticatedPrincipal(user_id=internal_id, status="active"), session_id=claims.session_id)
+    except SessionDependencyUnavailable:
+        # Distinguish known upstream outage from invalid credentials without
+        # exposing any original provider/session diagnostic message.
+        raise SessionDependencyUnavailable(_DENIED) from None
     except Exception:
         # Prevent exposing provider errors, raw credentials, or membership data.
         raise SessionRejected(_DENIED) from None
