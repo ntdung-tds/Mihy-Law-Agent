@@ -125,7 +125,7 @@ class RunReadBatchTests(unittest.TestCase):
         if self.fail_dependency == "acl":
             raise RuntimeError("ACL server private path")
         self.assertEqual((tenant, uid), (A, U))
-        return self.acl and run == RUN1
+        return self.acl if run == RUN1 else False
 
     def load(self, tenant, run_id):
         self.load_count += 1
