@@ -25,7 +25,9 @@
       "Unchanged"
     ],
     "libreoffice_render": "PASS_ONE_PAGE_VISUALLY_CHECKED",
-    "github_ci": "PENDING_PR"
+    "github_ci": "PASS_RUN_41618024600_FINAL_HEAD_0e92a6dc427db24b76f3c731e92d9a2d282e0986",
+    "github_pr": "MERGED_MAIN_4b1e7a47cffe23002acb0e1f24aa001344c1dfb5",
+    "private_drive_kit_readback": "PASS_71182_BYTES_SYNTHETIC_ONLY"
   },
   "negative_coverage": [
     "claimed wrong accepted edit indices",
