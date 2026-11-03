@@ -1,0 +1,52 @@
+{
+  "test_run_id": "AL-POC1-TR-20261103-R12-MIXED",
+  "repository": "ntdung-tds/Mihy-Law-Agent",
+  "base_main": "a7a224fffb7df2b219b69378162aa84f3db63db7",
+  "pcs_baseline_revision": 11,
+  "srs_version": "1.1.15",
+  "traceability": [
+    "FR02-04",
+    "FR07-04",
+    "TC02C"
+  ],
+  "scope": "Only static offline verification for 1..5 selected DOCX Track Changes mixed review results",
+  "gap": "Previous offline verifier accepted only one tracked pair; R8 batch 3-change fixture could not be verified with mixed decisions",
+  "test_results": {
+    "baseline_unit": "PASS_58_OF_58",
+    "new_unit": "PASS_8_OF_8",
+    "all_local_unit": "PASS_66_OF_66",
+    "controlled_r8_mixed_review": "STATIC_PASS_SIMULATED_ONLY",
+    "controlled_r8_tracked_sha256": "d02582fc8ca51229ecef9f92d3c179afa2b22bdeed8312c52c02d516e5c689ae",
+    "simulated_mixed_result_sha256": "dd35acc22cd318e86479ccc0ec5c84f33e9572e9af90dc9729a60779bba719f7",
+    "simulated_result_content": [
+      "30 ngày",
+      "B",
+      "C",
+      "Unchanged"
+    ],
+    "libreoffice_render": "PASS_ONE_PAGE_VISUALLY_CHECKED",
+    "github_ci": "PENDING_PR"
+  },
+  "negative_coverage": [
+    "claimed wrong accepted edit indices",
+    "all accepted instead of mixed",
+    "unresolved tracked revisions",
+    "extra unselected revisions in source",
+    "duplicate, boolean or out of range acceptance indices",
+    "unrelated paragraph altered"
+  ],
+  "supported_case": "Two accepted and one rejected revision; distinct selected runs in same paragraph",
+  "limitations": {
+    "microsoft_word_desktop": "NOT_RUN",
+    "tc02c_application": "NOT_RUN",
+    "tc07c_application": "NOT_RUN",
+    "tce2e_02_application": "NOT_RUN",
+    "owner_acceptance": "NOT_REQUESTED"
+  },
+  "classification": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY",
+  "files": [
+    "tools/verify_selected_review.py",
+    "tests/test_selected_review.py",
+    "tests/SELECTED_WORD_REVIEW_GATE.md"
+  ]
+}
