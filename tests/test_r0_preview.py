@@ -211,5 +211,13 @@ class R0PreviewTests(unittest.TestCase):
         self.assertNotIn("fetch(", self.js)
 
 
+
+    def test_r25_every_catalog_tile_binds_info_modal(self):
+        """A single element .forEach would throw and abort all later JS binding."""
+        self.assertIn("$('[data-demo-action]').forEach", self.js)
+        self.assertIn("openModal(n.dataset.demoAction, description", self.js)
+        self.assertIn("n.dataset.stage === 'r0'", self.js)
+
+
 if __name__ == '__main__':
     unittest.main()
