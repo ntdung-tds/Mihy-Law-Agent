@@ -11,11 +11,18 @@ from copy import deepcopy
 from datetime import datetime
 from io import BytesIO
 import json
+import re
 from pathlib import Path
 from typing import Any
 from lxml import etree as ET
 from zipfile import BadZipFile, ZipFile
 
+# XML revision w:date requires a date-time value, not every ISO string Python parses.
+_REVISION_DATE = re.compile(
+    r"[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}"
+    r"(?:\.[0-9]+)?(?:[Zz]|[+-][0-9]{2}:[0-9]{2})\Z",
+    re.ASCII,
+)
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 DOC_PART = "word/document.xml"
 SETTINGS_PART = "word/settings.xml"
@@ -43,14 +50,15 @@ def _validate_edit(edit: dict[str, Any]) -> tuple[int, str, str, str, str]:
     if not isinstance(author, str) or not author.strip() or len(author) > 100:
         raise EditError("author must be a non-empty string of at most 100 characters")
     stamp = edit.get("changed_at")
-    if not isinstance(stamp, str):
-        raise EditError("changed_at must be an explicit ISO 8601 timestamp")
+    if not isinstance(stamp, str) or not _REVISION_DATE.fullmatch(stamp):
+        raise EditError("changed_at must be RFC 3339 date-time with timezone")
     try:
-        parsed = datetime.fromisoformat(stamp.replace("Z", "+00:00"))
-        if parsed.tzinfo is None:
+        normalized = stamp[:-1] + "+00:00" if stamp.endswith(("Z", "z")) else stamp
+        parsed = datetime.fromisoformat(normalized)
+        if parsed.tzinfo is None or parsed.utcoffset() is None:
             raise ValueError("timezone is required")
     except ValueError as exc:
-        raise EditError("changed_at must include a timezone") from exc
+        raise EditError("changed_at must be valid RFC 3339 date-time") from exc
     return idx, old, new, author.strip(), stamp
 
 
