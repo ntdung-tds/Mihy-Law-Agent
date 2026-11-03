@@ -1,10 +1,17 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `25` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-03T22:54:49.848Z`.
-- **Phase:** R25 flat-block R0 Overview now deployed to nonproduction preview with 11 status-only UC tiles; source Chromium and CI passed. Owner final visual acceptance pending; real legal workflows remain unimplemented.
+- **PCS revision:** `26` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-03T23:11:26.745Z`.
+- **Phase:** R0 functional core: tenant membership read adapter TECH_DONE with synthetic SQL tests; no sign-in, live Postgres/RLS or authenticated API deployed. R25 flat UI preview preserved for Owner review.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R26 — read-only relational membership adapter (FR12-01)
+
+- **PR #38 merged** at `a638d73d09e96c279e4705ea8e52e7c761772376`: `r0_core/membership_repository.py` reads tenant, active principal, current membership and approved role registry using one parameter-bound DB-API query; existing core clears tenant-sensitive context on switch. No new HTTP endpoint introduced; R25 UI remains unchanged.
+- **Tests:** expected initial red CI `41736074780`; two additional timestamp/revocation tests red in `41736459846`; fixed and rerun full GitHub Actions **149/149 PASS** on PR final head `41736855153`. 12 cases use isolated **synthetic SQLite** with a PostgreSQL placeholder translator; this is *not* actual PostgreSQL, RLS, live auth or browser E2E.
+- **Gates remaining:** D01 security/role/owner approval is pending; do not use real customer data or enable real login/production. PostgreSQL migrations/RLS, actual IdP, session revocation, MatterACL, endpoint integration and E2E are NOT_RUN. A private Drive run folder exists but no raw test artifact was uploaded.
+- **Next:** verify authenticated principal at a request boundary with SRS-aligned API workflow without inventing an unauthorized tenant-switch endpoint; test real PostgreSQL/RLS separately when available.
 
 ## R25 — flat 11-UC blocks, informational modal click repaired
 
@@ -51,7 +58,7 @@
 
 ## Follow-up
 
-Continue functional R0 slices on separate task branches while retaining the saved R20 design and R25 updated preview. Owner is final project acceptor; POC1 stays ON_HOLD, POC2 and POC3 remain PLANNED.
+Continue functional R0 slices on separate task branches while retaining the saved R20 design and R25 preview (unchanged by R26). Owner is final project acceptor; POC1 stays ON_HOLD, POC2 and POC3 remain PLANNED.
 
 ## Publication boundary
 
