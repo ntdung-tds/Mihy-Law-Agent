@@ -1,13 +1,13 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 18,
-  "updated_at": "2026-11-03T13:38:06.812Z",
+  "revision": 19,
+  "updated_at": "2026-11-03T14:49:08.746Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
     "slug": "mihy-law-agent",
     "name": "AI Law — Mihy Law Agent",
-    "phase": "POC",
+    "phase": "R0",
     "source_refs": [
       {
         "name": "AI Law SRS v1.1.15",
@@ -287,6 +287,33 @@
         ],
         "owner_acceptance": "NOT_REQUESTED",
         "notes": "TECH_DONE is only a pure FR14-03 domain rule. Reviewer permission, authoritative storage, event idempotency, transaction version/authorization checks, TC14B and TCE2E-02 application E2E are NOT_RUN. Original SRS unchanged. R15: strict RFC3339-shaped audit stamps validated against SRS date-time schema; immutable product-version invariant enforced for rejected/changes_requested as well as approved. Pure domain POC only."
+      },
+      {
+        "id": "AL-R0-UI-001",
+        "title": "Create mobile-first AI Law R0 interactive visual preview shell (no backend)",
+        "status": "IN_PROGRESS",
+        "priority": "P0",
+        "scope": "Public-safe demo UI only; overview, synthetic documents, assistant shell, legal research shell, responsive mobile and desktop navigation; no new workflow backend",
+        "acceptance": [
+          "A clear R0 demo-only label and synthetic dataset, no false AI/legal answers or file upload",
+          "Mobile-first navigation and desktop layout with readable states",
+          "Working sample navigation, document filtering/search and modal; assistant prompt composition visibly not connected",
+          "No sensitive SRS contents, real client docs, credentials or production changes"
+        ],
+        "tests": {
+          "static_local": "PASS_6_OF_6",
+          "node_syntax": "PASS",
+          "browser_real": "BLOCKED_LOCAL_BROWSER_NAVIGATION_POLICY",
+          "github_ci": "NOT_RUN",
+          "preview_live": "NOT_DEPLOYED"
+        },
+        "owner_acceptance": "NOT_REQUESTED",
+        "evidence": [
+          "web/r0-preview/*",
+          "tests/test_r0_preview.py",
+          "No real data; static-only UI prototype"
+        ],
+        "notes": "Task is solely UI preview for Owner visual review; not real R0 application integration and not completion of SRS workflows."
       }
     ],
     "features": [
@@ -316,6 +343,14 @@
         "status": "PLANNED",
         "tasks": [
           "AL-POC3-001"
+        ]
+      },
+      {
+        "id": "R0-UI",
+        "name": "Responsive application shell — demonstration-only",
+        "status": "IN_PROGRESS",
+        "tasks": [
+          "AL-R0-UI-001"
         ]
       }
     ],
@@ -351,6 +386,12 @@
         "topic": "Owner instruction: provisionally park POC1",
         "value": "POC1 is temporarily parked at the current scoped technical checkpoint; no further POC1 development or automatic acceptance. Scoped DOCX/approval domain technical work is TECH_DONE with prior 105/105 GitHub CI PASS, but Microsoft Word Desktop and actual application TC02C/TC07C/TC14B/TCE2E-02 remain NOT_RUN/BLOCKED. SRS v1.1.15, product code and production unchanged. POC2 remains PLANNED and must not be started until Owner directs.",
         "authority": "Owner explicit chat instruction, 2026-11-03: 'Tạm thời chốt poc1 ở đây'"
+      },
+      {
+        "id": "DEC-005",
+        "topic": "Start R0 mobile-first UI preview",
+        "value": "Owner explicitly directs start of R0 and implementation of an attractive, intuitive, professional mobile-first interface for review. First slice is a separate synthetic-data static Web UI shell only; no unapproved backend, production deployment or SRS expansion. POC1 stays ON_HOLD, POC2/POC3 stay PLANNED.",
+        "authority": "Owner explicit messages on 2026-11-03: 'R0 luôn đi bạn, thiết kế cho mobile luôn nhé...' and 'Triển khai luôn nhé để tôi xem'"
       }
     ],
     "risks": [
@@ -574,12 +615,12 @@
       }
     ],
     "current": {
-      "active_task": null,
-      "last_completed_step": "Owner provisionally parked POC1 at PCS R18 after R17 test-run readiness and prior 105/105 CI PASS. All missing Word Desktop and application E2E gates stay NOT_RUN/BLOCKED; this is not POC1 PASS or final acceptance.",
-      "next_action": "Await explicit Owner direction for next phase (POC2 remains PLANNED) or resumption of POC1 gates. When POC1 resumes, execute genuine Microsoft Word Desktop three-scenario review and authenticated app TC02C/TC07C/TC14B/TCE2E-02; Owner final acceptance still required.",
+      "active_task": "AL-R0-UI-001",
+      "last_completed_step": "R0 responsive demo shell implemented locally and local 6/6 static tests plus JS syntax checks PASS; local Chromium navigation is blocked by environment policy, so no actual browser E2E evidence yet. POC1 remains ON_HOLD.",
+      "next_action": "Run GitHub CI, publish isolated Cloudflare preview (not production), verify serving/visibility, request Owner visual feedback. Do not claim real workflows or deploy production.",
       "blockers": [
-        "Microsoft Word Desktop GUI unavailable in available execution environment; original inputs and operator pack are ready but actual Word-saved output and screenshots/tester/version missing",
-        "No authenticated review/approval application runtime for TC02C, TC07C, TC14B and TCE2E-02"
+        "Local Chromium navigation to file/http loopback is BLOCKED_BY_ADMINISTRATOR; actual interactive-browser verification not yet available",
+        "Backend/auth/AI/legal data integration out of UI-shell slice and not tested"
       ]
     },
     "policy": {

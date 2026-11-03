@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f8fb" />
+  <meta name="description" content="AI Law — R0 mobile-first user interface preview, synthetic demonstration data only." />
+  <title>AI Law · Workspace Preview R0</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <svg aria-hidden="true" class="svg-sprite" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.8"/><rect x="14" y="3" width="7" height="7" rx="1.8"/><rect x="3" y="14" width="7" height="7" rx="1.8"/><rect x="14" y="14" width="7" height="7" rx="1.8"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a2 2 0 0 1 2-2z"/><path d="M14 3v6h5M9 13h6M9 17h6"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 2 1.9 7 7.1 3-7.1 2.9L12 22l-2.9-7.1L2 12l7.1-3z"/><path d="m19 2 .7 2.3L22 5l-2.3.7L19 8l-.7-2.3L16 5l2.3-.7z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="7.2"/><path d="m16.2 16.2 4.3 4.3"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m12 19 0-14m-6 6 6-6 6 6"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M4 12h16m-7-7 7 7-7 7"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5zm-9 10 9 5 9-5M3 17l9 5 9-5"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5c-2.5-2-6-2-9-1v15c3-1 6.5-1 9 1 2.5-2 6-2 9-1V4c-3-1-6.5-1-9 1zm0 0v15"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18M5 7h14M3 18h18M5 7l-3 6h6L5 7zm14 0-3 6h6l-3-6z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 2 9 4v6c0 5.5-3.7 8.5-9 10-5.3-1.5-9-4.5-9-10V6l9-4z"/><path d="m8 12 2.5 2.5L16 9"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 9h18c0-1-3-2-3-9zm-8 12h4"/></symbol>
+    <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12 9 17 20 6"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.5 0-2.8-.3-4-1L3 21l1.9-5.3A8.5 8.5 0 1 1 21 11.5z"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 .7l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7-.7l-3 3a5 5 0 0 0 7 7l2-2"/></symbol>
+  </svg>
+
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar" aria-label="Điều hướng chính">
+      <div class="brand"><div class="brand-mark"><svg class="icon"><use href="#i-scale"/></svg></div><div class="brand-copy"><strong>AI<span>LAW</span></strong><small>LEGAL WORKSPACE</small></div></div>
+      <div class="workspace-picker"><div class="workspace-avatar">A</div><div class="workspace-text"><strong>Không gian của tôi</strong><small>Bản xem trước R0</small></div><svg class="icon tiny"><use href="#i-chevron"/></svg></div>
+      <div class="side-label">KHÔNG GIAN LÀM VIỆC</div>
+      <nav class="side-nav" aria-label="Các khu vực">
+        <button class="nav-item active" data-view="overview"><svg class="icon"><use href="#i-grid"/></svg><span>Tổng quan</span></button>
+        <button class="nav-item" data-view="documents"><svg class="icon"><use href="#i-file"/></svg><span>Tài liệu</span><span class="nav-count">04</span></button>
+        <button class="nav-item" data-view="assistant"><svg class="icon"><use href="#i-spark"/></svg><span>Trợ lý AI</span><span class="nav-new">Mới</span></button>
+        <button class="nav-item" data-view="research"><svg class="icon"><use href="#i-book"/></svg><span>Tra cứu pháp lý</span></button>
+      </nav>
+      <div class="side-label secondary">HỖ TRỢ</div>
+      <nav class="side-nav"><button class="nav-item" id="side-guide"><svg class="icon"><use href="#i-shield"/></svg><span>Về bản xem trước</span></button></nav>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-note"><div class="side-note-icon"><svg class="icon"><use href="#i-spark"/></svg></div><strong>Pháp lý, đơn giản hơn.</strong><p>Một không gian để tập trung vào công việc quan trọng.</p><button id="sidebar-explore">Khám phá giao diện <span>↗</span></button></div>
+      <div class="sidebar-footer"><div class="profile-circle">AL</div><div><strong>Demo Workspace</strong><small>Chưa có đăng nhập</small></div><svg class="icon tiny"><use href="#i-dots"/></svg></div>
+    </aside>
+
+    <div class="page-main">
+      <header class="topbar">
+        <div class="mobile-brand"><div class="mobile-mark"><svg class="icon"><use href="#i-scale"/></svg></div><strong>AI<span>LAW</span></strong></div>
+        <div class="breadcrumbs"><span>Workspace</span><svg class="icon tiny"><use href="#i-chevron"/></svg><strong id="breadcrumb-current">Tổng quan</strong></div>
+        <div class="top-actions"><span class="preview-dot"><i></i>R0 Preview</span><button class="icon-btn search-shortcut" id="search-shortcut" aria-label="Tìm kiếm" title="Tìm kiếm"><svg class="icon"><use href="#i-search"/></svg></button><button class="icon-btn" id="notifications" aria-label="Thông báo" title="Thông báo"><svg class="icon"><use href="#i-bell"/></svg><span class="unread-dot"></span></button><div class="user-avatar" aria-label="Không gian demo">AL</div></div>
+      </header>
+      <div class="mobile-demo-label"><span class="live-dot"></span> Bản xem trước giao diện · Dữ liệu minh họa</div>
+
+      <main class="main-content" id="content">
+        <section id="view-overview" class="view-panel" data-panel="overview">
+          <div class="eyebrow mobile-hide">THỨC GIẢN HƠN, LÀM VIỆC HIỆU QUẢ HƠN <span class="eyebrow-line"></span></div>
+          <div class="welcome"><div><p class="hello">Không gian làm việc của bạn <span class="wave">✦</span></p><h1>Chào mừng đến với <em>AI Law.</em></h1><p class="subtitle">Mọi công việc pháp lý, tài liệu và tri thức trong một trải nghiệm liền mạch.</p></div><div class="welcome-date"><svg class="icon"><use href="#i-clock"/></svg><span id="today-date">Hôm nay</span></div></div>
+          <div class="hero"><div class="hero-content"><div class="hero-topline"><span class="hero-star">✦</span> AI-POWERED WORKSPACE <span class="hero-line"></span> R0</div><h2>Công việc pháp lý.<br><span>Rõ ràng trong từng bước.</span></h2><p>Từ soạn thảo, rà soát tài liệu đến nghiên cứu pháp lý — tất cả bắt đầu tại đây.</p><div class="hero-actions"><button class="btn btn-white" data-go="documents">Khám phá tài liệu <svg class="icon"><use href="#i-arrow-right"/></svg></button><button class="btn btn-hero-link" data-go="assistant">Trải nghiệm trợ lý <svg class="icon tiny"><use href="#i-chevron"/></svg></button></div></div><div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="hero-art-core"><div class="art-ring"><svg class="icon"><use href="#i-scale"/></svg></div><div class="art-bar art-bar-1"></div><div class="art-bar art-bar-2"></div><div class="art-bar art-bar-3"></div></div><div class="floating-token token-one">✦</div><div class="floating-token token-two">◎</div></div></div>
+
+          <div class="section-line"><div><h2 class="section-title">Tổng quan công việc</h2><p class="section-desc">Số liệu minh họa cho bản thiết kế</p></div><span class="hint-pill"><span class="live-dot"></span> Dữ liệu demo</span></div>
+          <div class="stats-grid"><div class="stat-card"><div class="stat-top"><span class="stat-icon lavender"><svg class="icon"><use href="#i-layers"/></svg></span><span class="stat-corner">↗</span></div><strong>04</strong><span>Tài liệu mẫu</span><p><b>Không có dữ liệu thật</b> <span>· Demo</span></p></div><div class="stat-card"><div class="stat-top"><span class="stat-icon amber"><svg class="icon"><use href="#i-clipboard"/></svg></span><span class="stat-corner">↗</span></div><strong>02</strong><span>Đang rà soát</span><p><b>Trạng thái giả lập</b> <span>· Demo</span></p></div><div class="stat-card"><div class="stat-top"><span class="stat-icon aqua"><svg class="icon"><use href="#i-check"/></svg></span><span class="stat-corner">↗</span></div><strong>01</strong><span>Đã hoàn tất</span><p><b>Không kết nối API</b> <span>· Demo</span></p></div></div>
+
+          <div class="section-line services-header"><div><h2 class="section-title">Bạn muốn bắt đầu từ đâu?</h2><p class="section-desc">Những tác vụ pháp lý phổ biến trong một lần chạm</p></div><button class="text-link" data-go="assistant">Xem trợ lý AI <svg class="icon"><use href="#i-arrow-right"/></svg></button></div>
+          <div class="services-grid"><button class="service-card" data-demo-action="Soạn thảo văn bản"><span class="service-icon service-violet"><svg class="icon"><use href="#i-file"/></svg></span><strong>Soạn thảo văn bản</strong><p>Tạo bản nháp và làm việc với tài liệu.</p><span class="service-bottom">Khám phá <svg class="icon tiny"><use href="#i-arrow-right"/></svg></span></button><button class="service-card" data-demo-action="Rà soát hợp đồng"><span class="service-icon service-blue"><svg class="icon"><use href="#i-clipboard"/></svg></span><strong>Rà soát hợp đồng</strong><p>Nhận diện điều khoản cần chú ý.</p><span class="service-bottom">Khám phá <svg class="icon tiny"><use href="#i-arrow-right"/></svg></span></button><button class="service-card" data-demo-action="Tóm tắt tài liệu"><span class="service-icon service-peach"><svg class="icon"><use href="#i-layers"/></svg></span><strong>Tóm tắt tài liệu</strong><p>Nắm bắt ý chính và nội dung trọng tâm.</p><span class="service-bottom">Khám phá <svg class="icon tiny"><use href="#i-arrow-right"/></svg></span></button><button class="service-card" data-go="research"><span class="service-icon service-mint"><svg class="icon"><use href="#i-book"/></svg></span><strong>Tra cứu pháp lý</strong><p>Thiết kế luồng tìm kiếm có dẫn nguồn.</p><span class="service-bottom">Khám phá <svg class="icon tiny"><use href="#i-arrow-right"/></svg></span></button></div>
+
+          <div class="below-grid"><section class="surface-panel"><div class="panel-header"><div><h2 class="section-title">Tài liệu gần đây</h2><p class="section-desc">Bộ dữ liệu minh họa giao diện</p></div><button class="text-link" data-go="documents">Xem tất cả <svg class="icon"><use href="#i-arrow-right"/></svg></button></div><div class="recent-list" id="recent-documents"></div></section><section class="assistant-panel"><div class="assistant-graphic"><span class="graphic-spark">✦</span><div class="graphic-orb"></div></div><span class="assistant-kicker">KHÔNG GIAN THÔNG MINH</span><h2>Một trợ lý.<br>Cho mọi câu hỏi.</h2><p>Trải nghiệm trước cách AI Law hỗ trợ tổ chức công việc và hiển thị căn cứ pháp lý.</p><button class="btn btn-dark" data-go="assistant">Mở trợ lý AI <svg class="icon"><use href="#i-arrow-right"/></svg></button><small>Minh họa UI · Chưa kết nối mô hình</small></section></div>
+        </section>
+
+        <section id="view-documents" class="view-panel" data-panel="documents" hidden>
+          <div class="sub-page-heading"><div><p class="section-kicker">QUẢN LÝ TÀI LIỆU</p><h1>Không gian tài liệu<span class="heading-dot">.</span></h1><p class="subtitle">Một nơi để lưu trữ, theo dõi và làm việc với tài liệu pháp lý.</p></div><button class="btn btn-primary" id="upload-btn"><svg class="icon"><use href="#i-plus"/></svg> Thêm tài liệu</button><input type="file" id="local-file" accept=".docx,.pdf" hidden /></div>
+          <div class="demo-disclaimer"><svg class="icon"><use href="#i-shield"/></svg><div><strong>Đây là dữ liệu minh họa</strong><span>Chưa có lưu trữ, tải lên máy chủ hoặc tích hợp xử lý tài liệu.</span></div></div>
+          <div class="document-panel"><div class="document-toolbar"><div class="filter-tabs" role="group" aria-label="Lọc trạng thái"><button class="filter-tab selected" data-filter="all">Tất cả <span>4</span></button><button class="filter-tab" data-filter="review">Đang rà soát</button><button class="filter-tab" data-filter="draft">Bản nháp</button><button class="filter-tab" data-filter="done">Hoàn tất</button></div><div class="list-search"><svg class="icon"><use href="#i-search"/></svg><input id="document-search" aria-label="Tìm tài liệu minh họa" placeholder="Tìm tài liệu..." /></div></div><div id="document-list" class="document-rows"></div><div id="empty-docs" class="empty-state" hidden>Không tìm thấy tài liệu minh họa phù hợp.</div></div>
+        </section>
+
+        <section id="view-assistant" class="view-panel" data-panel="assistant" hidden>
+          <div class="sub-page-heading"><div><p class="section-kicker">TRỢ LÝ AI</p><h1>Hỏi điều bạn cần<span class="heading-dot">.</span></h1><p class="subtitle">Bản thiết kế giao diện trò chuyện hỗ trợ công việc pháp lý.</p></div><span class="outline-pill">✦ Chế độ minh họa</span></div>
+          <div class="chat-shell"><div class="chat-center"><div class="chat-icon"><svg class="icon"><use href="#i-spark"/></svg></div><p class="chat-kicker">AI LAW ASSISTANT</p><h2>Hôm nay tôi có thể<br><em>giúp gì cho bạn?</em></h2><p>Chọn một câu hỏi mẫu để trải nghiệm thao tác. Trợ lý chưa kết nối AI hoặc nguồn luật thật.</p><div class="prompt-grid"><button class="prompt-card" data-prompt="Giúp tôi rà soát các điều khoản quan trọng trong hợp đồng dịch vụ."><span>✦</span> Rà soát hợp đồng <svg class="icon tiny"><use href="#i-arrow-right"/></svg></button><button class="prompt-card" data-prompt="Tóm tắt những điểm cần chú ý trong một văn bản pháp lý."><span>✦</span> Tóm tắt văn bản <svg class="icon tiny"><use href="#i-arrow-right"/></svg></button><button class="prompt-card" data-prompt="Tìm quy định pháp luật có liên quan và trích dẫn nguồn."><span>✦</span> Tìm quy định pháp luật <svg class="icon tiny"><use href="#i-arrow-right"/></svg></button></div></div><div id="chat-preview-reply" class="chat-preview-reply" hidden><div class="chat-preview-bubble"><strong>Chế độ xem trước</strong><p>Giao diện đã nhận câu hỏi mẫu. Chức năng AI, kiểm chứng nguồn và xử lý tài liệu sẽ được tích hợp trong các task R0 tiếp theo.</p></div></div><form id="chat-form" class="chat-composer"><label class="sr-only" for="chat-input">Nhập câu hỏi mẫu</label><textarea rows="2" id="chat-input" maxlength="400" placeholder="Nhập câu hỏi để xem trải nghiệm giao diện..."></textarea><div class="chat-compose-bottom"><span><svg class="icon"><use href="#i-shield"/></svg> Không gửi dữ liệu lên máy chủ</span><button type="submit" aria-label="Gửi câu hỏi mẫu"><svg class="icon"><use href="#i-arrow-up"/></svg></button></div></form><p class="chat-footnote">Bản xem trước thiết kế · Không cung cấp tư vấn pháp lý</p></div>
+        </section>
+
+        <section id="view-research" class="view-panel" data-panel="research" hidden>
+          <div class="sub-page-heading"><div><p class="section-kicker">TRA CỨU PHÁP LÝ</p><h1>Tìm đúng căn cứ<span class="heading-dot">.</span></h1><p class="subtitle">Thiết kế trải nghiệm tìm kiếm, so sánh và kiểm chứng nguồn.</p></div><span class="outline-pill">Bản phác thảo R0</span></div>
+          <div class="research-hero"><div class="research-emblem"><svg class="icon"><use href="#i-scale"/></svg></div><h2>Tri thức pháp lý, có căn cứ.</h2><p>Giao diện tra cứu được thiết kế để ưu tiên nguồn, thời điểm hiệu lực và khả năng kiểm chứng.</p><form id="research-form" class="research-input"><svg class="icon"><use href="#i-search"/></svg><input id="research-input" aria-label="Tìm kiếm pháp lý mẫu" placeholder="Nhập từ khóa pháp lý..." maxlength="160" /><button type="submit">Tìm kiếm</button></form><div class="research-note"><svg class="icon"><use href="#i-shield"/></svg> Chưa kết nối cơ sở dữ liệu pháp luật · Không hiển thị kết quả giả</div></div>
+          <div class="research-principles"><div><svg class="icon"><use href="#i-link"/></svg><h3>Nguồn truy xuất</h3><p>Các kết quả sau này cần dẫn được về văn bản và điều khoản.</p></div><div><svg class="icon"><use href="#i-clock"/></svg><h3>Hiệu lực theo thời gian</h3><p>Phân biệt thời điểm áp dụng của từng quy định.</p></div><div><svg class="icon"><use href="#i-shield"/></svg><h3>Kiểm chứng trước sử dụng</h3><p>Hỗ trợ người dùng tự đối chiếu thông tin quan trọng.</p></div></div>
+        </section>
+      </main>
+      <footer class="page-footer"><span>© <span id="year">2026</span> AI Law · R0 Interface Preview</span><span>Chỉ sử dụng dữ liệu minh họa · Chưa có backend</span></footer>
+    </div>
+  </div>
+
+  <nav class="mobile-bottom-nav" aria-label="Điều hướng trên điện thoại"><button class="bottom-item active" data-view="overview"><svg class="icon"><use href="#i-grid"/></svg><span>Tổng quan</span></button><button class="bottom-item" data-view="documents"><svg class="icon"><use href="#i-file"/></svg><span>Tài liệu</span></button><button class="bottom-item bottom-ai" data-view="assistant"><span class="bottom-ai-circle"><svg class="icon"><use href="#i-spark"/></svg></span><span>Trợ lý AI</span></button><button class="bottom-item" data-view="research"><svg class="icon"><use href="#i-search"/></svg><span>Tra cứu</span></button></nav>
+  <div id="modal-backdrop" class="modal-backdrop" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="modal-close icon-btn" id="modal-close" aria-label="Đóng"><svg class="icon"><use href="#i-x"/></svg></button><div class="modal-icon"><svg class="icon"><use href="#i-spark"/></svg></div><h2 id="modal-title">Bản xem trước</h2><p id="modal-description">Các tính năng nghiệp vụ đang được phát triển trong giai đoạn R0.</p><div id="modal-meta" class="modal-meta" hidden></div><button class="btn btn-primary modal-ack" id="modal-ack">Đã hiểu</button></div></div>
+  <div role="status" aria-live="polite" id="toast" class="toast" hidden></div>
+</body>
+</html>
