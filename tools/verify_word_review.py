@@ -16,7 +16,20 @@ from lxml import etree as ET
 
 from poc_docx.track_changes import DOC_PART, w, _validate_edit, _validate_package_basics, EditError
 
-REVISIONS = {w("ins"), w("del"), w("moveFrom"), w("moveTo")}
+# Any tracked property/move revision is outside the controlled single-run POC.
+# Reject it rather than accidentally declaring the entire document reviewed.
+REVISIONS = {
+    w(tag) for tag in (
+        "ins", "del", "moveFrom", "moveTo", "rPrChange", "pPrChange",
+        "tblPrChange", "trPrChange", "tcPrChange", "sectPrChange",
+        "numberingChange", "cellIns", "cellDel", "cellMerge",
+        "moveFromRangeStart", "moveFromRangeEnd", "moveToRangeStart",
+        "moveToRangeEnd", "customXmlInsRangeStart", "customXmlInsRangeEnd",
+        "customXmlDelRangeStart", "customXmlDelRangeEnd",
+        "customXmlMoveFromRangeStart", "customXmlMoveFromRangeEnd",
+        "customXmlMoveToRangeStart", "customXmlMoveToRangeEnd",
+    )
+}
 
 
 class ReviewError(ValueError):
