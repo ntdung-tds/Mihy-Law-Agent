@@ -127,5 +127,13 @@
     "production": "NOT_DEPLOYED"
   },
   "risk": "A clean bounded test cycle is not proof of exhaustive OOXML interoperability or application correctness. Word Desktop and authenticated app E2E remain blocked.",
-  "classification": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY"
+  "classification": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY",
+  "github_pr": {
+    "number": 23,
+    "merged": true,
+    "merge_commit": "696f7876d1a7d9db9e4c37b970e44623602b68e2",
+    "final_pr_head": "dbffb4cc022b298c1d627c3f1b511319d01ce7ae",
+    "final_head_ci_run": 41635542044,
+    "final_head_ci": "SUCCESS_105_TESTS"
+  }
 }
