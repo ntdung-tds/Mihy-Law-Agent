@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 3,
-  "updated_at": "2026-11-03T02:32:12.860Z",
+  "revision": 4,
+  "updated_at": "2026-11-03T02:37:29.333Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -54,7 +54,7 @@
           "local_render": "PASS_LIBREOFFICE_SYNTHETIC_SINGLE_PAGE",
           "microsoft_word": "NOT_RUN",
           "integration_e2e": "NOT_RUN",
-          "github_ci": "PASS_PR_HEAD_2e8049b3b645fd3ffad5e533af2a80e5184435d2_RUN_41566803416; VERIFY_FINAL_HEAD_BEFORE_MERGE",
+          "github_ci": "PASS_PR_1_FINAL_HEAD_d193392834f64732c5fa8cbf61bff26446ad7582_RUN_41567063066; MERGED_MAIN_18e5e809d1380e7cab161a907d34059fea5e9836",
           "local_negative_protected_doc": "PASS_AFTER_REPRODUCED_BUG_FIX",
           "package_static_contract": "PASS_2026_11_03",
           "package_offline_xml_accept_reject": "PASS_SIMULATION_ONLY_WORD_UI_NOT_RUN",
@@ -70,7 +70,8 @@
           "10/10 Python unittest cases, incl. protected document and malformed XML",
           "Offline XML accept/reject of synthetic fixture rendered in LibreOffice; not Word UI test",
           "tests/evidence/AL-POC1-R3-2026-11-03.json: 16/16 unit PASS; 3 reproduced pre-fix issues; synthetic LO 1-page render",
-          "GitHub Actions workflow run 41566803416: completed/success on PR head 2e8049b3b645fd3ffad5e533af2a80e5184435d2; steps incl. dependency install and unittest"
+          "GitHub Actions workflow run 41566803416: completed/success on PR head 2e8049b3b645fd3ffad5e533af2a80e5184435d2; steps incl. dependency install and unittest",
+          "PR #1 merged as 18e5e809d1380e7cab161a907d34059fea5e9836, final-head CI run 41567063066 completed/success (checked 2026-11-03)"
         ],
         "owner_acceptance": "NOT_REQUESTED",
         "notes": "TECH_DONE only for single-run scoped POC; field-context edits including cross-paragraph fields and invalid preexisting revision IDs now fail closed. Word GUI/E2E/Owner acceptance pending."
@@ -235,11 +236,11 @@
     ],
     "current": {
       "active_task": "AL-POC1-002",
-      "last_completed_step": "R3: reproduced 3 unsafe DOCX cases before fix; blocked field edits including cross-paragraph context and invalid existing revision IDs; 16/16 unittest PASS; rendered synthetic DOCX in LibreOffice (1 page) and inspected; SRS static checker PASS.",
-      "next_action": "Verify CI on the final PR head, merge technical bugfix if branch checks permit, read back canonical PCS revision 3; real Word GUI and app TC02C/TC07C/TCE2E-02 still outstanding.",
+      "last_completed_step": "PR #1 technical POC1 bugfix merged into main (18e5e809...) after CI run 41567063066 success; 16/16 local unittest, static SRS check and LibreOffice synthetic render PASS; Word GUI NOT_RUN.",
+      "next_action": "Owner reviews controlled DOCX fixture; run actual Microsoft Word Accept/Reject and build/run SRS TC02C, TC07C, TCE2E-02 application approval invalidation flow; no POC1 acceptance yet.",
       "blockers": [
-        "Actual Microsoft Word GUI unavailable in current execution environment",
-        "Application approval invalidation flow not implemented/testable; Owner SRS baseline signoff pending"
+        "No actual Microsoft Word GUI Accept/Reject evidence",
+        "No deployed/testable application review/approval invalidation flow; TCE2E-02 NOT_RUN"
       ]
     },
     "policy": {
