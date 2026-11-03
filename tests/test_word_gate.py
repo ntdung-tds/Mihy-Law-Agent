@@ -108,7 +108,7 @@ class OfflineWordGateTests(unittest.TestCase):
                 if info.filename.startswith("word/header") and info.filename.endswith(".xml"):
                     content = content.replace(b"Synthetic header", b"Modified header")
                 output.writestr(info, content)
-        with self.assertRaisesRegex(ReviewError, "header text changed"):
+        with self.assertRaisesRegex(ReviewError, "header story XML changed"):
             check_results(self.tracked, target.getvalue(), self.rejected, EDIT)
 
     def test_changed_style_definition_rejected(self):
