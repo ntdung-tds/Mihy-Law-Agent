@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 16,
-  "updated_at": "2026-11-03T12:27:25Z",
+  "revision": 17,
+  "updated_at": "2026-11-03T12:57:27.089Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -123,7 +123,11 @@
           "github_pr21_ci": "PASS_RUN_41631578039_FINAL_HEAD_9c4e42e21857e49c75a984e2b33d99a9899a52a3",
           "github_pr23": "MERGED_MAIN_696f7876d1a7d9db9e4c37b970e44623602b68e2",
           "github_pr23_ci": "PASS_RUN_41635542044_FINAL_HEAD_dbffb4cc022b298c1d627c3f1b511319d01ce7ae",
-          "private_drive_r16_evidence": "PASS_METADATA_READBACK_104161_BYTES_NONSHARED"
+          "private_drive_r16_evidence": "PASS_METADATA_READBACK_104161_BYTES_NONSHARED",
+          "word_ui_operator_kit": "READY_ZIP_CRC_PASS_SINGLE_AND_MIXED_SYNTHETIC_FIXTURES",
+          "word_ui_operator_kit_drive": "PASS_PRIVATE_UPLOAD_SIZE_AND_METADATA_READBACK_75332_BYTES",
+          "word_ui_operator_test_run": "AL-POC1-TR-20261103-WORD-UI-01_NOT_RUN",
+          "tc14b": "NOT_RUN"
         },
         "owner_acceptance": "NOT_REQUESTED",
         "traceability": [
@@ -151,9 +155,10 @@
           "FR14-03 domain event proof in AL-POC1-005, but TCE2E-02 application approval invalidation still NOT_RUN",
           "tests/evidence/AL-POC1-APPROVAL-REVIEW-LOOP-R15-2026-11-03.json: FR14-03 domain review loop; full CI 91/91, not app E2E",
           "tests/evidence/AL-POC1-REVIEW-LOOP-R16-2026-11-03.json: 4 red-green cycles and final clean bounded review, final PR23 CI run 41635542044 105/105 PASS",
-          "Private Drive AI Law Test Evidence / POC-DOCX-20261103-02: AL-POC1-TR-20261103-R16_Loop_Test_Evidence.zip (104161 bytes, metadata readback, not shared); private identifiers intentionally absent from public repo"
+          "Private Drive AI Law Test Evidence / POC-DOCX-20261103-02: AL-POC1-TR-20261103-R16_Loop_Test_Evidence.zip (104161 bytes, metadata readback, not shared); private identifiers intentionally absent from public repo",
+          "tests/evidence/AL-POC1-WORD-UI-GATE-PREP-R17-2026-11-03.json: synthetic R5/R12 sources, one-page LibreOffice sanity render, operator execution kit ZIP and private Drive run folder verified; actual Word Desktop saved outputs and screenshots NOT_COLLECTED"
         ],
-        "notes": "Two-stage QA review reproduced and fixed four offline verifier false-PASS classes (style definition, non-target run format, theme and tabs); verified relationship checks and XML indentation-only reserialization. Strict verifier may require manual review on benign Word resaves. Actual Word UI/TC02C/TC07C/TCE2E-02 remain NOT_RUN; task BLOCKED. R9 hardening: offline validator now rejects related-story formatting and table layout changes; still NOT_RUN in Microsoft Word. R10: Static verifier now checks page/section envelope and all non-document package parts; genuine Word metadata changes may legitimately require manual review. R11: DOCX root/settings relationship and MIME integrity negative cases fixed; bounded final review found no new reproductions. Real Word UI/app E2E remain blocked. R13 bounded mixed-review QA loop complete within synthetic scope; static PASS does not imply Word Desktop or application E2E acceptance. R16: improved single static review and shared generator fail-closed validation; real Microsoft Word Desktop still NOT_RUN. No Owner acceptance."
+        "notes": "Two-stage QA review reproduced and fixed four offline verifier false-PASS classes (style definition, non-target run format, theme and tabs); verified relationship checks and XML indentation-only reserialization. Strict verifier may require manual review on benign Word resaves. Actual Word UI/TC02C/TC07C/TCE2E-02 remain NOT_RUN; task BLOCKED. R9 hardening: offline validator now rejects related-story formatting and table layout changes; still NOT_RUN in Microsoft Word. R10: Static verifier now checks page/section envelope and all non-document package parts; genuine Word metadata changes may legitimately require manual review. R11: DOCX root/settings relationship and MIME integrity negative cases fixed; bounded final review found no new reproductions. Real Word UI/app E2E remain blocked. R13 bounded mixed-review QA loop complete within synthetic scope; static PASS does not imply Word Desktop or application E2E acceptance. R16: improved single static review and shared generator fail-closed validation; real Microsoft Word Desktop still NOT_RUN. No Owner acceptance. R17: Word Desktop test-run input and evidence procedure prepared in private Drive. No Word UI execution or application E2E has occurred; blocked status unchanged."
       },
       {
         "id": "AL-POC2-001",
@@ -556,15 +561,19 @@
       {
         "path": "tests/evidence/AL-POC1-REVIEW-LOOP-R16-2026-11-03.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-POC1-WORD-UI-GATE-PREP-R17-2026-11-03.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
       }
     ],
     "current": {
       "active_task": "AL-POC1-002",
-      "last_completed_step": "R16 POC1 bounded review: 4 red-green safety cycles corrected 10 false-PASS/unsupported edit classes with negative variants; 105/105 GitHub Actions unit PASS (run 41635542044), merged PR #23 at 696f7876; R12 kit rendered and CRC/OOXML checked. Private R16 evidence ZIP (104161 bytes) uploaded to authorized Drive folder and metadata readback confirmed.",
-      "next_action": "Run real Microsoft Word Desktop Accept/Reject on controlled R12 kit, retain Word-saved/reopened DOCX, screenshots, tester/version/test_run_id in private Drive; test TC02C/TC07C/TC14B/TCE2E-02 application E2E only when authorized runtime exists. Owner final acceptance.",
+      "last_completed_step": "R17 Word Desktop real-run gate prepared: synthetic R5 single + R12 mixed original files SHA verified; combined 75,332-byte operator kit ZIP CRC PASS; LibreOffice sanity renders one page each; authorized private Drive test-run folder and uploaded kit metadata readback confirmed. Actual Word Desktop NOT_RUN.",
+      "next_action": "Perform actual Microsoft Word Desktop Review Accept All/Reject All on separate R5 copies and Accept edits 0,1/Reject 2 on R12; save and reopen three genuine Word outputs; retain screenshots, Word build, tester and test_run_id in dedicated private Drive folder. Then run existing static Word gates against actual Word-saved files. Do not infer TC02C/TC07C/TC14B/TCE2E-02 app E2E success.",
       "blockers": [
-        "Real Microsoft Word Desktop Accept/Reject not executed; no genuine Word UI outputs or reviewer/version/test_run_id screenshots",
-        "Application review/approval authorization and persistence runtime unavailable; TC02C, TC07C, TC14B, TCE2E-02 NOT_RUN"
+        "Microsoft Word Desktop GUI unavailable in available execution environment; original inputs and operator pack are ready but actual Word-saved output and screenshots/tester/version missing",
+        "No authenticated review/approval application runtime for TC02C, TC07C, TC14B and TCE2E-02"
       ]
     },
     "policy": {
