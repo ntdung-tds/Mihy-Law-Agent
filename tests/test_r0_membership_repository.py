@@ -56,7 +56,8 @@ class MembershipRepositoryTests(unittest.TestCase):
                 CREATE TABLE tenants(tenant_id TEXT PRIMARY KEY,tenant_type TEXT);
                 CREATE TABLE memberships(membership_id TEXT PRIMARY KEY,
                     tenant_id TEXT,user_id TEXT,status TEXT,
-                    authz_version INTEGER,role_registry_version TEXT);
+                    authz_version INTEGER,role_registry_version TEXT,
+                    joined_at TEXT,revoked_at TEXT);
                 CREATE TABLE role_catalog(role_key TEXT,registry_version TEXT,
                     PRIMARY KEY(role_key,registry_version));
                 CREATE TABLE membership_roles(tenant_id TEXT,membership_id TEXT,
@@ -64,9 +65,9 @@ class MembershipRepositoryTests(unittest.TestCase):
             """)
             db.executemany("INSERT INTO principals VALUES (?,?)", [(U, "active"), (OTHER, "active")])
             db.executemany("INSERT INTO tenants VALUES (?,?)", [(A, "personal"), (B, "organization")])
-            db.executemany("INSERT INTO memberships VALUES (?,?,?,?,?,?)", [
-                (M_A, A, U, "active", 1, VERSION),
-                (M_B, B, U, "active", 2, VERSION),
+            db.executemany("INSERT INTO memberships VALUES (?,?,?,?,?,?,?,?)", [
+                (M_A, A, U, "active", 1, VERSION, "2025-01-01T00:00:00+00:00", None),
+                (M_B, B, U, "active", 2, VERSION, "2025-01-01T00:00:00+00:00", None),
             ])
             db.executemany("INSERT INTO role_catalog VALUES (?,?)", [
                 ("lawyer", VERSION), ("reviewer", VERSION),
@@ -155,6 +156,22 @@ class MembershipRepositoryTests(unittest.TestCase):
             with self.subTest(value=value):
                 with self.assertRaises(TenantContextDenied):
                     self.select(value)
+
+    def test_revocation_timestamp_blocks_stale_active_status(self):
+        self.update(
+            "UPDATE memberships SET revoked_at=? WHERE tenant_id=?",
+            ("2026-11-01T00:00:00+00:00", A),
+        )
+        with self.assertRaises(TenantContextDenied):
+            self.select(A)
+
+    def test_future_membership_join_not_usable(self):
+        self.update(
+            "UPDATE memberships SET joined_at=? WHERE tenant_id=?",
+            ("2099-01-01T00:00:00+00:00", A),
+        )
+        with self.assertRaises(TenantContextDenied):
+            self.select(A)
 
     def test_broken_connection_fails_closed_no_database_message(self):
         def broken():
