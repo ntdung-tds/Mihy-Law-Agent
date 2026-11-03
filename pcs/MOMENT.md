@@ -1,31 +1,29 @@
 # AI Law — PCS Chat Solo MOMENT
 
-- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public, Owner-selected); canonical branch `main` **only after checkpoint PR merge**.
-- **State revision:** `8` (authoritative: `pcs/STATE.json`).
-- **Updated:** `2026-11-03T05:40:31.916Z`.
-- **Phase:** POC1 technical preparation; no Owner acceptance or production.
-- **SRS:** Owner-supplied v1.1.15 package verified by checksums; original materials are private and unchanged.
+- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public; `main` canonical after checkpoint merge).
+- **State revision:** `9` (canonical: `pcs/STATE.json`).
+- **Updated:** `2026-11-03T09:16:37Z`.
+- **Phase:** POC1 technical preparation, no Owner acceptance or production.
+- **SRS:** Owner-provided v1.1.15 verified by checksum; unchanged and not published.
 
-## New technical slice — TC02C prerequisite
+## Two review rounds — R9
 
-- PR #7 merged into `main` at `5ecd5629931ba541d110f27d374d9bd3f05f7aa3`.
-- Selected 1–5 exact whole-run DOCX replacements are applied **atomically** to a synthetic fixture. Duplicate, ambiguous, missing, protected or field-context targets fail closed; no change to the original single-edit POC CLI.
-- Local unit regression **42/42 PASS** (31 existing + 11 new). SRS static checker `STATIC_CONTRACT_AND_WORD_PASS`.
-- GitHub Actions PR #7 run `41585067220` at head `4c4f00780c66f4c22a68f06d979aa50b4f57ad2d` completed **success**; job `unit` passed.
-- Synthetic DOCX produced 3 distinct real `w:ins`/`w:del` pairs. Offline XML mixed review: accept two / reject one gave expected content; LibreOffice rendered one page and image was checked. **Not** a Microsoft Word GUI test.
-- Evidence: `tests/evidence/AL-POC1-BATCH-R8-2026-11-03.json`; guide: `tests/POC1_BATCH_GATE.md`.
+- **Round 1** reproduced invalid DOCX missing `[Content_Types].xml` accepted by batch generator and header formatting changes missed by static Word-review gate.
+- **Round 2** reproduced table-width changes missed by the static gate. Both loops repaired the affected paths, including single-edit package validation; additional negative cases for malformed package metadata, footer formatting and table grid were exercised.
+- **Local verification:** **47/47** Python unit tests PASS (previously 42). Controlled synthetic R8 kit reproduced 3 genuine revision pairs and byte-equivalent tracked DOCX hash; LibreOffice rendered 1 page and was visually checked.
+- **GitHub:** <https://github.com/ntdung-tds/Mihy-Law-Agent/pull/9> merged as `53279eabb03bd5a80ddb668fda2db21ca0c8244b`; final PR head `ac94370d114d8d222e60ada04ff4bb095020e03a`, GitHub Actions run `41609586567` completed **success** (`unit` job passed).
+- **Evidence:** `tests/evidence/AL-POC1-TWO-ROUND-R9-2026-11-03.json`. Synthetic metadata only; no SRS content on public repo.
 
-## Remaining gates
+## Acceptance gates remain open
 
-- Active `AL-POC1-002` **BLOCKED**: real Microsoft Word Desktop review (Accept/Reject), screenshots, reviewer, Word version and test run evidence **NOT_RUN**.
-- Application acceptance `TC02C`, `TC07C`, `TCE2E-02`: **NOT_RUN**; approval-invalidation app flow unavailable. 79 SRS application cases not completed.
-- POC2 authorized legal PDF ingestion and POC3 real PostgreSQL RLS remain PLANNED.
+- `AL-POC1-002` **BLOCKED**: Microsoft Word Desktop mixed Accept/Reject, saved/reopened results, screenshots, reviewer, version and test_run_id: **NOT_RUN**.
+- Application `TC02C`, `TC07C`, `TCE2E-02`: **NOT_RUN**. POC2 and POC3 remain **PLANNED**.
 - No POC1 Owner acceptance and no production deployment.
 
 ## Next action
 
-Use the controlled Word kit to run actual Word Desktop mixed Accept/Reject; save/reopen files and secure evidence, verify Word-saved DOCX, then run full application-level cases when the workflow is testable. Do not equate offline XML simulation or unit/CI PASS with POC1 acceptance.
+Complete controlled Word Desktop review with private Drive evidence and verify the Word-saved results, then test the application approval invalidation flow. An offline `STATIC_PASS` or CI success is **not** proof of the Word UI outcome.
 
 ## Publication boundary
 
-Public repository contains only synthetic code/tests and safe metadata; no original SRS contents, legal/customer data, credentials, private Drive IDs or UI screenshots.
+Original SRS, legal/customer data, private Drive identifiers, credentials and screenshots remain excluded from Public GitHub.
