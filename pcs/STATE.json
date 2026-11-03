@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 19,
-  "updated_at": "2026-11-03T14:53:48.322Z",
+  "revision": 20,
+  "updated_at": "2026-11-03T15:31:52.263Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -315,6 +315,39 @@
           "Cloudflare isolated Worker ai-law-r0-preview; Workers.dev subdomain enabled/readback; Cloudflare Browser Rendering returned rendered mobile DOM containing synthetic recent-docs rows"
         ],
         "notes": "Task is solely UI preview for Owner visual review; not real R0 application integration and not completion of SRS workflows. Actual screenshot test blocked by Cloudflare Browser Rendering rate-limit 429. Owner visual sign-off pending."
+      },
+      {
+        "id": "AL-R0-UI-002",
+        "title": "Review and correct R0 mobile typography, contrast and tap targets",
+        "status": "REVIEW_READY",
+        "priority": "P0",
+        "scope": "Only responsive UI preview CSS and its regression tests; no backend, new workflow or production",
+        "acceptance": [
+          "Legible primary mobile text 14–16px, supporting labels 12–13px, 16px editable inputs",
+          "Mobile labels have contrast at least 4.5:1 against their known backgrounds",
+          "Important touch controls have >=44px hitboxes at smartphone and tablet widths",
+          "No document-level horizontal overflow in four demo views at 320px/390px; existing sample UI interactions remain functional",
+          "Desktop styling unchanged; preview remains explicitly synthetic and nonfunctional for real legal workflows"
+        ],
+        "tests": {
+          "github_ci": "PASS_115_OF_115_RUN_41664330719_COMMIT_8b224d1f1ea144278bdef9aa27ebfafe9f173ced",
+          "red_green": "PASS_THREE_ITERATIVE_REPRODUCE_FIX_TEST_CYCLES",
+          "chromium_320": "PASS_RESPONSIVE_OVERFLOW_INTERACTIONS_AND_44PX_CONTROL",
+          "chromium_390": "PASS_EFFECTIVE_CSS_AND_SAMPLE_NAVIGATION_FILTERS",
+          "chromium_768": "PASS_EFFECTIVE_TABLET_TYPOGRAPHY_AND_NO_PAGE_OVERFLOW",
+          "cloudflare_preview": "PASS_UPDATED_ISOLATED_WORKER_AND_MOBILE_DYNAMIC_DOM",
+          "screenshot_visual": "NOT_VERIFIED",
+          "physical_mobile_device": "NOT_RUN",
+          "backend_e2e": "NOT_RUN"
+        },
+        "owner_acceptance": "NOT_REQUESTED",
+        "evidence": [
+          "tests/evidence/AL-R0-UI-MOBILE-REVIEW-R20-2026-11-03.json",
+          "web/r0-preview/styles.css",
+          "tests/test_r0_preview.py",
+          "PR #28"
+        ],
+        "notes": "Final bounded review found no new reproducible mobile readability/contrast/overflow defect after three red-green loops. Live UI preview only; Owner must visually assess; no SRS or POC gate change."
       }
     ],
     "features": [
@@ -351,7 +384,8 @@
         "name": "Responsive application shell — demonstration-only",
         "status": "IN_REVIEW",
         "tasks": [
-          "AL-R0-UI-001"
+          "AL-R0-UI-001",
+          "AL-R0-UI-002"
         ]
       }
     ],
@@ -393,6 +427,12 @@
         "topic": "Start R0 mobile-first UI preview",
         "value": "Owner explicitly directs start of R0 and implementation of an attractive, intuitive, professional mobile-first interface for review. First slice is a separate synthetic-data static Web UI shell only; no unapproved backend, production deployment or SRS expansion. POC1 stays ON_HOLD, POC2/POC3 stay PLANNED.",
         "authority": "Owner explicit messages on 2026-11-03: 'R0 luôn đi bạn, thiết kế cho mobile luôn nhé...' and 'Triển khai luôn nhé để tôi xem'"
+      },
+      {
+        "id": "DEC-006",
+        "topic": "R0 mobile design review and legibility improvement",
+        "value": "Owner requested iterative R0 visual review with larger, more comfortable mobile typography; limit scope to visual legibility, contrast and touch targets in synthetic UI preview. No SRS baseline change, backend implementation or production release.",
+        "authority": "Owner message 2026-11-03: 'Tạo vòng lặp rà soát + điều chỉnh font chữ hợp lý hơn ở mobile, hơi nhỏ, ví dụ vậy'"
       }
     ],
     "risks": [
@@ -613,15 +653,19 @@
       {
         "path": "tests/evidence/AL-POC1-WORD-UI-GATE-PREP-R17-2026-11-03.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-R0-UI-MOBILE-REVIEW-R20-2026-11-03.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
       }
     ],
     "current": {
-      "active_task": "AL-R0-UI-001",
-      "last_completed_step": "R0 synthetic responsive visual shell deployed to an isolated nonproduction Cloudflare Worker. GitHub CI 111/111 PASS including Node syntax; Cloudflare Browser Rendering mobile DOM PASS. Screenshot test rate-limited HTTP 429 and complete interactive browser E2E still NOT_RUN; Owner UI feedback pending.",
-      "next_action": "Owner reviews live R0 UI preview on desktop/mobile and gives visual feedback; revise within current SRS scope. Then plan small authenticated R0 application tasks separately without implying backend readiness.",
+      "active_task": "AL-R0-UI-002",
+      "last_completed_step": "R0 UI mobile review R20: three reproduce/fix/test iterations (two expected red CI revisions); final 115/115 CI PASS and actual Chromium checks at widths 320/390/768 PASS for scoped fonts/contrast/overflow/sample interactions; isolated Cloudflare preview updated and mobile DOM readback PASS. Owner visual acceptance pending.",
+      "next_action": "Owner reviews updated isolated R0 UI preview on actual phone and desktop; record feedback, then continue next small R0 SRS task only after direction. Leave POC1 ON_HOLD, POC2 and POC3 PLANNED.",
       "blockers": [
-        "Full visual screenshots and interactive browser E2E NOT_RUN (Cloudflare screenshot API 429; local Chromium loopback/file access blocked).",
-        "Application backend and authenticated SRS workflows not implemented in this demo-only R0 UI shell."
+        "Human visual review on physical devices and screenshot-by-screenshot evidence NOT_VERIFIED; Cloudflare Screenshot API did not provide inspectable screenshot bytes.",
+        "No authenticated backend/API/AI/legal workflow in static demo UI; related application E2E NOT_RUN."
       ]
     },
     "policy": {
