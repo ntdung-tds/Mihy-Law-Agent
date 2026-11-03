@@ -1,0 +1,48 @@
+{
+  "test_run_id": "AL-POC1-TR-20261103-R8-BATCH",
+  "task_id": "AL-POC1-003",
+  "srs": "v1.1.15",
+  "test_contract": [
+    "TC02C"
+  ],
+  "scope": "Selected 1..5 whole-run DOCX replacements; atomic fail-closed POC; synthetic only",
+  "local_unit": {
+    "result": "PASS",
+    "count": 42,
+    "prior_count": 31,
+    "added_count": 11
+  },
+  "srs_static_check": {
+    "status": "STATIC_CONTRACT_AND_WORD_PASS",
+    "application_tests": "NOT_RUN_79"
+  },
+  "sample": {
+    "input_sha256": "7bdeffcd7308e7c2ab47b6002a0cb51c32a74a2128939cbf7981f32472534402",
+    "tracked_sha256": "d02582fc8ca51229ecef9f92d3c179afa2b22bdeed8312c52c02d516e5c689ae",
+    "synthetic_render": "PASS_1_PAGE_LIBREOFFICE_VISUALLY_INSPECTED",
+    "rev_pairs": 3,
+    "simulated_accept_two_reject_one": "PASS_OFFLINE_XML_ONLY"
+  },
+  "coverage": [
+    "3 pair revision IDs unique",
+    "all untouched package parts byte-identical",
+    "2 accept 1 reject simulated",
+    "unselected proposals absent",
+    "invalid later edit atomic rejection",
+    "duplicate target run rejection",
+    "same paragraph distinct runs",
+    "1..5 edit limit",
+    "enforced protection rejected",
+    "field-context rejected",
+    "corrupt package rejected"
+  ],
+  "not_run": [
+    "Microsoft Word Desktop Accept/Reject",
+    "TC02C application E2E",
+    "TC07C",
+    "TCE2E-02"
+  ],
+  "risk_note": "No Word UI or application E2E proof. Existing R7 Word verifier only supports single replacement; batch validation is currently via XML unit tests.",
+  "classification": "PUBLIC_SAFE_SYNTHETIC_METADATA_ONLY",
+  "owner_acceptance": "NOT_REQUESTED"
+}
