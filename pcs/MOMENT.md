@@ -1,30 +1,31 @@
 # AI Law — PCS Chat Solo MOMENT
 
-- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public; canonical `main` after checkpoint PR merge).
-- **State revision:** `10` (canonical source: `pcs/STATE.json`).
-- **Updated:** `2026-11-03T09:27:59Z`.
-- **Phase:** POC1 technical QA; no Owner acceptance or production.
-- **SRS:** Owner-provided v1.1.15 source previously checksum-verified, unchanged and kept outside Public GitHub.
+- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public, Owner-selected, `main` canonical once this PR is merged).
+- **State revision:** `11` (canonical: `pcs/STATE.json`).
+- **Updated:** `2026-11-03T09:45:46Z`.
+- **Phase:** POC1 technical preparation, not Owner accepted and not production.
+- **SRS baseline:** Owner-provided v1.1.15 verified; original text stays private and unchanged.
 
-## Newly verified technical review — R10
+## R11 bounded review loop (POC1)
 
-- Reproduced **four** false `STATIC_PASS` outcomes: page/section setup changed, Word protection settings changed, core metadata changed, and unexpected DOCX ZIP member added.
-- Fixed the offline Word-result QA gate to compare document envelope and all other package parts; XML reindentation-only comparison remains allowed. Word resaves can legitimately alter metadata and must be checked manually rather than marked PASS without investigation.
-- Added five regression cases. **52/52 local Python unit tests PASS**; baseline was 47/47. The tests use synthetic DOCX only.
-- **PR #11** merged as `eb4708b470838dd2aba9e005ed03711d07c42cde`; final PR head `597290b42e39873f1d5838565caea800eb40f264`, Actions run `41611158138` **completed/success** (`unit` job and test step PASS).
-- Report: `tests/evidence/AL-POC1-REVIEW-R10-2026-11-03.json`. Only public-safe QA metadata is stored in GitHub.
+- Baseline: 52/52 local synthetic tests PASS, R10 state consistent.
+- Cycle 1: reproduced six incorrectly accepted malformed/misdirected/external root officeDocument relationships across single and batch patchers, fixed and reran tests **54/54 PASS**.
+- Cycle 2: reproduced six missing/misdirected settings relationship/content-type variants, fixed and reran tests **56/56 PASS**.
+- Cycle 3: reproduced four contradictory duplicate main/settings content-type overrides, fixed and reran tests **58/58 PASS**.
+- Cycle 4: independently checked the bounded negative matrix, valid R8 Word kit and SRS static contract; **0 new reproducible issues in this reviewed scope**, 58/58 local tests PASS. R8 output SHA256 `d02582fc8ca51229ecef9f92d3c179afa2b22bdeed8312c52c02d516e5c689ae` byte-identical to reference; 3 revision pairs, non-target ZIP parts preserved; LibreOffice rendered 1 page, visually inspected. SRS static checker `STATIC_CONTRACT_AND_WORD_PASS` (79 application cases NOT_RUN).
+- **PR #13** merged as `8700ba4e16139a10c5c7af8e2ad83619e08281a6`; GitHub Actions run `41613522374` completed **success** on final head `17290aae0cec83361da4b02dbe7b7ff451787806`; unit job and test step PASS.
+- Evidence: `tests/evidence/AL-POC1-REVIEW-LOOP-R11-2026-11-03.json`. Synthetic QA metadata only.
 
-## Acceptance gates (unchanged)
+## Open gates
 
-- `AL-POC1-002` **BLOCKED**: actual Microsoft Word Desktop Accept/Reject, Word-saved/reopened files, screenshots, tester/Word version/test_run_id **NOT_RUN**.
-- SRS application `TC02C`, `TC07C`, `TCE2E-02` **NOT_RUN**, required application review/approval flow unavailable.
-- POC2 (10 authorized legal PDFs) and POC3 (real PostgreSQL RLS) **PLANNED**.
-- No Owner acceptance, no production deployment.
+- `AL-POC1-002`: **BLOCKED**. Actual Microsoft Word Desktop Accept/Reject, saved/reopened files, screenshots, tester/version/test_run_id: **NOT_RUN**.
+- Application SRS `TC02C`, `TC07C`, `TCE2E-02`: **NOT_RUN**. POC2 (10 authorized legal PDFs) and POC3 (real PostgreSQL RLS) remain PLANNED.
+- No Owner acceptance or production deployment. Bounded review-loop stopping does not mean the full system is error-free.
 
 ## Next action
 
-Test the controlled DOCX kit in Microsoft Word Desktop, retain genuine Word-saved files and UI evidence in authorized private Drive, investigate any benign metadata differences flagged by strict offline QA, then test application E2E when available. Owner makes final acceptance decision.
+Run controlled Word Desktop Accept/Reject and capture evidence in private Drive, then check Word-saved results using static QA and test the application approval invalidation flow when available. Only Owner accepts POC1.
 
-## Publication boundary
+## Public repository boundary
 
-No original SRS, legal/customer data, private Drive IDs, credentials or screenshots in Public GitHub.
+No original SRS, legal/customer documents, secrets, private Drive IDs, or screenshots are committed.
