@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 26,
-  "updated_at": "2026-11-03T23:11:26.745Z",
+  "revision": 27,
+  "updated_at": "2026-11-03T23:23:20.676Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -527,6 +527,42 @@
         ],
         "owner_acceptance": "PENDING_FUNCTIONAL_E2E_OWNER",
         "notes": "This is NOT real authentication or complete TC12A. D01 approval, IAM DB migrations/RLS/audit and IdP integration remain blocked. User OK to proceed after R25 did not grant data/production permissions."
+      },
+      {
+        "id": "AL-R0-FN-003",
+        "title": "Validate trusted bearer session principal before R26 tenant membership lookup",
+        "status": "TECH_DONE",
+        "priority": "P0",
+        "scope": "Pure internal request seam for Bearer token checked by injected trusted JWT verification dependency, server-owned identity mapper, session-status recheck, then R26 membership adapter. No /v1 endpoint, actual verifier, IdP, MFA, RLS, UI update or deployment.",
+        "acceptance": [
+          "Reject missing/malformed token before calling identity/service code",
+          "Use only identity already checked by server-injected verifier; enforce issuer/audience/time claims and independent internal principal map",
+          "Deny disabled principals, expired/revoked sessions, service outages and absent/foreign-tenant memberships",
+          "Current tenant selection requires new session check and R26 fresh membership lookup; switching clears prior tenant context",
+          "Run unit tests and PR CI, keep actual JWT crypto/IdP/live API/Postgres E2E explicitly NOT_RUN"
+        ],
+        "tests": {
+          "expected_red": "PASS_EXPECTED_MODULE_MISSING_CI_41738147905",
+          "synthetic_session": "PASS_12_OF_12_UNIT_TESTS_WITH_FAKE_VERIFIER",
+          "github_ci": "PASS_161_OF_161_RUN_41738492253_FINAL_PR40_HEAD_a265c2e3b10e6723f11bf0bd64f2153bd20752d8",
+          "merge": "PASS_PR40_MAIN_b797e9e94fae24ff9d9fd13458e2593828ea3917",
+          "real_jwt_cryptography": "NOT_RUN",
+          "actual_identity_provider": "NOT_RUN",
+          "session_database_and_mfa": "NOT_RUN",
+          "real_postgresql_rls": "NOT_RUN",
+          "real_http_and_browser_e2e": "NOT_RUN",
+          "production": "NOT_DEPLOYED"
+        },
+        "evidence": [
+          "r0_core/session_boundary.py",
+          "tests/test_r0_session_boundary.py",
+          "tests/evidence/AL-R0-SESSION-BOUNDARY-R27-2026-11-04.json",
+          "PR #40 merged main b797e9e94fae24ff9d9fd13458e2593828ea3917",
+          "GitHub Actions run 41738492253",
+          "Private Drive test-run folder prepared; raw logs not uploaded via connector file_uri"
+        ],
+        "owner_acceptance": "PENDING_FUNCTIONAL_E2E_OWNER",
+        "notes": "Only synthetic test gate complete; the JWT verifier is an injected stub contract, not implemented crypto or an authorized provider. Per SRS D01 remains pending; no SRS baseline change or production release."
       }
     ],
     "features": [
@@ -576,7 +612,8 @@
         "status": "IN_PROGRESS",
         "tasks": [
           "AL-R0-FN-001",
-          "AL-R0-FN-002"
+          "AL-R0-FN-002",
+          "AL-R0-FN-003"
         ]
       }
     ],
@@ -892,17 +929,21 @@
       {
         "path": "tests/evidence/AL-R0-FR12-01-DBREAD-2026-11-04.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-R0-SESSION-BOUNDARY-R27-2026-11-04.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
       }
     ],
     "current": {
-      "active_task": "AL-R0-FN-002",
-      "last_completed_step": "R26: PR #38 read-only membership relational adapter merged on main after expected red tests and 149/149 final CI PASS. 12 isolated synthetic SQL fixture tests cover cross-tenant, version, revocation, role registry and timestamps; R25 preview unchanged.",
-      "next_action": "Next R0 task: verified-session principal adapter and application request boundary using approved SRS contracts; then PostgreSQL RLS/migrations in isolated test env after D01 decision. Do not invent a new /v1 tenant-switch endpoint or claim real login/TC12A until all E2E gates pass.",
+      "active_task": "AL-R0-FN-003",
+      "last_completed_step": "R27 PR40 verified bearer request seam merged after expected red CI then full 161/161 PASS. 12 synthetic session/auth boundary tests cover failed token, issuer/audience/time, internal identity map, revoked session, tenant membership and data reset. No IdP or deployed API.",
+      "next_action": "Next bounded R0 task: choose an approved existing /v1 API operation for authenticated request integration, implement its server handler only after session/tenant/ACL policy and D01 technical assumptions are established. Real IdP, PostgreSQL RLS and E2E remain gated; preserve preview and SRS.",
       "blockers": [
-        "D01 ownership/role/security decision remains PENDING_APPROVAL in SRS; real data/production not authorized.",
-        "No real IdP/session verification, PostgreSQL database migration/trigger/RLS or audit implemented; TESTS ONLY on synthetic SQLite translation.",
-        "IF01 authenticated API/per-endpoint security, concurrent revocation at read time, document/MatterACL and full TC12A/browser E2E NOT_RUN.",
-        "Raw test artifact was not uploaded to private Drive due connector file_uri requirement, despite dedicated test-run folder preparation."
+        "D01 remains PENDING_APPROVAL for real-data Pilot. R0 synthetic fixtures only; no verified production identity provider or security authority.",
+        "No real JWT signature verifier, OIDC/JWKS integration, token rotation, MFA/step-up, persisted session revocation or audit; R27 uses test stubs and trust contract.",
+        "PostgreSQL schema migrations, FORCE RLS, document MatterACL, real /v1 route and cross-tenant browser/API E2E NOT_RUN.",
+        "Private Drive test-run folder exists, but raw test logs/screenshots were not uploaded because Google Drive connector upload requires authenticated file_uri."
       ]
     },
     "policy": {
