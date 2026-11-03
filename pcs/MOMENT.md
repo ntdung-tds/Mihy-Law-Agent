@@ -1,23 +1,24 @@
 # AI Law — PCS Chat Solo MOMENT
 
-- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public, Owner-selected; canonical branch `main`)
-- **State revision:** `1` (source of truth: `pcs/STATE.json`)
-- **Updated:** `2026-11-03T01:52:33Z`
-- **Phase:** `POC` — not production, no Owner acceptance yet
-- **SRS:** v1.1.15 referenced as locked, but original source artifact **not verified** in this repository/session; do not expand scope
+- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public; canonical branch `main`)
+- **State revision:** `2` (canonical: `pcs/STATE.json`)
+- **Updated:** `2026-11-03T02:08:30Z`
+- **Phase:** `POC` — not production; Owner acceptance pending
+- **SRS candidate:** v1.1.15, Owner-provided archive SHA-256 `bda7199181060f178f6ba6f6008a029c1b9ff576392c66792b93d822e74d932f` verified; source package kept outside Public repo. Owner has not signed baseline.
 
-## Most recent verified work
+## Verified in this checkpoint
 
-- `AL-POC1-001` — **TECH_DONE**: single-run JSON replacement generates real `w:del` and `w:ins`, preserves unrelated ZIP parts and MC namespaces; fails closed on ambiguous/unsupported edits.
-- Local unit checks: **7/7 PASS** using synthetic `.docx` inputs. LibreOffice rendered one synthetic sample without errors; visual page check performed. This is **not** Microsoft Word test evidence.
-- CI configured via `.github/workflows/tests.yml`; remote CI run must be checked after push, not assumed green.
+- ZIP CRC OK; manifest checksum matches **157/157**; nested contract checksum **145/145**; included `check_contracts.py --docx ...` returned `STATIC_CONTRACT_AND_WORD_PASS`, 132 requirements / 79 application TC **NOT_RUN**.
+- Corrected task `AL-POC1-002` traceability: Track Changes crosses `TC02C`, `TC07C`, `TCE2E-02` (not `TCE2E-01`, which is about the legal source flow).
+- `AL-POC1-001` remains **TECH_DONE** with scoped bug fix: enforced Word `documentProtection` is rejected. Bug reproduced before patch, unit regression **10/10 PASS** after patch.
+- Offline OOXML simulation on the provided *synthetic* tracked DOCX gave expected Accept `30 ngày` and Reject `15 ngày` content; LibreOffice render/visual check passed for both. **Not** a Microsoft Word GUI E2E test. The initial independent helper's Reject output failed an XML content assertion; re-tested with corrected OOXML unwrapping, not accepted as Word evidence.
 
-## Now / next
+## Active task / blockers
 
-- `AL-POC1-002` — **BLOCKED**: locked v1.1.15 / TCE2E-01 artifact and real Microsoft Word accept/reject validation outstanding.
-- POC2 legal PDF ingestion, then POC3 PostgreSQL RLS stay **PLANNED**, no real test evidence yet.
-- Next: inspect GitHub CI, locate SRS acceptance contract and run real Microsoft Word test. No production deployment or SRS changes are authorized by this checkpoint.
+- `AL-POC1-002` — **BLOCKED** pending actual Word UI Accept/Reject and application `TCE2E-02` approval invalidation flow. Word UI test and all 79 application TC are **NOT_RUN**. No POC is Owner-accepted.
+- POC2 official 10-PDF ingestion and POC3 actual PostgreSQL RLS remain **PLANNED**, not performed.
+- Next: run Word UI on controlled fixture, then exercise `TC02C`, `TC07C` and `TCE2E-02` once application flow and approvals exist. GitHub CI is **not independently verified** by this local test run.
 
 ## Publication boundary
 
-Only public-safe metadata and synthetic POC code/tests have been approved for this repo's initial checkpoint. No client documents, official PDFs, original SRS content or secrets.
+Only public-safe metadata, checksums and synthetic POC code/tests may be committed. Original SRS contents, customer legal files, and credentials are not committed.

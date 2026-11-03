@@ -5,6 +5,8 @@ from io import BytesIO
 import unittest
 from lxml import etree as ET
 from zipfile import ZipFile
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 
 from docx import Document
 from poc_docx.track_changes import EditError, apply_edit, w
@@ -136,6 +138,42 @@ class TrackedChangesTest(unittest.TestCase):
         for sample in samples:
             with self.subTest(sample=sample), self.assertRaises(EditError):
                 apply_edit(blob, sample)
+
+    def test_enforced_document_protection_fails_closed(self):
+        # POC_PROTOCOL.md negative case: locked document must not be altered.
+        for enforcement in ("1", "true", "on"):
+            with self.subTest(enforcement=enforcement):
+                doc = Document()
+                doc.add_paragraph("Original")
+                protection = OxmlElement("w:documentProtection")
+                protection.set(qn("w:edit"), "readOnly")
+                protection.set(qn("w:enforcement"), enforcement)
+                doc.settings._element.append(protection)
+                buffer = BytesIO()
+                doc.save(buffer)
+                with self.assertRaisesRegex(EditError, "document protection"):
+                    apply_edit(buffer.getvalue(), EDIT)
+
+    def test_non_enforced_document_protection_is_not_a_lock(self):
+        doc = Document()
+        doc.add_paragraph("Original")
+        protection = OxmlElement("w:documentProtection")
+        protection.set(qn("w:edit"), "readOnly")
+        protection.set(qn("w:enforcement"), "0")
+        doc.settings._element.append(protection)
+        buffer = BytesIO()
+        doc.save(buffer)
+        self.assertIn(b"word/document.xml", apply_edit(buffer.getvalue(), EDIT))
+
+    def test_malformed_document_xml_fails_closed(self):
+        source = fixture()
+        buf = BytesIO()
+        with ZipFile(BytesIO(source)) as archive, ZipFile(buf, "w") as modified:
+            for info in archive.infolist():
+                data = b"<invalid" if info.filename == "word/document.xml" else archive.read(info)
+                modified.writestr(info, data)
+        with self.assertRaises(EditError):
+            apply_edit(buf.getvalue(), EDIT)
 
     def test_bad_zip_fails_closed(self):
         with self.assertRaises(EditError):

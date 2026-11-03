@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 1,
-  "updated_at": "2026-11-03T01:52:33Z",
+  "revision": 2,
+  "updated_at": "2026-11-03T02:08:30Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -12,9 +12,14 @@
       {
         "name": "AI Law SRS v1.1.15",
         "date": "2026-11-03",
-        "kind": "owner-referenced baseline",
-        "status": "NOT_VERIFIED_IN_PROJECT_REPOSITORY",
-        "note": "Do not publish original SRS in this public repository without classification/authorization"
+        "kind": "Owner-supplied SRS implementation-readiness candidate",
+        "status": "VERIFIED_FROM_OWNER_ARCHIVE_NOT_OWNER_SIGNED",
+        "note": "Do not publish original SRS in this public repository without classification/authorization",
+        "archive_name": "AI_Law_SRS_FINAL_POC_READY_2026_11_03.zip",
+        "archive_sha256": "bda7199181060f178f6ba6f6008a029c1b9ff576392c66792b93d822e74d932f",
+        "docx_sha256": "06688b39058bcf2f7d6d88d2bc6fc0ec6cc2cb11737924d1791ec24cbf511972",
+        "verification": "ZIP CRC OK, top manifest 157/157, nested contract manifest 145/145; static check_contracts PASS (2026-11-03)",
+        "publication": "Hash/filename only; original package and legal text not committed to public repository"
       },
       {
         "name": "PCS Chat Solo",
@@ -24,11 +29,11 @@
     ],
     "product_map": {
       "status": "PARTIAL",
-      "summary": "AI assistant for Vietnam legal practice, 11 SRS workflows; no scope expansion. Exact locked v1.1.15 artifact not accessible for contract-level verification."
+      "summary": "AI support for 11 Vietnam legal workflows per Owner-supplied SRS v1.1.15 candidate; source archive hashes verified. Baseline not yet formally Owner-signed; no new scope."
     },
     "architecture_map": {
       "status": "POC_ONLY",
-      "summary": "Isolated Python DOCX OOXML replacement proof-of-concept. No assumption about production architecture, API or service deployment."
+      "summary": "Isolated Python OOXML single-run replacement POC; no production architecture inferred. Controlled Word accept/reject and actual app E2E remain pending."
     },
     "tasks": [
       {
@@ -41,37 +46,57 @@
           "Tracked deletion is w:del with w:delText, insertion is w:ins with w:t, distinct w:id and author/date",
           "Non-target ZIP parts, table structure and numbering unchanged for tested synthetic fixture",
           "Unsupported or ambiguous exact-run edit rejects without silently producing a modified file",
-          "Core XML compatibility prefix mappings retained and inserted leading/trailing spaces preserved"
+          "Core XML compatibility prefix mappings retained and inserted leading/trailing spaces preserved",
+          "Enforced Word documentProtection blocks edit; malformed document XML fails closed"
         ],
         "tests": {
-          "local_unittest": "PASS_7_OF_7",
+          "local_unittest": "PASS_10_OF_10_2026_11_03",
           "local_render": "PASS_LIBREOFFICE_SYNTHETIC_SINGLE_PAGE",
           "microsoft_word": "NOT_RUN",
           "integration_e2e": "NOT_RUN",
-          "github_ci": "PENDING_FIRST_COMMIT"
+          "github_ci": "NOT_VERIFIED",
+          "local_negative_protected_doc": "PASS_AFTER_REPRODUCED_BUG_FIX",
+          "package_static_contract": "PASS_2026_11_03",
+          "package_offline_xml_accept_reject": "PASS_SIMULATION_ONLY_WORD_UI_NOT_RUN"
         },
         "evidence": [
           "tests/test_track_changes.py (7 local cases, 2026-11-03)",
           "Local synthetic DOCX rendered with LibreOffice; not committed to public repository",
-          "poc_docx/track_changes.py"
+          "poc_docx/track_changes.py",
+          "Owner-supplied SRS archive SHA256 bda7199181060f178f6ba6f6008a029c1b9ff576392c66792b93d822e74d932f (private, not committed)",
+          "SRS static checker PASS on 2026-11-03; 157/157 + 145/145 checksum entries",
+          "10/10 Python unittest cases, incl. protected document and malformed XML",
+          "Offline XML accept/reject of synthetic fixture rendered in LibreOffice; not Word UI test"
         ],
         "owner_acceptance": "NOT_REQUESTED",
         "notes": "TECH_DONE is limited to this technical slice; it is not POC1 completion or acceptance."
       },
       {
         "id": "AL-POC1-002",
-        "title": "Verify tracked accept/reject using Microsoft Word and locked TCE2E-01",
+        "title": "Validate DOCX Track Changes and approval invalidation in actual Word using TC02C, TC07C, TCE2E-02",
         "status": "BLOCKED",
         "priority": "P0",
         "blockers": [
-          "Authoritative SRS v1.1.15 and TCE2E-01 acceptance artifact unavailable to this tool session",
-          "Microsoft Word application verification not available in this execution environment"
+          "Actual Microsoft Word GUI Accept/Reject validation not available in this execution environment",
+          "Application end-to-end review/proofread/export/approval invalidation flow not implemented or verified; fixture_version=TO_BE_CREATED in SRS test_register"
         ],
         "tests": {
-          "microsoft_word_accept": "NOT_RUN",
-          "microsoft_word_reject": "NOT_RUN"
+          "word_accept": "NOT_RUN",
+          "word_reject": "NOT_RUN",
+          "tc02c": "NOT_RUN",
+          "tc07c": "NOT_RUN",
+          "tce2e_02": "NOT_RUN"
         },
-        "owner_acceptance": "NOT_REQUESTED"
+        "owner_acceptance": "NOT_REQUESTED",
+        "traceability": [
+          "FR02-04",
+          "FR07-04",
+          "FR07-02",
+          "FR14-03",
+          "TC02C",
+          "TC07C",
+          "TCE2E-02"
+        ]
       },
       {
         "id": "AL-POC2-001",
@@ -119,7 +144,7 @@
       {
         "id": "DOCX-TRACKED-REPLACE",
         "status": "PARTIAL",
-        "evidence": "Synthetic one-run replacement and 7 automated tests; real Word review pending"
+        "evidence": "Single-run synthetic replacement, 10 automated unit tests, offline XML accept/reject visual rendering; Word UI + TCE2E-02 not run"
       }
     ],
     "releases": [],
@@ -133,8 +158,8 @@
       {
         "id": "DEC-002",
         "topic": "Scope",
-        "value": "Locked SRS v1.1.15; 3 POC sequence DOCX -> PDFs -> PostgreSQL RLS; no SRS expansion",
-        "authority": "Prior Owner decisions; baseline package not inspected in this session"
+        "value": "SRS v1.1.15 candidate source now hash-verified; owner signoff is pending. 3 POC order: DOCX -> 10 authorized legal PDFs -> real PostgreSQL RLS; no scope expansion",
+        "authority": "Owner-supplied archive 2026-11-03 and existing prioritisation; archive verification is not approval"
       },
       {
         "id": "DEC-003",
@@ -146,9 +171,10 @@
     "risks": [
       {
         "id": "RISK-001",
-        "level": "HIGH",
-        "title": "SRS baseline v1.1.15 is not available in current source tools",
-        "mitigation": "Do not mark POC compliance or implement broader scope until source/contract is verified"
+        "level": "LOW",
+        "title": "SRS artifact availability resolved; original remains private",
+        "mitigation": "ZIP+checksums verified; no disclosure of original source; Owner signoff and activated slice approval still required",
+        "status": "MITIGATED"
       },
       {
         "id": "RISK-002",
@@ -161,6 +187,13 @@
         "level": "MEDIUM",
         "title": "Public repository",
         "mitigation": "Synthetic tests/code and metadata only; never commit restricted artifacts"
+      },
+      {
+        "id": "RISK-004",
+        "level": "MEDIUM",
+        "title": "DOCX protected files were not initially rejected",
+        "status": "MITIGATED",
+        "mitigation": "POC patch now fails closed when documentProtection enforcement is on; regression tests 10/10. Other locked-region/edit permission combinations remain outside narrow POC."
       }
     ],
     "artifacts": [
@@ -187,11 +220,11 @@
     ],
     "current": {
       "active_task": "AL-POC1-002",
-      "last_completed_step": "Technical slice AL-POC1-001 implemented and locally verified (7/7; LO render); no Microsoft Word acceptance",
-      "next_action": "Verify CI on GitHub; obtain or locate locked v1.1.15 TCE2E-01 source and run Microsoft Word accept/reject with actual fixture",
+      "last_completed_step": "Verified Owner SRS v1.1.15 archive (ZIP 157/157, contracts 145/145; static checker PASS); corrected test mapping to TCE2E-02; fixed protected-document negative case (10/10 local unit); ran offline XML accept/reject and visually inspected two LibreOffice renders",
+      "next_action": "Validate real Microsoft Word Accept/Reject on controlled synthetic fixture, then build/test TC02C, TC07C and TCE2E-02 with owner-signed scope; no POC is accepted yet",
       "blockers": [
-        "Locked SRS v1.1.15 artifact not accessible in current sources",
-        "Microsoft Word verification not performed"
+        "No Microsoft Word GUI verification in current execution environment",
+        "No tested application review/approval flow for TCE2E-02; baseline Owner signoff pending"
       ]
     },
     "policy": {

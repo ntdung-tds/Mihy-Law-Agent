@@ -112,6 +112,15 @@ def _patch_settings(data: bytes) -> bytes:
     root = ET.fromstring(data, parser=ET.XMLParser(resolve_entities=False, no_network=True))
     if root.tag != w("settings"):
         raise EditError("Invalid settings.xml")
+    # POC1 negative case (locked edits): never bypass document protection.
+    # Even protection modes that permit certain Word UI actions are outside
+    # this narrow patcher's supported authorisation contract.
+    for protection in root.iter(w("documentProtection")):
+        enforcement = protection.get(w("enforcement"), "0").strip().lower()
+        if enforcement in {"1", "true", "on"}:
+            raise EditError("Enforced document protection: edit is blocked")
+        if enforcement not in {"0", "false", "off"}:
+            raise EditError("Unknown document protection enforcement value")
     existing = root.find(w("trackRevisions"))
     if existing is None:
         root.insert(0, ET.Element(w("trackRevisions")))
@@ -136,9 +145,9 @@ def apply_edit(source_docx: bytes, edit: dict[str, Any]) -> bytes:
                 raise EditError("DOCX has duplicate ZIP entries")
             if DOC_PART not in names or SETTINGS_PART not in names:
                 raise EditError("DOCX must contain document.xml and settings.xml")
-            # Parse/validate both XML parts before writing any output.
-            new_document = _patch_document(source.read(DOC_PART), index, old, new, author, stamp)
+            # Validate protection and XML before any output is written.
             new_settings = _patch_settings(source.read(SETTINGS_PART))
+            new_document = _patch_document(source.read(DOC_PART), index, old, new, author, stamp)
             dest = BytesIO()
             with ZipFile(dest, "w") as output:
                 for item in items:

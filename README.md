@@ -2,11 +2,11 @@
 
 This repository is the **Owner-selected public project repository**. Only non-sensitive project metadata and public-safe proof-of-concept code belong here. **Do not commit** original internal SRS files, client/legal case files, credentials, personal information, or real legal PDFs without explicit classification and authorization.
 
-Current focus: **DOCX Track Changes POC (small initial technical slice)**. The authoritative SRS is reported as `v1.1.15` (2026-11-03), but its actual package has **not yet been verified inside this repository**. The code is experimental; it is **not** an accepted Word integration, a completed POC, or a production service.
+Current focus: **DOCX Track Changes POC (small initial technical slice)**. The supplied SRS `v1.1.15` (2026-11-03) package was privately inspected and its checksum lists independently verified on 2026-11-03. The package was **not published** to this public repository; the baseline remains subject to Owner approval. The code is experimental; it is **not** an accepted Word integration, a completed POC, or a production service.
 
 ## Single-run tracked replacement (POC)
 
-Supported: a JSON `replace` operation targeting exactly one `w:t` text element in one direct paragraph run. It emits actual OOXML `w:del` and `w:ins` elements and enables revision tracking. It preserves other ZIP parts and untouched paragraphs/tables. A paragraph index is zero-based in WordprocessingML document order, including paragraphs inside tables. Unsupported cases **fail closed** rather than guessing.
+Supported: a JSON `replace` operation targeting exactly one `w:t` text element in one direct paragraph run. It emits actual OOXML `w:del` and `w:ins` elements and enables revision tracking. It preserves other ZIP parts and untouched paragraphs/tables. A paragraph index is zero-based in WordprocessingML document order, including paragraphs inside tables. Unsupported cases **fail closed** rather than guessing. An enforced `w:documentProtection` now rejects edits; this is a guard for the POC negative-case test, not a complete Word permissions engine.
 
 ```bash
 python -m pip install -r requirements-dev.txt
@@ -27,7 +27,7 @@ Example `edit.json` (synthetic text only):
 }
 ```
 
-Local tests need `python-docx` to construct synthetic `.docx` fixtures. The runtime patcher requires `lxml` to preserve namespace declarations and compatibility prefixes. Checks that XML correctly represents insert/delete and that a synthetic accept/reject simulation produces expected text **do not** substitute for opening/accepting/rejecting the document in actual Microsoft Word. The current implementation does not handle multi-run text, insert-only/delete-only operations, hyperlinks, headers/footers, nested revisions, or arbitrary change ranges; those remain outside this initial small task.
+Local tests need `python-docx` to construct synthetic `.docx` fixtures. The runtime patcher requires `lxml` to preserve namespace declarations and compatibility prefixes. Checks that XML correctly represents insert/delete and that a synthetic accept/reject simulation produces expected text **do not** substitute for opening/accepting/rejecting the document in actual Microsoft Word. SRS test alignment: `TC02C`, `TC07C` and cross-UC `TCE2E-02` (not `TCE2E-01`). These are **NOT_RUN** as application/Word UI tests. The current implementation does not handle multi-run text, insert-only/delete-only operations, hyperlinks, headers/footers, nested revisions, or arbitrary change ranges; those remain outside this initial small task.
 
 ## Project continuity
 
