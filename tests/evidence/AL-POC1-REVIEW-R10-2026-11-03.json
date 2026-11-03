@@ -1,0 +1,56 @@
+{
+  "test_run_id": "AL-POC1-TR-20261103-R10",
+  "repository": "ntdung-tds/Mihy-Law-Agent",
+  "baseline_head": "ba2e9bbb4e55f00672ae6e6e20133032a1425974",
+  "baseline_pcs_revision": 9,
+  "srs": "Owner-supplied SRS v1.1.15, private and unchanged",
+  "scope": "Single-edit Accept/Reject offline verifier; no Word desktop or application E2E",
+  "findings": [
+    {
+      "id": "R10-01",
+      "impact": "false STATIC_PASS",
+      "case": "changed section page size",
+      "pre_fix": "REPRODUCED",
+      "post_fix": "REGRESSION_PASS"
+    },
+    {
+      "id": "R10-02",
+      "impact": "false STATIC_PASS",
+      "case": "changed document protection in word/settings.xml",
+      "pre_fix": "REPRODUCED",
+      "post_fix": "REGRESSION_PASS"
+    },
+    {
+      "id": "R10-03",
+      "impact": "false STATIC_PASS",
+      "case": "changed docProps/core.xml metadata",
+      "pre_fix": "REPRODUCED",
+      "post_fix": "REGRESSION_PASS"
+    },
+    {
+      "id": "R10-04",
+      "impact": "false STATIC_PASS",
+      "case": "added unknown customXml/extra.xml ZIP member",
+      "pre_fix": "REPRODUCED",
+      "post_fix": "REGRESSION_PASS"
+    }
+  ],
+  "checks": {
+    "local_unittest": "PASS_52_OF_52",
+    "old_suite_regression": "PASS_47_OF_47",
+    "xml_reindent_of_unchanged_metadata": "PASS",
+    "github_ci": "PENDING_PR_CREATION",
+    "microsoft_word_desktop": "NOT_RUN",
+    "tc02c": "NOT_RUN",
+    "tc07c": "NOT_RUN",
+    "tce2e_02": "NOT_RUN",
+    "owner_acceptance": "NOT_REQUESTED"
+  },
+  "risk_note": "Strict comparison may flag benign Word metadata changes, requiring manual review rather than falsely passing.",
+  "evidence_classification": "PUBLIC_SAFE_SYNTHETIC_ONLY",
+  "source_files": [
+    "tools/verify_word_review.py",
+    "tests/test_word_gate.py",
+    "tests/WORD_REVIEW_GATE.md"
+  ]
+}
