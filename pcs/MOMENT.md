@@ -1,10 +1,18 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `27` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-03T23:23:20.676Z`.
-- **Phase:** R0 functional core R27 trusted bearer request seam TECH_DONE with synthetic tests only. No live verifier/IdP/API/PostgreSQL or release. R25 visual preview unchanged.
+- **PCS revision:** `28` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-03T23:45:50.144Z`.
+- **Phase:** R28 grouped internal getRun API seam TECH_DONE with synthetic 186/186 CI and local loopback HTTP; real IdP/PostgreSQL/RLS/app staging remain NOT_RUN. R25 UI preview unchanged.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R28 — grouped 3-task GET /v1/runs/{id} implementation, 4 review loops
+
+- **One batch, three tasks:** AL-R0-FN-004 verified session ID after R27 checks; AL-R0-FN-005 SRS-approved `GET /v1/runs/{id}` WSGI ErrorResponse/TaskRun handler; AL-R0-FN-006 session-owned tenant, fresh membership, run ACL and cross-tenant masking. **PR #42 merged** `46a284940c624d0fba4ab69b45699e61a19d770f`. No new endpoint outside the SRS.
+- **Four red→repair→green review loops:** initial missing handler, dependency failure HTTP 503 vs access 404 and unsupported run-ID maximum, typed IdP/service outage vs invalid token, and nullable TaskRun coverage/usage inconsistency. Synthetic test count grew to **186/186 PASS** at final PR-head GitHub Actions `41741449670`. See `tests/evidence/AL-R0-R28-GETRUN-TR-2026-11-04.json` for actual test-run history.
+- **Real HTTP evidence:** standard-library WSGI ran on an ephemeral **127.0.0.1 loopback server** with fake signed verifier, principal, membership, ACL and run store; returned synthetic 200/401/404 as asserted. Additional direct WSGI unit cases exercise 400 and 503. No cloud API, JWT cryptography, user data, browser E2E or production deployment.
+- **Unverified:** D01 security approvals, real IdP/JWKS/MFA, persistent session/active-tenant store, actual PostgreSQL FORCE RLS/MatterACL and real run repositories. Owner final functional acceptance PENDING. SRS v1.1.15 unchanged and immutable R20/R25 previews untouched.
+- **Next:** provision security approvals and isolated real dependencies before staging integration and E2E; never describe synthetic WSGI as deployed R0 product.
 
 ## R27 — trusted bearer request boundary, unit-tested only
 
