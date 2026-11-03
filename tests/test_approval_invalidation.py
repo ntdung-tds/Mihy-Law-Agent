@@ -124,6 +124,42 @@ class ApprovalVersionBindingTests(unittest.TestCase):
         with self.assertRaisesRegex(ApprovalGateError, "decision"):
             evaluate(approval(decision=["approved"]))
 
+    def test_schema_date_time_rejects_week_dates_spaces_and_offset_seconds(self):
+        for invalid in (
+            "2026-W45-2T10:00:00Z",
+            "2026-11-03 10:00:00Z",
+            "2026-11-03T10:00:00+07:00:30",
+        ):
+            with self.subTest(stamp=invalid), self.assertRaisesRegex(ApprovalGateError, "RFC 3339"):
+                evaluate(approval(recorded_at=invalid), product_version_id="v2")
+
+    def test_invalidation_event_date_time_rejects_non_rfc3339(self):
+        for invalid in (
+            "2026-W45-2T10:00:00Z",
+            "2026-11-03 10:00:00Z",
+            "2026-11-03T10:00:00+07:00:30",
+        ):
+            with self.subTest(stamp=invalid), self.assertRaisesRegex(ApprovalGateError, "RFC 3339"):
+                evaluate(product_version_id="v2", invalidated_at=invalid)
+
+    def test_immutable_product_version_guard_applies_to_every_decision(self):
+        for decision in ("rejected", "changes_requested"):
+            with self.subTest(decision=decision), self.assertRaisesRegex(ApprovalGateError, "mutated in place"):
+                evaluate(approval(decision=decision), product_bytes=SOURCE + b"!", product_version_id="v1")
+            with self.subTest(decision=decision, new_version=True):
+                self.assertIsNone(evaluate(approval(decision=decision), product_version_id="v2"))
+
+    def test_valid_rfc3339_offsets_and_original_record_remain_stable(self):
+        a = approval(recorded_at="2026-11-03T10:00:00+07:00")
+        before = deepcopy(a)
+        event = evaluate(a, product_version_id="v2", invalidated_at="2026-11-03T03:00:01Z")
+        self.assertEqual(event["reason"], "product_changed")
+        self.assertEqual(a, before)
+        with self.assertRaisesRegex(ApprovalGateError, "earlier than approval"):
+            evaluate(a, product_version_id="v2", invalidated_at="2026-11-03T02:59:59Z")
+        lowercase = evaluate(a, product_version_id="v2", invalidated_at="2026-11-03t11:00:00z")
+        self.assertEqual(lowercase["invalidated_at"], "2026-11-03t11:00:00z")
+
     def test_real_synthetic_docx_batch_edit_changes_sha_and_invalidates_approval(self):
         source_doc = Document()
         source_doc.add_paragraph("Payable in 15 days.")

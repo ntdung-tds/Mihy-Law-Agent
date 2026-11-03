@@ -1,0 +1,78 @@
+{
+  "test_run_id": "AL-POC1-TR-20261103-R15-APPROVAL-REVIEW-LOOP",
+  "project": "AI Law",
+  "task_id": "AL-POC1-005",
+  "baseline": {
+    "pcs_revision": 14,
+    "main_commit": "b7a4e07f4234fba94549bce929935f0e5743f681",
+    "srs_version": "1.1.15",
+    "srs_handling": "PRIVATE_UNCHANGED"
+  },
+  "scope": "Pure FR14-03 approval domain POC; no Word UI, IAM, storage or application E2E",
+  "cycles": [
+    {
+      "cycle": 1,
+      "step": "reproduce",
+      "findings": [
+        {
+          "id": "R15-F01",
+          "description": "ISO-8601 but non-RFC3339 approval or event timestamps accepted",
+          "pre_fix": "FAIL_REPRODUCED",
+          "post_fix": "PASS"
+        },
+        {
+          "id": "R15-F02",
+          "description": "Invalid in-place product hash mutation silently bypassed when decision is rejected or changes_requested",
+          "pre_fix": "FAIL_REPRODUCED",
+          "post_fix": "PASS"
+        }
+      ],
+      "local_test": "3 custom methods, 7 expected failures before patch"
+    },
+    {
+      "cycle": 2,
+      "step": "fix_and_regress",
+      "fixes": [
+        "Strict RFC3339-shaped date-time validation with Python calendar/timezone verification",
+        "Immutable hash/version guard before inactive decision return"
+      ],
+      "local_result": "PASS_3_OF_3_CUSTOM_METHODS"
+    },
+    {
+      "cycle": 3,
+      "step": "independent_review",
+      "checks": [
+        "Valid RFC3339 date-time Z/offset/fraction/lowercase: PASS 4 of 4",
+        "Invalid date-time week/space/offset-seconds/date-only/invalid-calendar: REJECT 7 of 7",
+        "ApprovalInvalidation emitted event validates against private SRS schema: 4 of 4",
+        "Timezone chronology and original record preservation: PASS",
+        "Nonactive decisions remain noninvalidating if version changes legitimately: PASS"
+      ],
+      "local_result": "PASS_6_OF_6_CUSTOM_METHODS",
+      "new_reproducible_findings": 0
+    }
+  ],
+  "local_proof": {
+    "negative_before_fix": "7 failures across first custom regression matrix",
+    "local_custom_suite_after_fix": "PASS_6_OF_6",
+    "compileall": "PASS",
+    "private_srs_schema_parity": "PASS_4_VALID_7_INVALID_STAMPS_4_EVENTS"
+  },
+  "github_ci": "PENDING",
+  "expected_total_unittest_after_addition": 91,
+  "blockers": {
+    "microsoft_word_desktop": "NOT_RUN",
+    "tc02c": "NOT_RUN",
+    "tc07c": "NOT_RUN",
+    "tc14b": "NOT_RUN",
+    "tce2e_02": "NOT_RUN",
+    "owner_acceptance": "NOT_REQUESTED"
+  },
+  "guardrails": [
+    "No real legal/approval records",
+    "No SRS baseline modification",
+    "No production deployment",
+    "Local pure-domain PASS does not equal application E2E"
+  ],
+  "classification": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA_ONLY"
+}
