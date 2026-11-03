@@ -19,3 +19,11 @@ The tests include a **real synthetic DOCX byte flow** from `poc_docx.batch_chang
 ## Remaining gates / release boundaries
 
 This module **does not** authenticate reviewers, authorize roles (`TC14B`), read the authoritative product/version from a database, persist events, enforce transaction concurrency or run an application approval-invalidating workflow (`TCE2E-02`). Those requirements remain **NOT_RUN**. Microsoft Word Desktop Accept/Reject (`TC02C`, `TC07C`) also remains **NOT_RUN**. Production use is prohibited without a separate authorized implementation and full integration test evidence. Owner retains final acceptance.
+
+## R15 review results
+
+The reviewed POC applies the immutable product-version hash check for all audit decisions, including rejected and changes_requested. Only an approved active record can emit an invalidation event.
+
+Both ApprovalRecord.recorded_at and ApprovalInvalidation.invalidated_at are checked against RFC3339-shaped date-time strings, not every input accepted by datetime.fromisoformat. Week dates, space separators and second-resolution timezone offsets are rejected. Supported numeric timezone offsets, lowercase t/z and fractional seconds are covered by synthetic tests.
+
+This is a bounded pure-domain review. It does not exercise Word Desktop, reviewer authorization, database transactions, event persistence or the application TCE2E-02 test.
