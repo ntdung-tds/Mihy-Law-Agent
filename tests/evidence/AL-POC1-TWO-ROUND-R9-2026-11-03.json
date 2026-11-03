@@ -1,0 +1,61 @@
+{
+  "test_run_id": "AL-POC1-TR-20261103-R9-TWO-ROUND",
+  "source_repo": "ntdung-tds/Mihy-Law-Agent",
+  "source_revision": 8,
+  "branch": "fix/poc1-two-round-package-story-table-r9",
+  "srs_baseline": "v1.1.15",
+  "srs_archive_sha256": "bda7199181060f178f6ba6f6008a029c1b9ff576392c66792b93d822e74d932f",
+  "scope": "POC1 single and selected-batch DOCX generation and offline Word-result verifier only",
+  "review_rounds": [
+    {
+      "round": 1,
+      "findings": [
+        {
+          "id": "R9-01",
+          "failure": "Batch accepted DOCX missing [Content_Types].xml",
+          "pre_fix": "REPRODUCED",
+          "post_fix": "REGRESSION_PASS"
+        },
+        {
+          "id": "R9-02",
+          "failure": "Offline Word static gate missed modified header run formatting",
+          "pre_fix": "REPRODUCED",
+          "post_fix": "REGRESSION_PASS"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "findings": [
+        {
+          "id": "R9-03",
+          "failure": "Offline Word static gate missed modified table width",
+          "pre_fix": "REPRODUCED",
+          "post_fix": "REGRESSION_PASS"
+        }
+      ],
+      "followup": "Additional malformed metadata and single-edit package regression cases"
+    }
+  ],
+  "local_run": {
+    "command": "python -m unittest discover -s tests -v",
+    "result": "PASS_47_OF_47",
+    "environment": "Python local synthetic fixture; no Microsoft Word UI"
+  },
+  "document_roundtrip": {
+    "fixture": "R8 controlled synthetic kit",
+    "result": "PASS",
+    "expected_revision_pairs": 3,
+    "actual_revision_pairs": 3,
+    "kit_sha256": "666628109baad49f2ed6b1330e4b428e4d2056e2ce3de5ead2d85735a6e29838",
+    "generated_docx_sha256": "d02582fc8ca51229ecef9f92d3c179afa2b22bdeed8312c52c02d516e5c689ae",
+    "render": "LibreOffice one page; visually inspected"
+  },
+  "github_ci": "PENDING_PR",
+  "microsoft_word_desktop": "NOT_RUN",
+  "tc02c": "NOT_RUN",
+  "tc07c": "NOT_RUN",
+  "tce2e_02": "NOT_RUN",
+  "owner_acceptance": "NOT_REQUESTED",
+  "publication": "PUBLIC_SAFE_SYNTHETIC_METADATA"
+}
