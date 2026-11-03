@@ -54,7 +54,7 @@
           "local_render": "PASS_LIBREOFFICE_SYNTHETIC_SINGLE_PAGE",
           "microsoft_word": "NOT_RUN",
           "integration_e2e": "NOT_RUN",
-          "github_ci": "PENDING_PR_RUN_R3",
+          "github_ci": "PASS_PR_HEAD_2e8049b3b645fd3ffad5e533af2a80e5184435d2_RUN_41566803416; VERIFY_FINAL_HEAD_BEFORE_MERGE",
           "local_negative_protected_doc": "PASS_AFTER_REPRODUCED_BUG_FIX",
           "package_static_contract": "PASS_2026_11_03",
           "package_offline_xml_accept_reject": "PASS_SIMULATION_ONLY_WORD_UI_NOT_RUN",
@@ -69,7 +69,8 @@
           "SRS static checker PASS on 2026-11-03; 157/157 + 145/145 checksum entries",
           "10/10 Python unittest cases, incl. protected document and malformed XML",
           "Offline XML accept/reject of synthetic fixture rendered in LibreOffice; not Word UI test",
-          "tests/evidence/AL-POC1-R3-2026-11-03.json: 16/16 unit PASS; 3 reproduced pre-fix issues; synthetic LO 1-page render"
+          "tests/evidence/AL-POC1-R3-2026-11-03.json: 16/16 unit PASS; 3 reproduced pre-fix issues; synthetic LO 1-page render",
+          "GitHub Actions workflow run 41566803416: completed/success on PR head 2e8049b3b645fd3ffad5e533af2a80e5184435d2; steps incl. dependency install and unittest"
         ],
         "owner_acceptance": "NOT_REQUESTED",
         "notes": "TECH_DONE only for single-run scoped POC; field-context edits including cross-paragraph fields and invalid preexisting revision IDs now fail closed. Word GUI/E2E/Owner acceptance pending."
@@ -235,7 +236,7 @@
     "current": {
       "active_task": "AL-POC1-002",
       "last_completed_step": "R3: reproduced 3 unsafe DOCX cases before fix; blocked field edits including cross-paragraph context and invalid existing revision IDs; 16/16 unittest PASS; rendered synthetic DOCX in LibreOffice (1 page) and inspected; SRS static checker PASS.",
-      "next_action": "PR/CI review of scoped DOCX fix, then actual Microsoft Word UI Accept/Reject and application TC02C, TC07C, TCE2E-02 before POC1 acceptance.",
+      "next_action": "Verify CI on the final PR head, merge technical bugfix if branch checks permit, read back canonical PCS revision 3; real Word GUI and app TC02C/TC07C/TCE2E-02 still outstanding.",
       "blockers": [
         "Actual Microsoft Word GUI unavailable in current execution environment",
         "Application approval invalidation flow not implemented/testable; Owner SRS baseline signoff pending"
