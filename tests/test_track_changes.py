@@ -243,6 +243,12 @@ class TrackedChangesTest(unittest.TestCase):
             with self.subTest(part_name=part_name), self.assertRaisesRegex(EditError, "content type"):
                 apply_edit(blob, EDIT)
 
+    def test_invalid_non_rfc3339_tracked_timestamp_rejected(self):
+        for stamp in ("2026-W45-2T10:00:00Z", "2026-11-03 10:00:00Z",
+                      "2026-11-03T10:00:00+07:00:30"):
+            with self.subTest(stamp=stamp), self.assertRaisesRegex(EditError, "RFC 3339"):
+                apply_edit(fixture(), {**EDIT, "changed_at": stamp})
+
     def test_bad_zip_fails_closed(self):
         with self.assertRaises(EditError):
             apply_edit(b"not a docx", EDIT)
