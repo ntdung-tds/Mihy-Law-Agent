@@ -111,6 +111,75 @@ class OfflineWordGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ReviewError, "header text changed"):
             check_results(self.tracked, target.getvalue(), self.rejected, EDIT)
 
+    def test_changed_style_definition_rejected(self):
+        def alter(data):
+            root = ET.fromstring(data)
+            next(root.iter(w("style"))).set(w("customStyle"), "1")
+            return ET.tostring(root)
+        with ZipFile(BytesIO(self.accepted)) as src:
+            dst = BytesIO()
+            with ZipFile(dst, "w") as output:
+                for info in src.infolist():
+                    content = alter(src.read(info)) if info.filename == "word/styles.xml" else src.read(info)
+                    output.writestr(info, content)
+        with self.assertRaisesRegex(ReviewError, "protected package definition changed"):
+            check_results(self.tracked, dst.getvalue(), self.rejected, EDIT)
+
+    def test_non_target_run_formatting_rejected(self):
+        def alter(root):
+            p = list(root.iter(w("p")))[1]
+            run = p.find(w("r"))
+            props = ET.Element(w("rPr"))
+            props.append(ET.Element(w("b")))
+            run.insert(0, props)
+        changed = _review_xml(self.tracked, True, alter=alter)
+        with self.assertRaisesRegex(ReviewError, "formatting changed"):
+            check_results(self.tracked, changed, self.rejected, EDIT)
+
+    def test_reindented_style_xml_is_not_a_semantic_mutation(self):
+        dst = BytesIO()
+        with ZipFile(BytesIO(self.accepted)) as src, ZipFile(dst, "w") as output:
+            for info in src.infolist():
+                content = src.read(info)
+                if info.filename == "word/styles.xml":
+                    parser = ET.XMLParser(remove_blank_text=True)
+                    content = ET.tostring(ET.fromstring(content, parser), pretty_print=True)
+                output.writestr(info, content)
+        self.assertEqual(check_results(self.tracked, dst.getvalue(), self.rejected, EDIT)["static_docx_content"], "PASS")
+
+    def test_theme_change_rejected(self):
+        dst = BytesIO()
+        with ZipFile(BytesIO(self.accepted)) as src, ZipFile(dst, "w") as output:
+            for info in src.infolist():
+                data = src.read(info)
+                if info.filename.startswith("word/theme/") and info.filename.endswith(".xml"):
+                    root = ET.fromstring(data)
+                    root.set("injected", "1")
+                    data = ET.tostring(root)
+                output.writestr(info, data)
+        with self.assertRaisesRegex(ReviewError, "protected package definition changed"):
+            check_results(self.tracked, dst.getvalue(), self.rejected, EDIT)
+
+    def test_non_target_tab_mutation_rejected(self):
+        def alter(root):
+            list(root.iter(w("p")))[1].find(w("r")).append(ET.Element(w("tab")))
+        changed = _review_xml(self.tracked, True, alter=alter)
+        with self.assertRaisesRegex(ReviewError, "non-text structure changed"):
+            check_results(self.tracked, changed, self.rejected, EDIT)
+
+    def test_relationship_target_change_rejected(self):
+        dst = BytesIO()
+        with ZipFile(BytesIO(self.accepted)) as src, ZipFile(dst, "w") as output:
+            for info in src.infolist():
+                data = src.read(info)
+                if info.filename == "word/_rels/document.xml.rels":
+                    root = ET.fromstring(data)
+                    next(iter(root)).set("Target", "malicious-target")
+                    data = ET.tostring(root)
+                output.writestr(info, data)
+        with self.assertRaisesRegex(ReviewError, "protected package definition changed"):
+            check_results(self.tracked, dst.getvalue(), self.rejected, EDIT)
+
     def test_corrupt_package_rejected(self):
         with self.assertRaisesRegex(ReviewError, "DOCX ZIP"):
             check_results(self.tracked, b"not ZIP", self.rejected, EDIT)
