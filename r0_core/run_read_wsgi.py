@@ -19,7 +19,7 @@ from .session_boundary import (
     IdentityLookup, SessionIsActive, SessionRejected, TokenVerifier,
     authenticate_bearer_session,
 )
-from .tenant_context import TenantContextDenied, _canonical_uuid
+from .tenant_context import TenantContextDenied, TenantMembershipUnavailable, _canonical_uuid
 
 _ROUTE = re.compile(r"^/v1/runs/([^/]+)$")
 _RUN_STATES = frozenset({
@@ -188,7 +188,7 @@ class GetRunWSGI:
             if method != "GET" or match is None:
                 return error(404)
             run_id = match.group(1)
-            if (not _present(run_id) or len(run_id) > 256 or
+            if (not _present(run_id) or
                     environ.get("QUERY_STRING") or
                     environ.get("CONTENT_LENGTH") not in (None, "", "0")):
                 return error(400)
@@ -232,10 +232,10 @@ class GetRunWSGI:
             return send(200, _safe_run_payload(snapshot, run_id))
         except SessionRejected:
             return error(401)
+        except TenantMembershipUnavailable:
+            return error(503)
         except TenantContextDenied:
-            # Consistent 404 prevents unauthorized existence disclosure. R26
-            # also masks dependency failures in TenantContextDenied; separate
-            # live monitoring/metrics must distinguish outages server-side.
+            # Uniform 404 prevents unauthorized/nonexistent run disclosure.
             return error(404)
         except Exception:
             # Avoid exposing database/IdP/ACL errors or raw run internals.
