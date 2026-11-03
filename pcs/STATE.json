@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 22,
-  "updated_at": "2026-11-03T16:28:00.000Z",
+  "revision": 23,
+  "updated_at": "2026-11-03T22:01:41.562Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -380,8 +380,42 @@
           "PR #30 merged main at 94c5fdc75b1ed68064db7bc483d75f90d0d2501a",
           "Private Drive test-run folder prepared, image bytes not uploaded"
         ],
-        "owner_acceptance": "PENDING",
+        "owner_acceptance": "R0_VISUAL_DESIGN_APPROVED_IN_CHAT_2026_11_04_NOT_APPLICATION_RELEASE",
         "notes": "R22 fixes a reproduced live 320px visual defect. Source branch render screenshots and redeployed isolated preview screenshots at 320 and 390 were visually checked. Full browser click interaction, real phone, login, AI, legal sources and backend E2E were not part of this CSS-only gate. Saved R20 recovery branch intact."
+      },
+      {
+        "id": "AL-R0-FN-001",
+        "title": "Implement tenant context selection with active membership and scoped workspace reset (FR12-01)",
+        "status": "TECH_DONE",
+        "priority": "P0",
+        "scope": "Internal pure Python tenant-selection service and synthetic fixture unit tests only, no auth provider, DB/RLS, API route, real data, or production",
+        "acceptance": [
+          "An active authenticated principal with active trusted membership may select personal or organization tenant",
+          "Changing tenant or authz_version resets document/matter/chat/search/suggestions/result context",
+          "No membership, mismatched tenant/user, suspended or revoked membership and invalid metadata fail closed",
+          "Current membership is checked on every selection; no API, database, credential or backend product E2E is claimed"
+        ],
+        "tests": {
+          "unit": "PASS_14_OF_14_FOCUSED_SYNTHETIC",
+          "github_ci": "PASS_130_OF_130_RUN_41726706712_PR32_HEAD_c358248d4d9e9546d0d15aa6e91fe839fc948522",
+          "merge": "PASS_PR32_MAIN_0ed8da7bfc08822091a588ff6f99a737d950e7c4",
+          "test_first_red_ci": "NOT_RUN_TESTS_COMMITTED_FIRST_BUT_RED_CI_NOT_EXECUTED",
+          "authentication_provider": "NOT_RUN",
+          "api_integration": "NOT_RUN",
+          "postgres_rls": "NOT_RUN",
+          "full_tc12a": "NOT_RUN",
+          "browser_e2e": "NOT_RUN",
+          "production": "NOT_DEPLOYED"
+        },
+        "evidence": [
+          "r0_core/tenant_context.py",
+          "tests/test_r0_tenant_context.py",
+          "tests/evidence/AL-R0-FR12-01-TR-20261104-01.json",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/32",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41726706712"
+        ],
+        "owner_acceptance": "PENDING_FUNCTIONAL_APP_ACCEPTANCE",
+        "notes": "TECH_DONE is only a tested in-process domain component, not a usable login/multi-tenant application. Principal and membership lookup MUST come from trusted server-side auth and persistent store at integration; current view is not an authorization oracle. No SRS deviation recorded."
       }
     ],
     "features": [
@@ -421,6 +455,14 @@
           "AL-R0-UI-001",
           "AL-R0-UI-002",
           "AL-R0-UI-003"
+        ]
+      },
+      {
+        "id": "R0-CORE",
+        "name": "R0 functional application-core slices — initial tenant isolation",
+        "status": "IN_PROGRESS",
+        "tasks": [
+          "AL-R0-FN-001"
         ]
       }
     ],
@@ -474,6 +516,12 @@
         "topic": "Owner saves the current R0 mobile UI as a reference",
         "value": "Preserve the exact visually reviewed R0 UI preview (mobile typography R20) as a recoverable design checkpoint. Source commit 19f02b9e53ce9a2db733d2cfeb92c62eac01b26f; fixed snapshot branch snapshot/r0-ui-mobile-r20-20261103; UI source web/r0-preview/index.html, styles.css and app.js. Future UI work may proceed independently but must not overwrite this saved reference. Existing live Cloudflare worker preview is mutable, so only Git commit/snapshot is the preserved version. This user instruction means SAVE DESIGN REFERENCE, not final R0 functional acceptance or production/deployment approval.",
         "authority": "Owner explicit 2026-11-03 instruction: 'Lưu giao diện này lại'"
+      },
+      {
+        "id": "DEC-008",
+        "topic": "Accept R0 visual design and proceed to functional R0 slices",
+        "value": "Owner's 'Đã ok, chuyển qua chức năng' accepts current R0 visual preview as design reference; proceed with small SRS-aligned functional tasks. Does not approve production, sensitive-data use, authenticated application readiness or R0 E2E.",
+        "authority": "Owner explicit chat message on 2026-11-04: 'Đã ok, chuyển qua chức năng'"
       }
     ],
     "risks": [
@@ -702,16 +750,20 @@
       {
         "path": "tests/evidence/AL-R0-UI-FILTER-R22-2026-11-03.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-R0-FR12-01-TR-20261104-01.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
       }
     ],
     "current": {
-      "active_task": "AL-R0-UI-003",
-      "last_completed_step": "R22 mobile document filter bug reproduced in live 320px screenshot, repaired in PR #30 and merged main. Expected red CI then 116/116 green; 320 and 390 static/layout and nonproduction live screenshot visual checks PASS, cloud Worker CSS readback matches main. Saved R20 design snapshot remains unchanged.",
-      "next_action": "Owner reviews updated R0 preview on a physical phone/desktop and decides final UI acceptance; continue next SRS-aligned R0 slice only on instruction. POC1 ON_HOLD, POC2/POC3 PLANNED; no production.",
+      "active_task": "AL-R0-FN-001",
+      "last_completed_step": "Owner accepted R0 visual preview and directed functional implementation. R23 first functional slice FR12-01 tenant-context selection core merged PR32; 14 focused unit cases PASS, full GitHub CI 130/130 PASS, no auth provider or API/DB E2E.",
+      "next_action": "Next small R0 function task: integrate trusted authenticated principal and active membership repository as an API boundary (FR12-01/TC12A), add cross-tenant negative tests and real nonproduction browser E2E before claiming functional app readiness. Preserve saved visual UI, SRS and production.",
       "blockers": [
-        "Physical Android/iOS visual Owner review NOT_RUN; no final UI Owner acceptance.",
-        "Cloudflare browser screenshots were inspected but raw image artifacts not transferred to the private Drive run folder (file-uri upload limitation).",
-        "No authenticated backend/API/AI/legal workflow in static demo UI; related app E2E NOT_RUN."
+        "No real authentication middleware, tenant database membership store, PostgreSQL RLS or deployed functional API yet.",
+        "Full TC12A and browser/end-to-end cross-tenant access tests NOT_RUN; no production or real client data.",
+        "Physical device QA and other R0 workflows outside this isolated core task still NOT_RUN."
       ]
     },
     "policy": {
