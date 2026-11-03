@@ -14,7 +14,7 @@ from zipfile import ZipFile, BadZipFile
 
 from lxml import etree as ET
 
-from poc_docx.track_changes import DOC_PART, w
+from poc_docx.track_changes import DOC_PART, w, _validate_edit, _validate_package_basics, EditError
 
 REVISIONS = {w("ins"), w("del"), w("moveFrom"), w("moveTo")}
 
@@ -34,6 +34,33 @@ def _parts(blob: bytes) -> dict[str, bytes]:
             return {name: doc.read(name) for name in names}
     except (BadZipFile, KeyError, RuntimeError) as exc:
         raise ReviewError("Invalid DOCX ZIP package") from exc
+
+
+def _checked_parts(blob: bytes) -> dict[str, bytes]:
+    """Validate each standalone DOCX before comparing it to any other file."""
+    found = _parts(blob)
+    try:
+        with ZipFile(BytesIO(blob)) as archive:
+            _validate_package_basics(archive, list(found))
+    except (EditError, ET.XMLSyntaxError) as exc:
+        raise ReviewError("Invalid DOCX package contract: missing/invalid Office parts or relationships") from exc
+    return found
+
+
+def _paragraph_identity_signature(paragraph: ET.Element) -> tuple:
+    """Guard stable paragraph attributes including paraId; allow Word rsid noise."""
+    return tuple(sorted((key, value) for key, value in paragraph.attrib.items()
+                        if not key.startswith(w("rsid"))))
+
+
+def _visible_space_stream(paragraph: ET.Element) -> str:
+    """Normalize w:t as Word displays spaces when xml:space=preserve is absent."""
+    xml_space = "{http://www.w3.org/XML/1998/namespace}space"
+    result: list[str] = []
+    for node in paragraph.iter(w("t")):
+        value = node.text or ""
+        result.append(value if node.get(xml_space) == "preserve" else value.strip())
+    return "".join(result)
 
 
 def _xml(data: bytes) -> ET.Element:
@@ -221,7 +248,7 @@ def _assert_nontext_content_safe(source_parts: dict[str, bytes], result_parts: d
 
 
 def _assert_only_one_pair(source: ET.Element, paragraphs: list[ET.Element], index: int,
-                          old: str, new: str) -> None:
+                          old: str, new: str, author: str, stamp: str) -> None:
     revs = [e for e in source.iter() if e.tag in REVISIONS]
     if len(revs) != 2 or {e.tag for e in revs} != {w("ins"), w("del")}:
         raise ReviewError("Source must contain precisely one insertion/deletion pair")
@@ -234,6 +261,20 @@ def _assert_only_one_pair(source: ET.Element, paragraphs: list[ET.Element], inde
     if ("".join(e.text or "" for e in deletion.iter(w("delText"))) != old or
             "".join(e.text or "" for e in insertion.iter(w("t"))) != new):
         raise ReviewError("Source revision text differs from edit specification")
+    if (deletion.getparent() is not target or insertion.getparent() is not target
+            or target.index(insertion) != target.index(deletion) + 1):
+        raise ReviewError("Source revision pair must be adjacent direct paragraph children")
+    if (deletion.get(w("author")) != author or insertion.get(w("author")) != author
+            or deletion.get(w("date")) != stamp or insertion.get(w("date")) != stamp):
+        raise ReviewError("Source revision author/date differs from edit specification")
+    for revision, text_tag in ((deletion, w("delText")), (insertion, w("t"))):
+        if len(revision) != 1 or revision[0].tag != w("r"):
+            raise ReviewError("Source unsupported revision run content")
+        tags = [node.tag for node in revision[0]]
+        if tags not in ([text_tag], [w("rPr"), text_tag]):
+            raise ReviewError("Source unsupported revision run content")
+    if _normalized_xml(deletion[0].find(w("rPr"))) != _normalized_xml(insertion[0].find(w("rPr"))):
+        raise ReviewError("Source revision insertion/deletion formatting mismatch")
     ids = (deletion.get(w("id")), insertion.get(w("id")))
     if not all(s is not None and s.isascii() and s.isdecimal() for s in ids) or ids[0] == ids[1]:
         raise ReviewError("Invalid revision IDs in source")
@@ -241,19 +282,18 @@ def _assert_only_one_pair(source: ET.Element, paragraphs: list[ET.Element], inde
 
 def check_results(tracked: bytes, accepted: bytes, rejected: bytes, edit: dict) -> dict:
     """Return static-content QA result; never claim Microsoft Word UI passed."""
-    if not isinstance(edit, dict) or edit.get("operation") != "replace":
-        raise ReviewError("Expected single replace specification")
-    index, old, new = edit.get("paragraph_index"), edit.get("old_text"), edit.get("new_text")
-    if type(index) is not int or index < 0 or not all(isinstance(v, str) and v for v in (old, new)):
-        raise ReviewError("Invalid edit specification")
+    try:
+        index, old, new, author, stamp = _validate_edit(edit)
+    except (EditError, TypeError) as exc:
+        raise ReviewError("Invalid edit specification") from exc
     blobs = {"tracked": tracked, "accepted": accepted, "rejected": rejected}
-    file_parts = {name: _parts(value) for name, value in blobs.items()}
+    file_parts = {name: _checked_parts(value) for name, value in blobs.items()}
     roots = {name: _xml(parts[DOC_PART]) for name, parts in file_parts.items()}
     paragraphs = {name: _paragraphs(root) for name, root in roots.items()}
     source = paragraphs["tracked"]
     if index >= len(source):
         raise ReviewError("Target paragraph outside source document")
-    _assert_only_one_pair(roots["tracked"], source, index, old, new)
+    _assert_only_one_pair(roots["tracked"], source, index, old, new, author, stamp)
     for outcome, accept in (("accepted", True), ("rejected", False)):
         target = paragraphs[outcome]
         if len(source) != len(target):
@@ -265,6 +305,28 @@ def check_results(tracked: bytes, accepted: bytes, rejected: bytes, edit: dict) 
             actual = _paragraph_text(output_p)
             if actual != expected:
                 raise ReviewError(f"{outcome}: paragraph {para_index} differs from expected content")
+            if _paragraph_identity_signature(source_p) != _paragraph_identity_signature(output_p):
+                raise ReviewError(f"{outcome}: paragraph {para_index} identity attributes changed")
+            # For the targeted paragraph, resolve source revisions to the chosen
+            # text before checking rendered leading/trailing whitespace semantics.
+            if para_index == index:
+                expected_root = ET.fromstring(ET.tostring(source_p))
+                for rev in list(expected_root):
+                    if rev.tag not in {w("ins"), w("del")}:
+                        continue
+                    keep = (rev.tag == w("ins")) == accept
+                    position = expected_root.index(rev)
+                    expected_root.remove(rev)
+                    if keep:
+                        chosen_run = rev[0]
+                        for node in chosen_run.iter(w("delText")):
+                            node.tag = w("t")
+                        expected_root.insert(position, chosen_run)
+                expected_para = expected_root
+            else:
+                expected_para = source_p
+            if _visible_space_stream(expected_para) != _visible_space_stream(output_p):
+                raise ReviewError(f"{outcome}: paragraph {para_index} whitespace preservation changed")
         if _document_envelope_signature(roots["tracked"]) != _document_envelope_signature(roots[outcome]):
             raise ReviewError(f"{outcome}: document envelope changed (section/page setup)")
         if _numbering_signature(source) != _numbering_signature(target):
