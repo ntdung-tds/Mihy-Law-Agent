@@ -117,5 +117,53 @@ class R0PreviewTests(unittest.TestCase):
         self.assertIn('.filter-tab{min-width:0;width:100%;white-space:normal;', mobile)
         self.assertIn('min-height:44px', mobile)
 
+
+    def test_r24_all_eleven_legal_workflow_entries_grouped(self):
+        """UI discovery maps all 11 approved UC IDs; R0 is only a visible priority."""
+        import re
+        groups = {
+            "A": ("UC01", "UC02", "UC03", "UC07"),
+            "B": ("UC04", "UC05", "UC08"),
+            "C": ("UC09", "UC10", "UC11", "UC06"),
+        }
+        matched = re.findall(r'<button\b[^>]*data-feature="(UC\d{2})"[^>]*>', self.html)
+        self.assertEqual(len(matched), 11)
+        self.assertEqual(set(matched), set(sum(groups.values(), ())))
+        self.assertEqual(len(set(matched)), len(matched))
+        for group, ids in groups.items():
+            section = re.search(
+                rf'<section class="catalog-group" data-catalog-group="{group}"[^>]*>(.*?)</section>',
+                self.html,
+                re.DOTALL,
+            )
+            self.assertIsNotNone(section, f"Missing catalog group {group}")
+            actual = re.findall(r'data-feature="(UC\d{2})"', section.group(1))
+            self.assertEqual(actual, list(ids), group)
+
+    def test_r24_truthful_r0_statuses_and_no_fake_workflow(self):
+        """UC03/04/07 remain not-yet-available while highlighted as R0 priorities."""
+        import re
+        for uc in ("UC03", "UC04", "UC07"):
+            self.assertRegex(self.html, rf'data-feature="{uc}" data-stage="r0"')
+        for uc in ("UC01", "UC02", "UC05", "UC06", "UC08", "UC09", "UC10", "UC11"):
+            self.assertRegex(self.html, rf'data-feature="{uc}" data-stage="r1"')
+        self.assertEqual(self.html.count("R0 · Đang triển khai"), 3)
+        self.assertEqual(self.html.count("R1 · Sắp triển khai"), 8)
+        self.assertIn("Chưa có nghiệp vụ AI nào hoạt động", self.html)
+        self.assertIn("Chưa thể thực hiện tác vụ", self.js)
+        self.assertIn("n.dataset.stage === 'r0'", self.js)
+
+    def test_r24_catalog_mobile_layout_and_accessibility(self):
+        self.assertIn('/* R24 11-UC catalog:', self.css)
+        segment = self.css.split('/* R24 11-UC catalog:', 1)[1]
+        self.assertIn('@media(max-width:620px)', segment)
+        self.assertIn('.catalog-group .services-grid{grid-template-columns:1fr}', segment)
+        self.assertIn('.catalog-card{min-height:144px}', segment)
+        self.assertIn('min-height:44px', segment)
+        for v in ("catalog-status-building", "catalog-status-planned"):
+            self.assertIn(v, segment)
+        self.assertIn('aria-label="Danh sách 11 nghiệp vụ pháp lý"', self.html)
+
+
 if __name__ == '__main__':
     unittest.main()
