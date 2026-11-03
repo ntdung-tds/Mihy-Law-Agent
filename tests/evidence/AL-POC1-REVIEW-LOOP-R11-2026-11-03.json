@@ -1,0 +1,72 @@
+{
+  "test_run_id": "AL-POC1-TR-20261103-R11-LOOP",
+  "baseline": {
+    "repo": "ntdung-tds/Mihy-Law-Agent",
+    "main_sha": "013993465df3bab4e030c425a843fd85945bdc59",
+    "pcs_revision": 10,
+    "srs": "v1.1.15",
+    "srs_publication": "NOT_PUBLISHED"
+  },
+  "task_ids": [
+    "AL-POC1-001",
+    "AL-POC1-003"
+  ],
+  "scope": "POC1 synthetic DOCX single/batch generators and mandatory OOXML relation/content-type safety",
+  "loops": [
+    {
+      "cycle": 1,
+      "pre_fix_reproduction": "6 of 6 variants incorrectly accepted (single/batch × missing, wrong-target, external officeDocument relationship)",
+      "fix": "Require exactly one internal officeDocument relationship targeting document.xml",
+      "after_local_suite": "PASS_54_OF_54"
+    },
+    {
+      "cycle": 2,
+      "pre_fix_reproduction": "6 of 6 variants incorrectly accepted (single/batch × missing settings relationship, wrong target, missing settings content-type)",
+      "fix": "Require internal settings relation and settings content-type declaration",
+      "after_local_suite": "PASS_56_OF_56"
+    },
+    {
+      "cycle": 3,
+      "pre_fix_reproduction": "4 of 4 variants incorrectly accepted (single/batch × duplicate conflicting document/settings content-type)",
+      "fix": "Require exactly one correct Override declaration per document.xml and settings.xml",
+      "after_local_suite": "PASS_58_OF_58"
+    },
+    {
+      "cycle": 4,
+      "focus": "bounded final regression cross-check",
+      "new_reproducible_issues": 0,
+      "local_suite": "PASS_58_OF_58",
+      "compileall": "PASS",
+      "r8_kit_compatibility": "PASS",
+      "libreoffice": "PASS_ONE_PAGE_VISUALLY_CHECKED",
+      "srs_static": "STATIC_CONTRACT_AND_WORD_PASS"
+    }
+  ],
+  "test_code": "python -m unittest discover -s tests -v",
+  "tests_added": 6,
+  "mandatory_pkg_part_validation": "PASS",
+  "r8_kit": {
+    "input_sha256": "7bdeffcd7308e7c2ab47b6002a0cb51c32a74a2128939cbf7981f32472534402",
+    "output_sha256": "d02582fc8ca51229ecef9f92d3c179afa2b22bdeed8312c52c02d516e5c689ae",
+    "byte_identical_to_reference": true,
+    "tracked_pairs": 3,
+    "unchanged_non_target_package_parts": true
+  },
+  "srs_static": {
+    "result": "STATIC_CONTRACT_AND_WORD_PASS",
+    "verified_contract_checksums": 145,
+    "requirements": 132,
+    "api_operations": 12,
+    "application_tests": "NOT_RUN_79"
+  },
+  "limitations": {
+    "microsoft_word_desktop_accept_reject": "NOT_RUN",
+    "tc02c": "NOT_RUN",
+    "tc07c": "NOT_RUN",
+    "tce2e_02": "NOT_RUN",
+    "owner_acceptance": "NOT_REQUESTED",
+    "github_ci": "PENDING_PR"
+  },
+  "stopping_rule": "End this bounded review after a final independent pass produces no new reproducible errors; do NOT equate with exhaustive DOCX compliance or POC acceptance",
+  "classification": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY"
+}
