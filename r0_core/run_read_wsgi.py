@@ -87,6 +87,8 @@ def _safe_run_payload(snapshot: RunSnapshot, requested_id: str) -> dict[str, Any
     ):
         raise ValueError("Invalid warnings")
     coverage = payload.get("coverage")
+    if "coverage" in payload and coverage is None:
+        raise ValueError("Coverage must be an object, not null")
     if coverage is not None:
         if (not isinstance(coverage, dict) or
                 set(coverage) - _COVERAGE_FIELDS or
@@ -111,6 +113,8 @@ def _safe_run_payload(snapshot: RunSnapshot, requested_id: str) -> dict[str, Any
                 payload["manifest_id"] != coverage["manifest_id"]):
             raise ValueError("Manifest references disagree")
     usage = payload.get("usage")
+    if "usage" in payload and usage is None:
+        raise ValueError("Usage must be an object, not null")
     if usage is not None:
         if (not isinstance(usage, dict) or
                 set(usage) - _USAGE_FIELDS or
