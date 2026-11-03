@@ -16,7 +16,8 @@ from uuid import uuid4
 
 from .membership_repository import PostgresMembershipRepository, select_tenant_from_store
 from .session_boundary import (
-    IdentityLookup, SessionIsActive, SessionRejected, TokenVerifier,
+    IdentityLookup, SessionIsActive, SessionRejected,
+    SessionDependencyUnavailable, TokenVerifier,
     authenticate_bearer_session,
 )
 from .tenant_context import TenantContextDenied, TenantMembershipUnavailable, _canonical_uuid
@@ -230,6 +231,8 @@ class GetRunWSGI:
                     snapshot.run_id != run_id):
                 return error(404)
             return send(200, _safe_run_payload(snapshot, run_id))
+        except SessionDependencyUnavailable:
+            return error(503)
         except SessionRejected:
             return error(401)
         except TenantMembershipUnavailable:
