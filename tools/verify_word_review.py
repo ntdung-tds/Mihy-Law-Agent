@@ -247,7 +247,7 @@ def check_results(tracked: bytes, accepted: bytes, rejected: bytes, edit: dict) 
         _assert_nontext_content_safe(file_parts["tracked"], file_parts[outcome], outcome)
         for kind in ("header", "footer", "footnotes", "endnotes", "comments"):
             if _other_story_signature(file_parts["tracked"], kind) != _other_story_signature(file_parts[outcome], kind):
-                raise ReviewError(f"{outcome}: {kind} text changed")
+                raise ReviewError(f"{outcome}: {kind} story XML changed (text or formatting)")
         if _structure_signature(roots["tracked"]) != _structure_signature(roots[outcome]):
             raise ReviewError(f"{outcome}: table structure changed")
     return {
