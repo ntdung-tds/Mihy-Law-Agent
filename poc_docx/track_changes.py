@@ -108,6 +108,33 @@ def _check_existing_revisions(root: ET.Element) -> None:
         seen.add(number)
 
 
+def _check_other_story_revisions(archive: ZipFile, names: list[str]) -> None:
+    """Fail closed if any other Word story/definition contains pending changes.
+
+    This POC edits only a whole run in document.xml. Preserving existing tracked
+    revisions in headers, footers, notes or definitions would make the resulting
+    package impossible to fully accept/reject using the scoped static gate.
+    """
+    tracked_names = {
+        "ins", "del", "moveFrom", "moveTo", "rPrChange", "pPrChange",
+        "tblPrChange", "trPrChange", "tcPrChange", "sectPrChange",
+        "numberingChange", "cellIns", "cellDel", "cellMerge",
+        "moveFromRangeStart", "moveFromRangeEnd", "moveToRangeStart",
+        "moveToRangeEnd", "customXmlInsRangeStart", "customXmlInsRangeEnd",
+        "customXmlDelRangeStart", "customXmlDelRangeEnd",
+        "customXmlMoveFromRangeStart", "customXmlMoveFromRangeEnd",
+        "customXmlMoveToRangeStart", "customXmlMoveToRangeEnd",
+    }
+    tracked_tags = {w(name) for name in tracked_names}
+    parser = ET.XMLParser(resolve_entities=False, no_network=True)
+    for name in names:
+        if not (name.startswith("word/") and name.endswith(".xml")) or name == DOC_PART:
+            continue
+        root = ET.fromstring(archive.read(name), parser=parser)
+        if any(node.tag in tracked_tags for node in root.iter()):
+            raise EditError(f"Existing unsupported tracked revision outside main document: {name}")
+
+
 def _check_field_context(paragraphs: list[ET.Element], target: ET.Element) -> None:
     """Reject field results/instructions, including fields spanning paragraphs.
 
@@ -268,6 +295,7 @@ def apply_edit(source_docx: bytes, edit: dict[str, Any]) -> bytes:
             if len(set(names)) != len(names):
                 raise EditError("DOCX has duplicate ZIP entries")
             _validate_package_basics(source, names)
+            _check_other_story_revisions(source, names)
             # Validate protection and XML before any output is written.
             new_settings = _patch_settings(source.read(SETTINGS_PART))
             new_document = _patch_document(source.read(DOC_PART), index, old, new, author, stamp)
