@@ -99,5 +99,13 @@ class R0PreviewTests(unittest.TestCase):
                       '.chat-composer textarea{font-size:16px}'):
             self.assertIn(value, css)
 
+
+    def test_mobile_header_touch_targets_r20(self):
+        """Notification and other compact actions must be touch-friendly."""
+        mobile = self.css.split('/* R0 mobile legibility review R20:', 1)[1]
+        self.assertIn('.top-actions .icon-btn{width:44px;height:44px}', mobile)
+        self.assertIn('.modal-close{width:44px;height:44px}', mobile)
+        self.assertIn('.text-link{font-size:13px;min-height:44px}', mobile)
+
 if __name__ == '__main__':
     unittest.main()
