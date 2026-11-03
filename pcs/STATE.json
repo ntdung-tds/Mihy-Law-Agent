@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 17,
-  "updated_at": "2026-11-03T12:57:27.089Z",
+  "revision": 18,
+  "updated_at": "2026-11-03T13:38:06.812Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -293,7 +293,7 @@
       {
         "id": "POC1",
         "name": "DOCX Track Changes",
-        "status": "IN_PROGRESS",
+        "status": "ON_HOLD",
         "tasks": [
           "AL-POC1-001",
           "AL-POC1-002",
@@ -345,6 +345,12 @@
         "topic": "Public data classification",
         "value": "Publish only explicitly public-safe project metadata, synthetic non-sensitive POC code and tests; do not publish SRS contents or customer/legal documents without separate approval",
         "authority": "PCS project instruction applied to public repo"
+      },
+      {
+        "id": "DEC-004",
+        "topic": "Owner instruction: provisionally park POC1",
+        "value": "POC1 is temporarily parked at the current scoped technical checkpoint; no further POC1 development or automatic acceptance. Scoped DOCX/approval domain technical work is TECH_DONE with prior 105/105 GitHub CI PASS, but Microsoft Word Desktop and actual application TC02C/TC07C/TC14B/TCE2E-02 remain NOT_RUN/BLOCKED. SRS v1.1.15, product code and production unchanged. POC2 remains PLANNED and must not be started until Owner directs.",
+        "authority": "Owner explicit chat instruction, 2026-11-03: 'Tạm thời chốt poc1 ở đây'"
       }
     ],
     "risks": [
@@ -568,9 +574,9 @@
       }
     ],
     "current": {
-      "active_task": "AL-POC1-002",
-      "last_completed_step": "R17 Word Desktop real-run gate prepared: synthetic R5 single + R12 mixed original files SHA verified; combined 75,332-byte operator kit ZIP CRC PASS; LibreOffice sanity renders one page each; authorized private Drive test-run folder and uploaded kit metadata readback confirmed. Actual Word Desktop NOT_RUN.",
-      "next_action": "Perform actual Microsoft Word Desktop Review Accept All/Reject All on separate R5 copies and Accept edits 0,1/Reject 2 on R12; save and reopen three genuine Word outputs; retain screenshots, Word build, tester and test_run_id in dedicated private Drive folder. Then run existing static Word gates against actual Word-saved files. Do not infer TC02C/TC07C/TC14B/TCE2E-02 app E2E success.",
+      "active_task": null,
+      "last_completed_step": "Owner provisionally parked POC1 at PCS R18 after R17 test-run readiness and prior 105/105 CI PASS. All missing Word Desktop and application E2E gates stay NOT_RUN/BLOCKED; this is not POC1 PASS or final acceptance.",
+      "next_action": "Await explicit Owner direction for next phase (POC2 remains PLANNED) or resumption of POC1 gates. When POC1 resumes, execute genuine Microsoft Word Desktop three-scenario review and authenticated app TC02C/TC07C/TC14B/TCE2E-02; Owner final acceptance still required.",
       "blockers": [
         "Microsoft Word Desktop GUI unavailable in available execution environment; original inputs and operator pack are ready but actual Word-saved output and screenshots/tester/version missing",
         "No authenticated review/approval application runtime for TC02C, TC07C, TC14B and TCE2E-02"
