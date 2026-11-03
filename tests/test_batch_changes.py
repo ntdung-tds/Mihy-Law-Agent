@@ -247,6 +247,11 @@ class SelectedTrackChangesTest(unittest.TestCase):
             with self.subTest(stamp=stamp), self.assertRaisesRegex(EditError, "RFC 3339"):
                 apply_batch(self.source, [{**self.selected[0], "changed_at": stamp}])
 
+    def test_batch_rejects_run_control_characters(self):
+        for new_text in ("New\nLine", "New\tTab", "New\rReturn"):
+            with self.subTest(text=repr(new_text)), self.assertRaisesRegex(EditError, "unsupported control"):
+                apply_batch(self.source, [{**self.selected[0], "new_text": new_text}])
+
     def test_malformed_package_rejected(self):
         with self.assertRaises(EditError):
             apply_batch(b"junk", self.selected[:1])
