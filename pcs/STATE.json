@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 24,
-  "updated_at": "2026-11-04T04:58:00+07:00",
+  "revision": 25,
+  "updated_at": "2026-11-03T22:54:49.848Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -450,6 +450,46 @@
         ],
         "owner_acceptance": "PENDING_VISUAL_CONFIRMATION",
         "notes": "This is only discoverability/status representation; no change to actual 11-UC release scope. No SRS change, no real data. Prior saved R20 design snapshot remains available."
+      },
+      {
+        "id": "AL-R0-UI-005",
+        "title": "Refine 11 legal workflow entries into flat blocks and repair information-only card click handler",
+        "priority": "P0",
+        "status": "REVIEW_READY",
+        "scope": "Only existing Overview catalog CSS and one-line static demo JS event binding; tests/README/evidence. R0/R1 feature statuses, four-view shell, private SRS v1.1.15 and production unchanged.",
+        "acceptance": [
+          "All 11 existing UCs remain grouped A/B/C; 3 R0 pending and 8 R1 planned, no real processing",
+          "Flat block borders and grouped sections, no shadow/lifting, clear focus state and mobile 16px titles/14px description",
+          "320px single-column layout has no document-level horizontal overflow; 1280px group B uses three equal-width blocks",
+          "Each of the 11 information-only tiles opens and closes correct unavailable-feature modal in source-branch Chromium",
+          "Final-head CI PASS and isolated live preview source readback match main; Owner physical-device review remains separate"
+        ],
+        "tests": {
+          "red_green": "PASS_CSS_EXPECTED_RED_41732615109_THEN_GREEN",
+          "github_ci": "PASS_137_OF_137_RUN_41734140720_PR36_HEAD_610a83ff81a44d3bf628d2a3f67a96b196e03b80",
+          "merge": "PASS_PR36_MAIN_3cecb226632121fb4eb709aa2d922fe1e451d0fc",
+          "chrom_src_mobile_390": "PASS_SCOPED_FLAT_GROUP_A",
+          "chrom_src_desktop_1280": "PASS_SCOPED_FLAT_GROUP_B",
+          "chrom_src_mobile_320": "PASS_WIDTH320_SCROLL320_FLAT_SHADOW_NONE_GRID1",
+          "chrom_src_card_click": "PASS_11_OF_11_INFO_MODAL_OPEN_CLOSE",
+          "live_browser_320": "PASS_11_LABELS_3_R0_8_R1_AND_FLAT_VISUAL_GROUP_A",
+          "worker_readback": "PASS_HTML_CSS_JS_ALL_MATCH_MAIN",
+          "live_card_click": "NOT_VERIFIED_SCRIPT_INJECTION_MARKER_ABSENT",
+          "physical_device": "NOT_RUN",
+          "screenshot_drive_upload": "NOT_COMPLETED",
+          "production": "NOT_DEPLOYED",
+          "real_backend_ai_e2e": "NOT_RUN_OUT_OF_SCOPE"
+        },
+        "evidence": [
+          "tests/evidence/AL-R0-UI-FLAT-R25-2026-11-04.json",
+          "web/r0-preview/styles.css",
+          "web/r0-preview/app.js",
+          "tests/test_r0_preview.py",
+          "PR #36; final CI run 41734140720; merged at 3cecb226632121fb4eb709aa2d922fe1e451d0fc",
+          "Private Drive test-run folder prepared; screenshot bytes not uploaded"
+        ],
+        "owner_acceptance": "PENDING_VISUAL_CONFIRMATION",
+        "notes": "Owner authorized a flat visual redesign of the existing UC catalog but has not approved this specific deployed R25 revision yet. No production, credential, legal or client data use. Old R20 immutable design snapshot preserved."
       }
     ],
     "features": [
@@ -489,7 +529,8 @@
           "AL-R0-UI-001",
           "AL-R0-UI-002",
           "AL-R0-UI-003",
-          "AL-R0-UI-004"
+          "AL-R0-UI-004",
+          "AL-R0-UI-005"
         ]
       },
       {
@@ -563,6 +604,12 @@
         "topic": "Display all 11 legal workflows as status-only entry points on the approved R0 preview",
         "value": "Present all 11 UCs in the three groups A/B/C from Owner-provided solution brief, with UC03/UC04/UC07 labeled 'R0 · Đang triển khai' and remaining 8 labeled 'R1 · Sắp triển khai'. This is UI discovery only; no R1 backend functionality activated or SRS baseline changed. Owner visual confirmation still separate.",
         "authority": "Owner explicit 2026-11-04 chat reply: 'Đồng ý' to prior UI coverage recommendation"
+      },
+      {
+        "id": "DEC-010",
+        "topic": "Owner-approved R25 flat block refinement on R0 Overview",
+        "value": "Refine only the 11-UC group A/B/C Overview into flat, clearly bordered function-first blocks with stronger R0 visual distinction and responsive legibility. Fix the directly discovered one-line catalog informational modal binding defect; no new legal workflows, no real AI/API, no SRS baseline or production changes. This is permission to implement the UI refinement, not the final mobile visual acceptance.",
+        "authority": "Owner explicit 'Ok' in chat after the R25 Flat block refinement proposal on 2026-11-04."
       }
     ],
     "risks": [
@@ -799,16 +846,21 @@
       {
         "path": "tests/evidence/AL-R0-UI-CATALOG-R24-2026-11-04.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-R0-UI-FLAT-R25-2026-11-04.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
       }
     ],
     "current": {
-      "active_task": "AL-R0-UI-004",
-      "last_completed_step": "R24 approved 11-UC catalog merged PR34; final CI 133/133 PASS, live Chromium 320 accessibility tree 11 unique buttons (3 R0, 8 R1), 390 grouped visual and all Worker assets readback PASS. No backend legal functions introduced.",
-      "next_action": "Owner visually checks current R0 preview (11 groups). Then return to small R0 functional API/auth/tenant membership integration task (FR12-01/TC12A) before connecting UC03/UC04/UC07. Avoid expanding R1 work.",
+      "active_task": "AL-R0-UI-005",
+      "last_completed_step": "R25 flat catalog PR36 merged and isolated preview deployed; code final CI 137/137 PASS, source Chromium 11/11 availability-modal interactions PASS, live 320 shows 11 correct statuses and flat cards, 320 branch runtime width=scrollWidth=320, Worker asset readback matches merged main. No production.",
+      "next_action": "Owner visually reviews R25 flat-block Overview on phone/desktop. If accepted, return to R0 functional trusted auth/tenant membership/API integration per FR12-01/TC12A before linking UC03/04/07 to real workflows; keep R1 UCs as planned.",
       "blockers": [
-        "All 11 catalog entries are info-only, not functional AI workflows; real processing and authenticated API E2E NOT_RUN.",
-        "Modal click/close live browser E2E NOT_VERIFIED due browser-injection/CSP test constraints; owner device review NOT_RUN.",
-        "Private Drive run folder exists but screenshot bytes were not uploaded; public repo holds only synthetic metadata."
+        "Owner physical-device visual approval of deployed R25 design is pending.",
+        "Live Worker information-modal click/close E2E was not verified by browser script injection; source-equivalent Chromium 11/11 test PASS.",
+        "Private Drive test folder created but raw Chromium screenshot assets were not uploaded.",
+        "Real authenticated legal workflows, AI tasks and backend E2E still NOT_RUN; no production."
       ]
     },
     "policy": {
