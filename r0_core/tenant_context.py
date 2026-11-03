@@ -17,6 +17,10 @@ class TenantContextDenied(PermissionError):
     """Generic denial; do not reveal whether another tenant exists."""
 
 
+class TenantMembershipUnavailable(TenantContextDenied):
+    """Only trusted membership storage failures, never denial from nonexistent membership."""
+
+
 @dataclass(frozen=True, slots=True)
 class AuthenticatedPrincipal:
     """Identity and status supplied by trusted authentication middleware."""
@@ -99,6 +103,10 @@ def select_tenant(
     # rather than using any prior client/session claim as authorization.
     try:
         member = membership_lookup(user_id, tenant_id)
+    except TenantMembershipUnavailable:
+        # Trusted adapter marks infrastructure failures so API can emit
+        # SRS 503 rather than incorrectly reporting ordinary 404 denial.
+        raise
     except Exception as exc:
         raise TenantContextDenied(denial) from exc
 
