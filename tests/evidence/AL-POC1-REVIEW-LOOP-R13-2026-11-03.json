@@ -77,7 +77,7 @@
   "statuses": {
     "local_unit": "PASS_72_OF_72",
     "source_kit_static": "PASS_SIMULATED_ONLY",
-    "github_ci": "NOT_YET_VERIFIED",
+    "github_ci": "PASS_PR17_RUN_41621686945_FINAL_HEAD_fb1869e1e3adf7d7faf73f320caacbf093614663",
     "word_desktop": "NOT_RUN",
     "tc02c": "NOT_RUN",
     "tc07c": "NOT_RUN",
@@ -91,5 +91,10 @@
     "Genuine Word resave may require manual review of metadata and paragraph identifiers",
     "Original SRS and real customer/legal data not committed to public GitHub"
   ],
-  "classification": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY"
+  "classification": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY",
+  "github_merge": {
+    "pr": 17,
+    "status": "MERGED",
+    "merge_commit": "1479a05035c0965ff261cb36502a5e04b3358b40"
+  }
 }
