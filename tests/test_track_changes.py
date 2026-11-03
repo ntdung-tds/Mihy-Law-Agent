@@ -175,6 +175,16 @@ class TrackedChangesTest(unittest.TestCase):
         with self.assertRaises(EditError):
             apply_edit(buf.getvalue(), EDIT)
 
+    def test_missing_content_types_rejected_in_single_edit(self):
+        original = parts(fixture())
+        invalid = BytesIO()
+        with ZipFile(invalid, "w") as archive:
+            for part, data in original.items():
+                if part != "[Content_Types].xml":
+                    archive.writestr(part, data)
+        with self.assertRaisesRegex(EditError, "required package part"):
+            apply_edit(invalid.getvalue(), EDIT)
+
     def test_bad_zip_fails_closed(self):
         with self.assertRaises(EditError):
             apply_edit(b"not a docx", EDIT)
