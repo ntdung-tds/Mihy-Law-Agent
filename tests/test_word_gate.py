@@ -356,6 +356,22 @@ class OfflineWordGateTests(unittest.TestCase):
             check_results(add_unresolved(self.tracked),
                           add_unresolved(self.accepted), add_unresolved(self.rejected), EDIT)
 
+    def test_unsupported_property_revision_in_source_cannot_static_pass(self):
+        output = BytesIO()
+        with ZipFile(BytesIO(self.tracked)) as source, ZipFile(output, "w") as target:
+            for item in source.infolist():
+                data = source.read(item)
+                if item.filename == "word/document.xml":
+                    root = ET.fromstring(data)
+                    para = list(root.iter(w("p")))[1]
+                    props = ET.Element(w("pPr"))
+                    ET.SubElement(props, w("pPrChange"), {w("id"): "271"})
+                    para.insert(0, props)
+                    data = ET.tostring(root)
+                target.writestr(item, data)
+        with self.assertRaisesRegex(ReviewError, "one insertion/deletion pair"):
+            check_results(output.getvalue(), self.accepted, self.rejected, EDIT)
+
     def test_corrupt_package_rejected(self):
         with self.assertRaisesRegex(ReviewError, "DOCX ZIP"):
             check_results(self.tracked, b"not ZIP", self.rejected, EDIT)
