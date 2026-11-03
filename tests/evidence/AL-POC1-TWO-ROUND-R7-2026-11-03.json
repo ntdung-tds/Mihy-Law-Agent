@@ -1,0 +1,60 @@
+{
+  "test_run_id": "AL-POC1-TR-20261103-R7-TWO-PASS",
+  "task_id": "AL-POC1-002",
+  "scope": "Offline QA verifier only, synthetic DOCX, no Microsoft Word GUI",
+  "reference_srs_version": "1.1.15",
+  "round_1": [
+    {
+      "id": "QA-R7-01",
+      "risk": "style definition altered but STATIC_PASS",
+      "pre_fix": "REPRODUCED",
+      "regression": "PASS"
+    },
+    {
+      "id": "QA-R7-02",
+      "risk": "non-target bold formatting altered but STATIC_PASS",
+      "pre_fix": "REPRODUCED",
+      "regression": "PASS"
+    }
+  ],
+  "round_2": [
+    {
+      "id": "QA-R7-03",
+      "risk": "theme altered but STATIC_PASS",
+      "pre_fix": "REPRODUCED",
+      "regression": "PASS"
+    },
+    {
+      "id": "QA-R7-04",
+      "risk": "non-target tab injected but STATIC_PASS",
+      "pre_fix": "REPRODUCED",
+      "regression": "PASS"
+    },
+    {
+      "id": "QA-R7-05",
+      "risk": "prettyprinted XML may be harmless; no false failure",
+      "regression": "PASS"
+    },
+    {
+      "id": "QA-R7-06",
+      "risk": "document rel target changed",
+      "regression": "PASS"
+    }
+  ],
+  "local_tests": {
+    "python_unittest": "PASS_31_OF_31",
+    "python_compileall": "PASS",
+    "zip_manifest": "PASS_157_OF_157",
+    "word_kit_offline_simulated": "STATIC_PASS"
+  },
+  "github_ci": "PENDING_PR",
+  "not_run": [
+    "Microsoft Word UI Accept/Reject",
+    "TC02C",
+    "TC07C",
+    "TCE2E-02"
+  ],
+  "evidence_note": "Public-safe synthetic QA metadata; original SRS and DOCX test kit not committed",
+  "acceptance": "NOT_REQUESTED",
+  "classification": "PUBLIC_SAFE_SYNTHETIC_ONLY"
+}
