@@ -282,6 +282,37 @@ class RunReadBatchTests(unittest.TestCase):
             with self.subTest(method=method,path=path):
                 self.assertEqual(self.request(method=method, path=path)[0], 404)
 
+    def test_membership_database_unavailable_503_not_fake_not_found(self):
+        self.fail_dependency = "database"
+        code, body, _ = self.request()
+        self.assertEqual(code, 503)
+        self.assertEqual(body["code"], "DEPENDENCY_UNAVAILABLE")
+        self.assertIs(body["retryable"], True)
+        self.assertNotIn("credentials", json.dumps(body))
+        self.assertEqual(self.acl_count, 0)
+
+    def test_long_nonblank_run_id_is_contract_valid_not_framing_400(self):
+        # OpenAPI says minLength:1 and non-whitespace; no 256-byte maximum.
+        code, _, _ = self.request(path="/v1/runs/" + "r" * 300)
+        self.assertEqual(code, 404)  # unauthorized run, not malformed framing
+
+    def test_strict_acl_true_bool_not_truthy_one(self):
+        self.acl = 1
+        code, body, _ = self.request()
+        self.assertEqual(code, 404)
+        self.assertEqual(self.load_count, 0)
+
+    def test_outage_retryable_is_only_dependency_failure(self):
+        self.fail_dependency = "acl"
+        code, body, _ = self.request()
+        self.assertEqual(code, 503)
+        self.assertIs(body["retryable"], True)
+        self.fail_dependency = None
+        self.acl = False
+        code, body, _ = self.request()
+        self.assertEqual(code, 404)
+        self.assertIs(body["retryable"], False)
+
     def test_invalid_run_response_fails_closed(self):
         for payload in (
             {**PAYLOAD, "secret_admin_flag": "do-not-return"},
