@@ -72,6 +72,20 @@
       "ci": 41740932757,
       "actual": "PASS_185_OF_185",
       "reason": "Explicitly typed IdP/identity/session dependency errors return retryable 503 without leaking exception; spoofed header and fresh membership tests pass."
+    },
+    {
+      "phase": "LOOP_4_OPENAPI_NULL_TEST",
+      "commit": "2b237a6670dc4dc2ed250dd87f813455f07a3678",
+      "ci": 41741265332,
+      "actual": "EXPECTED_FAIL_2_SUBTESTS",
+      "reason": "Optional coverage/usage fields appeared explicitly null; OpenAPI only allows an object when provided."
+    },
+    {
+      "phase": "LOOP_4_REPAIR",
+      "commit": "3cfc0000c2e40d407ab6974f2b5d45bbb10c5198",
+      "ci": 41741367541,
+      "actual": "PASS_186_OF_186",
+      "reason": "Both nullable-object violations fail closed with generic 503, other tests green."
     }
   ],
   "qa_cases": [
@@ -184,14 +198,20 @@
       "id": "R28-FULL-E2E",
       "result": "NOT_RUN",
       "description": "Signed-in physical browser E2E, real legal data or jobs"
+    },
+    {
+      "id": "R28-18",
+      "result": "PASS_UNIT",
+      "description": "Optional TaskRun coverage and usage cannot be explicit null, as per SRS schema."
     }
   ],
-  "final_ci_status": "PENDING_FINAL_COMMIT_RERUN",
+  "final_ci_status": "FOUR_REVIEW_LOOPS_GREEN_BEFORE_FINAL_METADATA_WRITE; verify PR last commit CI before merge",
   "secrets_in_repo": false,
   "sensitive_data_used": false,
   "file_artifacts": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY",
   "drive_artifacts": "Private test run folder planned; raw CI logs unavailable as Drive upload file_uri.",
   "srs_changed": "NONE",
   "owner_acceptance": "PENDING",
-  "security_status": "INTEGRATION_GATES_OPEN"
+  "security_status": "INTEGRATION_GATES_OPEN",
+  "final_test_count": 186
 }
