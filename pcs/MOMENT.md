@@ -1,10 +1,17 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `26` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-03T23:11:26.745Z`.
-- **Phase:** R0 functional core: tenant membership read adapter TECH_DONE with synthetic SQL tests; no sign-in, live Postgres/RLS or authenticated API deployed. R25 flat UI preview preserved for Owner review.
+- **PCS revision:** `27` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-03T23:23:20.676Z`.
+- **Phase:** R0 functional core R27 trusted bearer request seam TECH_DONE with synthetic tests only. No live verifier/IdP/API/PostgreSQL or release. R25 visual preview unchanged.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R27 — trusted bearer request boundary, unit-tested only
+
+- **PR #40 merged** at `b797e9e94fae24ff9d9fd13458e2593828ea3917`. `r0_core/session_boundary.py` consumes Authorization Bearer through **injected external trusted verifier**, maps provider subject through authoritative internal identity store, rechecks active session, and invokes existing R26 tenant membership adapter. There is no new HTTP route, runtime token-verifier implementation or real IdP.
+- **Test-first:** missing-module regression was an expected RED in run `41738147905`; final PR-head GitHub Actions run `41738492253` **161/161 PASS**, including **12 synthetic** auth/tenant boundary unit cases. This proves in-process adapter behavior, not JWT cryptography, MFA, HTTP 401/403 behavior, PostgreSQL RLS or actual logged-in UI.
+- **Boundaries:** SRS v1.1.15 stays private/unchanged, D01 PENDING_APPROVAL. Do not use client-supplied claim objects as verified identities. No real data or production; immutable R20 snapshot and R25 live UI not touched. Private Drive test folder prepared, raw logs not uploaded.
+- **Next:** implement a small approved /v1 request handler after trusted verification, configured session source and tenant/ACL gate are available; run isolated actual PostgreSQL/RLS and browser E2E before claiming IAM readiness.
 
 ## R26 — read-only relational membership adapter (FR12-01)
 
@@ -58,7 +65,7 @@
 
 ## Follow-up
 
-Continue functional R0 slices on separate task branches while retaining the saved R20 design and R25 preview (unchanged by R26). Owner is final project acceptor; POC1 stays ON_HOLD, POC2 and POC3 remain PLANNED.
+Continue functional R0 slices on separate task branches while retaining the saved R20 design and R25 preview (unchanged by R26/R27). Owner is final project acceptor; POC1 stays ON_HOLD, POC2 and POC3 remain PLANNED.
 
 ## Publication boundary
 
