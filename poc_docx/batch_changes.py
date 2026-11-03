@@ -26,6 +26,7 @@ from poc_docx.track_changes import (
     _patch_settings,
     _validate_edit,
     _validate_package_basics,
+    _check_other_story_revisions,
     w,
 )
 
@@ -116,6 +117,7 @@ def apply_batch(source_docx: bytes, edits: list[dict[str, Any]]) -> bytes:
             if len(set(names)) != len(names):
                 raise EditError("DOCX has duplicate ZIP entries")
             _validate_package_basics(source, names)
+            _check_other_story_revisions(source, names)
             new_settings = _patch_settings(source.read(SETTINGS_PART))
             new_document = _patch_document_batch(source.read(DOC_PART), specs)
             output = BytesIO()
