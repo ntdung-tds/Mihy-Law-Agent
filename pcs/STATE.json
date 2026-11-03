@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 14,
-  "updated_at": "2026-11-03T11:02:21Z",
+  "revision": 15,
+  "updated_at": "2026-11-03T11:58:05Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -96,7 +96,7 @@
           "tce2e_02": "NOT_RUN",
           "offline_review_validator": "PASS_SYNTHETIC_STORY_AND_TABLE_LAYOUT_REGRESSIONS_R9",
           "offline_review_validator_e2e": "PASS_SIMULATED_INPUT_ONLY",
-          "local_suite": "PASS_72_OF_72_R13_SYNTHETIC",
+          "local_suite": "PASS_91_OF_91_PR21_CI_SYNTHETIC",
           "pr3_initial_ci": "PASS_RUN_41569272520_ON_HEAD_4e105d800b03a5a19c03a7988ace16bca05f8429",
           "pr3_final_head_ci": "PASS_RUN_41569562446_HEAD_77dfbda614916765fc1467ea920f1b21be1df503",
           "github_pr3": "MERGED_MAIN_7bd3787a16c63ed3d40623afe6dd582054dde270",
@@ -115,7 +115,9 @@
           "github_pr15_ci": "PASS_RUN_41618024600_FINAL_HEAD_0e92a6dc427db24b76f3c731e92d9a2d282e0986",
           "github_pr17": "MERGED_MAIN_1479a05035c0965ff261cb36502a5e04b3358b40",
           "github_pr17_ci": "PASS_RUN_41621686945_FINAL_HEAD_fb1869e1e3adf7d7faf73f320caacbf093614663",
-          "domain_fr14_03": "PASS_PURE_DOMAIN_POC_ONLY_R14"
+          "domain_fr14_03": "PASS_R15_STATIC_PURE_DOMAIN_ONLY",
+          "github_pr21": "MERGED_MAIN_9aeb4ce42e4b762d8d5ab33de0b8a97bea316bc3",
+          "github_pr21_ci": "PASS_RUN_41631578039_FINAL_HEAD_9c4e42e21857e49c75a984e2b33d99a9899a52a3"
         },
         "owner_acceptance": "NOT_REQUESTED",
         "traceability": [
@@ -140,7 +142,8 @@
           "tests/evidence/AL-POC1-REVIEW-LOOP-R11-2026-11-03.json: 3 reproduce-fix-test loops (52→54→56→58) + final clean bounded review",
           "tests/evidence/AL-POC1-MIXED-R12-2026-11-03.json: synthetic mixed review QA 8 new cases, total 66/66; Word UI still NOT_RUN",
           "tests/evidence/AL-POC1-REVIEW-LOOP-R13-2026-11-03.json; static mixed check 72/72 local and PR #17 CI success; actual Word UI still NOT_RUN",
-          "FR14-03 domain event proof in AL-POC1-005, but TCE2E-02 application approval invalidation still NOT_RUN"
+          "FR14-03 domain event proof in AL-POC1-005, but TCE2E-02 application approval invalidation still NOT_RUN",
+          "tests/evidence/AL-POC1-APPROVAL-REVIEW-LOOP-R15-2026-11-03.json: FR14-03 domain review loop; full CI 91/91, not app E2E"
         ],
         "notes": "Two-stage QA review reproduced and fixed four offline verifier false-PASS classes (style definition, non-target run format, theme and tabs); verified relationship checks and XML indentation-only reserialization. Strict verifier may require manual review on benign Word resaves. Actual Word UI/TC02C/TC07C/TCE2E-02 remain NOT_RUN; task BLOCKED. R9 hardening: offline validator now rejects related-story formatting and table layout changes; still NOT_RUN in Microsoft Word. R10: Static verifier now checks page/section envelope and all non-document package parts; genuine Word metadata changes may legitimately require manual review. R11: DOCX root/settings relationship and MIME integrity negative cases fixed; bounded final review found no new reproductions. Real Word UI/app E2E remain blocked. R13 bounded mixed-review QA loop complete within synthetic scope; static PASS does not imply Word Desktop or application E2E acceptance."
       },
@@ -244,25 +247,27 @@
           "Full existing regression suite and PR-head GitHub CI PASS"
         ],
         "tests": {
-          "local_unittest": "PASS_87_OF_87_R14",
-          "new_cases": "PASS_15_OF_15_DOMAIN_SYNTHETIC",
+          "local_unittest": "PASS_6_OF_6_FOCUSED_SYNTHETIC_R15",
+          "new_cases": "PASS_4_OF_4_R15_NEW_METHODS",
           "srs_static": "STATIC_CONTRACT_AND_WORD_PASS_V1_1_15_145_CONTRACT_HASHES",
-          "schema_parity": "PASS_LOCAL_PRIVATE_ApprovalInvalidation_SCHEMA",
+          "schema_parity": "PASS_LOCAL_4_VALID_7_INVALID_RFC3339_TIMESTAMP_SAMPLES_4_EVENTS",
           "single_character_docx": "PASS_15_TO_16_TRACKED_REPLACEMENT_EVENT_PRODUCT_CHANGED",
-          "github_ci": "PASS_PR19_RUN_41624122919_FINAL_HEAD_2aafc93aa623277a6684257dd3d2ae5fe20e49ad_MERGED_MAIN_6d98d0ddb7d43cc4bcafa3f083825fec67bffc64",
+          "github_ci": "PASS_PR21_RUN_41631578039_MERGED_MAIN_9aeb4ce42e4b762d8d5ab33de0b8a97bea316bc3",
           "private_drive_evidence": "PASS_FOLDER_AUTHORIZED_FILE_SIZE_71890_METADATA_READBACK",
           "microsoft_word_ui": "NOT_RUN",
           "tc14b_authorization": "NOT_RUN",
-          "tce2e_02_application": "NOT_RUN"
+          "tce2e_02_application": "NOT_RUN",
+          "full_repository_ci": "PASS_91_OF_91_RUN_41631578039_FINAL_HEAD_9c4e42e21857e49c75a984e2b33d99a9899a52a3"
         },
         "evidence": [
           "tests/test_approval_invalidation.py (15 new synthetic local PASS cases)",
           "tests/evidence/AL-POC1-APPROVAL-R14-2026-11-03.json (public-safe; PR #19 CI verified)",
           "PR #19 merged at 6d98d0ddb7d43cc4bcafa3f083825fec67bffc64 after final-head Actions run 41624122919 success",
-          "Private Drive AI Law Test Evidence/POC-DOCX-20261103-02: AL-POC1-TR-20261103-R14_approval_invalidation_synthetic_evidence.zip, size 71890, metadata readback; not Word UI evidence"
+          "Private Drive AI Law Test Evidence/POC-DOCX-20261103-02: AL-POC1-TR-20261103-R14_approval_invalidation_synthetic_evidence.zip, size 71890, metadata readback; not Word UI evidence",
+          "tests/evidence/AL-POC1-APPROVAL-REVIEW-LOOP-R15-2026-11-03.json: R15 two reproduced defect classes, bounded final clean check, full GitHub CI 91/91"
         ],
         "owner_acceptance": "NOT_REQUESTED",
-        "notes": "TECH_DONE is only a pure FR14-03 domain rule. Reviewer permission, authoritative storage, event idempotency, transaction version/authorization checks, TC14B and TCE2E-02 application E2E are NOT_RUN. Original SRS unchanged."
+        "notes": "TECH_DONE is only a pure FR14-03 domain rule. Reviewer permission, authoritative storage, event idempotency, transaction version/authorization checks, TC14B and TCE2E-02 application E2E are NOT_RUN. Original SRS unchanged. R15: strict RFC3339-shaped audit stamps validated against SRS date-time schema; immutable product-version invariant enforced for rejected/changes_requested as well as approved. Pure domain POC only."
       }
     ],
     "features": [
@@ -405,6 +410,13 @@
         "title": "Pure approval invalidation decision may be mistaken for an authorized, transaction-safe application approval workflow",
         "status": "OPEN_IN_APP",
         "mitigation": "FR14-03 R14 helper is POC only; caller must provide server-authoritative versions/snapshots and enforce reviewer IAM, transaction/optimistic concurrency, idempotent event persistence and tenant isolation before application acceptance. TC14B/TCE2E-02 remain NOT_RUN; Owner decides acceptance."
+      },
+      {
+        "id": "RISK-011",
+        "level": "MEDIUM",
+        "title": "FR14-03 approval domain previously accepted non-RFC3339 timestamps and bypassed immutability for inactive decisions",
+        "status": "MITIGATED_IN_SCOPED_POC",
+        "mitigation": "Two reproduced defect classes fixed, four regression methods, schema crosscheck 4 valid/7 invalid date stamps + 4 events; 91/91 GitHub CI PASS. No claim of reviewer authorization or transaction-safe persistence."
       }
     ],
     "artifacts": [
@@ -515,15 +527,19 @@
       {
         "path": "tests/evidence/AL-POC1-APPROVAL-R14-2026-11-03.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-POC1-APPROVAL-REVIEW-LOOP-R15-2026-11-03.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
       }
     ],
     "current": {
       "active_task": "AL-POC1-002",
-      "last_completed_step": "R14 FR14-03 pure approval invalidation POC: 15 new tests; 87/87 total local PASS; private SRS static/schema PASS; PR #19 final-head CI run 41624122919 success and merged 6d98d0dd; private synthetic ZIP evidence 71890 bytes uploaded and Drive metadata read back.",
-      "next_action": "Run real Microsoft Word Desktop R12 mixed Accept/Reject and save GUI evidence; build authorized/persistent approval flow and test TC14B/TCE2E-02 in actual application using server-authoritative product versions, role checks and transactions. Owner final acceptance; no production.",
+      "last_completed_step": "R15 bounded FR14-03 approval domain loop: 2 reproduced defects fixed, 6 focused local methods PASS, SRS RFC3339 schema parity 4 valid/7 invalid timestamps and 4 events PASS, GitHub CI full 91/91 PASS on PR #21, merged main 9aeb4ce4.",
+      "next_action": "Continue AL-POC1-002: run real Microsoft Word Desktop Accept/Reject using controlled R12 fixture and private Drive evidence, then actual authorization/persistent approval E2E TC14B/TCE2E-02 when runtime available; Owner final acceptance.",
       "blockers": [
-        "Microsoft Word Desktop mixed Accept/Reject still NOT_RUN; genuine saved/reopened Word files/screenshots/reviewer/version missing",
-        "No deployed application approval/auth/versioning runtime: TC14B, TC02C, TC07C, TCE2E-02 remain NOT_RUN"
+        "Actual Microsoft Word Desktop UI test not executed; genuine Word-saved files, screenshots and tester/version evidence absent",
+        "No application authorization + persisted approval invalidation runtime; TC14B, TC02C, TC07C, TCE2E-02 NOT_RUN"
       ]
     },
     "policy": {
