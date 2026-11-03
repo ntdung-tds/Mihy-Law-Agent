@@ -1,0 +1,91 @@
+{
+  "test_run_id": "AL-R0-UI-TR-20261104-R24",
+  "task_id": "AL-R0-UI-004",
+  "date": "2026-11-04",
+  "scope": "11 UC discovery/catalog UI on nonproduction static R0 preview only; 3 A/B/C groupings, 3 R0 statuses, 8 R1 statuses; not real AI workflows.",
+  "source_reference": "Owner-supplied Giải-phap-Tro-ly-AI-cho-Luat-su.pdf pp.5-6 and private SRS v1.1.15 UI/R0 mapping (not published)",
+  "owner_approval": "Owner chat reply 'Đồng ý' to showing 11 status-only entries and prioritizing UC03, UC04, UC07; final visual acceptance not yet recorded.",
+  "revision": {
+    "pr": 34,
+    "merge_main": "332e7cf345d4750bc3403d478d1abc8c6044bc79",
+    "review_branch": "feat/r0-ui-catalog-11-uc-r24"
+  },
+  "checks": [
+    {
+      "id": "R24-RED",
+      "type": "CI - intentional regression detection",
+      "status": "EXPECTED_FAIL",
+      "run_id": 41729224471,
+      "details": "Contract test for 11 items fails before feature implementation."
+    },
+    {
+      "id": "R24-CI",
+      "type": "GitHub final head CI",
+      "status": "PASS",
+      "run_id": 41730222478,
+      "unit": "133/133",
+      "details": "Python repository suite and R0 JavaScript syntax passed."
+    },
+    {
+      "id": "R24-CATALOG",
+      "type": "Rendered live Chromium accessibilityTree 320px",
+      "status": "PASS",
+      "details": "Exactly 11 unique buttons with accessible names; 3 'Đang triển khai' and 8 'Sắp triển khai'."
+    },
+    {
+      "id": "R24-LAYOUT-A",
+      "type": "Chromium source-branch screenshot section A 390px",
+      "status": "PASS_SCOPED",
+      "details": "Four entry cards visible, not clipped."
+    },
+    {
+      "id": "R24-LAYOUT-B",
+      "type": "Chromium LIVE nonproduction screenshot section B 390px",
+      "status": "PASS_SCOPED",
+      "details": "Three entry cards visible, not clipped."
+    },
+    {
+      "id": "R24-LAYOUT-C",
+      "type": "Chromium source-branch section C 320px",
+      "status": "PARTIAL",
+      "details": "Four cards render; element screenshot captured an overlaid sticky topbar on lower card due tall element, so full visual assertion not made."
+    },
+    {
+      "id": "R24-ASSET-READBACK",
+      "type": "Worker source readback",
+      "status": "PASS",
+      "details": "index.html, styles.css, app.js exactly match main; worker only ai-law-r0-preview updated."
+    },
+    {
+      "id": "R24-CLICK",
+      "type": "Real browser click/close modal interaction",
+      "status": "NOT_VERIFIED",
+      "details": "Cloudflare test injection could not confirm modal visibility; no claim of full click E2E."
+    },
+    {
+      "id": "R24-DEVICE",
+      "type": "Physical Android/iOS Owner visual test",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "R24-AI",
+      "type": "Actual legal AI processing / file ingestion / backend authenticated E2E",
+      "status": "NOT_RUN"
+    }
+  ],
+  "privacy": "PUBLIC_SAFE_SYNTHETIC_METADATA_ONLY",
+  "storage": {
+    "code_and_machine_evidence": "Public GitHub synthetic metadata and PR #34",
+    "private_drive_folder_prepared": true,
+    "raw_screenshot_upload": "NOT_COMPLETED",
+    "public_drive_link_excluded": true
+  },
+  "deployment": {
+    "name": "ai-law-r0-preview",
+    "environment": "isolated_nonproduction_preview",
+    "deployment_id": "de97b99612c244c0a92e1b04971d33b9",
+    "production": "NOT_DEPLOYED"
+  },
+  "srs_baseline": "UNCHANGED",
+  "owner_final_acceptance": "PENDING"
+}

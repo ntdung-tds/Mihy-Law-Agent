@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 23,
-  "updated_at": "2026-11-03T22:01:41.562Z",
+  "revision": 24,
+  "updated_at": "2026-11-04T04:58:00+07:00",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -416,6 +416,40 @@
         ],
         "owner_acceptance": "PENDING_FUNCTIONAL_APP_ACCEPTANCE",
         "notes": "TECH_DONE is only a tested in-process domain component, not a usable login/multi-tenant application. Principal and membership lookup MUST come from trusted server-side auth and persistent store at integration; current view is not an authorization oracle. No SRS deviation recorded."
+      },
+      {
+        "id": "AL-R0-UI-004",
+        "title": "Present 11 grouped legal UC entry points with truthful R0/R1 readiness labels",
+        "priority": "P0",
+        "status": "REVIEW_READY",
+        "scope": "Existing static Overview UI only (catalog HTML, responsive CSS, info modal JS and regression tests). All 11 info-only, 3 R0 prioritized, no real legal AI service, no sensitive data or production.",
+        "acceptance": [
+          "Exactly 11 unique UC entry points appear in groups A/B/C, preserving approved R0 visual shell",
+          "UC03, UC04, UC07 labeled 'R0 · Đang triển khai'; remaining eight 'R1 · Sắp triển khai'",
+          "All cards declare unavailable and never fabricate AI output",
+          "Mobile cards readable and accessible, no backend/network, existing R20 snapshot intact",
+          "CI and live 320px accessibility-tree/390px visual checks pass; Owner final visual acceptance remains open"
+        ],
+        "tests": {
+          "red_green": "EXPECTED_RED_RUN_41729224471_THEN_PASS",
+          "github_ci": "PASS_133_OF_133_RUN_41730222478_PR34_MERGED_MAIN_332e7cf345d4750bc3403d478d1abc8c6044bc79",
+          "chromium_live_320_accessibility": "PASS_11_UNIQUE_3_R0_8_R1",
+          "chromium_live_390_visual": "PASS_SCOPED_GROUP_B",
+          "chromium_source_390_visual": "PASS_SCOPED_GROUP_A",
+          "chromium_source_320_visual": "PARTIAL_GROUP_C_STICKY_HEADER_CAPTURE",
+          "preview_worker_asset_readback": "PASS_ALL_3_ASSETS_MATCH_MAIN",
+          "real_click_e2e": "NOT_VERIFIED",
+          "physical_device": "NOT_RUN",
+          "private_drive_screenshot_upload": "NOT_COMPLETED",
+          "legal_ai_backend_e2e": "NOT_RUN"
+        },
+        "evidence": [
+          "tests/evidence/AL-R0-UI-CATALOG-R24-2026-11-04.json",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/34",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41730222478"
+        ],
+        "owner_acceptance": "PENDING_VISUAL_CONFIRMATION",
+        "notes": "This is only discoverability/status representation; no change to actual 11-UC release scope. No SRS change, no real data. Prior saved R20 design snapshot remains available."
       }
     ],
     "features": [
@@ -454,7 +488,8 @@
         "tasks": [
           "AL-R0-UI-001",
           "AL-R0-UI-002",
-          "AL-R0-UI-003"
+          "AL-R0-UI-003",
+          "AL-R0-UI-004"
         ]
       },
       {
@@ -522,6 +557,12 @@
         "topic": "Accept R0 visual design and proceed to functional R0 slices",
         "value": "Owner's 'Đã ok, chuyển qua chức năng' accepts current R0 visual preview as design reference; proceed with small SRS-aligned functional tasks. Does not approve production, sensitive-data use, authenticated application readiness or R0 E2E.",
         "authority": "Owner explicit chat message on 2026-11-04: 'Đã ok, chuyển qua chức năng'"
+      },
+      {
+        "id": "DEC-009",
+        "topic": "Display all 11 legal workflows as status-only entry points on the approved R0 preview",
+        "value": "Present all 11 UCs in the three groups A/B/C from Owner-provided solution brief, with UC03/UC04/UC07 labeled 'R0 · Đang triển khai' and remaining 8 labeled 'R1 · Sắp triển khai'. This is UI discovery only; no R1 backend functionality activated or SRS baseline changed. Owner visual confirmation still separate.",
+        "authority": "Owner explicit 2026-11-04 chat reply: 'Đồng ý' to prior UI coverage recommendation"
       }
     ],
     "risks": [
@@ -754,16 +795,20 @@
       {
         "path": "tests/evidence/AL-R0-FR12-01-TR-20261104-01.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-R0-UI-CATALOG-R24-2026-11-04.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
       }
     ],
     "current": {
-      "active_task": "AL-R0-FN-001",
-      "last_completed_step": "Owner accepted R0 visual preview and directed functional implementation. R23 first functional slice FR12-01 tenant-context selection core merged PR32; 14 focused unit cases PASS, full GitHub CI 130/130 PASS, no auth provider or API/DB E2E.",
-      "next_action": "Next small R0 function task: integrate trusted authenticated principal and active membership repository as an API boundary (FR12-01/TC12A), add cross-tenant negative tests and real nonproduction browser E2E before claiming functional app readiness. Preserve saved visual UI, SRS and production.",
+      "active_task": "AL-R0-UI-004",
+      "last_completed_step": "R24 approved 11-UC catalog merged PR34; final CI 133/133 PASS, live Chromium 320 accessibility tree 11 unique buttons (3 R0, 8 R1), 390 grouped visual and all Worker assets readback PASS. No backend legal functions introduced.",
+      "next_action": "Owner visually checks current R0 preview (11 groups). Then return to small R0 functional API/auth/tenant membership integration task (FR12-01/TC12A) before connecting UC03/UC04/UC07. Avoid expanding R1 work.",
       "blockers": [
-        "No real authentication middleware, tenant database membership store, PostgreSQL RLS or deployed functional API yet.",
-        "Full TC12A and browser/end-to-end cross-tenant access tests NOT_RUN; no production or real client data.",
-        "Physical device QA and other R0 workflows outside this isolated core task still NOT_RUN."
+        "All 11 catalog entries are info-only, not functional AI workflows; real processing and authenticated API E2E NOT_RUN.",
+        "Modal click/close live browser E2E NOT_VERIFIED due browser-injection/CSP test constraints; owner device review NOT_RUN.",
+        "Private Drive run folder exists but screenshot bytes were not uploaded; public repo holds only synthetic metadata."
       ]
     },
     "policy": {

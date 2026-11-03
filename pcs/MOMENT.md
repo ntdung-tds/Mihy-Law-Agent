@@ -1,10 +1,18 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `23` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-03T22:01:41.562Z`.
-- **Phase:** R0 visual preview accepted by Owner for design; first R0 tenant isolation application-core function TECH_DONE only, not deployed functional application.
+- **PCS revision:** `24` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T04:58:00+07:00`.
+- **Phase:** R0 preview UI now displays 11 status-only entry points grouped A/B/C. Owner's final visual acceptance pending; backend remains an isolated FR12-01 core slice without login/API.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R24 — 11 UC catalog on R0 nonproduction preview
+
+- **Owner direction DEC-009:** Approved grouped display of 11 legal workflows as status-only entries. UC03 translation, UC04 summarization and UC07 grammar correction are shown as **R0 · Đang triển khai**; remaining 8 are **R1 · Sắp triển khai**. Nothing is marked usable. Private SRS v1.1.15 and actual release scope remain unchanged.
+- **PR #34 merged:** `332e7cf345d4750bc3403d478d1abc8c6044bc79`. Changes limited to Overview HTML/CSS/preview modal info, README and 3 regressions. Saved `snapshot/r0-ui-mobile-r20-20261103` intact. Isolated `ai-law-r0-preview` Worker updated; all 3 assets read back equal merged main; production untouched.
+- **Tests:** Expected preimplementation red CI `41729224471`; final green **133/133** run `41730222478`. Actual deployed Chromium 320px accessibility tree exposes **11 unique buttons** (3 R0, 8 R1); visual screenshots source group A 390px and live group B 390px passed scoped layout checks.
+- **Still open:** Full live click/close-modal E2E not verified; 320px group C tall-element screenshot partial; physical Owner device testing NOT_RUN; private Drive test-run folder prepared but raw screenshot bytes not uploaded. Real AI/legal workflows and backend E2E remain NOT_RUN.
+- **Next:** Owner checks current 11-UC preview. Continue smallest authenticated principal/membership/API integration task before connecting UC03/04/07. POC1 stays ON_HOLD.
 
 ## R23 — first R0 functional core slice (FR12-01 / TC12A)
 
@@ -34,7 +42,7 @@
 
 ## Follow-up
 
-Continue functional R0 slices on separate task branches while retaining the saved R20 design and R22 deployed preview. Owner is final project acceptor; POC1 stays ON_HOLD, POC2 and POC3 remain PLANNED.
+Continue functional R0 slices on separate task branches while retaining the saved R20 design and R24 updated preview. Owner is final project acceptor; POC1 stays ON_HOLD, POC2 and POC3 remain PLANNED.
 
 ## Publication boundary
 
