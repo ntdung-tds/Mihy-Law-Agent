@@ -1,0 +1,68 @@
+{
+  "test_run_id": "AL-R0-FR12-01-TR-20261104-01",
+  "task_id": "AL-R0-FN-001",
+  "date": "2026-11-04",
+  "baseline": "AI Law SRS v1.1.15 (private; unchanged)",
+  "refs": [
+    "FR12-01",
+    "TC12A"
+  ],
+  "scope": "Pure server-side synthetic fixture tenant-context switching logic; no authentication provider, database, RLS, endpoint, user data or production.",
+  "base_main": "8a472ace4ad4467ad3ac2243b702fb27e33c9981",
+  "final_code_head": "9547ac34cdcd97bdb6def14844071a41b6e9f0e4",
+  "pr": 32,
+  "github_ci": {
+    "run_id": 41726563145,
+    "status": "PASS",
+    "test_count": 130,
+    "failures": 0,
+    "node_syntax": "PASS"
+  },
+  "focused_test_count": 14,
+  "acceptance_results": [
+    {
+      "case": "active personal and organization memberships via trusted lookup",
+      "status": "PASS_UNIT"
+    },
+    {
+      "case": "switch clears selected matter, documents, chat, search, suggestions, results",
+      "status": "PASS_UNIT"
+    },
+    {
+      "case": "same tenant and authz version preserves current context",
+      "status": "PASS_UNIT"
+    },
+    {
+      "case": "authz version bump clears stale cached scope",
+      "status": "PASS_UNIT"
+    },
+    {
+      "case": "missing/mismatched/inactive/revoked membership denies without leak",
+      "status": "PASS_UNIT"
+    },
+    {
+      "case": "suspended/disabled principal denied",
+      "status": "PASS_UNIT"
+    },
+    {
+      "case": "invalid UUID/registry/role/version denied",
+      "status": "PASS_UNIT"
+    },
+    {
+      "case": "membership lookup outage fails closed; generic error",
+      "status": "PASS_UNIT"
+    }
+  ],
+  "boundaries": {
+    "test_first_source_order": "tests committed before implementation; initial red CI was NOT_RUN (PR only opened after implementation)",
+    "real_login": "NOT_RUN",
+    "real_database_rls": "NOT_RUN",
+    "API_integration": "NOT_RUN",
+    "browser_e2e": "NOT_RUN",
+    "actual_mfa": "NOT_RUN",
+    "owner_functional_acceptance": "PENDING",
+    "production": "NOT_DEPLOYED",
+    "visual_reference": "PRESERVED"
+  },
+  "privacy": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY"
+}
