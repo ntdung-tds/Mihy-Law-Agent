@@ -1,0 +1,66 @@
+{
+  "test_run_id": "AL-R0-UI-TR-20261103-R22",
+  "task_id": "AL-R0-UI-003",
+  "date": "2026-11-03",
+  "scope": "R0 synthetic-data UI preview, CSS-only document filter visibility on narrow mobile; SRS v1.1.15 unchanged",
+  "repo": "ntdung-tds/Mihy-Law-Agent",
+  "baseline": "snapshot/r0-ui-mobile-r20-20261103 (preserved)",
+  "pr": 30,
+  "source": {
+    "red_head": "58cf132ecc104550439ddcfcbfe8e3ad58797edc",
+    "fix_head": "2fe0445eefd59dfd5e124dd460062d9f425573d4"
+  },
+  "defect": {
+    "observed": "Live Chromium screenshot at 320x740, #documents: horizontal filter strip cut 'Bản nháp' and hid 'Hoàn tất'.",
+    "cause": "Horizontal overflow on .filter-tabs plus nowrap filter buttons at <=620px.",
+    "fix": "CSS-only 2x2 grid of four filters at <=620px; 13px labels and >=44px tap targets."
+  },
+  "test_cases": [
+    {
+      "id": "R22-RED",
+      "method": "GitHub CI unittest",
+      "run_id": 41672607713,
+      "result": "EXPECTED_FAIL",
+      "details": "116 tests, 1 failing new R22 regression test prior to CSS repair"
+    },
+    {
+      "id": "R22-GREEN",
+      "method": "GitHub CI unittest plus Node syntax",
+      "run_id": 41672699383,
+      "result": "PASS",
+      "details": "116/116 unittest, node --check passed at fix commit"
+    },
+    {
+      "id": "R22-VIS-320",
+      "method": "Cloudflare Chromium screenshot, source branch HTML/CSS static Documents panel",
+      "viewport": "320x740",
+      "result": "PASS_SCOPED",
+      "details": "All 4 tabs visibly arranged 2x2; no visual clipping. Harness excluded application JS and document rows."
+    },
+    {
+      "id": "R22-VIS-390",
+      "method": "Cloudflare Chromium screenshot, source branch HTML/CSS static Documents panel",
+      "viewport": "390x844",
+      "result": "PASS_SCOPED",
+      "details": "All 4 tabs visibly arranged 2x2; no visual clipping. Harness excluded application JS and document rows."
+    },
+    {
+      "id": "R22-LIVE",
+      "method": "Updated live worker + actual interactions",
+      "result": "NOT_RUN_YET"
+    },
+    {
+      "id": "R22-PHYSICAL",
+      "method": "Physical Android/iOS Owner device",
+      "result": "NOT_RUN"
+    },
+    {
+      "id": "R22-FULL-E2E",
+      "method": "Authenticated app/backend legal workflows",
+      "result": "NOT_RUN_NOT_IN_UI_PREVIEW_SCOPE"
+    }
+  ],
+  "screenshot_storage": "PRIVATE_DRIVE_TEST_RUN_FOLDER_CREATED; raw image upload not completed. Never place screenshots or private Drive URL in public GitHub.",
+  "publication": "PUBLIC_SAFE_SYNTHETIC_METADATA_ONLY",
+  "owner_acceptance": "PENDING"
+}

@@ -107,5 +107,15 @@ class R0PreviewTests(unittest.TestCase):
         self.assertIn('.modal-close{width:44px;height:44px}', mobile)
         self.assertIn('.text-link{font-size:13px;min-height:44px}', mobile)
 
+    def test_mobile_document_filters_fit_without_horizontal_clipping_r22(self):
+        """All four filter choices must be visible as two rows on narrow phones."""
+        marker = '/* R22 document filter mobile visibility:'
+        self.assertIn(marker, self.css)
+        mobile = self.css.split(marker, 1)[1]
+        self.assertIn('@media(max-width:620px)', mobile)
+        self.assertIn('.filter-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible;', mobile)
+        self.assertIn('.filter-tab{min-width:0;width:100%;white-space:normal;', mobile)
+        self.assertIn('min-height:44px', mobile)
+
 if __name__ == '__main__':
     unittest.main()
