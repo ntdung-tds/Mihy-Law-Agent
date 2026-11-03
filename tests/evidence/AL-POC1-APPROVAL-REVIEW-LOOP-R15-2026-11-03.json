@@ -56,9 +56,10 @@
     "negative_before_fix": "7 failures across first custom regression matrix",
     "local_custom_suite_after_fix": "PASS_6_OF_6",
     "compileall": "PASS",
-    "private_srs_schema_parity": "PASS_4_VALID_7_INVALID_STAMPS_4_EVENTS"
+    "private_srs_schema_parity": "PASS_4_VALID_7_INVALID_STAMPS_4_EVENTS",
+    "private_srs_static": "STATIC_CONTRACT_AND_WORD_PASS_145_VERIFIED_CHECKSUMS_79_APP_CASES_NOT_RUN"
   },
-  "github_ci": "PENDING",
+  "github_ci": "PASS_91_OF_91_RUN_41631578039_FINAL_HEAD_9c4e42e21857e49c75a984e2b33d99a9899a52a3_RAW_LOG_READBACK",
   "expected_total_unittest_after_addition": 91,
   "blockers": {
     "microsoft_word_desktop": "NOT_RUN",
@@ -74,5 +75,10 @@
     "No production deployment",
     "Local pure-domain PASS does not equal application E2E"
   ],
-  "classification": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA_ONLY"
+  "classification": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA_ONLY",
+  "github_merge": {
+    "pr": 21,
+    "status": "MERGED",
+    "merge_commit": "9aeb4ce42e4b762d8d5ab33de0b8a97bea316bc3"
+  }
 }
