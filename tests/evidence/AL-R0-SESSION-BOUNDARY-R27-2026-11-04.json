@@ -1,0 +1,98 @@
+{
+  "test_run_id": "AL-R0-SESSION-BOUNDARY-TR-20261104-R27",
+  "task_id": "AL-R0-FN-003",
+  "date": "2026-11-04",
+  "repo": "ntdung-tds/Mihy-Law-Agent",
+  "baseline": "AI Law SRS v1.1.15 — private/unchanged",
+  "requirements": [
+    "FR12-01",
+    "FR12-03",
+    "IF01-01",
+    "SEC01-01 (boundary only)",
+    "TC12A",
+    "TC12B (partial negative coverage)"
+  ],
+  "scope": "Internal bearer request-to-principal adapter with injected external trusted verifier, server-owned identity resolution, revocation check and R26 membership adapter call. No HTTP endpoint, JWT cryptographic implementation, provider, real DB, RLS, MFA, client content or deployment.",
+  "branch": "feat/r0-session-principal-boundary-r27",
+  "pr": 40,
+  "tests": [
+    {
+      "id": "R27-RED",
+      "result": "EXPECTED_FAIL",
+      "source": "GitHub Actions",
+      "run_id": 41738147905,
+      "notes": "Tests added first; import fails before session module."
+    },
+    {
+      "id": "R27-GREEN",
+      "result": "PASS",
+      "source": "GitHub Actions",
+      "run_id": 41738249638,
+      "total": 161,
+      "new_cases": 12,
+      "notes": "Synthetic fake verifier and membership DB-API result sets; node --check UI also passed."
+    },
+    {
+      "id": "R27-HEADER",
+      "result": "PASS_SYNTHETIC",
+      "notes": "Malformed/missing bearer and long/multitoken headers rejected before verifier."
+    },
+    {
+      "id": "R27-PROVIDER",
+      "result": "PASS_SYNTHETIC",
+      "notes": "Trusted callback result required; issuer/audience/subject, issued/not-before/expiry evaluated."
+    },
+    {
+      "id": "R27-IDMAP",
+      "result": "PASS_SYNTHETIC",
+      "notes": "Server authority maps external identity to internal principal, not directly from token subject."
+    },
+    {
+      "id": "R27-REVOCATION",
+      "result": "PASS_SYNTHETIC",
+      "notes": "Session status rechecked for every call, including case of cryptographically valid but revoked session."
+    },
+    {
+      "id": "R27-PRIVACY",
+      "result": "PASS_SYNTHETIC",
+      "notes": "Verifier, identity store, session store errors suppressed from response."
+    },
+    {
+      "id": "R27-TENANT",
+      "result": "PASS_SYNTHETIC",
+      "notes": "Authenticated principal passed to R26 DB membership adapter; target tenant rechecked, old document/chat context reset."
+    },
+    {
+      "id": "R27-IDP-LIVE",
+      "result": "NOT_RUN",
+      "notes": "Actual OIDC/SAML/JWT signature verification, keys, rotation, provider policy."
+    },
+    {
+      "id": "R27-SESSION-LIVE",
+      "result": "NOT_RUN",
+      "notes": "Persistent session DB, MFA/step-up, logout, token rotation, concurrent revocation."
+    },
+    {
+      "id": "R27-API-LIVE",
+      "result": "NOT_RUN",
+      "notes": "Approved HTTP handler and true 401/403/404 behavior, browser/cross-tenant E2E."
+    },
+    {
+      "id": "R27-RLS",
+      "result": "NOT_RUN",
+      "notes": "PostgreSQL migrations, FORCE RLS, tenant and document ACL at point of use."
+    },
+    {
+      "id": "R27-PRODUCTION",
+      "result": "NOT_DEPLOYED",
+      "notes": "No app staging or production runtime deployed."
+    }
+  ],
+  "trust_contract": "Token verifier MUST be an independently vetted trusted server dependency and return VerifiedBearerIdentity only after cryptographic verification. Mock verified identity in tests is not a security proof. Session and principal lookup are server-owned.",
+  "data_classification": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY",
+  "owner_acceptance": "PENDING",
+  "srs_changes": "NONE",
+  "srs_owner_decisions": "D01 remains PENDING_APPROVAL; not silently closed.",
+  "screenshots": "NOT_APPLICABLE_NO_UI_CHANGE",
+  "status": "TECH_DONE_UNIT_ONLY_PENDING_INTEGRATION"
+}
