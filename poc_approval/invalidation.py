@@ -27,6 +27,14 @@ _REQUIRED = frozenset({
 })
 _DECISIONS = frozenset({"approved", "rejected", "changes_requested"})
 _HASH = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
+# SRS ApprovalRecord/ApprovalInvalidation use JSON Schema format: date-time.
+# datetime.fromisoformat alone also accepts ISO week dates, spaces, and
+# non-RFC3339 timezone offsets; those must not reach persisted audit events.
+_RFC3339 = re.compile(
+    r"[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}"
+    r"(?:\.[0-9]+)?(?:[Zz]|[+-][0-9]{2}:[0-9]{2})\Z",
+    re.ASCII,
+)
 
 
 def _nonblank(name: str, value: Any) -> str:
@@ -35,14 +43,21 @@ def _nonblank(name: str, value: Any) -> str:
     return value
 
 
+def _parse_timestamp(stamp: str) -> datetime:
+    normalized = stamp[:-1] + "+00:00" if stamp.endswith(("Z", "z")) else stamp
+    return datetime.fromisoformat(normalized)
+
+
 def _timestamp(name: str, value: Any) -> str:
     stamp = _nonblank(name, value)
+    if not _RFC3339.fullmatch(stamp):
+        raise ApprovalGateError(f"{name} must be RFC 3339 date-time with a timezone")
     try:
-        parsed = datetime.fromisoformat(stamp.replace("Z", "+00:00"))
+        parsed = _parse_timestamp(stamp)
     except ValueError as exc:
-        raise ApprovalGateError(f"{name} must be ISO 8601 with a timezone") from exc
+        raise ApprovalGateError(f"{name} must be valid RFC 3339 date-time") from exc
     if parsed.tzinfo is None or parsed.utcoffset() is None:
-        raise ApprovalGateError(f"{name} must be ISO 8601 with a timezone")
+        raise ApprovalGateError(f"{name} must be RFC 3339 date-time with a timezone")
     return stamp
 
 
@@ -84,6 +99,11 @@ def invalidate_if_stale(
     current_policy = _nonblank("policy_version", policy_version)
     current_hash = sha256(product_bytes).hexdigest()
 
+    # Product-version immutability holds for every decision, including
+    # rejected/changes_requested audit records that are not active approvals.
+    if approval["product_hash"] != current_hash and approval["product_version_id"] == current_version:
+        raise ApprovalGateError("Product version was mutated in place; a new version is required")
+
     # A nonapproved decision does not represent a currently active approval.
     if approval["decision"] != "approved":
         return None
@@ -95,12 +115,9 @@ def invalidate_if_stale(
     if not any((product_changed, source_changed, policy_changed)):
         return None
 
-    if approval["product_hash"] != current_hash and approval["product_version_id"] == current_version:
-        raise ApprovalGateError("Approved product version was mutated in place; a new version is required")
-
-    recorded = datetime.fromisoformat(approval["recorded_at"].replace("Z", "+00:00"))
+    recorded = _parse_timestamp(approval["recorded_at"])
     invalidated_stamp = _timestamp("invalidated_at", invalidated_at)
-    invalidated = datetime.fromisoformat(invalidated_stamp.replace("Z", "+00:00"))
+    invalidated = _parse_timestamp(invalidated_stamp)
     if invalidated < recorded:
         raise ApprovalGateError("invalidated_at is earlier than approval recorded_at")
 
