@@ -1,0 +1,47 @@
+{
+  "test_run_id": "AL-POC1-TR-20261103-R14-APPROVAL",
+  "repo": "ntdung-tds/Mihy-Law-Agent",
+  "base_sha": "bf88d920b2c309f3f64b63b964c59114f19abcfc",
+  "pcs_base_revision": 13,
+  "srs_version": "1.1.15",
+  "srs_source_status": "OWNER_SUPPLIED_VERIFIED_PRIVATE_UNCHANGED",
+  "task_id": "AL-POC1-005",
+  "requirements": [
+    "FR14-03"
+  ],
+  "related_acceptance_cases": [
+    "TC14B",
+    "TCE2E-02",
+    "TC02C",
+    "TC07C"
+  ],
+  "scope": "Pure approval version-binding and invalidation event domain POC; no network, persistence, IAM, Word UI, or application runtime",
+  "pre_fix_reproducible_issues": [
+    "Invalidation timestamp earlier than original approval was accepted",
+    "Nonstring/unhashable decision raised uncontrolled TypeError"
+  ],
+  "post_fix": {
+    "python_unittest": "PASS_87_OF_87",
+    "new_unit_cases": 15,
+    "compileall": "PASS",
+    "private_srs_static": "STATIC_CONTRACT_AND_WORD_PASS",
+    "private_srs_checksum_entries_verified": 145,
+    "approval_event_schema_parity": "PASS_LOCAL_USING_PRIVATE_SRS_SCHEMA_ApprovalInvalidation",
+    "synthetic_docx_one_character_change": "PASS_CHANGED_15_TO_16",
+    "source_snapshot_change": "PASS",
+    "policy_version_change": "PASS",
+    "approval_record_immutable": "PASS",
+    "in_place_version_mutation": "REJECTED",
+    "github_ci": "PENDING_PR"
+  },
+  "not_run": {
+    "microsoft_word_desktop": "NOT_RUN",
+    "tc02c": "NOT_RUN",
+    "tc07c": "NOT_RUN",
+    "tc14b_role_authorization": "NOT_RUN",
+    "tce2e_02_application": "NOT_RUN",
+    "production": "NOT_DEPLOYED"
+  },
+  "owner_acceptance": "NOT_REQUESTED",
+  "publication": "PUBLIC_SAFE_SYNTHETIC_CODE_AND_QA_METADATA_ONLY"
+}
