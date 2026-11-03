@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 15,
-  "updated_at": "2026-11-03T11:58:05Z",
+  "revision": 16,
+  "updated_at": "2026-11-03T12:27:25Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -50,7 +50,7 @@
           "Enforced Word documentProtection blocks edit; malformed document XML fails closed"
         ],
         "tests": {
-          "local_unittest": "PASS_58_OF_58_TOTAL_POC1_SUITE_R11",
+          "local_unittest": "PASS_105_OF_105_R16_FULL_SUITE",
           "local_render": "PASS_LIBREOFFICE_SYNTHETIC_SINGLE_PAGE",
           "microsoft_word": "NOT_RUN",
           "integration_e2e": "NOT_RUN",
@@ -60,7 +60,10 @@
           "package_offline_xml_accept_reject": "PASS_SIMULATION_ONLY_WORD_UI_NOT_RUN",
           "field_negative_cases": "PASS_2026_11_03_R3",
           "header_footer_part_preservation": "PASS_2026_11_03_R3",
-          "package_ooxml_integrity": "PASS_ROOT_OFFICEDOCUMENT_AND_SETTINGS_REL_AND_UNIQUE_CONTENT_TYPES_R11"
+          "package_ooxml_integrity": "PASS_ROOT_OFFICEDOCUMENT_AND_SETTINGS_REL_AND_UNIQUE_CONTENT_TYPES_R11",
+          "github_pr23": "MERGED_MAIN_696f7876d1a7d9db9e4c37b970e44623602b68e2",
+          "github_pr23_ci": "PASS_RUN_41635542044_FINAL_HEAD_dbffb4cc022b298c1d627c3f1b511319d01ce7ae",
+          "review_r16": "PASS_PACKAGE_AND_METADATA_AND_STORY_GUARDS"
         },
         "evidence": [
           "tests/test_track_changes.py (7 local cases, 2026-11-03)",
@@ -96,7 +99,7 @@
           "tce2e_02": "NOT_RUN",
           "offline_review_validator": "PASS_SYNTHETIC_STORY_AND_TABLE_LAYOUT_REGRESSIONS_R9",
           "offline_review_validator_e2e": "PASS_SIMULATED_INPUT_ONLY",
-          "local_suite": "PASS_91_OF_91_PR21_CI_SYNTHETIC",
+          "local_suite": "PASS_105_OF_105_R16_SYNTHETIC_ONLY",
           "pr3_initial_ci": "PASS_RUN_41569272520_ON_HEAD_4e105d800b03a5a19c03a7988ace16bca05f8429",
           "pr3_final_head_ci": "PASS_RUN_41569562446_HEAD_77dfbda614916765fc1467ea920f1b21be1df503",
           "github_pr3": "MERGED_MAIN_7bd3787a16c63ed3d40623afe6dd582054dde270",
@@ -117,7 +120,9 @@
           "github_pr17_ci": "PASS_RUN_41621686945_FINAL_HEAD_fb1869e1e3adf7d7faf73f320caacbf093614663",
           "domain_fr14_03": "PASS_R15_STATIC_PURE_DOMAIN_ONLY",
           "github_pr21": "MERGED_MAIN_9aeb4ce42e4b762d8d5ab33de0b8a97bea316bc3",
-          "github_pr21_ci": "PASS_RUN_41631578039_FINAL_HEAD_9c4e42e21857e49c75a984e2b33d99a9899a52a3"
+          "github_pr21_ci": "PASS_RUN_41631578039_FINAL_HEAD_9c4e42e21857e49c75a984e2b33d99a9899a52a3",
+          "github_pr23": "MERGED_MAIN_696f7876d1a7d9db9e4c37b970e44623602b68e2",
+          "github_pr23_ci": "PASS_RUN_41635542044_FINAL_HEAD_dbffb4cc022b298c1d627c3f1b511319d01ce7ae"
         },
         "owner_acceptance": "NOT_REQUESTED",
         "traceability": [
@@ -143,9 +148,10 @@
           "tests/evidence/AL-POC1-MIXED-R12-2026-11-03.json: synthetic mixed review QA 8 new cases, total 66/66; Word UI still NOT_RUN",
           "tests/evidence/AL-POC1-REVIEW-LOOP-R13-2026-11-03.json; static mixed check 72/72 local and PR #17 CI success; actual Word UI still NOT_RUN",
           "FR14-03 domain event proof in AL-POC1-005, but TCE2E-02 application approval invalidation still NOT_RUN",
-          "tests/evidence/AL-POC1-APPROVAL-REVIEW-LOOP-R15-2026-11-03.json: FR14-03 domain review loop; full CI 91/91, not app E2E"
+          "tests/evidence/AL-POC1-APPROVAL-REVIEW-LOOP-R15-2026-11-03.json: FR14-03 domain review loop; full CI 91/91, not app E2E",
+          "tests/evidence/AL-POC1-REVIEW-LOOP-R16-2026-11-03.json: 4 red-green cycles and final clean bounded review, final PR23 CI run 41635542044 105/105 PASS"
         ],
-        "notes": "Two-stage QA review reproduced and fixed four offline verifier false-PASS classes (style definition, non-target run format, theme and tabs); verified relationship checks and XML indentation-only reserialization. Strict verifier may require manual review on benign Word resaves. Actual Word UI/TC02C/TC07C/TCE2E-02 remain NOT_RUN; task BLOCKED. R9 hardening: offline validator now rejects related-story formatting and table layout changes; still NOT_RUN in Microsoft Word. R10: Static verifier now checks page/section envelope and all non-document package parts; genuine Word metadata changes may legitimately require manual review. R11: DOCX root/settings relationship and MIME integrity negative cases fixed; bounded final review found no new reproductions. Real Word UI/app E2E remain blocked. R13 bounded mixed-review QA loop complete within synthetic scope; static PASS does not imply Word Desktop or application E2E acceptance."
+        "notes": "Two-stage QA review reproduced and fixed four offline verifier false-PASS classes (style definition, non-target run format, theme and tabs); verified relationship checks and XML indentation-only reserialization. Strict verifier may require manual review on benign Word resaves. Actual Word UI/TC02C/TC07C/TCE2E-02 remain NOT_RUN; task BLOCKED. R9 hardening: offline validator now rejects related-story formatting and table layout changes; still NOT_RUN in Microsoft Word. R10: Static verifier now checks page/section envelope and all non-document package parts; genuine Word metadata changes may legitimately require manual review. R11: DOCX root/settings relationship and MIME integrity negative cases fixed; bounded final review found no new reproductions. Real Word UI/app E2E remain blocked. R13 bounded mixed-review QA loop complete within synthetic scope; static PASS does not imply Word Desktop or application E2E acceptance. R16: improved single static review and shared generator fail-closed validation; real Microsoft Word Desktop still NOT_RUN. No Owner acceptance."
       },
       {
         "id": "AL-POC2-001",
@@ -174,7 +180,7 @@
           "All prior regression tests and independent PR CI pass"
         ],
         "tests": {
-          "local_unittest": "PASS_58_OF_58_TOTAL_POC1_SUITE_R11",
+          "local_unittest": "PASS_105_OF_105_R16_FULL_SUITE",
           "added_cases": "PASS_11_OF_11_SYNTHETIC",
           "srs_static": "STATIC_CONTRACT_AND_WORD_PASS",
           "libreoffice_render": "PASS_SINGLE_PAGE_VISUALLY_CHECKED",
@@ -182,7 +188,10 @@
           "microsoft_word": "NOT_RUN",
           "tc02c_app": "NOT_RUN",
           "github_ci": "PASS_PR13_RUN_41613522374_FINAL_HEAD_17290aae0cec83361da4b02dbe7b7ff451787806_MERGED_MAIN_8700ba4e16139a10c5c7af8e2ad83619e08281a6",
-          "package_ooxml_basics": "PASS_REQUIRED_RELATIONSHIPS_AND_UNIQUE_CONTENT_TYPE_DECLARATIONS_R11"
+          "package_ooxml_basics": "PASS_REQUIRED_RELATIONSHIPS_AND_UNIQUE_CONTENT_TYPE_DECLARATIONS_R11",
+          "github_pr23": "MERGED_MAIN_696f7876d1a7d9db9e4c37b970e44623602b68e2",
+          "github_pr23_ci": "PASS_RUN_41635542044_FINAL_HEAD_dbffb4cc022b298c1d627c3f1b511319d01ce7ae",
+          "review_r16": "PASS_INVALID_DATES_CONTROLS_AND_NON_TARGET_REVISIONS_REJECTED"
         },
         "evidence": [
           "PR #7 merged as 5ecd5629931ba541d110f27d374d9bd3f05f7aa3",
@@ -209,14 +218,17 @@
           "Invalid decisions, missing/unselected revisions, altered results fail closed and prior unit regression remains green"
         ],
         "tests": {
-          "local_unittest": "PASS_72_OF_72_2026_11_03_R13",
+          "local_unittest": "PASS_105_OF_105_R16_FULL_SUITE",
           "added_cases": "PASS_6_OF_6_R13_SYNTHETIC",
           "controlled_r8_kit": "PASS_STATIC_SIMULATED_TWO_ACCEPT_ONE_REJECT",
           "libreoffice": "PASS_ONE_PAGE_VISUALLY_CHECKED",
           "microsoft_word_ui": "NOT_RUN",
           "application_tc02c": "NOT_RUN",
           "github_ci": "PASS_PR17_RUN_41621686945_FINAL_HEAD_fb1869e1e3adf7d7faf73f320caacbf093614663_MERGED_MAIN_1479a05035c0965ff261cb36502a5e04b3358b40",
-          "controlled_r12_kit": "PASS_STATIC_SIMULATED_TWO_ACCEPT_ONE_REJECT_SHA256_VERIFIED"
+          "controlled_r12_kit": "PASS_STATIC_SIMULATED_TWO_ACCEPT_ONE_REJECT_SHA256_VERIFIED",
+          "github_pr23": "MERGED_MAIN_696f7876d1a7d9db9e4c37b970e44623602b68e2",
+          "github_pr23_ci": "PASS_RUN_41635542044_FINAL_HEAD_dbffb4cc022b298c1d627c3f1b511319d01ce7ae",
+          "review_r16": "PASS_SHARED_REVISION_DETECTION_REGRESSION"
         },
         "evidence": [
           "tests/evidence/AL-POC1-MIXED-R12-2026-11-03.json",
@@ -304,7 +316,7 @@
       {
         "id": "DOCX-TRACKED-REPLACE",
         "status": "PARTIAL",
-        "evidence": "R13 selected mixed-review static QA: 72/72 local unit tests PASS, PR17 final-head GitHub Actions PASS; R12 2 accept / 1 reject simulation STATIC_PASS; actual Word Desktop + application E2E NOT_RUN."
+        "evidence": "R16 full POC1 synthetic unit suite 105/105 PASS, PR23 final-head GitHub Actions 41635542044 PASS, R12 controlled kit ZIP CRC and LibreOffice render PASS; Word Desktop and application E2E NOT_RUN."
       }
     ],
     "releases": [],
@@ -417,6 +429,13 @@
         "title": "FR14-03 approval domain previously accepted non-RFC3339 timestamps and bypassed immutability for inactive decisions",
         "status": "MITIGATED_IN_SCOPED_POC",
         "mitigation": "Two reproduced defect classes fixed, four regression methods, schema crosscheck 4 valid/7 invalid date stamps + 4 events; 91/91 GitHub CI PASS. No claim of reviewer authorization or transaction-safe persistence."
+      },
+      {
+        "id": "RISK-012",
+        "level": "MEDIUM",
+        "title": "POC1 single Word-result verifier and DOCX generators had mismatched safety gates / false STATIC_PASS",
+        "status": "MITIGATED_IN_SCOPED_POC",
+        "mitigation": "4 reproduced red-green CI cycles (96→99→103→105 tests); final 105/105 GitHub Actions success; R12 synthetic kit CRC and one-page renders inspected. True Word desktop UI and application E2E remain NOT_RUN."
       }
     ],
     "artifacts": [
@@ -531,15 +550,19 @@
       {
         "path": "tests/evidence/AL-POC1-APPROVAL-REVIEW-LOOP-R15-2026-11-03.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-POC1-REVIEW-LOOP-R16-2026-11-03.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA"
       }
     ],
     "current": {
       "active_task": "AL-POC1-002",
-      "last_completed_step": "R15 bounded FR14-03 approval domain loop: 2 reproduced defects fixed, 6 focused local methods PASS, SRS RFC3339 schema parity 4 valid/7 invalid timestamps and 4 events PASS, GitHub CI full 91/91 PASS on PR #21, merged main 9aeb4ce4.",
-      "next_action": "Continue AL-POC1-002: run real Microsoft Word Desktop Accept/Reject using controlled R12 fixture and private Drive evidence, then actual authorization/persistent approval E2E TC14B/TCE2E-02 when runtime available; Owner final acceptance.",
+      "last_completed_step": "R16 POC1 bounded review: 4 red-green safety cycles corrected 10 false-PASS/unsupported edit classes with negative variants; 105/105 GitHub Actions unit PASS (run 41635542044), merged PR #23 at 696f7876; R12 kit rendered and CRC/OOXML checked.",
+      "next_action": "Run real Microsoft Word Desktop Accept/Reject on controlled R12 kit, retain Word-saved/reopened DOCX, screenshots, tester/version/test_run_id in private Drive; test TC02C/TC07C/TC14B/TCE2E-02 application E2E only when authorized runtime exists. Owner final acceptance.",
       "blockers": [
-        "Actual Microsoft Word Desktop UI test not executed; genuine Word-saved files, screenshots and tester/version evidence absent",
-        "No application authorization + persisted approval invalidation runtime; TC14B, TC02C, TC07C, TCE2E-02 NOT_RUN"
+        "Real Microsoft Word Desktop Accept/Reject not executed; no genuine Word UI outputs or reviewer/version/test_run_id screenshots",
+        "Application review/approval authorization and persistence runtime unavailable; TC02C, TC07C, TC14B, TCE2E-02 NOT_RUN"
       ]
     },
     "policy": {
