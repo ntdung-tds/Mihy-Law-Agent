@@ -32,3 +32,11 @@ This is intentionally strict: a legitimate Word resave may trigger manual inspec
 The offline gate now compares document-level page/section configuration and **every non-document ZIP part** (package membership, XML semantics or binary bytes), including `word/settings.xml` and `docProps/`. These checks reject unintended changes that otherwise appeared as `STATIC_PASS`. Formatting-only XML reindentation is treated as equivalent.
 
 **Strict-save caveat:** Microsoft Word may legitimately update metadata or settings while saving. If that happens, the gate reports a static difference requiring **manual investigation**, not automatic success; original files and tester evidence must be retained. Do not bypass this protection by deleting metadata from files. Even `STATIC_PASS` does **not** establish that Word Desktop UI was used. `TC02C`, `TC07C`, `TCE2E-02` and Owner acceptance remain separate gates.
+
+## R16 bounded review loop — one-edit Word result QA
+
+Repeated test-first loops found and fixed false STATIC_PASS cases in the single-edit verifier: three DOCX packages missing matching required parts; forged revision author/date; hidden run tab in the deletion; changed paragraph identity; missing `xml:space="preserve"`; unhandled header revisions; and unsupported tracked formatting/move revisions. The checker now validates each package individually, verifies the exact adjacent deletion/insertion provenance and run shape, rejects any pending revisions across related Word parts, and compares paragraph identity and visible whitespace semantics.
+
+The shared single and batch generators now refuse unsupported tracked revision kinds, embedded tab/newline/carriage return characters in text-only replacements, non-RFC3339 revision dates, and preexisting tracked changes outside the main document. Every negative class was observed with a failing GitHub CI run **before** patching, then green regression on the following head.
+
+The scoped review's final run was **105/105 PASS**. R12 synthetic tracked and 2-accept/1-reject files were checked for CRC/OOXML and rendered to one page each in LibreOffice; this is **not Microsoft Word Desktop Accept/Reject evidence**. Real Word UI and application TC02C/TC07C/TCE2E-02 stay NOT_RUN. A bounded clean pass does not guarantee all Office documents or the overall application are error free.

@@ -11,11 +11,18 @@ from copy import deepcopy
 from datetime import datetime
 from io import BytesIO
 import json
+import re
 from pathlib import Path
 from typing import Any
 from lxml import etree as ET
 from zipfile import BadZipFile, ZipFile
 
+# XML revision w:date requires a date-time value, not every ISO string Python parses.
+_REVISION_DATE = re.compile(
+    r"[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}"
+    r"(?:\.[0-9]+)?(?:[Zz]|[+-][0-9]{2}:[0-9]{2})\Z",
+    re.ASCII,
+)
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 DOC_PART = "word/document.xml"
 SETTINGS_PART = "word/settings.xml"
@@ -39,18 +46,23 @@ def _validate_edit(edit: dict[str, Any]) -> tuple[int, str, str, str, str]:
     old, new = edit.get("old_text"), edit.get("new_text")
     if not isinstance(old, str) or not old or not isinstance(new, str) or not new or old == new:
         raise EditError("old_text and new_text must be different non-empty strings")
+    # A Word line break/tab is a separate w:br/w:tab, not a character inside w:t.
+    # The whole-run POC cannot encode structured control runs safely.
+    if any(character in text for text in (old, new) for character in "\t\r\n"):
+        raise EditError("Whole-run replacement contains unsupported control characters")
     author = edit.get("author", "AI Law POC")
     if not isinstance(author, str) or not author.strip() or len(author) > 100:
         raise EditError("author must be a non-empty string of at most 100 characters")
     stamp = edit.get("changed_at")
-    if not isinstance(stamp, str):
-        raise EditError("changed_at must be an explicit ISO 8601 timestamp")
+    if not isinstance(stamp, str) or not _REVISION_DATE.fullmatch(stamp):
+        raise EditError("changed_at must be RFC 3339 date-time with timezone")
     try:
-        parsed = datetime.fromisoformat(stamp.replace("Z", "+00:00"))
-        if parsed.tzinfo is None:
+        normalized = stamp[:-1] + "+00:00" if stamp.endswith(("Z", "z")) else stamp
+        parsed = datetime.fromisoformat(normalized)
+        if parsed.tzinfo is None or parsed.utcoffset() is None:
             raise ValueError("timezone is required")
     except ValueError as exc:
-        raise EditError("changed_at must include a timezone") from exc
+        raise EditError("changed_at must be valid RFC 3339 date-time") from exc
     return idx, old, new, author.strip(), stamp
 
 
@@ -67,9 +79,24 @@ def _next_id(root: ET.Element) -> int:
 
 
 def _check_existing_revisions(root: ET.Element) -> None:
-    """Do not carry invalid tracked insert/delete IDs into a newly edited document."""
+    """Fail closed on unsupported Word revision kinds and invalid insert/delete IDs."""
+    unsupported = {
+        w(tag) for tag in (
+            "rPrChange", "pPrChange", "tblPrChange", "trPrChange",
+            "tcPrChange", "sectPrChange", "numberingChange",
+            "moveFrom", "moveTo", "moveFromRangeStart", "moveFromRangeEnd",
+            "moveToRangeStart", "moveToRangeEnd",
+            "cellIns", "cellDel", "cellMerge",
+            "customXmlInsRangeStart", "customXmlInsRangeEnd",
+            "customXmlDelRangeStart", "customXmlDelRangeEnd",
+            "customXmlMoveFromRangeStart", "customXmlMoveFromRangeEnd",
+            "customXmlMoveToRangeStart", "customXmlMoveToRangeEnd",
+        )
+    }
     seen: set[int] = set()
     for element in root.iter():
+        if element.tag in unsupported:
+            raise EditError("Document contains unsupported tracked revision kind")
         if element.tag not in {w("ins"), w("del")}:
             continue
         identifier = element.get(w("id"))
@@ -79,6 +106,33 @@ def _check_existing_revisions(root: ET.Element) -> None:
         if number in seen:
             raise EditError("Existing tracked revision has duplicate w:id")
         seen.add(number)
+
+
+def _check_other_story_revisions(archive: ZipFile, names: list[str]) -> None:
+    """Fail closed if any other Word story/definition contains pending changes.
+
+    This POC edits only a whole run in document.xml. Preserving existing tracked
+    revisions in headers, footers, notes or definitions would make the resulting
+    package impossible to fully accept/reject using the scoped static gate.
+    """
+    tracked_names = {
+        "ins", "del", "moveFrom", "moveTo", "rPrChange", "pPrChange",
+        "tblPrChange", "trPrChange", "tcPrChange", "sectPrChange",
+        "numberingChange", "cellIns", "cellDel", "cellMerge",
+        "moveFromRangeStart", "moveFromRangeEnd", "moveToRangeStart",
+        "moveToRangeEnd", "customXmlInsRangeStart", "customXmlInsRangeEnd",
+        "customXmlDelRangeStart", "customXmlDelRangeEnd",
+        "customXmlMoveFromRangeStart", "customXmlMoveFromRangeEnd",
+        "customXmlMoveToRangeStart", "customXmlMoveToRangeEnd",
+    }
+    tracked_tags = {w(name) for name in tracked_names}
+    parser = ET.XMLParser(resolve_entities=False, no_network=True)
+    for name in names:
+        if not (name.startswith("word/") and name.endswith(".xml")) or name == DOC_PART:
+            continue
+        root = ET.fromstring(archive.read(name), parser=parser)
+        if any(node.tag in tracked_tags for node in root.iter()):
+            raise EditError(f"Existing unsupported tracked revision outside main document: {name}")
 
 
 def _check_field_context(paragraphs: list[ET.Element], target: ET.Element) -> None:
@@ -241,6 +295,7 @@ def apply_edit(source_docx: bytes, edit: dict[str, Any]) -> bytes:
             if len(set(names)) != len(names):
                 raise EditError("DOCX has duplicate ZIP entries")
             _validate_package_basics(source, names)
+            _check_other_story_revisions(source, names)
             # Validate protection and XML before any output is written.
             new_settings = _patch_settings(source.read(SETTINGS_PART))
             new_document = _patch_document(source.read(DOC_PART), index, old, new, author, stamp)

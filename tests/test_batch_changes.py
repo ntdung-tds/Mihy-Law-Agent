@@ -242,6 +242,32 @@ class SelectedTrackChangesTest(unittest.TestCase):
             with self.subTest(part_name=part_name), self.assertRaisesRegex(EditError, "content type"):
                 apply_batch(blob, self.selected)
 
+    def test_selected_batch_rejects_non_rfc3339_revision_timestamp(self):
+        for stamp in ("2026-W45-2T10:00:00Z", "2026-11-03 10:00:00Z"):
+            with self.subTest(stamp=stamp), self.assertRaisesRegex(EditError, "RFC 3339"):
+                apply_batch(self.source, [{**self.selected[0], "changed_at": stamp}])
+
+    def test_batch_rejects_run_control_characters(self):
+        for new_text in ("New\nLine", "New\tTab", "New\rReturn"):
+            with self.subTest(text=repr(new_text)), self.assertRaisesRegex(EditError, "unsupported control"):
+                apply_batch(self.source, [{**self.selected[0], "new_text": new_text}])
+
+    def test_batch_rejects_preexisting_header_revision(self):
+        original = zip_parts(self.source)
+        root = ET.fromstring(original["word/header1.xml"])
+        paragraph = next(root.iter(w("p")))
+        revision = ET.SubElement(paragraph, w("ins"), {
+            w("id"): "123", w("author"): "Existing",
+            w("date"): "2026-11-03T01:00:00Z"})
+        run = ET.SubElement(revision, w("r"))
+        ET.SubElement(run, w("t")).text = "Unresolved"
+        buffer = BytesIO()
+        with ZipFile(buffer, "w") as output:
+            for path, data in original.items():
+                output.writestr(path, ET.tostring(root) if path == "word/header1.xml" else data)
+        with self.assertRaisesRegex(EditError, "outside main document"):
+            apply_batch(buffer.getvalue(), self.selected)
+
     def test_malformed_package_rejected(self):
         with self.assertRaises(EditError):
             apply_batch(b"junk", self.selected[:1])

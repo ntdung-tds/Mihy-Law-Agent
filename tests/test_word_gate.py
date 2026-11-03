@@ -266,6 +266,112 @@ class OfflineWordGateTests(unittest.TestCase):
                 out.writestr(item, data)
         self.assertEqual(check_results(self.tracked, result.getvalue(), self.rejected, EDIT)["static_docx_content"], "PASS")
 
+    def test_all_three_incomplete_packages_must_not_static_pass(self):
+        for part in ("_rels/.rels", "word/_rels/document.xml.rels", "word/settings.xml"):
+            def drop(blob):
+                output = BytesIO()
+                with ZipFile(BytesIO(blob)) as source, ZipFile(output, "w") as target:
+                    for info in source.infolist():
+                        if info.filename != part:
+                            target.writestr(info, source.read(info))
+                return output.getvalue()
+            with self.subTest(part=part), self.assertRaisesRegex(ReviewError, "Invalid DOCX package contract"):
+                check_results(drop(self.tracked), drop(self.accepted), drop(self.rejected), EDIT)
+
+    def test_forged_revision_author_or_date_rejected(self):
+        for prop, value in (("author", "Forged"), ("date", "2026-11-03T02:00:00Z")):
+            modified = _review_xml(self.tracked, True)
+            # Change tracked revision attributes, preserving both review outputs.
+            output = BytesIO()
+            with ZipFile(BytesIO(self.tracked)) as source, ZipFile(output, "w") as target:
+                for item in source.infolist():
+                    data = source.read(item)
+                    if item.filename == "word/document.xml":
+                        root = ET.fromstring(data)
+                        next(root.iter(w("ins"))).set(w(prop), value)
+                        data = ET.tostring(root)
+                    target.writestr(item, data)
+            with self.subTest(property=prop), self.assertRaisesRegex(ReviewError, "author/date"):
+                check_results(output.getvalue(), self.accepted, self.rejected, EDIT)
+
+    def test_hidden_deletion_tab_rejected_even_if_reject_output_contains_it(self):
+        output = BytesIO()
+        with ZipFile(BytesIO(self.tracked)) as source, ZipFile(output, "w") as target:
+            for item in source.infolist():
+                data = source.read(item)
+                if item.filename == "word/document.xml":
+                    root = ET.fromstring(data)
+                    run = next(root.iter(w("del"))).find(w("r"))
+                    run.append(ET.Element(w("tab")))
+                    data = ET.tostring(root)
+                target.writestr(item, data)
+        corrupted = output.getvalue()
+        with self.assertRaisesRegex(ReviewError, "unsupported revision run content"):
+            check_results(corrupted, _review_xml(corrupted, True),
+                          _review_xml(corrupted, False), EDIT)
+
+    def test_unrelated_paragraph_identity_drift_rejected(self):
+        def alter(root):
+            p = list(root.iter(w("p")))[1]
+            p.set("{http://schemas.microsoft.com/office/word/2010/wordml}paraId", "FFFF0001")
+        changed = _review_xml(self.tracked, True, alter=alter)
+        with self.assertRaisesRegex(ReviewError, "paragraph 1 identity"):
+            check_results(self.tracked, changed, self.rejected, EDIT)
+
+    def test_dropped_xml_space_preserve_on_accepted_text_rejected(self):
+        source_doc = Document()
+        source_doc.add_paragraph("Original")
+        source_file = BytesIO()
+        source_doc.save(source_file)
+        spec = {**EDIT, "new_text": " Updated "}
+        tracked = apply_edit(source_file.getvalue(), spec)
+        accepted = _review_xml(tracked, True)
+        rejected = _review_xml(tracked, False)
+        def drop_preserve(root):
+            for node in root.iter(w("t")):
+                if node.text == " Updated ":
+                    node.attrib.pop("{http://www.w3.org/XML/1998/namespace}space", None)
+        broken_accepted = _review_xml(tracked, True, alter=drop_preserve)
+        with self.assertRaisesRegex(ReviewError, "whitespace preservation"):
+            check_results(tracked, broken_accepted, rejected, spec)
+
+    def test_unresolved_header_revision_equal_in_all_three_files_rejected(self):
+        def add_unresolved(blob):
+            result = BytesIO()
+            with ZipFile(BytesIO(blob)) as source, ZipFile(result, "w") as target:
+                for info in source.infolist():
+                    data = source.read(info)
+                    if info.filename == "word/header1.xml":
+                        root = ET.fromstring(data)
+                        paragraph = next(root.iter(w("p")))
+                        revision = ET.SubElement(paragraph, w("ins"), {
+                            w("id"): "888", w("author"): "QA",
+                            w("date"): "2026-11-03T01:00:00Z"})
+                        run = ET.SubElement(revision, w("r"))
+                        ET.SubElement(run, w("t")).text = "UNRESOLVED"
+                        data = ET.tostring(root)
+                    target.writestr(info, data)
+            return result.getvalue()
+        with self.assertRaisesRegex(ReviewError, "unresolved revision in"):
+            check_results(add_unresolved(self.tracked),
+                          add_unresolved(self.accepted), add_unresolved(self.rejected), EDIT)
+
+    def test_unsupported_property_revision_in_source_cannot_static_pass(self):
+        output = BytesIO()
+        with ZipFile(BytesIO(self.tracked)) as source, ZipFile(output, "w") as target:
+            for item in source.infolist():
+                data = source.read(item)
+                if item.filename == "word/document.xml":
+                    root = ET.fromstring(data)
+                    para = list(root.iter(w("p")))[1]
+                    props = ET.Element(w("pPr"))
+                    ET.SubElement(props, w("pPrChange"), {w("id"): "271"})
+                    para.insert(0, props)
+                    data = ET.tostring(root)
+                target.writestr(item, data)
+        with self.assertRaisesRegex(ReviewError, "one insertion/deletion pair"):
+            check_results(output.getvalue(), self.accepted, self.rejected, EDIT)
+
     def test_corrupt_package_rejected(self):
         with self.assertRaisesRegex(ReviewError, "DOCX ZIP"):
             check_results(self.tracked, b"not ZIP", self.rejected, EDIT)
