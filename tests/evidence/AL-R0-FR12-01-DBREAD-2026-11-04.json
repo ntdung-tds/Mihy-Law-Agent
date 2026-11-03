@@ -1,0 +1,128 @@
+{
+  "test_run_id": "AL-R0-FR12-01-DBREAD-TR-20261104-01",
+  "task_id": "AL-R0-FN-002",
+  "date": "2026-11-04",
+  "project": "AI Law",
+  "baseline": "SRS v1.1.15 private baseline, unchanged",
+  "requirements": [
+    "FR12-01",
+    "TC12A",
+    "IF01-01 (internal request boundary only)"
+  ],
+  "task_scope": "Read-only PostgreSQL DB-API membership lookup adapter called by existing server-side tenant-context core. No new public API path, no OAuth provider, no live Postgres/RLS, no product E2E.",
+  "source_contract_reference": "SRS v1.1.15 specification-only principals/tenants/memberships/membership_roles/role_catalog; private contract files NOT copied.",
+  "branch": "feat/r0-membership-read-adapter-r26",
+  "pr": 38,
+  "ci": {
+    "red_initial": {
+      "run_id": 41736074780,
+      "conclusion": "EXPECTED_FAIL",
+      "cause": "New tests imported module before implementation"
+    },
+    "red_adversarial": {
+      "run_id": 41736459846,
+      "conclusion": "EXPECTED_FAIL",
+      "cause": "Future joined_at and populated revoked_at were improperly authorized before SQL repair"
+    },
+    "green_code": {
+      "run_id": 41736555633,
+      "conclusion": "PASS",
+      "total_tests": 149,
+      "focused_relational_tests": 12
+    }
+  },
+  "checks": [
+    {
+      "id": "DBREAD-01",
+      "result": "PASS_SYNTHETIC",
+      "case": "Personal and organization memberships use per-tenant role assignments"
+    },
+    {
+      "id": "DBREAD-02",
+      "result": "PASS_SYNTHETIC",
+      "case": "No membership / different user / invalid tenant identifiers deny"
+    },
+    {
+      "id": "DBREAD-03",
+      "result": "PASS_SYNTHETIC",
+      "case": "Revoked membership denies same-tenant cached context"
+    },
+    {
+      "id": "DBREAD-04",
+      "result": "PASS_SYNTHETIC",
+      "case": "Database-disabled principal denies stale authenticated session"
+    },
+    {
+      "id": "DBREAD-05",
+      "result": "PASS_SYNTHETIC",
+      "case": "authz_version bump clears document/chat/search selections"
+    },
+    {
+      "id": "DBREAD-06",
+      "result": "PASS_SYNTHETIC",
+      "case": "Unregistered role / zero authorized roles deny"
+    },
+    {
+      "id": "DBREAD-07",
+      "result": "PASS_SYNTHETIC",
+      "case": "Wrong role-registry version denies"
+    },
+    {
+      "id": "DBREAD-08",
+      "result": "PASS_SYNTHETIC",
+      "case": "Invalid UUID denied before SQL"
+    },
+    {
+      "id": "DBREAD-09",
+      "result": "PASS_SYNTHETIC",
+      "case": "Connection outage fails closed with generic denial"
+    },
+    {
+      "id": "DBREAD-10",
+      "result": "PASS_SYNTHETIC",
+      "case": "revoked_at set on active row still denies"
+    },
+    {
+      "id": "DBREAD-11",
+      "result": "PASS_SYNTHETIC",
+      "case": "joined_at in the future denies"
+    },
+    {
+      "id": "DBREAD-12",
+      "result": "PASS_SYNTHETIC",
+      "case": "Parameter-bound one-shot relational SQL with approved registry"
+    },
+    {
+      "id": "DBREAD-PG",
+      "result": "NOT_RUN",
+      "case": "Live PostgreSQL driver + migrations and real row-level security"
+    },
+    {
+      "id": "DBREAD-AUTH",
+      "result": "NOT_RUN",
+      "case": "Real signed session, MFA, live revocation and user login"
+    },
+    {
+      "id": "DBREAD-API",
+      "result": "NOT_RUN",
+      "case": "Authenticated HTTP API handlers, tenant switching and cross-tenant E2E"
+    },
+    {
+      "id": "DBREAD-CLOUD",
+      "result": "NOT_DEPLOYED",
+      "case": "Staging/production application runtime"
+    }
+  ],
+  "trust_boundary": {
+    "client_tenant_is_request_not_authority": true,
+    "verified_principal_required": true,
+    "role_registry_version_server_config": true,
+    "database_connection_read_only_required": true,
+    "per_use_content_acl_and_rls": "NOT_IMPLEMENTED",
+    "sensitive_data_used": false,
+    "production_deployed": false
+  },
+  "data_classification": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA_ONLY",
+  "owner_final_acceptance": "PENDING",
+  "conclusion": "TECH_DONE_SYNTHETIC_ONLY; NOT a working identity/authentication application; D01 approvals and PostgreSQL RLS verification required before live integration."
+}
