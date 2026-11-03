@@ -100,7 +100,14 @@
   }
   $$('[data-view]').forEach(n => n.addEventListener('click', () => goto(n.dataset.view)));
   $$('[data-go]').forEach(n => n.addEventListener('click', () => goto(n.dataset.go)));
-  $$('[data-demo-action]').forEach(n => n.addEventListener('click', () => openModal(n.dataset.demoAction, 'Màn hình tác vụ sẽ được triển khai theo SRS trong các bước R0 tiếp theo. Đây là bản xem trước UI, chưa xử lý nghiệp vụ hoặc gọi API.')));
+  $('[data-demo-action]').forEach(n => n.addEventListener('click', () => {
+    const isR0 = n.dataset.stage === 'r0';
+    const description = isR0
+      ? 'Tác vụ này đang được ưu tiên phát triển trong R0 theo SRS. Chưa thể thực hiện tác vụ, tải hồ sơ hay nhận kết quả từ AI trên bản xem trước.'
+      : 'Tác vụ này được dự kiến cho giai đoạn R1 theo SRS. Chưa thể thực hiện tác vụ hoặc xử lý tài liệu trên bản xem trước.';
+    const phase = isR0 ? 'R0 · Đang triển khai' : 'R1 · Sắp triển khai';
+    openModal(n.dataset.demoAction, description, `${n.dataset.feature} · ${phase} · Chưa khả dụng`);
+  }));
   $$('.filter-tab').forEach(n => n.addEventListener('click', () => {
     filter = n.dataset.filter;
     $$('.filter-tab').forEach(b => b.classList.toggle('selected', b === n));
