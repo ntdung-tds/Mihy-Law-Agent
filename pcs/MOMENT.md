@@ -1,32 +1,31 @@
 # AI Law — PCS Chat Solo MOMENT
 
-- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public, Owner-selected; `main` canonical after checkpoint PR merge).
-- **State revision:** `13` (source of truth: `pcs/STATE.json`).
-- **Updated:** `2026-11-03T10:44:29Z`.
-- **Phase:** POC1 synthetic technical QA, not Owner accepted and not production.
-- **SRS baseline:** Owner-supplied v1.1.15 archive checksum-verified, private and unchanged.
+- **Repository:** `ntdung-tds/Mihy-Law-Agent` (Public; canonical `main` only after PR merge).
+- **State revision:** `14` (canonical source: `pcs/STATE.json`).
+- **Updated:** `2026-11-03T11:02:21Z`.
+- **Phase:** POC1 technical preparation; no Owner acceptance or production deployment.
+- **SRS baseline:** Owner-provided v1.1.15 previously checksum-verified; original remains private and unchanged.
 
-## R13 bounded mixed-review QA loop
+## R14 — FR14-03 approval invalidation domain slice
 
-- Base R12: **66/66** synthetic tests PASS; scoped tool `tools/verify_selected_review.py`.
-- Cycle 1: reproduced **three false STATIC_PASS** cases (insertion/deletion run formatting mismatch, hidden tab in deletion, unresolved header revision). Fixed exact-run revision validation and all-Word-story revision scan: **69/69 PASS**.
-- Cycle 2: reproduced **two false STATIC_PASS** cases (paragraph identity `paraId` altered and `xml:space="preserve"` lost while raw text unchanged). Fixed paragraph attribute and effective whitespace comparison: **71/71 PASS**.
-- Cycle 3: reproduced **three false STATIC_PASS** cases (both supplied DOCX packages missing mandatory root relationships, document relationships or settings file). Reused POC1 package validator for both inputs: **72/72 PASS**.
-- Cycle 4: clean bounded cross-check; 72/72 local tests PASS, compileall PASS. R12 controlled synthetic kit `STATIC_PASS` for accept edits `[0,1]`, reject edit `[2]`; tracked and simulated result SHA-256 unchanged. **This is not a Word Desktop UI test.**
-- **PR #17** merged as `1479a05035c0965ff261cb36502a5e04b3358b40`; GitHub Actions final PR head `fb1869e1e3adf7d7faf73f320caacbf093614663`, run `41621686945` completed `success` (`unit` job and unittest step passed).
-- Evidence: `tests/evidence/AL-POC1-REVIEW-LOOP-R13-2026-11-03.json` (public-safe synthetic metadata).
+- **AL-POC1-005 TECH_DONE**, narrow pure-Python domain helper `poc_approval/invalidation.py`. An immutable approved record binds output version and SHA-256, source snapshot and policy. A stale binding emits a new `ApprovalInvalidation`-shaped event instead of rewriting the prior approval.
+- A real **synthetic DOCX byte test** changes `15` to `16` (one character) with a successor product version. It triggers `product_changed`; the old approved hash/record remains unchanged. Source snapshot or policy changes also invalidate; wrong hash without a new version is rejected.
+- Two defects found and fixed during local negative testing: invalidation timestamp earlier than original approval was accepted; a malformed non-string decision raised uncontrolled `TypeError`.
+- **Local tests:** **87/87 PASS** (72 prior + 15 new) and compileall PASS. SRS v1.1.15 private static contract checker returned `STATIC_CONTRACT_AND_WORD_PASS`, 145 contract checksums; locally validated generated events against private `ApprovalInvalidation` schema.
+- **PR #19** merged as `6d98d0ddb7d43cc4bcafa3f083825fec67bffc64`; final PR head `2aafc93aa623277a6684257dd3d2ae5fe20e49ad`; GitHub Actions run `41624122919` completed `success` (unit job and unittest step PASS).
+- **Drive:** synthetic R14 test-run ZIP uploaded into existing authorized private evidence folder; file `AL-POC1-TR-20261103-R14_approval_invalidation_synthetic_evidence.zip`, size **71890 bytes**, metadata read back. No private Drive file ID published to GitHub.
+- **Public-safe evidence:** `tests/evidence/AL-POC1-APPROVAL-R14-2026-11-03.json`.
 
-## Acceptance blockers remain
+## Open acceptance gates — not masked by this POC
 
-- `AL-POC1-002` **BLOCKED**: real Microsoft Word Desktop Accept/Reject, Word-saved/reopened files, screenshots, Word version, reviewer/test_run_id: **NOT_RUN**.
-- Application SRS `TC02C`, `TC07C`, `TCE2E-02`: **NOT_RUN**; application approval workflow unavailable for E2E testing.
-- POC2 authorized legal PDF ingestion / POC3 actual PostgreSQL RLS: **PLANNED**.
-- No Owner acceptance, production deployment or SRS baseline changes.
+- `AL-POC1-002` remains **BLOCKED**: Microsoft Word Desktop Accept/Reject, real Word-saved/reopened files and screenshot/tester/version/test_run_id **NOT_RUN**.
+- Application `TC02C`, `TC07C`, `TC14B` reviewer authorization, `TCE2E-02` approval invalidation E2E **NOT_RUN**. This pure helper does **not** supply authenticated reviewer identity, persistence, concurrency safety or real app end-to-end evidence.
+- POC2 authorized legal PDFs / POC3 real PostgreSQL RLS remain PLANNED; no Owner acceptance and no production.
 
 ## Next action
 
-Test mixed Accept/Reject in actual Microsoft Word Desktop with the authorized controlled R12 kit; save UI evidence privately and verify genuine Word-saved outputs. Investigate metadata differences manually; never replace UI evidence with offline simulation. Only Owner decides final POC1 acceptance.
+Run real Microsoft Word Desktop review on controlled R12 kit, record private GUI evidence, then build/test the application authorization and transaction-safe approval flow as separately authorized SRS slices. Owner gives final acceptance; do not change v1.1.15 baseline automatically.
 
 ## Publication boundary
 
-Do not publish original SRS, real legal/customer data, credentials, private Drive identifiers or test screenshots to the Public repository.
+Original SRS, legal/customer data, private Drive IDs, credentials and screenshots remain out of Public GitHub.
