@@ -24,7 +24,11 @@ BUNDLE="${AI_LAW_QA_CREDENTIALS:-$SECRET_HOME/qa-credentials.json}"
 DIR="$SECRET_HOME/$PROFILE"
 ENV_FILE="$DIR/installation.env"
 SQL_FILE="$DIR/qa-seed.sql"
-PROJECT="ai_law_qa_$PROFILE"
+PROJECT_PREFIX="${AI_LAW_QA_PROJECT_PREFIX:-ai_law_qa}"
+case "$PROJECT_PREFIX" in ai_law_qa|alr41ci_[a-zA-Z0-9_]*) ;; *)
+  echo "Invalid isolated QA project prefix" >&2; exit 2;;
+esac
+PROJECT="${PROJECT_PREFIX}_$PROFILE"
 BASE="$ROOT/deployment/standalone/compose.yaml"
 API="$ROOT/deployment/standalone/compose.api-test.yaml"
 LOGIN="$ROOT/deployment/standalone/compose.login-test.yaml"
