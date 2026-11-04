@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 36,
-  "updated_at": "2026-11-04T04:14:19.313Z",
+  "revision": 37,
+  "updated_at": "2026-11-04T04:46:00Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -962,7 +962,10 @@
           "backup_restore_rollback": "NOT_RUN",
           "dedicated_db_compose_bootstrap": "PASS_CI_41771766696",
           "two_real_pg_instances_isolated": "PASS_CI_41771766696",
-          "db_volume_persistence": "PASS_CI_41771766696"
+          "db_volume_persistence": "PASS_CI_41771766696",
+          "dedicated_nonprod_http_api_real_postgres": "PASS_CI_41774950797",
+          "nonprod_signed_jwt_and_persisted_sessions": "PASS_CI_41774950797",
+          "nonprod_matter_acl_and_revocation": "PASS_CI_41774950797"
         },
         "evidence": [
           "deployment/modes.json",
@@ -973,7 +976,15 @@
           "deployment/standalone/compose.yaml",
           "deployment/standalone/smoke_isolation.sh",
           "deployment/standalone/README.md",
-          "GitHub Actions 41771766696 standalone-db job PASS"
+          "GitHub Actions 41771766696 standalone-db job PASS",
+          "r0_core/standalone_fixture_api.py",
+          "db/standalone/0002_r37_nonprod_http_fixtures.sql",
+          "db/standalone/0003_r37_reader.sh",
+          "deployment/standalone/Dockerfile.nonprod-api",
+          "deployment/standalone/compose.api-test.yaml",
+          "deployment/standalone/smoke_api.sh",
+          "tests/evidence/AL-R0-R37-STANDALONE-HTTP-2026-11-04.json",
+          "GitHub Actions 41774950797 unit,postgres-rls,standalone-db,standalone-api all PASS"
         ]
       }
     ],
@@ -1450,8 +1461,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "Owner DEC-016 redirected to standalone-first, IAICT ordinary customer organization. R36 actual two independent Docker Compose PostgreSQL16 stacks PASS for initialization, schema, separate synthetic tenants, unexposed ports and volume persistence; NOT a deployed AI Law application.",
-      "next_action": "Integrate real AI Law application/standalone IAM and session, create role-specific customer accounts including one IAICT organization with no special privilege, then browser/API/PostgreSQL SRS R0 E2E on standalone. SaaS later. No production/customer legal data until gates and Owner acceptance.",
+      "last_completed_step": "R37 standalone-first real two-instance Docker API + actual PostgreSQL16 persisted disposable identity/session/run fixtures, cryptographic signed JWT, MatterACL RLS and revocations PASS GitHub Actions 41774950797; no actual login or full app.",
+      "next_action": "Implement actual standalone user account provisioning/login and session lifecycle with an approved provider or local auth if SRS authorized; then real UI and UC03/04/07 on per-installation database. IAICT is ordinary test organization. Do not activate SaaS or production.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1460,7 +1471,8 @@
         "Owner final functional E2E, actual TC12A/TC12B and live browser test NOT_RUN; no staging/production deployment authorized.",
         "Previous R31 static role-selector and isolated PostgreSQL fixtures are not real role-based test accounts. Actual approved IdP-backed user provisioning and TC12A/B application E2E NOT_RUN.",
         "Dedicated/on-premises/private cloud deployment is Owner-required and in implementation scope (DEC-015), but installation packaging, real isolated deploy, account login, workflow E2E, upgrade/rollback remain NOT_RUN. SaaS readiness is not sufficient to close the dual-delivery target.",
-        "R36 standalone isolated PostgreSQL16 bootstrap CI PASS, but real application server, IdP/login, persistent identity/session, legal workflows, document storage, backup/recovery/upgrade and end-to-end acceptance NOT_RUN."
+        "R36 standalone isolated PostgreSQL16 bootstrap CI PASS, but real application server, IdP/login, persistent identity/session, legal workflows, document storage, backup/recovery/upgrade and end-to-end acceptance NOT_RUN.",
+        "R37 real standalone one approved GET API route+RLS+synthetic signed identities PASS, but full independent app, actual account login/provider, persistent canonical TaskRun, legal AI workflows, document store, browser E2E, backup/restore and final Owner acceptance still NOT_RUN."
       ]
     },
     "policy": {
