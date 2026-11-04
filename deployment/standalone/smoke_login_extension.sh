@@ -64,6 +64,14 @@ login_b() {
     dc_b exec -T auth python -m tools.r38_login_probe login "$expected"
 }
 
+# Browser UI tests use actual Playwright/Chromium and the real
+# loopback gateway -> auth -> API -> PostgreSQL stacks. No screenshots
+# or customer secrets are uploaded to the public repository.
+if [ "${R39_ENABLE:-0}" = "1" ]; then
+  python "$ROOT/tests/browser/test_r39_browser_e2e.py" \
+    "$TMP/a/fixture_passwords.json" "$TMP/b/fixture_passwords.json"
+fi
+
 # Check actual HTTP login, not a locally minted fake token.
 login_a iaict-lawyer "$org_a" 401 bad-request
 token_a="$(login_a iaict-lawyer "$org_a" 200)"
