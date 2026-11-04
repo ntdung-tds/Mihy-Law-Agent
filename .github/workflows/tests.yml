@@ -170,6 +170,10 @@ jobs:
           node --check deployment/cloudflare/src/r0_preview_worker.mjs
           node --check web/r0-preview/matters.js
           node --check tools/build_cf_r0_preview.mjs
+          node --check deployment/cloudflare/src/site_worker.mjs
+          node --check tools/build_cf_site.mjs
+          node --check web/website/site.js
+          node --check web/website/login.js
       - name: Verify RS256 JWT, D1 authz fail-close and Google Drive adapter with fake credentials
         run: node --test deployment/cloudflare/tests/worker.test.mjs
       - name: Verify real WebCrypto PBKDF2 QA session cookies, mobile markup and CSRF
@@ -180,6 +184,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/preview_worker.test.mjs
       - name: Verify real QA matter list/create role boundary and D1 transaction contract
         run: node --test deployment/cloudflare/tests/matter_workspace.test.mjs
+      - name: Verify public website and protected workspace R47 routes
+        run: node --test deployment/cloudflare/tests/site_worker.test.mjs
 
   cloudflare-live-qa:
     # Only R43 feature branch: public nonproduction endpoint with ZERO secrets.
