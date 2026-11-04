@@ -1,10 +1,18 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `31` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T02:44:22.227Z`.
-- **Phase:** R31 fictional demo tenant and release-readiness checklist TECH_DONE (disposable PostgreSQL only); live login, full application E2E, staging and production BLOCKED. D01 and legal-data gates pending.
+- **PCS revision:** `32` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T02:50:47.105Z`.
+- **Phase:** R31 backend and independent 5-scenario nonproduction customer UI TECH_DONE as synthetic demos. Main CI PASS after PR #47 and #46; full browser interactions, real login, application E2E, production and Owner final acceptance NOT_DONE/BLOCKED. D01/legal-data gates still pending.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R32 checkpoint — merged synthetic customer UI and release gate evidence
+
+- **PR #46 merged to main:** `aebf8f40e22737865d5ef485d90f88591bb53ef8`; main CI `41763166002` **completed/success**. Premerge latest head also passed 2 separate GitHub Actions runs. `web/r0-demo/` shows 5 clearly labeled fake personas over 2 tenants, no passwords, file upload, real AI output or authentication.
+- **Existing PR #47 merged earlier:** independent negative PostgreSQL fixture `db/demo/` is different from UI `demo/customers.json`. README now warns these are two independent test datasets and must not be treated as synced customer records or seeded together. Main after #46 contains both without file conflict.
+- **Nonproduction preview:** https://ai-law-r31-demo.iaict-platform.workers.dev/ exists and browser-rendered at 320px (5 persona buttons and 2 initial synthetic document cards) and 390px (5 persona DOM elements). Full scripted persona-switch/revoke/dialog E2E, desktop 1280px and physical-device acceptance remain NOT_RUN; further browser API calls returned HTTP 429 rate limit. No raw screenshots uploaded.
+- **Readiness checker:** `tools/check_product_readiness.py` + `release/product_readiness.json` records `DEMO_FIXTURE=PASS`, `DEMO_POSTGRES=PASS`, `DEMO_NONPROD=PASS`, `DEMO_BROWSER=PARTIAL_TESTED`. Product readiness remains **false**, release authorization **NOT_AUTHORIZED**, Owner acceptance **PENDING**. This advisory checklist does not authorize deployment.
+- **Tasks:** `AL-R0-DEMO-002` and `AL-R0-RELEASE-002` are **TECH_DONE only** for synthetic UI/source/readiness, not real product acceptance. SRS v1.1.15, saved R20 UI reference, R25 flat preview and real-data gates unchanged. Next is approved identity + persistent run/document workflows and full actual E2E after prerequisites.
 
 ## R31 — synthetic customer and product readiness
 
