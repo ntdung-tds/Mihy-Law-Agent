@@ -180,3 +180,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Call real dedicated Cloudflare Free Worker over HTTPS and deny anonymous legal-file requests
         run: bash deployment/cloudflare/tests/live_http_smoke.sh
+
+  cloudflare-auth-r44:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify D1 auth contract
+        run: node --experimental-sqlite --test deployment/cloudflare/tests/auth.test.mjs
