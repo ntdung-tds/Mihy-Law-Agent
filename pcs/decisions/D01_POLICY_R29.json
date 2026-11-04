@@ -40,11 +40,25 @@
     "synthetic_fixtures": true,
     "real_client_data": false,
     "live_identity_tenant_activation": false,
-    "production": false
+    "production": false,
+    "real_r0_engineering": true,
+    "role_specific_real_test_accounts": "AFTER_IDP_AND_ACCESS_EVIDENCE"
   },
   "real_postgres_rls_test": "NOT_RUN",
   "real_identity_session_e2e": "NOT_RUN",
   "full_tc12_ab": "NOT_RUN",
   "srs_modified": false,
-  "privacy_classification": "PUBLIC_SAFE_DECISION_METADATA"
+  "privacy_classification": "PUBLIC_SAFE_DECISION_METADATA",
+  "platform_operator": "IAICT",
+  "platform_operator_management_scope": [
+    "platform_operations",
+    "customer_account_administration",
+    "tenant_membership_administration",
+    "security_and_audit_operations"
+  ],
+  "platform_operator_implicit_matter_read": false,
+  "operator_source": "Owner clarification 2026-11-04: IAICT manages and operates the AI Law platform",
+  "owner_policy_approval_reaffirmed": "2026-11-04",
+  "real_implementation_direction": "Build actual authenticated R0 service and real role-specific staging test accounts; synthetic UI fixtures are not delivery acceptance",
+  "legal_entity_note": "IAICT is the Owner-designated operator; exact registered legal entity details, contracting identity and legal sign-off not supplied."
 }
