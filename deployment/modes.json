@@ -23,7 +23,7 @@
       "required": true,
       "provider_operation": "Customer or agreed operator under deployment contract",
       "isolation": "Isolated application environment, dedicated data/storage/secrets; existing tenant and MatterACL controls remain in force",
-      "stage": "R41_DOCKER_KIT_PARKED_CLOUDFLARE_FREE_NEW_TARGET_NOT_IMPLEMENTED",
+      "stage": "R43_CF_WORKER_AND_D1_QA_DEPLOYED_NO_USER_LOGIN_OR_REAL_DRIVE",
       "real_customer_login": "NOT_RUN",
       "end_to_end": "NOT_RUN",
       "current_priority": "NOW",
@@ -32,7 +32,7 @@
       "next_runtime": "cloudflare_workers_free",
       "next_storage": "customer_google_drive",
       "saved_docker_deployment": "R41_PAUSED_UNTIL_OWNER_HOST",
-      "cloudflare_storage_e2e": "NOT_RUN"
+      "cloudflare_storage_e2e": "PARTIAL_METADATA_ONLY_NO_OAUTH"
     }
   ],
   "shared_invariants": [
@@ -55,7 +55,9 @@
     "pcs/STATE.json DEC-015",
     "deployment/README.md",
     "pcs/STATE.json DEC-017",
-    "deployment/DEC-017-CLOUDFLARE-FREE-PORTABLE-STORAGE.md"
+    "deployment/DEC-017-CLOUDFLARE-FREE-PORTABLE-STORAGE.md",
+    "tests/evidence/AL-R0-R43-CLOUDFLARE-FREE-FIRST-SLICE-2026-11-04.json",
+    "Cloudflare Worker ai-law-standalone-cf-qa + separate D1 actual migrations + GitHub Actions 41802685576 live smoke"
   ],
   "real_dedicated_deployment": "NOT_RUN",
   "production_authorization": "NOT_AUTHORIZED",
@@ -65,8 +67,8 @@
   "saas_future_operator": "IAICT",
   "standalone_operator": "PER_INSTALLATION_CUSTOMER_OR_APPROVED_CONTRACTOR",
   "current_prior_standalone_host_state": "R41_VERIFIED_KIT_PARKED_WAITING_FOR_OWNER_HOST",
-  "current_host_implementation": "CLOUDFLARE_WORKERS_FREE_NONPRODUCTION_PLANNED_NOT_DEPLOYED",
-  "current_file_storage": "CUSTOMER_OWNED_GOOGLE_DRIVE_PLANNED_NOT_CONNECTED",
+  "current_host_implementation": "CLOUDFLARE_WORKERS_FREE_QA_WORKER_DEPLOYED_NO_REAL_USER_LOGIN",
+  "current_file_storage": "GOOGLE_DRIVE_ADAPTER_MOCK_TESTED_NO_OAUTH",
   "portability_contract": {
     "feature_source": "ONE_AI_LAW_PRODUCT_AND_SRS_V1.1.15",
     "current_runtime_target": "cloudflare_workers_free_isolated_customer_nonproduction",
@@ -97,5 +99,6 @@
       "No customer legal data or production until tested and Owner accepted"
     ],
     "status": "OWNER_APPROVED_DIRECTION_NOT_IMPLEMENTED"
-  }
+  },
+  "current_metadata_database": "INDEPENDENT_CLOUDFLARE_D1_QA_8_TABLES_LIVE"
 }
