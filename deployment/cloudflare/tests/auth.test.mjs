@@ -27,8 +27,8 @@ const stmt=db=>({prepare(sql){return {bind(...args){return {
 };}};}});
 function create(){
  const db=new DatabaseSync(":memory:");
- db.exec(readFileSync(new URL("../migrations/0001_cf_qa_metadata.sql",ROOT),"utf8"));
- db.exec(readFileSync(new URL("../migrations/0002_cf_qa_mobile_auth.sql",ROOT),"utf8"));
+ db.exec(readFileSync(new URL("migrations/0001_cf_qa_metadata.sql",ROOT),"utf8"));
+ db.exec(readFileSync(new URL("migrations/0002_cf_qa_mobile_auth.sql",ROOT),"utf8"));
  const passwords={};
  db.prepare("INSERT INTO qa_tenants VALUES(?,?,?)").run(INSTALL,ORG,"organization");
  db.prepare("INSERT INTO qa_tenants VALUES(?,?,?)").run(INSTALL,PERSONAL,"personal");
