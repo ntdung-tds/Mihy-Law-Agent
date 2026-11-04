@@ -128,3 +128,24 @@ jobs:
         run: bash -n deployment/standalone/smoke_qa.sh
       - name: Real 10-account QA role provisioning, signed HTTP login, ACL, no-rotation, volume survival
         run: bash deployment/standalone/smoke_qa.sh
+
+  standalone-staging-kit:
+    # R41 tests operator-run, named-volume persistent-style standalone QA
+    # packaging with 10 private TEMP CI accounts. CI still tears down all
+    # resources: this does NOT deploy an Owner-accessible permanent server.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install standalone QA PostgreSQL/JWT/Argon2 and Chromium test dependencies
+        run: |
+          python -m pip install -r requirements-r0-auth.txt "argon2-cffi==25.1.0" "playwright==1.55.0"
+          python -m playwright install --with-deps chromium
+      - name: Check strict operator and CI shell syntax
+        run: |
+          bash -n deployment/standalone/qa_staging.sh
+          bash -n deployment/standalone/smoke_staging_kit.sh
+      - name: Execute operator-style install, 10-account QA, Chromium mobile+desktop, restart without rekey
+        run: R41_CI=disposable-docker-runner-only bash deployment/standalone/smoke_staging_kit.sh
