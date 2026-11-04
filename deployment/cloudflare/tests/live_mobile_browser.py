@@ -28,9 +28,11 @@ def run():
                         "horizontal overflow viewport "+str(width)
                     assert page.locator("#submit").is_enabled()
                     if width==390:
-                        page.locator("#email").fill("unknown-login@ai-law.invalid")
+                        page.locator("#email").fill("qa04.lawyer@ai-law.invalid")
                         page.locator("#password").fill("deliberately-not-a-QA-password")
-                        page.locator("#submit").click()
+                        with page.expect_response(lambda r: r.url.endswith("/api/qa/login"),timeout=30000) as response_info:
+                            page.locator("#submit").click()
+                        assert response_info.value.status==401, ("Expected PBKDF2 wrong-password rejection, got "+str(response_info.value.status))
                         expect(page.locator("#form-error")).to_be_visible(timeout=18000)
                         expect(page.locator("#dashboard")).to_be_hidden()
                         page.reload(wait_until="domcontentloaded")
