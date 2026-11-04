@@ -1,6 +1,12 @@
-# AI Law — R0 product release decision (R40)
+# AI Law — R0 product release decision (R41)
 
-**State:** PRODUCT_NOT_READY. **D01 policy: OWNER APPROVED. Platform operator: IAICT.** The earlier five-persona static showcase and PostgreSQL seed are synthetic-only test aids; the Owner-defined demo acceptance target is **real authenticated accounts for different customer roles** with real staging E2E. They are not equivalent.
+**State:** PRODUCT_NOT_READY. **D01 policy: OWNER APPROVED. On standalone IAICT is an ordinary customer; future IAICT SaaS operation is deferred.** The earlier five-persona static showcase and PostgreSQL seed are synthetic-only test aids; the Owner-defined demo acceptance target is **real authenticated accounts for different customer roles** with real staging E2E. They are not equivalent.
+
+## R41 — Operator QA kit tested, permanent staging still unavailable
+
+Two local independent Docker+PostgreSQL16 QA installations ran 10 credentials, membership/MatterACL and real Chromium 1440/390/320 checks before and after stop/restart. RSA keys and database accounts were unchanged. CI 41793096574: PASS all eight jobs.
+
+The deployment kit and operator runbook are ready for an authorized standalone host, but no durable Docker host is connected; the Owner-saved R40 bundle was not applied to a permanent staging server. Full legal AI workflows, authenticated workspace discovery, approved IdP/MFA, TC12 and final acceptance remain NOT_RUN. No public deploy or production.
 
 ## R40 — 10 named QA actor accounts, nonproduction SQL/HTTP tests and private credentials
 
