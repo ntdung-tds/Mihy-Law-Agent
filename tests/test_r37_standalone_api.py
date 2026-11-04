@@ -5,6 +5,8 @@ These unit tests do not replace real two-instance Docker/PG16 HTTP tests.
 from __future__ import annotations
 
 import base64
+from contextlib import redirect_stdout
+from io import StringIO
 import json
 import os
 from pathlib import Path
@@ -83,7 +85,12 @@ class R37FixtureRuntimeTests(unittest.TestCase):
             self.assertNotIn("BEGIN", env)
             self.assertTrue((directory / "private.pem").exists())
             # Signature creation is real cryptography, never a fixed token.
-            self.assertIsNone(mint(directory, "fixture-sub", "fixture-session"))
+            output = StringIO()
+            with redirect_stdout(output):
+                self.assertIsNone(mint(directory, "fixture-sub", "fixture-session"))
+            signed = output.getvalue()
+            self.assertEqual(jwt.get_unverified_header(signed)["typ"], "at+jwt")
+            self.assertTrue(signed.count(".") == 2)
 
     def test_compose_is_only_internal_and_schema_is_not_canonical(self):
         compose = (ROOT / "deployment/standalone/compose.api-test.yaml").read_text()
