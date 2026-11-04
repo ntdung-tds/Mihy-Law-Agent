@@ -88,10 +88,9 @@ const WORKSPACES=[
  "ORDER BY CASE WHEN t.kind='organization' THEN 0 ELSE 1 END,m.tenant_id"
 ].join(" ");
 const SESSION=[
- "SELECT s.user_id,s.tenant_id,s.token_digest,s.csrf_digest,a.email,m.role_key",
+ "SELECT s.user_id,s.tenant_id,s.token_digest,s.csrf_digest,s.email,m.role_key",
  "FROM qa_web_sessions s",
  "JOIN qa_principals p ON p.installation_id=s.installation_id AND p.user_id=s.user_id AND p.status='active'",
- "JOIN qa_password_accounts a ON a.installation_id=s.installation_id AND a.user_id=s.user_id",
  "JOIN qa_memberships m ON m.installation_id=s.installation_id AND m.user_id=s.user_id",
  "AND m.tenant_id=s.tenant_id AND m.status='active'",
  "WHERE s.installation_id=? AND s.token_digest=? AND s.revoked_at IS NULL",
@@ -177,9 +176,9 @@ async function login(request,env,now){
    const sid=crypto.randomUUID();
    await env.DB.prepare([
      "INSERT INTO qa_web_sessions(installation_id,sid,token_digest,user_id,tenant_id,",
-     "csrf_digest,created_at,expires_at,revoked_at) VALUES(?,?,?,?,?,?,?,?,NULL)"
+     "csrf_digest,created_at,expires_at,revoked_at,email) VALUES(?,?,?,?,?,?,?,?,NULL,?)"
    ].join(" ")).bind(env.INSTALLATION_ID,sid,await digest(token),
-      account.user_id,selected.tenant_id,csrf,now,now+TTL).run();
+      account.user_id,selected.tenant_id,csrf,now,now+TTL,account.email).run();
    await env.DB.prepare(
      "DELETE FROM qa_auth_attempts WHERE installation_id=? AND attempt_key=?"
    ).bind(env.INSTALLATION_ID,attemptKey).run();
@@ -222,6 +221,27 @@ async function logout(request,env,now){
    return reply(200,{authenticated:false},{"Set-Cookie":makeCookie("",0)});
  }catch{return offline();}
 }
+export async function accessQaLogin(env, userId, email, now=Math.floor(Date.now()/1000)){
+ if(!authEnabled(env)||!UUID.test(userId)||typeof email!=="string")return offline();
+ try{
+   const principal=await env.DB.prepare(
+     "SELECT status FROM qa_principals WHERE installation_id=? AND user_id=?"
+   ).bind(env.INSTALLATION_ID,userId).first();
+   if(principal?.status!=="active")return unknown();
+   const spaces=await workspaceList(env,userId);
+   if(!spaces.length)return unknown();
+   const token=to64(randomBytes(32)),csrf=to64(randomBytes(24));
+   await env.DB.prepare([
+     "INSERT INTO qa_web_sessions(installation_id,sid,token_digest,user_id,tenant_id,",
+     "csrf_digest,created_at,expires_at,revoked_at,email) VALUES(?,?,?,?,?,?,?,?,NULL,?)"
+   ].join(" ")).bind(env.INSTALLATION_ID,crypto.randomUUID(),await digest(token),
+     userId,spaces[0].tenant_id,csrf,now,now+TTL,email).run();
+   return new Response(null,{status:303,headers:{
+     "Location":"/","Cache-Control":"no-store","Set-Cookie":makeCookie(token)
+   }});
+ }catch{return offline();}
+}
+
 export async function authRoute(request,env,options={}){
  if(!authEnabled(env))return offline();
  const path=new URL(request.url).pathname,now=options.now??Math.floor(Date.now()/1000);
