@@ -186,6 +186,12 @@ probe_a 401 "$LAWYER_A"
 sql_b "UPDATE ai_law.memberships SET status='revoked',revoked_at=now()
        WHERE user_id='33333333-3333-4333-8333-333333333333'" >/dev/null
 probe_b 404 "$LAWYER_B"
-# Another container remains fully isolated after one application's session loss.
-probe_a 404 "$ADMIN_A"
+# In R38 extended mode a disabled administrator has already had its
+# persisted session revoked by the account-disable trigger (401).
+# The original R37-only test retains the 404 matter-ACL boundary.
+if [ "$R38_ENABLE" = "1" ]; then
+  probe_a 401 "$ADMIN_A"
+else
+  probe_a 404 "$ADMIN_A"
+fi
 echo "PASS R37: two isolated real HTTP API/PG16 installations, RS256, SQL sessions, RLS/MatterACL, revoked and cross-install denial"
