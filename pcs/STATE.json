@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 34,
-  "updated_at": "2026-11-04T03:24:40.989Z",
+  "revision": 35,
+  "updated_at": "2026-11-04T03:45:00Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -943,6 +943,31 @@
           "GitHub Actions 41766637661 completed/success (unit + postgres-rls)",
           "GitHub Actions 41766669235 completed/success"
         ]
+      },
+      {
+        "id": "AL-R0-DEPLOY-001",
+        "title": "Build and verify dedicated customer installation alongside IAICT SaaS from one AI Law core",
+        "priority": "P0",
+        "required": true,
+        "status": "IN_PROGRESS",
+        "owner_acceptance": "PENDING_REAL_E2E",
+        "scope": "Two supported required product delivery configurations: shared IAICT-hosted SaaS and an isolated customer deployment; one source, separate environment configuration, deployable package, real IAM and R0 workflow E2E, backup/upgrade/rollback. Not a feature fork or automatic production rollout.",
+        "tests": {
+          "dual_mode_governance_contract": "PENDING_CI",
+          "actual_dedicated_install": "NOT_RUN",
+          "real_dedicated_account_login": "NOT_RUN",
+          "isolated_storage_and_keys": "NOT_RUN",
+          "saas_login_e2e": "NOT_RUN",
+          "same_build_legal_workflow_both_modes": "NOT_RUN",
+          "backup_restore_rollback": "NOT_RUN"
+        },
+        "evidence": [
+          "deployment/modes.json",
+          "deployment/README.md",
+          "srs_changed.md",
+          "release/product_readiness.json",
+          "tests/test_dual_delivery_contract.py"
+        ]
       }
     ],
     "features": [
@@ -1098,6 +1123,12 @@
         "topic": "Owner correction: actual R0 implementation and real test customer accounts under IAICT",
         "value": "D01 policy is already OWNER_APPROVED, no repeat policy decision requested; IAICT is Owner-designated platform operator managing overall AI Law services and customer/tenant administration, without automatic access to private MatterACL-protected data. Demo means distinct role-specific real IdP-backed test accounts, not a static persona showcase or PostgreSQL seed alone. Proceed with actual SRS v1.1.15 implementation and E2E. Distinct formal legal record, live-data security and final production gates remain evidence-based; Owner final acceptance reserved.",
         "authority": "Owner explicit clarification 2026-11-04 in this conversation."
+      },
+      {
+        "id": "DEC-015",
+        "topic": "Owner-confirmed mandatory dual deployment: IAICT SaaS and independently installed AI Law",
+        "value": "Owner explicitly confirmed 2026-11-04 that dedicated/private AI Law deployment remains an actual required implementation deliverable; it must not be skipped or postponed as a merely hypothetical future option. Both IAICT-hosted SaaS and isolated customer deployments share one core source, database migration and R0 legal workflows; only infrastructure/configuration and operational boundaries differ. Keep direct customer-account experience simple, security checks identical, and staging test both modes. Record SRS synchronization in srs_changed.md; private SRS v1.1.15 stays unchanged until formal Owner consolidation. No claim of delivered private install or production authorization.",
+        "authority": "Owner correction 2026-11-04: 'Triển khai riêng vẫn được làm, không thể bỏ qua' after confirming SaaS and dedicated modes."
       }
     ],
     "risks": [
@@ -1406,15 +1437,16 @@
     ],
     "current": {
       "active_task": "AL-R0-IAM-REAL-001",
-      "last_completed_step": "R34 concrete RS256+JWKS at+jwt verifier, real cryptographic tests and signed local HTTP GET /v1/runs/{id} with actual disposable PostgreSQL16/RLS PASS at PR-head 41766637661 and 41766669235. Does not supply external IdP, real login or sessions.",
-      "next_action": "Attach an Owner/IAICT-approved real IdP provider configuration (trusted issuer, audience, JWKS, access-token profile with sid), provision non-sensitive real role accounts with persistent session/identity mapping on isolated staging, test TC12A/B with real browser/API. Continue small task/PR and CI. No production or real client data without separate gates.",
+      "last_completed_step": "Owner R35 clarified that both shared IAICT SaaS and isolated dedicated private deployment are required implementation targets; R34 signed JWT real PostgreSQL16 CI remains PASS; deployment acceptance for either mode is NOT_RUN. Recorded deployment contract and pending real acceptance.",
+      "next_action": "Continue real account sign-in IAM and develop dedicated portable deployment configuration/package in parallel from SAME AI Law codebase. Run authenticated role, PostgreSQL/matter ACL and R0 workflow E2E separately on SaaS and dedicated test installations. Retain Owner final acceptance and legal/production gates.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
         "Real PostgreSQL16 FORCE RLS verified in disposable CI only; real production-equivalent service roles, connection pooling/SQL-injection GUC spoofing, all search/download/jobs, and independent security audit NOT_RUN.",
         "Full audit/outbox, cache/invalidation propagation, TaskRun storage/matter mapping and schema rollback or production migration NOT_RUN.",
         "Owner final functional E2E, actual TC12A/TC12B and live browser test NOT_RUN; no staging/production deployment authorized.",
-        "Previous R31 static role-selector and isolated PostgreSQL fixtures are not real role-based test accounts. Actual approved IdP-backed user provisioning and TC12A/B application E2E NOT_RUN."
+        "Previous R31 static role-selector and isolated PostgreSQL fixtures are not real role-based test accounts. Actual approved IdP-backed user provisioning and TC12A/B application E2E NOT_RUN.",
+        "Dedicated/on-premises/private cloud deployment is Owner-required and in implementation scope (DEC-015), but installation packaging, real isolated deploy, account login, workflow E2E, upgrade/rollback remain NOT_RUN. SaaS readiness is not sufficient to close the dual-delivery target."
       ]
     },
     "policy": {
