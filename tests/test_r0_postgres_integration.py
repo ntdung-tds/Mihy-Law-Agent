@@ -7,8 +7,12 @@ from __future__ import annotations
 
 import json
 import os
+import time
 import unittest
 from pathlib import Path
+
+import jwt
+from cryptography.hazmat.primitives.asymmetric import rsa
 
 try:
     import psycopg
@@ -19,6 +23,7 @@ from r0_core.membership_repository import PostgresMembershipRepository, select_t
 from r0_core.tenant_context import AuthenticatedPrincipal, TenantContextDenied
 from r0_core.run_read_wsgi import GetRunWSGI, RunSnapshot
 from r0_core.session_boundary import VerifiedBearerIdentity
+from r0_core.jwks_verifier import JWKSAccessTokenVerifier
 from r0_core.postgres_scope import ScopedPostgresFactory, VerifiedDatabaseScope
 from r0_core.postgres_acl import PostgresMatterRead
 
@@ -412,8 +417,28 @@ class RealPostgresRlsTests(unittest.TestCase):
         self.assertTrue(PostgresMatterRead(open_scoped_connection=self.scoped(U,A))(A,U,CASE_A))
 
     def test_http_get_run_with_real_postgres_membership_and_matter_acl(self):
-        # Session verified by a FAKE verifier; run contents are synthetic in
-        # memory. PostgreSQL enforces *real* membership and MatterACL.
+        # Real RSA signature verified via PyJWT + two R0 server boundaries;
+        # public JWKS is injected from in-process fixture, not a real IdP.
+        # Actual PostgreSQL 16 enforces membership and MatterACL.
+        rsa_key = rsa.generate_private_key(public_exponent=65537,key_size=2048)
+        wrong_key = rsa.generate_private_key(public_exponent=65537,key_size=2048)
+        jwk = jwt.algorithms.RSAAlgorithm.to_jwk(rsa_key.public_key(),as_dict=True)
+        jwk.update({"kid":"r34-pg-1","use":"sig","alg":"RS256"})
+        verifier = JWKSAccessTokenVerifier(
+            issuer="https://idp.example.invalid",
+            audience="ai-law-api",
+            jwks_url="https://idp.example.invalid/keys"
+        )
+        verifier._jwks.fetch_data=lambda:{"keys":[jwk]}
+        now=int(time.time())
+        claims={"iss":"https://idp.example.invalid",
+                "sub":"fixture-external","aud":"ai-law-api",
+                "sid":"synthetic-session", "iat":now-10,
+                "nbf":now-10,"exp":now+600}
+        good_token=jwt.encode(claims,rsa_key,algorithm="RS256",
+                              headers={"kid":"r34-pg-1","typ":"at+jwt"})
+        forged_token=jwt.encode(claims,wrong_key,algorithm="RS256",
+                                headers={"kid":"r34-pg-1","typ":"at+jwt"})
         active_tenant=[A]
         calls=[]
         def repo_for_scope(user,tenant):
@@ -426,9 +451,7 @@ class RealPostgresRlsTests(unittest.TestCase):
                 tenant,user,CASE_A
             )
         app=GetRunWSGI(
-            token_verifier=lambda _:VerifiedBearerIdentity(
-              "https://idp.example.invalid","fixture-external",("ai-law-api",),
-              "synthetic-session",NOW-10,NOW-10,NOW+100),
+            token_verifier=verifier,
             identity_lookup=lambda iss,sub:AuthenticatedPrincipal(U,"active"),
             session_is_active=lambda uid,sid:True,
             active_tenant_for_session=lambda uid,sid:active_tenant[0],
@@ -438,17 +461,21 @@ class RealPostgresRlsTests(unittest.TestCase):
             load_run=lambda t,r:RunSnapshot(t,r,{"run_id":r,"status":"queued",
                             "input_snapshot_id":"fixture-input","policy_version":"fixture-policy"}),
             expected_issuer="https://idp.example.invalid",
-            expected_audience="ai-law-api",now_epoch=lambda:NOW,
+            expected_audience="ai-law-api",now_epoch=lambda:int(time.time()),
         )
-        def get_response():
+        def get_response(auth=None):
             from io import BytesIO
             status=[]
             body=b"".join(app({"REQUEST_METHOD":"GET",
                 "PATH_INFO":"/v1/runs/fixture-run", "QUERY_STRING":"",
-                "HTTP_AUTHORIZATION":"Bearer fixture",
+                "HTTP_AUTHORIZATION":auth or "Bearer " + good_token,
                 "wsgi.input":BytesIO()},lambda s,h,*_:status.append(s)))
             return int(status[0][:3]),json.loads(body)
-        # In-process WSGI contract: real Postgres-backed membership + MatterACL.
+        # A valid signature alone is never authorization. Invalid signatures
+        # must be denied before any database membership/ACL query.
+        self.assertEqual(get_response("Bearer "+forged_token)[0],401)
+        self.assertEqual(calls,[])
+        # In-process contract: signed JWT + real PostgreSQL membership/MatterACL.
         self.assertEqual(get_response()[0],200)
         # Actual local HTTP transport, still with fake verifier and run content.
         from wsgiref.simple_server import make_server, WSGIRequestHandler
@@ -464,11 +491,14 @@ class RealPostgresRlsTests(unittest.TestCase):
             worker=threading.Thread(target=server.serve_forever,daemon=True)
             worker.start()
             url="http://127.0.0.1:%d/v1/runs/fixture-run" % server.server_port
-            req=lambda:Request(url,headers={"Authorization":"Bearer fixture"})
+            req=lambda auth="Bearer "+good_token:Request(url,headers={"Authorization":auth})
             try:
                 with urlopen(req(),timeout=5) as response:
                     self.assertEqual(response.status,200)
                     self.assertEqual(json.load(response)["run_id"],"fixture-run")
+                with self.assertRaises(HTTPError) as caught:
+                    urlopen(req("Bearer "+forged_token),timeout=5)
+                self.assertEqual(caught.exception.code,401)
 
                 active_tenant[0]=B
                 self.assertEqual(get_response()[0],404)
