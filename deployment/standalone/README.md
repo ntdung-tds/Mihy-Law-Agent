@@ -1,4 +1,27 @@
-# AI Law R36–R38 — standalone-first local deployment bootstrap
+# AI Law R36–R39 — standalone-first local deployment bootstrap
+
+## R39 — Browser UX connected to real standalone login and protected API (test only)
+
+**User workflow:** open AI Law local login page → enter the operator-issued test email/password → choose the **authorized** personal/organizational workspace → sign in → inspect the real PostgreSQL-backed synthetic TaskRun with MatterACL → sign out. The interface has the same navy/light, flat-block and mobile-first direction as the Owner's R0 preview. IAICT is ONLY an ordinary test organization, not a global root account. SaaS is deferred.
+
+**Implementation:**
+- `web/r0-standalone/index.html`, `styles.css`, `app.js`: responsive login/dashboard. Unimplemented legal-workflow cards are explicitly marked **Chưa kết nối**; no simulated AI outputs are misrepresented as real.
+- `r0_core/standalone_browser_gateway.py`: Python WSGI browser-to-backend (BFF) test gateway. Browser sends login credentials once through same-origin POST, while the gateway calls R38 authenticated login and holds JWT in **process memory**. Browser only receives an independent **HttpOnly / SameSite=Strict opaque session cookie**; no JWT in JavaScript, DOM, URL or browser storage. Requests for task-run output are forwarded to real R37 API, which revalidates signed identity, PostgreSQL session and MatterACL. Logout calls authenticated R38 revoke and drops gateway session.
+- Per-installation data and service images remain isolated. The optional gateway is **bound strictly to `127.0.0.1:18080`** for the synthetic IAICT organization and `127.0.0.1:18081` for the independent organization in CI. Auth and API are **not** published to the host. Login POST requires exact same Origin, and host header is allowlisted. The gateway refuses to start without the explicit nonproduction mode flag.
+- The **public workspace picker in R39 is only a synthetic display fixture**. It is NOT how the product discovers memberships. The backend independently validates the requested tenant from real SQL, and a different tenant is rejected. Before customer/staging release, this must be replaced by verified post-authenticated membership listing under the approved SRS IAM flow.
+- A browser gateway's cookie table is **ephemeral process memory**, not a durable HA session store. The real R38 signed server session is in PostgreSQL. No production release, no public domain, no actual customer accounts, no MFA, no real document data are authorized here.
+
+**Reproduce real browser testing** in a disposable machine with Docker Compose v2, Python 3.12 and Chromium Playwright (on an OS supported by Playwright, e.g. Ubuntu 24.04):
+
+```bash
+python -m pip install -r requirements-r0-auth.txt "argon2-cffi==25.1.0" "playwright==1.55.0"
+python -m playwright install --with-deps chromium
+R38_ENABLE=1 R39_ENABLE=1 bash deployment/standalone/smoke_api.sh
+```
+
+The test creates three ephemeral `.invalid` accounts in two Docker stacks, exercises real browser HTTP and renders at **1440, 390 and 320px**, reload/cookie continuity, authorized/denied matter ACL, sign-out and cross-origin protection; then destroys both stacks/credentials. **No screenshot or test password is uploaded to the public GitHub repository.** The CI status must be observed before claiming PASS.
+
+**Do not use R39 as production authentication:** The unapproved `/api/*` and `/standalone/auth/*` endpoints are internal test integration routes, not new approved SRS public API contracts. Before Owner acceptance, complete durable standalone installation, authenticated workspace selection, real account provisioning, canonical schema/sessions, TLS and browser/mobile acceptance, full R0 legal workflows, backup and rollback.
 
 ## R38: isolated LOCAL password accounts and actual HTTP login — NONPRODUCTION ONLY
 

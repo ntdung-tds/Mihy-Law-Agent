@@ -42,6 +42,29 @@ def prepare(directory: Path, profile: str) -> None:
             "AI_LAW_TEST_SIGNING_KEY_B64=" + base64.b64encode(private).decode() + "\n"
             "AI_LAW_TEST_KEY_KID=" + kid + "\n"
         )
+    # Only public synthetic workspace labels; in the product the workspace
+    # list must come from authenticated memberships, never client assertions.
+    workspaces = (
+        [{"id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "label": "IAICT · Tổ chức thử nghiệm", "type": "organization"},
+         {"id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+          "label": "Không gian cá nhân", "type": "personal"}]
+        if profile == "iaict" else
+        [{"id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+          "label": "Tổ chức độc lập", "type": "organization"}]
+    )
+    port = "18080" if profile == "iaict" else "18081"
+    with (directory / "installation.env").open("a") as env:
+        env.write(
+            "AI_LAW_R39_HOST_PORT=" + port + "\n"
+            "AI_LAW_R39_BROWSER_ORIGIN=http://127.0.0.1:" + port + "\n"
+            "AI_LAW_R39_COOKIE_NAME=al_r39_" + profile + "\n"
+            "AI_LAW_R39_WORKSPACES_B64=" +
+            base64.b64encode(
+                json.dumps(workspaces, ensure_ascii=False,
+                           separators=(",", ":")).encode()
+            ).decode() + "\n"
+        )
     records = {}
     sql = ["BEGIN;"]
     for email, subject, uid in ACCOUNTS:

@@ -8,6 +8,7 @@ RUN python -m pip install --no-cache-dir -r requirements-r0-auth.txt "psycopg[bi
     && useradd --system --uid 10001 --no-create-home appuser
 COPY r0_core ./r0_core
 COPY tools ./tools
+COPY web/r0-standalone ./web/r0-standalone
 USER 10001:10001
-EXPOSE 8080
+EXPOSE 8080 8081 8082
 CMD ["python", "-m", "r0_core.standalone_fixture_api"]

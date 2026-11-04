@@ -6,12 +6,21 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BASE="$ROOT/deployment/standalone/compose.yaml"
 EXT="$ROOT/deployment/standalone/compose.api-test.yaml"
 EXT_LOGIN="$ROOT/deployment/standalone/compose.login-test.yaml"
+EXT_BROWSER="$ROOT/deployment/standalone/compose.browser-test.yaml"
 R38_ENABLE="${R38_ENABLE:-0}"
+R39_ENABLE="${R39_ENABLE:-0}"
+if [ "$R39_ENABLE" != "0" ] && [ "$R39_ENABLE" != "1" ]; then
+  echo "Invalid R39 test mode" >&2; exit 1
+fi
+if [ "$R39_ENABLE" = "1" ] && [ "$R38_ENABLE" != "1" ]; then
+  echo "R39 browser E2E requires R38 auth E2E" >&2; exit 1
+fi
 if [ "$R38_ENABLE" != "0" ] && [ "$R38_ENABLE" != "1" ]; then
   echo "Invalid isolated test mode" >&2; exit 1
 fi
 OVERLAYS=()
 if [ "$R38_ENABLE" = "1" ]; then OVERLAYS=(-f "$EXT_LOGIN"); fi
+if [ "$R39_ENABLE" = "1" ]; then OVERLAYS+=(-f "$EXT_BROWSER"); fi
 TMP="$(mktemp -d)"
 umask 077
 A="alr37_iaict_$$"
