@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "status": "OWNER_APPROVED_DELIVERY_TARGET_NOT_YET_IMPLEMENTED",
+  "authority": "Owner explicit 2026-11-04: both SaaS and independent deployment must be built; independent deployment cannot be deferred or omitted.",
+  "product": "AI Law",
+  "platform_operator": "IAICT",
+  "same_core_source": true,
+  "srs_baseline": "v1.1.15 unchanged pending recorded change review",
+  "delivery_modes": [
+    {
+      "id": "saas",
+      "label": "IAICT-hosted shared SaaS",
+      "required": true,
+      "provider_operation": "IAICT",
+      "isolation": "Multiple customer tenants; membership, MatterACL and RLS enforce separate data",
+      "stage": "IMPLEMENTATION_IN_PROGRESS",
+      "real_customer_login": "NOT_RUN",
+      "end_to_end": "NOT_RUN"
+    },
+    {
+      "id": "dedicated",
+      "label": "Dedicated deployment for a customer organization (private cloud/on-premises or isolated environment)",
+      "required": true,
+      "provider_operation": "Customer or agreed operator under deployment contract",
+      "isolation": "Isolated application environment, dedicated data/storage/secrets; existing tenant and MatterACL controls remain in force",
+      "stage": "IMPLEMENTATION_REQUIRED_NOT_YET_DEPLOYED",
+      "real_customer_login": "NOT_RUN",
+      "end_to_end": "NOT_RUN"
+    }
+  ],
+  "shared_invariants": [
+    "Identical application source and versioned database migrations; no permanent product fork.",
+    "Shared legal AI workflows, IAM authorization semantics, SRS APIs, audit semantics and negative tests.",
+    "Authentication provider, storage and external AI dependencies are explicit environment configuration; do not embed IAICT SaaS credentials in a customer installation.",
+    "No implicit IAICT operator or customer tenant-admin read of a MatterACL-protected case.",
+    "Customer/user/tenant names and JWT/header values never bypass verified membership and ACL.",
+    "No production or customer legal data until independent security/legal and Owner release acceptance."
+  ],
+  "implementation_targets": [
+    "R0 bounded deployment-mode config and separation contract",
+    "Shared application packaging/migration path with distinct environment settings",
+    "Isolated dedicated test environment with genuine login and authorization",
+    "Run one representative R0 end-to-end legal workflow in each mode, then entire R0 acceptance matrix",
+    "Backup/restore, upgrade/rollback, secret isolation, logging and operational acceptance by Owner"
+  ],
+  "evidence": [
+    "pcs/STATE.json DEC-015",
+    "deployment/README.md"
+  ],
+  "real_dedicated_deployment": "NOT_RUN",
+  "production_authorization": "NOT_AUTHORIZED"
+}
