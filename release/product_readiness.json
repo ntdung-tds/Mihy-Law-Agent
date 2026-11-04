@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "baseline": "SRS v1.1.15",
+  "release_target": "R0",
+  "checkpoint": "R31",
+  "assessment_date": "2026-11-04",
+  "synthetic_demo_customers_created": true,
+  "live_customer_accounts_created": false,
+  "production_deployment": "NOT_AUTHORIZED",
+  "owner_final_acceptance": "PENDING",
+  "srs_changed": false,
+  "purpose": "Block product release until actual SRS-defined functions, identity, security, legal and owner gates have separate evidence. Demo is NOT a customer-facing working AI law product.",
+  "demo_gates": [
+    {
+      "id": "DEMO_FIXTURE",
+      "status": "PASS",
+      "evidence": [
+        "demo/customers.json",
+        "demo/seed_demo.py"
+      ],
+      "note": "Synthetic tenants/users; no passwords, no real IdP."
+    },
+    {
+      "id": "DEMO_POSTGRES",
+      "status": "PENDING_CI",
+      "evidence": [],
+      "note": "Real PG16 R31 customer seed and RLS suite pending."
+    },
+    {
+      "id": "DEMO_BROWSER",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "note": "Mobile 320/390px and desktop browser real interaction not yet verified."
+    },
+    {
+      "id": "DEMO_NONPROD",
+      "status": "NOT_DEPLOYED",
+      "evidence": [],
+      "note": "Publicly viewable isolated demo preview not yet deployed."
+    }
+  ],
+  "gates": [
+    {
+      "id": "D01_APPROVAL",
+      "status": "PENDING_EVIDENCE",
+      "evidence": [],
+      "need": "Formal authority/provider role and signed D01-R0 evidence; in-chat policy approval is not a signed release."
+    },
+    {
+      "id": "LEGAL_DATA",
+      "status": "PENDING_APPROVAL",
+      "evidence": [],
+      "need": "D03/D05/D07, conditional D02/D04, legal entity and required data agreements; verified service license applicability."
+    },
+    {
+      "id": "REAL_IDP_JWT_MFA",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [],
+      "need": "Approved actual identity provider, JWKS JWT signature verification, MFA, session revocation, real user provisioning."
+    },
+    {
+      "id": "REAL_TENANT_RLS_SECURITY",
+      "status": "PARTIAL_TESTED",
+      "evidence": [
+        "tests/evidence/AL-R0-R30-POSTGRES-2026-11-04.json"
+      ],
+      "need": "Independent production-equivalent role, GUC spoofing, transaction pooling and full E2E/TC12A/B security review."
+    },
+    {
+      "id": "REAL_CASE_DOC_STORAGE",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [],
+      "need": "Safe encrypted content storage, upload validation, antivirus/quarantine, OCR and immutable originals per SRS."
+    },
+    {
+      "id": "UC03_TRANSLATE",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [],
+      "need": "Real translation workflow + citations/context protection/QA acceptance per SRS."
+    },
+    {
+      "id": "UC04_SUMMARIZE",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [],
+      "need": "Real document summary workflow + grounding and test cases per SRS."
+    },
+    {
+      "id": "UC07_GRAMMAR",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [],
+      "need": "Real grammar correction workflow + actual DOCX/Word acceptance tests."
+    },
+    {
+      "id": "RUNS_JOBS_AUDIT",
+      "status": "PARTIAL_TESTED",
+      "evidence": [
+        "tests/evidence/AL-R0-R28-GETRUN-TR-2026-11-04.json"
+      ],
+      "need": "Persistent TaskRun, worker retry and revocation, MatterACL mapping, append-only audit/outbox and full lifecycle."
+    },
+    {
+      "id": "APPLICATION_E2E",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "need": "Authenticated staging end-to-end desktop/mobile/browser, upload, real AI outputs and authorization with sanctioned test accounts."
+    },
+    {
+      "id": "OPERATIONS_RELEASE",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "need": "Backups/restores, monitoring, incident/rollback plans, accessibility/performance and final cutover checklist."
+    }
+  ],
+  "release_policy": {
+    "production_never_auto_deploy": true,
+    "only_owner_can_accept": true,
+    "legal_data_gate_separate": true,
+    "no_demo_identity_equals_real_auth": true,
+    "no_fake_ai_output_presented_as_real": true
+  }
+}
