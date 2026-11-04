@@ -1,0 +1,13 @@
+# R37 nonproduction ONLY: narrow GET /v1/runs/{id} adapter.
+# NOT a production AI Law service or live identity provider.
+FROM python:3.12-slim
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+WORKDIR /srv/ai-law
+COPY requirements-r0-auth.txt .
+RUN python -m pip install --no-cache-dir -r requirements-r0-auth.txt "psycopg[binary]==3.3.7" \
+    && useradd --system --uid 10001 --no-create-home appuser
+COPY r0_core ./r0_core
+COPY tools ./tools
+USER 10001:10001
+EXPOSE 8080
+CMD ["python", "-m", "r0_core.standalone_fixture_api"]
