@@ -140,7 +140,29 @@ probe_a 401 "$LAWYER_B"
 probe_a 401 ""
 probe_a 401 "invalid-untrusted-token"
 
-# Test the persisted authorization state is re-evaluated for every HTTP call.
+# The application SQL role cannot create tenant rows or become an admin user.
+dc_a exec -T api python - <<'PY'
+import os
+import sys
+import psycopg
+try:
+    with psycopg.connect(os.environ["AI_LAW_READER_DSN"]) as connection:
+        connection.execute("INSERT INTO ai_law.tenants VALUES ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee','organization')")
+except psycopg.errors.InsufficientPrivilege:
+    print("PASS R37: application database identity is read-only")
+else:
+    print("FAIL R37: app reader wrote organization tenant")
+    sys.exit(1)
+PY
+
+# ACL revocation, independent of session state, must deny the SAME signed token.
+sql_a "UPDATE ai_law.matter_user_acl
+       SET valid_to=now()-interval '1 minute'
+       WHERE tenant_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+         AND user_id='11111111-1111-4111-8111-111111111111'" >/dev/null
+probe_a 404 "$LAWYER_A"
+
+# Test the persisted session and membership state on every subsequent call.
 sql_a "UPDATE ai_law_nonprod.sessions SET revoked_at=now() WHERE session_id='r37-iaict-lawyer-sid'" >/dev/null
 probe_a 401 "$LAWYER_A"
 sql_b "UPDATE ai_law.memberships SET status='revoked',revoked_at=now()
