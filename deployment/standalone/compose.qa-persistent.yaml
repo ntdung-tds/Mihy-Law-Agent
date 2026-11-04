@@ -1,0 +1,19 @@
+# R41 operator-run LOCAL-ONLY QA installation overlay.
+# Named PG16 volume belongs to the Compose project and persists across
+# up/down. No ports for database, signed-JWT service or internal API.
+# Browser gateway still binds ONLY 127.0.0.1 per compose.browser-test.yaml.
+# No production, no public SaaS, no actual legal files.
+services:
+  db:
+    restart: unless-stopped
+  api:
+    restart: unless-stopped
+  auth:
+    restart: unless-stopped
+  gateway:
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8082/',timeout=2).close()"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
