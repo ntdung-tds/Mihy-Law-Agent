@@ -67,6 +67,10 @@ class RealPostgresRlsTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.admin.close()
 
+    def _many(self, query, rows):
+        with self.admin.cursor() as cur:
+            cur.executemany(query, rows)
+
     def setUp(self):
         self.admin.execute("""
           TRUNCATE ai_law.membership_roles,ai_law.matter_group_members,
@@ -76,29 +80,29 @@ class RealPostgresRlsTests(unittest.TestCase):
                    ai_law.iam_audit CASCADE
         """)
         with self.admin.transaction():
-            self.admin.executemany("INSERT INTO ai_law.principals VALUES (%s,%s,%s)", [
+            self._many("INSERT INTO ai_law.principals VALUES (%s,%s,%s)", [
                 (U, "fixture-ext", "active"), (OTHER, "fixture-ext-2", "active")
             ])
-            self.admin.executemany("INSERT INTO ai_law.tenants VALUES (%s,%s)", [
+            self._many("INSERT INTO ai_law.tenants VALUES (%s,%s)", [
                 (A, "personal"), (B, "organization")
             ])
-            self.admin.executemany(
+            self._many(
                 "INSERT INTO ai_law.role_catalog(role_key,description,registry_version) VALUES (%s,%s,%s)",
                 [("lawyer", "synthetic lawyer", "1.1.15"),
                  ("tenant_admin","synthetic admin", "1.1.15")],
             )
-            self.admin.executemany("""
+            self._many("""
               INSERT INTO ai_law.memberships
               (membership_id,tenant_id,user_id,status,authz_version,
                role_registry_version,joined_at)
               VALUES (%s,%s,%s,'active',1,'1.1.15',now()-interval '1 day')
             """, [(M_UA,A,U),(M_UB,B,U),(M_OTHER,A,OTHER)])
-            self.admin.executemany("""
+            self._many("""
               INSERT INTO ai_law.membership_roles
               (tenant_id,membership_id,role_key,registry_version)
               VALUES (%s,%s,%s,'1.1.15')
             """, [(A,M_UA,"lawyer"),(B,M_UB,"lawyer"),(A,M_OTHER,"tenant_admin")])
-            self.admin.executemany("""
+            self._many("""
               INSERT INTO ai_law.matters(tenant_id,matter_id,owner_user_id,acl_version)
               VALUES (%s,%s,%s,1)
             """, [(A,CASE_A,U),(B,CASE_B,U)])
