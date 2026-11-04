@@ -187,8 +187,8 @@
       "conclusion": "PASS",
       "db": "PostgreSQL 16 disposable service"
     },
-    "latest_success_run": 41750489061,
-    "last_commit_ci": "WILL_RECHECK_AFTER_FINAL_COMMIT"
+    "latest_success_run": 41750910297,
+    "last_commit_ci": "R30_CODE_HEAD_PASS_BEFORE_PCS_CHANGE"
   },
   "governance": {
     "D01_policy_approval": "OWNER_APPROVED_IN_CHAT",
@@ -201,6 +201,7 @@
     "production_deployed": false
   },
   "evidence_classification": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA",
-  "private_drive_folder": "PREPARED_LATER",
-  "raw_logs_drive": "NOT_YET_UPLOADED"
+  "private_drive_folder": "PREPARED_R30_TEST_RUN_FOLDER",
+  "raw_logs_drive": "NOT_YET_UPLOADED",
+  "note": "Latest CI for combined PCS commit will run before PR merge; this evidence records actual earlier executed runs only."
 }
