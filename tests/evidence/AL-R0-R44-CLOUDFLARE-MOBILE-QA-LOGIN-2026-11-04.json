@@ -1,0 +1,54 @@
+{
+  "id": "AL-R0-R44-CLOUDFLARE-MOBILE-QA-LOGIN-2026-11-04",
+  "date": "2026-11-04",
+  "repo": "ntdung-tds/Mihy-Law-Agent",
+  "baseline": "SRS v1.1.15 unchanged; Owner DEC-017 Cloudflare Free isolated installation; R41 host parked; IAICT ordinary organization",
+  "qa_url": "https://ai-law-standalone-cf-qa.iaict-platform.workers.dev/",
+  "qa_identity": "QA-04 / qa04.lawyer@ai-law.invalid",
+  "qa_credential": "NEW_R44_CLOUDFLARE_ONLY_RANDOM_SECRET_SAVED_OWNER_ONLY_DRIVE_NOT_IN_PUBLIC_GITHUB",
+  "r40_docker_credentials": "UNCHANGED",
+  "cloudflare_actual": {
+    "worker": "ai-law-standalone-cf-qa",
+    "d1": "ai-law-standalone-cf-qa",
+    "migration": "0002_cf_qa_mobile_login.sql",
+    "qa_login_table": "qa_login_verifiers",
+    "qa_rate_table": "qa_login_rate",
+    "account_is_active": true,
+    "organization_member_is_active": true,
+    "qa_matter_data": "NO_LEGAL_MATTER_RECORDS",
+    "private_pepper_binding": "QA_RATE_PEPPER_SECRET_TEXT",
+    "http_cookie": "HttpOnly, Secure, SameSite Strict, Max-Age 1800"
+  },
+  "verified_tests": {
+    "node_password_validation_success_and_session_cookie": "PASS_41817289435",
+    "node_logout_revokes_session_and_clears_cookie": "PASS_41817289435",
+    "node_disabled_revoked_credential_rejection": "PASS_41817289435",
+    "node_origin_csrf_and_rate_limiter": "PASS_41817289435",
+    "mobile_real_chromium_320_390_430_1440": "PASS_41817969438",
+    "mobile_real_https_no_horizontal_overflow": "PASS_41817969438",
+    "real_cloudflare_qa04_incorrect_password_yields_HTTP_401": "PASS_41817969438",
+    "real_cloudflare_unauthenticated_dashboard_denied": "PASS_41817969438",
+    "real_d1_qa04_identity_membership_verifier": "PASS_CLOUDFLARE_API",
+    "existing_r41_and_r43_regressions": "PASS_CI_41817969438"
+  },
+  "not_run": {
+    "real_correct_password_cloudflare_post_200": "PENDING_PRIVATE_OWNER_INTERACTIVE_TEST",
+    "real_phone_browser_success_cookie_reload_logout": "PENDING_OWNER_ACCEPTANCE",
+    "customer_approved_IDP_MFA": "NOT_IMPLEMENTED",
+    "ten_R40_QA_accounts_active_on_CF": "NOT_IMPLEMENTED_ONLY_QA04_SEPARATE_CREDENTIAL",
+    "google_drive_oauth_and_upload": "NOT_IMPLEMENTED",
+    "full_legal_ai_functions": "NOT_IMPLEMENTED",
+    "full_SRS_IAM_PG16_RLS_D1_parity": "NOT_RUN",
+    "production_release": "NOT_AUTHORIZED"
+  },
+  "security": "No real legal data, public QA verifier salt/hash or owner-private password stored in GitHub. Owner-only credential document exists in restricted Drive; its URL and password intentionally excluded from this public evidence.",
+  "source": [
+    "deployment/cloudflare/src/mobile_auth.mjs",
+    "deployment/cloudflare/src/mobile_assets.mjs",
+    "deployment/cloudflare/migrations/0002_cf_qa_mobile_login.sql",
+    "deployment/cloudflare/tests/mobile.test.mjs",
+    "deployment/cloudflare/tests/live_mobile_browser.py",
+    "deployment/cloudflare/QA_R44_MOBILE_LOGIN.md"
+  ],
+  "test_run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41817969438"
+}
