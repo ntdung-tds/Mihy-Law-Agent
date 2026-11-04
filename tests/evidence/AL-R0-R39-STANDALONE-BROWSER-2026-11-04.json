@@ -1,0 +1,61 @@
+{
+  "id": "AL-R0-R39-STANDALONE-BROWSER-2026-11-04",
+  "date": "2026-11-04",
+  "baseline": "SRS v1.1.15 unchanged",
+  "owner_priority": "STANDALONE_FIRST_IAICT_ORDINARY_ORGANIZATION_SAAS_DEFERRED",
+  "environment": "GitHub Actions Ubuntu 24.04, Playwright 1.55 Chromium, two disposable Docker Compose gateway+auth+API+PostgreSQL16 installations",
+  "verified_ci": {
+    "url": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41784653735",
+    "head_sha": "52835f081b4500a11c5ca6c09bb6c31e99f44c85",
+    "status": "SUCCESS",
+    "jobs": {
+      "unit": "PASS",
+      "postgres_rls": "PASS",
+      "standalone_db": "PASS",
+      "standalone_api": "PASS",
+      "standalone_login": "PASS",
+      "standalone_browser": "PASS"
+    }
+  },
+  "tests": {
+    "real_browser_desktop_1440_organization_lawyer_login_run_logout": "PASS",
+    "real_browser_mobile_390_same_principal_personal_context_denies_org_run": "PASS",
+    "real_browser_mobile_320_tenant_admin_denied_ungranted_matter": "PASS",
+    "real_browser_mobile_390_other_isolated_installation_login": "PASS",
+    "browser_invalid_password_denies_dashboard": "PASS",
+    "browser_refresh_preserves_opaque_http_only_cookie_session": "PASS",
+    "browser_no_jwt_in_cookie_or_local_storage": "PASS",
+    "browser_csrf_wrong_origin_rejected_403": "PASS",
+    "mobile_no_horizontal_overflow_320_and_390": "PASS",
+    "mobile_login_touch_target_and_font_readability": "PASS",
+    "actual_docker_authenticated_http_to_postgres_rls_matter_acl": "PASS",
+    "both_installations_have_isolated_databases_keys_and_cookie_names": "PASS",
+    "existing_r37_r38_postgres_rls_unit_jobs": "PASS"
+  },
+  "scope_limitations": {
+    "fixture_only_test_account_creation": "EPHEMERAL_SYNTHETIC",
+    "genuine_customer_accounts_on_persistent_staging": "NOT_CREATED",
+    "direct_user_accessible_staging_url": "NOT_DEPLOYED",
+    "approved_production_idp_mfa": "NOT_RUN",
+    "canonical_srs_session_and_run_schema": "NOT_IMPLEMENTED",
+    "full_srs_legal_ai_functions_and_document_storage": "NOT_IMPLEMENTED",
+    "test_real_mobile_physical_device": "NOT_RUN",
+    "full_tech_browser_tc12a_tc12b_legal_workflows": "NOT_RUN",
+    "standalone_release_ready": false,
+    "actual_customer_data": "NOT_AUTHORIZED",
+    "production": "NOT_AUTHORIZED",
+    "owner_final_acceptance": "PENDING"
+  },
+  "security": "Browser never receives RSA JWT, only independent HttpOnly SameSite Strict cookie; session held in bounded process memory. The localhost-only gateway requires exact Host and Origin for writes. No screenshot/token/password/private signing key in GitHub. The public test workspace picker is only synthetic UI labels, not trusted membership.",
+  "evidence_files": [
+    "r0_core/standalone_browser_gateway.py",
+    "web/r0-standalone/index.html",
+    "web/r0-standalone/styles.css",
+    "web/r0-standalone/app.js",
+    "deployment/standalone/compose.browser-test.yaml",
+    "tests/browser/test_r39_browser_e2e.py",
+    "tests/test_r39_browser_gateway.py",
+    "deployment/standalone/smoke_api.sh",
+    ".github/workflows/tests.yml"
+  ]
+}
