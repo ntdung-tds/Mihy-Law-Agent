@@ -130,6 +130,45 @@ class RealPostgresRlsTests(unittest.TestCase):
             approved_registry_version="1.1.15",
         )
 
+    def test_r31_demo_customer_seed_and_cross_tenant_negative_cases(self):
+        # Reuse the disposable schema, never a shared or real customer DB.
+        self.admin.execute("""
+          TRUNCATE ai_law.membership_roles,ai_law.matter_group_members,
+                   ai_law.matter_user_acl,ai_law.matter_group_acl,
+                   ai_law.matter_groups,ai_law.matters,ai_law.memberships,
+                   ai_law.role_catalog,ai_law.principals,ai_law.tenants,
+                   ai_law.iam_audit CASCADE
+        """)
+        root=Path(__file__).resolve().parents[1]
+        catalog=json.loads((root/"db/demo/customer_catalog.json").read_text())
+        self.assertEqual(catalog["status"],"DATABASE_FIXTURE_ONLY_NOT_LOGIN_ACCOUNT")
+        self.assertIsNone(catalog["credentials"])
+        self.assertIsNone(catalog["login_url"])
+        self.admin.execute((root/"db/demo/seed_r31_synthetic.sql").read_text())
+        demo_tenant="55555555-5555-4555-8555-555555555551"
+        outsider_tenant="55555555-5555-4555-8555-555555555552"
+        lawyer="44444444-4444-4444-8444-444444444442"
+        admin="44444444-4444-4444-8444-444444444441"
+        outsider="44444444-4444-4444-8444-444444444443"
+        demo_matter="77777777-7777-4777-8777-777777777771"
+        outsider_matter="77777777-7777-4777-8777-777777777772"
+        self.assertEqual(
+          self.admin.execute("SELECT count(*) FROM ai_law.tenants").fetchone()[0],2)
+        self.assertEqual(
+          self.admin.execute("SELECT count(*) FROM ai_law.memberships").fetchone()[0],3)
+        self.assertIsNotNone(self.membership(lawyer,demo_tenant)(lawyer,demo_tenant))
+        self.assertIsNone(self.membership(outsider,demo_tenant)(outsider,demo_tenant))
+        self.assertTrue(PostgresMatterRead(self.scoped(lawyer,demo_tenant))(
+            demo_tenant,lawyer,demo_matter))
+        self.assertFalse(PostgresMatterRead(self.scoped(admin,demo_tenant))(
+            demo_tenant,admin,demo_matter))
+        self.assertFalse(PostgresMatterRead(self.scoped(lawyer,demo_tenant))(
+            demo_tenant,lawyer,outsider_matter))
+        self.assertFalse(PostgresMatterRead(self.scoped(outsider,outsider_tenant))(
+            outsider_tenant,outsider,demo_matter))
+        self.assertTrue(PostgresMatterRead(self.scoped(outsider,outsider_tenant))(
+            outsider_tenant,outsider,outsider_matter))
+
     def test_migration_has_force_rls_and_non_bypass_runtime(self):
         tables = self.admin.execute("""
           SELECT relname,relrowsecurity,relforcerowsecurity
