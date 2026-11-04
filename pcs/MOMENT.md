@@ -1,10 +1,20 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `47` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T16:08:00Z`.
+- **PCS revision:** `48` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T16:48:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R47 — public AI Law website + login-gated R0 workspace; main Worker ai-law-web
+
+- **Owner direction:** Build a professional public AI Law website, visually attractive with a real homepage, header, footer and product introduction. User login must precede all legal workspace functions. The primary Worker must not be called `preview`.
+- **New public QA site:** `https://ai-law-web.iaict-platform.workers.dev/` (`ai-law-web`) offers branded Vietnamese landing page, responsive mobile menu, 3 function groups covering the existing 11 SRS UCs, illustrative UI, security/architecture explanation, FAQ and CTA. All claims state roadmap/QA accurately; no fake customer logos, rates, AI legal responses or real case data.
+- **Access boundary:** `/login` is a dedicated branded page; `/app` requires a real R44 QA D1 session via private Service Binding `QA_AUTH`. Unauthenticated `/app` redirects to `/login`, while workspace JS/CSS and QA metadata API deny anonymous access. QA04 Owner-private password unchanged. Existing R0 workspace UI + R46 real D1 matter case register are reused, not rewritten. `/api/qa/*` remains same-origin, POST Origin-protected.
+- **Workers:** New `ai-law-web-qa` for staging and `ai-law-web` for current QA homepage, both with `QA_AUTH -> ai-law-standalone-cf-qa`. Stable Worker version `1655e9e3-5228-485a-a3b3-13b92cf44d9e`. Old `ai-law-r0-preview` now only redirects public pages to new site (308), denies old API/mutations 410 and holds no service binding. Historical old preview version retained in Cloudflare. Public web route uses no D1 or OAuth client secrets.
+- **Tests:** GitHub Actions PR #64 code/contract tests PASS. Live HTTPS Chromium on both QA staging and primary Worker at 320/390/430/1440 tested public home, mobile menu, header/footer, `/login`, and anonymous `/app` denial, all PASS run `41870114170`. Legacy redirect source contract PASS in `41870579391`; separate live redirect smoke to follow. Owner private correct-password login and final visual acceptance on new hostname NOT_RUN_OWNER.
+- **Limits:** QA not production, no real customer legal documents, no approved production MFA/IdP, no Google Drive OAuth or actual legal AI UC03/04/07. SRS v1.1.15 unchanged; R41 dedicated server kit parked; central IAICT SaaS deferred.
+- **PR:** https://github.com/ntdung-tds/Mihy-Law-Agent/pull/64
 
 ## R46 — real persistent QA matter registry deployed on original preview (full product still gated)
 

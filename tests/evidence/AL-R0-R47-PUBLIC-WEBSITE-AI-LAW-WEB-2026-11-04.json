@@ -1,0 +1,53 @@
+{
+  "id": "AL-R0-R47-PUBLIC-WEBSITE-AI-LAW-WEB-2026-11-04",
+  "date": "2026-11-04",
+  "approved_scope": "Owner-directed professional public website, login-gated P0/R0 workspace, Worker primary name without preview",
+  "primary_website": "https://ai-law-web.iaict-platform.workers.dev/",
+  "qa_staging": "https://ai-law-web-qa.iaict-platform.workers.dev/",
+  "primary_worker": "ai-law-web",
+  "primary_version": "1655e9e3-5228-485a-a3b3-13b92cf44d9e",
+  "auth_service_binding": "QA_AUTH -> ai-law-standalone-cf-qa",
+  "existing_d1_modified": false,
+  "real_passwords_or_customer_files_committed": false,
+  "public_pages": [
+    "/",
+    "/login",
+    "/site.css",
+    "/site.js",
+    "/site-login.js"
+  ],
+  "private_workspace": "/app and scripts/CSS guarded by R44 active QA session",
+  "legacy_worker": "ai-law-r0-preview",
+  "legacy_behavior": "Public GET safe redirect 308 to new hostname; API POST/GET 410; no backend bindings.",
+  "automated_tests": {
+    "node_route_auth_csrf_session": "PASS_CI_41870579391_CLOUDFLARE_CONTRACT",
+    "browser_mobile_320_390_430_and_desktop_1440_both_hosts": "PASS_CI_41870114170_CLOUDFLARE_SITE_LIVE",
+    "old_preview_redirect_contract": "PASS_CI_41870579391",
+    "old_preview_redirect_live_https": "NOT_RUN_AT_RECORD_CHECKPOINT",
+    "qa04_positive_login_on_new_hostname": "NOT_RUN_OWNER",
+    "owner_website_visual_acceptance": "NOT_RUN_OWNER",
+    "security_prod_acceptance": "NOT_READY"
+  },
+  "design_sections": [
+    "top announcement",
+    "sticky header and mobile nav",
+    "editorial hero and CSS app illustration",
+    "3 SRS capability cards",
+    "workspace explanation",
+    "3-step phased workflow",
+    "data-access design principles",
+    "FAQ",
+    "CTA",
+    "footer"
+  ],
+  "known_limits": [
+    "No real customer data authorized",
+    "no production IdP/MFA",
+    "no Google Drive OAuth",
+    "no legal AI UC03/04/07 completed",
+    "no official branded domain configured",
+    "R41 host kit parked",
+    "IAICT SaaS deferred",
+    "SRS v1.1.15 unchanged"
+  ]
+}
