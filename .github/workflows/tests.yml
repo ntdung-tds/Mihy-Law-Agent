@@ -149,3 +149,24 @@ jobs:
           bash -n deployment/standalone/smoke_staging_kit.sh
       - name: Execute operator-style install, 10-account QA, Chromium mobile+desktop, restart without rekey
         run: R41_CI=disposable-docker-runner-only bash deployment/standalone/smoke_staging_kit.sh
+
+  cloudflare-contract:
+    # Nonproduction Worker/D1 contract regression. Does NOT deploy a Worker,
+    # create a D1 database, connect Owner Google OAuth or run real Cloud D1.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check Cloudflare Worker JavaScript module syntax
+        run: |
+          node --check deployment/cloudflare/src/worker.mjs
+          node --check deployment/cloudflare/src/google_drive.mjs
+      - name: Verify RS256 JWT, D1 authz fail-close and Google Drive adapter with fake credentials
+        run: node --test deployment/cloudflare/tests/worker.test.mjs
+      - name: Execute actual authz queries and FK/deny rules against SQLite
+        run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_sqlite_acl.py' -v
