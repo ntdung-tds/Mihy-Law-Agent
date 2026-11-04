@@ -1,6 +1,6 @@
 # R31 — Standalone synthetic customer demonstration
 
-**Independent of the approved R25 UI preview.** Contains only HTML, CSS, JavaScript and local demo JSON. No login, cookies, account registration, external AI API, file upload, persistence or real customer data.
+**Independent of the approved R25 UI preview.** Isolated nonproduction readback verified at https://ai-law-r31-demo.iaict-platform.workers.dev/ on 2026-11-04. Chromium loaded five roles and two initial synthetic document cards at 320px; full persona-click/revocation/modal E2E and desktop viewport validation remain NOT_RUN/partial. Contains only HTML, CSS, JavaScript and local demo JSON. No login, cookies, account registration, external AI API, file upload, persistence or real customer data.
 
 Run locally from repository root:
 
