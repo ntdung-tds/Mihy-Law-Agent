@@ -20,6 +20,9 @@ input,select{background:#fff;color:#142840;display:block;width:100%;border:1px s
 .secondary-button{border:1px solid #ceddeb;border-radius:10px;background:#f3f7fc;color:#214a78;padding:10px 13px;font-size:13px;font-weight:750;min-height:44px}
 .primary-button{background:#2767e5;color:#fff;border:0;border-radius:11px;padding:12px 16px;font-size:15px;font-weight:760;min-height:50px}
 #login-submit{width:100%;margin-top:22px}
+.access-button{display:grid;place-items:center;width:100%;min-height:50px;border-radius:11px;background:#2767e5;color:white;text-decoration:none;font-size:15px;font-weight:770;padding:10px 12px;text-align:center}
+.access-button:focus-visible{outline:3px solid #8bbcff;outline-offset:2px}
+.divider-text{text-align:center;color:#778aa1;font-size:12px;margin:22px 0 8px}
 .error{background:#fff0f2;color:#a62440;border:1px solid #eac5cd;padding:12px 13px;border-radius:10px;font-size:13px;line-height:1.5;margin:14px 0 0}
 .notice{margin-top:21px;border-radius:12px;background:#eff5fc;border:1px solid #d9e8f8;color:#556d88;font-size:12px;line-height:1.65;padding:12px 14px}
 .foot{font-size:12px;color:#8293a8;line-height:1.7;margin:21px auto;text-align:center}
