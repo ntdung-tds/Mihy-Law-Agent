@@ -1,0 +1,64 @@
+{
+  "id": "AL-R0-R43-CLOUDFLARE-FREE-FIRST-SLICE-2026-11-04",
+  "recorded_date": "2026-11-04",
+  "owner_decision": "DEC-017 standalone Cloudflare Free + customer-owned Google Drive now; Docker R41 parked; SaaS later",
+  "srs_baseline": "v1.1.15 unchanged",
+  "real_cloudflare": {
+    "account_product": "Cloudflare Workers Free + D1, isolated AI Law nonproduction resources only",
+    "script_name": "ai-law-standalone-cf-qa",
+    "qa_public_technical_url": "https://ai-law-standalone-cf-qa.iaict-platform.workers.dev",
+    "worker_uploaded": "PASS_CLOUDFLARE_API",
+    "workers_dev_subdomain_enabled": "PASS_CLOUDFLARE_API",
+    "d1_name": "ai-law-standalone-cf-qa",
+    "d1_uuid": "c229ee95-50c1-4b39-901c-0b03496fc1d0",
+    "d1_schema_applied": "PASS_CLOUDFLARE_QUERY_API",
+    "real_qa_tables_created": [
+      "qa_principals",
+      "qa_tenants",
+      "qa_memberships",
+      "qa_sessions",
+      "qa_matters",
+      "qa_matter_acl",
+      "qa_runs",
+      "qa_file_links"
+    ],
+    "no_customer_data_in_d1": true,
+    "public_worker_jwks": "EMPTY_KEYS_DENY_ALL",
+    "current_access": "No approved test IdP/token issuer, no active user sessions or document contents"
+  },
+  "tests": {
+    "local_node_rs256_jwt_header_claims_crypto": "PASS_CI_41802685576",
+    "local_node_strict_no_tenant_headers": "PASS_CI_41802685576",
+    "local_node_mock_d1_session_member_acl": "PASS_CI_41802685576",
+    "local_node_drive_adapter_no_redirect_out_of_folder": "PASS_CI_41802685576",
+    "actual_sqlite_run_file_acl_member_version_deny": "PASS_CI_41802685576",
+    "cloudflare_d1_real_metadata_migration": "PASS_CLOUDFLARE_API",
+    "cloudflare_qa_worker_live_https_health": "PASS_GITHUB_ACTIONS_41802685576",
+    "cloudflare_qa_anonymous_run_file_requests_401": "PASS_GITHUB_ACTIONS_41802685576",
+    "cloudflare_qa_invalid_http_write_404": "PASS_GITHUB_ACTIONS_41802685576"
+  },
+  "blocked_or_not_run": {
+    "actual_qa01_to_qa10_on_cf_d1": "NOT_RUN",
+    "real_cloudflare_user_login": "NOT_RUN",
+    "approved_idp_jwks_mfa": "NOT_RUN",
+    "actual_google_drive_oauth_grant": "NOT_CONNECTED",
+    "actual_google_drive_legal_file_upload": "NOT_IMPLEMENTED",
+    "actual_google_drive_legal_file_download": "NOT_RUN_NO_AUTHORIZED_OAUTH",
+    "complete_srs_matter_acl_RLS_parity": "NOT_RUN",
+    "actual_legal_ai_uc03_04_07": "NOT_IMPLEMENTED",
+    "physical_mobile_browser": "NOT_RUN",
+    "owner_acceptance": "PENDING",
+    "production": "NOT_AUTHORIZED"
+  },
+  "quota_note": "At creation, account had 9 D1 databases; new QA D1 uses the 10th, which reaches the current Workers Free D1 account count limit. No other application's database was altered.",
+  "safety": "Public live QA worker allows /health but fail-closes all protected operations because JWKS is empty and no sessions seeded. Worker has no real file OAuth, real legal data, production IdP or shared SaaS privileges. No private R40 passwords/signing keys included in repository or Cloudflare.",
+  "source_paths": [
+    "deployment/cloudflare/src/worker.mjs",
+    "deployment/cloudflare/src/google_drive.mjs",
+    "deployment/cloudflare/migrations/0001_cf_qa_metadata.sql",
+    "deployment/cloudflare/tests/worker.test.mjs",
+    "deployment/cloudflare/tests/test_sqlite_acl.py",
+    "deployment/cloudflare/tests/live_http_smoke.sh"
+  ],
+  "ci_link": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41802685576"
+}
