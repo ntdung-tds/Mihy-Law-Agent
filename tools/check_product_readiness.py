@@ -12,6 +12,24 @@ import json
 from pathlib import Path
 
 
+REQUIRED_DEMO_GATES = frozenset({
+    "DEMO_FIXTURE", "DEMO_POSTGRES", "DEMO_BROWSER", "DEMO_NONPROD"
+})
+REQUIRED_PRODUCT_GATES = frozenset({
+    "D01_APPROVAL", "LEGAL_DATA", "REAL_IDP_JWT_MFA",
+    "REAL_TENANT_RLS_SECURITY", "REAL_CASE_DOC_STORAGE",
+    "UC03_TRANSLATE", "UC04_SUMMARIZE", "UC07_GRAMMAR",
+    "RUNS_JOBS_AUDIT", "APPLICATION_E2E", "OPERATIONS_RELEASE",
+})
+
+
+def _has_required_gates(items: list, required: frozenset[str]) -> bool:
+    if not isinstance(items, list):
+        return False
+    ids = [g.get("id") for g in items if isinstance(g, dict)]
+    return len(ids) == len(required) and len(set(ids)) == len(ids) and set(ids) == required
+
+
 def _complete(items: list) -> bool:
     return bool(items) and all(
         isinstance(g, dict) and
@@ -31,7 +49,7 @@ def evaluate_readiness(data: dict) -> dict:
     if not isinstance(demo, list) or not isinstance(hard, list):
         raise ValueError("Invalid gate collection")
 
-    demo_ready = _complete(demo)
+    demo_ready = _has_required_gates(demo, REQUIRED_DEMO_GATES) and _complete(demo)
     blockers = [g.get("id", "UNKNOWN") for g in hard
                 if g.get("status") != "PASS" or not g.get("evidence")]
     owner_accepted = data.get("owner_final_acceptance") == "APPROVED"
@@ -41,10 +59,14 @@ def evaluate_readiness(data: dict) -> dict:
     if not production_permitted:
         blockers.append("PRODUCTION_AUTHORIZATION")
 
-    product_ready = (demo_ready and _complete(hard) and
+    product_ready = (demo_ready and _has_required_gates(hard, REQUIRED_PRODUCT_GATES) and _complete(hard) and
                      owner_accepted and production_permitted and
                      data.get("live_customer_accounts_created") is True and
                      data.get("srs_changed") is False)
+    if not _has_required_gates(hard, REQUIRED_PRODUCT_GATES):
+        blockers.append("REQUIRED_PRODUCT_GATES_MISSING_OR_DUPLICATED")
+    if not _has_required_gates(demo, REQUIRED_DEMO_GATES):
+        blockers.append("REQUIRED_DEMO_GATES_MISSING_OR_DUPLICATED")
     if not demo_ready:
         blockers.extend(g.get("id", "DEMO_UNKNOWN") for g in demo
                         if g.get("status") != "PASS" or not g.get("evidence"))
