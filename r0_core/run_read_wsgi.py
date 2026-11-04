@@ -161,6 +161,7 @@ class GetRunWSGI:
     expected_audience: str
     now_epoch: Callable[[], int]
     membership_repository_for_scope: Callable[[str, str], PostgresMembershipRepository] | None = None
+    load_run_for_scope: Callable[[str, str, str], RunSnapshot | None] | None = None
 
     def __call__(self, environ: Mapping[str, Any], start_response: Callable):
         correlation_id = str(uuid4())
@@ -237,7 +238,14 @@ class GetRunWSGI:
                 view.tenant_id, view.user_id, run_id
             ) is not True:
                 return error(404)
-            snapshot = self.load_run(view.tenant_id, run_id)
+            # A trust-configured PostgreSQL run reader may need the verified
+            # principal to establish *another* fresh RLS transaction.
+            # Never bind this identity from request headers or JWT subject.
+            snapshot = (
+                self.load_run_for_scope(view.tenant_id, view.user_id, run_id)
+                if self.load_run_for_scope is not None
+                else self.load_run(view.tenant_id, run_id)
+            )
             if snapshot is None:
                 return error(404)
             if (not isinstance(snapshot, RunSnapshot) or
