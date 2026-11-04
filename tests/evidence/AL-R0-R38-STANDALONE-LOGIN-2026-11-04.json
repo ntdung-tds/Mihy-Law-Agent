@@ -1,0 +1,55 @@
+{
+  "id": "AL-R0-R38-STANDALONE-LOGIN-2026-11-04",
+  "recorded_date": "2026-11-04",
+  "srs_baseline": "v1.1.15 unchanged",
+  "owner_priority": "STANDALONE_FIRST_IAICT_ORDINARY_ORGANIZATION_SAAS_DEFERRED",
+  "testing_scope": "Real HTTP password verification with ephemeral invented nonproduction accounts, Argon2id hashes, separate auth/API containers, real PostgreSQL16 membership and persisted sessions, RS256 Bearer, no production provider",
+  "ci": {
+    "url": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41781535393",
+    "sha": "a9cee368ed0c2cef1cc5158e42c90a6d60b0637c",
+    "status": "PASS",
+    "jobs": [
+      "unit PASS",
+      "postgres-rls PASS",
+      "standalone-db PASS",
+      "standalone-api PASS",
+      "standalone-login PASS"
+    ],
+    "unit_tests_discovered": 269,
+    "unit_tests_skipped": 23
+  },
+  "tests": {
+    "two_isolated_auth_api_postgres16_stacks": "PASS",
+    "runtime_only_internal_no_host_ports": "PASS",
+    "ephemeral_account_credentials_not_checked_into_git": "PASS",
+    "argon2id_passwords_persisted_as_hash": "PASS",
+    "actual_http_post_login_valid_password_200": "PASS",
+    "wrong_password_generic_401": "PASS",
+    "unauthorized_tenant_request_denied_401": "PASS",
+    "one_identity_personal_and_organization_membership": "PASS",
+    "actual_rs256_jwt_used_to_call_r37_api_200": "PASS",
+    "tenant_admin_without_matteracl_denied_404": "PASS",
+    "independent_installation_jwt_cannot_cross_401": "PASS",
+    "logout_revokes_actual_sql_session_401": "PASS",
+    "account_disable_revokes_all_existing_sessions_401": "PASS",
+    "separate_auth_sql_role_cannot_read_legal_matters": "PASS",
+    "app_sql_role_cannot_write_tenants": "PASS",
+    "five_bad_passwords_lock_account_for_15_minutes": "PASS",
+    "CI_unit_postgres_rls_standalone_db_api_login": "PASS"
+  },
+  "not_verified": {
+    "approved_external_idp_oidc": "NOT_RUN",
+    "mfa_stepup": "NOT_IMPLEMENTED",
+    "persistent_customer_account_on_non_ephemeral_staging": "NOT_CREATED",
+    "email_verification": "NOT_IMPLEMENTED",
+    "password_recovery": "NOT_IMPLEMENTED",
+    "browser_or_mobile_login": "NOT_RUN",
+    "permanent_standalone_installation": "NOT_RUN",
+    "canonical_srs_auth_run_migration": "NOT_IMPLEMENTED",
+    "real_ai_law_workflows_uc03_04_07": "NOT_IMPLEMENTED",
+    "legal_client_data": "NOT_AUTHORIZED",
+    "production": "NOT_AUTHORIZED",
+    "owner_final_acceptance": "PENDING"
+  },
+  "safety": "Test-only /standalone/auth/login and /standalone/auth/logout are not claimed as approved public SRS APIs. Every test installation and password is disposed at end of CI. No private signing keys, plaintext account passwords or client documents in repo or logs."
+}
