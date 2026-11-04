@@ -247,6 +247,93 @@ class RealPostgresRlsTests(unittest.TestCase):
               (tenant_id,matter_id,user_id,permission,effect,acl_version,valid_from)
               VALUES (%s,%s,%s,'read','allow',1,now())""",(B,CASE_B,OTHER))
 
+    def test_removing_last_role_rolls_back_at_commit(self):
+        with self.assertRaises(psycopg.Error):
+            with self.admin.transaction():
+                self.admin.execute(
+                    "DELETE FROM ai_law.membership_roles WHERE membership_id=%s",
+                    (M_UA,),
+                )
+        remaining=self.admin.execute(
+            "SELECT count(*) FROM ai_law.membership_roles WHERE membership_id=%s",
+            (M_UA,),
+        ).fetchone()[0]
+        self.assertEqual(remaining,1)
+
+    def test_revoked_membership_cannot_reactivate_implicitly(self):
+        self.admin.execute(
+            "UPDATE ai_law.memberships SET status='revoked',revoked_at=now() WHERE membership_id=%s",
+            (M_UA,),
+        )
+        with self.assertRaises(psycopg.Error):
+            self.admin.execute(
+                "UPDATE ai_law.memberships SET status='active',revoked_at=NULL WHERE membership_id=%s",
+                (M_UA,),
+            )
+        self.assertIsNone(self.membership(U,A)(U,A))
+
+    def test_group_membership_change_invalidates_authz_version(self):
+        with self.admin.transaction():
+            self.admin.execute(
+                "INSERT INTO ai_law.matter_groups VALUES (%s,%s,'synthetic group')",
+                (A,GROUP_A),
+            )
+        before=self.admin.execute(
+            "SELECT authz_version FROM ai_law.memberships WHERE membership_id=%s",
+            (M_UA,),
+        ).fetchone()[0]
+        self.admin.execute(
+            "INSERT INTO ai_law.matter_group_members VALUES (%s,%s,%s)",
+            (A,GROUP_A,U),
+        )
+        after=self.admin.execute(
+            "SELECT authz_version FROM ai_law.memberships WHERE membership_id=%s",
+            (M_UA,),
+        ).fetchone()[0]
+        self.assertGreater(after,before)
+        self.admin.execute(
+            "DELETE FROM ai_law.matter_group_members WHERE tenant_id=%s AND group_id=%s AND user_id=%s",
+            (A,GROUP_A,U),
+        )
+        after_delete=self.admin.execute(
+            "SELECT authz_version FROM ai_law.memberships WHERE membership_id=%s",
+            (M_UA,),
+        ).fetchone()[0]
+        self.assertGreater(after_delete,after)
+
+    def test_acl_mutations_atomically_bump_matter_revision(self):
+        read=PostgresMatterRead(open_scoped_connection=self.scoped(U,A))
+        self.assertTrue(read(A,U,CASE_A))
+        before=self.admin.execute(
+            "SELECT acl_version FROM ai_law.matters WHERE matter_id=%s",(CASE_A,)
+        ).fetchone()[0]
+        self.admin.execute("""INSERT INTO ai_law.matter_user_acl
+          (tenant_id,matter_id,user_id,permission,effect,acl_version,valid_from)
+          VALUES (%s,%s,%s,'read','deny',1,now()-interval '1 hour')""",(A,CASE_A,U))
+        after=self.admin.execute(
+            "SELECT acl_version FROM ai_law.matters WHERE matter_id=%s",(CASE_A,)
+        ).fetchone()[0]
+        self.assertGreater(after,before)
+        self.assertFalse(read(A,U,CASE_A))
+        self.admin.execute("""DELETE FROM ai_law.matter_user_acl
+          WHERE tenant_id=%s AND matter_id=%s AND effect='deny'""",(A,CASE_A))
+        self.assertTrue(read(A,U,CASE_A))
+
+    def test_acl_read_fails_after_revocation_even_with_existing_connection(self):
+        factory=self.scoped(U,A)
+        with factory() as conn:
+            self.assertEqual(
+                conn.execute("SELECT count(*) FROM matters WHERE matter_id=%s",(CASE_A,)).fetchone()[0],1
+            )
+            self.admin.execute("""
+              UPDATE ai_law.memberships SET status='revoked',revoked_at=now()
+              WHERE membership_id=%s""",(M_UA,))
+            # Same connection but second statement under READ COMMITTED sees
+            # revoked membership from the committed other transaction.
+            self.assertEqual(
+                conn.execute("SELECT count(*) FROM matters WHERE matter_id=%s",(CASE_A,)).fetchone()[0],0
+            )
+
     def test_http_get_run_with_real_postgres_membership_and_matter_acl(self):
         # Session verified by a FAKE verifier; run contents are synthetic in
         # memory. PostgreSQL enforces *real* membership and MatterACL.
