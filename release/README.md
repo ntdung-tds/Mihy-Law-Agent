@@ -1,6 +1,10 @@
-# AI Law — R0 product release decision (R36)
+# AI Law — R0 product release decision (R37)
 
 **State:** PRODUCT_NOT_READY. **D01 policy: OWNER APPROVED. Platform operator: IAICT.** The earlier five-persona static showcase and PostgreSQL seed are synthetic-only test aids; the Owner-defined demo acceptance target is **real authenticated accounts for different customer roles** with real staging E2E. They are not equivalent.
+
+## R37: actual isolated API+PostgreSQL one-route test; not customer product
+
+R37 tests real Docker standalone HTTP API, actual disposable PostgreSQL16 persisted synthetic sessions and queued runs, RSA-signed JWT and MatterACL/RLS. The `standalone-api` CI job passed on 2026-11-04 (run 41774950797), with no public API/DB port and no privileged SQL application role. This **does not** implement real account login or functional legal workflows, and does not satisfy full dedicated app acceptance. `delivery_modes.dedicated` is PARTIAL_TESTED, `deployment_e2e` NOT_RUN and `standalone_release_ready` false.
 
 ## Owner DEC-016 priority: standalone FIRST (2026-11-04)
 
