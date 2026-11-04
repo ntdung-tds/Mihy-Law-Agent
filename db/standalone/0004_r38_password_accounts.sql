@@ -17,3 +17,20 @@ CREATE TABLE ai_law_nonprod.password_accounts (
 );
 -- No plaintext password and no implicit tenant-admin matter permissions.
 -- Password account DB access is isolated to the separate auth container.
+
+-- Disabling a local account revokes existing sessions too. Without this,
+-- password authentication would stop but an old Bearer would still work.
+CREATE FUNCTION ai_law_nonprod.revoke_sessions_on_disabled_account()
+RETURNS trigger LANGUAGE plpgsql
+SET search_path=ai_law_nonprod,pg_catalog AS $$
+BEGIN
+  IF OLD.status <> 'disabled' AND NEW.status = 'disabled' THEN
+    UPDATE sessions SET revoked_at=now()
+    WHERE user_id=NEW.user_id AND revoked_at IS NULL;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+CREATE TRIGGER r38_account_disabled_revoke
+AFTER UPDATE OF status ON ai_law_nonprod.password_accounts
+FOR EACH ROW EXECUTE FUNCTION ai_law_nonprod.revoke_sessions_on_disabled_account();
