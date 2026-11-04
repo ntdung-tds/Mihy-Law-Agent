@@ -32,7 +32,11 @@ import psycopg
 from .jwks_verifier import JWKSAccessTokenVerifier
 from .membership_repository import PostgresMembershipRepository, select_tenant_from_store
 from .postgres_scope import ScopedPostgresFactory, VerifiedDatabaseScope
-from .tenant_context import AuthenticatedPrincipal, _canonical_uuid
+from .tenant_context import (
+    AuthenticatedPrincipal, TenantMembershipUnavailable,
+    TenantContextDenied, _canonical_uuid,
+)
+from .session_boundary import SessionRejected, SessionDependencyUnavailable
 
 _ISSUER = "https://idp.example.invalid"
 _AUDIENCE = "ai-law-api"
@@ -120,8 +124,12 @@ class LocalPasswordAuthStore:
                 principal=AuthenticatedPrincipal(user_id=uid, status="active"),
                 current=None, target_tenant_id=tenant_id, repository=repo,
             )
-        except Exception:
+        except TenantMembershipUnavailable:
+            raise AccountStoreUnavailable("Membership store unavailable") from None
+        except TenantContextDenied:
             raise CredentialsDenied("Authentication failed") from None
+        except Exception:
+            raise AccountStoreUnavailable("Membership store unavailable") from None
 
     def start_session(self, *, user_id: str, tenant_id: str, session_id: str):
         try:
@@ -235,10 +243,14 @@ class StandaloneAuthApp:
             verified = self.verifier(items[1])
             self.store.logout(verified.issuer, verified.subject, verified.session_id)
             return respond(200, {"ok": True})
-        except (CredentialsDenied, Exception) as exc:
-            if isinstance(exc, AccountStoreUnavailable):
-                return respond(503, {"code": "DEPENDENCY_UNAVAILABLE"})
+        except (AccountStoreUnavailable, SessionDependencyUnavailable):
+            return respond(503, {"code": "DEPENDENCY_UNAVAILABLE"})
+        except (CredentialsDenied, SessionRejected):
             return respond(401, {"code": "UNAUTHENTICATED"})
+        except Exception:
+            # Server-side failures cannot become authentication bypasses or
+            # client-visible error detail; treat as unavailable, not a login.
+            return respond(503, {"code": "DEPENDENCY_UNAVAILABLE"})
 
 
 def create_auth_app():
