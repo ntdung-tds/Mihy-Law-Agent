@@ -98,6 +98,17 @@ class DemoFixtureContracts(unittest.TestCase):
         self.assertIn("prefers-reduced-motion", css)
         self.assertIn("aria-live=\"polite\"", html)
 
+    def test_direct_seed_api_rejects_non_disposable_connection(self):
+        class NonDisposableConnection:
+            class info:
+                dbname = "real_legal_cases"
+                host = "db.production.example"
+                user = "postgres"
+            def transaction(self):
+                raise AssertionError("Must deny before opening transaction")
+        with self.assertRaises(ValueError):
+            seed_demo_records(NonDisposableConnection(), self.fixture)
+
     def test_destructive_seed_guard_rejects_non_disposable_dsn(self):
         for val in (
             "postgresql://user:pass@db.production:5432/ai_law",
@@ -140,6 +151,15 @@ class ProductReadinessContracts(unittest.TestCase):
         self.assertFalse(result["product_ready"])
         self.assertFalse(self.data["live_customer_accounts_created"])
         self.assertTrue(self.data["synthetic_demo_customers_created"])
+
+    def test_cannot_erase_required_gates_to_claim_product_ready(self):
+        forged = json.loads(json.dumps(self.data))
+        forged["demo_gates"] = [{"id":"DEMO_FIXTURE", "status":"PASS", "evidence":["fake"]}]
+        forged["gates"] = [{"id":"D01_APPROVAL", "status":"PASS", "evidence":["fake"]}]
+        forged["production_deployment"] = "AUTHORIZED"
+        forged["owner_final_acceptance"] = "APPROVED"
+        forged["live_customer_accounts_created"] = True
+        self.assertFalse(evaluate_readiness(forged)["product_ready"])
 
     def test_readiness_cli_fail_closed_exit_code(self):
         proc = subprocess.run(
