@@ -1,0 +1,27 @@
+# R38 isolated nonproduction password-login overlay.
+# Both auth and application API stay private to the Compose network.
+services:
+  db:
+    environment:
+      AI_LAW_AUTH_DB_PASSWORD: ${AI_LAW_AUTH_DB_PASSWORD:?Separate auth DB password required}
+    volumes:
+      - ../../db/standalone/0004_r38_password_accounts.sql:/docker-entrypoint-initdb.d/0004_r38_password_accounts.sql:ro
+      - ../../db/standalone/0005_r38_auth_role.sh:/docker-entrypoint-initdb.d/0005_r38_auth_role.sh:ro
+  auth:
+    image: ${AI_LAW_R37_API_IMAGE:-ai-law-r37-nonprod:local}
+    command: ["python", "-m", "r0_core.standalone_password_auth"]
+    init: true
+    read_only: true
+    user: "10001:10001"
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      AI_LAW_NONPROD_R38: isolated-login-fixture-only
+      AI_LAW_AUTH_DB_DSN: postgresql://ai_law_r38_auth:${AI_LAW_AUTH_DB_PASSWORD:?}@db:5432/ai_law
+      AI_LAW_TEST_SIGNING_KEY_B64: ${AI_LAW_TEST_SIGNING_KEY_B64:?Ephemeral R38 signing key required}
+      AI_LAW_TEST_KEY_KID: ${AI_LAW_TEST_KEY_KID:?Ephemeral key ID required}
+    # No host ports, no cloud account dependency, no public signup.

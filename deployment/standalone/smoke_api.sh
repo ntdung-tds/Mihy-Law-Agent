@@ -5,6 +5,13 @@ set -Eeuo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BASE="$ROOT/deployment/standalone/compose.yaml"
 EXT="$ROOT/deployment/standalone/compose.api-test.yaml"
+EXT_LOGIN="$ROOT/deployment/standalone/compose.login-test.yaml"
+R38_ENABLE="${R38_ENABLE:-0}"
+if [ "$R38_ENABLE" != "0" ] && [ "$R38_ENABLE" != "1" ]; then
+  echo "Invalid isolated test mode" >&2; exit 1
+fi
+OVERLAYS=()
+if [ "$R38_ENABLE" = "1" ]; then OVERLAYS=(-f "$EXT_LOGIN"); fi
 TMP="$(mktemp -d)"
 umask 077
 A="alr37_iaict_$$"
@@ -17,9 +24,13 @@ clean() {
 trap clean EXIT
 python "$ROOT/tools/r37_fixture_crypto.py" init "$TMP/a"
 python "$ROOT/tools/r37_fixture_crypto.py" init "$TMP/b"
+if [ "$R38_ENABLE" = "1" ]; then
+  python "$ROOT/tools/r38_fixture_prep.py" init "$TMP/a" iaict
+  python "$ROOT/tools/r38_fixture_prep.py" init "$TMP/b" other
+fi
 
-dc_a() { docker compose -p "$A" --env-file "$TMP/a/installation.env" -f "$BASE" -f "$EXT" "$@"; }
-dc_b() { docker compose -p "$B" --env-file "$TMP/b/installation.env" -f "$BASE" -f "$EXT" "$@"; }
+dc_a() { docker compose -p "$A" --env-file "$TMP/a/installation.env" -f "$BASE" -f "$EXT" "${OVERLAYS[@]}" "$@"; }
+dc_b() { docker compose -p "$B" --env-file "$TMP/b/installation.env" -f "$BASE" -f "$EXT" "${OVERLAYS[@]}" "$@"; }
 sql_a() { dc_a exec -T db psql -X -A -t -v ON_ERROR_STOP=1 -U ai_law_admin -d ai_law -c "$1"; }
 sql_b() { dc_b exec -T db psql -X -A -t -v ON_ERROR_STOP=1 -U ai_law_admin -d ai_law -c "$1"; }
 check_eq() {
@@ -155,6 +166,13 @@ else:
     sys.exit(1)
 PY
 
+# R38 exercises actual HTTP password login in the same two installations.
+# The extra checks are sourced only when explicitly requested, and cannot
+# change the validated R37-only smoke behavior.
+if [ "$R38_ENABLE" = "1" ]; then
+  source "$ROOT/deployment/standalone/smoke_login_extension.sh"
+fi
+
 # ACL revocation, independent of session state, must deny the SAME signed token.
 sql_a "UPDATE ai_law.matter_user_acl
        SET valid_to=now()-interval '1 minute'
@@ -168,6 +186,12 @@ probe_a 401 "$LAWYER_A"
 sql_b "UPDATE ai_law.memberships SET status='revoked',revoked_at=now()
        WHERE user_id='33333333-3333-4333-8333-333333333333'" >/dev/null
 probe_b 404 "$LAWYER_B"
-# Another container remains fully isolated after one application's session loss.
-probe_a 404 "$ADMIN_A"
+# In R38 extended mode a disabled administrator has already had its
+# persisted session revoked by the account-disable trigger (401).
+# The original R37-only test retains the 404 matter-ACL boundary.
+if [ "$R38_ENABLE" = "1" ]; then
+  probe_a 401 "$ADMIN_A"
+else
+  probe_a 404 "$ADMIN_A"
+fi
 echo "PASS R37: two isolated real HTTP API/PG16 installations, RS256, SQL sessions, RLS/MatterACL, revoked and cross-install denial"

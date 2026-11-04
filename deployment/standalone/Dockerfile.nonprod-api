@@ -4,7 +4,7 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /srv/ai-law
 COPY requirements-r0-auth.txt .
-RUN python -m pip install --no-cache-dir -r requirements-r0-auth.txt "psycopg[binary]==3.3.7" \
+RUN python -m pip install --no-cache-dir -r requirements-r0-auth.txt "psycopg[binary]==3.3.7" "argon2-cffi==25.1.0" \
     && useradd --system --uid 10001 --no-create-home appuser
 COPY r0_core ./r0_core
 COPY tools ./tools

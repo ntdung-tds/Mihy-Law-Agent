@@ -1,4 +1,23 @@
-# AI Law R36–R37 — standalone-first local deployment bootstrap
+# AI Law R36–R38 — standalone-first local deployment bootstrap
+
+## R38: isolated LOCAL password accounts and actual HTTP login — NONPRODUCTION ONLY
+
+**Owner delivery order remains dedicated/standalone first.** IAICT is just one ordinary organization test tenant. No IAICT SaaS, Cloudflare Access, shared global login authority, public registration, payment or customer data is required.
+
+An optional test-only Docker Compose extension (`compose.login-test.yaml`) adds a separate, non-root **authentication process** beside the existing R37 read-only API and PostgreSQL 16. It tests actual HTTP email/password login and logout. All passwords are randomly generated for the test run and saved only in a throwaway local directory. Account rows contain **Argon2id hashes, never plaintext passwords**. The auth process issues real RS256-signed 15-minute JWT access tokens after checking real PostgreSQL memberships. The separate API checks the signatures using only a public key; the private signing key is never injected into the API container. Active sessions and their selected tenants are stored in SQL and rechecked on every API request.
+
+`POST /standalone/auth/login` and `POST /standalone/auth/logout` are **test-only local HTTP interfaces**, not newly approved public SRS APIs, an external OIDC IdP or production credentials integration. They have no host-published ports, no long-lived account directory, no MFA/password recovery and no browser login UI. Five consecutive invalid passwords lock the disposable account for 15 minutes. A disabled account automatically revokes its existing SQL sessions, including already signed Bearer credentials. IAICT admin rights do **not** bypass the existing MatterACL.
+
+**Reproduce with Docker Compose and Python on a disposable machine:**
+
+```bash
+python -m pip install -r requirements-dev.txt
+R38_ENABLE=1 bash deployment/standalone/smoke_api.sh
+```
+
+This starts **two separate** auth+API+PostgreSQL16 installations, provisions three fictitious `.invalid` email account records with different roles and isolation boundaries, performs credential-based real HTTP login, selects organizational/personal context, checks GET /v1/runs/{id}, wrong-tenant denial, cross-installation token denial, logout, account-disable revocation, brute-force lockout and SQL privilege isolation, then destroys both instances and their ephemeral secrets. A single principal may use both a personal and organization tenant *only after validating membership*; no account is created in any persistent public environment.
+
+**Current acceptance:** isolated Docker/HTTP/DB integration tests (after successful GitHub Actions run) may be marked PASS only for these specific checks. External production-approved IdP, real-user provisioning, MFA/step-up, browser/mobile test, complete legal AI workflows UC03/04/07, canonical SRS TaskRun/audit, document storage and independent production installation are still **NOT_RUN / NOT_IMPLEMENTED**, with Owner final acceptance pending. No real case documents or production deployment are permitted.
 
 ## R37: isolated nonproduction HTTP API + real PostgreSQL16 sessions/RLS
 

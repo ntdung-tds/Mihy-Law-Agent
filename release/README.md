@@ -1,6 +1,12 @@
-# AI Law — R0 product release decision (R37)
+# AI Law — R0 product release decision (R38)
 
 **State:** PRODUCT_NOT_READY. **D01 policy: OWNER APPROVED. Platform operator: IAICT.** The earlier five-persona static showcase and PostgreSQL seed are synthetic-only test aids; the Owner-defined demo acceptance target is **real authenticated accounts for different customer roles** with real staging E2E. They are not equivalent.
+
+## R38: actual standalone credential test login in isolated Docker (not production IAM)
+
+R38 provisions **disposable, invented** individual/organization/tenant-admin password accounts into isolated PostgreSQL16 fixture databases and performs actual `POST /standalone/auth/login` and `/logout` over a private Docker HTTP network. Argon2id verifies passwords, membership is checked against PostgreSQL RLS, a separate auth process signs an RSA JWT, and the application verifies that JWT/SQL session/MatterACL before returning the existing SRS GET /v1/runs/{id}. Account disable triggers session revocation, five bad passwords lock a disposable account, and authorization checks protect ordinary IAICT customer cases. GitHub Actions `41781535393` passes five jobs including real login.
+
+**Important:** These test-only endpoints are private/local scaffolding, *not* an approved production IdP, public SRS auth contract, persistent live user directory or self-registration. External IdP, MFA, actual customer account activation, browser login and entire R0 legal workflows are not complete. Production remains NOT_AUTHORIZED and the Owner must still accept the complete standalone result. SaaS implementation is still postponed by Owner.
 
 ## R37: actual isolated API+PostgreSQL one-route test; not customer product
 
