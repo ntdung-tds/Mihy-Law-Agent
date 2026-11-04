@@ -8,7 +8,7 @@ import { PREVIEW_JS } from './preview_app.mjs';
 import { PREVIEW_SESSION_JS } from './preview_session.mjs';
 import { PREVIEW_LOGIN_JS } from './preview_login.mjs';
 const AUTH='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
-const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout']);
+const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters']);
 const privatePaths=new Set(['/','/index.html','/styles.css','/app.js','/session.js']);
 const headerMap=(type)=>({
  'Content-Type':type,'Cache-Control':'no-store','Vary':'Cookie',
@@ -51,7 +51,9 @@ export async function handlePreview(req,env){
  if(req.method==='GET' && path==='/preview-login.js')return respond(PREVIEW_LOGIN_JS,'application/javascript; charset=utf-8');
  if(req.method==='GET' && path==='/health')return respond(JSON.stringify({status:'qa_only',site:'r0_preview'}),'application/json; charset=utf-8');
  if(API.has(path)){
-   if((path==='/api/qa/session' && req.method!=='GET') || (path!=='/api/qa/session' && req.method!=='POST'))return missing();
+   if((path==='/api/qa/session' && req.method!=='GET') ||
+       (path==='/api/qa/matters' && !['GET','POST'].includes(req.method)) ||
+       (path!=='/api/qa/session' && path!=='/api/qa/matters' && req.method!=='POST'))return missing();
    try{return await relay(req,env,path)}catch{return unavailable()}
  }
  if(req.method!=='GET'||!privatePaths.has(path))return missing();
