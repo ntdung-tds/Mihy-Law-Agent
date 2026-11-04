@@ -202,3 +202,11 @@ jobs:
         run: npm install --no-save playwright@1.55.0 && npx playwright install --with-deps chromium
       - name: Run browser tests
         run: node --experimental-sqlite deployment/cloudflare/tests/browser_qa.mjs
+
+  cloudflare-live-r44:
+    if: github.ref_name == 'feat/r44-cloudflare-mobile-qa-login-e2e' || github.head_ref == 'feat/r44-cloudflare-mobile-qa-login-e2e'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Real HTTPS QA UI and auth boundary
+        run: bash deployment/cloudflare/tests/live_r44.sh
