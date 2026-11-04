@@ -2,6 +2,8 @@
    JWT must be RS256 at+jwt from a trusted issuer; D1 session/member/ACL
    checks are explicit because SQLite has no PostgreSQL FORCE RLS. */
 import { GoogleDriveAdapter } from "./google_drive.mjs";
+import { mobileApi } from "./mobile_auth.mjs";
+import { MOBILE_HTML, MOBILE_CSS, MOBILE_JS } from "./mobile_assets.mjs";
 
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const result=(status,data)=>new Response(JSON.stringify(data),{status,headers:{
@@ -91,6 +93,19 @@ const params=(env,session,id,now)=>[
 ];
 export async function handle(request,env,options={}){
   const url=new URL(request.url);
+  if(url.pathname==="/" && request.method==="GET"){
+    return new Response(MOBILE_HTML,{status:200,headers:{
+      "Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store",
+      "Content-Security-Policy":"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; font-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+      "X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY",
+      "Referrer-Policy":"no-referrer"
+    }});
+  }
+  if(url.pathname==="/mobile.css" && request.method==="GET")
+    return new Response(MOBILE_CSS,{headers:{"Content-Type":"text/css; charset=utf-8","Cache-Control":"public, max-age=300","X-Content-Type-Options":"nosniff"}});
+  if(url.pathname==="/mobile.js" && request.method==="GET")
+    return new Response(MOBILE_JS,{headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"public, max-age=300","X-Content-Type-Options":"nosniff"}});
+  if(url.pathname.startsWith("/api/qa/"))return mobileApi(request,env,options);
   if(request.method!=="GET"||url.search||request.headers.has("X-AI-LAW-TENANT"))return missing();
   if(url.pathname==="/health")return result(validEnv(env)?200:503,{
     status:validEnv(env)?"configured":"unavailable",scope:"nonprod_qa_only",
