@@ -27,7 +27,9 @@ ACCOUNTS = [
 ]
 
 
-def prepare(directory: Path) -> None:
+def prepare(directory: Path, profile: str) -> None:
+    if profile not in ('iaict','other'):
+        raise ValueError('Choose a valid isolated test profile')
     if not (directory / "installation.env").is_file():
         raise RuntimeError("Run existing R37 fixture init first")
     private = (directory / "private.pem").read_bytes()
@@ -43,6 +45,9 @@ def prepare(directory: Path) -> None:
     records = {}
     sql = ["BEGIN;"]
     for email, subject, uid in ACCOUNTS:
+        if (profile == "iaict" and not subject.startswith("iaict-")) or (
+                profile == "other" and subject != "other-lawyer"):
+            continue
         password = secrets.token_urlsafe(28)
         # No passwords go into SQL: only per-account Argon2id hashes.
         digest = _HASH.hash(password)
@@ -70,13 +75,13 @@ def request(directory: Path, subject: str, tenant_id: str, *, wrong=False) -> No
 
 def main() -> None:
     action, directory = sys.argv[1], Path(sys.argv[2])
-    if action == "init" and len(sys.argv) == 3:
-        prepare(directory)
+    if action == "init" and len(sys.argv) == 4:
+        prepare(directory, sys.argv[3])
     elif action in ("request", "bad-request") and len(sys.argv) == 5:
         request(directory, sys.argv[3], sys.argv[4], wrong=action == "bad-request")
     else:
         raise SystemExit(
-            "Usage: init <temp> | request|bad-request <temp> <subject> <tenant>"
+            "Usage: init <temp> iaict|other | request|bad-request <temp> <subject> <tenant>"
         )
 
 
