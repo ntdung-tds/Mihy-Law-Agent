@@ -2,7 +2,7 @@
 
 Genuine positive-password login needs the Owner-only QA password and is
 separately gated; this public CI suite tests responsive page and denied
-login on actual Cloudflare Workers Free from Chromium.
+login on actual Cloudflare Workers Free from Chromium. Do not send repeated\nwrong passwords to the Owner QA-04 account: its lockout is persistent D1 state.
 """
 from playwright.sync_api import sync_playwright, expect
 
@@ -28,11 +28,11 @@ def run():
                         "horizontal overflow viewport "+str(width)
                     assert page.locator("#submit").is_enabled()
                     if width==390:
-                        page.locator("#email").fill("qa04.lawyer@ai-law.invalid")
+                        page.locator("#email").fill("unregistered-ci-negative@ai-law.invalid")
                         page.locator("#password").fill("deliberately-not-a-QA-password")
                         with page.expect_response(lambda r: r.url.endswith("/api/qa/login"),timeout=30000) as response_info:
                             page.locator("#submit").click()
-                        assert response_info.value.status==401, ("Expected PBKDF2 wrong-password rejection, got "+str(response_info.value.status))
+                        assert response_info.value.status==401, ("Expected unknown-account rejection, got "+str(response_info.value.status))
                         expect(page.locator("#form-error")).to_be_visible(timeout=18000)
                         expect(page.locator("#dashboard")).to_be_hidden()
                         page.reload(wait_until="domcontentloaded")
