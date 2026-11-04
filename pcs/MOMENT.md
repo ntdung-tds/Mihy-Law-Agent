@@ -1,19 +1,17 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `44` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T11:05:00Z`.
+- **PCS revision:** `45` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T13:58:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
-## R44 — mobile sign-in is deployed to Cloudflare QA; Owner positive login pending
+## R44 — positive mobile sign-in confirmed by Owner (QA milestone)
 
-- **Owner milestone:** User wants to open the mobile UI, sign in and enter the workspace. Scope stops at QA login/dashboard/reload/logout; not full AI functionality. `deployment/cloudflare/QA_R44_MOBILE_LOGIN.md`.
-- **Actual live:** Dedicated nonproduction Worker `ai-law-standalone-cf-qa` serves responsive login + dashboard on HTTPS, D1 migration `0002_cf_qa_mobile_login.sql` created password verifier + rate limiter, and QA-04 from R40 inventory was provisioned as an ordinary lawyer with active organization membership. Its **new, separate Cloudflare-only QA password** is saved in owner-only private Drive; never include it or its URL in public GitHub. Original 10 R40 Docker credentials are unchanged.
-- **Security:** Random salted PBKDF2-SHA256 100k verification, per-IP HMAC/Cloudflare secret rate limiting, per-account lock, strict Origin, cookie Secure HttpOnly SameSite Strict 30min; session resolved via D1 active principal+tenant membership+login status, and logout revokes DB session. R43 signed JWT file/run access boundaries unaffected.
-- **Evidence:** Real HTTPS Chromium viewport 320/390/430/1440 and wrong password **against existing QA04** returned actual 401, no horizontal overflow; CI `41817969438` success. Node crypto success-session/logout/CSRF and expiry tests PASS with synthetic D1 mock. Real correct password 200 + dashboard on Owner's phone **NOT_RUN** because Owner-private credential is not put in CI/public tools. Owner must accept or return error for repeat fix/test.
-- **Remaining:** Customer-approved IdP/MFA and full SRS IAM parity, Google Drive OAuth/upload/download and legal AI UC all NOT_RUN; no production or real matter data. R41 own-server setup parked; IAICT ordinary organization; SaaS deferred.
-- **Next:** Owner logs in from phone with R44 private QA credential, verifies workspace/reload/logout. Close R44 only after Owner confirms success; otherwise fix and rerun. Then proceed to Drive OAuth and SRS legal functions.
+- **Owner confirmation, 2026-11-04:** Owner explicitly reported successful sign-in to AI Law on a physical mobile device at the Cloudflare QA URL. Record as **PASS_OWNER_REPORTED_SIGNIN** (not independently instrumented); this satisfies the Owner's immediate "mobile tôi đăng nhập vào được" milestone. Do not infer that Owner tested reload, cookie persistence, or logout: **OWNER_CHECK_PENDING** for both.
+- **Technical evidence:** PR #60 merged to main commit `8a62eb2682540a1ae8f3d22de31790c5392c0817`; PR live Chromium `41829971339` PASS; main CI `41830676069` PASS. Cloudflare Worker `ai-law-standalone-cf-qa` deployed on isolated D1, responsive UI and QA04 password verifier/active membership; no secrets in GitHub. Synthetic unit tests cover success-session/logout; QA04 Owner-private Cloudflare-specific password remains in restricted Drive.
+- **Acceptance separation:** Functional positive mobile login = Owner reported PASS. Real Owner-device reload and logout = **NOT_CONFIRMED**. Full app workflows, customer Google Drive OAuth, privileged IAM/MFA, legal documents, TC12 and production release = **NOT_RUN/NOT_AUTHORIZED**. No change to SRS v1.1.15, R40 credentials, R41 server checkpoint or DEC-017.
+- **Proposed next after Owner direction:** R45 scoped nonproduction Google Drive OAuth + fictional file storage behind tenant/MatterACL, one provider only. Do not begin SaaS or host migration; no implicit authority to use ChatGPT Drive connector credentials in Worker.
 
 ## R43 — first REAL isolated Cloudflare Free Worker+D1 infrastructure with locked-down API
 

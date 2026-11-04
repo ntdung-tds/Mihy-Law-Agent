@@ -1,0 +1,38 @@
+{
+  "id": "AL-R0-R44-OWNER-MOBILE-SIGNIN-2026-11-04",
+  "date": "2026-11-04",
+  "scope": "AI Law isolated Cloudflare Free QA, owner physical-device positive sign-in",
+  "actor": "Owner self-report in this conversation",
+  "target": "https://ai-law-standalone-cf-qa.iaict-platform.workers.dev/",
+  "srs_baseline": "v1.1.15 unchanged",
+  "tests": {
+    "physical_mobile_positive_signin": {
+      "status": "PASS_OWNER_REPORTED",
+      "evidence_type": "owner_message",
+      "note": "Owner said they successfully signed into AI Law on mobile; no screenshot or independent instrumentation provided."
+    },
+    "physical_mobile_reload_persistence": {
+      "status": "NOT_CONFIRMED",
+      "note": "No explicit Owner result."
+    },
+    "physical_mobile_logout": {
+      "status": "NOT_CONFIRMED",
+      "note": "No explicit Owner result."
+    },
+    "cloudflare_live_responsive_320_390_430_1440": {
+      "status": "PASS_CI",
+      "run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41829971339"
+    },
+    "main_ci": {
+      "status": "PASS_CI",
+      "run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41830676069"
+    }
+  },
+  "limits": [
+    "nonproduction QA only",
+    "no customer data or credentials in this evidence",
+    "no full production IAM/MFA/IdP acceptance",
+    "Google Drive OAuth and real legal AI workflows NOT_RUN"
+  ],
+  "next_proposal": "R45 per-organization Drive OAuth + single fictional file E2E behind tenant/MatterACL; not authorized by this checkpoint"
+}
