@@ -1,0 +1,59 @@
+{
+  "classification": "PUBLIC_SAFE_SYNTHETIC_FIXTURE",
+  "version": "R31",
+  "date": "2026-11-04",
+  "status": "DATABASE_FIXTURE_ONLY_NOT_LOGIN_ACCOUNT",
+  "warning": "Fictional customer records, NOT real client accounts, NOT an IdP login. Never use on shared/staging/production DB.",
+  "customers": [
+    {
+      "label": "Công ty Luật Minh Họa (DEMO)",
+      "tenant_id": "55555555-5555-4555-8555-555555555551",
+      "tenant_type": "organization",
+      "users": [
+        {
+          "display_name": "Quản trị Demo",
+          "user_id": "44444444-4444-4444-8444-444444444441",
+          "role": "tenant_admin",
+          "identity_provider_id": "demo.invalid:owner"
+        },
+        {
+          "display_name": "Luật sư Demo",
+          "user_id": "44444444-4444-4444-8444-444444444442",
+          "role": "lawyer",
+          "identity_provider_id": "demo.invalid:lawyer"
+        }
+      ],
+      "matters": [
+        {
+          "label": "Hồ sơ hợp đồng minh họa",
+          "matter_id": "77777777-7777-4777-8777-777777777771",
+          "reader": "44444444-4444-4444-8444-444444444442"
+        }
+      ]
+    },
+    {
+      "label": "Tổ chức đối chứng (DEMO)",
+      "tenant_id": "55555555-5555-4555-8555-555555555552",
+      "tenant_type": "organization",
+      "users": [
+        {
+          "display_name": "Người dùng đối chứng",
+          "user_id": "44444444-4444-4444-8444-444444444443",
+          "role": "lawyer",
+          "identity_provider_id": "demo.invalid:outsider"
+        }
+      ],
+      "matters": [
+        {
+          "label": "Hồ sơ đối chứng",
+          "matter_id": "77777777-7777-4777-8777-777777777772",
+          "reader": "44444444-4444-4444-8444-444444444443"
+        }
+      ]
+    }
+  ],
+  "login_url": null,
+  "credentials": null,
+  "real_idp_connected": false,
+  "real_legal_files": false
+}
