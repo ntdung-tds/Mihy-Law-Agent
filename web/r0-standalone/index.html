@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f8fc">
+  <meta name="description" content="AI Law — môi trường kiểm thử đăng nhập của bản cài đặt độc lập.">
+  <title>AI Law · Không gian làm việc độc lập</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script defer src="/app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Đến nội dung chính</a>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Thông tin hệ thống">
+      <div class="brand">
+        <span class="brand-symbol" aria-hidden="true">⚖</span>
+        <div><strong>AI<span>LAW</span></strong><small>LEGAL WORKSPACE</small></div>
+      </div>
+      <div class="side-divider"></div>
+      <p class="side-kicker">KHÔNG GIAN PHÁP LÝ</p>
+      <h2>Độc lập.<br><span>Rõ quyền hạn.</span><br>Thuận tiện sử dụng.</h2>
+      <p class="side-desc">Một tài khoản, những không gian được phép truy cập. Dữ liệu hồ sơ luôn được kiểm tra quyền trên máy chủ.</p>
+      <div class="side-spacer"></div>
+      <div class="side-panel"><span class="side-panel-icon" aria-hidden="true">▧</span><div><strong>Triển khai riêng</strong><span>Không phụ thuộc SaaS IAICT</span></div></div>
+      <p class="side-foot">AI Law · R39 · Môi trường kỹ thuật nội bộ</p>
+    </aside>
+    <main id="main" class="main">
+      <header class="topbar">
+        <div class="mobile-brand"><span aria-hidden="true">⚖</span> AI <strong>LAW</strong></div>
+        <span class="environment"><span class="dot" aria-hidden="true"></span> TEST · STANDALONE</span>
+      </header>
+      <div class="main-inner">
+        <div class="notice" role="note"><span aria-hidden="true">ⓘ</span><p><strong>Môi trường kiểm thử độc lập.</strong> Chỉ dùng tài khoản và dữ liệu giả lập được cấp trong phiên kiểm thử; chưa kết nối hồ sơ pháp lý hoặc AI thực.</p></div>
+
+        <section id="login-screen" class="login-card" aria-labelledby="login-title">
+          <div class="eyebrow">ĐĂNG NHẬP AI LAW</div>
+          <h1 id="login-title">Chào mừng trở lại<span class="accent">.</span></h1>
+          <p class="intro">Sử dụng tài khoản được cấp cho bản cài đặt này.</p>
+          <form id="login-form" novalidate>
+            <div class="field">
+              <label for="login-email">Email tài khoản</label>
+              <input id="login-email" type="email" autocomplete="username" inputmode="email" required placeholder="ten@donvi.example" spellcheck="false">
+            </div>
+            <div class="field">
+              <label for="login-password">Mật khẩu</label>
+              <input id="login-password" type="password" autocomplete="current-password" required minlength="8" placeholder="Nhập mật khẩu">
+            </div>
+            <div class="field">
+              <label for="login-workspace">Không gian làm việc</label>
+              <select id="login-workspace" required><option value="">Đang tải danh sách kiểm thử…</option></select>
+              <small>Chỉ tài khoản có quyền thành viên mới đăng nhập được.</small>
+            </div>
+            <p id="login-error" class="form-error" role="alert" hidden></p>
+            <button id="login-submit" class="primary" type="submit">Đăng nhập <span aria-hidden="true">→</span></button>
+          </form>
+          <div class="login-foot"><span>⌑</span> Xác thực qua API của chính bản cài đặt · Không lưu token trên trình duyệt.</div>
+        </section>
+
+        <section id="dashboard" aria-labelledby="dashboard-title" hidden>
+          <div class="dashboard-head">
+            <div><p class="eyebrow">KHÔNG GIAN LÀM VIỆC</p><h1 id="dashboard-title">Tổng quan <span class="accent">AI Law</span></h1><p class="intro">Bạn đã đăng nhập vào môi trường được hệ thống xác thực.</p></div>
+            <button id="logout" type="button" class="outline">Đăng xuất</button>
+          </div>
+          <div class="workspace-banner">
+            <div class="workspace-avatar" aria-hidden="true">AL</div>
+            <div><strong id="workspace-name">Không gian hiện tại</strong><p id="account-name"></p></div>
+            <span class="member-pill">Đã xác thực</span>
+          </div>
+          <div class="section-head"><div><h2>Chức năng AI Law</h2><p>Các nghiệp vụ sẽ được mở theo tiến độ triển khai SRS.</p></div></div>
+          <div class="services">
+            <div class="service"><span class="service-icon purple" aria-hidden="true">▤</span><strong>Tài liệu pháp lý</strong><p>Quản lý và xử lý tài liệu</p><span class="service-state">Chưa kết nối</span></div>
+            <div class="service"><span class="service-icon blue" aria-hidden="true">✧</span><strong>Trợ lý AI pháp lý</strong><p>Hỗ trợ nghiệp vụ và phân tích</p><span class="service-state">Chưa kết nối</span></div>
+            <div class="service"><span class="service-icon yellow" aria-hidden="true">⌕</span><strong>Tra cứu pháp luật</strong><p>Tìm kiếm quy định và bản án</p><span class="service-state">Chưa kết nối</span></div>
+          </div>
+          <section class="run-panel" aria-labelledby="run-panel-title">
+            <div><p class="eyebrow">BACKEND ĐANG KẾT NỐI</p><h2 id="run-panel-title">Kiểm tra tiến trình xử lý</h2><p class="intro">Đọc dữ liệu kỹ thuật thử nghiệm từ PostgreSQL và xác minh quyền hồ sơ bằng API thực.</p></div>
+            <button id="run-check" class="secondary" type="button">Kiểm tra kết quả <span aria-hidden="true">→</span></button>
+            <div id="run-result" class="run-result" role="status" aria-live="polite">Chưa yêu cầu dữ liệu.</div>
+          </section>
+        </section>
+      </div>
+      <footer class="page-foot">AI Law · Bản cài đặt độc lập · Quyền truy cập được kiểm tra tại máy chủ</footer>
+    </main>
+  </div>
+</body>
+</html>
