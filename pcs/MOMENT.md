@@ -1,10 +1,18 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `40` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T07:04:00Z`.
+- **PCS revision:** `41` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T07:40:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R41 — private persistent-style QA installation kit; connected host still blocked
+
+- **Operator package:** `tools/r41_staging_config.py` creates each installation's private env, distinct RSA/DB keys and QA workspace labels ONE TIME with strict owner-only 0600/0700 and no accidental rekey. `deployment/standalone/qa_staging.sh` offers `init/up/provision/verify/status/stop/preflight` for 2 separate local Compose apps, with PostgreSQL16 named volumes, non-root private auth/API and localhost-only UI. Operator stop does not erase volumes. R40 private credential bundle remains in Owner-only Drive; no new roles or passwords in GitHub.
+- **Real CI proof:** `deployment/standalone/smoke_staging_kit.sh` used **the same ten CI-generated QA passwords** for both 2 installations and repeated full actual HTTP login/Argon2id/JWT/MatterACL/Chromium browser checks before AND after stopping/restarting services; private keys, DB data and credential file unchanged. Playwright 1440/390/320, QA-02/03/04/05/07/08/10 including denial, refresh, CSRF and logout PASS. **8/8 CI jobs PASS** run `41793096574`, including the new staging-kit job; `tests/evidence/AL-R0-R41-STANDALONE-STAGING-KIT-2026-11-04.json`.
+- **Actual infrastructure block:** Cloudflare connection confirmed, but Containers access HTTP401 and zero available Cloudflare Tunnels. There is no authorized persistent standalone Docker/PG16 host connected; user-saved R40 credential file NOT applied to any permanent staging server. No owner-accessible QA URL, production-approved IAM/MFA, real legal AI UC functions, full TC12, backup/rollback, physical mobile or Owner final acceptance.
+- **Runbook:** `deployment/standalone/QA_R41_OPERATIONS.md` documents how an authorized QA host operator uses the original R40 owner-private bundle and SSH tunnel. Do not use R41 test-only auth as production or public SaaS. IAICT ordinary organization on standalone; SaaS deferred; SRS baseline v1.1.15 unchanged.
+- **Next:** connect an approved nonproduction standalone Linux Docker host for actual persistent staging and Owner browser acceptance; until then advance the real core legal AI workflows and remaining security gates in isolation.
 
 ## R40 — reusable 10-account QA matrix saved privately, actual SQL/HTTP CI verification
 
