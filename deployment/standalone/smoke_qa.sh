@@ -4,6 +4,7 @@
 # both test stacks at end; the script is NOT the live persistent staging host.
 set -Eeuo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT"
 TMP="$(mktemp -d)"
 umask 077
 PRIMARY="alr40_primary_$$"
@@ -32,13 +33,13 @@ probe_b() {
 }
 login_a() {
   local actor="$1" tenant="$2" expected="$3"
-  python "$ROOT/tools/r40_qa_request.py" \
+  python -m tools.r40_qa_request \
     --credentials "$TMP/qa-credentials.json" --account "$actor" --tenant "$tenant" |
     dc_a exec -T auth python -m tools.r38_login_probe login "$expected"
 }
 login_b() {
   local actor="$1" tenant="$2" expected="$3"
-  python "$ROOT/tools/r40_qa_request.py" \
+  python -m tools.r40_qa_request \
     --credentials "$TMP/qa-credentials.json" --account "$actor" --tenant "$tenant" |
     dc_b exec -T auth python -m tools.r38_login_probe login "$expected"
 }
