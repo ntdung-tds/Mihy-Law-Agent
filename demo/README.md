@@ -1,6 +1,8 @@
 # AI Law — R31 demo customers and safe usage
 
-The canonical, **synthetic-only** fixture is demo/customers.json, copied identically to web/r0-demo/customers.json. Automated tests verify both copies match.
+The **UI demo scenario fixture** is `demo/customers.json`, copied identically to `web/r0-demo/customers.json`. Automated tests verify both copies match. This is the canonical source **for the R31 UI demo only**, not for all repository test fixtures.
+
+**Separate backend adversarial fixture:** PR #47 already merged `db/demo/customer_catalog.json` and `db/demo/seed_r31_synthetic.sql` for a different, PostgreSQL-only negative test (two fictional organization tenants). Its IDs and personas intentionally differ from this UI fixture (personal + organization tenants). Neither fixture is a real client account, and they must not be seeded together into one disposable database. Do not treat the JSON datasets as synchronized customer records.
 
 | Scenario | Demo identity | Tenant | Right | Visible synthetic labels |
 | --- | --- | --- | --- | --- |
