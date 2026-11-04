@@ -97,7 +97,7 @@ class D01R33RealImplementationClarification(unittest.TestCase):
     def test_real_role_accounts_not_confused_with_static_fixtures(self):
         path = ROOT / "tests" / "acceptance" / "R0_REAL_ROLE_ACCOUNTS.md"
         content = path.read_text(encoding="utf-8")
-        for case in range(1, 9):
+        for case in range(1, 10):
             self.assertIn("RA-" + str(case).zfill(2), content)
         self.assertIn("actual test user account", content)
         self.assertIn("TC12A/TC12B", content)
