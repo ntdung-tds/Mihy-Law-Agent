@@ -1,4 +1,10 @@
-# AI Law R36–R39 — standalone-first local deployment bootstrap
+# AI Law R36–R40 — standalone-first local deployment bootstrap
+
+## R40 — ten reusable QA accounts with owner-only stored credentials
+
+**Detailed operator procedure:** [QA_R40_PROVISION.md](./QA_R40_PROVISION.md). The approved public-safe QA actor matrix is `tests/acceptance/R40_STANDALONE_QA_INVENTORY.json` (QA-01..QA-10, covering RA-02..RA-09 with existing role keys). Private passwords + Argon2id hashes are in **restricted Owner-only Drive**, not in this public repository.
+
+`tools/r40_qa_provision.py` generates/validates the private account bundle once, then renders per-installation **idempotent SQL**. `bash deployment/standalone/smoke_qa.sh` verifies 10 real account records and HTTP sign-ins with PostgreSQL16 in two independent Docker stacks, checks individual/organization ACL, revoked/disabled/limited states, and proves the **named DB volume survives compose down/up without `-v`**. CI cleans the test infrastructure afterward; Owner's saved credentials are NOT yet activated on a permanent staging host. Never commit the private JSON or publish the local-only auth/API publicly.
 
 ## R39 — Browser UX connected to real standalone login and protected API (test only)
 
