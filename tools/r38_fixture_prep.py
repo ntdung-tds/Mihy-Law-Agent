@@ -56,14 +56,14 @@ def prepare(directory: Path, profile: str) -> None:
     port = "18080" if profile == "iaict" else "18081"
     with (directory / "installation.env").open("a") as env:
         env.write(
-            "AI_LAW_R39_HOST_PORT=" + port + "\\n"
-            "AI_LAW_R39_BROWSER_ORIGIN=http://127.0.0.1:" + port + "\\n"
-            "AI_LAW_R39_COOKIE_NAME=al_r39_" + profile + "\\n"
+            "AI_LAW_R39_HOST_PORT=" + port + "\n"
+            "AI_LAW_R39_BROWSER_ORIGIN=http://127.0.0.1:" + port + "\n"
+            "AI_LAW_R39_COOKIE_NAME=al_r39_" + profile + "\n"
             "AI_LAW_R39_WORKSPACES_B64=" +
             base64.b64encode(
                 json.dumps(workspaces, ensure_ascii=False,
                            separators=(",", ":")).encode()
-            ).decode() + "\\n"
+            ).decode() + "\n"
         )
     records = {}
     sql = ["BEGIN;"]
