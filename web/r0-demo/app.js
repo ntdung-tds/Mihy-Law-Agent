@@ -124,7 +124,10 @@
     $('#persona-description').textContent = scenario.intent;
     $('#test-result').classList.remove('denied');
     $('#test-result').textContent = 'Đã đổi kịch bản và xóa lựa chọn/từ khóa cũ (mô phỏng).';
-    renderScenarios();
+    document.querySelectorAll('[data-scenario-key]').forEach(button => {
+      button.setAttribute('aria-pressed',
+        button.dataset.scenarioKey === scenario.key ? 'true' : 'false');
+    });
     renderDocuments();
   }
 
@@ -150,6 +153,7 @@
       throw new Error('Unsupported or unsafe fixture');
     }
     state.data = data;
+    renderScenarios();
     chooseScenario('personal');
     $('#doc-search').addEventListener('input', event => {
       state.search = event.target.value;
