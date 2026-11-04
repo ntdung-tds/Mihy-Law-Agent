@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 46,
-  "updated_at": "2026-11-04T15:08:00Z",
+  "revision": 47,
+  "updated_at": "2026-11-04T16:08:00Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1033,7 +1033,15 @@
           "cf_r45_unit_auth_csrf_11uc": "PASS_41853343847_NODE_AND_PYTHON",
           "cf_r45_original_url_owner_positive_password_login": "NOT_RUN_OWNER",
           "cf_r45_full_authenticated_live_browser_menu": "NOT_RUN_OWNER_ONLY_PRIVATE_CREDENTIAL",
-          "cf_r45_actual_legal_ai_and_file_flows": "NOT_RUN"
+          "cf_r45_actual_legal_ai_and_file_flows": "NOT_RUN",
+          "cf_r46_real_matter_d1_migration": "PASS_CLOUDFLARE_API_0003_TABLES_READBACK",
+          "cf_r46_real_matter_sqlite_acl": "PASS_GITHUB_R46_CLOUDFLARE_CONTRACT_41861636678",
+          "cf_r46_matter_backend_worker_qa": "DEPLOYED_CLOUDFLARE_5_MODULES_BINDINGS_RETAINED",
+          "cf_r46_original_preview_qa": "DEPLOYED_CLOUDFLARE_8_MODULES_2026_11_04",
+          "cf_r46_authenticated_staging_browser_real_db_read": "PASS_CLOUDFLARE_BROWSER_RENDERING_390_WITH_SYNTHETIC_QA_RECORD_CLEANED",
+          "cf_r46_live_post_create_owner_device": "NOT_RUN_OWNER",
+          "cf_r46_full_product_readiness": "NOT_READY_FULL_GATES_NOT_PASSED",
+          "cf_r46_branch_ci_all_jobs": "PENDING_QUEUE_AT_CHECKPOINT"
         },
         "evidence": [
           "deployment/modes.json",
@@ -1276,6 +1284,12 @@
         "topic": "Owner-selected existing R0 preview URL must host QA sign-in and mobile right-side functional navigation",
         "value": "R45 QA preview gateway at ai-law-r0-preview uses Cloudflare internal service binding QA_AUTH to existing isolated ai-law-standalone-cf-qa R44 identity and D1; no public cross-origin auth calls, no duplicate user database or copied secrets. Anonymous preview shows login, authenticated QA session opens original R0 shell with 11 SRS discovery/status-only tiles. The mobile bottom navigation is replaced by a right vertical rail and 11-workflow drawer; all 11 UC status labels remain informational. Cloudflare isolated nonproduction only, no real legal data, file uploads, SRS AI services or production authorization. Owner must accept positive login from their own device on the original URL; R41 dedicated server kit stays parked, IAICT is ordinary organization and shared SaaS deferred. SRS v1.1.15 unchanged.",
         "authority": "Owner 2026-11-04: 'Sao không đưa phần đăng nhập vào đây? https://ai-law-r0-preview.iaict-platform.workers.dev/...#documents Giao diện này làm thêm menu ngang dưới=> bên phải để hiện các chức năng'."
+      },
+      {
+        "id": "DEC-019",
+        "topic": "Owner directs transition to real AI Law product; first bounded R46 durable QA matter workflow",
+        "value": "Implement the SRS-defined product as real functioning modules, not invented legal answers or static sample lists. R46 first real Cloudflare Free QA matter register provides authenticated case metadata creation/listing, tenant-scoped explicit MatterACL, audit event, and D1 persistence. Owner's original preview hostname serves the QA application; R44 password/session service reused. No real client data, no customer-owned Google Drive OAuth, no actual DOCX/PDF content, no legal AI R0 UC, and no production security/legal approval at this checkpoint. Production release remains fail-closed by release/product_readiness.json and Owner acceptance. R41 dedicated-server kit preserved; SaaS IAICT deferred; SRS v1.1.15 unchanged.",
+        "authority": "Owner 2026-11-04: 'Hãy triển khai đây là sản phẩm thật'."
       }
     ],
     "risks": [
@@ -1588,8 +1602,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R45 deployed isolated QA login gateway + original R0 shell + mobile right-side function rail to https://ai-law-r0-preview.iaict-platform.workers.dev/ ; Cloudflare API readback confirms QA_AUTH service binding and new script deployment, original URL live HTTPS anonymous-denial/CSRF smoke PASS, staging Chromium 320/390/430/1440 and local UI right-menu PASS, Node/Python tests PASS. Existing R44 QA credential unchanged. Owner physical-device positive login on ORIGINAL URL NOT_RUN; no SRS AI workflow or Drive OAuth.",
-      "next_action": "Owner opens the original ai-law-r0-preview URL on phone, signs in with existing Owner-private QA04 R44 credential, sees original R0 11-workflow shell, checks right-side rail and 11 functions, reloads, logs out; report PASS/FAIL for final R45 acceptance. If fail, repeat code/test/fix. Only after acceptance progress to authorized original SRS legal workflows and customer-owned Google Drive OAuth. R41 host paused, SaaS deferred.",
+      "last_completed_step": "R46 first REAL persistent QA matter metadata registry implemented and deployed on existing Cloudflare Free D1 and original preview URL. D1 migration 0003 applied (qa_matter_catalog, qa_matter_events), backend retains all R44 bindings/password secrets, R0 preview uses QA_AUTH private service binding. Cloudflare Browser Rendering authenticated staging 390px saw real D1 seeded synthetic case under MatterACL, then synthetic row/session were revoked/deleted. PR #63 tests SQL and Node PASS on earlier R46 revision; newer branch CI has queued jobs. This is NOT full legal AI product.",
+      "next_action": "Owner logs into original preview URL using already saved QA04 account and creates an innocuous QA-only matter name, reloads and confirms persistence, logs out; Owner reports PASS/FAIL. Continue per SRS: secure customer-owned Google Drive OAuth + real file storage, real AI UC03/04/07, tenant ACL/security, audit/job lifecycle, robust E2E, operations and dedicated deployment QA. Do NOT ingest real legal records or deploy production until full release gates/Owner final acceptance.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1607,7 +1621,8 @@
         "DEC-017 Cloudflare Free + Google Drive is an APPROVED DIRECTION only, NOT IMPLEMENTED. R41 PG16 Docker cannot run unchanged on Workers; D1 SQL/ACL equivalence, OAuth Drive scopes, quota/ToS, provider security and actual browser/file E2E have NOT_RUN. Owner dedicated Docker host is paused, not abandoned; SaaS deferred.",
         "R43 Cloudflare Worker+D1 real infrastructure is QA-only and all private routes deny (JWT_JWKS_JSON has zero keys, no signed test users or sessions). Google Drive OAuth grant/refresh token, real upload/download, complete PostgreSQL-RLS-to-D1 SRS parity, production login/MFA, legal AI UC and Owner final acceptance NOT_RUN. D1 count now reaches current Free limit 10/10, so further new D1 DBs require cleanup or plan change.",
         "R44 Owner reported positive phone sign-in on 2026-11-04. Reload/session persistence and logout on physical device remain OWNER_CHECK_PENDING; QA-only PBKDF2 is NOT full production IAM/IdP/MFA. Google Drive OAuth/file upload and SRS legal workflows NOT_RUN; production unauthorized.",
-        "R45 preview UI is deployed on original URL and anonymous/auth-boundary HTTPS tested; Owner positive sign-in into full original UI, session persistence and logout on physical mobile remain NOT_RUN. No claim of production-ready IAM, legal AI functionality, Google Drive OAuth, full D1 RLS parity or TC12."
+        "R45 preview UI is deployed on original URL and anonymous/auth-boundary HTTPS tested; Owner positive sign-in into full original UI, session persistence and logout on physical mobile remain NOT_RUN. No claim of production-ready IAM, legal AI functionality, Google Drive OAuth, full D1 RLS parity or TC12.",
+        "R46 matter metadata create/list is implemented QA-only, but positive owner-device POST+reload, all requested legal document file storage/Google Drive OAuth, AI UC03/04/07, full MatterACL/RLS parity, security/operational gates and production approval remain pending. Original URL is still NONPRODUCTION_QA."
       ]
     },
     "policy": {

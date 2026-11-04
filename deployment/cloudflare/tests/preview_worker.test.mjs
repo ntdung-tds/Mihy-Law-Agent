@@ -20,6 +20,9 @@ const env={QA_AUTH:{async fetch(req){
     logged=true;
     return new Response('{"ok":true}',{headers:{'Content-Type':'application/json','Set-Cookie':'al_qa_session=00000000-0000-4000-8000-000000000000; Path=/; HttpOnly; Secure; SameSite=Strict'}});
   }
+  if(u.pathname==='/api/qa/matters') {
+    return Response.json(req.method==='GET'?{matters:[]}:{id:'f0000000-0000-4000-8000-000000000001',title:'QA case',created_at:1800000000},{status:req.method==='GET'?200:201});
+  }
   if(u.pathname==='/api/qa/logout'){
     logged=false;
     return new Response('{"ok":true}',{headers:{'Set-Cookie':'al_qa_session=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Strict'}});
@@ -53,8 +56,23 @@ test('authenticated preview serves all four areas and 11 right-drawer functions'
   for(const id of ['UC01','UC02','UC03','UC04','UC05','UC06','UC07','UC08','UC09','UC10','UC11'])
     assert.match(html,new RegExp('data-feature-jump="'+id+'"'));
   assert.match(html,/mobile-right-rail/);assert.match(html,/id="preview-logout"/);
-  for(const file of ['/styles.css','/app.js','/session.js'])
+  for(const file of ['/styles.css','/app.js','/session.js','/matters.js'])
     assert.equal((await handlePreview(new Request(origin+file),env)).status,200);
+});
+test('R46 real matter API GET/POST are same-origin, service-bound and not public mock documents',async()=>{
+  logged=true;
+  const privateJs=await handlePreview(new Request(origin+'/matters.js',{headers:{Cookie:'al_qa_session=mock'}}),env);
+  assert.equal(privateJs.status,200);
+  assert.match(await privateJs.text(),/api\/qa\/matters/);
+  const list=await handlePreview(new Request(origin+'/api/qa/matters',{headers:{Cookie:'al_qa_session=mock'}}),env);
+  assert.equal(list.status,200);assert.deepEqual((await list.json()).matters,[]);
+  const csrf=await handlePreview(new Request(origin+'/api/qa/matters',{
+    method:'POST',headers:{Origin:'https://evil.invalid','Content-Type':'application/json'},body:'{}'}),env);
+  assert.equal(csrf.status,403);
+  const created=await handlePreview(new Request(origin+'/api/qa/matters',{
+    method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:'{"title":"QA case"}'}),env);
+  assert.equal(created.status,201);
+  assert.equal(requests.at(-1).origin,'https://ai-law-standalone-cf-qa.iaict-platform.workers.dev');
 });
 test('logout is CSRF protected and clears session',async()=>{
   const bad=await handlePreview(new Request(origin+'/api/qa/logout',{method:'POST',headers:{Origin:'https://evil.invalid'},body:'{}'}),env);

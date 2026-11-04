@@ -1,12 +1,7 @@
 /* AI Law R0 UI preview: synthetic metadata only. No document upload, AI calls, auth or network APIs. */
 (() => {
   'use strict';
-  const documents = Object.freeze([
-    { id: 'AL-DEMO-01', name: 'Hợp đồng cung cấp dịch vụ.docx', category: 'Hợp đồng', type: 'docx', status: 'review', label: 'Đang rà soát', date: '02/11/2026' },
-    { id: 'AL-DEMO-02', name: 'Phụ lục điều khoản bảo mật.pdf', category: 'Phụ lục', type: 'pdf', status: 'draft', label: 'Bản nháp', date: '01/11/2026' },
-    { id: 'AL-DEMO-03', name: 'Thỏa thuận hợp tác kinh doanh.docx', category: 'Thỏa thuận', type: 'docx', status: 'review', label: 'Đang rà soát', date: '31/10/2026' },
-    { id: 'AL-DEMO-04', name: 'Bản ghi nhớ pháp lý.pdf', category: 'Ghi nhớ', type: 'pdf', status: 'done', label: 'Hoàn tất', date: '28/10/2026' }
-  ]);
+  const documents = Object.freeze([]); // No fabricated file records in the live QA workspace.
   const viewLabels = { overview: 'Tổng quan', documents: 'Tài liệu', assistant: 'Trợ lý AI', research: 'Tra cứu pháp lý' };
   let filter = 'all';
   let currentView = 'overview';
@@ -94,7 +89,7 @@
       else btn.removeAttribute('aria-current');
     });
     $('#breadcrumb-current').textContent = viewLabels[view];
-    if (view === 'documents') renderDocuments();
+    if (view === 'documents') { renderDocuments(); window.dispatchEvent(new Event('ai-law:documents-open')); }
     if (updateHash && window.location.hash !== `#${view}`) window.history.replaceState(null, '', `#${view}`);
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
@@ -146,7 +141,7 @@
     renderDocuments();
   }));
   $('#document-search').addEventListener('input', renderDocuments);
-  $('#search-shortcut').addEventListener('click', () => { goto('documents'); $('#document-search').focus(); });
+  $('#search-shortcut').addEventListener('click', () => { goto('documents'); ($('#matter-search') || $('#document-search')).focus(); });
   window.addEventListener('keydown', event => {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); goto('documents'); $('#document-search').focus(); }
     if (event.key === 'Escape' && !$('#modal-backdrop').hidden) closeModal();
@@ -156,13 +151,13 @@
       else if (!event.shiftKey && document.activeElement === focusables[focusables.length - 1]) { event.preventDefault(); focusables[0].focus(); }
     }
   });
-  $('#notifications').addEventListener('click', () => toast('Chưa có hệ thống thông báo — đây là bản xem trước R0.'));
-  $('#side-guide').addEventListener('click', () => openModal('R0 · Bản xem trước', 'Giao diện chạy độc lập, responsive mobile-first. Dữ liệu tài liệu là giả lập, không có tài khoản, API, AI, lưu trữ hoặc tải tệp lên máy chủ. POC1 vẫn tạm dừng và chưa nghiệm thu cuối.'));
+  $('#notifications').addEventListener('click', () => toast('Chưa có hệ thống thông báo — chức năng đang triển khai.'));
+  $('#side-guide').addEventListener('click', () => openModal('R0 · Bản xem trước', 'Ứng dụng QA hiện đã kết nối đăng nhập, danh mục hồ sơ và MatterACL trên D1. Không sử dụng hồ sơ thật. Tệp Google Drive, các tác vụ AI và nghiệm thu production chưa hoàn thành.'));
   $('#sidebar-explore').addEventListener('click', () => goto('assistant'));
   $('#modal-close').addEventListener('click', closeModal);
   $('#modal-ack').addEventListener('click', closeModal);
   $('#modal-backdrop').addEventListener('click', (event) => { if (event.target.id === 'modal-backdrop') closeModal(); });
-  $('#upload-btn').addEventListener('click', () => $('#local-file').click());
+  $('#upload-btn').addEventListener('click', () => { goto('documents'); $('#matter-title').focus(); });
   $('#local-file').addEventListener('change', event => {
     const file = event.target.files?.[0];
     if (file) openModal('Đã chọn tệp trên thiết bị', 'Ứng dụng chỉ đọc tên tệp để minh họa thao tác chọn tài liệu. Tệp không được tải lên, đọc nội dung hay lưu trữ trên máy chủ.', `Tên tệp: ${file.name} · ${Math.round(file.size / 1024)} KB`);
