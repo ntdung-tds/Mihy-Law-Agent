@@ -161,9 +161,9 @@ class TestD1ScopedAuthorization(unittest.TestCase):
     def test_foreign_key_denies_cross_install_reference(self):
         with self.assertRaises(sqlite3.IntegrityError):
             self.db.execute("INSERT INTO qa_file_links VALUES(?,?,?,?,?,?,?)",(
-                INSTALL_OTHER,ORG,"cross-linked",MATTER,"google_drive",
+                INSTALL_OTHER,OTHER_TENANT,"cross-linked",MATTER,"google_drive",
                 "fakeDriveObject012345","text/plain",
-            )) # no matter with this tenant? INSTALL_OTHER does have one
+            )) # secondary installation has no OTHER_TENANT
         # Strict FKs should disallow linking nonexistent matter.
         with self.assertRaises(sqlite3.IntegrityError):
             self.db.execute("INSERT INTO qa_runs VALUES(?,?,?,?,?)",(
