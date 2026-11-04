@@ -1,10 +1,19 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `43` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T08:48:00Z`.
+- **PCS revision:** `44` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T11:05:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R44 — mobile sign-in is deployed to Cloudflare QA; Owner positive login pending
+
+- **Owner milestone:** User wants to open the mobile UI, sign in and enter the workspace. Scope stops at QA login/dashboard/reload/logout; not full AI functionality. `deployment/cloudflare/QA_R44_MOBILE_LOGIN.md`.
+- **Actual live:** Dedicated nonproduction Worker `ai-law-standalone-cf-qa` serves responsive login + dashboard on HTTPS, D1 migration `0002_cf_qa_mobile_login.sql` created password verifier + rate limiter, and QA-04 from R40 inventory was provisioned as an ordinary lawyer with active organization membership. Its **new, separate Cloudflare-only QA password** is saved in owner-only private Drive; never include it or its URL in public GitHub. Original 10 R40 Docker credentials are unchanged.
+- **Security:** Random salted PBKDF2-SHA256 100k verification, per-IP HMAC/Cloudflare secret rate limiting, per-account lock, strict Origin, cookie Secure HttpOnly SameSite Strict 30min; session resolved via D1 active principal+tenant membership+login status, and logout revokes DB session. R43 signed JWT file/run access boundaries unaffected.
+- **Evidence:** Real HTTPS Chromium viewport 320/390/430/1440 and wrong password **against existing QA04** returned actual 401, no horizontal overflow; CI `41817969438` success. Node crypto success-session/logout/CSRF and expiry tests PASS with synthetic D1 mock. Real correct password 200 + dashboard on Owner's phone **NOT_RUN** because Owner-private credential is not put in CI/public tools. Owner must accept or return error for repeat fix/test.
+- **Remaining:** Customer-approved IdP/MFA and full SRS IAM parity, Google Drive OAuth/upload/download and legal AI UC all NOT_RUN; no production or real matter data. R41 own-server setup parked; IAICT ordinary organization; SaaS deferred.
+- **Next:** Owner logs in from phone with R44 private QA credential, verifies workspace/reload/logout. Close R44 only after Owner confirms success; otherwise fix and rerun. Then proceed to Drive OAuth and SRS legal functions.
 
 ## R43 — first REAL isolated Cloudflare Free Worker+D1 infrastructure with locked-down API
 

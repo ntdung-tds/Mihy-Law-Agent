@@ -1,4 +1,4 @@
-# AI Law R43 — Cloudflare Workers Free, D1, Google Drive boundary
+# AI Law R43–R44 — Cloudflare Workers Free, D1, Google Drive boundary
 
 **Standalone first. IAICT is only an ordinary customer. SaaS deferred.**
 SRS v1.1.15 unchanged, R41 Docker/PG16 + saved R40 private QA accounts
@@ -21,6 +21,12 @@ parked until Owner supplies a server. No production or real legal case data.
 - Without a valid token, D1 binding, approved folder, or Drive grant,
   the Worker FAILS CLOSED. Login, customer OAuth consent, token refresh,
   file upload, delete, indexing and AI legal workflows are NOT implemented.
+
+## R44 — mobile QA login now deployed on Cloudflare Free
+
+Use the real HTTPS QA UI: **https://ai-law-standalone-cf-qa.iaict-platform.workers.dev/**. Owner mobile acceptance instructions are in [QA_R44_MOBILE_LOGIN.md](QA_R44_MOBILE_LOGIN.md). This R44 QA-only implementation includes a server-verified password for the existing synthetic QA-04 user with a **separate Owner-private Cloudflare password**, D1 active session/membership checks, Secure HttpOnly SameSite Strict cookie and logout. It does not reuse or alter the Owner's R40 Docker passwords.
+
+Live GitHub Actions Chromium confirmed 320/390/430/1440 px responsive rendering and QA04 wrong-password **HTTP401**, plus local Node WebCrypto positive login/session/logout tests. Correct-password Owner phone sign-in remains **PENDING Owner acceptance**; no claim that the full mobile product, legal AI workflows or Google Drive OAuth are delivered. No real legal data, production IdP/MFA or production deployment.
 
 ## Actual R43 QA deployment status
 

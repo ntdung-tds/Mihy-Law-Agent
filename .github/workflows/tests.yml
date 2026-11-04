@@ -168,6 +168,8 @@ jobs:
           node --check deployment/cloudflare/src/google_drive.mjs
       - name: Verify RS256 JWT, D1 authz fail-close and Google Drive adapter with fake credentials
         run: node --test deployment/cloudflare/tests/worker.test.mjs
+      - name: Verify real WebCrypto PBKDF2 QA session cookies, mobile markup and CSRF
+        run: node --test deployment/cloudflare/tests/mobile.test.mjs
       - name: Execute actual authz queries and FK/deny rules against SQLite
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_sqlite_acl.py' -v
 
@@ -180,3 +182,20 @@ jobs:
       - uses: actions/checkout@v4
       - name: Call real dedicated Cloudflare Free Worker over HTTPS and deny anonymous legal-file requests
         run: bash deployment/cloudflare/tests/live_http_smoke.sh
+
+  cloudflare-mobile-live:
+    # Real Cloudflare QA HTML/mobile Chrome test. No private QA password in CI.
+    # Actual authenticated login must be checked with the private owner account.
+    if: github.ref_name == 'feat/r44-cloudflare-mobile-qa-login' || github.head_ref == 'feat/r44-cloudflare-mobile-qa-login'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Chromium and Playwright
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: Real HTTPS Cloudflare login page Chromium 320/390/430/1440 + invalid credentials
+        run: python deployment/cloudflare/tests/live_mobile_browser.py

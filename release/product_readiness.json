@@ -2,7 +2,7 @@
   "schema_version": 1,
   "baseline": "SRS v1.1.15",
   "release_target": "R0",
-  "checkpoint": "R43_CLOUDFLARE_FREE_QA_INFRA_ONLY",
+  "checkpoint": "R44_MOBILE_QA_LOGIN_OWNER_ACCEPTANCE_PENDING",
   "assessment_date": "2026-11-04",
   "synthetic_demo_customers_created": true,
   "live_customer_accounts_created": false,
@@ -155,7 +155,7 @@
     "dedicated": {
       "required": true,
       "status": "PARTIAL_TESTED",
-      "deployment_e2e": "NOT_RUN",
+      "deployment_e2e": "NOT_RUN_OWNER_MOBILE_SUCCESS",
       "evidence": [
         "pcs/STATE.json DEC-015 Owner-approved implementation requirement",
         "deployment/standalone/compose.yaml (isolated nonproduction database bootstrap, NOT complete AI Law app)",
@@ -174,9 +174,12 @@
         "deployment/DEC-017-CLOUDFLARE-FREE-PORTABLE-STORAGE.md",
         "tests/evidence/AL-R0-R43-CLOUDFLARE-FREE-FIRST-SLICE-2026-11-04.json",
         "Cloudflare API real Worker ai-law-standalone-cf-qa + D1 ai-law-standalone-cf-qa 8 tables",
-        "GitHub Actions 41802685576 live Worker health / protected anonymous file/run 401 / writes 404; local RS256/SQLite ACL/Drive provider tests"
+        "GitHub Actions 41802685576 live Worker health / protected anonymous file/run 401 / writes 404; local RS256/SQLite ACL/Drive provider tests",
+        "tests/evidence/AL-R0-R44-CLOUDFLARE-MOBILE-QA-LOGIN-2026-11-04.json",
+        "GitHub Actions 41817969438 real mobile Chromium QA Cloudflare login form, QA04 wrong password HTTP401",
+        "R44 owner-only private Cloudflare QA password (link/password withheld from public repository)"
       ],
-      "need": "R41 repeatable private standalone QA kit tested in two disposable Docker+PG16+auth/API/UI installations with stable account passwords and signing keys across stop/restart; Chromium desktop/mobile-viewport 1440/390/320 PASS. No authorized persistent host connected (Cloudflare Containers 401, no Tunnel/host); saved owner QA bundle NOT applied to long-lived staging. Official IdP/MFA, protected workspace discovery, real SRS AI UC functions, full TC12, legal data, backup/restore and Owner acceptance remain NOT_RUN. DEC-017 Owner now prioritizes an isolated nonproduction Cloudflare Free AI Law deployment storing files in the organization's own Google Drive while R41 host kit remains parked for later server. No Cloudflare AI Law backend/metadata DB/OAuth/file upload implemented; Workers Free cannot simply run R41 Docker+PostgreSQL16. D1 tenant ACL/RLS parity and SRS impact not yet validated. Future OneDrive/NAS/VPS/AWS/Azure/GCP portability is only architecture intent. R43 created actual nonproduction Cloudflare Worker and 8-table separate D1 schema; real HTTPS smoke passes anonymous protected denial, but NO active QA IdP, signed login/session, uploaded files, real Google Drive OAuth consent/token, full D1-vs-PG RLS SRS parity, legal AI service workflows, full browser acceptance or production. D1 Free account has reached 10 databases, so further DB creation requires resource review."
+      "need": "R41 repeatable private standalone QA kit tested in two disposable Docker+PG16+auth/API/UI installations with stable account passwords and signing keys across stop/restart; Chromium desktop/mobile-viewport 1440/390/320 PASS. No authorized persistent host connected (Cloudflare Containers 401, no Tunnel/host); saved owner QA bundle NOT applied to long-lived staging. Official IdP/MFA, protected workspace discovery, real SRS AI UC functions, full TC12, legal data, backup/restore and Owner acceptance remain NOT_RUN. DEC-017 Owner now prioritizes an isolated nonproduction Cloudflare Free AI Law deployment storing files in the organization's own Google Drive while R41 host kit remains parked for later server. No Cloudflare AI Law backend/metadata DB/OAuth/file upload implemented; Workers Free cannot simply run R41 Docker+PostgreSQL16. D1 tenant ACL/RLS parity and SRS impact not yet validated. Future OneDrive/NAS/VPS/AWS/Azure/GCP portability is only architecture intent. R43 created actual nonproduction Cloudflare Worker and 8-table separate D1 schema; real HTTPS smoke passes anonymous protected denial, but NO active QA IdP, signed login/session, uploaded files, real Google Drive OAuth consent/token, full D1-vs-PG RLS SRS parity, legal AI service workflows, full browser acceptance or production. D1 Free account has reached 10 databases, so further DB creation requires resource review. R44 mobile UI and test-only session API now deployed on Cloudflare with separate Owner-only QA04 password, real mobile Chromium viewport PASS and QA04 wrong password returns 401. Correct-password real phone login/dashboard/session persistence still awaits Owner test. Full legal AI workflows, Google Drive OAuth/upload and production IAM/MFA remain incomplete."
     }
   },
   "delivery_modes_owner_approved": "2026-11-04; both SaaS and dedicated REQUIRED for AI Law product target, not either-or",
@@ -202,16 +205,22 @@
   "standalone_qa_staging_kit": "PASS_CI_41793096574",
   "standalone_qa_staging_kit_browser_e2e": "PASS_CHROMIUM_CI_41793096574",
   "standalone_qa_test_accounts_after_restart": "PASS_EPHEMERAL_CI_PG16_VOLUME",
-  "standalone_qa_owner_saved_credentials_activated": "NOT_APPLIED_TO_PERMANENT_HOST_OR_CF",
+  "standalone_qa_owner_saved_credentials_activated": "NOT_APPLIED_TO_PERMANENT_HOST",
   "owner_delivery_direction": "CLOUDFLARE_WORKERS_FREE_AND_CUSTOMER_OWNED_GOOGLE_DRIVE_FIRST",
   "r41_owner_server_resume": "PARKED_UNTIL_OWNER_PROVIDES_DEDICATED_HOST",
   "r41_verified_main_ci": "PASS_8_OF_8_41794614580",
-  "cloudflare_free_runtime": "DEPLOYED_REAL_NONPROD_QA_LIVE_ANONYMOUS_DENIAL_VERIFIED",
-  "cloudflare_ai_law_d1_db": "CREATED_REAL_QA_D1_8_METADATA_TABLES_NO_CUSTOMER_DATA",
-  "cloudflare_real_user_login": "NOT_RUN_DENY_ALL_NO_ISSUER",
+  "cloudflare_free_runtime": "DEPLOYED_REAL_NONPROD_QA_MOBILE_LOGIN_PAGE_AND_AUTH_ENDPOINTS",
+  "cloudflare_ai_law_d1_db": "R44_REAL_QA_D1_VERIFIER_RATE_SESSION_AND_QA04_MEMBERSHIP",
+  "cloudflare_real_user_login": "R44_SYNTHETIC_QA04_BFF_READY_CORRECT_PASSWORD_LIVE_OWNER_TEST_NOT_RUN",
   "google_drive_legal_file_storage": "ADAPTER_MOCKED_NO_OAUTH_NOT_ACTIVE",
   "google_drive_oauth_per_organization": "NOT_RUN_NO_APPROVED_OAUTH_GRANT",
   "onedrive_nas_vps_aws_azure_gcp_storage_adapter": "DESIGN_TARGET_ONLY_NOT_IMPLEMENTED",
   "future_portable_hosts": "VPS_PRIVATE_SERVER_AWS_AZURE_GCP_DESIGN_TARGET_ONLY",
-  "srs_baseline_changed": false
+  "srs_baseline_changed": false,
+  "cloudflare_mobile_login_ui": "PASS_LIVE_CHROMIUM_320_390_430_1440_41817969438",
+  "cloudflare_mobile_qa04_incorrect_password": "PASS_LIVE_HTTP401_41817969438",
+  "cloudflare_mobile_qa04_positive_login": "NOT_RUN_OWNER_PRIVATE_PASSWORD",
+  "cloudflare_mobile_logout_and_session": "PASS_LOCAL_NODE_TEST_WITH_MOCK_D1_NO_POSITIVE_LIVE_PROOF",
+  "cloudflare_qa_owner_credential": "SAVED_OWNER_ONLY_DRIVE_R44_SEPARATE_FROM_R40",
+  "cloudflare_mobile_owner_acceptance": "PENDING"
 }
