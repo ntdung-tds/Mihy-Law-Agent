@@ -170,8 +170,8 @@ def initialize(profile: str, directory: Path, credentials: Path) -> dict:
     directory = _safe_directory(directory)
     # Never silently rekey an existing PostgreSQL volume or override
     # installation secrets: the auth/JWKS keys must persist across restart.
-    directory.parent.mkdir(parents=True, exist_ok=True)
-    os.chmod(directory.parent, 0o700)
+    directory.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    _owner_only(directory.parent, directory=True)
     directory.mkdir(mode=0o700, exist_ok=False)
     env = directory / "installation.env"
     try:
