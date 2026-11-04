@@ -201,3 +201,20 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Real HTTPS Cloudflare login page Chromium 320/390/430/1440 + invalid credentials
         run: python deployment/cloudflare/tests/live_mobile_browser.py
+
+  cloudflare-preview-live:
+    # R45 only: live Cloudflare preview QA login screen and anonymous denial;
+    # authorized workspace menu tested locally in Chromium with synthetic UI.
+    if: github.ref_name == 'feat/r45-r0-preview-login-right-menu' || github.head_ref == 'feat/r45-r0-preview-login-right-menu'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Chromium and Playwright
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: HTTPS live login denial and mobile right-rail Chromium
+        run: python deployment/cloudflare/tests/live_r0_preview_browser.py
