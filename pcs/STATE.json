@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 43,
-  "updated_at": "2026-11-04T08:48:00Z",
+  "revision": 44,
+  "updated_at": "2026-11-04T11:04:00Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -976,7 +976,7 @@
         "required": true,
         "status": "IN_PROGRESS",
         "owner_acceptance": "PENDING_REAL_STANDALONE_E2E",
-        "scope": "Dedicated AI Law FIRST (DEC-016); IAICT ordinary customer. R41 operator-use QA installer with stable per-install RSA/DB secrets, 10 existing R40 accounts, Docker named PostgreSQL16 volumes, private localhost browser gateway and owner-only bundle; two disposable Docker stacks prove restart persistence and Chromium QA, NOT a deployed persistent/owner-accessible QA host. DEC-017: R41 Docker bundle frozen until Owner provides standalone server; current Cloudflare Free + customer Google Drive NONPRODUCTION rollout first. Future provider-host/runtime portability is a design invariant, not proof of implementation. R43 installed separate Cloudflare nonprod QA Worker+D1 metadata schema. Public QA HTTP /health works and protected routes deny anonymous access, full signed auth/Google Drive/file workflows not operational.",
+        "scope": "Dedicated AI Law FIRST (DEC-016); IAICT ordinary customer. R41 operator-use QA installer with stable per-install RSA/DB secrets, 10 existing R40 accounts, Docker named PostgreSQL16 volumes, private localhost browser gateway and owner-only bundle; two disposable Docker stacks prove restart persistence and Chromium QA, NOT a deployed persistent/owner-accessible QA host. DEC-017: R41 Docker bundle frozen until Owner provides standalone server; current Cloudflare Free + customer Google Drive NONPRODUCTION rollout first. Future provider-host/runtime portability is a design invariant, not proof of implementation. R43 installed separate Cloudflare nonprod QA Worker+D1 metadata schema. Public QA HTTP /health works and protected routes deny anonymous access, full signed auth/Google Drive/file workflows not operational. R44 Cloudflare Workers Free QA mobile sign-in implemented for one saved QA-04 synthetic actor with a NEW owner-only Cloudflare password, existing R40 Docker credentials unchanged. Actual mobile Chrome page works; wrong password 401; positive owner-device login pending human test.",
         "tests": {
           "dual_mode_governance_contract": "PENDING_CI",
           "actual_dedicated_install": "NOT_RUN",
@@ -1012,12 +1012,18 @@
           "real_legal_workflow_on_staging": "NOT_RUN",
           "cf_free_worker_deployment": "PASS_NONPROD_CLOUDFLARE_API_AND_LIVE_HTTPS_41802685576",
           "cf_free_database_srs_security_parity": "PARTIAL_SQLITE_MOCK_TESTED_FULL_SRS_NOT_RUN",
-          "google_drive_per_organization_file_storage_e2e": "NOT_RUN_NO_CUSTOMER_OAUTH",
+          "google_drive_per_organization_file_storage_e2e": "NOT_RUN_OAUTH_DEFERRED_UNTIL_AFTER_MOBILE_LOGIN_ACCEPTANCE",
           "storage_adapter_future_providers": "NOT_RUN",
           "owner_host_r41_activation": "PAUSED_BY_OWNER_UNTIL_HOST",
           "cf_free_d1_qa_schema": "PASS_CLOUDFLARE_QUERY_API",
           "cf_anonymous_matter_and_file_401": "PASS_LIVE_CI_41802685576",
-          "cf_real_customer_login": "NOT_RUN"
+          "cf_real_customer_login": "NOT_RUN_QA_ONLY",
+          "cf_mobile_login_ui_responsive_real_chromium": "PASS_41817969438_320_390_430_1440",
+          "cf_mobile_qa04_pbkdf2_password_negative_live": "PASS_41817969438_HTTP401",
+          "cf_mobile_qa04_password_hash_and_membership_live_d1": "PASS_CLOUDFLARE_API",
+          "cf_mobile_qa_success_cookie_dashboard_logout_unit": "PASS_41817289435_MOCK_D1",
+          "cf_mobile_positive_password_browser_live": "PENDING_OWNER_PRIVATE_CREDENTIAL_TEST",
+          "cf_mobile_owner_physical_device_acceptance": "NOT_RUN_OWNER"
         },
         "evidence": [
           "deployment/modes.json",
@@ -1072,7 +1078,12 @@
           "deployment/cloudflare/migrations/0001_cf_qa_metadata.sql",
           "deployment/cloudflare/src/google_drive.mjs",
           "tests/evidence/AL-R0-R43-CLOUDFLARE-FREE-FIRST-SLICE-2026-11-04.json",
-          "GitHub Actions 41802685576 cloudflare-contract and cloudflare-live-qa PASS; Cloudflare API D1 real 8 tables"
+          "GitHub Actions 41802685576 cloudflare-contract and cloudflare-live-qa PASS; Cloudflare API D1 real 8 tables",
+          "deployment/cloudflare/src/mobile_auth.mjs",
+          "deployment/cloudflare/src/mobile_assets.mjs",
+          "deployment/cloudflare/QA_R44_MOBILE_LOGIN.md",
+          "tests/evidence/AL-R0-R44-CLOUDFLARE-MOBILE-QA-LOGIN-2026-11-04.json",
+          "GitHub Actions 41817969438: real Chromium 320/390/430/1440 on deployed QA Worker; QA04 wrong password HTTP401"
         ]
       }
     ],
@@ -1559,8 +1570,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R43: isolated AI Law QA Cloudflare Worker ai-law-standalone-cf-qa uploaded and nonproduction workers.dev enabled; separate new D1 ai-law-standalone-cf-qa created and actual 8-table migration applied; live GitHub Actions HTTPS /health PASS, protected anonymous run/file 401 and HTTP write 404. Real RS256 profile + D1 session/MatterACL and Drive folder read adapter tested in Node/SQLite with fake credentials; NO QA login provider, no real Google OAuth/file E2E, no legal AI functions or client data. R41 Docker host kit remains parked; stored R40 credentials unchanged.",
-      "next_action": "R44: implement an approved Cloudflare QA identity/session issuance (not exposing private QA passwords), actual signed 401/200 D1 authorization E2E on real Worker, then per-organization Google Drive OAuth with authorized consent and real file upload/download under ACL. Do not use ChatGPT Drive connector as Worker credentials, do not expose real legal files, complete TC12 and SRS IAM/security review before Owner acceptance. R41 resumes only after Owner provides host.",
+      "last_completed_step": "R44: real Cloudflare Free QA mobile web UI and PBKDF2/D1 session/cookie APIs uploaded to isolated ai-law-standalone-cf-qa, QA-04 new Cloudflare-specific synthetic password stored privately on owner-only Google Drive. Actual Cloudflare Chromium 320/390/430/1440 tested, no horizontal overflow, wrong password against existing QA04 returns true 401, anonymous remains signed out. Node WebCrypto success-login/session/logout/revoked/CSRF checks PASS. Correct password browser login/physical Owner phone NOT_RUN; Owner asked to accept when mobile works. R40 credentials and R41 Docker host checkpoint untouched.",
+      "next_action": "Owner opens https://ai-law-standalone-cf-qa.iaict-platform.workers.dev/ from phone and uses R44 cloud QA04 owner-only private password to verify positive login -> dashboard -> reload -> logout, then accept/fail. If FAIL fix via actual E2E loop. Only after Owner acceptance advance Google Drive OAuth file workflow and real legal AI SRS features. Do not mark R44 Owner mobile login as PASS until observed. R41 host parked and SaaS deferred.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1576,7 +1587,8 @@
         "R40 QA credentials are generated and saved privately, and 10 corresponding account models have been provisioned/tested in disposable CI instances, but these specifically saved credentials have NOT been applied to a long-lived owner-accessible staging server. Persistent deployment/approved IAM/MFA/real legal AI/full TC12/Owner final acceptance remain blocked.",
         "R41 finished private deployment KIT and 2-installation durable-volume restart/browser CI PASS, but Cloudflare Containers unauthorized (401), 0 tunnels and no connected independent Docker host; Owner-saved QA credentials cannot yet be activated on a permanent QA server. Production IdP/MFA, real legal functions, physical mobile, full TC12, operations and Owner acceptance remain NOT_RUN.",
         "DEC-017 Cloudflare Free + Google Drive is an APPROVED DIRECTION only, NOT IMPLEMENTED. R41 PG16 Docker cannot run unchanged on Workers; D1 SQL/ACL equivalence, OAuth Drive scopes, quota/ToS, provider security and actual browser/file E2E have NOT_RUN. Owner dedicated Docker host is paused, not abandoned; SaaS deferred.",
-        "R43 Cloudflare Worker+D1 real infrastructure is QA-only and all private routes deny (JWT_JWKS_JSON has zero keys, no signed test users or sessions). Google Drive OAuth grant/refresh token, real upload/download, complete PostgreSQL-RLS-to-D1 SRS parity, production login/MFA, legal AI UC and Owner final acceptance NOT_RUN. D1 count now reaches current Free limit 10/10, so further new D1 DBs require cleanup or plan change."
+        "R43 Cloudflare Worker+D1 real infrastructure is QA-only and all private routes deny (JWT_JWKS_JSON has zero keys, no signed test users or sessions). Google Drive OAuth grant/refresh token, real upload/download, complete PostgreSQL-RLS-to-D1 SRS parity, production login/MFA, legal AI UC and Owner final acceptance NOT_RUN. D1 count now reaches current Free limit 10/10, so further new D1 DBs require cleanup or plan change.",
+        "R44 owner successful password login on real phone has not been observed; public CI cannot access owner-only R44 password. QA R44 is test-only PBKDF2 login, not accepted production IAM/IdP/MFA, and only QA04 is seeded on Cloudflare. Google Drive OAuth/file upload and full SRS workflows remain NOT_RUN. No production."
       ]
     },
     "policy": {
