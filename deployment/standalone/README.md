@@ -1,4 +1,10 @@
-# AI Law R36–R40 — standalone-first local deployment bootstrap
+# AI Law R36–R41 — standalone-first local deployment bootstrap
+
+## R41 — Repeatable local QA installation with saved R40 accounts
+
+Runbook: [QA_R41_OPERATIONS.md](./QA_R41_OPERATIONS.md). The `qa_staging.sh` operator commands create per-installation secrets once, start two independent local-only QA auth/API/PostgreSQL16/Chromium gateway stacks, apply the already-saved R40 private credential bundle, test access, and stop without deleting the named volumes.
+
+CI 41793096574 PASS: same 10 temporary QA identities and RSA signing keys survived stop/restart; real Chromium at 1440/390/320 and login/authorization tested twice. CI cleanup destroys only its own disposable volumes; permanent owner-accessible staging still requires an authorized connected Docker host. No public app port, legal client data or production IAM release.
 
 ## R40 — ten reusable QA accounts with owner-only stored credentials
 
