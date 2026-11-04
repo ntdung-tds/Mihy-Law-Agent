@@ -1,8 +1,9 @@
 """R47 real HTTPS browser QA: public homepage, login, protected workspace, mobile layout.
 Does not use user credentials or save screenshots to GitHub.
 """
+import os
 from playwright.sync_api import sync_playwright
-BASE="https://ai-law-web-qa.iaict-platform.workers.dev"
+BASE=os.environ.get("AI_LAW_WEBSITE_URL","https://ai-law-web-qa.iaict-platform.workers.dev")
 def run():
     with sync_playwright() as p:
         browser=p.chromium.launch(headless=True)

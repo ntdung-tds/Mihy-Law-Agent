@@ -299,5 +299,7 @@ jobs:
         run: |
           python -m pip install 'playwright==1.55.0'
           python -m playwright install --with-deps chromium
-      - name: Verify homepage, header/footer/mobile menu, login and private-app gate
-        run: python deployment/cloudflare/tests/live_ai_law_website.py
+      - name: Verify staging and final website names across 4 viewport sizes
+        run: |
+          python deployment/cloudflare/tests/live_ai_law_website.py
+          AI_LAW_WEBSITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_ai_law_website.py
