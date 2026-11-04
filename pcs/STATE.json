@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 31,
-  "updated_at": "2026-11-04T02:44:22.227Z",
+  "revision": 32,
+  "updated_at": "2026-11-04T02:50:47.105Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -829,6 +829,52 @@
           "production": "NOT_DEPLOYED",
           "owner_acceptance": "PENDING"
         }
+      },
+      {
+        "id": "AL-R0-DEMO-002",
+        "title": "R31-03: independent mobile-first synthetic customer scenario UI",
+        "priority": "P0",
+        "status": "TECH_DONE",
+        "scope": "Five synthetic UI personas, personal and organization tenants, visible permission simulation only, isolated R31 nonproduction Cloudflare Worker; do not assert real authentication or browser E2E.",
+        "baseline": "SRS v1.1.15 unchanged",
+        "owner_acceptance": "PENDING_REAL_BROWSER_E2E_AND_OWNER",
+        "tests": {
+          "unit_and_synthetic_pg16": "PASS_MAIN_CI_41763166002",
+          "browser_initial_dom_320_390": "PASS_INITIAL_DOM_ONLY",
+          "full_browser_persona_interactions": "NOT_RUN",
+          "browser_1280": "BLOCKED_BROWSER_RENDERING_RATE_LIMIT_429",
+          "real_idp": "NOT_IMPLEMENTED",
+          "physical_mobile": "NOT_RUN"
+        },
+        "evidence": [
+          "PR #46 merged at aebf8f40e22737865d5ef485d90f88591bb53ef8",
+          "Main CI run 41763166002 completed/success",
+          "web/r0-demo/ (synthetic static source)",
+          "demo/customers.json (UI fixture independent of db/demo negative-case seed)",
+          "https://ai-law-r31-demo.iaict-platform.workers.dev/ (nonproduction)",
+          "release/product_readiness.json (DEMO_BROWSER=PARTIAL_TESTED)"
+        ]
+      },
+      {
+        "id": "AL-R0-RELEASE-002",
+        "title": "R31-04: evidence-based readiness checker, release still blocked",
+        "priority": "P0",
+        "status": "TECH_DONE",
+        "scope": "Read-only R0 gate evaluator and source-only checklist; never authorize production from checklist alone.",
+        "baseline": "SRS v1.1.15 unchanged",
+        "owner_acceptance": "PENDING",
+        "tests": {
+          "readiness_check": "PASS_UNIT_MAIN_CI_41763166002",
+          "product_ready": "FALSE_PRODUCT_NOT_READY",
+          "production": "NOT_DEPLOYED",
+          "owner_acceptance": "PENDING"
+        },
+        "evidence": [
+          "tools/check_product_readiness.py",
+          "release/product_readiness.json",
+          "release/README.md",
+          "PR #46 merged, main CI 41763166002 success"
+        ]
       }
     ],
     "features": [
@@ -1258,19 +1304,35 @@
       {
         "path": "tests/evidence/AL-R0-R31-DEMO-2026-11-04.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
+      },
+      {
+        "path": "demo/customers.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_ONLY"
+      },
+      {
+        "path": "web/r0-demo/index.html",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_ONLY"
+      },
+      {
+        "path": "release/product_readiness.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_ONLY"
+      },
+      {
+        "path": "tools/check_product_readiness.py",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_ONLY"
       }
     ],
     "current": {
-      "active_task": "AL-R0-RELEASE-001",
-      "last_completed_step": "R31: created fictional demo customer and second tenant in isolated PostgreSQL seed; tested membership and MatterACL via actual PostgreSQL16 CI run 41762583625 (unit and postgres-rls both PASS). Product release readiness documented. No live IdP user or staging/production deploy.",
-      "next_action": "Build approved IdP/JWKS/session and durable TaskRun, deploy to isolated staging with synthetic identities only after prerequisites, complete full SRS R0 UC03/04/07 E2E and security/Word/browser QA; require D01 and legal-data approvals plus Owner final production release acceptance.",
+      "active_task": "AL-R0-RELEASE-002",
+      "last_completed_step": "R31 backend demo PR #47 and UI demo PR #46 both merged to main; latest aebf8f40e22737865d5ef485d90f88591bb53ef8 CI 41763166002 completed success. Synthetic only; isolated Cloudflare ai-law-r31-demo initial DOM tested 320/390px; full browser click E2E NOT_RUN.",
+      "next_action": "Do not deploy production. Before product/real customer access: verified approved IdP/JWKS/MFA and synthetic account E2E, persistent documents/TaskRun/audit, SRS R0 UC03/04/07 workflows, full TC12A/B/browser/Word security acceptance, formal D01 + legal-data gates and Owner final approval.",
       "blockers": [
         "Owner approved technical R30 batch and D01 policy in chat, but GATE-D01-R0 is still PENDING_EVIDENCE, GATE-LEGAL-DATA remains PENDING_APPROVAL.",
         "Actual JWT/OIDC provider and persistent authenticated sessions/MFA not integrated; R30 uses synthetic bearer verifier and in-memory run content.",
         "Real PostgreSQL16 FORCE RLS verified in disposable CI only; real production-equivalent service roles, connection pooling/SQL-injection GUC spoofing, all search/download/jobs, and independent security audit NOT_RUN.",
         "Full audit/outbox, cache/invalidation propagation, TaskRun storage/matter mapping and schema rollback or production migration NOT_RUN.",
         "Owner final functional E2E, actual TC12A/TC12B and live browser test NOT_RUN; no staging/production deployment authorized.",
-        "R31 fictional demo is a PostgreSQL test fixture only: cannot log in, no credentials, no real client data; product not complete and release gates remain blocked."
+        "R31 now includes independent PostgreSQL negative fixture and standalone nonproduction synthetic UI; neither provides real login, legal AI operations or real client data. Browser interaction/full E2E NOT_RUN; product gates remain closed."
       ]
     },
     "policy": {
