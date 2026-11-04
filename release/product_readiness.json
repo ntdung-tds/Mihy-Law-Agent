@@ -9,7 +9,7 @@
   "production_deployment": "NOT_AUTHORIZED",
   "owner_final_acceptance": "PENDING",
   "srs_changed": false,
-  "purpose": "Block product release until actual SRS-defined functions, identity, security, legal and owner gates have separate evidence. Demo is NOT a customer-facing working AI law product.",
+  "purpose": "Actual SRS R0 product implementation. Previous synthetic UI and DB fixtures are limited tests, not real role-based customer login acceptance. Production remains separately gated.",
   "demo_gates": [
     {
       "id": "DEMO_FIXTURE",
@@ -50,9 +50,12 @@
   "gates": [
     {
       "id": "D01_APPROVAL",
-      "status": "PENDING_EVIDENCE",
-      "evidence": [],
-      "need": "Formal authority/provider role and signed D01-R0 evidence; in-chat policy approval is not a signed release."
+      "status": "PASS",
+      "evidence": [
+        "pcs/decisions/D01_POLICY_R29.json (OWNER_APPROVED_IN_CHAT; reconfirmed 2026-11-04)",
+        "pcs/STATE.json DEC-011"
+      ],
+      "need": "Owner approved D01 policy. Do not confuse distinct signed-record, legal-data, identity E2E or final production gates with policy approval."
     },
     {
       "id": "LEGAL_DATA",
@@ -125,5 +128,8 @@
     "legal_data_gate_separate": true,
     "no_demo_identity_equals_real_auth": true,
     "no_fake_ai_output_presented_as_real": true
-  }
+  },
+  "operator": "IAICT",
+  "real_role_accounts_target": "CONFIGURED_IDP_REAL_LOGIN_AND_TC12A_B_E2E_NOT_YET_DONE",
+  "signed_d01_record": "PENDING_EVIDENCE_SEPARATE_FROM_APPROVED_POLICY"
 }

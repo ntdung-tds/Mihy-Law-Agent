@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 32,
-  "updated_at": "2026-11-04T02:50:47.105Z",
+  "revision": 33,
+  "updated_at": "2026-11-04T03:06:28.924Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -875,6 +875,46 @@
           "release/README.md",
           "PR #46 merged, main CI 41763166002 success"
         ]
+      },
+      {
+        "id": "AL-R0-GOV-003",
+        "title": "Clarify D01 approved status, IAICT operational manager and real demo-account acceptance meaning",
+        "priority": "P0",
+        "status": "TECH_DONE",
+        "scope": "Public-safe metadata, acceptance cases and readiness reporting only; do not alter private SRS or deploy",
+        "owner_acceptance": "PENDING",
+        "tests": {
+          "governance_regressions": "PENDING_PR_CI",
+          "full_ci": "PENDING_PR_CI",
+          "real_idp_login": "NOT_RUN"
+        },
+        "evidence": [
+          "pcs/decisions/D01_POLICY_R29.json",
+          "pcs/decisions/D01_POLICY_R29.md",
+          "release/product_readiness.json",
+          "tests/acceptance/R0_REAL_ROLE_ACCOUNTS.md",
+          "tests/test_d01_policy.py"
+        ]
+      },
+      {
+        "id": "AL-R0-IAM-REAL-001",
+        "title": "Implement real approved IdP-backed customer test logins, IAICT operator and TC12A/B multi-tenant role E2E",
+        "priority": "P0",
+        "status": "PLANNED",
+        "scope": "Real isolated nonproduction IAM wiring, approved provider issuer/JWKS verifier, user/session/role provision and actual browser+API cross-tenant/revocation tests. No new unapproved SRS APIs or real client data.",
+        "owner_acceptance": "PENDING_REAL_E2E",
+        "tests": {
+          "actual_idp_login": "NOT_RUN",
+          "tc12a": "NOT_RUN",
+          "tc12b": "NOT_RUN",
+          "iaict_admin": "NOT_RUN",
+          "browser_e2e": "NOT_RUN"
+        },
+        "blockers": [
+          "Approved real identity provider tenant/issuer/JWKS runtime configuration and access have not been evidenced in the project repository.",
+          "Actual isolated staging app/service/session store for role login has not been verified. Do not fabricate user accounts or report static demo as real login."
+        ],
+        "acceptance_ref": "tests/acceptance/R0_REAL_ROLE_ACCOUNTS.md"
       }
     ],
     "features": [
@@ -1024,6 +1064,12 @@
         "topic": "Owner request to create demo customer and complete product launch preparation",
         "value": "Use fictional isolated PostgreSQL customer and negative-control tenant; no real IdP account, credentials or production deploy before all SRS security and legal-data gates and final owner acceptance. Prepare release readiness checklist and execute only safe fixture tests in this PR.",
         "authority": "Owner message 2026-11-04: 'Tạo khách hàng demo, để hoàn thành dự án, và hoàn thành các bước để lên product'."
+      },
+      {
+        "id": "DEC-014",
+        "topic": "Owner correction: actual R0 implementation and real test customer accounts under IAICT",
+        "value": "D01 policy is already OWNER_APPROVED, no repeat policy decision requested; IAICT is Owner-designated platform operator managing overall AI Law services and customer/tenant administration, without automatic access to private MatterACL-protected data. Demo means distinct role-specific real IdP-backed test accounts, not a static persona showcase or PostgreSQL seed alone. Proceed with actual SRS v1.1.15 implementation and E2E. Distinct formal legal record, live-data security and final production gates remain evidence-based; Owner final acceptance reserved.",
+        "authority": "Owner explicit clarification 2026-11-04 in this conversation."
       }
     ],
     "risks": [
@@ -1320,19 +1366,23 @@
       {
         "path": "tools/check_product_readiness.py",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_ONLY"
+      },
+      {
+        "path": "tests/acceptance/R0_REAL_ROLE_ACCOUNTS.md",
+        "visibility": "PUBLIC_SAFE_TEST_PLAN"
       }
     ],
     "current": {
-      "active_task": "AL-R0-RELEASE-002",
-      "last_completed_step": "R31 backend demo PR #47 and UI demo PR #46 both merged to main; latest aebf8f40e22737865d5ef485d90f88591bb53ef8 CI 41763166002 completed success. Synthetic only; isolated Cloudflare ai-law-r31-demo initial DOM tested 320/390px; full browser click E2E NOT_RUN.",
-      "next_action": "Do not deploy production. Before product/real customer access: verified approved IdP/JWKS/MFA and synthetic account E2E, persistent documents/TaskRun/audit, SRS R0 UC03/04/07 workflows, full TC12A/B/browser/Word security acceptance, formal D01 + legal-data gates and Owner final approval.",
+      "active_task": "AL-R0-IAM-REAL-001",
+      "last_completed_step": "R33 corrected misinterpreted demo target: D01 already approved and IAICT Owner-designated operator; real role-based test accounts and real SRS R0 are target. Decision/reporting changes on PR branch pending CI. R31 static demo remains a fixture, not customer IAM E2E.",
+      "next_action": "Implement actual SRS-compatible approved IdP cryptographic JWT verification and session store, provision role-differentiated real staging test accounts under IAICT, run TC12A/B actual browser/API/RLS tests; then implement persistent TaskRun, UC03/04/07 slices. Never claim these are done until evidenced.",
       "blockers": [
-        "Owner approved technical R30 batch and D01 policy in chat, but GATE-D01-R0 is still PENDING_EVIDENCE, GATE-LEGAL-DATA remains PENDING_APPROVAL.",
+        "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Actual JWT/OIDC provider and persistent authenticated sessions/MFA not integrated; R30 uses synthetic bearer verifier and in-memory run content.",
         "Real PostgreSQL16 FORCE RLS verified in disposable CI only; real production-equivalent service roles, connection pooling/SQL-injection GUC spoofing, all search/download/jobs, and independent security audit NOT_RUN.",
         "Full audit/outbox, cache/invalidation propagation, TaskRun storage/matter mapping and schema rollback or production migration NOT_RUN.",
         "Owner final functional E2E, actual TC12A/TC12B and live browser test NOT_RUN; no staging/production deployment authorized.",
-        "R31 now includes independent PostgreSQL negative fixture and standalone nonproduction synthetic UI; neither provides real login, legal AI operations or real client data. Browser interaction/full E2E NOT_RUN; product gates remain closed."
+        "Previous R31 static role-selector and isolated PostgreSQL fixtures are not real role-based test accounts. Actual approved IdP-backed user provisioning and TC12A/B application E2E NOT_RUN."
       ]
     },
     "policy": {

@@ -1,10 +1,18 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `32` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T02:50:47.105Z`.
-- **Phase:** R31 backend and independent 5-scenario nonproduction customer UI TECH_DONE as synthetic demos. Main CI PASS after PR #47 and #46; full browser interactions, real login, application E2E, production and Owner final acceptance NOT_DONE/BLOCKED. D01/legal-data gates still pending.
+- **PCS revision:** `33` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T03:06:28.924Z`.
+- **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; IAICT operates the platform. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R33 — Owner clarification: actual product with IAICT-managed real test accounts
+
+- **DEC-014:** Owner clarified D01 has already been approved. Treat D01 policy as **APPROVED**, not awaiting another policy decision. IAICT is designated operator/manager of the entire AI Law platform; neither platform operator nor tenant admin has implicit MatterACL-protected customer-file read rights. Exact legal registration/signature and real-data processing authorizations are separate evidence questions.
+- **True "demo" target:** create different **real IdP-backed customer test accounts** (IAICT platform operator, personal professional, same principal in two tenants, organization administrator, permitted organization lawyer, outsider/revoked actor), connect to real isolated app/database and execute TC12A/B/browser/API/security negative E2E. Existing R31 static UI and PostgreSQL fixture remain only synthetic tests. These real accounts and E2E have **NOT_RUN**.
+- **Docs and tests:** `pcs/decisions/D01_POLICY_R29.{md,json}`, `release/product_readiness.json` (D01_APPROVAL PASS, separate product/legal gates still closed), `tests/acceptance/R0_REAL_ROLE_ACCOUNTS.md` and D01 regression checks.
+- **Next task:** `AL-R0-IAM-REAL-001` implement real approved IdP/JWT/JWKS/session and provision authorized role-specific nonproduction test accounts. Continue to persistent case/TaskRun and R0 UC03/04/07; no private SRS change or unapproved production deployment.
+- **Owner acceptance:** Final product approval remains with the Owner, independent of approval of D01.
 
 ## R32 checkpoint — merged synthetic customer UI and release gate evidence
 
