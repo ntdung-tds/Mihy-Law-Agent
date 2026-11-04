@@ -57,6 +57,31 @@ class DualDeliveryContractTests(unittest.TestCase):
         self.assertEqual(dedicated[0]["owner_acceptance"], "PENDING_REAL_E2E")
         self.assertEqual(dedicated[0]["tests"]["actual_dedicated_install"], "NOT_RUN")
 
+    def test_release_gate_cannot_pass_with_only_saas(self):
+        from copy import deepcopy
+        from tools.check_product_readiness import evaluate_readiness
+        ready = deepcopy(self.release)
+        for gate in ready["demo_gates"] + ready["gates"]:
+            gate["status"] = "PASS"
+            gate["evidence"] = ["test-run-pointer-only"]
+        for mode in ready["delivery_modes"].values():
+            mode["status"] = "PASS"
+            mode["deployment_e2e"] = "PASS"
+            mode["evidence"] = ["test-run-pointer-only"]
+        ready["live_customer_accounts_created"] = True
+        ready["production_deployment"] = "AUTHORIZED"
+        ready["owner_final_acceptance"] = "APPROVED"
+        self.assertTrue(evaluate_readiness(ready)["product_ready"])
+        ready["delivery_modes"]["dedicated"]["status"] = "NOT_IMPLEMENTED"
+        result = evaluate_readiness(ready)
+        self.assertFalse(result["product_ready"])
+        self.assertFalse(result["delivery_modes_ready"])
+        self.assertIn("DELIVERY_MODE_DEDICATED_NOT_VERIFIED", result["blockers"])
+        ready["delivery_modes"].pop("dedicated")
+        result = evaluate_readiness(ready)
+        self.assertFalse(result["product_ready"])
+        self.assertIn("REQUIRED_DELIVERY_MODES_MISSING_OR_DUPLICATED", result["blockers"])
+
 
 if __name__ == "__main__":
     unittest.main()
