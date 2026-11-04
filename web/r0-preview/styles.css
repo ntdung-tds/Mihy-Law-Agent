@@ -289,3 +289,7 @@ body.drawer-open{overflow:hidden}
   .rail-item{width:45px}
   .mobile-right-rail{width:53px;right:4px}
 }
+
+/* R45 mobile sign-out is inside right drawer to keep 320px header unclipped. */
+.drawer-groups .drawer-signout{margin-top:14px;background:#fff3f3;border-color:#eccbcb;color:#8b2830;justify-content:center}
+@media(max-width:620px){.top-logout{display:none}}

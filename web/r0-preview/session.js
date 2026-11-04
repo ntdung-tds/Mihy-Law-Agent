@@ -14,13 +14,15 @@
       el('#profile-role').textContent = kind + ' · ' + role + ' · QA';
     } catch { el('#profile-role').textContent = 'Không thể kiểm tra phiên'; }
   }
-  el('#preview-logout').addEventListener('click', async () => {
-    const btn=el('#preview-logout'); btn.disabled=true;
+  async function logout() {
+    const btn=el('#drawer-logout')?.offsetParent ? el('#drawer-logout') : el('#preview-logout'); btn.disabled=true;
     try {
       const r=await fetch('/api/qa/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',credentials:'same-origin',cache:'no-store'});
       if(!r.ok) throw Error('logout');
       location.replace('/');
     } catch { btn.disabled=false; btn.textContent='Thử đăng xuất lại'; }
-  });
+  }
+  el('#preview-logout').addEventListener('click', logout);
+  el('#drawer-logout').addEventListener('click', logout);
   check();
 })();
