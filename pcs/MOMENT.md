@@ -1,10 +1,18 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `29` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T00:29:20.259Z`.
-- **Phase:** Owner-approved D01 policy recorded for R0 synthetic assumptions; GATE-D01-R0 and real-client-data Pilot remain PENDING_EVIDENCE/PENDING_APPROVAL. R28 code and R25 visual preview unchanged.
+- **PCS revision:** `30` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T01:01:42.890Z`.
+- **Phase:** R30 four-task actual PostgreSQL16 synthetic RLS/ACL integration TECH_DONE in disposable CI. R31 live IdP/staging/real run store NOT_STARTED. D01 and real-data gates remain pending; R25 UI unchanged.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R30 — one-batch PostgreSQL16 IAM/RLS and synthetic getRun integration
+
+- **DEC-012 / AL-R0-DB-001..004**: Owner approved a single grouped R30. Added isolated versioned `db/migrations/0001_r0_iam_rls.sql` with IAM tables, FK constraints, deferred active-role rule, membership audit metadata, FORCE RLS and read MatterACL with deny precedence. A nonowner and non-BYPASSRLS runtime role in CI cannot read other-tenant records or write data.
+- **Authorization state:** trusted per-transaction database scope; role or matter-group change bumps `authz_version`, MatterACL changes bump `acl_version`; revoked membership cannot silently reactivate. Security-invoker `matter_acl` view does not bypass RLS. Existing R26 PostgresMembershipRepository and R28 `GET /v1/runs/{id}` use actual PostgreSQL for membership+MatterACL with an in-memory fake run store and fake bearer verifier.
+- **Real CI evidence:** GitHub Actions run `41750910297` on R30 code branch: real PostgreSQL16 job **18/18 PASS** and separate standard unit job **195 PASS, 18 DB-only tests SKIPPED by design** (all executed in DB job). Verified local HTTP 200 when allowed and 404 after changing tenant/revoking. Earlier failed review cases—fixture setup, missing version triggers, active-role guard assertion—were fixed and retested. See `tests/evidence/AL-R0-R30-POSTGRES-2026-11-04.json`.
+- **Not yet accepted as live IAM:** D01 formal signed evidence and legal-data Pilot approval pending; production JWT/IdP/MFA, persisted session and TaskRun store, full audit/outbox, SQL-injection/role/pool independent assessment, application TC12A/B E2E and actual customer data NOT_RUN. No staging/production deployed and baseline SRS v1.1.15 unchanged.
+- **Next:** verify and approve real external identity + controlled isolated staging, production-equivalent DB/service roles, real run authorization storage and full app E2E before any gate change. Owner final acceptance pending.
 
 ## R29 — D01 Owner policy approval, formal/legal/security evidence still open
 

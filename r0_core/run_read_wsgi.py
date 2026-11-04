@@ -160,6 +160,7 @@ class GetRunWSGI:
     expected_issuer: str
     expected_audience: str
     now_epoch: Callable[[], int]
+    membership_repository_for_scope: Callable[[str, str], PostgresMembershipRepository] | None = None
 
     def __call__(self, environ: Mapping[str, Any], start_response: Callable):
         correlation_id = str(uuid4())
@@ -218,10 +219,19 @@ class GetRunWSGI:
             if not isinstance(active_tenant, str):
                 return error(404)
             _canonical_uuid(active_tenant)
+            # R30: each authenticated request may supply a fresh, transaction-
+            # scoped PostgreSQL repository constructed by trusted server code.
+            # The callback cannot be sourced from HTTP headers or token claims.
+            repository = (
+                self.membership_repository_for_scope(
+                    session.principal.user_id, active_tenant
+                ) if self.membership_repository_for_scope is not None
+                else self.membership_repository
+            )
             view = select_tenant_from_store(
                 principal=session.principal, current=None,
                 target_tenant_id=active_tenant,
-                repository=self.membership_repository,
+                repository=repository,
             )
             if self.authorize_run_read(
                 view.tenant_id, view.user_id, run_id
