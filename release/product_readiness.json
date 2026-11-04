@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "baseline": "SRS v1.1.15",
+  "release_target": "R0",
+  "checkpoint": "R31",
+  "assessment_date": "2026-11-04",
+  "synthetic_demo_customers_created": true,
+  "live_customer_accounts_created": false,
+  "production_deployment": "NOT_AUTHORIZED",
+  "owner_final_acceptance": "PENDING",
+  "srs_changed": false,
+  "purpose": "Block product release until actual SRS-defined functions, identity, security, legal and owner gates have separate evidence. Demo is NOT a customer-facing working AI law product.",
+  "demo_gates": [
+    {
+      "id": "DEMO_FIXTURE",
+      "status": "PASS",
+      "evidence": [
+        "demo/customers.json",
+        "demo/seed_demo.py"
+      ],
+      "note": "Synthetic tenants/users; no passwords, no real IdP."
+    },
+    {
+      "id": "DEMO_POSTGRES",
+      "status": "PASS",
+      "evidence": [
+        "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41755010695 (postgres-rls job completed success; R31 synthetic tests)",
+        "tests/test_r31_demo_customers.py"
+      ],
+      "note": "Actual disposable PostgreSQL 16 IAM/RLS and demo fixture CI verified; no live accounts."
+    },
+    {
+      "id": "DEMO_BROWSER",
+      "status": "PARTIAL_TESTED",
+      "evidence": [
+        "Cloudflare Browser Rendering 2026-11-04: isolated preview 320px Chromium loaded 5 synthetic scenario buttons, 2 personal document cards and visible disclaimers; 390px initial five-role DOM also verified"
+      ],
+      "note": "Actual initial DOM render at 320px/390px confirmed; scripted persona-switch/revoke/modal and 1280px desktop E2E still NOT_RUN (browser service rate-limited further requests). No screenshots uploaded."
+    },
+    {
+      "id": "DEMO_NONPROD",
+      "status": "PASS",
+      "evidence": [
+        "https://ai-law-r31-demo.iaict-platform.workers.dev/ (readback 2026-11-04)",
+        "Cloudflare ai-law-r31-demo deployment 4038ae54-5485-4f78-982b-93bcbbd39bc4 (100% nonproduction Worker; no backend bindings)"
+      ],
+      "note": "Nonproduction, isolated public synthetic-only UI. Production not deployed and no authentication or real records."
+    }
+  ],
+  "gates": [
+    {
+      "id": "D01_APPROVAL",
+      "status": "PENDING_EVIDENCE",
+      "evidence": [],
+      "need": "Formal authority/provider role and signed D01-R0 evidence; in-chat policy approval is not a signed release."
+    },
+    {
+      "id": "LEGAL_DATA",
+      "status": "PENDING_APPROVAL",
+      "evidence": [],
+      "need": "D03/D05/D07, conditional D02/D04, legal entity and required data agreements; verified service license applicability."
+    },
+    {
+      "id": "REAL_IDP_JWT_MFA",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [],
+      "need": "Approved actual identity provider, JWKS JWT signature verification, MFA, session revocation, real user provisioning."
+    },
+    {
+      "id": "REAL_TENANT_RLS_SECURITY",
+      "status": "PARTIAL_TESTED",
+      "evidence": [
+        "tests/evidence/AL-R0-R30-POSTGRES-2026-11-04.json"
+      ],
+      "need": "Independent production-equivalent role, GUC spoofing, transaction pooling and full E2E/TC12A/B security review."
+    },
+    {
+      "id": "REAL_CASE_DOC_STORAGE",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [],
+      "need": "Safe encrypted content storage, upload validation, antivirus/quarantine, OCR and immutable originals per SRS."
+    },
+    {
+      "id": "UC03_TRANSLATE",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [],
+      "need": "Real translation workflow + citations/context protection/QA acceptance per SRS."
+    },
+    {
+      "id": "UC04_SUMMARIZE",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [],
+      "need": "Real document summary workflow + grounding and test cases per SRS."
+    },
+    {
+      "id": "UC07_GRAMMAR",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [],
+      "need": "Real grammar correction workflow + actual DOCX/Word acceptance tests."
+    },
+    {
+      "id": "RUNS_JOBS_AUDIT",
+      "status": "PARTIAL_TESTED",
+      "evidence": [
+        "tests/evidence/AL-R0-R28-GETRUN-TR-2026-11-04.json"
+      ],
+      "need": "Persistent TaskRun, worker retry and revocation, MatterACL mapping, append-only audit/outbox and full lifecycle."
+    },
+    {
+      "id": "APPLICATION_E2E",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "need": "Authenticated staging end-to-end desktop/mobile/browser, upload, real AI outputs and authorization with sanctioned test accounts."
+    },
+    {
+      "id": "OPERATIONS_RELEASE",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "need": "Backups/restores, monitoring, incident/rollback plans, accessibility/performance and final cutover checklist."
+    }
+  ],
+  "release_policy": {
+    "production_never_auto_deploy": true,
+    "only_owner_can_accept": true,
+    "legal_data_gate_separate": true,
+    "no_demo_identity_equals_real_auth": true,
+    "no_fake_ai_output_presented_as_real": true
+  }
+}

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5f7fb">
+  <meta name="description" content="AI Law R31 synthetic customer experience and tenant permission demonstration. Not a live application.">
+  <title>AI Law · Khách hàng demo R31</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Bỏ qua điều hướng</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#main" aria-label="AI Law Demo">
+        <span class="brand-symbol" aria-hidden="true">⚖</span>
+        <span class="brand-name">AI <strong>LAW</strong><span class="brand-caption">CUSTOMER DEMO</span></span>
+      </a>
+      <div class="top-links">
+        <span class="edition">R31 · MÔ PHỎNG</span>
+        <a class="back-link" href="https://ai-law-r0-preview.iaict-platform.workers.dev/#overview" rel="noopener noreferrer">Giao diện R25 <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+    <main id="main" class="main-area">
+      <div class="notice" role="note">
+        <span class="notice-icon" aria-hidden="true">i</span>
+        <p><strong>DỮ LIỆU GIẢ LẬP</strong> · Không phải đăng nhập thật. Không có hồ sơ khách hàng thật, không tải tệp lên và <strong>Chưa kết nối AI</strong>. Kiểm tra giao diện chỉ là mô phỏng; bảo mật tenant phải được kiểm chứng riêng ở backend.</p>
+      </div>
+      <section class="intro">
+        <div>
+          <p class="eyebrow">TRẢI NGHIỆM KHÁCH HÀNG MẪU <span> / R31</span></p>
+          <h1>Khách hàng demo, <em>quyền rõ ràng.</em></h1>
+          <p>Chọn một vai trò để xem AI Law phân biệt không gian cá nhân và tổ chức, đồng thời minh họa việc từ chối truy cập trái quyền.</p>
+        </div>
+        <div class="summary-mark">
+          <span class="summary-number">05</span>
+          <span>Kịch bản<br>kiểm thử</span>
+        </div>
+      </section>
+      <div class="layout">
+        <aside class="left">
+          <section class="panel persona-panel" aria-labelledby="scenario-heading">
+            <div class="panel-head">
+              <div>
+                <p class="section-kicker">BƯỚC 01</p>
+                <h2 id="scenario-heading">Chọn khách hàng demo</h2>
+              </div>
+              <span class="tiny-tag">Tổng hợp</span>
+            </div>
+            <p class="hint">Không cần mật khẩu. Đây là việc chuyển bối cảnh minh họa, không cấp phiên đăng nhập.</p>
+            <div id="scenario-list" class="scenario-list" role="group" aria-label="Các vai trò mẫu"></div>
+          </section>
+          <section class="panel explainer">
+            <p class="section-kicker">PHẠM VI SRS</p>
+            <h2>Quyền nào được mô phỏng?</h2>
+            <p><strong>TC12A</strong> — Một luật sư thuộc hai tenant, tài liệu không đi theo khi đổi tenant.</p>
+            <p><strong>TC12B</strong> — Quản trị viên không mặc nhiên được xem hồ sơ; thu hồi quyền dẫn đến từ chối truy cập.</p>
+            <p class="small-print">Đây là mô phỏng giao diện. Bộ kiểm thử PostgreSQL/RLS thực tế nằm trong CI của repository.</p>
+          </section>
+        </aside>
+        <div class="right">
+          <section class="panel workspace" aria-labelledby="workspace-title">
+            <div class="workspace-header">
+              <div>
+                <p class="section-kicker">BƯỚC 02 · NGỮ CẢNH HIỆN TẠI</p>
+                <h2 id="workspace-title">Không gian demo</h2>
+                <p id="persona-description" class="workspace-subtitle">Đang nạp dữ liệu tổng hợp...</p>
+              </div>
+              <span class="sim-indicator">MÔ PHỎNG</span>
+            </div>
+            <div class="identity-grid">
+              <div class="identity-block"><span>Người dùng</span><strong id="current-user">—</strong></div>
+              <div class="identity-block"><span>Tenant</span><strong id="current-tenant">—</strong></div>
+              <div class="identity-block"><span>Vai trò</span><strong id="current-role">—</strong></div>
+            </div>
+            <div id="permission-result" class="permission-result" role="status" aria-live="polite">Đang kiểm tra dữ liệu mẫu...</div>
+          </section>
+          <section class="panel docs-panel" aria-labelledby="docs-heading">
+            <div class="panel-head">
+              <div>
+                <p class="section-kicker">BƯỚC 03 · TÀI LIỆU</p>
+                <h2 id="docs-heading">Hồ sơ được xem</h2>
+              </div>
+              <span id="doc-count" class="count">0 hồ sơ</span>
+            </div>
+            <label class="search-label" for="doc-search">Lọc tên tài liệu demo</label>
+            <input id="doc-search" type="search" inputmode="search" placeholder="Tìm tài liệu mẫu..." autocomplete="off">
+            <div id="doc-list" class="doc-list" aria-live="polite"></div>
+            <div id="doc-empty" class="empty-state" hidden>
+              <span class="empty-icon" aria-hidden="true">◌</span>
+              <h3>Không có hồ sơ được phép xem</h3>
+              <p id="empty-reason">Bạn không có quyền đọc tài liệu trong kịch bản này.</p>
+            </div>
+          </section>
+          <section class="panel security-panel" aria-labelledby="access-heading">
+            <div class="panel-head">
+              <div><p class="section-kicker">BƯỚC 04 · RANH GIỚI QUYỀN</p><h2 id="access-heading">Kiểm thử quyền</h2></div>
+              <span class="tiny-tag">Mô phỏng</span>
+            </div>
+            <p class="hint">Các nút này chỉ thay đổi dữ liệu hiển thị tại trình duyệt, không gọi API và không thay đổi database.</p>
+            <div class="actions">
+              <button type="button" class="btn outline" id="try-cross-tenant">Thử xem hồ sơ tenant khác</button>
+              <button type="button" class="btn danger" id="revoke-demo">Thu hồi quyền (mô phỏng)</button>
+              <button type="button" class="btn subtle" id="reset-demo">Khôi phục demo</button>
+            </div>
+            <div id="test-result" class="test-result" role="status" aria-live="polite">Chọn một thao tác để quan sát quy tắc từ chối trong giao diện.</div>
+          </section>
+          <section class="panel features">
+            <div class="panel-head"><div><p class="section-kicker">LỘ TRÌNH R0</p><h2>Chức năng AI đang phát triển</h2></div><span class="tiny-tag">SRS v1.1.15</span></div>
+            <div class="feature-grid">
+              <div class="feature"><span>UC03</span><strong>Dịch tài liệu</strong><small>Chưa thực thi AI</small></div>
+              <div class="feature"><span>UC04</span><strong>Tóm tắt văn bản</strong><small>Chưa thực thi AI</small></div>
+              <div class="feature"><span>UC07</span><strong>Sửa lỗi ngữ pháp</strong><small>Chưa thực thi AI</small></div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <footer class="footer">
+        <div><strong>AI Law R31</strong> · Demo độc lập · Chỉ dữ liệu tổng hợp</div>
+        <span>Chưa triển khai sản phẩm thực tế · Quyền theo SRS chưa nghiệm thu E2E</span>
+      </footer>
+    </main>
+  </div>
+  <dialog id="doc-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-body">
+      <span class="tiny-tag">TÀI LIỆU MẪU</span>
+      <h2 id="dialog-title">Tài liệu minh họa</h2>
+      <p id="dialog-description"></p>
+      <button type="button" id="dialog-close" class="btn primary">Đã hiểu</button>
+    </div>
+  </dialog>
+</body>
+</html>

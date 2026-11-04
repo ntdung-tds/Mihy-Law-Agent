@@ -1,0 +1,202 @@
+{
+  "schema_version": 1,
+  "fixture_id": "AL-R31-SYNTHETIC-20261104",
+  "synthetic_only": true,
+  "baseline": "SRS v1.1.15",
+  "disclaimer": "Toàn bộ là dữ liệu tổng hợp; không có đăng nhập, hồ sơ thật hoặc kết quả AI.",
+  "tenants": [
+    {
+      "id": "22000000-0000-4000-8000-000000000001",
+      "key": "personal",
+      "type": "personal",
+      "name": "Không gian cá nhân Mẫu",
+      "short": "Cá nhân",
+      "accent": "#4c6bef"
+    },
+    {
+      "id": "22000000-0000-4000-8000-000000000002",
+      "key": "organization",
+      "type": "organization",
+      "name": "Công ty Luật Mẫu",
+      "short": "Tổ chức",
+      "accent": "#0e8f85"
+    }
+  ],
+  "users": [
+    {
+      "id": "11000000-0000-4000-8000-000000000001",
+      "key": "lawyer_a",
+      "name": "Luật sư Demo A",
+      "identity_provider_id": "synthetic-r31-lawyer-a",
+      "status": "active"
+    },
+    {
+      "id": "11000000-0000-4000-8000-000000000002",
+      "key": "org_admin",
+      "name": "Quản trị Demo B",
+      "identity_provider_id": "synthetic-r31-admin-b",
+      "status": "active"
+    },
+    {
+      "id": "11000000-0000-4000-8000-000000000003",
+      "key": "org_lawyer",
+      "name": "Luật sư Demo C",
+      "identity_provider_id": "synthetic-r31-lawyer-c",
+      "status": "active"
+    },
+    {
+      "id": "11000000-0000-4000-8000-000000000004",
+      "key": "outsider",
+      "name": "Khách ngoài Demo D",
+      "identity_provider_id": "synthetic-r31-outsider-d",
+      "status": "active"
+    }
+  ],
+  "memberships": [
+    {
+      "id": "33000000-0000-4000-8000-000000000001",
+      "user_id": "11000000-0000-4000-8000-000000000001",
+      "tenant_id": "22000000-0000-4000-8000-000000000001",
+      "role": "lawyer",
+      "status": "active"
+    },
+    {
+      "id": "33000000-0000-4000-8000-000000000002",
+      "user_id": "11000000-0000-4000-8000-000000000001",
+      "tenant_id": "22000000-0000-4000-8000-000000000002",
+      "role": "lawyer",
+      "status": "active"
+    },
+    {
+      "id": "33000000-0000-4000-8000-000000000003",
+      "user_id": "11000000-0000-4000-8000-000000000002",
+      "tenant_id": "22000000-0000-4000-8000-000000000002",
+      "role": "tenant_admin",
+      "status": "active"
+    },
+    {
+      "id": "33000000-0000-4000-8000-000000000004",
+      "user_id": "11000000-0000-4000-8000-000000000003",
+      "tenant_id": "22000000-0000-4000-8000-000000000002",
+      "role": "lawyer",
+      "status": "active"
+    }
+  ],
+  "matters": [
+    {
+      "id": "44000000-0000-4000-8000-000000000001",
+      "key": "personal",
+      "tenant_id": "22000000-0000-4000-8000-000000000001",
+      "owner_user_id": "11000000-0000-4000-8000-000000000001",
+      "title": "Hồ sơ mẫu cá nhân 01",
+      "read_user_ids": [
+        "11000000-0000-4000-8000-000000000001"
+      ]
+    },
+    {
+      "id": "44000000-0000-4000-8000-000000000002",
+      "key": "organization",
+      "tenant_id": "22000000-0000-4000-8000-000000000002",
+      "owner_user_id": "11000000-0000-4000-8000-000000000001",
+      "title": "Hồ sơ mẫu tổ chức 01",
+      "read_user_ids": [
+        "11000000-0000-4000-8000-000000000001",
+        "11000000-0000-4000-8000-000000000003"
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "id": "DEM-P01",
+      "tenant_id": "22000000-0000-4000-8000-000000000001",
+      "matter_id": "44000000-0000-4000-8000-000000000001",
+      "name": "Hợp đồng dịch vụ — MẪU.docx",
+      "kind": "Hợp đồng",
+      "status": "draft",
+      "updated": "04/11/2026"
+    },
+    {
+      "id": "DEM-P02",
+      "tenant_id": "22000000-0000-4000-8000-000000000001",
+      "matter_id": "44000000-0000-4000-8000-000000000001",
+      "name": "Ghi chú hồ sơ — MẪU.pdf",
+      "kind": "Ghi chú",
+      "status": "review",
+      "updated": "03/11/2026"
+    },
+    {
+      "id": "DEM-O01",
+      "tenant_id": "22000000-0000-4000-8000-000000000002",
+      "matter_id": "44000000-0000-4000-8000-000000000002",
+      "name": "Thỏa thuận hợp tác — MẪU.docx",
+      "kind": "Thỏa thuận",
+      "status": "review",
+      "updated": "04/11/2026"
+    },
+    {
+      "id": "DEM-O02",
+      "tenant_id": "22000000-0000-4000-8000-000000000002",
+      "matter_id": "44000000-0000-4000-8000-000000000002",
+      "name": "Biên bản họp — MẪU.pdf",
+      "kind": "Biên bản",
+      "status": "done",
+      "updated": "02/11/2026"
+    }
+  ],
+  "scenarios": [
+    {
+      "key": "personal",
+      "label": "Luật sư cá nhân",
+      "user_id": "11000000-0000-4000-8000-000000000001",
+      "tenant_id": "22000000-0000-4000-8000-000000000001",
+      "role": "lawyer",
+      "expected_doc_ids": [
+        "DEM-P01",
+        "DEM-P02"
+      ],
+      "intent": "Không gian riêng — chỉ hồ sơ cá nhân"
+    },
+    {
+      "key": "organization",
+      "label": "Cùng luật sư, tenant tổ chức",
+      "user_id": "11000000-0000-4000-8000-000000000001",
+      "tenant_id": "22000000-0000-4000-8000-000000000002",
+      "role": "lawyer",
+      "expected_doc_ids": [
+        "DEM-O01",
+        "DEM-O02"
+      ],
+      "intent": "Chuyển tenant — không giữ hồ sơ cá nhân"
+    },
+    {
+      "key": "org_admin",
+      "label": "Quản trị tổ chức",
+      "user_id": "11000000-0000-4000-8000-000000000002",
+      "tenant_id": "22000000-0000-4000-8000-000000000002",
+      "role": "tenant_admin",
+      "expected_doc_ids": [],
+      "intent": "Admin không mặc nhiên được đọc hồ sơ"
+    },
+    {
+      "key": "org_lawyer",
+      "label": "Luật sư thuộc tổ chức",
+      "user_id": "11000000-0000-4000-8000-000000000003",
+      "tenant_id": "22000000-0000-4000-8000-000000000002",
+      "role": "lawyer",
+      "expected_doc_ids": [
+        "DEM-O01",
+        "DEM-O02"
+      ],
+      "intent": "Được cấp quyền xem vụ việc cụ thể"
+    },
+    {
+      "key": "outsider",
+      "label": "Khách không có membership",
+      "user_id": "11000000-0000-4000-8000-000000000004",
+      "tenant_id": "22000000-0000-4000-8000-000000000002",
+      "role": "none",
+      "expected_doc_ids": [],
+      "intent": "Từ chối truy cập khi không là thành viên"
+    }
+  ]
+}
