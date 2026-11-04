@@ -1,10 +1,19 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `42` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T07:55:00Z`.
+- **PCS revision:** `43` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T08:48:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R43 — first REAL isolated Cloudflare Free Worker+D1 infrastructure with locked-down API
+
+- **Actual resources created:** Cloudflare Worker `ai-law-standalone-cf-qa` was deployed and its workers.dev nonproduction subdomain enabled. Dedicated D1 database `ai-law-standalone-cf-qa` was created without changing existing IAICT Portal or demo databases. **Eight relational metadata tables** applied via actual Cloudflare D1 query API, with no user/customer matter/file data.
+- **Actual live HTTP checks:** GitHub Actions `41802685576` `cloudflare-live-qa` successfully called HTTPS /health, got 401 for anonymous read of runs/file metadata/file content, and 404 for forbidden POST. Worker JWKS contains **zero keys** and has no approved IdP, so this is a safe deny-all technical QA server, **not a customer login service**.
+- **Code & tests:** `deployment/cloudflare/src/worker.mjs` verifies RS256 at+jwt and joins D1 sessions + active member + application-scoped versioned MatterACL. `deployment/cloudflare/src/google_drive.mjs` guards out-of-folder, trashed and redirected Drive file reads; tests use fake HTTP/credentials and no live Drive OAuth. `deployment/cloudflare/tests/worker.test.mjs` Node real cryptography and `test_sqlite_acl.py` real SQLite query tests passed. The 8-job R41 Docker QA suite remains intact and unmodified.
+- **Hard limits:** D1 free account now 10/10 DBs (new AI Law QA consumed last slot); D1/SQLite has no PG FORCE RLS, full SRS v1.1.15 IAM/audit parity is NOT VERIFIED. Real Cloudflare QA accounts and user sign-in, customer Google Drive OAuth, file upload/download, AI legal UC and Owner acceptance NOT_RUN. Do not call the QA /health deployment product-ready or upload real client legal files.
+- **R41:** still parked. Same private R40 ten-QA password bundle and Docker host restart kit unchanged until Owner provides server. No SaaS.
+- **Next R44:** approved QA identity/token/session issuance and real scoped positive/negative D1 auth on Cloudflare; customer authorized Google Drive OAuth and safe upload/read if permissions granted; repeat actual E2E and record PASS/FAIL/BLOCKED. Baseline SRS unchanged, `srs_changed.md` SC-007.
 
 ## DEC-017 / R42 — saved Owner priority: Cloudflare Free + customer Drive NOW, R41 host parked
 
