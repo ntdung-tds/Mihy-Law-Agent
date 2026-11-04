@@ -18,6 +18,7 @@ The entries below are **test actor scenarios, not proof that accounts have been 
 | RA-06 | Authenticated nonmember / revoked member | Cannot access target tenant, matter, run, file, search, or download (deny/masked response) | NOT_RUN |
 | RA-07 | Revoked session / disabled user | Login or subsequent calls fail closed; no stale authorization after revocation | NOT_RUN |
 | RA-08 | Malicious tenant/matter/run substitution | Cross-tenant URL, header, ID and query tampering cannot override authenticated session context | NOT_RUN |
+| RA-09 | Limited-permission organization member | Can read only the explicitly granted matter; another matter in the same tenant remains denied (not a new SRS role) | NOT_RUN |
 
 ## Execution requirements and evidence
 
