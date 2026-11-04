@@ -74,3 +74,19 @@ jobs:
         run: bash -n deployment/standalone/smoke_api.sh
       - name: Real nonproduction standalone API HTTP + PG16 signed JWT isolation
         run: bash deployment/standalone/smoke_api.sh
+
+  standalone-login:
+    # Real HTTP email/password verification with isolated Argon2id test accounts.
+    # Only disposable Docker+PG16; NOT a production-approved customer IdP.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install ephemeral password account hashing and JWT dependencies
+        run: python -m pip install -r requirements-r0-auth.txt "argon2-cffi==25.1.0"
+      - name: Validate isolated auth smoke script syntax
+        run: bash -n deployment/standalone/smoke_api.sh
+      - name: Test real isolated Argon2id logins, signed bearer, PostgreSQL session, ACL and signout
+        run: R38_ENABLE=1 bash deployment/standalone/smoke_api.sh
