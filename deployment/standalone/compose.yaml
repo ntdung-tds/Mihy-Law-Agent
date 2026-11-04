@@ -1,0 +1,23 @@
+# R36 nonproduction isolated PostgreSQL bootstrap for ONE AI Law installation.
+# This is not a runnable AI Law application or an approved production config.
+# Compose -p determines the isolated volumes/networks. Do not expose DB ports.
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ai_law_admin
+      POSTGRES_DB: ai_law
+      POSTGRES_PASSWORD: ${AI_LAW_DB_PASSWORD:?Set an installation-specific AI_LAW_DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ../../db/migrations/0001_r0_iam_rls.sql:/docker-entrypoint-initdb.d/0001_r0_iam_rls.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ai_law_admin -d ai_law"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    # Intentionally no host port mapping. Future application container
+    # must join this installation's internal network, not any shared DB.
+volumes:
+  db_data:

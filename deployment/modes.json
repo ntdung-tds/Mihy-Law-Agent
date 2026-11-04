@@ -3,7 +3,6 @@
   "status": "OWNER_APPROVED_DELIVERY_TARGET_NOT_YET_IMPLEMENTED",
   "authority": "Owner explicit 2026-11-04: both SaaS and independent deployment must be built; independent deployment cannot be deferred or omitted.",
   "product": "AI Law",
-  "platform_operator": "IAICT",
   "same_core_source": true,
   "srs_baseline": "v1.1.15 unchanged pending recorded change review",
   "delivery_modes": [
@@ -13,9 +12,10 @@
       "required": true,
       "provider_operation": "IAICT",
       "isolation": "Multiple customer tenants; membership, MatterACL and RLS enforce separate data",
-      "stage": "IMPLEMENTATION_IN_PROGRESS",
+      "stage": "DEFERRED_BY_OWNER_AFTER_STANDALONE",
       "real_customer_login": "NOT_RUN",
-      "end_to_end": "NOT_RUN"
+      "end_to_end": "NOT_RUN",
+      "current_priority": "LATER"
     },
     {
       "id": "dedicated",
@@ -23,9 +23,11 @@
       "required": true,
       "provider_operation": "Customer or agreed operator under deployment contract",
       "isolation": "Isolated application environment, dedicated data/storage/secrets; existing tenant and MatterACL controls remain in force",
-      "stage": "IMPLEMENTATION_REQUIRED_NOT_YET_DEPLOYED",
+      "stage": "STANDALONE_DB_BOOTSTRAP_IN_PROGRESS_NO_APPLICATION",
       "real_customer_login": "NOT_RUN",
-      "end_to_end": "NOT_RUN"
+      "end_to_end": "NOT_RUN",
+      "current_priority": "NOW",
+      "test_organization": "IAICT_ORDINARY_CUSTOMER"
     }
   ],
   "shared_invariants": [
@@ -48,5 +50,10 @@
     "deployment/README.md"
   ],
   "real_dedicated_deployment": "NOT_RUN",
-  "production_authorization": "NOT_AUTHORIZED"
+  "production_authorization": "NOT_AUTHORIZED",
+  "current_implementation_priority": "standalone_first",
+  "current_test_customer": "IAICT_as_ordinary_organization_in_standalone",
+  "iaict_standalone_privileges": "NONE_BEYOND_EXPLICIT_TENANT_MEMBERSHIP_AND_MATTER_ACL",
+  "saas_future_operator": "IAICT",
+  "standalone_operator": "PER_INSTALLATION_CUSTOMER_OR_APPROVED_CONTRACTOR"
 }

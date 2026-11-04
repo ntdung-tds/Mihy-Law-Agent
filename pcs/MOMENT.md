@@ -1,10 +1,19 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `35` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T03:45:00Z`.
+- **PCS revision:** `36` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; IAICT operates the platform. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R36 — Owner standalone-first execution, IAICT ordinary customer
+
+- **DEC-016:** Independent AI Law standalone implementation and acceptance is first. IAICT is **one ordinary organization tenant in standalone**, with no special cross-installation authority and no implicit MatterACL read. Shared IAICT SaaS is deferred until standalone acceptance, not cancelled.
+- **Real implementation:** `deployment/standalone/compose.yaml` launches one isolated PostgreSQL16 environment with a per-installation volume and secret, no publicly published DB port, and the existing R30 test-only IAM/RLS migration. `deployment/standalone/smoke_isolation.sh` creates two independent Compose projects (synthetic IAICT customer and an unrelated organization) with distinct secrets and records, verifies cross-instance isolation, DB restart durability and cleans up after CI.
+- **Actual CI:** R36 `standalone-db` job first PASS in GitHub Actions `41771766696`, alongside unit and postgres-rls jobs. This proves nonprod isolated DB bootstrapping only; NOT a full AI Law app, not real role login, not complete doc/AI workflow, not production-grade migrations.
+- **Dedicated release gate independent of deferred SaaS:** `tools/check_product_readiness.py` reports `standalone_release_ready` using legal/security/functionality, actual dedicated E2E evidence, specific owner acceptance and dedicated deployment authorization. Future SaaS is **not** a prerequisite for standalone acceptance, though full dual-delivery product readiness still requires both.
+- **Baseline:** SRS v1.1.15 unchanged. `srs_changed.md` SC-002 records Owner rollout priority without overwriting approved SRS. `AL-R0-DEPLOY-001` active; application, IdP, account provisioning, document store, UC03/04/07 and browser E2E next.
+- **Product safety:** D01 approved, Owner final acceptance pending, production unauthorized, no real case data used.
 
 ## R35 — Owner: dedicated delivery must be implemented, not deferred
 

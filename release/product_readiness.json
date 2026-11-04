@@ -2,7 +2,7 @@
   "schema_version": 1,
   "baseline": "SRS v1.1.15",
   "release_target": "R0",
-  "checkpoint": "R35",
+  "checkpoint": "R36",
   "assessment_date": "2026-11-04",
   "synthetic_demo_customers_created": true,
   "live_customer_accounts_created": false,
@@ -146,17 +146,23 @@
       "evidence": [
         "GitHub Actions 41767087750 proves RSA+PG16 CI only, NOT an actual SaaS login or deployment"
       ],
-      "need": "Real approved provider, session, account provisioning, actual application and R0 workflow E2E with tenant RLS."
+      "need": "Deferred by Owner: build IAICT-hosted shared SaaS after standalone implementation and acceptance. Preserve source/architecture compatibility without building SaaS now."
     },
     "dedicated": {
       "required": true,
       "status": "NOT_IMPLEMENTED",
       "deployment_e2e": "NOT_RUN",
       "evidence": [
-        "pcs/STATE.json DEC-015 Owner-approved implementation requirement"
+        "pcs/STATE.json DEC-015 Owner-approved implementation requirement",
+        "deployment/standalone/compose.yaml (isolated nonproduction database bootstrap, NOT complete AI Law app)"
       ],
-      "need": "Build one-source portable dedicated installation package, isolate database/storage/keys/provider configuration, deploy isolated staging environment, test role login, SRS R0 workflows, backup/restore and rollback."
+      "need": "Current isolated DB bootstrap covers only PostgreSQL and approved R30 test-only schema; build real standalone app/session/IdP, role accounts, document workflows/storage, secure production migrations and backup/restore. Actual app install and E2E NOT_RUN."
     }
   },
-  "delivery_modes_owner_approved": "2026-11-04; both SaaS and dedicated REQUIRED for AI Law product target, not either-or"
+  "delivery_modes_owner_approved": "2026-11-04; both SaaS and dedicated REQUIRED for AI Law product target, not either-or",
+  "delivery_focus": "dedicated_standalone_first",
+  "saas_implementation_priority": "DEFERRED_BY_OWNER_UNTIL_DEDICATED_ACCEPTED",
+  "iaict_in_dedicated_mode": "ORDINARY_ORGANIZATION_CUSTOMER_NO_PLATFORM_PRIVILEGE",
+  "dedicated_owner_final_acceptance": "PENDING",
+  "dedicated_production_deployment": "NOT_AUTHORIZED"
 }

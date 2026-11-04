@@ -76,6 +76,23 @@ def evaluate_readiness(data: dict) -> dict:
     if not production_permitted:
         blockers.append("PRODUCTION_AUTHORIZATION")
 
+    # Dedicated-first rollout (Owner DEC-016): standalone may be independently
+    # accepted when ALL core security/legal/functionality gates and its own
+    # installation test, user/owner acceptance, and separate production
+    # authorization are complete. Future SaaS is NOT a prerequisite here.
+    standalone = delivery.get("dedicated") if isinstance(delivery, dict) else None
+    standalone_ready = (
+        isinstance(standalone, dict) and standalone.get("required") is True and
+        standalone.get("status") == "PASS" and
+        standalone.get("deployment_e2e") == "PASS" and
+        isinstance(standalone.get("evidence"), list) and
+        bool(standalone["evidence"]) and
+        _has_required_gates(hard, REQUIRED_PRODUCT_GATES) and _complete(hard) and
+        data.get("live_customer_accounts_created") is True and
+        data.get("dedicated_owner_final_acceptance") == "APPROVED" and
+        data.get("dedicated_production_deployment") == "AUTHORIZED" and
+        data.get("srs_changed") is False
+    )
     product_ready = (demo_ready and delivery_ready and
                      _has_required_gates(hard, REQUIRED_PRODUCT_GATES) and _complete(hard) and
                      owner_accepted and production_permitted and
@@ -102,6 +119,7 @@ def evaluate_readiness(data: dict) -> dict:
 
     return {
         "demo_ready": bool(demo_ready),
+        "standalone_release_ready": bool(standalone_ready),
         "delivery_modes_ready": bool(delivery_ready),
         "product_ready": bool(product_ready),
         "blockers": sorted(set(blockers)),
@@ -120,6 +138,8 @@ def main() -> int:
         print(json.dumps(result, indent=2, ensure_ascii=False))
     else:
         print("PRODUCT_READY" if result["product_ready"] else "PRODUCT_NOT_READY")
+        print("STANDALONE_RELEASE_READY" if result["standalone_release_ready"]
+              else "STANDALONE_RELEASE_NOT_READY")
         print("DEMO_READY" if result["demo_ready"] else "DEMO_NOT_READY")
         for missing in result["blockers"]:
             print("BLOCKED:", missing)

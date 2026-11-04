@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 35,
-  "updated_at": "2026-11-04T03:45:00Z",
+  "revision": 36,
+  "updated_at": "2026-11-04T04:14:19.313Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -901,7 +901,7 @@
         "title": "Implement real approved IdP-backed customer test logins, IAICT operator and TC12A/B multi-tenant role E2E",
         "priority": "P0",
         "status": "IN_PROGRESS",
-        "scope": "Real isolated nonproduction IAM wiring, approved provider issuer/JWKS verifier, user/session/role provision and actual browser+API cross-tenant/revocation tests. No new unapproved SRS APIs or real client data.",
+        "scope": "Standalone-first: isolated real IAM/login/session/membership and role-based E2E for ordinary customer organizations, IAICT among them. SaaS-specific rollout deferred by Owner. No Cloudflare Portal cross-install identity assumption or production auto-deploy.",
         "owner_acceptance": "PENDING_REAL_E2E",
         "tests": {
           "actual_idp_login": "NOT_RUN",
@@ -946,27 +946,34 @@
       },
       {
         "id": "AL-R0-DEPLOY-001",
-        "title": "Build and verify dedicated customer installation alongside IAICT SaaS from one AI Law core",
+        "title": "Standalone-first AI Law app and isolated installation; IAICT test tenant is an ordinary organization",
         "priority": "P0",
         "required": true,
         "status": "IN_PROGRESS",
-        "owner_acceptance": "PENDING_REAL_E2E",
-        "scope": "Two supported required product delivery configurations: shared IAICT-hosted SaaS and an isolated customer deployment; one source, separate environment configuration, deployable package, real IAM and R0 workflow E2E, backup/upgrade/rollback. Not a feature fork or automatic production rollout.",
+        "owner_acceptance": "PENDING_REAL_STANDALONE_E2E",
+        "scope": "Owner priority: isolated standalone AI Law installation and real functional E2E first; IAICT is an ordinary organization tenant in standalone. Keep shared core, SaaS paused until standalone accepted. Current R36 ships disposable PostgreSQL16-only bootstrap, not application/server/login or production.",
         "tests": {
           "dual_mode_governance_contract": "PENDING_CI",
           "actual_dedicated_install": "NOT_RUN",
           "real_dedicated_account_login": "NOT_RUN",
           "isolated_storage_and_keys": "NOT_RUN",
-          "saas_login_e2e": "NOT_RUN",
+          "saas_login_e2e": "DEFERRED_OWNER",
           "same_build_legal_workflow_both_modes": "NOT_RUN",
-          "backup_restore_rollback": "NOT_RUN"
+          "backup_restore_rollback": "NOT_RUN",
+          "dedicated_db_compose_bootstrap": "PASS_CI_41771766696",
+          "two_real_pg_instances_isolated": "PASS_CI_41771766696",
+          "db_volume_persistence": "PASS_CI_41771766696"
         },
         "evidence": [
           "deployment/modes.json",
           "deployment/README.md",
           "srs_changed.md",
           "release/product_readiness.json",
-          "tests/test_dual_delivery_contract.py"
+          "tests/test_dual_delivery_contract.py",
+          "deployment/standalone/compose.yaml",
+          "deployment/standalone/smoke_isolation.sh",
+          "deployment/standalone/README.md",
+          "GitHub Actions 41771766696 standalone-db job PASS"
         ]
       }
     ],
@@ -1129,6 +1136,12 @@
         "topic": "Owner-confirmed mandatory dual deployment: IAICT SaaS and independently installed AI Law",
         "value": "Owner explicitly confirmed 2026-11-04 that dedicated/private AI Law deployment remains an actual required implementation deliverable; it must not be skipped or postponed as a merely hypothetical future option. Both IAICT-hosted SaaS and isolated customer deployments share one core source, database migration and R0 legal workflows; only infrastructure/configuration and operational boundaries differ. Keep direct customer-account experience simple, security checks identical, and staging test both modes. Record SRS synchronization in srs_changed.md; private SRS v1.1.15 stays unchanged until formal Owner consolidation. No claim of delivered private install or production authorization.",
         "authority": "Owner correction 2026-11-04: 'Triển khai riêng vẫn được làm, không thể bỏ qua' after confirming SaaS and dedicated modes."
+      },
+      {
+        "id": "DEC-016",
+        "topic": "Owner rollout sequence: standalone AI Law first, IAICT ordinary organization, SaaS deferred",
+        "value": "Deliver usable independent/dedicated AI Law first and accept that mode independently. Shared IAICT-hosted SaaS implementation is postponed until after standalone acceptance, not cancelled. For standalone IAM and acceptance IAICT is one ordinary organization customer/tenant, with no implicit platform-root account, no tenant override and no special MatterACL access. Same underlying AI Law source and authorized SRS v1.1.15 functions; only runtime/installation configuration varies. Owner final acceptance remains reserved; no automatic production deployment.",
+        "authority": "Owner explicit 2026-11-04: 'Hướng saas của iaict làm sau, giờ tôi muốn làm triển khai riêng, thực tế coi iaict như 1 đơn vị mà thôi'."
       }
     ],
     "risks": [
@@ -1436,9 +1449,9 @@
       }
     ],
     "current": {
-      "active_task": "AL-R0-IAM-REAL-001",
-      "last_completed_step": "Owner R35 clarified that both shared IAICT SaaS and isolated dedicated private deployment are required implementation targets; R34 signed JWT real PostgreSQL16 CI remains PASS; deployment acceptance for either mode is NOT_RUN. Recorded deployment contract and pending real acceptance.",
-      "next_action": "Continue real account sign-in IAM and develop dedicated portable deployment configuration/package in parallel from SAME AI Law codebase. Run authenticated role, PostgreSQL/matter ACL and R0 workflow E2E separately on SaaS and dedicated test installations. Retain Owner final acceptance and legal/production gates.",
+      "active_task": "AL-R0-DEPLOY-001",
+      "last_completed_step": "Owner DEC-016 redirected to standalone-first, IAICT ordinary customer organization. R36 actual two independent Docker Compose PostgreSQL16 stacks PASS for initialization, schema, separate synthetic tenants, unexposed ports and volume persistence; NOT a deployed AI Law application.",
+      "next_action": "Integrate real AI Law application/standalone IAM and session, create role-specific customer accounts including one IAICT organization with no special privilege, then browser/API/PostgreSQL SRS R0 E2E on standalone. SaaS later. No production/customer legal data until gates and Owner acceptance.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1446,7 +1459,8 @@
         "Full audit/outbox, cache/invalidation propagation, TaskRun storage/matter mapping and schema rollback or production migration NOT_RUN.",
         "Owner final functional E2E, actual TC12A/TC12B and live browser test NOT_RUN; no staging/production deployment authorized.",
         "Previous R31 static role-selector and isolated PostgreSQL fixtures are not real role-based test accounts. Actual approved IdP-backed user provisioning and TC12A/B application E2E NOT_RUN.",
-        "Dedicated/on-premises/private cloud deployment is Owner-required and in implementation scope (DEC-015), but installation packaging, real isolated deploy, account login, workflow E2E, upgrade/rollback remain NOT_RUN. SaaS readiness is not sufficient to close the dual-delivery target."
+        "Dedicated/on-premises/private cloud deployment is Owner-required and in implementation scope (DEC-015), but installation packaging, real isolated deploy, account login, workflow E2E, upgrade/rollback remain NOT_RUN. SaaS readiness is not sufficient to close the dual-delivery target.",
+        "R36 standalone isolated PostgreSQL16 bootstrap CI PASS, but real application server, IdP/login, persistent identity/session, legal workflows, document storage, backup/recovery/upgrade and end-to-end acceptance NOT_RUN."
       ]
     },
     "policy": {

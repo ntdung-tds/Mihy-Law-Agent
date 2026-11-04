@@ -1,6 +1,14 @@
-# AI Law — R0 product release decision (R35)
+# AI Law — R0 product release decision (R36)
 
 **State:** PRODUCT_NOT_READY. **D01 policy: OWNER APPROVED. Platform operator: IAICT.** The earlier five-persona static showcase and PostgreSQL seed are synthetic-only test aids; the Owner-defined demo acceptance target is **real authenticated accounts for different customer roles** with real staging E2E. They are not equivalent.
+
+## Owner DEC-016 priority: standalone FIRST (2026-11-04)
+
+The active product target is a **working independently installed AI Law**. IAICT is an ordinary organization customer tenant inside standalone, not a root operator for every deployment. IAICT-hosted shared SaaS is intentionally deferred until after standalone acceptance.
+
+**Separate acceptance:** `tools.check_product_readiness.evaluate_readiness` now reports `standalone_release_ready`. It requires complete legal/security/functional gates, actual standalone deployment E2E PASS and evidence, real accounts, separate dedicated Owner final approval and dedicated production authorization. It does **not** require the deferred SaaS mode to PASS. `product_ready` remains the later *combined dual-delivery offering* gate. Both remain **false** today.
+
+**R36 real CI:** `deployment/standalone/compose.yaml` and `deployment/standalone/smoke_isolation.sh` boot two isolated PostgreSQL16 database instances and verify no exposed host ports, independent synthetic org tenants and restart durability. This is **not** a functioning AI Law application or proof of user login, storage or workflow E2E. Production migration is not approved.
 
 ## Two required delivery modes — Owner DEC-015 (2026-11-04)
 
