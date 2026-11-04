@@ -170,6 +170,11 @@ jobs:
           node --check deployment/cloudflare/src/r0_preview_worker.mjs
           node --check web/r0-preview/matters.js
           node --check tools/build_cf_r0_preview.mjs
+          node --check deployment/cloudflare/src/site_worker.mjs
+          node --check tools/build_cf_site.mjs
+          node --check deployment/cloudflare/src/legacy_preview_redirect.mjs
+          node --check web/website/site.js
+          node --check web/website/login.js
       - name: Verify RS256 JWT, D1 authz fail-close and Google Drive adapter with fake credentials
         run: node --test deployment/cloudflare/tests/worker.test.mjs
       - name: Verify real WebCrypto PBKDF2 QA session cookies, mobile markup and CSRF
@@ -180,6 +185,10 @@ jobs:
         run: node --test deployment/cloudflare/tests/preview_worker.test.mjs
       - name: Verify real QA matter list/create role boundary and D1 transaction contract
         run: node --test deployment/cloudflare/tests/matter_workspace.test.mjs
+      - name: Verify public website and protected workspace R47 routes
+        run: node --test deployment/cloudflare/tests/site_worker.test.mjs
+      - name: Verify safe redirects from retired preview hostname
+        run: node --test deployment/cloudflare/tests/legacy_redirect.test.mjs
 
   cloudflare-live-qa:
     # Only R43 feature branch: public nonproduction endpoint with ZERO secrets.
@@ -278,3 +287,47 @@ jobs:
           test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$preview/matters.js")" = 401
           test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$preview/api/qa/matters")" = 401
           test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://evil.invalid' -H 'Content-Type: application/json' -d '{"title":"Synthetic QA"}' "$preview/api/qa/matters")" = 403
+
+  cloudflare-site-live:
+    # R47 only: website QA public homepage and protected-login mobile browser smoke.
+    # Never accesses Owner passwords or uploads images to GitHub.
+    if: github.ref_name == 'feat/r47-public-website-ai-law-web' || github.head_ref == 'feat/r47-public-website-ai-law-web'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Chromium for live Cloudflare QA website
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: Verify staging and final website names across 4 viewport sizes
+        run: |
+          python deployment/cloudflare/tests/live_ai_law_website.py
+          AI_LAW_WEBSITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_ai_law_website.py
+
+  cloudflare-site-redirect:
+    if: github.ref_name == 'feat/r47-public-website-ai-law-web' || github.head_ref == 'feat/r47-public-website-ai-law-web'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify stable public website and legacy preview bridge over real HTTPS
+        run: |
+          set -euo pipefail
+          old="https://ai-law-r0-preview.iaict-platform.workers.dev"
+          new="https://ai-law-web.iaict-platform.workers.dev"
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$old/")" = 308
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$old/?utm_source=chatgpt.com")" = 308
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$old/app")" = 308
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$old/api/qa/matters")" = 410
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{}' "$old/api/qa/login")" = 410
+          curl -sS --max-time 25 -D /tmp/ai-law-legacy-headers -o /dev/null "$old/"
+          grep -iF "Location: $new/" /tmp/ai-law-legacy-headers
+          test "$(curl -sS --max-time 25 -o /tmp/ai-law-site-home -w '%{http_code}' "$new/")" = 200
+          grep -q 'id="hero-title"' /tmp/ai-law-site-home
+          grep -q 'class="site-footer"' /tmp/ai-law-site-home
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$new/login")" = 200
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$new/app")" = 302
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$new/app.js")" = 401
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$new/api/qa/matters")" = 401
