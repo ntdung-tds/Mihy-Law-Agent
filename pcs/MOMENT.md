@@ -1,10 +1,18 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `38` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T05:52:00Z`.
+- **PCS revision:** `39` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T06:22:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R39 — actual Chromium browser against standalone auth/API/PostgreSQL16
+
+- **Real UI + gateway:** `web/r0-standalone/` is the live responsive nonproduction login/dashboard (navy/light flat R0 style), not the old static R31 role selector. A private `r0_core/standalone_browser_gateway.py` only binds loopback `127.0.0.1` via Compose, proxies signed R38 login/logout and R37 GET run via HttpOnly SameSite session cookie, never exposing JWT to browser storage/JS; checks Host and Origin. The backend still verifies JWT, SQL session, membership and MatterACL on every use.
+- **Real desktop/mobile browser test:** `tests/browser/test_r39_browser_e2e.py` Playwright Chromium test at 1440 desktop, 390/320 mobile, signed password login, personal and organization tenant selection, read allowed/denied, reload persistence, logout revocation and CSRF. Two full independent `gateway+auth+API+PostgreSQL16` Docker instances use throwaway .invalid accounts and unique keys. **PASS** at GitHub Actions `41784653735` (six successful unit/PG/DB/API/login/browser jobs).
+- **Scope boundary:** The real UI returns a **synthetic queued run fixture** from PostgreSQL, and shows other legal service blocks as `Chưa kết nối`. Synthetic public workspace choices are display-only and authorizations are enforced server-side. No approved provider, no permanent owner-accessible staging URL, actual customer accounts, real legal case files, complete R0 AI functions, physical-device test or production.
+- **Evidence:** `tests/evidence/AL-R0-R39-STANDALONE-BROWSER-2026-11-04.json` + private Drive R39 test run (do not store sensitive URLs/credentials in this public PCS).
+- **Next:** R40 persistent standalone nonprod installation with operator-provisioned approved QA identities, real browser owner test, first approved R0 legal workflow. SaaS remains deferred; SRS v1.1.15 unchanged; Owner final acceptance pending.
 
 ## R38 — real standalone local password login (test-only account service)
 
