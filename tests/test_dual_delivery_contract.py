@@ -130,7 +130,7 @@ class DualDeliveryContractTests(unittest.TestCase):
         self.assertIn("dc_b up -d --wait", smoke)
         self.assertIn("docker port", smoke)
         self.assertIn("down -v --remove-orphans", smoke)
-        self.assertFalse(self.release["standalone_owner_final_acceptance"]
+        self.assertFalse(self.release["dedicated_owner_final_acceptance"]
                          == "APPROVED")
         self.assertEqual(self.release["dedicated_production_deployment"],
                          "NOT_AUTHORIZED")
