@@ -30,7 +30,7 @@ async function relay(req,env,path){
  const cookie=req.headers.get('Cookie');if(cookie)h.set('Cookie',cookie);
  const type=req.headers.get('Content-Type');if(type)h.set('Content-Type',type);
  if(method==='POST'){h.set('Origin',url.origin);h.set('Sec-Fetch-Site','same-origin');}
- const proxied=new Request(url.href,{method,headers:h,body:method==='POST'?req.body:undefined,redirect:'manual'});
+ const proxied=new Request(url.href,{method,headers:h,body:method==='POST'?req.body:undefined,duplex:'half',redirect:'manual'});
  const result=await env.QA_AUTH.fetch(proxied);
  const outgoing=new Headers(headerMap('application/json; charset=utf-8'));
  for(const name of ['Content-Type','Set-Cookie','Cache-Control','Cross-Origin-Resource-Policy']){
