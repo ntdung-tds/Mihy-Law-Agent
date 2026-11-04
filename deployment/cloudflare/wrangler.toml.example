@@ -1,0 +1,20 @@
+# R43 Cloudflare Workers Free, isolated nonproduction example.
+# Fill real D1 UUID only on a QA host. Do not store OAuth tokens, JWT
+# private keys or R40 account credentials here or in the public repository.
+name = "ai-law-standalone-cf-qa"
+main = "src/worker.mjs"
+compatibility_date = "2026-11-04"
+workers_dev = true
+
+[vars]
+AI_LAW_CF_MODE = "isolated-qa-only"
+INSTALLATION_ID = "a1a1a1a1-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+JWT_ISSUER = "https://idp.example.invalid"
+JWT_AUDIENCE = "ai-law-api"
+JWT_JWKS_JSON = '{"keys":[]}' # DENY ALL until QA issuer configured
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ai-law-standalone-cf-qa"
+database_id = "REPLACE_WITH_D1_QA_DB_UUID"
+migrations_dir = "migrations"
