@@ -50,6 +50,11 @@ def seed_demo_records(conn, fixture: dict) -> None:
     """
     if fixture.get("synthetic_only") is not True:
         raise ValueError("Refusing non-synthetic data")
+    info = getattr(conn, "info", None)
+    if (getattr(info, "dbname", None) != _ALLOWED_DB or
+            getattr(info, "host", None) not in ("127.0.0.1", "localhost") or
+            getattr(info, "user", None) != "postgres"):
+        raise ValueError("Refusing to seed anything except the disposable local PostgreSQL CI database")
     with conn.transaction():
         if conn.execute("SELECT count(*) FROM ai_law.principals").fetchone()[0]:
             raise ValueError("Refusing to seed a non-empty database")
