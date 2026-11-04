@@ -1,6 +1,12 @@
-# AI Law — R0 product release decision (R38)
+# AI Law — R0 product release decision (R39)
 
 **State:** PRODUCT_NOT_READY. **D01 policy: OWNER APPROVED. Platform operator: IAICT.** The earlier five-persona static showcase and PostgreSQL seed are synthetic-only test aids; the Owner-defined demo acceptance target is **real authenticated accounts for different customer roles** with real staging E2E. They are not equivalent.
+
+## R39 — browser sign-in real against disposable standalone stack, NOT full application E2E
+
+Playwright/Chromium actually opened and used the `web/r0-standalone` login UI at **1440, 390 and 320 px**, via a same-origin local-only BFF and a separate R38 Argon2id account service with SQL session, RS256 JWT, R37 GET run and PostgreSQL16 FORCE RLS/MatterACL. Two separate Docker installations were used, and both host the identical UI/backend image; localhost cookie/CSRF, reload and logout are tested. GitHub Actions `41784653735` **PASS** all six jobs. Other legal AI functions are correctly labeled not connected.
+
+**Do not mark `APPLICATION_E2E` PASS.** This is only a nonproduction narrow TaskRun GET fixture; no real user accounts on durable staging, upload, AI legal outputs, full TC12A/B, MFA, production security/operations, Owner acceptance or production authorization. `delivery_modes.dedicated.deployment_e2e` remains `NOT_RUN`, and `standalone_release_ready` remains false. SaaS later.
 
 ## R38: actual standalone credential test login in isolated Docker (not production IAM)
 
