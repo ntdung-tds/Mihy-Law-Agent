@@ -227,11 +227,13 @@ jobs:
       - name: Live HTTPS health, login UI, anonymous denial and CSRF (no credentials)
         run: |
           set -euo pipefail
-          base="https://ai-law-r0-preview-r45-qa.iaict-platform.workers.dev"
-          test "$(curl -sSL --max-time 25 -o /tmp/ai-law-health -w '%{http_code}' "$base/health")" = 200
-          grep -q 'qa_only' /tmp/ai-law-health
-          test "$(curl -sSL --max-time 25 -o /tmp/ai-law-login -w '%{http_code}' "$base/?utm_source=chatgpt.com")" = 200
-          grep -q 'id="login-form"' /tmp/ai-law-login
-          test "$(curl -sSL --max-time 25 -o /dev/null -w '%{http_code}' "$base/app.js")" = 401
-          test "$(curl -sSL --max-time 25 -o /dev/null -w '%{http_code}' "$base/api/qa/session")" = 401
-          test "$(curl -sSL --max-time 25 -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://attacker.invalid' -H 'Content-Type: application/json' -d '{}' "$base/api/qa/logout")" = 403
+          for base in "https://ai-law-r0-preview-r45-qa.iaict-platform.workers.dev" "https://ai-law-r0-preview.iaict-platform.workers.dev"; do
+            echo "Checking configured QA and original R0 preview: $base"
+            test "$(curl -sSL --max-time 25 -o /tmp/ai-law-health -w '%{http_code}' "$base/health")" = 200
+            grep -q 'qa_only' /tmp/ai-law-health
+            test "$(curl -sSL --max-time 25 -o /tmp/ai-law-login -w '%{http_code}' "$base/?utm_source=chatgpt.com")" = 200
+            grep -q 'id="login-form"' /tmp/ai-law-login
+            test "$(curl -sSL --max-time 25 -o /dev/null -w '%{http_code}' "$base/app.js")" = 401
+            test "$(curl -sSL --max-time 25 -o /dev/null -w '%{http_code}' "$base/api/qa/session")" = 401
+            test "$(curl -sSL --max-time 25 -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://attacker.invalid' -H 'Content-Type: application/json' -d '{}' "$base/api/qa/logout")" = 403
+          done
