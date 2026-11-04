@@ -2,7 +2,7 @@
   "schema_version": 1,
   "baseline": "SRS v1.1.15",
   "release_target": "R0",
-  "checkpoint": "R40",
+  "checkpoint": "R41",
   "assessment_date": "2026-11-04",
   "synthetic_demo_customers_created": true,
   "live_customer_accounts_created": false,
@@ -167,9 +167,11 @@
         "GitHub Actions 41784653735 (Chromium 1440/390/320 real browser against 2 ephemeral Docker auth/API/PG16 stacks, POST login/logout and tenant ACL)",
         "tests/evidence/AL-R0-R40-QA-ACCOUNTS-2026-11-04.json",
         "GitHub Actions 41788819557 (10 SQL QA actors, real login, MatterACL and durable named volume after service down/up)",
-        "Private owner-only Drive credential bundle (link kept out of public repo)"
+        "Private owner-only Drive credential bundle (link kept out of public repo)",
+        "tests/evidence/AL-R0-R41-STANDALONE-STAGING-KIT-2026-11-04.json",
+        "GitHub Actions 41793096574: 8 jobs PASS including operator-style local QA installation with real Chromium, same 10 QA accounts and SQL/RS256 after stop/start"
       ],
-      "need": "R40 ten named synthetic QA actors mapped to RA02..09 and credential bundle saved in restricted owner-only Drive; 10 Argon2id accounts provisioned/verified in actual disposable SQL HTTP QA installations; idempotent replay and Docker named volume survival PASS. No long-lived accessible staging instance or issued actual user account activation, external IdP/MFA, complete legal AI/document workflows, full TC12/browser production E2E, backup/restore or Owner final acceptance."
+      "need": "R41 repeatable private standalone QA kit tested in two disposable Docker+PG16+auth/API/UI installations with stable account passwords and signing keys across stop/restart; Chromium desktop/mobile-viewport 1440/390/320 PASS. No authorized persistent host connected (Cloudflare Containers 401, no Tunnel/host); saved owner QA bundle NOT applied to long-lived staging. Official IdP/MFA, protected workspace discovery, real SRS AI UC functions, full TC12, legal data, backup/restore and Owner acceptance remain NOT_RUN."
     }
   },
   "delivery_modes_owner_approved": "2026-11-04; both SaaS and dedicated REQUIRED for AI Law product target, not either-or",
@@ -190,6 +192,10 @@
   "standalone_qa_accounts_inventory": "10_NAMED_ACTORS_RA02_RA09",
   "standalone_qa_private_credentials": "OWNER_ONLY_DRIVE_SAVED_PREPARED_NOT_ACTIVE",
   "standalone_qa_disposable_pg_http_provision": "PASS_CI_41788819557",
-  "standalone_qa_durable_host_deployment": "NOT_DEPLOYED",
-  "standalone_qa_db_persist_after_compose_down_up": "PASS_CI_41788819557"
+  "standalone_qa_durable_host_deployment": "BLOCKED_NO_AUTHORIZED_HOST_CONNECTED",
+  "standalone_qa_db_persist_after_compose_down_up": "PASS_CI_41788819557",
+  "standalone_qa_staging_kit": "PASS_CI_41793096574",
+  "standalone_qa_staging_kit_browser_e2e": "PASS_CHROMIUM_CI_41793096574",
+  "standalone_qa_test_accounts_after_restart": "PASS_EPHEMERAL_CI_PG16_VOLUME",
+  "standalone_qa_owner_saved_credentials_activated": "NOT_APPLIED_TO_PERMANENT_HOST"
 }

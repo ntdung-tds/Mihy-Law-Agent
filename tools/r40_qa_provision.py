@@ -33,6 +33,8 @@ EMAIL = re.compile(r"^qa[0-9]{2}\.[a-z0-9]+@ai-law\.invalid$")
 
 
 def _outside_source(path: Path) -> Path:
+    if path.expanduser().is_symlink():
+        raise ValueError("Private QA file cannot be symlinked")
     target = path.expanduser().resolve()
     if target == ROOT or ROOT in target.parents:
         raise ValueError("Private QA credentials/SQL must be outside source repo")

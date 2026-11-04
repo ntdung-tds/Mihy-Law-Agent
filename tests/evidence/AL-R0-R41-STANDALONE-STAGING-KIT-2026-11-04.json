@@ -1,0 +1,71 @@
+{
+  "id": "AL-R0-R41-STANDALONE-STAGING-KIT-2026-11-04",
+  "recorded_date": "2026-11-04",
+  "baseline": "AI Law SRS v1.1.15 unchanged; D01 and owner standalone-first DEC-016 maintained",
+  "scope": "Local/private QA staging deployment KIT, NOT connected owner-accessible long-lived staging or production.",
+  "owner_qa_saved_credentials": "R40 ten-account bundle remains restricted owner-only Drive and accessible as owner-provided private JSON; checksum/hash verified outside public GitHub. R41 CI deliberately generated a distinct temporary bundle and NEVER accessed Owner's passwords.",
+  "infrastructure_check": {
+    "cloudflare_account_access": "CONNECTED",
+    "cloudflare_containers": "BLOCKED_401_UNAUTHORIZED",
+    "cloudflare_tunnels_available": 0,
+    "existing_ai_law_workers": "STATIC_PREVIEWS_NOT_STANDALONE_POSTGRES",
+    "connected_dedicated_docker_host": "NOT_AVAILABLE",
+    "owner_accessible_staging_url": "NOT_DEPLOYED"
+  },
+  "ci_verified": {
+    "url": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41793096574",
+    "commit": "d92bb5d30d5e4f21627ef7dc01adcc46b195975d",
+    "conclusion": "success",
+    "job_count": 8,
+    "jobs": [
+      "unit PASS",
+      "postgres-rls PASS",
+      "standalone-db PASS",
+      "standalone-api PASS",
+      "standalone-login PASS",
+      "standalone-browser PASS",
+      "standalone-qa PASS",
+      "standalone-staging-kit PASS"
+    ]
+  },
+  "tests": {
+    "same_ten_QA_accounts_reused_across_first_and_second_test_cycle": "PASS",
+    "two_independent_compose_api_auth_postgres16_gateway_stacks": "PASS",
+    "primary_QA01_to_QA09_actual_passwords_and_tenant_MatterACL": "PASS",
+    "secondary_QA10_dedicated_installation_login": "PASS",
+    "local_only_HTTP_browser_port_18080_and_18081": "PASS",
+    "no_postgresql_auth_or_api_host_published_port": "PASS",
+    "owner_only_secret_env_permissions_and_distinct_RSA_keys": "PASS",
+    "refused_initialization_of_previously_initialized_QA_keys": "PASS",
+    "idempotent_SQL_provisioning_using_same_private_bundle": "PASS",
+    "key_and_environment_hash_unchanged_after_stop_restart": "PASS",
+    "sql_accounts_and_memberships_survive_stop_restart": "PASS",
+    "full_browser_1440_390_320_real_playwright_login_reload_logout_and_csrf": "PASS",
+    "disabled_QA07_and_nonmember_QA05_denied_in_real_browser": "PASS",
+    "existing_R37_R38_R39_R40_regression_suites": "PASS"
+  },
+  "not_run_or_blocked": {
+    "actual_saved_owner_private_passwords_activated_on_staging": "BLOCKED_NO_QA_HOST",
+    "own_device_ssh_tunnel_to_real_qa_server": "NOT_RUN",
+    "live_persistent_server_outside_disposable_CI": "NOT_DEPLOYED",
+    "tls_or_private_VPN_mobile_physical_device": "NOT_RUN",
+    "production_approved_IdP_MFA": "NOT_IMPLEMENTED",
+    "authenticated_workspace_discovery_not_synthetic": "NOT_IMPLEMENTED",
+    "real_AI_legal_UC03_UC04_UC07": "NOT_IMPLEMENTED",
+    "full_TC12A_TC12B_and_owner_business_acceptance": "NOT_RUN",
+    "real_case_documents": "NOT_AUTHORIZED",
+    "backup_restore_upgrade_rollback": "NOT_RUN",
+    "production_deployment": "NOT_AUTHORIZED",
+    "Owner_final_acceptance": "PENDING"
+  },
+  "security_boundaries": "No private Drive document ID, QA password, JWT, private RSA key or password hash in public evidence. Temporary CI secrets and Docker named volumes removed automatically at completion. A real operator-mode installation does not remove volumes on stop. Browser gateway only 127.0.0.1; encrypted SSH tunnel is the proposed authorized remote access path.",
+  "artifacts": [
+    "deployment/standalone/QA_R41_OPERATIONS.md",
+    "deployment/standalone/qa_staging.sh",
+    "deployment/standalone/compose.qa-persistent.yaml",
+    "deployment/standalone/smoke_staging_kit.sh",
+    "tools/r41_staging_config.py",
+    "tests/browser/test_r41_staging_browser.py",
+    "tests/test_r41_staging_kit.py"
+  ]
+}

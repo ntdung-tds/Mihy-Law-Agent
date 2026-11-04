@@ -79,7 +79,7 @@ class StandaloneBrowserGateway:
             raise ValueError("Gateway test origin must be local loopback only")
         if not _COOKIE_PATTERN.fullmatch(cookie_name):
             raise ValueError("Invalid test-only cookie name")
-        if (not isinstance(workspaces, list) or not 1 <= len(workspaces) <= 4 or
+        if (not isinstance(workspaces, list) or not 1 <= len(workspaces) <= 10 or
                 any(not isinstance(w, dict) or set(w) != {"id", "label", "type"}
                     or not isinstance(w["id"], str) or
                     not re.fullmatch(r"[0-9a-f-]{36}", w["id"]) or
