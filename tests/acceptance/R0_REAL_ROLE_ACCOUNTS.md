@@ -20,6 +20,14 @@ The entries below are **test actor scenarios, not proof that accounts have been 
 | RA-08 | Malicious tenant/matter/run substitution | Cross-tenant URL, header, ID and query tampering cannot override authenticated session context | NOT_RUN |
 | RA-09 | Limited-permission organization member | Can read only the explicitly granted matter; another matter in the same tenant remains denied (not a new SRS role) | NOT_RUN |
 
+## R40 QA account inventory — 10 named actors, reusable credentials PREPARED
+
+Owner requested sufficiently many persistent-reusable **QA actor credentials**, stored privately and kept after CI. Public non-secret inventory: `tests/acceptance/R40_STANDALONE_QA_INVENTORY.json`; detailed private installation procedure: `deployment/standalone/QA_R40_PROVISION.md`.
+
+QA01 personal; QA02 same principal personal+organization; QA03 organization administrator without implicit MatterACL; QA04 granted organization lawyer; QA05 nonmember; QA06 revoked organization member with active personal tenant; QA07 disabled; QA08 limited two-case MatterACL; QA09 unrelated tenant same installation; QA10 independent installation. Reuses only `lawyer`/`tenant_admin` from existing R0 role tests. RA-02..RA-09 **bounded HTTP/SQL test slice PASS** at CI `41788819557`; 10 SQL accounts were actually provisioned into two disposable PostgreSQL16 stacks and authenticated/denied with signed Bearer. Test also proved repeated provisioning is idempotent and preserves accounts after Compose down/up **without deleting volumes**.
+
+**Important:** This is NOT complete RA-02..RA-09 acceptance under TC12A/B or proof that those exact Owner-saved credentials are installed on accessible permanent staging. The Owner-only private Drive bundle is saved, hash-verified, and ready for future use, but remains **PREPARED_NOT_ACTIVE** until explicitly provisioned on a long-lived nonproduction host. In the table below, `NOT_RUN` continues to refer to **full accepted product tests**, not the passed synthetic QA slice. Future SaaS RA-01 remains deferred.
+
 ## R39 bounded real-browser result (not full TC12 acceptance)
 
 Playwright/Chromium actually signs in to two separate disposable Docker standalone installations with Argon2id .invalid accounts, signed JWT and real PostgreSQL16. R39 smoke checks **organization lawyer 200, organization admin ungranted matter 404, same lawyer's personal workspace cannot view organization matter, unrelated organization's installation separated, logout, wrong credentials, mobile responsive widths and CSRF**. Evidence: `tests/evidence/AL-R0-R39-STANDALONE-BROWSER-2026-11-04.json`, CI `41784653735`.
