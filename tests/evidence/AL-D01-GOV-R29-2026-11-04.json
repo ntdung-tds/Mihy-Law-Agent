@@ -36,10 +36,31 @@
     },
     {
       "name": "GitHub code & PCS regression suite",
-      "status": "PENDING_CI_AT_RECORD_CREATION"
+      "status": "PASS_9_D01_AND_195_TOTAL_GITHUB_RUN_41747231230"
     }
   ],
   "srs_baseline_modified": false,
   "public_repo_contains_private_document": false,
-  "owner_final": "POLICY_APPROVED_NOT_REAL_DATA_ACTIVATION"
+  "owner_final": "POLICY_APPROVED_NOT_REAL_DATA_ACTIVATION",
+  "review_cycles": [
+    {
+      "round": 1,
+      "result": "EXPECTED_FAIL",
+      "ci_run": 41746898291,
+      "notes": "D01 policy tests authored before public governance record/PCS checkpoint."
+    },
+    {
+      "round": 2,
+      "result": "PASS",
+      "ci_run": 41747231230,
+      "notes": "9 D01 policy guardrail tests, 195 total repository suite; no gate bypass."
+    }
+  ],
+  "private_artifacts": {
+    "docx": "RENDERED_6_PAGES_CHECKED",
+    "zip": "ZIP_AND_SHA256_MANIFEST_PASS",
+    "google_docs": "PRIVATE_CREATED_READBACK_AND_FOLDER_VERIFIED",
+    "raw_docx_to_drive": "NOT_UPLOADED_RAW_BINARY"
+  },
+  "last_ci": "PASS_195_OF_195_RUN_41747231230"
 }

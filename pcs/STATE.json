@@ -652,18 +652,24 @@
           "PCS record and policy metadata consistency tested, CI green, Owner final acceptance limited to policy"
         ],
         "tests": {
-          "d01_policy_invariants": "CI_PENDING_R29",
+          "d01_policy_invariants": "PASS_9_OF_9_GITHUB_RUN_41747231230",
           "source_contract_crosscheck": "PASS_PRIVATE_SRS_V1_1_15_DECISION_REGISTER_AND_RELEASE_GATES_REVIEW",
           "live_rls_tc12": "NOT_RUN",
           "legal_applicability_opinion": "NOT_PROVIDED",
           "signed_owner_decision": "NOT_PROVIDED",
-          "production": "NOT_DEPLOYED"
+          "production": "NOT_DEPLOYED",
+          "full_repo_ci": "PASS_195_OF_195_GITHUB_RUN_41747231230",
+          "private_policy_docx_render": "PASS_6_PAGES_RENDERED_AND_ZIP_SHA256_VERIFIED",
+          "drive_doc": "PASS_PRIVATE_GOOGLE_DOC_READBACK_AND_PARENT_VERIFIED",
+          "real_client_data": "NOT_AUTHORIZED"
         },
         "evidence": [
           "pcs/decisions/D01_POLICY_R29.json",
           "pcs/decisions/D01_POLICY_R29.md",
           "tests/test_d01_policy.py",
-          "Private D01 decision/role/gate/QA pack prepared; no private SRS bytes on public GitHub"
+          "Private D01 decision/role/gate/QA pack prepared; no private SRS bytes on public GitHub",
+          "GitHub Actions run 41747231230 (195/195 PASS); 9 D01 governance cases PASS",
+          "Private Word/JSON/CSV ZIP locally rendered and checksummed; private Google Doc created and verified in dedicated Drive folder (no raw private SRS in repo)"
         ],
         "owner_acceptance": "APPROVED_POLICY_ONLY",
         "notes": "Owner explicitly approved principle/model. Due SRS R0/Pilot evidence gates, this task does not close live IAM or real-data compliance. Separate authorized approval and real E2E still required."
@@ -1058,11 +1064,15 @@
       {
         "path": "pcs/decisions/D01_POLICY_R29.md",
         "visibility": "PUBLIC_SAFE_DECISION_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-D01-GOV-R29-2026-11-04.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
       }
     ],
     "current": {
       "active_task": "AL-D01-GOV-001",
-      "last_completed_step": "D01 policy model owner approved, private legal/role/flow/gate/QA pack prepared; public-safe D01 summary recorded. Live R0 identity gate and real-data Pilot gate still PENDING, legal entity/DPA/Decree 356 opinion unverified. R28 code unchanged.",
+      "last_completed_step": "R29: Owner-approved D01 policy recorded as DEC-011 without unblocking real-data/identity gates. 9 new guardrail tests green and 195/195 full repo CI PASS (run 41747231230). Private 6-page D01 Word pack rendered, ZIP integrity verified, private Google Doc folder readback PASS. No SRS change, client data or production.",
       "next_action": "Obtain named legal entity, signed D01 approval record and processing-role/DPA review; independent legal opinion on whether the actual AI Law offering falls under Decree 356/2025 arts.21–25; then conduct real isolated PostgreSQL FORCE RLS/MatterACL/IdP/TC12A/B before considering gate opening. Keep synthetic work under approved SRS unchanged.",
       "blockers": [
         "Owner approved D01 policy in chat, but no signed/evidenced D01 form was provided for GATE-D01-R0.",
