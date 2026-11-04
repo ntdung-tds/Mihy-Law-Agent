@@ -409,14 +409,45 @@ class RealPostgresRlsTests(unittest.TestCase):
                 "HTTP_AUTHORIZATION":"Bearer fixture",
                 "wsgi.input":BytesIO()},lambda s,h,*_:status.append(s)))
             return int(status[0][:3]),json.loads(body)
+        # In-process WSGI contract: real Postgres-backed membership + MatterACL.
         self.assertEqual(get_response()[0],200)
-        active_tenant[0]=B
-        self.assertEqual(get_response()[0],404)
-        active_tenant[0]=A
-        self.admin.execute("""UPDATE ai_law.memberships
-          SET status='revoked',revoked_at=now() WHERE membership_id=%s""",(M_UA,))
-        self.assertEqual(get_response()[0],404)
-        self.assertEqual(len(calls),3)
+        # Actual local HTTP transport, still with fake verifier and run content.
+        from wsgiref.simple_server import make_server, WSGIRequestHandler
+        from urllib.request import Request, urlopen
+        from urllib.error import HTTPError
+        import threading
+
+        class QuietHandler(WSGIRequestHandler):
+            def log_message(self, *_):
+                pass
+
+        with make_server("127.0.0.1",0,app,handler_class=QuietHandler) as server:
+            worker=threading.Thread(target=server.serve_forever,daemon=True)
+            worker.start()
+            url="http://127.0.0.1:%d/v1/runs/fixture-run" % server.server_port
+            req=lambda:Request(url,headers={"Authorization":"Bearer fixture"})
+            try:
+                with urlopen(req(),timeout=5) as response:
+                    self.assertEqual(response.status,200)
+                    self.assertEqual(json.load(response)["run_id"],"fixture-run")
+
+                active_tenant[0]=B
+                self.assertEqual(get_response()[0],404)
+                with self.assertRaises(HTTPError) as caught:
+                    urlopen(req(),timeout=5)
+                self.assertEqual(caught.exception.code,404)
+
+                active_tenant[0]=A
+                self.admin.execute("""UPDATE ai_law.memberships
+                  SET status='revoked',revoked_at=now() WHERE membership_id=%s""",(M_UA,))
+                self.assertEqual(get_response()[0],404)
+                with self.assertRaises(HTTPError) as caught:
+                    urlopen(req(),timeout=5)
+                self.assertEqual(caught.exception.code,404)
+            finally:
+                server.shutdown()
+                worker.join(timeout=5)
+        self.assertEqual(len(calls),6)
 
 
 if __name__=="__main__":
