@@ -103,20 +103,20 @@ class TestD1ScopedAuthorization(unittest.TestCase):
         return self.db.execute(self.sql["SESSION_SQL"],
             (installation,sid,ISSUER,subject,at)).fetchone()
 
-    def run(self, installation=INSTALL, tenant=ORG,
+    def read_run(self, installation=INSTALL, tenant=ORG,
             user=USER, at=NOW, table="RUN_SQL", obj="fixture-run"):
         return self.db.execute(self.sql[table],(
             installation,tenant,obj,user,at,at,user,at,at)).fetchone()
 
     def test_session_and_authorized_run_sql_really_executes(self):
         self.assertEqual(self.session(),(USER,ORG))
-        raw=self.run()
+        raw=self.read_run()
         self.assertEqual(json.loads(raw[0])["installation"],"primary")
-        self.assertIsNone(self.run(user=ADMIN)) # admins cannot read cases
-        self.assertIsNone(self.run(user=OUTSIDER))
-        self.assertEqual(json.loads(self.run(
+        self.assertIsNone(self.read_run(user=ADMIN)) # admins cannot read cases
+        self.assertIsNone(self.read_run(user=OUTSIDER))
+        self.assertEqual(json.loads(self.read_run(
             tenant=OTHER_TENANT,user=OUTSIDER)[0])["installation"],"other-tenant")
-        self.assertEqual(json.loads(self.run(
+        self.assertEqual(json.loads(self.read_run(
             installation=INSTALL_OTHER)[0])["installation"],"other-install")
 
     def test_disabled_suspended_revoked_and_expired_sessions_deny(self):
@@ -138,24 +138,24 @@ class TestD1ScopedAuthorization(unittest.TestCase):
         self.assertIsNone(self.session(at=NOW+901))
 
     def test_acl_version_expiry_and_explicit_deny_override_allow(self):
-        self.assertIsNotNone(self.run())
+        self.assertIsNotNone(self.read_run())
         self.db.execute("INSERT INTO qa_matter_acl VALUES(?,?,?,?,?,?,?,?,?)",
             (INSTALL,ORG,MATTER,USER,"read","deny",1,NOW-1,None))
-        self.assertIsNone(self.run())
+        self.assertIsNone(self.read_run())
         self.db.execute("DELETE FROM qa_matter_acl WHERE effect='deny'")
         self.db.execute("UPDATE qa_matters SET acl_version=2 WHERE installation_id=?",
                         (INSTALL,))
-        self.assertIsNone(self.run())
+        self.assertIsNone(self.read_run())
         self.db.execute("INSERT INTO qa_matter_acl VALUES(?,?,?,?,?,?,?,?,?)",
             (INSTALL,ORG,MATTER,USER,"read","allow",2,NOW-1,NOW+20))
-        self.assertIsNotNone(self.run())
-        self.assertIsNone(self.run(at=NOW+21))
+        self.assertIsNotNone(self.read_run())
+        self.assertIsNone(self.read_run(at=NOW+21))
 
     def test_file_acl_guards_provider_ref_too(self):
-        self.assertEqual(self.run(table="FILE_SQL",obj="file-01")[0],"file-01")
-        self.assertIsNone(self.run(table="FILE_SQL",obj="file-01",user=ADMIN))
-        self.assertIsNone(self.run(table="FILE_SQL",obj="file-01",user=OUTSIDER))
-        self.assertEqual(self.run(table="FILE_SQL",obj="file-01",
+        self.assertEqual(self.read_run(table="FILE_SQL",obj="file-01")[0],"file-01")
+        self.assertIsNone(self.read_run(table="FILE_SQL",obj="file-01",user=ADMIN))
+        self.assertIsNone(self.read_run(table="FILE_SQL",obj="file-01",user=OUTSIDER))
+        self.assertEqual(self.read_run(table="FILE_SQL",obj="file-01",
             tenant=OTHER_TENANT,user=OUTSIDER)[2],"differentDriveObj12345")
 
     def test_foreign_key_denies_cross_install_reference(self):
