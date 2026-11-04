@@ -2,7 +2,7 @@
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
 - **PCS revision:** `33` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T03:15:00Z`.
+- **Updated:** `2026-11-04T03:06:28.924Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; IAICT operates the platform. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
