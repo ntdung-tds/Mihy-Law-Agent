@@ -1,10 +1,18 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `37` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T04:46:00Z`.
-- **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; IAICT operates the platform. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
+- **PCS revision:** `38` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T05:52:00Z`.
+- **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R38 — real standalone local password login (test-only account service)
+
+- **Actual code:** `r0_core/standalone_password_auth.py` implements real HTTP credential checks using Argon2id password hashes stored in dedicated nonproduction PostgreSQL16 account rows, a separate least-privilege auth DB role, an ephemeral RSA private signing key held only by the auth container, and actual short-lived access JWTs bound to revocable SQL sessions. The read-only app independently validates the signature and tenant MatterACL. Same person may select personal/organization membership after verified SQL checks.
+- **Actual Docker CI:** two independent real `auth + API + PostgreSQL16` Compose installations, IAICT a *fictional ordinary customer organization* in installation A and separate organization B. Checks 200 valid credential/Bearer, 401 wrong password, wrong tenant and cross-installation JWT, 404 admin without MatterACL, sign-out revokes a real SQL session, disabling account revokes existing sessions, 5 consecutive invalid passwords lock account for 15 minutes, auth SQL identity cannot read customer matters. **PASS** GitHub Actions `41781535393`: `unit`, `postgres-rls`, `standalone-db`, `standalone-api`, `standalone-login`.
+- **Evidence:** `tests/evidence/AL-R0-R38-STANDALONE-LOGIN-2026-11-04.json`. Synthetic temporary passwords/keys/account rows are created at test run and destroyed; no real customer email or legal data; no public login port; `/standalone/auth/login` and `/standalone/auth/logout` are NOT SRS public production endpoints.
+- **Outstanding:** persistent real customer account provisioning, approved production identity/MFA, browser/UI sign-in, canonical SRS account/session/TaskRun migrations, full legal AI UC03/04/07 and real document workflow, durable private installation backup/upgrade/rollback, Owner final acceptance. Both standalone product and SaaS remain NOT_READY; SaaS implementation intentionally deferred.
+- **Next:** build standalone login UI and actual approved nonproduction account provisioning/integration; perform browser + API TC12A/B with isolated roles. Continue core functions without changing approved private SRS v1.1.15.
 
 ## R37 — real standalone API + persisted PostgreSQL16 auth/run test fixtures
 
