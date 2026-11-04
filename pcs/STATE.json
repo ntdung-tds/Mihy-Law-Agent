@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 44,
-  "updated_at": "2026-11-04T11:04:00Z",
+  "revision": 45,
+  "updated_at": "2026-11-04T13:58:00Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1022,8 +1022,10 @@
           "cf_mobile_qa04_pbkdf2_password_negative_live": "PASS_41817969438_HTTP401",
           "cf_mobile_qa04_password_hash_and_membership_live_d1": "PASS_CLOUDFLARE_API",
           "cf_mobile_qa_success_cookie_dashboard_logout_unit": "PASS_41817289435_MOCK_D1",
-          "cf_mobile_positive_password_browser_live": "PENDING_OWNER_PRIVATE_CREDENTIAL_TEST",
-          "cf_mobile_owner_physical_device_acceptance": "NOT_RUN_OWNER"
+          "cf_mobile_positive_password_browser_live": "PASS_OWNER_SELF_REPORTED_PHYSICAL_MOBILE_2026_11_04",
+          "cf_mobile_owner_physical_device_acceptance": "PASS_OWNER_REPORTED_SIGNIN_ONLY_2026_11_04",
+          "cf_mobile_owner_reload_session_persistence": "NOT_CONFIRMED_BY_OWNER",
+          "cf_mobile_owner_logout": "NOT_CONFIRMED_BY_OWNER"
         },
         "evidence": [
           "deployment/modes.json",
@@ -1083,7 +1085,8 @@
           "deployment/cloudflare/src/mobile_assets.mjs",
           "deployment/cloudflare/QA_R44_MOBILE_LOGIN.md",
           "tests/evidence/AL-R0-R44-CLOUDFLARE-MOBILE-QA-LOGIN-2026-11-04.json",
-          "GitHub Actions 41817969438: real Chromium 320/390/430/1440 on deployed QA Worker; QA04 wrong password HTTP401"
+          "GitHub Actions 41817969438: real Chromium 320/390/430/1440 on deployed QA Worker; QA04 wrong password HTTP401",
+          "R44 Owner self-reported positive physical mobile sign-in on 2026-11-04 (conversation confirmation only, no independent device recording). Previous PR #60 live Chromium test and main CI PASS; reload/logout on Owner phone pending. Public-safe checkpoint: tests/evidence/AL-R0-R44-OWNER-MOBILE-SIGNIN-2026-11-04.json."
         ]
       }
     ],
@@ -1570,8 +1573,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R44: real Cloudflare Free QA mobile web UI and PBKDF2/D1 session/cookie APIs uploaded to isolated ai-law-standalone-cf-qa, QA-04 new Cloudflare-specific synthetic password stored privately on owner-only Google Drive. Actual Cloudflare Chromium 320/390/430/1440 tested, no horizontal overflow, wrong password against existing QA04 returns true 401, anonymous remains signed out. Node WebCrypto success-login/session/logout/revoked/CSRF checks PASS. Correct password browser login/physical Owner phone NOT_RUN; Owner asked to accept when mobile works. R40 credentials and R41 Docker host checkpoint untouched.",
-      "next_action": "Owner opens https://ai-law-standalone-cf-qa.iaict-platform.workers.dev/ from phone and uses R44 cloud QA04 owner-only private password to verify positive login -> dashboard -> reload -> logout, then accept/fail. If FAIL fix via actual E2E loop. Only after Owner acceptance advance Google Drive OAuth file workflow and real legal AI SRS features. Do not mark R44 Owner mobile login as PASS until observed. R41 host parked and SaaS deferred.",
+      "last_completed_step": "R44 scoped target reached: Owner self-reported successful sign-in on physical mobile to live Cloudflare Free QA Worker on 2026-11-04. PR #60 live HTTPS Chromium PASS (41829971339); main CI PASS (41830676069). Owner device reload and logout are not separately confirmed. No owner-private credential or real legal data committed. SRS v1.1.15 unchanged.",
+      "next_action": "R44: ask Owner to confirm only physical-device reload retains session and logout returns to sign-in, without blocking the already achieved sign-in milestone. PROPOSAL R45 (not yet authorized/implemented): bounded per-organization Google Drive OAuth consent and single fictional QA file upload/download behind D1 tenant/MatterACL; test revoke/expiry/denial/ToS/quota in nonproduction. R41 dedicated-host Docker remains parked; SaaS deferred; no production.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1588,7 +1591,7 @@
         "R41 finished private deployment KIT and 2-installation durable-volume restart/browser CI PASS, but Cloudflare Containers unauthorized (401), 0 tunnels and no connected independent Docker host; Owner-saved QA credentials cannot yet be activated on a permanent QA server. Production IdP/MFA, real legal functions, physical mobile, full TC12, operations and Owner acceptance remain NOT_RUN.",
         "DEC-017 Cloudflare Free + Google Drive is an APPROVED DIRECTION only, NOT IMPLEMENTED. R41 PG16 Docker cannot run unchanged on Workers; D1 SQL/ACL equivalence, OAuth Drive scopes, quota/ToS, provider security and actual browser/file E2E have NOT_RUN. Owner dedicated Docker host is paused, not abandoned; SaaS deferred.",
         "R43 Cloudflare Worker+D1 real infrastructure is QA-only and all private routes deny (JWT_JWKS_JSON has zero keys, no signed test users or sessions). Google Drive OAuth grant/refresh token, real upload/download, complete PostgreSQL-RLS-to-D1 SRS parity, production login/MFA, legal AI UC and Owner final acceptance NOT_RUN. D1 count now reaches current Free limit 10/10, so further new D1 DBs require cleanup or plan change.",
-        "R44 owner successful password login on real phone has not been observed; public CI cannot access owner-only R44 password. QA R44 is test-only PBKDF2 login, not accepted production IAM/IdP/MFA, and only QA04 is seeded on Cloudflare. Google Drive OAuth/file upload and full SRS workflows remain NOT_RUN. No production."
+        "R44 Owner reported positive phone sign-in on 2026-11-04. Reload/session persistence and logout on physical device remain OWNER_CHECK_PENDING; QA-only PBKDF2 is NOT full production IAM/IdP/MFA. Google Drive OAuth/file upload and SRS legal workflows NOT_RUN; production unauthorized."
       ]
     },
     "policy": {

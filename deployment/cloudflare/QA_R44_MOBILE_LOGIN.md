@@ -6,6 +6,13 @@ post-login dashboard, reload, and sign out. This is NOT the release of the
 full legal AI workflows or Google Drive OAuth. Standalone-first DEC-017;
 IAICT ordinary customer; SaaS deferred, SRS v1.1.15 unchanged.
 
+## Owner acceptance update — 2026-11-04
+
+- **PASS_OWNER_REPORTED_SIGNIN:** The Owner confirmed in the project conversation that the live AI Law QA mobile sign-in succeeded on a physical phone. This is an Owner statement, not an independently captured Playwright run using the private password.
+- **OWNER_CHECK_PENDING:** The Owner did not separately attest reload/session persistence or logout on that device. CI/unit tests for those controls are separate; do not convert them to physical-device PASS.
+- **LIMITS:** QA-only; no full SRS IAM, Google Drive OAuth/file uploads, actual legal AI workflows, or production authorization. No private credentials or client data in this document.
+- The earlier "NOT_RUN positive Owner login" section below was the **pre-acceptance snapshot** and is superseded only for the successful sign-in claim.
+
 ## Live QA entry point
 
 https://ai-law-standalone-cf-qa.iaict-platform.workers.dev/
