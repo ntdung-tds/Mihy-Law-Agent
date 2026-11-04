@@ -22,7 +22,10 @@ def main():
         for width in (320, 390, 430, 1440):
             page.set_viewport_size({"width":width,"height":850})
             response = page.goto(ORIGIN + "/?utm_source=chatgpt.com#documents", wait_until="domcontentloaded", timeout=30000)
-            assert response.status == 200, ("login", width, response.status)
+            if response is not None:
+                assert response.status == 200, ("login", width, response.status)
+            else:
+                assert page.url.startswith(ORIGIN + "/"), ("unexpected URL",page.url)
             page.locator("#login-form").wait_for()
             assert page.locator("#password").is_visible()
             assert not page.locator(".mobile-right-rail").count(), "authenticated workspace was leaked anonymously"
