@@ -284,3 +284,20 @@ jobs:
           test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$preview/matters.js")" = 401
           test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$preview/api/qa/matters")" = 401
           test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://evil.invalid' -H 'Content-Type: application/json' -d '{"title":"Synthetic QA"}' "$preview/api/qa/matters")" = 403
+
+  cloudflare-site-live:
+    # R47 only: website QA public homepage and protected-login mobile browser smoke.
+    # Never accesses Owner passwords or uploads images to GitHub.
+    if: github.ref_name == 'feat/r47-public-website-ai-law-web' || github.head_ref == 'feat/r47-public-website-ai-law-web'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Chromium for live Cloudflare QA website
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: Verify homepage, header/footer/mobile menu, login and private-app gate
+        run: python deployment/cloudflare/tests/live_ai_law_website.py
