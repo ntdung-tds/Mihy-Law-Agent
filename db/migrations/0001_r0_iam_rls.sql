@@ -339,4 +339,53 @@ $$;
 CREATE TRIGGER audit_member_mutation
 AFTER INSERT OR UPDATE ON ai_law.memberships FOR EACH ROW
 EXECUTE FUNCTION ai_law.audit_member_mutation();
+-- Group ACL membership changes affect authorization even when assigned
+-- role keys do not change. Bump membership version to invalidate prior caches.
+CREATE FUNCTION ai_law.bump_member_on_group_change()
+RETURNS trigger LANGUAGE plpgsql SET search_path=ai_law,pg_catalog AS $$
+DECLARE tid uuid; uid uuid;
+BEGIN
+  tid:= CASE WHEN TG_OP='DELETE' THEN OLD.tenant_id ELSE NEW.tenant_id END;
+  uid:= CASE WHEN TG_OP='DELETE' THEN OLD.user_id ELSE NEW.user_id END;
+  UPDATE memberships SET authz_version=authz_version+1
+  WHERE tenant_id=tid AND user_id=uid;
+  RETURN NULL;
+END;
+$$;
+CREATE TRIGGER bump_member_on_group_change
+AFTER INSERT OR UPDATE OR DELETE ON ai_law.matter_group_members
+FOR EACH ROW EXECUTE FUNCTION ai_law.bump_member_on_group_change();
+
+-- ACL mutations atomically advance matter.acl_version and remap surviving
+-- ACL rows to that revision inside the same transaction. Nested trigger depth
+-- prevents recursive version bumps during the internal remap. The runtime
+-- application role has SELECT only, so only privileged workflow transactions
+-- may change ACLs. No production-grade event outbox is claimed here.
+CREATE FUNCTION ai_law.bump_matter_acl_revision()
+RETURNS trigger LANGUAGE plpgsql SET search_path=ai_law,pg_catalog AS $$
+DECLARE tid uuid; mid uuid; revision bigint;
+BEGIN
+  IF pg_trigger_depth()>1 THEN
+    RETURN NULL;
+  END IF;
+  tid := CASE WHEN TG_OP='DELETE' THEN OLD.tenant_id ELSE NEW.tenant_id END;
+  mid := CASE WHEN TG_OP='DELETE' THEN OLD.matter_id ELSE NEW.matter_id END;
+  UPDATE matters SET acl_version=acl_version+1
+    WHERE tenant_id=tid AND matter_id=mid
+    RETURNING acl_version INTO revision;
+  IF revision IS NOT NULL THEN
+    UPDATE matter_user_acl SET acl_version=revision
+      WHERE tenant_id=tid AND matter_id=mid AND acl_version<>revision;
+    UPDATE matter_group_acl SET acl_version=revision
+      WHERE tenant_id=tid AND matter_id=mid AND acl_version<>revision;
+  END IF;
+  RETURN NULL;
+END;
+$$;
+CREATE TRIGGER bump_matter_on_user_acl_change
+AFTER INSERT OR UPDATE OR DELETE ON ai_law.matter_user_acl
+FOR EACH ROW EXECUTE FUNCTION ai_law.bump_matter_acl_revision();
+CREATE TRIGGER bump_matter_on_group_acl_change
+AFTER INSERT OR UPDATE OR DELETE ON ai_law.matter_group_acl
+FOR EACH ROW EXECUTE FUNCTION ai_law.bump_matter_acl_revision();
 COMMIT;
