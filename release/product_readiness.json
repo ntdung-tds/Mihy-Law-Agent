@@ -2,7 +2,7 @@
   "schema_version": 1,
   "baseline": "SRS v1.1.15",
   "release_target": "R0",
-  "checkpoint": "R38",
+  "checkpoint": "R39",
   "assessment_date": "2026-11-04",
   "synthetic_demo_customers_created": true,
   "live_customer_accounts_created": false,
@@ -116,8 +116,10 @@
     {
       "id": "APPLICATION_E2E",
       "status": "NOT_RUN",
-      "evidence": [],
-      "need": "Authenticated staging end-to-end desktop/mobile/browser, upload, real AI outputs and authorization with sanctioned test accounts."
+      "evidence": [
+        "tests/evidence/AL-R0-R39-STANDALONE-BROWSER-2026-11-04.json (only test-only signed-GET-run browser slice; does NOT pass application legal workflow gate)"
+      ],
+      "need": "R39 Chromium real desktop/mobile-viewport login and one synthetic SQL-backed GET TaskRun PASS in disposable Docker only. Full actual customer staging browser flows, legal document upload, AI outputs UC03/04/07, TC12A/B acceptance, real device tests and authorized records are NOT_RUN."
     },
     {
       "id": "OPERATIONS_RELEASE",
@@ -159,9 +161,11 @@
         "tests/evidence/AL-R0-R37-STANDALONE-HTTP-2026-11-04.json",
         "GitHub Actions 41774950797: real 2-instance Docker API+Postgres16, JWT/SQL sessions/MatterACL PASSED",
         "tests/evidence/AL-R0-R38-STANDALONE-LOGIN-2026-11-04.json",
-        "GitHub Actions 41781535393: real local Argon2id password HTTP login, 2 isolated auth/API+PostgreSQL16 stacks, sessions and ACL PASS"
+        "GitHub Actions 41781535393: real local Argon2id password HTTP login, 2 isolated auth/API+PostgreSQL16 stacks, sessions and ACL PASS",
+        "tests/evidence/AL-R0-R39-STANDALONE-BROWSER-2026-11-04.json",
+        "GitHub Actions 41784653735 (Chromium 1440/390/320 real browser against 2 ephemeral Docker auth/API/PG16 stacks, POST login/logout and tenant ACL)"
       ],
-      "need": "R38 genuine nonproduction email/password test account login in disposable standalone Docker is PASS (random Argon2id secrets, signed JWT, roles/membership/session, logout, disable/lockout). No durable real customer accounts or approved production IdP/OIDC, MFA, canonical SRS IAM/TaskRun schema, full UI, files/UC03/04/07, browser E2E, backup/restore or Owner acceptance. Do not mark dedicated deployment ready."
+      "need": "R39 real Chromium login/tenant/run/logout nonproduction browser E2E PASS for disposable fake accounts, UI gateway holds JWT server-side with HttpOnly cookie and localhost-only port. Still NO durable standalone/customer-host installation, actual owner-accessible staging URL/issued real test accounts, approved production IAM/MFA/session schema, full AI legal UC03/04/07, document upload/storage, backup, rollback or final Owner acceptance."
     }
   },
   "delivery_modes_owner_approved": "2026-11-04; both SaaS and dedicated REQUIRED for AI Law product target, not either-or",
@@ -175,5 +179,8 @@
   "standalone_ephemeral_internal_test_accounts_created": true,
   "real_customer_accounts_on_persistent_staging": "NOT_CREATED",
   "standalone_auth_provider_type": "LOCAL_ARGON2ID_TEST_ONLY_NOT_PRODUCTION_APPROVED",
-  "standalone_operator": "CUSTOMER_OR_APPROVED_CONTRACTOR_PER_INSTALLATION"
+  "standalone_operator": "CUSTOMER_OR_APPROVED_CONTRACTOR_PER_INSTALLATION",
+  "standalone_nonprod_browser_login_status": "PASS_CI_41784653735",
+  "standalone_browser_scope": "CHROMIUM_E2E_WITH_SYNTHETIC_EPHEMERAL_ACCOUNTS_AND_SQL_MATTERACL_ONLY",
+  "standalone_direct_owner_staging_url": "NOT_DEPLOYED"
 }
