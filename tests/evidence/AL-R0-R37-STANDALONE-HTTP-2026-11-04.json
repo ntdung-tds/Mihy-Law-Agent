@@ -1,0 +1,64 @@
+{
+  "id": "AL-R0-R37-STANDALONE-HTTP-2026-11-04",
+  "date": "2026-11-04",
+  "baseline": "SRS v1.1.15 unchanged",
+  "owner_priority": "STANDALONE_FIRST_IAICT_ORDINARY_CUSTOMER",
+  "test_run": {
+    "url": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41774950797",
+    "head_sha": "5567f1eff11a954d2e3a65a30a3e134a03adc776",
+    "status": "COMPLETED_SUCCESS",
+    "jobs": [
+      {
+        "name": "unit",
+        "status": "PASS"
+      },
+      {
+        "name": "postgres-rls",
+        "status": "PASS"
+      },
+      {
+        "name": "standalone-db",
+        "status": "PASS"
+      },
+      {
+        "name": "standalone-api",
+        "status": "PASS"
+      }
+    ]
+  },
+  "tested_in_docker": {
+    "two_independent_postgresql16_instances": "PASS",
+    "two_independent_wsgi_http_api_containers": "PASS",
+    "internal_only_ports": "PASS",
+    "reader_role_non_superuser_non_bypassrls": "PASS",
+    "reader_role_insert_denial": "PASS",
+    "per_installation_ephemeral_secrets_and_public_keys": "PASS",
+    "rsa_signed_bearer_token_verification": "PASS",
+    "server_side_persistent_identity_and_session_fixture": "PASS",
+    "server_side_persistent_queued_run_fixture": "PASS",
+    "valid_lawyer_200": "PASS",
+    "tenant_admin_no_implicit_matter_acl_404": "PASS",
+    "unknown_run_404": "PASS",
+    "cross_install_jwt_401": "PASS",
+    "missing_or_invalid_jwt_401": "PASS",
+    "matter_acl_revoked_404": "PASS",
+    "session_revoked_401": "PASS",
+    "membership_revoked_404": "PASS",
+    "both_instances_disposable_and_cleaned_up": "PASS"
+  },
+  "limits": {
+    "actual_external_idp_https_jwks": "NOT_RUN",
+    "real_email_password_login": "NOT_IMPLEMENTED",
+    "customer_accounts": "NOT_CREATED",
+    "canonical_production_taskrun_store": "NOT_IMPLEMENTED",
+    "actual_ai_legal_workflows": "NOT_IMPLEMENTED",
+    "real_customer_documents": "NOT_USED",
+    "browser_e2e": "NOT_RUN",
+    "full_standalone_product_e2e": "NOT_RUN",
+    "deployment_to_customer_host": "NOT_RUN",
+    "production_authorization": "NOT_AUTHORIZED",
+    "owner_final_acceptance": "PENDING"
+  },
+  "classification": "PUBLIC_SAFE_CI_METADATA_ONLY",
+  "notes": "Real HTTP + PostgreSQL+RLS and cryptographic RSA signature, but synthetic test-only IdP JWKS transport and disposable fixture tables. No live customer data, accounts, secrets, or tokens are committed."
+}
