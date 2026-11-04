@@ -1,0 +1,26 @@
+# R39 test-only loopback browser/UI gateway. Only nonproduction.
+# Internal network services auth and api are NEVER host-exposed.
+# Gateway is host-bound to 127.0.0.1, never 0.0.0.0.
+services:
+  gateway:
+    image: ${AI_LAW_R37_API_IMAGE:-ai-law-r37-nonprod:local}
+    command: ["python", "-m", "r0_core.standalone_browser_gateway"]
+    init: true
+    read_only: true
+    user: "10001:10001"
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      auth:
+        condition: service_started
+      api:
+        condition: service_started
+    environment:
+      AI_LAW_NONPROD_R39: isolated-browser-fixture-only
+      AI_LAW_R39_BROWSER_ORIGIN: ${AI_LAW_R39_BROWSER_ORIGIN:?Local browser origin required}
+      AI_LAW_R39_COOKIE_NAME: ${AI_LAW_R39_COOKIE_NAME:?Per-installation cookie name required}
+      AI_LAW_R39_WORKSPACES_B64: ${AI_LAW_R39_WORKSPACES_B64:?Synthetic fixture display workspaces required}
+    ports:
+      - "127.0.0.1:${AI_LAW_R39_HOST_PORT:?Loopback test port required}:8082"
+    # Do not publish on public IP. This browser gateway is disposable.
