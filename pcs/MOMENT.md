@@ -1,10 +1,17 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `30` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T01:01:42.890Z`.
-- **Phase:** R30 four-task actual PostgreSQL16 synthetic RLS/ACL integration TECH_DONE in disposable CI. R31 live IdP/staging/real run store NOT_STARTED. D01 and real-data gates remain pending; R25 UI unchanged.
+- **PCS revision:** `31` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T02:44:22.227Z`.
+- **Phase:** R31 fictional demo tenant and release-readiness checklist TECH_DONE (disposable PostgreSQL only); live login, full application E2E, staging and production BLOCKED. D01 and legal-data gates pending.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R31 — synthetic customer and product readiness
+
+- **DEC-013 / AL-R0-DEMO-001:** Seeded a fictional “Công ty Luật Minh Họa (DEMO)” organization with two synthetic principal records and a separate outsider tenant in `db/demo/seed_r31_synthetic.sql`. No passwords, external accounts, client records or live login.
+- **Real test:** GitHub Actions `41762583625` both jobs PASS, including PostgreSQL 16 tests verifying the synthetic lawyer's explicit read grant, tenant admin's lack of implicit MatterACL, and cross-tenant isolation.
+- **AL-R0-RELEASE-001:** `db/demo/README.md` lists production release gates and missing capabilities. Not yet delivered: approved real IdP/JWKS/session, persisted TaskRun, R0 workflows, independent security audit, audit/outbox, complete browser/Word E2E and D01/legal-data approvals. No staging/production deployment; Owner final acceptance PENDING.
+- **Next:** approved identity and persistent run store in isolated staging, then full SRS acceptance and separate explicit production approval.
 
 ## R30 — one-batch PostgreSQL16 IAM/RLS and synthetic getRun integration
 

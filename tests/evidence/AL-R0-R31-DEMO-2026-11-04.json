@@ -1,0 +1,53 @@
+{
+  "run_id": "AL-R0-R31-DEMO-2026-11-04-01",
+  "date": "2026-11-04",
+  "scope": "Synthetic fictional customer DB fixture, second-tenant negative access, launch readiness matrix; not a real account",
+  "pr": 47,
+  "ci_run": 41762583625,
+  "checks": [
+    {
+      "id": "DEMO-01",
+      "result": "PASS_REAL_POSTGRES16",
+      "description": "Fictional organization demo tenant, 2 synthetic principals, membership roles and matter created from seed"
+    },
+    {
+      "id": "DEMO-02",
+      "result": "PASS_REAL_POSTGRES16",
+      "description": "Second independent tenant and outsider synthetic principal deny cross-tenant read"
+    },
+    {
+      "id": "DEMO-03",
+      "result": "PASS_REAL_POSTGRES16",
+      "description": "Explicit lawyer matter read allowed; tenant admin cannot implicitly read matter"
+    },
+    {
+      "id": "DEMO-04",
+      "result": "PASS_REAL_POSTGRES16",
+      "description": "Seed has no password or real IdP; catalog login_url and credentials null"
+    },
+    {
+      "id": "DEMO-05",
+      "result": "PASS_CI",
+      "description": "Existing unit job and PostgreSQL 16 job both successful, run 41762583625"
+    },
+    {
+      "id": "DEMO-06",
+      "result": "NOT_RUN",
+      "description": "Live IdP account creation, login, persistent session, actual legal workflow and browser E2E"
+    },
+    {
+      "id": "DEMO-07",
+      "result": "BLOCKED_GATES",
+      "description": "Staging pilot and production release gates not satisfied; no deploy"
+    }
+  ],
+  "customer_display_name": "Công ty Luật Minh Họa (DEMO)",
+  "real_customer_created": false,
+  "real_accounts_created": false,
+  "credentials_created": false,
+  "staging_deployed": false,
+  "production_deployed": false,
+  "srs_baseline_changed": false,
+  "owner_acceptance": "PENDING",
+  "classification": "PUBLIC_SAFE_SYNTHETIC_METADATA"
+}
