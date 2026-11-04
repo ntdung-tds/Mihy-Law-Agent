@@ -170,3 +170,13 @@ jobs:
         run: node --test deployment/cloudflare/tests/worker.test.mjs
       - name: Execute actual authz queries and FK/deny rules against SQLite
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_sqlite_acl.py' -v
+
+  cloudflare-live-qa:
+    # Only R43 feature branch: public nonproduction endpoint with ZERO secrets.
+    # Does not verify login or Google Drive OAuth; only smoke + fail-closed API.
+    if: github.ref_name == 'feat/r43-cloudflare-d1-authorization-and-drive-contract' || github.head_ref == 'feat/r43-cloudflare-d1-authorization-and-drive-contract'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Call real dedicated Cloudflare Free Worker over HTTPS and deny anonymous legal-file requests
+        run: bash deployment/cloudflare/tests/live_http_smoke.sh
