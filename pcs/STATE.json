@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 41,
-  "updated_at": "2026-11-04T07:40:00Z",
+  "revision": 42,
+  "updated_at": "2026-11-04T07:55:00Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -976,7 +976,7 @@
         "required": true,
         "status": "IN_PROGRESS",
         "owner_acceptance": "PENDING_REAL_STANDALONE_E2E",
-        "scope": "Dedicated AI Law FIRST (DEC-016); IAICT ordinary customer. R41 operator-use QA installer with stable per-install RSA/DB secrets, 10 existing R40 accounts, Docker named PostgreSQL16 volumes, private localhost browser gateway and owner-only bundle; two disposable Docker stacks prove restart persistence and Chromium QA, NOT a deployed persistent/owner-accessible QA host.",
+        "scope": "Dedicated AI Law FIRST (DEC-016); IAICT ordinary customer. R41 operator-use QA installer with stable per-install RSA/DB secrets, 10 existing R40 accounts, Docker named PostgreSQL16 volumes, private localhost browser gateway and owner-only bundle; two disposable Docker stacks prove restart persistence and Chromium QA, NOT a deployed persistent/owner-accessible QA host. DEC-017: R41 Docker bundle frozen until Owner provides standalone server; current Cloudflare Free + customer Google Drive NONPRODUCTION rollout first. Future provider-host/runtime portability is a design invariant, not proof of implementation.",
         "tests": {
           "dual_mode_governance_contract": "PENDING_CI",
           "actual_dedicated_install": "NOT_RUN",
@@ -1009,7 +1009,12 @@
           "qa_staging_same_ten_accounts_after_restart": "PASS_CI_41793096574",
           "qa_staging_private_secrets_no_rekey_and_local_ports": "PASS_CI_41793096574",
           "qa_staging_browser_desktop_mobile_chromium": "PASS_CI_41793096574",
-          "real_legal_workflow_on_staging": "NOT_RUN"
+          "real_legal_workflow_on_staging": "NOT_RUN",
+          "cf_free_worker_deployment": "NOT_RUN",
+          "cf_free_database_srs_security_parity": "NOT_RUN",
+          "google_drive_per_organization_file_storage_e2e": "NOT_RUN",
+          "storage_adapter_future_providers": "NOT_RUN",
+          "owner_host_r41_activation": "PAUSED_BY_OWNER_UNTIL_HOST"
         },
         "evidence": [
           "deployment/modes.json",
@@ -1057,7 +1062,9 @@
           "deployment/standalone/smoke_staging_kit.sh",
           "tools/r41_staging_config.py",
           "tests/browser/test_r41_staging_browser.py",
-          "GitHub Actions 41793096574: 8 jobs PASS incl standalone-staging-kit"
+          "GitHub Actions 41793096574: 8 jobs PASS incl standalone-staging-kit",
+          "deployment/DEC-017-CLOUDFLARE-FREE-PORTABLE-STORAGE.md",
+          "srs_changed.md SC-006 (decision checkpoint only, no implementation evidence)"
         ]
       }
     ],
@@ -1226,6 +1233,12 @@
         "topic": "Owner rollout sequence: standalone AI Law first, IAICT ordinary organization, SaaS deferred",
         "value": "Deliver usable independent/dedicated AI Law first and accept that mode independently. Shared IAICT-hosted SaaS implementation is postponed until after standalone acceptance, not cancelled. For standalone IAM and acceptance IAICT is one ordinary organization customer/tenant, with no implicit platform-root account, no tenant override and no special MatterACL access. Same underlying AI Law source and authorized SRS v1.1.15 functions; only runtime/installation configuration varies. Owner final acceptance remains reserved; no automatic production deployment.",
         "authority": "Owner explicit 2026-11-04: 'Hướng saas của iaict làm sau, giờ tôi muốn làm triển khai riêng, thực tế coi iaict như 1 đơn vị mà thôi'."
+      },
+      {
+        "id": "DEC-017",
+        "topic": "Owner pauses standalone Docker R41 until a server is supplied; immediate Cloudflare Workers Free with per-organization Google Drive storage and future portable deployment/storage",
+        "value": "Preserve verified R41 deployment kit, CI and reusable private QA-01..QA-10 credentials exactly as-is to resume when Owner connects an independent host; no R41 permanent staging exists. Immediate AI Law target is a NONPRODUCTION isolated deployment using Cloudflare Workers Free with each customer/installation's own Google Drive for legal files. IAICT remains an ordinary organization, NOT IAICT-hosted SaaS operator; central SaaS continues DEFERRED. Future vendors/storage include Microsoft OneDrive, NAS, VPS/S3-compatible, AWS S3, Azure Blob and Google Cloud Storage, plus application deployments on VPS, owned servers, AWS/Azure/GCP. Maintain one portable functional product, tenant/MatterACL/IAM/audit invariants, configuration-driven per-customer storage and runtime adapters, no hardcoded IAICT/Google Drive. Storage portability target does not mean all adapters or Cloudflare deployment are completed. Workers Free/D1 cannot run R41 Docker/PostgreSQL16 unchanged; evaluate SRS compatibility and security rigorously, especially PostgreSQL RLS versus D1 database access controls. Record changes to srs_changed.md only, keep SRS v1.1.15 baseline unchanged. No production or real customer data without approvals and Owner acceptance.",
+        "authority": "Owner message 2026-11-04: 'Lưu chỗ này lại để khi có máy chủ tôi sẽ đưa cho bạn; bây giờ phương án là triển khai trên cloudflare free, các tệp (file) lưu ở driver: sau này ... google drive, one driver ... nas, vps ... aws, azuze, google cloud ... vẫn triển khai được chứ?'"
       }
     ],
     "risks": [
@@ -1538,8 +1551,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R41 local-only, operator-managed, two-installation QA staging kit with same 10 R40 accounts: PostgreSQL16 named volume, non-rotating RSA/DB secrets, 127.0.0.1 only, Argon2id/RS256+MatterACL, Chromium 1440/390/320 before/after restart. GitHub Actions 41793096574 eight jobs PASS. Private owner R40 credential bundle remains owner-only and unchanged, but was NOT applied to a permanent host.",
-      "next_action": "R42 only after authorized nonproduction Linux Docker host is connected: install R41 kit with exact existing R40 owner-private bundle, enable SSH tunnel or appropriately secured private access, execute real owner-accessible QA browser TC12 and then implement an approved SRS legal AI workflow; no IAICT SaaS or production. While host absent, continue isolated legal-function development and security/backup review without fake deployment.",
+      "last_completed_step": "R41 remains the last verified implemented standalone QA kit: PR #57 merged, main CI 41794614580 all 8 jobs PASS. Owner DEC-017 formally PARKS real R41 host activation until they provide a server; no static demo counted as product, no permanent host or owner QA credentials active. New Cloudflare Free+Google Drive design priority saved as decision/planning only, implementation NOT_RUN.",
+      "next_action": "DEC-017 next: evaluate/build a scoped AI Law nonproduction Cloudflare Workers Free runtime with each organization-authorized Google Drive file adapter; test tenant/matter ACL, real OAuth, separate file metadata DB (D1 only if SRS/security equivalence approved), and file upload/download end-to-end. Keep core portable to OneDrive/NAS/VPS/S3/AWS/Azure/GCP; do not implement every provider at once, do not change baseline SRS v1.1.15 or deploy production. If Owner provides a dedicated host, resume R41 intact with original owner-only R40 QA bundle.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1553,7 +1566,8 @@
         "R38 isolated Docker Argon2id credential auth and signed HTTP/PG16 E2E PASS, but credentials are ephemeral invented test accounts and the login endpoints are private nonproduction test harness, NOT approved permanent IdP/MFA/user administration/browser or production IAM.",
         "R39 Chromium local test-only UI and signed API database E2E PASS, but QA accounts and Docker stacks are disposable; no accessible long-lived standalone staging URL, no production-approved IdP/session/MFA, canonical app schema, client file storage, UC03/04/07, backup or browser full TC12. Final Owner acceptance/production remain blocked.",
         "R40 QA credentials are generated and saved privately, and 10 corresponding account models have been provisioned/tested in disposable CI instances, but these specifically saved credentials have NOT been applied to a long-lived owner-accessible staging server. Persistent deployment/approved IAM/MFA/real legal AI/full TC12/Owner final acceptance remain blocked.",
-        "R41 finished private deployment KIT and 2-installation durable-volume restart/browser CI PASS, but Cloudflare Containers unauthorized (401), 0 tunnels and no connected independent Docker host; Owner-saved QA credentials cannot yet be activated on a permanent QA server. Production IdP/MFA, real legal functions, physical mobile, full TC12, operations and Owner acceptance remain NOT_RUN."
+        "R41 finished private deployment KIT and 2-installation durable-volume restart/browser CI PASS, but Cloudflare Containers unauthorized (401), 0 tunnels and no connected independent Docker host; Owner-saved QA credentials cannot yet be activated on a permanent QA server. Production IdP/MFA, real legal functions, physical mobile, full TC12, operations and Owner acceptance remain NOT_RUN.",
+        "DEC-017 Cloudflare Free + Google Drive is an APPROVED DIRECTION only, NOT IMPLEMENTED. R41 PG16 Docker cannot run unchanged on Workers; D1 SQL/ACL equivalence, OAuth Drive scopes, quota/ToS, provider security and actual browser/file E2E have NOT_RUN. Owner dedicated Docker host is paused, not abandoned; SaaS deferred."
       ]
     },
     "policy": {

@@ -23,12 +23,16 @@
       "required": true,
       "provider_operation": "Customer or agreed operator under deployment contract",
       "isolation": "Isolated application environment, dedicated data/storage/secrets; existing tenant and MatterACL controls remain in force",
-      "stage": "STANDALONE_NONPROD_HTTP_API_AND_PG16_TEST_ONLY",
+      "stage": "R41_DOCKER_KIT_PARKED_CLOUDFLARE_FREE_NEW_TARGET_NOT_IMPLEMENTED",
       "real_customer_login": "NOT_RUN",
       "end_to_end": "NOT_RUN",
       "current_priority": "NOW",
       "test_organization": "IAICT_ORDINARY_CUSTOMER",
-      "nonproduction_one_endpoint_http": "PASS_CI_41774950797"
+      "nonproduction_one_endpoint_http": "PASS_CI_41774950797",
+      "next_runtime": "cloudflare_workers_free",
+      "next_storage": "customer_google_drive",
+      "saved_docker_deployment": "R41_PAUSED_UNTIL_OWNER_HOST",
+      "cloudflare_storage_e2e": "NOT_RUN"
     }
   ],
   "shared_invariants": [
@@ -37,7 +41,8 @@
     "Authentication provider, storage and external AI dependencies are explicit environment configuration; do not embed IAICT SaaS credentials in a customer installation.",
     "No implicit IAICT operator or customer tenant-admin read of a MatterACL-protected case.",
     "Customer/user/tenant names and JWT/header values never bypass verified membership and ACL.",
-    "No production or customer legal data until independent security/legal and Owner release acceptance."
+    "No production or customer legal data until independent security/legal and Owner release acceptance.",
+    "DEC-017: Cloudflare Free first with customer-controlled Google Drive for legal files; portable storage/runtime adapter design for future providers; preserve R41 Docker/PG16 solution for later owner host and do not confuse this with SaaS implementation."
   ],
   "implementation_targets": [
     "R0 bounded deployment-mode config and separation contract",
@@ -48,7 +53,9 @@
   ],
   "evidence": [
     "pcs/STATE.json DEC-015",
-    "deployment/README.md"
+    "deployment/README.md",
+    "pcs/STATE.json DEC-017",
+    "deployment/DEC-017-CLOUDFLARE-FREE-PORTABLE-STORAGE.md"
   ],
   "real_dedicated_deployment": "NOT_RUN",
   "production_authorization": "NOT_AUTHORIZED",
@@ -56,5 +63,39 @@
   "current_test_customer": "IAICT_as_ordinary_organization_in_standalone",
   "iaict_standalone_privileges": "NONE_BEYOND_EXPLICIT_TENANT_MEMBERSHIP_AND_MATTER_ACL",
   "saas_future_operator": "IAICT",
-  "standalone_operator": "PER_INSTALLATION_CUSTOMER_OR_APPROVED_CONTRACTOR"
+  "standalone_operator": "PER_INSTALLATION_CUSTOMER_OR_APPROVED_CONTRACTOR",
+  "current_prior_standalone_host_state": "R41_VERIFIED_KIT_PARKED_WAITING_FOR_OWNER_HOST",
+  "current_host_implementation": "CLOUDFLARE_WORKERS_FREE_NONPRODUCTION_PLANNED_NOT_DEPLOYED",
+  "current_file_storage": "CUSTOMER_OWNED_GOOGLE_DRIVE_PLANNED_NOT_CONNECTED",
+  "portability_contract": {
+    "feature_source": "ONE_AI_LAW_PRODUCT_AND_SRS_V1.1.15",
+    "current_runtime_target": "cloudflare_workers_free_isolated_customer_nonproduction",
+    "current_file_storage_target": "google_drive_customer_controlled_per_installation",
+    "current_metadata_database": "TO_VALIDATE_SRS_PG16_RLS_VS_D1",
+    "future_runtime_targets": [
+      "docker_vps",
+      "owned_server",
+      "private_cloud",
+      "aws",
+      "azure",
+      "google_cloud"
+    ],
+    "future_storage_targets": [
+      "google_drive",
+      "onedrive",
+      "nas_private_endpoint",
+      "s3_compatible_vps_minio",
+      "aws_s3",
+      "azure_blob",
+      "google_cloud_storage"
+    ],
+    "mandatory_invariants": [
+      "Customer-specific storage permissions, refresh tokens/keys and backups NEVER shared",
+      "MatterACL/tenant membership checked on all file paths",
+      "No approval or proof of future adapters from this direction",
+      "Auth/session/audit/workflow semantics must match the locked SRS",
+      "No customer legal data or production until tested and Owner accepted"
+    ],
+    "status": "OWNER_APPROVED_DIRECTION_NOT_IMPLEMENTED"
+  }
 }

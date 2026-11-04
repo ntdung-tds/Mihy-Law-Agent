@@ -1,10 +1,19 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `41` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T07:40:00Z`.
+- **PCS revision:** `42` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T07:55:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## DEC-017 / R42 — saved Owner priority: Cloudflare Free + customer Drive NOW, R41 host parked
+
+- **Owner's instruction saved:** Do NOT drop or redo R41. Private Docker/PG16 kit remains at merged PR #57 / main commit `f61e8540cca8947559f03a52eaefa0ffa04f179e`, 8/8 main CI PASS `41794614580`. Save the original owner-only R40 ten-QA credential bundle, and resume R41 exactly if/when Owner supplies a real independent server. No permanent staging exists yet and the saved password bundle is not activated.
+- **Current deployment-first direction:** One **isolated organization AI Law installation** on **Cloudflare Workers Free**, with **legal documents stored in that organization's own Google Drive**. **IAICT remains one ordinary customer organization**, not a shared SaaS provider. Shared SaaS delivery remains deferred.
+- **Long-term portability** is a design invariant, not delivered integration: Google Drive/OneDrive/NAS/VPS/S3/AWS/Azure/GCP file storage and Cloudflare/VPS/owned servers/private cloud/AWS/Azure/GCP runtime deployments via configurable providers. Never hardcode IAICT or Drive, never share credentials/ACLs across organizations; keep one legal AI product and SRS contracts.
+- **Architecture gate:** Workers Free cannot host R41 Docker+PostgreSQL16 unchanged; Cloudflare D1 may be assessed for metadata **only after validating equivalent SRS IAM/tenant/MatterACL/audit constraints** (PostgreSQL RLS has no automatic D1 equivalent). Drive OAuth API permission and ToS must be confirmed; ChatGPT connected Drive is NOT a Worker OAuth credential. Heavy AI tasks need an external model/service; free Workers quotas apply. No Cloudflare production deployment, new legal file API, OAuth, or real AI workflow has been tested or deployed for DEC-017.
+- **Checkpoint:** `pcs/STATE.json` DEC-017, `srs_changed.md` SC-006, `deployment/DEC-017-CLOUDFLARE-FREE-PORTABLE-STORAGE.md` and `deployment/modes.json`. Baseline SRS v1.1.15 unchanged.
+- **Next actionable bounded task:** evaluate Cloudflare Free/D1 security and build nonproduction adapter proof with authorized test Google Drive, end-to-end file ACL and IAM, without modifying current public IAICT Portal/AI Law demo Workers or publishing customer data. Keep R41 resumable for Owner-provided host.
 
 ## R41 — private persistent-style QA installation kit; connected host still blocked
 
