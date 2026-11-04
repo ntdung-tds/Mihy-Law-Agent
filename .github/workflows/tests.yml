@@ -306,3 +306,28 @@ jobs:
         run: |
           python deployment/cloudflare/tests/live_ai_law_website.py
           AI_LAW_WEBSITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_ai_law_website.py
+
+  cloudflare-site-redirect:
+    if: github.ref_name == 'feat/r47-public-website-ai-law-web' || github.head_ref == 'feat/r47-public-website-ai-law-web'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify stable public website and legacy preview bridge over real HTTPS
+        run: |
+          set -euo pipefail
+          old="https://ai-law-r0-preview.iaict-platform.workers.dev"
+          new="https://ai-law-web.iaict-platform.workers.dev"
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$old/")" = 308
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$old/?utm_source=chatgpt.com")" = 308
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$old/app")" = 308
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$old/api/qa/matters")" = 410
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{}' "$old/api/qa/login")" = 410
+          curl -sS --max-time 25 -D /tmp/ai-law-legacy-headers -o /dev/null "$old/"
+          grep -iF "Location: $new/" /tmp/ai-law-legacy-headers
+          test "$(curl -sS --max-time 25 -o /tmp/ai-law-site-home -w '%{http_code}' "$new/")" = 200
+          grep -q 'id="hero-title"' /tmp/ai-law-site-home
+          grep -q 'class="site-footer"' /tmp/ai-law-site-home
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$new/login")" = 200
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$new/app")" = 302
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$new/app.js")" = 401
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$new/api/qa/matters")" = 401
