@@ -6,6 +6,7 @@ import {authRoute,sessionForRequest} from "./qa_auth.mjs";
 import {renderLayout} from "./layout.mjs";
 import {renderTheme} from "./theme.mjs";
 import {renderClient} from "./client.mjs";
+import {accessLogin} from "./access_login.mjs";
 
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const result=(status,data)=>new Response(JSON.stringify(data),{status,headers:{
@@ -101,6 +102,8 @@ export async function handle(request,env,options={}){
     return renderTheme();
   if(request.method==="GET" && !url.search && url.pathname==="/assets/app.js")
     return renderClient();
+  if(url.pathname==="/v1/auth/access-login" && request.method==="GET" && !url.search)
+    return accessLogin(request,env,options);
   if(url.pathname.startsWith("/v1/auth/"))
     return authRoute(request,env,options);
   if(request.method!=="GET"||url.search||request.headers.has("X-AI-LAW-TENANT"))return missing();
