@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 39,
-  "updated_at": "2026-11-04T06:22:00Z",
+  "revision": 40,
+  "updated_at": "2026-11-04T07:04:00Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -917,7 +917,11 @@
           "disabled_user_and_bruteforce_lockout": "PASS_CI_41781535393",
           "real_customer_accounts_on_staging": "NOT_RUN",
           "nonprod_real_chromium_browser_login": "PASS_CI_41784653735",
-          "nonprod_browser_owner_role_acl_denial": "PASS_CI_41784653735"
+          "nonprod_browser_owner_role_acl_denial": "PASS_CI_41784653735",
+          "nonprod_qa_actors_ra02_ra09_postgres_http": "PASS_CI_41788819557",
+          "qa_disabled_revoked_limited_and_dual_membership": "PASS_CI_41788819557",
+          "qa_private_credentials_saved": "VERIFIED_OWNER_ONLY_DRIVE",
+          "qa_persistent_staging_login": "NOT_RUN"
         },
         "blockers": [
           "Real approved IdP issuer/client/audience/JWKS runtime configuration and access NOT_FOUND; standalone signed-JWT crypto CI now PASS but external provider and account provisioning NOT_RUN.",
@@ -929,7 +933,10 @@
           "r0_core/standalone_password_auth.py",
           "deployment/standalone/compose.login-test.yaml",
           "GitHub Actions 41781535393 (5 CI jobs success)",
-          "tests/evidence/AL-R0-R39-STANDALONE-BROWSER-2026-11-04.json"
+          "tests/evidence/AL-R0-R39-STANDALONE-BROWSER-2026-11-04.json",
+          "tests/evidence/AL-R0-R40-QA-ACCOUNTS-2026-11-04.json",
+          "deployment/standalone/QA_R40_PROVISION.md",
+          "GitHub Actions 41788819557; temporary CI QA database only"
         ]
       },
       {
@@ -966,7 +973,7 @@
         "required": true,
         "status": "IN_PROGRESS",
         "owner_acceptance": "PENDING_REAL_STANDALONE_E2E",
-        "scope": "Owner standalone-first; IAICT is ordinary organization. R39 connects a real responsive browser UI through test-only BFF login session to R38 auth, R37 API and actual PostgreSQL16; actual Chromium 1440/390/320+second installation E2E PASS. No persistent approved staging customer app or legal UC workflows.",
+        "scope": "Standalone-first; IAICT is ordinary customer organization. R40 has 10 reusable private credential records saved in owner-only Drive and real 9+1 account SQL HTTP provisioning tested in two disposable Docker QA installations. Postgres named volumes survive down/up on installed hosts, but no actual owner-accessible persistent host is deployed; SaaS later.",
         "tests": {
           "dual_mode_governance_contract": "PENDING_CI",
           "actual_dedicated_install": "NOT_RUN",
@@ -988,7 +995,13 @@
           "nonprod_browser_personal_org_membership_and_matter_acl": "PASS_CI_41784653735",
           "nonprod_browser_session_cookie_csrf_logout": "PASS_CI_41784653735",
           "nonprod_other_installation_browser_login": "PASS_CI_41784653735",
-          "full_legal_workflows_browser_e2e": "NOT_RUN"
+          "full_legal_workflows_browser_e2e": "NOT_RUN",
+          "reusable_qa_inventory_ten_accounts": "PASS_CI_41788819557",
+          "qa_ten_real_postgres_argon2_accounts_http_login": "PASS_CI_41788819557",
+          "qa_two_independent_instances_with_roles_and_matteracl": "PASS_CI_41788819557",
+          "qa_credentials_saved_owner_only_private_drive": "VERIFIED_OWNER_ONLY",
+          "qa_same_seed_idempotent_and_restarts_persist": "PASS_CI_41788819557",
+          "owner_accessible_permanent_staging_accounts": "NOT_RUN"
         },
         "evidence": [
           "deployment/modes.json",
@@ -1023,7 +1036,13 @@
           "tests/browser/test_r39_browser_e2e.py",
           "tests/test_r39_browser_gateway.py",
           "tests/evidence/AL-R0-R39-STANDALONE-BROWSER-2026-11-04.json",
-          "GitHub Actions 41784653735 all SIX jobs success incl standalone-browser"
+          "GitHub Actions 41784653735 all SIX jobs success incl standalone-browser",
+          "tests/acceptance/R40_STANDALONE_QA_INVENTORY.json",
+          "tools/r40_qa_provision.py",
+          "deployment/standalone/smoke_qa.sh",
+          "deployment/standalone/QA_R40_PROVISION.md",
+          "tests/evidence/AL-R0-R40-QA-ACCOUNTS-2026-11-04.json",
+          "GitHub Actions 41788819557 (7 jobs success incl standalone-qa)"
         ]
       }
     ],
@@ -1504,8 +1523,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R39: responsive standalone browser login dashboard using internal BFF opaque HttpOnly session cookie (no JWT in browser), real R38 Argon2/RS256 auth, R37 read API, PostgreSQL16 RLS/MatterACL. GitHub Actions 41784653735 six jobs PASS; real Chromium 1440/390/320; two isolated simulated organizations, login, reload, denied access, logout, CSRF. Disposable test only.",
-      "next_action": "R40 standalone independent persistent *nonproduction* installation with operator-provisioned durable QA identities, approved IAM configuration and same-origin UI; run actual owner-accessible browser TC12A/B and implement first approved legal AI R0 UC while preserving SRS scope, D01 and legal data gates. Do not work on SaaS before standalone Owner acceptance.",
+      "last_completed_step": "R40 ten named QA test users defined across 2 isolated standalone installations and accounts provisioned in real disposable PostgreSQL16 with Argon2id, HTTP login, scope ACL, revoked/disabled/limited/multitenant cases. Repeated SQL idempotent and DB survives Docker Compose down/up; 7 CI jobs PASS run 41788819557. Separate 10-account private password+hash bundle saved in owner-only Drive, cryptographically verified, NOT activated on permanent staging.",
+      "next_action": "R41: configure a real isolated nonproduction host/long-lived PostgreSQL16 installation with permitted access/TLS and apply R40 private credentials from restricted Drive; browser E2E on owner-accessible staging with QA01..QA10; run the first real SRS legal AI workflow. Do not activate user accounts outside authorized staging, expose QA publicly, or deploy production.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1517,7 +1536,8 @@
         "R36 standalone isolated PostgreSQL16 bootstrap CI PASS, but real application server, IdP/login, persistent identity/session, legal workflows, document storage, backup/recovery/upgrade and end-to-end acceptance NOT_RUN.",
         "R37 real standalone one approved GET API route+RLS+synthetic signed identities PASS, but full independent app, actual account login/provider, persistent canonical TaskRun, legal AI workflows, document store, browser E2E, backup/restore and final Owner acceptance still NOT_RUN.",
         "R38 isolated Docker Argon2id credential auth and signed HTTP/PG16 E2E PASS, but credentials are ephemeral invented test accounts and the login endpoints are private nonproduction test harness, NOT approved permanent IdP/MFA/user administration/browser or production IAM.",
-        "R39 Chromium local test-only UI and signed API database E2E PASS, but QA accounts and Docker stacks are disposable; no accessible long-lived standalone staging URL, no production-approved IdP/session/MFA, canonical app schema, client file storage, UC03/04/07, backup or browser full TC12. Final Owner acceptance/production remain blocked."
+        "R39 Chromium local test-only UI and signed API database E2E PASS, but QA accounts and Docker stacks are disposable; no accessible long-lived standalone staging URL, no production-approved IdP/session/MFA, canonical app schema, client file storage, UC03/04/07, backup or browser full TC12. Final Owner acceptance/production remain blocked.",
+        "R40 QA credentials are generated and saved privately, and 10 corresponding account models have been provisioned/tested in disposable CI instances, but these specifically saved credentials have NOT been applied to a long-lived owner-accessible staging server. Persistent deployment/approved IAM/MFA/real legal AI/full TC12/Owner final acceptance remain blocked."
       ]
     },
     "policy": {
