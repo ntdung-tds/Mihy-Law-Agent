@@ -1,6 +1,12 @@
-# AI Law — R0 product release decision (R31)
+# AI Law — R0 product release decision (R35)
 
 **State:** PRODUCT_NOT_READY. **D01 policy: OWNER APPROVED. Platform operator: IAICT.** The earlier five-persona static showcase and PostgreSQL seed are synthetic-only test aids; the Owner-defined demo acceptance target is **real authenticated accounts for different customer roles** with real staging E2E. They are not equivalent.
+
+## Two required delivery modes — Owner DEC-015 (2026-11-04)
+
+The Owner explicitly requires both the **IAICT-hosted shared SaaS** and **dedicated customer installation** (separately hosted/private cloud/on-premises) to be **implemented and tested** using the **same application code, migrations, authorization and R0 legal workflows**. Dedicated installation must not be omitted or automatically delayed until after SaaS is considered complete. See `deployment/README.md`, `deployment/modes.json` and `srs_changed.md` for the decision, current work and proposed SRS alignment.
+
+The readiness checker now requires **actual deployment E2E PASS evidence for both** `delivery_modes.saas` and `delivery_modes.dedicated` before declaring the full dual-delivery product ready. A signed-JWT CI test or a static frontend cannot satisfy either installation test. Both are currently NOT_RUN, and production remains unauthorized.
 
 ## Evidence-driven gate order
 
