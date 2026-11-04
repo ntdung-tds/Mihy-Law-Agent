@@ -99,7 +99,7 @@
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
   $$('[data-view]').forEach(n => n.addEventListener('click', () => goto(n.dataset.view)));
-  $('[data-go]').forEach(n => n.addEventListener('click', () => goto(n.dataset.go)));
+  $$('[data-go]').forEach(n => n.addEventListener('click', () => goto(n.dataset.go)));
 
   const drawer = $('#function-drawer'), backdrop = $('#drawer-backdrop'), trigger = $('#rail-features');
   function closeFunctionDrawer(restoreFocus = true) {
@@ -115,10 +115,10 @@
   trigger.addEventListener('click', openFunctionDrawer);
   $('#drawer-close').addEventListener('click', () => closeFunctionDrawer());
   backdrop.addEventListener('click', () => closeFunctionDrawer());
-  $('[data-drawer-view]').forEach(n => n.addEventListener('click', () => {
+  $$('[data-drawer-view]').forEach(n => n.addEventListener('click', () => {
     goto(n.dataset.drawerView); closeFunctionDrawer(false);
   }));
-  $('[data-feature-jump]').forEach(n => n.addEventListener('click', () => {
+  $$('[data-feature-jump]').forEach(n => n.addEventListener('click', () => {
     const target = $('[data-feature="' + n.dataset.featureJump + '"]');
     goto('overview'); closeFunctionDrawer(false);
     if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); target.focus({ preventScroll: true }); }
