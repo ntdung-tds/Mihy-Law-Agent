@@ -25,3 +25,10 @@ A legal entity/operator has not been supplied. Applicable controller/processor r
 - This is public-safe project governance metadata; see `D01_POLICY_R29.json` for machine-readable controls and blockers.
 
 **Current effect:** Approve the D01 design assumptions for synthetic R0 work, keep the two live-data/identity gates locked, and require separate formal evidence before any actual activation.
+
+## R33 — Owner clarification, 2026-11-04 (supersedes earlier interpretation of demo/implementation)
+
+- **D01 is APPROVED by the Owner**; do not request another D01 policy approval or imply a return to design stage. Existing `OWNER_APPROVED_IN_CHAT` decision is evidence of the policy decision; a distinct signed-record/real-data/legal gate remains tracked separately and is not misrepresented as completed.
+- **IAICT** is designated by the Owner to manage and operate the entire AI Law platform (operations, customer account administration, tenant/member administration, service security/audit). This does **not** give IAICT or a tenant administrator implicit access to private matter content. Exact registered legal entity name/contractual identity, if different from IAICT trading/operating name, requires separate documentary verification.
+- **This is REAL PRODUCT IMPLEMENTATION**, using the approved private SRS v1.1.15. The phrase **"demo customer" means a real test login/account with assigned customer/organization roles for E2E** in an authorized isolated environment; it does not mean a static persona-switch UI. Previously created `web/r0-demo/` and `db/demo/` are limited synthetic preview/test fixtures and shall not count as meeting that target.
+- Work can proceed on real code/isolated integration and non-sensitive test accounts. Real-client files and production remain subject to their respective legal, security and Owner release checks; no independent production approval is inferred from this correction.
