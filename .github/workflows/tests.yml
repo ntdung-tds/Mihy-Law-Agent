@@ -49,3 +49,12 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_r0_postgres_integration.py' -v
       - name: Real PostgreSQL demo customer membership and MatterACL tests
         run: python -m unittest discover -s tests -p 'test_r31_demo_customers.py' -v
+
+  standalone-db:
+    # Actual two isolated Docker Compose PostgreSQL16 installations.
+    # This is infrastructure-only smoke, NOT a full app deployment/login test.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Two real standalone installation DBs + isolation + restart
+        run: bash deployment/standalone/smoke_isolation.sh
