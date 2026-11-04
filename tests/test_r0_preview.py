@@ -212,6 +212,15 @@ class R0PreviewTests(unittest.TestCase):
 
 
 
+    def test_r46_real_matter_workspace_without_synthetic_document_rows(self):
+        self.assertIn('id="matter-workspace"', self.html)
+        self.assertIn('id="matter-form"', self.html)
+        self.assertIn('id="matter-list"', self.html)
+        self.assertIn('src="./matters.js"', self.html)
+        self.assertIn("const documents = Object.freeze([])", self.js)
+        self.assertIn('Hồ sơ vụ việc', self.html)
+        self.assertIn('Google Drive, tải tệp và xử lý AI chưa kích hoạt', self.html)
+
     def test_r45_right_menu_multi_selector_and_11_srs_shortcuts(self):
         """Regression for the real Chromium error: querySelector is not a NodeList."""
         for selector in ("[data-go]", "[data-drawer-view]", "[data-feature-jump]"):
