@@ -11,7 +11,9 @@ export const qaHtml = `<!doctype html><html lang="vi"><head>
 <p class="eyebrow">KHÔNG GIAN LÀM VIỆC</p><h1>Chào mừng<br>trở lại.</h1>
 <p class="intro">Đăng nhập để truy cập không gian pháp lý được cấp cho bạn.</p>
 <div class="panel"><h2>Đăng nhập AI Law</h2>
-<p class="hint">Sử dụng tài khoản QA đã được cấp riêng để kiểm thử.</p>
+<p class="hint">Đăng nhập bảo mật bằng email đã được cấp quyền.</p>
+<a class="access-button" id="access-login" href="/v1/auth/access-login">Đăng nhập bằng email Cloudflare</a>
+<p class="divider-text">Hoặc dùng tài khoản QA đã kích hoạt</p>
 <form id="login-form">
 <label for="login-email">Địa chỉ email</label>
 <input id="login-email" type="email" autocomplete="username" placeholder="email@example.com" required maxlength="254">
