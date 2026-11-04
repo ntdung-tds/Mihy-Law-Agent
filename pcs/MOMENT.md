@@ -1,10 +1,18 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `36` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04`.
+- **PCS revision:** `37` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T04:46:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; IAICT operates the platform. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R37 — real standalone API + persisted PostgreSQL16 auth/run test fixtures
+
+- **Implementation:** Containerized Python WSGI GET /v1/runs/{id} from approved SRS, connected to separate PostgreSQL16 instance using SELECT-only NO BYPASSRLS role. Synthetic external-to-internal identity mapping, session active tenant/revocation and queued TaskRun payload are actually persisted in `ai_law_nonprod` test-only schema. JWT RS256 signature validation is cryptographic; only public JWKS transport is injected from local nonprod config (real HTTPS IdP still not integrated). Fresh DB RLS/MatterACL checks protect the run snapshot.
+- **Two real Docker stacks:** isolated API+DB in CI, "IAICT" just one ordinary synthetic organization and a separate unrelated installation. Real HTTP 200 for permitted lawyer, 404 for admin with no MatterACL, 401 for wrong cross-install JWT or revoked session, 404 when matter or membership ACL revoked, database app account cannot insert; independent keys/data/port isolation.
+- **CI evidence:** GitHub Actions `41774950797` **completed/success** for `unit`, `postgres-rls`, `standalone-db`, `standalone-api`; `tests/evidence/AL-R0-R37-STANDALONE-HTTP-2026-11-04.json`.
+- **Limit:** This is *a real deployed Docker test API* for one existing read endpoint, **not** actual user login, a customer-ready AI Law app, or real legal AI workflows. Fixture sessions and runs explicitly NOT canonical SRS production schema. All real user accounts and external IdP, app/browser E2E, storage, backup and Owner final acceptance NOT_RUN.
+- **Owner priorities:** Standalone FIRST; IAICT ordinary organization; SaaS later. SRS v1.1.15 unchanged; no production deploy.
 
 ## R36 — Owner standalone-first execution, IAICT ordinary customer
 
