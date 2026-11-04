@@ -2,7 +2,7 @@
   "schema_version": 1,
   "baseline": "SRS v1.1.15",
   "release_target": "R0",
-  "checkpoint": "R34",
+  "checkpoint": "R35",
   "assessment_date": "2026-11-04",
   "synthetic_demo_customers_created": true,
   "live_customer_accounts_created": false,
@@ -130,11 +130,33 @@
     "only_owner_can_accept": true,
     "legal_data_gate_separate": true,
     "no_demo_identity_equals_real_auth": true,
-    "no_fake_ai_output_presented_as_real": true
+    "no_fake_ai_output_presented_as_real": true,
+    "both_delivery_modes_required_for_product_target": true
   },
   "operator": "IAICT",
   "real_role_accounts_target": "CONFIGURED_IDP_REAL_LOGIN_AND_TC12A_B_E2E_NOT_YET_DONE",
   "signed_d01_record": "PENDING_EVIDENCE_SEPARATE_FROM_APPROVED_POLICY",
   "real_jwks_verifier_profile": "RS256 at+jwt with server-configured HTTPS same-origin JWKS; synthetic keys in CI only",
-  "real_idp_accounts": "NOT_CREATED"
+  "real_idp_accounts": "NOT_CREATED",
+  "delivery_modes": {
+    "saas": {
+      "required": true,
+      "status": "PARTIAL_TESTED",
+      "deployment_e2e": "NOT_RUN",
+      "evidence": [
+        "GitHub Actions 41767087750 proves RSA+PG16 CI only, NOT an actual SaaS login or deployment"
+      ],
+      "need": "Real approved provider, session, account provisioning, actual application and R0 workflow E2E with tenant RLS."
+    },
+    "dedicated": {
+      "required": true,
+      "status": "NOT_IMPLEMENTED",
+      "deployment_e2e": "NOT_RUN",
+      "evidence": [
+        "pcs/STATE.json DEC-015 Owner-approved implementation requirement"
+      ],
+      "need": "Build one-source portable dedicated installation package, isolate database/storage/keys/provider configuration, deploy isolated staging environment, test role login, SRS R0 workflows, backup/restore and rollback."
+    }
+  },
+  "delivery_modes_owner_approved": "2026-11-04; both SaaS and dedicated REQUIRED for AI Law product target, not either-or"
 }
