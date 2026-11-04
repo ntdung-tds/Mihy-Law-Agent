@@ -1,10 +1,19 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `39` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T06:22:00Z`.
+- **PCS revision:** `40` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T07:04:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R40 — reusable 10-account QA matrix saved privately, actual SQL/HTTP CI verification
+
+- **User request fulfilled within accessible capabilities:** 10 named fictitious QA accounts QA-01..QA-10 for approved SRS actor cases RA-02..RA-09, with roles limited to `lawyer`/`tenant_admin`. Nine in primary standalone (IAICT ordinary organization, a separate organization and personal workspaces) and one on a separate installation. Includes disabled/revoked, tenant outsider, personal+org membership same principal and two-case limited MatterACL scenarios. No future SaaS RA-01.
+- **Credentials saved for reuse:** Owner-only, unshared private Google Drive folder holds a full R40 10-account password+Argon2id-hash credential JSON bundle; the same JSON exists as a local owner-download artifact. **No passwords, private hashes, JWT or Drive secret links in this public repository.** The bundle is prepared, but not installed on a long-lived server.
+- **Actual PostgreSQL16 tests:** `tools/r40_qa_provision.py` creates private credentials once and renders atomic idempotent SQL, with registration fingerprint preventing accidental rotation. `deployment/standalone/smoke_qa.sh` applied the seed to two real Docker Compose auth/API/DB stacks, tested 10 actor logins, access/denials, ACL scope and cross-install signed JWT. SQL reapplication preserves original password hashes and ACL version. Docker Compose DOWN/UP without `-v` preserves accounts and sessions; different bundle is rejected. GitHub Actions `41788819557` 7/7 CI jobs PASS.
+- **Limits:** These CI accounts lived in *disposable* installations and were deleted after the CI run. Specific Owner-saved password bundle is **NOT ACTIVE** on long-lived owner-accessible standalone staging. External IdP/MFA, real legal AI services, full TC12A/B and Owner final acceptance remain blocked; production unauthorized. D01 policy approved, unchanged.
+- **Files:** `tests/acceptance/R40_STANDALONE_QA_INVENTORY.json` (public non-secret), `deployment/standalone/QA_R40_PROVISION.md`, `tools/r40_qa_provision.py`, `tests/evidence/AL-R0-R40-QA-ACCOUNTS-2026-11-04.json`. SRS v1.1.15 unchanged.
+- **Next:** authorized operator applies saved credentials to a real long-lived private QA PostgreSQL16 host, confirms security/role smoke, and makes Owner-accessible staging available before full TC12/legal AI flows. Shared IAICT SaaS later.
 
 ## R39 — actual Chromium browser against standalone auth/API/PostgreSQL16
 
