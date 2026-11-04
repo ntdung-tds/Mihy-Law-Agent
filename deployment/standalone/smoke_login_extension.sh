@@ -89,6 +89,32 @@ sql_a "UPDATE ai_law_nonprod.password_accounts SET status='disabled'
 probe_a 401 "$token_admin"
 login_a iaict-admin "$org_a" 401
 
+# Authentication SQL identity must NEVER be able to read legal case rows.
+dc_a exec -T auth python - <<'PY'
+import os
+import psycopg
+import sys
+try:
+    with psycopg.connect(os.environ["AI_LAW_AUTH_DB_DSN"]) as conn:
+        conn.execute("SELECT count(*) FROM ai_law.matters")
+except psycopg.errors.InsufficientPrivilege:
+    print("PASS R38: auth SQL role cannot read case data")
+else:
+    print("FAIL R38: auth SQL role has unauthorized case SELECT")
+    sys.exit(1)
+PY
+
+# Repeated bad passwords lock the real synthetic account in PostgreSQL,
+# with one generic 401 even when the correct password is supplied afterward.
+for attempt in $(seq 1 5); do
+  login_a iaict-lawyer "$org_a" 401 bad-request
+done
+check_eq "$(sql_a "SELECT failed_attempts FROM ai_law_nonprod.password_accounts
+  WHERE email='iaict-lawyer@example.invalid'")" "5" "five failed login attempts"
+check_eq "$(sql_a "SELECT (locked_until > now())::text FROM ai_law_nonprod.password_accounts
+  WHERE email='iaict-lawyer@example.invalid'")" "true" "account lockout timer persisted"
+login_a iaict-lawyer "$org_a" 401
+
 # No impact on unrelated independent installation.
 probe_b 200 "$token_b"
-echo "PASS R38: actual Argon2id email/password HTTP login/logout, dual membership, RSA signed access, persisted SQL session and account disable"
+echo "PASS R38: real Argon2id login/logout, organization+personal, account lockout, signed access, SQL session revoke and isolation"
