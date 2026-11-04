@@ -2,6 +2,10 @@
    JWT must be RS256 at+jwt from a trusted issuer; D1 session/member/ACL
    checks are explicit because SQLite has no PostgreSQL FORCE RLS. */
 import { GoogleDriveAdapter } from "./google_drive.mjs";
+import {authRoute,sessionForRequest} from "./qa_auth.mjs";
+import {renderLayout} from "./layout.mjs";
+import {renderTheme} from "./theme.mjs";
+import {renderClient} from "./client.mjs";
 
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const result=(status,data)=>new Response(JSON.stringify(data),{status,headers:{
@@ -91,6 +95,14 @@ const params=(env,session,id,now)=>[
 ];
 export async function handle(request,env,options={}){
   const url=new URL(request.url);
+  if(request.method==="GET" && !url.search && (url.pathname==="/"||url.pathname==="/login"))
+    return renderLayout();
+  if(request.method==="GET" && !url.search && url.pathname==="/assets/theme.css")
+    return renderTheme();
+  if(request.method==="GET" && !url.search && url.pathname==="/assets/app.js")
+    return renderClient();
+  if(url.pathname.startsWith("/v1/auth/"))
+    return authRoute(request,env,options);
   if(request.method!=="GET"||url.search||request.headers.has("X-AI-LAW-TENANT"))return missing();
   if(url.pathname==="/health")return result(validEnv(env)?200:503,{
     status:validEnv(env)?"configured":"unavailable",scope:"nonprod_qa_only",
@@ -101,10 +113,14 @@ export async function handle(request,env,options={}){
   if(!validEnv(env))return unavailable();
   const now=options.now??Math.floor(Date.now()/1000);
   const identity=await verifyBearer(request,env,now);
-  if(!identity)return deny();
+  let session=null;
   try{
-    const session=await env.DB.prepare(SESSION_SQL).bind(env.INSTALLATION_ID,
-      identity.sid,identity.issuer,identity.subject,now).first();
+    if(identity){
+      session=await env.DB.prepare(SESSION_SQL).bind(env.INSTALLATION_ID,
+        identity.sid,identity.issuer,identity.subject,now).first();
+    }else if(!request.headers.has("Authorization")){
+      session=await sessionForRequest(request,env,now);
+    }
     if(!session||!UUID.test(session.user_id)||!UUID.test(session.tenant_id))return deny();
     const sql=route[1]==="runs"?RUN_SQL:FILE_SQL;
     const row=await env.DB.prepare(sql).bind(...params(env,session,route[2],now)).first();
