@@ -23,11 +23,12 @@
       "required": true,
       "provider_operation": "Customer or agreed operator under deployment contract",
       "isolation": "Isolated application environment, dedicated data/storage/secrets; existing tenant and MatterACL controls remain in force",
-      "stage": "STANDALONE_DB_BOOTSTRAP_IN_PROGRESS_NO_APPLICATION",
+      "stage": "STANDALONE_NONPROD_HTTP_API_AND_PG16_TEST_ONLY",
       "real_customer_login": "NOT_RUN",
       "end_to_end": "NOT_RUN",
       "current_priority": "NOW",
-      "test_organization": "IAICT_ORDINARY_CUSTOMER"
+      "test_organization": "IAICT_ORDINARY_CUSTOMER",
+      "nonproduction_one_endpoint_http": "PASS_CI_41774950797"
     }
   ],
   "shared_invariants": [
@@ -40,7 +41,7 @@
   ],
   "implementation_targets": [
     "R0 bounded deployment-mode config and separation contract",
-    "Shared application packaging/migration path with distinct environment settings",
+    "Standalone containerized read-only API and isolated PostgreSQL16 bootstrap now tested; real IdP accounts and production packaging still needed",
     "Isolated dedicated test environment with genuine login and authorization",
     "Run one representative R0 end-to-end legal workflow in each mode, then entire R0 acceptance matrix",
     "Backup/restore, upgrade/rollback, secret isolation, logging and operational acceptance by Owner"

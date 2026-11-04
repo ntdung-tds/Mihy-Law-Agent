@@ -1,4 +1,26 @@
-# AI Law R36 — standalone-first, nonproduction database bootstrap
+# AI Law R36–R37 — standalone-first local deployment bootstrap
+
+## R37: isolated nonproduction HTTP API + real PostgreSQL16 sessions/RLS
+
+**Now runnable in GitHub Actions:** `deployment/standalone/Dockerfile.nonprod-api` packages the existing SRS `GET /v1/runs/{id}` WSGI endpoint as a real Python service container. The test-only Compose override `compose.api-test.yaml` attaches it to one installation's PostgreSQL16 network, not to any IAICT SaaS service.
+
+- API database role is **read-only, non-superuser, non-BYPASSRLS**, with a different per-installation password from the PostgreSQL migration owner.
+- The server verifies genuine RSA-signed `at+jwt` credentials (R34) against a trusted *test-only public* JWKS; **no external IdP HTTPS request or real user login** has been implemented.
+- Ephemeral private signing keys never enter API containers or GitHub source. Test sessions, internal identity mappings and queued run snapshots are **persisted in isolated PostgreSQL16** test-only tables. The run fixture uses `FORCE ROW LEVEL SECURITY` requiring the matter's explicit ACL.
+- The test runs TWO whole Docker Compose stacks in CI: the IAICT-labeled organization and another independent organization, both with unique keys, secrets, DB/network/volumes, HTTP server process and tenant data. IAICT has no special platform permissions.
+- Smoke assertions: **200** authorized lawyer, **404** tenant administrator with no explicit case ACL, **404** nonexistent run, **401** cross-installation JWT, **401** invalid/missing token, **404** after real PostgreSQL ACL/membership revocation, **401** after real session revocation, and database reader cannot write.
+- Neither API nor PostgreSQL publishes host ports. **A fixture/test API process is not the accepted standalone legal AI product.** It has no signup/password screen, real IdP, document handling, actual legal AI provider, production TaskRun schema or backup/upgrade acceptance.
+
+Run in a **disposable CI-equivalent** host after installing Docker, Docker Compose v2 and Python dependencies:
+
+```bash
+python -m pip install -r requirements-r0-auth.txt
+bash deployment/standalone/smoke_api.sh
+```
+
+The runner creates randomly signed JWTs and credentials, sends them through in-container localhost HTTP, performs real SQL tests and removes two stacks plus ephemeral keys. **Do not use this script with production or customer data.**
+
+## R36: database-only bootstrap
 
 ## Owner priority (2026-11-04)
 

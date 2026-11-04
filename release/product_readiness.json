@@ -2,7 +2,7 @@
   "schema_version": 1,
   "baseline": "SRS v1.1.15",
   "release_target": "R0",
-  "checkpoint": "R36",
+  "checkpoint": "R37",
   "assessment_date": "2026-11-04",
   "synthetic_demo_customers_created": true,
   "live_customer_accounts_created": false,
@@ -150,13 +150,15 @@
     },
     "dedicated": {
       "required": true,
-      "status": "NOT_IMPLEMENTED",
+      "status": "PARTIAL_TESTED",
       "deployment_e2e": "NOT_RUN",
       "evidence": [
         "pcs/STATE.json DEC-015 Owner-approved implementation requirement",
-        "deployment/standalone/compose.yaml (isolated nonproduction database bootstrap, NOT complete AI Law app)"
+        "deployment/standalone/compose.yaml (isolated nonproduction database bootstrap, NOT complete AI Law app)",
+        "tests/evidence/AL-R0-R37-STANDALONE-HTTP-2026-11-04.json",
+        "GitHub Actions 41774950797: real 2-instance Docker API+Postgres16, JWT/SQL sessions/MatterACL PASSED"
       ],
-      "need": "Current isolated DB bootstrap covers only PostgreSQL and approved R30 test-only schema; build real standalone app/session/IdP, role accounts, document workflows/storage, secure production migrations and backup/restore. Actual app install and E2E NOT_RUN."
+      "need": "Real isolated API+PostgreSQL16 nonproduction GET /v1/runs/{id} with signed JWT and SQL fixture sessions PASS; actual approved identity provider, customer accounts, canonical TaskRun, document storage, UC03/04/07, UI, browser E2E, backup/restore, production migration, Owner final acceptance NOT_RUN."
     }
   },
   "delivery_modes_owner_approved": "2026-11-04; both SaaS and dedicated REQUIRED for AI Law product target, not either-or",
@@ -164,5 +166,6 @@
   "saas_implementation_priority": "DEFERRED_BY_OWNER_UNTIL_DEDICATED_ACCEPTED",
   "iaict_in_dedicated_mode": "ORDINARY_ORGANIZATION_CUSTOMER_NO_PLATFORM_PRIVILEGE",
   "dedicated_owner_final_acceptance": "PENDING",
-  "dedicated_production_deployment": "NOT_AUTHORIZED"
+  "dedicated_production_deployment": "NOT_AUTHORIZED",
+  "standalone_nonprod_api_http_status": "PASS_CI_41774950797"
 }

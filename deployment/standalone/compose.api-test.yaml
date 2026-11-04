@@ -1,0 +1,28 @@
+# R37 opt-in extension to compose.yaml; never use on production.
+# API has NO host-published ports and is isolated to this Compose project.
+services:
+  db:
+    environment:
+      AI_LAW_APP_DB_PASSWORD: ${AI_LAW_APP_DB_PASSWORD:?Set a unique read-only DB role password}
+    volumes:
+      - ../../db/standalone/0002_r37_nonprod_http_fixtures.sql:/docker-entrypoint-initdb.d/0002_r37_nonprod_http_fixtures.sql:ro
+      - ../../db/standalone/0003_r37_reader.sh:/docker-entrypoint-initdb.d/0003_r37_reader.sh:ro
+  api:
+    image: ${AI_LAW_R37_API_IMAGE:-ai-law-r37-nonprod:local}
+    init: true
+    read_only: true
+    user: "10001:10001"
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      AI_LAW_NONPROD_R37: isolated-fixture-only
+      AI_LAW_READER_DSN: postgresql://ai_law_r37_reader:${AI_LAW_APP_DB_PASSWORD:?}@db:5432/ai_law
+      AI_LAW_TEST_ISSUER: https://idp.example.invalid
+      AI_LAW_TEST_AUDIENCE: ai-law-api
+      AI_LAW_TEST_JWKS_B64: ${AI_LAW_TEST_JWKS_B64:?Test public JWKS required}
+    # No ports. App is reachable only from its isolated Compose network
+    # and through local Docker exec in the R37 test runner.
