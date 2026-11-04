@@ -341,6 +341,37 @@ class RealPostgresRlsTests(unittest.TestCase):
                 conn.execute("SELECT count(*) FROM matters WHERE matter_id=%s",(CASE_A,)).fetchone()[0],0
             )
 
+    def test_acl_view_is_invoker_scoped_not_owner_bypass(self):
+        # Populate identical per-user read ACL under second tenant, but the
+        # app's A context must still be unable to view B records via the view.
+        self.admin.execute("""INSERT INTO ai_law.matter_user_acl
+          (tenant_id,matter_id,user_id,permission,effect,acl_version,valid_from)
+          VALUES (%s,%s,%s,'read','allow',1,now()-interval '1 hour')""",(B,CASE_B,U))
+        with self.scoped(U,A)() as conn:
+            rows=conn.execute("SELECT DISTINCT tenant_id FROM ai_law.matter_acl").fetchall()
+            self.assertEqual([str(r[0]) for r in rows],[A])
+        with self.scoped(U,B)() as conn:
+            rows=conn.execute("SELECT DISTINCT tenant_id FROM ai_law.matter_acl").fetchall()
+            self.assertEqual([str(r[0]) for r in rows],[B])
+
+    def test_bulk_acl_update_is_atomic_and_keeps_existing_read_grants(self):
+        # Two row writes in one statement; a row-trigger implementation can
+        # trip tuple-modified errors or leave mis-versioned existing grants.
+        self.admin.execute("""INSERT INTO ai_law.matter_user_acl
+          (tenant_id,matter_id,user_id,permission,effect,acl_version,valid_from)
+          VALUES
+            (%s,%s,%s,'write','allow',1,now()-interval '1 hour'),
+            (%s,%s,%s,'export','allow',1,now()-interval '1 hour')
+        """,(A,CASE_A,U,A,CASE_A,U))
+        version=self.admin.execute(
+          "SELECT acl_version FROM ai_law.matters WHERE tenant_id=%s AND matter_id=%s",
+          (A,CASE_A)).fetchone()[0]
+        versions=self.admin.execute(
+          "SELECT DISTINCT acl_version FROM ai_law.matter_user_acl WHERE tenant_id=%s AND matter_id=%s",
+          (A,CASE_A)).fetchall()
+        self.assertEqual(versions,[(version,)])
+        self.assertTrue(PostgresMatterRead(open_scoped_connection=self.scoped(U,A))(A,U,CASE_A))
+
     def test_http_get_run_with_real_postgres_membership_and_matter_acl(self):
         # Session verified by a FAKE verifier; run contents are synthetic in
         # memory. PostgreSQL enforces *real* membership and MatterACL.
