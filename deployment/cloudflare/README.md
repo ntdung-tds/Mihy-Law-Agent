@@ -22,6 +22,14 @@ parked until Owner supplies a server. No production or real legal case data.
   the Worker FAILS CLOSED. Login, customer OAuth consent, token refresh,
   file upload, delete, indexing and AI legal workflows are NOT implemented.
 
+## Actual R43 QA deployment status
+
+- **Worker:** `ai-law-standalone-cf-qa` on the existing Cloudflare account, with workers.dev enabled for nonproduction only. Actual technical URL: `https://ai-law-standalone-cf-qa.iaict-platform.workers.dev`.
+- **D1 database:** separate `ai-law-standalone-cf-qa` (no IAICT database reuse). Real API migration applied; query of SQLite catalog returned all eight QA metadata table names. No real user/matter/file rows seeded, and JWKS deliberately has empty keys.
+- **Live external validation:** GitHub Actions `41802685576` `cloudflare-live-qa` PASS: HTTPS `/health` configured, anonymous `/v1/runs/fixture-run` and file metadata/download return **401**, forbidden POST returns **404**. This does NOT prove valid signed user login or real Google Drive file transfer.
+- **Quota:** account had nine D1 databases before R43; this QA DB is the tenth. Cloudflare Free currently limits to ten databases. Further database creation must be reviewed for impact.
+- **Preserve security:** Until trusted QA issuer, session data and customer OAuth are approved, leave current JWKS deny-all and Google Drive secret unset. Do not publish a private customer service or disable ACL to make demo pass.
+
 ## Verified by tests (not automatically a real Cloudflare deployment)
 
 Local tests using Node.js 22 and Python 3.12, no credentials required:
