@@ -2,7 +2,7 @@
   "schema_version": 1,
   "baseline": "SRS v1.1.15",
   "release_target": "R0",
-  "checkpoint": "R39",
+  "checkpoint": "R40",
   "assessment_date": "2026-11-04",
   "synthetic_demo_customers_created": true,
   "live_customer_accounts_created": false,
@@ -69,9 +69,10 @@
       "evidence": [
         "tests/evidence/AL-R0-R34-JWKS-2026-11-04.json",
         "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41766637661 (signed RS256 CI unit + PostgreSQL16 HTTP/RLS both PASS)",
-        "tests/evidence/AL-R0-R38-STANDALONE-LOGIN-2026-11-04.json (local isolated test auth ONLY; not external production IdP)"
+        "tests/evidence/AL-R0-R38-STANDALONE-LOGIN-2026-11-04.json (local isolated test auth ONLY; not external production IdP)",
+        "tests/evidence/AL-R0-R40-QA-ACCOUNTS-2026-11-04.json (local synthetic QA accounts only, not production-approved IAM)"
       ],
-      "need": "R34 cryptographic JWT and R38 local Argon2id nonproduction login/passphrase/session tests PASS. Approved production IdP/issuance model, MFA/step-up, persistent customer account provisioning, external JWKS HTTPS, browser TC12A/B and threat modeling NOT_RUN. Never treat R38 test accounts as real service activation."
+      "need": "R40 isolated 10-account Argon2id/RS256 login tests and stored private QA credential bundle PASS. External approved IdP/MFA/step-up, durable owner-accessible QA staging with provisioned accounts, canonical SRS IAM and full TC12A/B remain NOT_RUN."
     },
     {
       "id": "REAL_TENANT_RLS_SECURITY",
@@ -163,9 +164,12 @@
         "tests/evidence/AL-R0-R38-STANDALONE-LOGIN-2026-11-04.json",
         "GitHub Actions 41781535393: real local Argon2id password HTTP login, 2 isolated auth/API+PostgreSQL16 stacks, sessions and ACL PASS",
         "tests/evidence/AL-R0-R39-STANDALONE-BROWSER-2026-11-04.json",
-        "GitHub Actions 41784653735 (Chromium 1440/390/320 real browser against 2 ephemeral Docker auth/API/PG16 stacks, POST login/logout and tenant ACL)"
+        "GitHub Actions 41784653735 (Chromium 1440/390/320 real browser against 2 ephemeral Docker auth/API/PG16 stacks, POST login/logout and tenant ACL)",
+        "tests/evidence/AL-R0-R40-QA-ACCOUNTS-2026-11-04.json",
+        "GitHub Actions 41788819557 (10 SQL QA actors, real login, MatterACL and durable named volume after service down/up)",
+        "Private owner-only Drive credential bundle (link kept out of public repo)"
       ],
-      "need": "R39 real Chromium login/tenant/run/logout nonproduction browser E2E PASS for disposable fake accounts, UI gateway holds JWT server-side with HttpOnly cookie and localhost-only port. Still NO durable standalone/customer-host installation, actual owner-accessible staging URL/issued real test accounts, approved production IAM/MFA/session schema, full AI legal UC03/04/07, document upload/storage, backup, rollback or final Owner acceptance."
+      "need": "R40 ten named synthetic QA actors mapped to RA02..09 and credential bundle saved in restricted owner-only Drive; 10 Argon2id accounts provisioned/verified in actual disposable SQL HTTP QA installations; idempotent replay and Docker named volume survival PASS. No long-lived accessible staging instance or issued actual user account activation, external IdP/MFA, complete legal AI/document workflows, full TC12/browser production E2E, backup/restore or Owner final acceptance."
     }
   },
   "delivery_modes_owner_approved": "2026-11-04; both SaaS and dedicated REQUIRED for AI Law product target, not either-or",
@@ -182,5 +186,10 @@
   "standalone_operator": "CUSTOMER_OR_APPROVED_CONTRACTOR_PER_INSTALLATION",
   "standalone_nonprod_browser_login_status": "PASS_CI_41784653735",
   "standalone_browser_scope": "CHROMIUM_E2E_WITH_SYNTHETIC_EPHEMERAL_ACCOUNTS_AND_SQL_MATTERACL_ONLY",
-  "standalone_direct_owner_staging_url": "NOT_DEPLOYED"
+  "standalone_direct_owner_staging_url": "NOT_DEPLOYED",
+  "standalone_qa_accounts_inventory": "10_NAMED_ACTORS_RA02_RA09",
+  "standalone_qa_private_credentials": "OWNER_ONLY_DRIVE_SAVED_PREPARED_NOT_ACTIVE",
+  "standalone_qa_disposable_pg_http_provision": "PASS_CI_41788819557",
+  "standalone_qa_durable_host_deployment": "NOT_DEPLOYED",
+  "standalone_qa_db_persist_after_compose_down_up": "PASS_CI_41788819557"
 }

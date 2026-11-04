@@ -1,0 +1,60 @@
+{
+  "id": "AL-R0-R40-QA-ACCOUNTS-2026-11-04",
+  "date": "2026-11-04",
+  "baseline": "SRS v1.1.15 unchanged",
+  "owner_scope": "Standalone-first. IAICT ordinary customer organization. SaaS operator RA-01 deferred.",
+  "account_inventory": "tests/acceptance/R40_STANDALONE_QA_INVENTORY.json",
+  "qa_accounts_defined": 10,
+  "qa_accounts_issued_and_tested_in_disposable_postgresql16": 10,
+  "qa_accounts_in_primary_qa_installation": 9,
+  "qa_accounts_in_secondary_independent_installation": 1,
+  "qa_owner_credentials_saved_separately_on_restricted_drive": true,
+  "drive_acl_verified": "OWNER_ONLY_SHARED_FALSE",
+  "public_repository_contains_secrets": false,
+  "owner_saved_credentials_status": "PREPARED_AND_VERIFIED_ARGON2ID_NOT_ACTIVE_ON_PERSISTENT_STAGING",
+  "ci": {
+    "url": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41788819557",
+    "head_sha": "b8833d1799a6f2a3d59cc3749ed68b50829740bd",
+    "status": "SUCCESS",
+    "jobs": [
+      "unit PASS",
+      "postgres-rls PASS",
+      "standalone-db PASS",
+      "standalone-api PASS",
+      "standalone-login PASS",
+      "standalone-browser PASS",
+      "standalone-qa PASS"
+    ]
+  },
+  "scoped_tests": {
+    "ten_named_account_issuance_and_actual_sql_passwords": "PASS",
+    "ten_unique_argon2id_password_hashes": "PASS",
+    "qa01_individual_own_case": "PASS",
+    "qa02_same_principal_personal_and_org_context": "PASS",
+    "qa03_organization_admin_denied_implicit_matter_read": "PASS",
+    "qa04_lawyer_explicit_two_matter_grants": "PASS",
+    "qa05_nonmember_denied_iaict_org": "PASS",
+    "qa06_revoked_org_but_active_personal": "PASS",
+    "qa07_disabled_account_rejected_even_correct_password": "PASS",
+    "qa08_limited_member_allowed_first_case_denied_second": "PASS",
+    "qa09_other_tenant_cannot_select_iaict": "PASS",
+    "qa10_other_independent_installation_cross_jwt_denied": "PASS",
+    "first_and_second_installation_password_session_isolation": "PASS",
+    "credential_bundle_private_mode_0600": "PASS",
+    "same_sql_seed_idempotent_no_hash_rotation_no_acl_version_bump": "PASS",
+    "docker_compose_down_up_retains_account_and_signed_sql_session": "PASS",
+    "mismatched_generated_secret_bundle_rejected_atomically": "PASS",
+    "local_browser_r39_and_r38_previous_suites_still_pass": "PASS"
+  },
+  "unverified": {
+    "permanent_qa_database_running_on_owner_accessible_staging": "NOT_DEPLOYED",
+    "ten_specific_saved_owner_passwords_applied_to_live_staging": "NOT_APPLIED",
+    "actual_approved_customer_iam_idp_mfa": "NOT_RUN",
+    "real_email_verification_or_invitations": "NOT_IMPLEMENTED_QA_EMAILS_INVALID",
+    "full_role_matrix_legal_srs_tc12a_tc12b": "NOT_RUN",
+    "real_legal_ai_workflows_uc03_uc04_uc07": "NOT_IMPLEMENTED",
+    "customer_data_and_production": "NOT_AUTHORIZED",
+    "owner_final_acceptance": "PENDING"
+  },
+  "safety": "Public evidence contains no password, JWT, private key, Argon2id hash, internal Drive secret URL, actual customer case file or private folder ID. The credentials are generated outside repository; GitHub CI disposes its own temporary passwords and DB volumes after the test run, though the script can retain named volumes on an operator QA host."
+}
