@@ -110,7 +110,7 @@ class BrowserGatewayTests(unittest.TestCase):
             status,data,headers=self.invoke(path="/api/logout",
                 method="POST",body=b"{}",cookie=cookie)
             self.assertEqual((status,data),(200,{"ok":True}))
-            self.assertEqual(http.call_args.kwargs["bearer"],JWT)
+            self.assertEqual(http.call_args.args[4],JWT)
             self.assertIn("Max-Age=0",headers["Set-Cookie"])
         status,data,_=self.invoke(path="/api/run",cookie=cookie,
                                   query="run_id=fixture-run")
