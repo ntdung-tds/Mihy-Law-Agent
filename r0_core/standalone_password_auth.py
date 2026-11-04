@@ -203,7 +203,10 @@ class StandaloneAuthApp:
                         not 1 <= int(environ["CONTENT_LENGTH"]) <= 2048):
                     return respond(400, {"code": "INVALID_REQUEST"})
                 raw = environ["wsgi.input"].read(int(environ["CONTENT_LENGTH"]))
-                fields = loads(raw)
+                try:
+                    fields = loads(raw)
+                except (ValueError, UnicodeError):
+                    return respond(400, {"code": "INVALID_REQUEST"})
                 if not isinstance(fields, dict) or set(fields) != {
                         "email", "password", "tenant_id"}:
                     return respond(400, {"code": "INVALID_REQUEST"})
