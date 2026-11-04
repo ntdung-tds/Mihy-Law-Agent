@@ -1,10 +1,19 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `34` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T03:24:40.989Z`.
+- **PCS revision:** `35` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T03:45:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; IAICT operates the platform. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R35 — Owner: dedicated delivery must be implemented, not deferred
+
+- **DEC-015 (Owner 2026-11-04):** both delivery modes are **required** for the AI Law product: (1) IAICT-operated multi-tenant SaaS and (2) isolated customer deployment, including private cloud/on-premises when agreed. One product, same source, migrations, authorization logic, legal functions and tests. Only environment/infrastructure operations differ. This directly corrects the earlier assistant's incorrect suggestion to defer dedicated delivery.
+- **Recorded implementation path:** `deployment/modes.json` and `deployment/README.md` specify two required mode targets, safety invariants, independent real-acceptance tests and honest current NOT_RUN statuses. `AL-R0-DEPLOY-001` is IN_PROGRESS, not an imaginary future task.
+- **Release enforcement:** `tools/check_product_readiness.py` blocks final product readiness unless both SaaS and dedicated modes have real deployment E2E `PASS` and non-empty verified evidence. `release/product_readiness.json` has both unfinished profiles.
+- **Baseline control:** SRS v1.1.15 remains unchanged. `srs_changed.md` SC-001 records whether deployment wording requires synchronization; only Owner decides final baseline sync.
+- **No false installation claims:** actual dedicated package / private instance / accounts / UI / backup-rollback E2E NOT_RUN; SaaS real customer login E2E also NOT_RUN. No production or real customer data authorized.
+- **Next implementation:** continue real IAM work and deliver reproducible dedicated nonprod packaging in bounded tasks in parallel. Actual authenticated browser/API R0 workflows must be tested in **each** mode before final product acceptance.
 
 ## R34 — Concrete signed JWT + real PostgreSQL16 HTTP integration
 
