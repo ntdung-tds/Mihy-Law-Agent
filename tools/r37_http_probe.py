@@ -22,7 +22,8 @@ def main():
     if status != expected:
         print("FAIL: unexpected HTTP status; expected", expected, "got", status)
         return 1
-    if status == 200 and (body.get("run_id") != "fixture-run" or
+    run_id = path.rsplit("/", 1)[-1]
+    if status == 200 and (body.get("run_id") != run_id or
                           body.get("status") != "queued"):
         print("FAIL: unexpected TaskRun response")
         return 1
