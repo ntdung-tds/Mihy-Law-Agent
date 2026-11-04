@@ -2,7 +2,7 @@
   "schema_version": 1,
   "baseline": "SRS v1.1.15",
   "release_target": "R0",
-  "checkpoint": "R31",
+  "checkpoint": "R34",
   "assessment_date": "2026-11-04",
   "synthetic_demo_customers_created": true,
   "live_customer_accounts_created": false,
@@ -65,9 +65,12 @@
     },
     {
       "id": "REAL_IDP_JWT_MFA",
-      "status": "NOT_IMPLEMENTED",
-      "evidence": [],
-      "need": "Approved actual identity provider, JWKS JWT signature verification, MFA, session revocation, real user provisioning."
+      "status": "PARTIAL_TESTED",
+      "evidence": [
+        "tests/evidence/AL-R0-R34-JWKS-2026-11-04.json",
+        "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41766637661 (signed RS256 CI unit + PostgreSQL16 HTTP/RLS both PASS)"
+      ],
+      "need": "Cryptographic RS256 JWKS profile tests PASS with injected public key set; actual approved external IdP HTTPS JWKS fetch, real customer test account provisioning/login, persistent revocable session, MFA/step-up, browser TC12A/B are NOT_RUN or NOT_IMPLEMENTED. Do not mark complete."
     },
     {
       "id": "REAL_TENANT_RLS_SECURITY",
@@ -131,5 +134,7 @@
   },
   "operator": "IAICT",
   "real_role_accounts_target": "CONFIGURED_IDP_REAL_LOGIN_AND_TC12A_B_E2E_NOT_YET_DONE",
-  "signed_d01_record": "PENDING_EVIDENCE_SEPARATE_FROM_APPROVED_POLICY"
+  "signed_d01_record": "PENDING_EVIDENCE_SEPARATE_FROM_APPROVED_POLICY",
+  "real_jwks_verifier_profile": "RS256 at+jwt with server-configured HTTPS same-origin JWKS; synthetic keys in CI only",
+  "real_idp_accounts": "NOT_CREATED"
 }
