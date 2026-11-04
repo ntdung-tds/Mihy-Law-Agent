@@ -12,7 +12,8 @@ const sources=[
  ['preview_css.mjs','web/r0-preview/styles.css','PREVIEW_CSS'],
  ['preview_app.mjs','web/r0-preview/app.js','PREVIEW_JS'],
  ['preview_session.mjs','web/r0-preview/session.js','PREVIEW_SESSION_JS'],
- ['preview_login.mjs','web/r0-preview/login.js','PREVIEW_LOGIN_JS']
+ ['preview_login.mjs','web/r0-preview/login.js','PREVIEW_LOGIN_JS'],
+ ['preview_matters.mjs','web/r0-preview/matters.js','PREVIEW_MATTERS_JS']
 ];
 for(const [name,rel,exportName] of sources){
   const content=fs.readFileSync(path.join(root,rel),'utf8');

@@ -7,9 +7,10 @@ import { PREVIEW_CSS } from './preview_css.mjs';
 import { PREVIEW_JS } from './preview_app.mjs';
 import { PREVIEW_SESSION_JS } from './preview_session.mjs';
 import { PREVIEW_LOGIN_JS } from './preview_login.mjs';
+import { PREVIEW_MATTERS_JS } from './preview_matters.mjs';
 const AUTH='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
 const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters']);
-const privatePaths=new Set(['/','/index.html','/styles.css','/app.js','/session.js']);
+const privatePaths=new Set(['/','/index.html','/styles.css','/app.js','/session.js','/matters.js']);
 const headerMap=(type)=>({
  'Content-Type':type,'Cache-Control':'no-store','Vary':'Cookie',
  'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY',
@@ -66,6 +67,7 @@ export async function handlePreview(req,env){
  if(path==='/'||path==='/index.html')return respond(PREVIEW_HTML);
  if(path==='/styles.css')return respond(PREVIEW_CSS,'text/css; charset=utf-8');
  if(path==='/app.js')return respond(PREVIEW_JS,'application/javascript; charset=utf-8');
+ if(path==='/matters.js')return respond(PREVIEW_MATTERS_JS,'application/javascript; charset=utf-8');
  return respond(PREVIEW_SESSION_JS,'application/javascript; charset=utf-8');
 }
 export default {fetch:handlePreview};

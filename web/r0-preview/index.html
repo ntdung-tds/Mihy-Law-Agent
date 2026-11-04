@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="./styles.css" />
   <script src="./app.js" defer></script>
   <script src="./session.js" defer></script>
+  <script src="./matters.js" defer></script>
 </head>
 <body>
   <svg aria-hidden="true" class="svg-sprite" xmlns="http://www.w3.org/2000/svg">
@@ -43,7 +44,7 @@
       <div class="side-label">KHÔNG GIAN LÀM VIỆC</div>
       <nav class="side-nav" aria-label="Các khu vực">
         <button class="nav-item active" data-view="overview"><svg class="icon"><use href="#i-grid"/></svg><span>Tổng quan</span></button>
-        <button class="nav-item" data-view="documents"><svg class="icon"><use href="#i-file"/></svg><span>Tài liệu</span><span class="nav-count">04</span></button>
+        <button class="nav-item" data-view="documents"><svg class="icon"><use href="#i-file"/></svg><span>Tài liệu</span><span class="nav-count" id="nav-matter-count">0</span></button>
         <button class="nav-item" data-view="assistant"><svg class="icon"><use href="#i-spark"/></svg><span>Trợ lý AI</span><span class="nav-new">Mới</span></button>
         <button class="nav-item" data-view="research"><svg class="icon"><use href="#i-book"/></svg><span>Tra cứu pháp lý</span></button>
       </nav>
@@ -60,7 +61,7 @@
         <div class="breadcrumbs"><span>Workspace</span><svg class="icon tiny"><use href="#i-chevron"/></svg><strong id="breadcrumb-current">Tổng quan</strong></div>
         <div class="top-actions"><span class="preview-dot"><i></i>R0 Preview</span><button class="icon-btn search-shortcut" id="search-shortcut" aria-label="Tìm kiếm" title="Tìm kiếm"><svg class="icon"><use href="#i-search"/></svg></button><button class="icon-btn" id="notifications" aria-label="Thông báo" title="Thông báo"><svg class="icon"><use href="#i-bell"/></svg><span class="unread-dot"></span></button><button type="button" id="preview-logout" class="top-logout" aria-label="Đăng xuất khỏi AI Law">Đăng xuất</button><div class="user-avatar" aria-label="Không gian QA">AL</div></div>
       </header>
-      <div class="mobile-demo-label"><span class="live-dot"></span> Bản xem trước giao diện · Dữ liệu minh họa</div>
+      <div class="mobile-demo-label"><span class="live-dot"></span> Ứng dụng QA · Danh mục hồ sơ lưu thật trên D1 · Không sử dụng hồ sơ khách hàng</div>
 
       <main class="main-content" id="content">
         <section id="view-overview" class="view-panel" data-panel="overview">
@@ -68,8 +69,8 @@
           <div class="welcome"><div><p class="hello">Không gian làm việc của bạn <span class="wave">✦</span></p><h1>Chào mừng đến với <em>AI Law.</em></h1><p class="subtitle">Mọi công việc pháp lý, tài liệu và tri thức trong một trải nghiệm liền mạch.</p></div><div class="welcome-date"><svg class="icon"><use href="#i-clock"/></svg><span id="today-date">Hôm nay</span></div></div>
           <div class="hero"><div class="hero-content"><div class="hero-topline"><span class="hero-star">✦</span> AI-POWERED WORKSPACE <span class="hero-line"></span> R0</div><h2>Công việc pháp lý.<br><span>Rõ ràng trong từng bước.</span></h2><p>Từ soạn thảo, rà soát tài liệu đến nghiên cứu pháp lý — tất cả bắt đầu tại đây.</p><div class="hero-actions"><button class="btn btn-white" data-go="documents">Khám phá tài liệu <svg class="icon"><use href="#i-arrow-right"/></svg></button><button class="btn btn-hero-link" data-go="assistant">Trải nghiệm trợ lý <svg class="icon tiny"><use href="#i-chevron"/></svg></button></div></div><div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="hero-art-core"><div class="art-ring"><svg class="icon"><use href="#i-scale"/></svg></div><div class="art-bar art-bar-1"></div><div class="art-bar art-bar-2"></div><div class="art-bar art-bar-3"></div></div><div class="floating-token token-one">✦</div><div class="floating-token token-two">◎</div></div></div>
 
-          <div class="section-line"><div><h2 class="section-title">Tổng quan công việc</h2><p class="section-desc">Số liệu minh họa cho bản thiết kế</p></div><span class="hint-pill"><span class="live-dot"></span> Dữ liệu demo</span></div>
-          <div class="stats-grid"><div class="stat-card"><div class="stat-top"><span class="stat-icon lavender"><svg class="icon"><use href="#i-layers"/></svg></span><span class="stat-corner">↗</span></div><strong>04</strong><span>Tài liệu mẫu</span><p><b>Không có dữ liệu thật</b> <span>· Demo</span></p></div><div class="stat-card"><div class="stat-top"><span class="stat-icon amber"><svg class="icon"><use href="#i-clipboard"/></svg></span><span class="stat-corner">↗</span></div><strong>02</strong><span>Đang rà soát</span><p><b>Trạng thái giả lập</b> <span>· Demo</span></p></div><div class="stat-card"><div class="stat-top"><span class="stat-icon aqua"><svg class="icon"><use href="#i-check"/></svg></span><span class="stat-corner">↗</span></div><strong>01</strong><span>Đã hoàn tất</span><p><b>Không kết nối API</b> <span>· Demo</span></p></div></div>
+          <div class="section-line"><div><h2 class="section-title">Tổng quan công việc</h2><p class="section-desc">Danh mục hồ sơ QA lưu trong cơ sở dữ liệu; AI pháp lý đang xây dựng</p></div><span class="hint-pill"><span class="live-dot"></span> Dữ liệu D1 · QA</span></div>
+          <div class="stats-grid"><div class="stat-card"><div class="stat-top"><span class="stat-icon lavender"><svg class="icon"><use href="#i-layers"/></svg></span><span class="stat-corner">↗</span></div><strong id="dashboard-matter-count">0</strong><span>Hồ sơ QA</span><p><b>Đã kết nối D1</b> <span>· Dữ liệu thử nghiệm</span></p></div><div class="stat-card"><div class="stat-top"><span class="stat-icon amber"><svg class="icon"><use href="#i-clipboard"/></svg></span><span class="stat-corner">↗</span></div><strong>—</strong><span>AI đang triển khai</span><p><b>Chưa vận hành</b></p></div><div class="stat-card"><div class="stat-top"><span class="stat-icon aqua"><svg class="icon"><use href="#i-check"/></svg></span><span class="stat-corner">↗</span></div><strong>—</strong><span>Google Drive</span><p><b>Chờ kết nối OAuth</b></p></div></div>
 
           <div class="section-line services-header"><div><h2 class="section-title">11 nghiệp vụ hỗ trợ luật sư</h2><p class="section-desc">Chia theo 3 nhóm công việc; chọn từng thẻ để xem trạng thái triển khai.</p></div><span class="catalog-summary">03 ưu tiên R0 · 08 dự kiến R1</span></div>
           <div class="catalog-notice" role="note"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg><div><strong>Chưa có nghiệp vụ AI nào hoạt động trên bản xem trước.</strong><p>“Đang triển khai” chỉ là trạng thái phát triển; chưa thể xử lý hồ sơ hay cung cấp kết quả pháp lý. Không sử dụng dữ liệu khách hàng thật.</p></div></div>
@@ -104,13 +105,33 @@
           </section>
           </div>
 
-          <div class="below-grid"><section class="surface-panel"><div class="panel-header"><div><h2 class="section-title">Tài liệu gần đây</h2><p class="section-desc">Bộ dữ liệu minh họa giao diện</p></div><button class="text-link" data-go="documents">Xem tất cả <svg class="icon"><use href="#i-arrow-right"/></svg></button></div><div class="recent-list" id="recent-documents"></div></section><section class="assistant-panel"><div class="assistant-graphic"><span class="graphic-spark">✦</span><div class="graphic-orb"></div></div><span class="assistant-kicker">KHÔNG GIAN THÔNG MINH</span><h2>Một trợ lý.<br>Cho mọi câu hỏi.</h2><p>Trải nghiệm trước cách AI Law hỗ trợ tổ chức công việc và hiển thị căn cứ pháp lý.</p><button class="btn btn-dark" data-go="assistant">Mở trợ lý AI <svg class="icon"><use href="#i-arrow-right"/></svg></button><small>Minh họa UI · Chưa kết nối mô hình</small></section></div>
+          <div class="below-grid"><section class="surface-panel"><div class="panel-header"><div><h2 class="section-title">Hồ sơ QA gần đây</h2><p class="section-desc">Danh mục được truy vấn từ D1</p></div><button class="text-link" data-go="documents">Xem tất cả <svg class="icon"><use href="#i-arrow-right"/></svg></button></div><div class="recent-list" id="recent-documents"></div></section><section class="assistant-panel"><div class="assistant-graphic"><span class="graphic-spark">✦</span><div class="graphic-orb"></div></div><span class="assistant-kicker">KHÔNG GIAN THÔNG MINH</span><h2>Một trợ lý.<br>Cho mọi câu hỏi.</h2><p>Trải nghiệm trước cách AI Law hỗ trợ tổ chức công việc và hiển thị căn cứ pháp lý.</p><button class="btn btn-dark" data-go="assistant">Mở trợ lý AI <svg class="icon"><use href="#i-arrow-right"/></svg></button><small>Minh họa UI · Chưa kết nối mô hình</small></section></div>
         </section>
 
         <section id="view-documents" class="view-panel" data-panel="documents" hidden>
-          <div class="sub-page-heading"><div><p class="section-kicker">QUẢN LÝ TÀI LIỆU</p><h1>Không gian tài liệu<span class="heading-dot">.</span></h1><p class="subtitle">Một nơi để lưu trữ, theo dõi và làm việc với tài liệu pháp lý.</p></div><button class="btn btn-primary" id="upload-btn"><svg class="icon"><use href="#i-plus"/></svg> Thêm tài liệu</button><input type="file" id="local-file" accept=".docx,.pdf" hidden /></div>
-          <div class="demo-disclaimer"><svg class="icon"><use href="#i-shield"/></svg><div><strong>Đây là dữ liệu minh họa</strong><span>Chưa có lưu trữ, tải lên máy chủ hoặc tích hợp xử lý tài liệu.</span></div></div>
-          <div class="document-panel"><div class="document-toolbar"><div class="filter-tabs" role="group" aria-label="Lọc trạng thái"><button class="filter-tab selected" data-filter="all">Tất cả <span>4</span></button><button class="filter-tab" data-filter="review">Đang rà soát</button><button class="filter-tab" data-filter="draft">Bản nháp</button><button class="filter-tab" data-filter="done">Hoàn tất</button></div><div class="list-search"><svg class="icon"><use href="#i-search"/></svg><input id="document-search" aria-label="Tìm tài liệu minh họa" placeholder="Tìm tài liệu..." /></div></div><div id="document-list" class="document-rows"></div><div id="empty-docs" class="empty-state" hidden>Không tìm thấy tài liệu minh họa phù hợp.</div></div>
+          <div class="sub-page-heading"><div><p class="section-kicker">DANH MỤC HỒ SƠ · DỮ LIỆU QA</p><h1>Hồ sơ vụ việc<span class="heading-dot">.</span></h1><p class="subtitle">Tạo và quản lý danh mục hồ sơ lưu bền vững trên D1, có phân quyền theo từng hồ sơ.</p></div>
+            <button class="btn btn-primary" type="button" id="upload-btn"><svg class="icon"><use href="#i-plus"/></svg> Tạo hồ sơ QA</button><input type="file" id="local-file" accept=".docx,.pdf" hidden /></div>
+          <div class="demo-disclaimer"><svg class="icon"><use href="#i-shield"/></svg><div><strong>Đã kết nối dữ liệu hồ sơ QA thật — chưa lưu tài liệu</strong>
+            <span>Danh mục và phân quyền được lưu trong D1. Không nhập tên khách hàng hoặc dữ liệu vụ việc thật. Google Drive, tải tệp và xử lý AI chưa kích hoạt.</span></div></div>
+          <section id="matter-workspace" class="matter-workspace" aria-labelledby="matter-title-heading">
+            <div class="matter-card">
+              <h2 id="matter-title-heading">Tạo hồ sơ mới</h2>
+              <p>Chỉ tạo hồ sơ thử nghiệm không chứa thông tin cá nhân hoặc hồ sơ khách hàng.</p>
+              <form id="matter-form"><label for="matter-title">Tên hồ sơ QA (3–100 ký tự)</label>
+                <div class="matter-form-row"><input id="matter-title" name="title" required minlength="3" maxlength="100" placeholder="Ví dụ: Hồ sơ QA - kiểm thử phân quyền" autocomplete="off"/>
+                  <button type="submit" id="matter-create">Lưu hồ sơ</button></div></form>
+              <p id="matter-feedback" role="status" aria-live="polite"></p>
+            </div>
+            <div class="matter-card">
+              <div class="matter-list-heading"><h2>Danh mục đã lưu <span id="matter-total">0</span></h2>
+                <button type="button" id="matter-refresh">Làm mới</button></div>
+              <label class="sr-only" for="matter-search">Tìm hồ sơ QA</label>
+              <input id="matter-search" placeholder="Tìm theo tên hồ sơ…" type="search" aria-label="Tìm hồ sơ QA" />
+              <p id="matter-empty">Chưa có hồ sơ nào. Tạo hồ sơ thử nghiệm đầu tiên để kiểm tra dữ liệu thật.</p>
+              <div id="matter-list" class="matter-list" role="list"></div>
+            </div>
+          </section>
+          <div class="document-panel" hidden><div class="document-toolbar"><div class="filter-tabs" role="group" aria-label="Lọc trạng thái"><button class="filter-tab selected" data-filter="all">Tất cả <span>0</span></button><button class="filter-tab" data-filter="review">Đang rà soát</button><button class="filter-tab" data-filter="draft">Bản nháp</button><button class="filter-tab" data-filter="done">Hoàn tất</button></div><div class="list-search"><svg class="icon"><use href="#i-search"/></svg><input id="document-search" aria-label="Tìm tài liệu minh họa" placeholder="Chưa có tài liệu" /></div></div><div id="document-list" class="document-rows"></div><div id="empty-docs" class="empty-state" hidden>Chưa có tệp tài liệu.</div></div>
         </section>
 
         <section id="view-assistant" class="view-panel" data-panel="assistant" hidden>
@@ -124,7 +145,7 @@
           <div class="research-principles"><div><svg class="icon"><use href="#i-link"/></svg><h3>Nguồn truy xuất</h3><p>Các kết quả sau này cần dẫn được về văn bản và điều khoản.</p></div><div><svg class="icon"><use href="#i-clock"/></svg><h3>Hiệu lực theo thời gian</h3><p>Phân biệt thời điểm áp dụng của từng quy định.</p></div><div><svg class="icon"><use href="#i-shield"/></svg><h3>Kiểm chứng trước sử dụng</h3><p>Hỗ trợ người dùng tự đối chiếu thông tin quan trọng.</p></div></div>
         </section>
       </main>
-      <footer class="page-footer"><span>© <span id="year">2026</span> AI Law · R0 Interface Preview</span><span>Chỉ sử dụng dữ liệu minh họa · Nghiệp vụ AI chưa kết nối</span></footer>
+      <footer class="page-footer"><span>© <span id="year">2026</span> AI Law · R0 Interface Preview</span><span>Hồ sơ QA lưu trên D1 · Tệp Google Drive và nghiệp vụ AI chưa kết nối</span></footer>
     </div>
   </div>
 

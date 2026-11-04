@@ -293,3 +293,27 @@ body.drawer-open{overflow:hidden}
 /* R45 mobile sign-out is inside right drawer to keep 320px header unclipped. */
 .drawer-groups .drawer-signout{margin-top:14px;background:#fff3f3;border-color:#eccbcb;color:#8b2830;justify-content:center}
 @media(max-width:620px){.top-logout{display:none}}
+
+/* R46: functional D1-backed QA matter registry; separate from the 11 status-only AI workflows. */
+.matter-workspace{display:grid;grid-template-columns:1fr;gap:16px;margin-top:18px}
+.matter-card{background:#fff;border:1px solid #dce3ee;border-radius:15px;padding:20px;box-shadow:0 3px 17px #1e31450a}
+.matter-card h2{font-size:18px;letter-spacing:-.3px;margin:0 0 8px;color:#1e2e47}
+.matter-card p{font-size:13px;color:#4f6078;margin:0 0 13px;line-height:1.55}
+#matter-form label{display:block;font-weight:750;font-size:13px;margin:14px 0 7px}
+.matter-form-row{display:flex;gap:9px;flex-wrap:wrap}
+.matter-form-row input,#matter-search{border:1px solid #cbd5e3;border-radius:10px;padding:12px 13px;font-size:16px;min-height:46px;color:#1c2a40;background:#fff}
+.matter-form-row input{min-width:0;flex:1 1 260px}
+.matter-form-row button{border:0;border-radius:10px;background:#4b4cb6;color:#fff;font-weight:800;padding:12px 17px;min-height:46px}
+.matter-form-row button:disabled{opacity:.6;cursor:wait}
+#matter-feedback{min-height:20px;margin:11px 0 0!important;font-weight:700}
+.matter-list-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.matter-list-heading button{border:1px solid #c9d3e4;border-radius:9px;padding:9px 11px;background:#f5f7fc;color:#314967;font-weight:700;min-height:44px}
+#matter-total{font-size:13px;color:#53627d}
+#matter-search{width:100%;margin:9px 0 14px}
+#matter-empty{border:1px dashed #cdd8e6;border-radius:10px;background:#fafbfe;padding:18px}
+.matter-list{display:flex;flex-direction:column;gap:9px}
+.matter-row{border:1px solid #d7e0eb;background:#f9fafd;border-radius:12px;padding:13px 15px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.matter-row strong{display:block;font-size:14px;overflow-wrap:anywhere}
+.matter-row small{display:block;font-size:12px;color:#61738b;margin-top:4px}
+.matter-row .matter-read-label{font-size:11px;font-weight:800;color:#24634c;background:#e7f6ed;padding:5px 8px;border-radius:20px;flex-shrink:0}
+@media(max-width:620px){.matter-card{padding:14px}.matter-form-row button{width:100%}.matter-row{align-items:flex-start;flex-direction:column}.matter-row .matter-read-label{align-self:flex-start}}
