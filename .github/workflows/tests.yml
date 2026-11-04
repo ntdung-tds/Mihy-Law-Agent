@@ -259,3 +259,22 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Test R46 matter UI create/list/reload with real browser, no secrets
         run: python deployment/cloudflare/tests/live_r46_matter_browser.py
+
+  cloudflare-matter-live:
+    # R46 isolated QA Worker only; no password or legal client data in GitHub.
+    if: github.ref_name == 'feat/r46-real-matter-workspace-cloudflare-d1' || github.head_ref == 'feat/r46-real-matter-workspace-cloudflare-d1'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Real live Cloudflare/D1 QA anonymous denial and same-origin preview gate
+        run: |
+          set -euo pipefail
+          backend="https://ai-law-standalone-cf-qa.iaict-platform.workers.dev"
+          preview="https://ai-law-r0-preview-r46-qa.iaict-platform.workers.dev"
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$backend/health")" = 200
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$backend/api/qa/matters")" = 401
+          test "$(curl -sS --max-time 25 -o /tmp/r46-login -w '%{http_code}' "$preview/#documents")" = 200
+          grep -q 'id="login-form"' /tmp/r46-login
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$preview/matters.js")" = 401
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$preview/api/qa/matters")" = 401
+          test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://evil.invalid' -H 'Content-Type: application/json' -d '{"title":"Synthetic QA"}' "$preview/api/qa/matters")" = 403
