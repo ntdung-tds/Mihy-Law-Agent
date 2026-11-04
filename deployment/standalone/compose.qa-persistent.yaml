@@ -13,7 +13,7 @@ services:
   gateway:
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8082/',timeout=2).close()"]
+      test: ["CMD", "python", "-c", "import os,urllib.request;req=urllib.request.Request('http://127.0.0.1:8082/',headers={'Host':os.environ['AI_LAW_R39_BROWSER_ORIGIN'].split('://',1)[1]});urllib.request.urlopen(req,timeout=2).close()"]
       interval: 3s
       timeout: 3s
       retries: 20
