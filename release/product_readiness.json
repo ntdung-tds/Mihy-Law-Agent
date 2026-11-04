@@ -2,7 +2,7 @@
   "schema_version": 1,
   "baseline": "SRS v1.1.15",
   "release_target": "R0",
-  "checkpoint": "R41",
+  "checkpoint": "R41_FROZEN_DEC017_R42_CLOUDFLARE_DIRECTION",
   "assessment_date": "2026-11-04",
   "synthetic_demo_customers_created": true,
   "live_customer_accounts_created": false,
@@ -169,9 +169,11 @@
         "GitHub Actions 41788819557 (10 SQL QA actors, real login, MatterACL and durable named volume after service down/up)",
         "Private owner-only Drive credential bundle (link kept out of public repo)",
         "tests/evidence/AL-R0-R41-STANDALONE-STAGING-KIT-2026-11-04.json",
-        "GitHub Actions 41793096574: 8 jobs PASS including operator-style local QA installation with real Chromium, same 10 QA accounts and SQL/RS256 after stop/start"
+        "GitHub Actions 41793096574: 8 jobs PASS including operator-style local QA installation with real Chromium, same 10 QA accounts and SQL/RS256 after stop/start",
+        "pcs/STATE.json DEC-017 (Owner direction saved, NOT implementation proof)",
+        "deployment/DEC-017-CLOUDFLARE-FREE-PORTABLE-STORAGE.md"
       ],
-      "need": "R41 repeatable private standalone QA kit tested in two disposable Docker+PG16+auth/API/UI installations with stable account passwords and signing keys across stop/restart; Chromium desktop/mobile-viewport 1440/390/320 PASS. No authorized persistent host connected (Cloudflare Containers 401, no Tunnel/host); saved owner QA bundle NOT applied to long-lived staging. Official IdP/MFA, protected workspace discovery, real SRS AI UC functions, full TC12, legal data, backup/restore and Owner acceptance remain NOT_RUN."
+      "need": "R41 repeatable private standalone QA kit tested in two disposable Docker+PG16+auth/API/UI installations with stable account passwords and signing keys across stop/restart; Chromium desktop/mobile-viewport 1440/390/320 PASS. No authorized persistent host connected (Cloudflare Containers 401, no Tunnel/host); saved owner QA bundle NOT applied to long-lived staging. Official IdP/MFA, protected workspace discovery, real SRS AI UC functions, full TC12, legal data, backup/restore and Owner acceptance remain NOT_RUN. DEC-017 Owner now prioritizes an isolated nonproduction Cloudflare Free AI Law deployment storing files in the organization's own Google Drive while R41 host kit remains parked for later server. No Cloudflare AI Law backend/metadata DB/OAuth/file upload implemented; Workers Free cannot simply run R41 Docker+PostgreSQL16. D1 tenant ACL/RLS parity and SRS impact not yet validated. Future OneDrive/NAS/VPS/AWS/Azure/GCP portability is only architecture intent."
     }
   },
   "delivery_modes_owner_approved": "2026-11-04; both SaaS and dedicated REQUIRED for AI Law product target, not either-or",
@@ -197,5 +199,16 @@
   "standalone_qa_staging_kit": "PASS_CI_41793096574",
   "standalone_qa_staging_kit_browser_e2e": "PASS_CHROMIUM_CI_41793096574",
   "standalone_qa_test_accounts_after_restart": "PASS_EPHEMERAL_CI_PG16_VOLUME",
-  "standalone_qa_owner_saved_credentials_activated": "NOT_APPLIED_TO_PERMANENT_HOST"
+  "standalone_qa_owner_saved_credentials_activated": "NOT_APPLIED_TO_PERMANENT_HOST",
+  "owner_delivery_direction": "CLOUDFLARE_WORKERS_FREE_AND_CUSTOMER_OWNED_GOOGLE_DRIVE_FIRST",
+  "r41_owner_server_resume": "PARKED_UNTIL_OWNER_PROVIDES_DEDICATED_HOST",
+  "r41_verified_main_ci": "PASS_8_OF_8_41794614580",
+  "cloudflare_free_runtime": "NOT_IMPLEMENTED",
+  "cloudflare_ai_law_d1_db": "NOT_CREATED",
+  "cloudflare_real_user_login": "NOT_RUN",
+  "google_drive_legal_file_storage": "NOT_CONNECTED",
+  "google_drive_oauth_per_organization": "NOT_RUN",
+  "onedrive_nas_vps_aws_azure_gcp_storage_adapter": "DESIGN_TARGET_ONLY_NOT_IMPLEMENTED",
+  "future_portable_hosts": "VPS_PRIVATE_SERVER_AWS_AZURE_GCP_DESIGN_TARGET_ONLY",
+  "srs_baseline_changed": false
 }
