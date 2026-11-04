@@ -55,8 +55,8 @@ https://ai-law-standalone-cf-qa.iaict-platform.workers.dev/
   logout, expiry, strict Origin and rate limiting.
 - **PASS:** GitHub Actions live Playwright Chromium over the real QA
   workers.dev URL: responsive rendering, login page, no horizontal
-  overflow, anonymous view denied, QA-04 wrong password returns actual
-  HTTP 401 (verifies Worker PBKDF2 + D1 access under Cloudflare Free),
+  overflow, anonymous view denied, unknown synthetic email returns actual
+  HTTP 401 (verifies denial path on live Worker; PBKDF2 real signature/password logic covered by Node tests),
   refresh still not authenticated.
 - **PASS:** Actual Cloudflare D1 has R44 migration tables, QA-04 synthetic
   account verifier, active principal and organization membership.
@@ -68,7 +68,7 @@ https://ai-law-standalone-cf-qa.iaict-platform.workers.dev/
   full IAM/RLS SRS parity, Google Drive OAuth or file upload,
   actual legal AI functions/TC12 and production release.
 
-## Owner phone acceptance
+**Regression fixed:** repeated public CI wrong-password submissions to QA-04 reached D1 lockout. Live browser CI now uses a nonexistent email to avoid locking the Owner's login. Unlock QA-04 after final CI and keep lockout policy active.\n\n## Owner phone acceptance
 
 1. Open the exact QA URL above on your Android/iOS browser.
 2. Sign in with the R44 synthetic email and the separate private R44
