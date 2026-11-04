@@ -79,5 +79,43 @@ class D01PolicyApprovalTests(unittest.TestCase):
         self.assertEqual(task["owner_acceptance"], "APPROVED_POLICY_ONLY")
 
 
+
+class D01R33RealImplementationClarification(unittest.TestCase):
+    """Owner-approved D01 is a project decision; real login E2E stays separate."""
+
+    def test_iaict_operates_platform_but_cannot_implicitly_read_matters(self):
+        data = json.loads(POLICY.read_text(encoding="utf-8"))
+        self.assertEqual(data["policy_approval"], "OWNER_APPROVED_IN_CHAT")
+        self.assertEqual(data["platform_operator"], "IAICT")
+        self.assertIn("customer_account_administration",
+                      data["platform_operator_management_scope"])
+        self.assertFalse(data["platform_operator_implicit_matter_read"])
+        self.assertEqual(data["default_platform_operator_matter_read"], "DENY")
+        self.assertEqual(data["legal_entity"], "NOT_IDENTIFIED")  # Registered name proof is separate
+        self.assertTrue(data["allowed"]["real_r0_engineering"])
+
+    def test_real_role_accounts_not_confused_with_static_fixtures(self):
+        path = ROOT / "tests" / "acceptance" / "R0_REAL_ROLE_ACCOUNTS.md"
+        content = path.read_text(encoding="utf-8")
+        for case in range(1, 9):
+            self.assertIn("RA-" + str(case).zfill(2), content)
+        self.assertIn("actual test user account", content)
+        self.assertIn("TC12A/TC12B", content)
+        self.assertIn("NOT_RUN", content)
+        self.assertIn("IAICT", content)
+
+    def test_policy_gate_is_approved_but_product_remains_blocked(self):
+        from tools.check_product_readiness import evaluate_readiness
+        release = json.loads((ROOT / "release" / "product_readiness.json").read_text(encoding="utf-8"))
+        d01 = [g for g in release["gates"] if g["id"] == "D01_APPROVAL"]
+        self.assertEqual(len(d01), 1)
+        self.assertEqual(d01[0]["status"], "PASS")
+        self.assertTrue(d01[0]["evidence"])
+        self.assertEqual(release["operator"], "IAICT")
+        self.assertFalse(release["live_customer_accounts_created"])
+        self.assertFalse(evaluate_readiness(release)["product_ready"])
+        self.assertEqual(release["production_deployment"], "NOT_AUTHORIZED")
+
+
 if __name__ == "__main__":
     unittest.main()
