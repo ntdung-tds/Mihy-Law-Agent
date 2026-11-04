@@ -1,6 +1,14 @@
-# AI Law — R0 product release decision (R39)
+# AI Law — R0 product release decision (R40)
 
 **State:** PRODUCT_NOT_READY. **D01 policy: OWNER APPROVED. Platform operator: IAICT.** The earlier five-persona static showcase and PostgreSQL seed are synthetic-only test aids; the Owner-defined demo acceptance target is **real authenticated accounts for different customer roles** with real staging E2E. They are not equivalent.
+
+## R40 — 10 named QA actor accounts, nonproduction SQL/HTTP tests and private credentials
+
+A reusable public-safe manifest maps QA-01..QA-10 to RA-02..RA-09 (9 primary standalone, 1 independent second installation), with **actual existing** `lawyer` and `tenant_admin` roles and explicit MatterACL. Private owner-only Google Drive holds a separate credential bundle with 10 random passwords and Argon2id hashes; no secret links or hashes are placed in this public repository. A trusted operator may apply the SQL produced by `tools/r40_qa_provision.py` idempotently on a **private QA-only PostgreSQL16** installation.
+
+GitHub Actions `41788819557`: all SEVEN jobs PASS including actual credential-based HTTP login for QA-01..QA-10, multi-membership, tenant_admin denial, revoked/disabled accounts, limited two-case read ACL, cross-installation signing key isolation, same SQL idempotency, Docker Compose down/up data persistence and mismatched private secret bundle refusal.
+
+**Status NOT READY:** The CI installs were destroyed after tests and the owner-saved bundle has NOT been applied to any durable owner-accessible staging host. `delivery_modes.dedicated.deployment_e2e`, `APPLICATION_E2E`, full TC12, legal AI UC cases, canonical production IAM, MFA and backup remain NOT_RUN. Do not mark real customer accounts activated, enable SaaS or deploy production. D01 Owner-approved and SRS baseline v1.1.15 stay unchanged.
 
 ## R39 — browser sign-in real against disposable standalone stack, NOT full application E2E
 
