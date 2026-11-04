@@ -29,7 +29,7 @@
     }
   ],
   "shared_invariants": [
-    "Identical application source and versioned database migrations; no permanent product fork.",
+    "Same application source and versioned database migrations for both delivery modes; no permanent product fork.",
     "Shared legal AI workflows, IAM authorization semantics, SRS APIs, audit semantics and negative tests.",
     "Authentication provider, storage and external AI dependencies are explicit environment configuration; do not embed IAICT SaaS credentials in a customer installation.",
     "No implicit IAICT operator or customer tenant-admin read of a MatterACL-protected case.",
