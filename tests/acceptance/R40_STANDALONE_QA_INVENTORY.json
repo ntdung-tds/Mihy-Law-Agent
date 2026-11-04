@@ -1,0 +1,342 @@
+{
+  "schema_version": 1,
+  "track": "AI_LAW_R40_STANDALONE_QA_NONPROD",
+  "srs": "v1.1.15_LOCKED",
+  "purpose": "Canonical public-safe QA test actor inventory, NOT proof of deployment or live account activation.",
+  "saas_ra01": "DEFERRED_BY_OWNER",
+  "installations": [
+    {
+      "id": "primary",
+      "description": "IAICT as an ordinary organization and a second tenant, one isolated installation",
+      "tenants": [
+        {
+          "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "type": "organization",
+          "label": "IAICT (customer, NOT SaaS operator)"
+        },
+        {
+          "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+          "type": "organization",
+          "label": "Independent law organization"
+        },
+        {
+          "id": "f1111111-1111-4111-8111-111111111111",
+          "type": "personal",
+          "label": "QA-01 personal"
+        },
+        {
+          "id": "f2222222-2222-4222-8222-222222222222",
+          "type": "personal",
+          "label": "QA-02 personal"
+        },
+        {
+          "id": "f5555555-5555-4555-8555-555555555555",
+          "type": "personal",
+          "label": "QA-05 personal"
+        },
+        {
+          "id": "f6666666-6666-4666-8666-666666666666",
+          "type": "personal",
+          "label": "QA-06 personal"
+        }
+      ]
+    },
+    {
+      "id": "secondary",
+      "description": "A completely separate installation to verify physical DB/JWT isolation",
+      "tenants": [
+        {
+          "id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+          "type": "organization",
+          "label": "Separate company"
+        }
+      ]
+    }
+  ],
+  "roles_approved_existing": [
+    "lawyer",
+    "tenant_admin"
+  ],
+  "accounts": [
+    {
+      "id": "QA-01",
+      "email": "qa01.personal@ai-law.invalid",
+      "subject": "qa01-personal",
+      "user_id": "40404040-0000-4000-8000-000000000001",
+      "installation": "primary",
+      "status": "active",
+      "memberships": [
+        {
+          "tenant_id": "f1111111-1111-4111-8111-111111111111",
+          "role_key": "lawyer",
+          "status": "active"
+        }
+      ],
+      "ra_cases": [
+        "RA-02"
+      ]
+    },
+    {
+      "id": "QA-02",
+      "email": "qa02.dual@ai-law.invalid",
+      "subject": "qa02-dual",
+      "user_id": "40404040-0000-4000-8000-000000000002",
+      "installation": "primary",
+      "status": "active",
+      "memberships": [
+        {
+          "tenant_id": "f2222222-2222-4222-8222-222222222222",
+          "role_key": "lawyer",
+          "status": "active"
+        },
+        {
+          "tenant_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "role_key": "lawyer",
+          "status": "active"
+        }
+      ],
+      "ra_cases": [
+        "RA-03"
+      ]
+    },
+    {
+      "id": "QA-03",
+      "email": "qa03.admin@ai-law.invalid",
+      "subject": "qa03-admin",
+      "user_id": "40404040-0000-4000-8000-000000000003",
+      "installation": "primary",
+      "status": "active",
+      "memberships": [
+        {
+          "tenant_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "role_key": "tenant_admin",
+          "status": "active"
+        }
+      ],
+      "ra_cases": [
+        "RA-04"
+      ]
+    },
+    {
+      "id": "QA-04",
+      "email": "qa04.lawyer@ai-law.invalid",
+      "subject": "qa04-lawyer",
+      "user_id": "40404040-0000-4000-8000-000000000004",
+      "installation": "primary",
+      "status": "active",
+      "memberships": [
+        {
+          "tenant_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "role_key": "lawyer",
+          "status": "active"
+        }
+      ],
+      "ra_cases": [
+        "RA-05"
+      ]
+    },
+    {
+      "id": "QA-05",
+      "email": "qa05.nonmember@ai-law.invalid",
+      "subject": "qa05-nonmember",
+      "user_id": "40404040-0000-4000-8000-000000000005",
+      "installation": "primary",
+      "status": "active",
+      "memberships": [
+        {
+          "tenant_id": "f5555555-5555-4555-8555-555555555555",
+          "role_key": "lawyer",
+          "status": "active"
+        }
+      ],
+      "ra_cases": [
+        "RA-06",
+        "RA-08"
+      ]
+    },
+    {
+      "id": "QA-06",
+      "email": "qa06.revoked@ai-law.invalid",
+      "subject": "qa06-revoked",
+      "user_id": "40404040-0000-4000-8000-000000000006",
+      "installation": "primary",
+      "status": "active",
+      "memberships": [
+        {
+          "tenant_id": "f6666666-6666-4666-8666-666666666666",
+          "role_key": "lawyer",
+          "status": "active"
+        },
+        {
+          "tenant_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "role_key": "lawyer",
+          "status": "revoked"
+        }
+      ],
+      "ra_cases": [
+        "RA-06",
+        "RA-07"
+      ]
+    },
+    {
+      "id": "QA-07",
+      "email": "qa07.disabled@ai-law.invalid",
+      "subject": "qa07-disabled",
+      "user_id": "40404040-0000-4000-8000-000000000007",
+      "installation": "primary",
+      "status": "disabled",
+      "memberships": [
+        {
+          "tenant_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "role_key": "lawyer",
+          "status": "active"
+        }
+      ],
+      "ra_cases": [
+        "RA-07"
+      ]
+    },
+    {
+      "id": "QA-08",
+      "email": "qa08.limited@ai-law.invalid",
+      "subject": "qa08-limited",
+      "user_id": "40404040-0000-4000-8000-000000000008",
+      "installation": "primary",
+      "status": "active",
+      "memberships": [
+        {
+          "tenant_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "role_key": "lawyer",
+          "status": "active"
+        }
+      ],
+      "ra_cases": [
+        "RA-09"
+      ]
+    },
+    {
+      "id": "QA-09",
+      "email": "qa09.otherorg@ai-law.invalid",
+      "subject": "qa09-otherorg",
+      "user_id": "40404040-0000-4000-8000-000000000009",
+      "installation": "primary",
+      "status": "active",
+      "memberships": [
+        {
+          "tenant_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+          "role_key": "lawyer",
+          "status": "active"
+        }
+      ],
+      "ra_cases": [
+        "RA-06",
+        "RA-08"
+      ]
+    },
+    {
+      "id": "QA-10",
+      "email": "qa10.separate@ai-law.invalid",
+      "subject": "qa10-separate",
+      "user_id": "40404040-0000-4000-8000-000000000010",
+      "installation": "secondary",
+      "status": "active",
+      "memberships": [
+        {
+          "tenant_id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+          "role_key": "lawyer",
+          "status": "active"
+        }
+      ],
+      "ra_cases": [
+        "RA-06",
+        "RA-08"
+      ]
+    }
+  ],
+  "synthetic_matters": [
+    {
+      "id": "c1111111-1111-4111-8111-111111111111",
+      "installation": "primary",
+      "tenant_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "owner_account": "QA-04",
+      "run_id": "fixture-run",
+      "grants": [
+        "QA-04",
+        "QA-02",
+        "QA-08"
+      ]
+    },
+    {
+      "id": "c2222222-2222-4222-8222-222222222222",
+      "installation": "primary",
+      "tenant_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "owner_account": "QA-04",
+      "run_id": "qa-run-second",
+      "grants": [
+        "QA-04"
+      ]
+    },
+    {
+      "id": "c3333333-3333-4333-8333-333333333333",
+      "installation": "primary",
+      "tenant_id": "f1111111-1111-4111-8111-111111111111",
+      "owner_account": "QA-01",
+      "run_id": "fixture-run",
+      "grants": [
+        "QA-01"
+      ]
+    },
+    {
+      "id": "c4444444-4444-4444-8444-444444444444",
+      "installation": "primary",
+      "tenant_id": "f2222222-2222-4222-8222-222222222222",
+      "owner_account": "QA-02",
+      "run_id": "fixture-run",
+      "grants": [
+        "QA-02"
+      ]
+    },
+    {
+      "id": "c5555555-5555-4555-8555-555555555555",
+      "installation": "primary",
+      "tenant_id": "f5555555-5555-4555-8555-555555555555",
+      "owner_account": "QA-05",
+      "run_id": "fixture-run",
+      "grants": [
+        "QA-05"
+      ]
+    },
+    {
+      "id": "c6666666-6666-4666-8666-666666666666",
+      "installation": "primary",
+      "tenant_id": "f6666666-6666-4666-8666-666666666666",
+      "owner_account": "QA-06",
+      "run_id": "fixture-run",
+      "grants": [
+        "QA-06"
+      ]
+    },
+    {
+      "id": "c9999999-9999-4999-8999-999999999999",
+      "installation": "primary",
+      "tenant_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      "owner_account": "QA-09",
+      "run_id": "fixture-run",
+      "grants": [
+        "QA-09"
+      ]
+    },
+    {
+      "id": "ceeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+      "installation": "secondary",
+      "tenant_id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+      "owner_account": "QA-10",
+      "run_id": "fixture-run",
+      "grants": [
+        "QA-10"
+      ]
+    }
+  ],
+  "access_rule": "MatterACL explicitly grants each case. Neither tenant_admin, principal owner nor IAICT provider name implies access.",
+  "credentials_policy": "Never put passwords, signing keys, SQL password hashes, token or Drive secret links in this public GitHub file. Credentials stored separately in restricted Drive and injected for local installation only. Do not claim accounts are active until applied to durable DB and validated."
+}
