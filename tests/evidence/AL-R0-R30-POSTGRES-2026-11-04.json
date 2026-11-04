@@ -1,0 +1,206 @@
+{
+  "test_run_id": "AL-R0-R30-POSTGRES-TR-2026-11-04-01",
+  "run_date": "2026-11-04",
+  "repo": "ntdung-tds/Mihy-Law-Agent",
+  "branch": "feat/r0-postgres-rls-batch-r30",
+  "pr": 45,
+  "scope": "R30 batch: disposable PostgreSQL16 IAM migration, FORCE RLS/MatterACL/trigger tests, R26-R28 real database authorization seam and synthetic HTTP. No identity provider, deployed API or real customer data.",
+  "baseline": "AI Law SRS v1.1.15 private canonical IAM design; unchanged",
+  "tasks": [
+    {
+      "task_id": "AL-R0-DB-001",
+      "title": "R30-01 PostgreSQL IAM relational migration",
+      "result": "PASS_DISPOSABLE_PG16",
+      "real_prod_migration": "NOT_RUN"
+    },
+    {
+      "task_id": "AL-R0-DB-002",
+      "title": "R30-02 RLS/MatterACL tenant and role/group/ACL revision controls",
+      "result": "PASS_DISPOSABLE_PG16",
+      "real_prod_equivalent_security_review": "NOT_RUN"
+    },
+    {
+      "task_id": "AL-R0-DB-003",
+      "title": "R30-03 integrate R26 membership and R28 getRun tenant/MatterACL with PostgreSQL",
+      "result": "PASS_SYNTHETIC_POSTGRES_AND_LOOPBACK_HTTP",
+      "real_idp_or_run_store": "NOT_RUN"
+    },
+    {
+      "task_id": "AL-R0-DB-004",
+      "title": "R30-04 integration and regressions",
+      "result": "PASS_18_PG_AND_195_UNIT",
+      "actual_browser_e2e": "NOT_RUN"
+    }
+  ],
+  "review_cycles": [
+    {
+      "phase": "R30-TEST_FIRST",
+      "result": "EXPECTED_FAIL",
+      "ci_run": 41749247030,
+      "comment": "New PG integration test and CI job added before implementation, module absent."
+    },
+    {
+      "phase": "R30-LOOP_1_FIXTURE",
+      "result": "FAIL_THEN_FIXED",
+      "ci_run": 41749603234,
+      "comment": "Actual PostgreSQL started, tests identified a psycopg3 fixture error using Connection.executemany (not valid); test was repaired to Cursor.executemany."
+    },
+    {
+      "phase": "R30-LOOP_1_GREEN",
+      "result": "PASS",
+      "ci_run": 41749719287,
+      "comment": "11/11 PostgreSQL 16 integration tests plus 195 existing non-PG unit tests PASS."
+    },
+    {
+      "phase": "R30-LOOP_2_ADVERSARIAL",
+      "result": "EXPECTED_FAIL_2",
+      "ci_run": 41749951384,
+      "comment": "Detected missing authz_version bump on group membership changes and missing acl_version bump on MatterACL mutation; incorrect role-trigger test also found and made specific."
+    },
+    {
+      "phase": "R30-LOOP_2_GREEN",
+      "result": "PASS",
+      "ci_run": 41750155090,
+      "comment": "16/16 PG tests with group/ACL version triggers and tested deferred active-role guard."
+    },
+    {
+      "phase": "R30-LOOP_3_VIEW_AND_BULK",
+      "result": "PASS",
+      "ci_run": 41750309108,
+      "comment": "18/18 PostgreSQL16 tests; ACL security-invoker view and multirow ACL updates preserve isolation/versioning."
+    },
+    {
+      "phase": "R30-LOOP_4_LOOPBACK",
+      "result": "PASS",
+      "ci_run": 41750489061,
+      "comment": "18/18 PostgreSQL16 tests, includes real localhost HTTP GET backed by PostgreSQL IAM/MatterACL; fake token and in-memory TaskRun."
+    }
+  ],
+  "checks": [
+    {
+      "id": "R30-PG-01",
+      "status": "PASS_REAL_PG",
+      "detail": "Migration applied to isolated PostgreSQL16 schema via actual driver."
+    },
+    {
+      "id": "R30-PG-02",
+      "status": "PASS_REAL_PG",
+      "detail": "FORCE RLS on tenant-sensitive tables, runtime test role nonowner/non-BYPASS."
+    },
+    {
+      "id": "R30-PG-03",
+      "status": "PASS_REAL_PG",
+      "detail": "No trusted session scope returns zero rows."
+    },
+    {
+      "id": "R30-PG-04",
+      "status": "PASS_REAL_PG",
+      "detail": "Tenant A principal cannot read Tenant B membership or matters; per-transaction scope clears after commit."
+    },
+    {
+      "id": "R30-PG-05",
+      "status": "PASS_REAL_PG",
+      "detail": "Runtime cannot insert tenant; read-only permission and FK blocks cross-tenant ACL."
+    },
+    {
+      "id": "R30-PG-06",
+      "status": "PASS_REAL_PG",
+      "detail": "Active membership without registered role rejected at deferred commit; last-role removal rolled back."
+    },
+    {
+      "id": "R30-PG-07",
+      "status": "PASS_REAL_PG",
+      "detail": "Revoked membership cannot silently reactivate; revocation bumps authz_version and hides rows."
+    },
+    {
+      "id": "R30-PG-08",
+      "status": "PASS_REAL_PG",
+      "detail": "Membership role and group mutation bump authz_version."
+    },
+    {
+      "id": "R30-PG-09",
+      "status": "PASS_REAL_PG",
+      "detail": "MatterACL explicit user/group read, valid_from/valid_to and deny override allow."
+    },
+    {
+      "id": "R30-PG-10",
+      "status": "PASS_REAL_PG",
+      "detail": "ACL mutation bumps matter acl_version atomically; group ACL/user ACL bulk writes keep surviving grants at current revision."
+    },
+    {
+      "id": "R30-PG-11",
+      "status": "PASS_REAL_PG",
+      "detail": "Security-invoker ACL view cannot leak the other tenant's ACL rows."
+    },
+    {
+      "id": "R30-PG-12",
+      "status": "PASS_REAL_PG",
+      "detail": "Revoked membership denied on second statement of existing READ COMMITTED connection."
+    },
+    {
+      "id": "R30-PG-13",
+      "status": "PASS_REAL_PG_SYNTHETIC_HTTP",
+      "detail": "SRS GET /v1/runs/{id} 200, 404 other tenant and 404 after revoked; actual localhost WSGI+Postgres but fake bearer verifier and in-memory run payload."
+    },
+    {
+      "id": "R30-REAL-IDP",
+      "status": "NOT_RUN",
+      "detail": "Production/OIDC/JWKS verification, persistence, MFA/step-up, rotation and session revocation."
+    },
+    {
+      "id": "R30-PROD-RLS",
+      "status": "NOT_RUN",
+      "detail": "Review of production-equivalent DB roles, auth-context forgery under SQL injection, pooling, SECURITY DEFINER and all storage/job/search/download services."
+    },
+    {
+      "id": "R30-REAL-RUN",
+      "status": "NOT_RUN",
+      "detail": "Real TaskRun table/repo, authorized run-to-matter association, actual legal case data and browser E2E."
+    },
+    {
+      "id": "R30-OUTBOX",
+      "status": "NOT_IMPLEMENTED",
+      "detail": "Immutable audit/outbox and cross-service index, download-proxy/session cache invalidation."
+    },
+    {
+      "id": "R30-LEGAL",
+      "status": "PENDING",
+      "detail": "D01 signed evidence, vendor/role decisions, D03/D05/D07 and conditional decisions remain unapproved for real-data Pilot."
+    },
+    {
+      "id": "R30-DEPLOY",
+      "status": "NOT_DEPLOYED",
+      "detail": "Neither staging application nor production deployed."
+    }
+  ],
+  "github_actions": {
+    "unit_job": {
+      "ran": 213,
+      "passed": 195,
+      "skipped_postgres": 18,
+      "conclusion": "PASS"
+    },
+    "postgres_rls_job": {
+      "ran": 18,
+      "passed": 18,
+      "skipped": 0,
+      "conclusion": "PASS",
+      "db": "PostgreSQL 16 disposable service"
+    },
+    "latest_success_run": 41750489061,
+    "last_commit_ci": "WILL_RECHECK_AFTER_FINAL_COMMIT"
+  },
+  "governance": {
+    "D01_policy_approval": "OWNER_APPROVED_IN_CHAT",
+    "GATE-D01-R0": "PENDING_EVIDENCE",
+    "GATE-LEGAL-DATA": "PENDING_APPROVAL",
+    "GATE-IAM-RUNTIME": "NOT_ACCEPTED_REAL_APP",
+    "owner_final_acceptance": "PENDING",
+    "srs_changed": "NONE",
+    "sensitive_data_used": false,
+    "production_deployed": false
+  },
+  "evidence_classification": "PUBLIC_SAFE_SYNTHETIC_TEST_METADATA",
+  "private_drive_folder": "PREPARED_LATER",
+  "raw_logs_drive": "NOT_YET_UPLOADED"
+}
