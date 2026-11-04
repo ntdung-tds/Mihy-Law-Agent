@@ -73,7 +73,7 @@ class D01PolicyApprovalTests(unittest.TestCase):
         decisions = [d for d in state["state"]["decisions"] if d["id"] == "DEC-011"]
         self.assertEqual(len(decisions), 1)
         self.assertIn("D01", decisions[0]["topic"])
-        self.assertEqual(state["state"]["current"]["active_task"], "AL-D01-GOV-001")
+        self.assertGreaterEqual(state["revision"], 29)  # D01 approval persists after later tasks
         task = next(t for t in state["state"]["tasks"] if t["id"] == "AL-D01-GOV-001")
         self.assertEqual(task["status"], "POLICY_RECORDED")
         self.assertEqual(task["owner_acceptance"], "APPROVED_POLICY_ONLY")
