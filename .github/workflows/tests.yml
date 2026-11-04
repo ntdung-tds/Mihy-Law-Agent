@@ -243,3 +243,19 @@ jobs:
             test "$(curl -sSL --max-time 25 -o /dev/null -w '%{http_code}' "$base/api/qa/session")" = 401
             test "$(curl -sSL --max-time 25 -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://attacker.invalid' -H 'Content-Type: application/json' -d '{}' "$base/api/qa/logout")" = 403
           done
+
+  cloudflare-matter-browser:
+    # R46 real Chromium UI test with isolated synthetic HTTP API; D1 SQL separately tested.
+    if: github.ref_name == 'feat/r46-real-matter-workspace-cloudflare-d1' || github.head_ref == 'feat/r46-real-matter-workspace-cloudflare-d1'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Chromium
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: Test R46 matter UI create/list/reload with real browser, no secrets
+        run: python deployment/cloudflare/tests/live_r46_matter_browser.py
