@@ -1,10 +1,20 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `46` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T15:08:00Z`.
+- **PCS revision:** `47` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T16:08:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R46 — real persistent QA matter registry deployed on original preview (full product still gated)
+
+- **Owner direction:** Replace simulated UI with real user-operable product modules; do not widen SRS v1.1.15. Release remains Owner-gated and no real customer legal data authorized.
+- **Implemented:** existing login service validates R44 QA session; new `GET/POST /api/qa/matters` scoped to installation/tenant and active membership. Creation atomically persists one QA matter, creator's versioned MatterACL read/write grants, metadata title/time and a creation audit event. Listing performs allow-minus-deny MatterACL checks. UI `#documents` has real form, persisted list, search, refresh, accurate counts, no fake file rows. Storage is *metadata only* in D1; no upload or AI.
+- **Live infrastructure:** D1 `0003_cf_qa_matter_catalog.sql` applied to same AI Law isolated database (no new D1). Cloudflare Worker `ai-law-standalone-cf-qa` uploaded five modules retaining R44 D1+secret bindings, previous version `1a40a403-339c-4dde-af60-36e0ec1e9d70` preserved. Original `ai-law-r0-preview` now uploaded eight modules, existing QA_AUTH Service Binding preserved; prior version `0d073b3f-0ffc-4337-ad15-972e51e45456` preserved.
+- **Verified:** actual Cloudflare D1 migration/schema readback PASS; R46 Node route/CSRF/transaction tests and real SQLite tenant/MatterACL tests PASS in R46 early CI. Cloudflare Browser Rendering (authenticated synthetic QA test session) observed R46 QA case metadata actually rendered in the mobile 390px list; synthetic test case and session removed/revoked after the check. Browser Rendering also confirmed staging login on mobile. No owner password or session token recorded in evidence.
+- **Not yet verified:** Owner's real phone POST matter create/reload/logout on original URL = NOT_RUN_OWNER. Later branch CI jobs queued at evidence checkpoint, not PASS. No live Google Drive OAuth, DOCX/PDF storage, legal AI UC03/04/07, security audit, full TC12 or production approval. R41 server handoff remains parked, SaaS deferred. Product readiness is NOT_READY.
+- **PR:** https://github.com/ntdung-tds/Mihy-Law-Agent/pull/63
+- **Source:** `deployment/cloudflare/src/matter_workspace.mjs`, `deployment/cloudflare/migrations/0003_cf_qa_matter_catalog.sql`, `web/r0-preview/matters.js` and R46 tests.
 
 ## R45 — original R0 preview now uses R44 QA login and right mobile menu (Owner pending)
 

@@ -88,3 +88,7 @@ https://developers.cloudflare.com/workers/platform/limits/
 https://developers.cloudflare.com/d1/platform/limits/
 https://developers.cloudflare.com/d1/worker-api/d1-database/
 https://developers.google.com/workspace/drive/api/guides/api-specific-auth
+
+## R46 — QA-only durable matter register (real metadata)
+
+Apply additive `migrations/0003_cf_qa_matter_catalog.sql` to the *existing isolated AI Law D1 only*. Deploy `src/matter_workspace.mjs` alongside the existing backend Worker modules; preserve ALL preexisting D1/plain-text/secret bindings (never print a secret in logs). Preview has `QA_AUTH` private service binding and eight build modules including `preview_matters.mjs`. API `GET/POST /api/qa/matters` uses the R44 HttpOnly QA cookie, active tenant session, CSRF Origin for writes and explicit versioned MatterACL allow-minus-deny for reads. POST atomically writes matter, creator read/write grants, catalog and creation event. All R46 content is synthetic QA metadata. Real Drive file storage, virus scanning, approved IdP/MFA, production security and full legal SRS functions are **not implemented**; production is BLOCKED.

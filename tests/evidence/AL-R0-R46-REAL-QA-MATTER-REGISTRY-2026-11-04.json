@@ -1,0 +1,33 @@
+{
+  "id": "AL-R0-R46-REAL-QA-MATTER-REGISTRY-2026-11-04",
+  "date": "2026-11-04",
+  "environment": "CLOUDFLARE_FREE_NONPRODUCTION_QA",
+  "feature": "Actual authenticated tenant-scoped D1 matter metadata creation/listing/search with versioned MatterACL and atomic create audit",
+  "main_pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/63",
+  "qa_url": "https://ai-law-r0-preview.iaict-platform.workers.dev/#documents",
+  "backend_worker": "ai-law-standalone-cf-qa",
+  "preview_worker": "ai-law-r0-preview",
+  "new_d1_databases": 0,
+  "binding_readback": "PASS_EXISTING_DB_AND_SECRET_BINDINGS_PRESERVED",
+  "migration": "PASS_D1_0003_TABLES_APPLIED_AND_READBACK",
+  "tests": {
+    "sql_acl": "PASS_REAL_SQLITE_AND_NODE_CI_R46_EARLIER_COMMIT",
+    "original_backend_and_preview_cloudflare_deployed": "PASS_API_READBACK",
+    "chrome_staging_login": "PASS_CF_BROWSER_390",
+    "real_d1_authenticated_mobile_read": "PASS_CF_BROWSER_390_SYNTHETIC_RECORD_SEEDED_AND_REMOVED",
+    "original_url_owner_case_create": "NOT_RUN_OWNER",
+    "live_post_create_logout_end_to_end": "NOT_RUN_OWNER",
+    "latest_branch_ci": "QUEUED_AT_CHECKPOINT",
+    "google_oauth_real_file_upload": "NOT_IMPLEMENTED",
+    "legal_ai_uc03_uc04_uc07": "NOT_IMPLEMENTED",
+    "production_security_and_release": "BLOCKED"
+  },
+  "known_limitations": [
+    "QA PBKDF2 auth is not product IAM/IdP/MFA",
+    "D1 explicit application ACL is not PostgreSQL FORCE RLS",
+    "Only synthetic QA case metadata is allowed",
+    "No production or real legal data",
+    "SRS v1.1.15 unchanged",
+    "R41 independent host deployment parked"
+  ]
+}

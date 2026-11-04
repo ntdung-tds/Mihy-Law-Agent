@@ -2,14 +2,14 @@
   "schema_version": 1,
   "baseline": "SRS v1.1.15",
   "release_target": "R0",
-  "checkpoint": "R44_MOBILE_QA_LOGIN_OWNER_ACCEPTANCE_PENDING",
+  "checkpoint": "R46_REAL_QA_MATTER_REGISTRY_NOT_PRODUCTION_READY",
   "assessment_date": "2026-11-04",
   "synthetic_demo_customers_created": true,
   "live_customer_accounts_created": false,
   "production_deployment": "NOT_AUTHORIZED",
   "owner_final_acceptance": "PENDING",
   "srs_changed": false,
-  "purpose": "Actual SRS R0 product implementation. Previous synthetic UI and DB fixtures are limited tests, not real role-based customer login acceptance. Production remains separately gated.",
+  "purpose": "SRS R0 real product development. R46 now has an actual QA-only D1-backed MatterACL-gated matter metadata workflow, not a fully released legal AI application.",
   "demo_gates": [
     {
       "id": "DEMO_FIXTURE",
@@ -86,7 +86,7 @@
       "id": "REAL_CASE_DOC_STORAGE",
       "status": "NOT_IMPLEMENTED",
       "evidence": [],
-      "need": "Safe encrypted content storage, upload validation, antivirus/quarantine, OCR and immutable originals per SRS."
+      "need": "Safe encrypted content storage, upload validation, antivirus/quarantine, OCR and immutable originals per SRS. R46 QA case metadata create/list is functional with tenant ACL, but real encrypted client-file storage/Drive OAuth and original retention controls remain UNIMPLEMENTED; do not mark this gate PASS."
     },
     {
       "id": "UC03_TRANSLATE",
@@ -120,7 +120,7 @@
       "evidence": [
         "tests/evidence/AL-R0-R39-STANDALONE-BROWSER-2026-11-04.json (only test-only signed-GET-run browser slice; does NOT pass application legal workflow gate)"
       ],
-      "need": "R39 Chromium real desktop/mobile-viewport login and one synthetic SQL-backed GET TaskRun PASS in disposable Docker only. Full actual customer staging browser flows, legal document upload, AI outputs UC03/04/07, TC12A/B acceptance, real device tests and authorized records are NOT_RUN."
+      "need": "R39 Chromium real desktop/mobile-viewport login and one synthetic SQL-backed GET TaskRun PASS in disposable Docker only. Full actual customer staging browser flows, legal document upload, AI outputs UC03/04/07, TC12A/B acceptance, real device tests and authorized records are NOT_RUN. R46 Cloudflare Browser Rendering proved staging 390px authorized synthetic D1 list display (record/session cleaned), but Owner real device create/reload and legal workflow E2E remain NOT_RUN."
     },
     {
       "id": "OPERATIONS_RELEASE",
