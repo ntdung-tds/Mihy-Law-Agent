@@ -65,7 +65,7 @@ test("JWT signature, issuer, audience, expiration, missing sid, future nbf and h
     token({claims:{aud:"another-api"}}),
     token({claims:{sid:""}}),token({claims:{nbf:now+1}}),
     token({claims:{iat:now+1}}),token({claims:{exp:now}}),
-    token({claims:{exp:now+100000}}),token().replace(/\.$/,""),
+    token({claims:{exp:now+100000}}),token().slice(0,-10),
     "invalid", 
   ];
   for(const t of rejected)assert.equal(await verifyBearer(request("/v1/runs/fixture-run",t),env,now),null);
