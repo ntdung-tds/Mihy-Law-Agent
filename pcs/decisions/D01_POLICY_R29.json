@@ -1,0 +1,50 @@
+{
+  "id": "D01",
+  "baseline": "SRS v1.1.15",
+  "policy_approval": "OWNER_APPROVED_IN_CHAT",
+  "signed_record_status": "PENDING_SIGNED_EVIDENCE",
+  "signed_evidence_uri": null,
+  "tenant_types": [
+    "personal",
+    "organization"
+  ],
+  "one_identity_multiple_memberships": true,
+  "default_cross_tenant_data_transfer": "DENY",
+  "default_external_provider_data_access": "DENY",
+  "default_tenant_admin_matter_read": "DENY",
+  "default_platform_operator_matter_read": "DENY",
+  "matter_acl_required": true,
+  "access_rechecked_on_use": true,
+  "default_customer_data_ai_training": "DENY",
+  "legal_role_assignment": "PER_PROCESSING_ACTIVITY_REVIEW_REQUIRED",
+  "legal_entity": "NOT_IDENTIFIED",
+  "legal_review": {
+    "decree_356_2025_articles_21_25": "PENDING_WRITTEN_OPINION",
+    "customer_dpa": "NOT_SIGNED",
+    "external_provider": "NOT_APPROVED"
+  },
+  "other_decisions": {
+    "D02": "CONDITIONAL",
+    "D03": "PENDING",
+    "D04": "CONDITIONAL",
+    "D05": "PENDING",
+    "D06": "SEPARATE_BUDGET_DECISION",
+    "D07": "PENDING",
+    "D08": "ONLY_IF_EXTERNAL_DMS_ENABLED"
+  },
+  "gates": {
+    "GATE-D01-R0": "PENDING_EVIDENCE",
+    "GATE-LEGAL-DATA": "PENDING_APPROVAL"
+  },
+  "allowed": {
+    "synthetic_fixtures": true,
+    "real_client_data": false,
+    "live_identity_tenant_activation": false,
+    "production": false
+  },
+  "real_postgres_rls_test": "NOT_RUN",
+  "real_identity_session_e2e": "NOT_RUN",
+  "full_tc12_ab": "NOT_RUN",
+  "srs_modified": false,
+  "privacy_classification": "PUBLIC_SAFE_DECISION_METADATA"
+}
