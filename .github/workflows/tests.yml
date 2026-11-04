@@ -168,6 +168,8 @@ jobs:
           node --check deployment/cloudflare/src/google_drive.mjs
       - name: Verify RS256 JWT, D1 authz fail-close and Google Drive adapter with fake credentials
         run: node --test deployment/cloudflare/tests/worker.test.mjs
+      - name: Verify real WebCrypto PBKDF2 QA session cookies, mobile markup and CSRF
+        run: node --test deployment/cloudflare/tests/mobile.test.mjs
       - name: Execute actual authz queries and FK/deny rules against SQLite
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_sqlite_acl.py' -v
 
