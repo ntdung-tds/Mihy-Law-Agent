@@ -3,7 +3,6 @@
   "status": "OWNER_APPROVED_DELIVERY_TARGET_NOT_YET_IMPLEMENTED",
   "authority": "Owner explicit 2026-11-04: both SaaS and independent deployment must be built; independent deployment cannot be deferred or omitted.",
   "product": "AI Law",
-  "platform_operator": "IAICT",
   "same_core_source": true,
   "srs_baseline": "v1.1.15 unchanged pending recorded change review",
   "delivery_modes": [
@@ -54,5 +53,7 @@
   "production_authorization": "NOT_AUTHORIZED",
   "current_implementation_priority": "standalone_first",
   "current_test_customer": "IAICT_as_ordinary_organization_in_standalone",
-  "iaict_standalone_privileges": "NONE_BEYOND_EXPLICIT_TENANT_MEMBERSHIP_AND_MATTER_ACL"
+  "iaict_standalone_privileges": "NONE_BEYOND_EXPLICIT_TENANT_MEMBERSHIP_AND_MATTER_ACL",
+  "saas_future_operator": "IAICT",
+  "standalone_operator": "PER_INSTALLATION_CUSTOMER_OR_APPROVED_CONTRACTOR"
 }
