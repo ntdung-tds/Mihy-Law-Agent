@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 37,
-  "updated_at": "2026-11-04T04:46:00Z",
+  "revision": 38,
+  "updated_at": "2026-11-04T05:52:00Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -898,10 +898,10 @@
       },
       {
         "id": "AL-R0-IAM-REAL-001",
-        "title": "Implement real approved IdP-backed customer test logins, IAICT operator and TC12A/B multi-tenant role E2E",
+        "title": "Implement real standalone customer accounts/identity: internal login test PASS; approved long-lived customer IdP/UI pending",
         "priority": "P0",
         "status": "IN_PROGRESS",
-        "scope": "Standalone-first: isolated real IAM/login/session/membership and role-based E2E for ordinary customer organizations, IAICT among them. SaaS-specific rollout deferred by Owner. No Cloudflare Portal cross-install identity assumption or production auto-deploy.",
+        "scope": "Standalone-first: real internal nonproduction Argon2id email/password account login E2E tested in 2 independent Docker auth+API+PG16 instances; server-owned session and tenant membership, real signed JWT, no account from SaaS. External approved IdP, long-lived customer test users and browser E2E not implemented. IAICT is ordinary organization test tenant.",
         "owner_acceptance": "PENDING_REAL_E2E",
         "tests": {
           "actual_idp_login": "NOT_RUN",
@@ -909,13 +909,25 @@
           "tc12b": "NOT_RUN",
           "iaict_admin": "NOT_RUN",
           "browser_e2e": "NOT_RUN",
-          "cryptographic_jwt": "PASS_PR_CI_41766637661"
+          "cryptographic_jwt": "PASS_PR_CI_41766637661",
+          "nonprod_local_password_login": "PASS_CI_41781535393",
+          "real_argon2id_postgres_account_hash": "PASS_CI_41781535393",
+          "jwt_signed_session_and_logout": "PASS_CI_41781535393",
+          "personal_and_org_tenant_context": "PASS_CI_41781535393",
+          "disabled_user_and_bruteforce_lockout": "PASS_CI_41781535393",
+          "real_customer_accounts_on_staging": "NOT_RUN"
         },
         "blockers": [
           "Real approved IdP issuer/client/audience/JWKS runtime configuration and access NOT_FOUND; standalone signed-JWT crypto CI now PASS but external provider and account provisioning NOT_RUN.",
-          "Actual isolated staging app/service/session store for role login has not been verified. Do not fabricate user accounts or report static demo as real login."
+          "R38 disposable isolated auth/API/PG16 service and test account login PASS; long-lived staging with approved IdP, permanent account administration, browser login and SRS TC12A/B remain NOT_RUN."
         ],
-        "acceptance_ref": "tests/acceptance/R0_REAL_ROLE_ACCOUNTS.md"
+        "acceptance_ref": "tests/acceptance/R0_REAL_ROLE_ACCOUNTS.md",
+        "evidence": [
+          "tests/evidence/AL-R0-R38-STANDALONE-LOGIN-2026-11-04.json",
+          "r0_core/standalone_password_auth.py",
+          "deployment/standalone/compose.login-test.yaml",
+          "GitHub Actions 41781535393 (5 CI jobs success)"
+        ]
       },
       {
         "id": "AL-R0-IAM-JWKS-001",
@@ -951,7 +963,7 @@
         "required": true,
         "status": "IN_PROGRESS",
         "owner_acceptance": "PENDING_REAL_STANDALONE_E2E",
-        "scope": "Owner priority: isolated standalone AI Law installation and real functional E2E first; IAICT is an ordinary organization tenant in standalone. Keep shared core, SaaS paused until standalone accepted. Current R36 ships disposable PostgreSQL16-only bootstrap, not application/server/login or production.",
+        "scope": "Owner priority remains standalone independent AI Law first; IAICT ordinary customer organization; SaaS later. R38 provides real local HTTP password login and API integration in ephemeral Docker+Postgres16, NOT durable end-customer staging or complete app.",
         "tests": {
           "dual_mode_governance_contract": "PENDING_CI",
           "actual_dedicated_install": "NOT_RUN",
@@ -965,7 +977,10 @@
           "db_volume_persistence": "PASS_CI_41771766696",
           "dedicated_nonprod_http_api_real_postgres": "PASS_CI_41774950797",
           "nonprod_signed_jwt_and_persisted_sessions": "PASS_CI_41774950797",
-          "nonprod_matter_acl_and_revocation": "PASS_CI_41774950797"
+          "nonprod_matter_acl_and_revocation": "PASS_CI_41774950797",
+          "nonprod_real_email_password_login_http": "PASS_CI_41781535393",
+          "standalone_two_installations_auth_independence": "PASS_CI_41781535393",
+          "nonprod_login_session_and_acl_revocation": "PASS_CI_41781535393"
         },
         "evidence": [
           "deployment/modes.json",
@@ -984,7 +999,14 @@
           "deployment/standalone/compose.api-test.yaml",
           "deployment/standalone/smoke_api.sh",
           "tests/evidence/AL-R0-R37-STANDALONE-HTTP-2026-11-04.json",
-          "GitHub Actions 41774950797 unit,postgres-rls,standalone-db,standalone-api all PASS"
+          "GitHub Actions 41774950797 unit,postgres-rls,standalone-db,standalone-api all PASS",
+          "tests/evidence/AL-R0-R38-STANDALONE-LOGIN-2026-11-04.json",
+          "GitHub Actions 41781535393 unit+postgres-rls+standalone-db+standalone-api+standalone-login PASS",
+          "r0_core/standalone_password_auth.py",
+          "db/standalone/0004_r38_password_accounts.sql",
+          "db/standalone/0005_r38_auth_role.sh",
+          "deployment/standalone/compose.login-test.yaml",
+          "deployment/standalone/smoke_login_extension.sh"
         ]
       }
     ],
@@ -1457,12 +1479,16 @@
       {
         "path": "tests/evidence/AL-R0-R34-JWKS-2026-11-04.json",
         "visibility": "PUBLIC_SAFE_TECHNICAL_CI_EVIDENCE"
+      },
+      {
+        "path": "tests/evidence/AL-R0-R38-STANDALONE-LOGIN-2026-11-04.json",
+        "visibility": "PUBLIC_SAFE_TECHNICAL_CI_EVIDENCE"
       }
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R37 standalone-first real two-instance Docker API + actual PostgreSQL16 persisted disposable identity/session/run fixtures, cryptographic signed JWT, MatterACL RLS and revocations PASS GitHub Actions 41774950797; no actual login or full app.",
-      "next_action": "Implement actual standalone user account provisioning/login and session lifecycle with an approved provider or local auth if SRS authorized; then real UI and UC03/04/07 on per-installation database. IAICT is ordinary test organization. Do not activate SaaS or production.",
+      "last_completed_step": "R38 actual email/password sign-in into two disposable independent Docker auth/API/PG16 installations; Argon2id hashes, real RS256 JWT, selected personal/organization membership, persisted sessions, logout, disabled account, five-attempt lockout, MatterACL and cross-install denial PASS in GitHub Actions 41781535393; no permanent customer logins or UI.",
+      "next_action": "R39: integrate the real standalone login UI with operator-created staging identities and secure session/tenant context, then browser-based RA/TC12A/B and one SRS legal AI workflow. Production provider/canonical schema/security checks and Owner final acceptance remain gates; SaaS later.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1472,7 +1498,8 @@
         "Previous R31 static role-selector and isolated PostgreSQL fixtures are not real role-based test accounts. Actual approved IdP-backed user provisioning and TC12A/B application E2E NOT_RUN.",
         "Dedicated/on-premises/private cloud deployment is Owner-required and in implementation scope (DEC-015), but installation packaging, real isolated deploy, account login, workflow E2E, upgrade/rollback remain NOT_RUN. SaaS readiness is not sufficient to close the dual-delivery target.",
         "R36 standalone isolated PostgreSQL16 bootstrap CI PASS, but real application server, IdP/login, persistent identity/session, legal workflows, document storage, backup/recovery/upgrade and end-to-end acceptance NOT_RUN.",
-        "R37 real standalone one approved GET API route+RLS+synthetic signed identities PASS, but full independent app, actual account login/provider, persistent canonical TaskRun, legal AI workflows, document store, browser E2E, backup/restore and final Owner acceptance still NOT_RUN."
+        "R37 real standalone one approved GET API route+RLS+synthetic signed identities PASS, but full independent app, actual account login/provider, persistent canonical TaskRun, legal AI workflows, document store, browser E2E, backup/restore and final Owner acceptance still NOT_RUN.",
+        "R38 isolated Docker Argon2id credential auth and signed HTTP/PG16 E2E PASS, but credentials are ephemeral invented test accounts and the login endpoints are private nonproduction test harness, NOT approved permanent IdP/MFA/user administration/browser or production IAM."
       ]
     },
     "policy": {
