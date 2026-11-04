@@ -190,3 +190,15 @@ jobs:
           node-version: '22'
       - name: Verify D1 auth contract
         run: node --experimental-sqlite --test deployment/cloudflare/tests/auth.test.mjs
+
+  cloudflare-chromium-r44:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser
+        run: npm install --no-save playwright@1.55.0 && npx playwright install --with-deps chromium
+      - name: Run browser tests
+        run: node --experimental-sqlite deployment/cloudflare/tests/browser_qa.mjs
