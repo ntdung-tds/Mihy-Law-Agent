@@ -22,21 +22,29 @@
     },
     {
       "id": "DEMO_POSTGRES",
-      "status": "PENDING_CI",
-      "evidence": [],
-      "note": "Real PG16 R31 customer seed and RLS suite pending."
+      "status": "PASS",
+      "evidence": [
+        "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41755010695 (postgres-rls job completed success; R31 synthetic tests)",
+        "tests/test_r31_demo_customers.py"
+      ],
+      "note": "Actual disposable PostgreSQL 16 IAM/RLS and demo fixture CI verified; no live accounts."
     },
     {
       "id": "DEMO_BROWSER",
-      "status": "NOT_RUN",
-      "evidence": [],
-      "note": "Mobile 320/390px and desktop browser real interaction not yet verified."
+      "status": "PARTIAL_TESTED",
+      "evidence": [
+        "Cloudflare Browser Rendering content readback 2026-11-04: 390px Chromium loaded 5 synthetic scenario buttons at isolated preview; no full click or physical-device E2E"
+      ],
+      "note": "Real browser initial DOM rendered; scripted persona-switch/revoke/modal and mobile 320px/desktop 1280px E2E still NOT_RUN. No screenshot evidence uploaded."
     },
     {
       "id": "DEMO_NONPROD",
-      "status": "NOT_DEPLOYED",
-      "evidence": [],
-      "note": "Publicly viewable isolated demo preview not yet deployed."
+      "status": "PASS",
+      "evidence": [
+        "https://ai-law-r31-demo.iaict-platform.workers.dev/ (readback 2026-11-04)",
+        "Cloudflare ai-law-r31-demo deployment 4038ae54-5485-4f78-982b-93bcbbd39bc4 (100% nonproduction Worker; no backend bindings)"
+      ],
+      "note": "Nonproduction, isolated public synthetic-only UI. Production not deployed and no authentication or real records."
     }
   ],
   "gates": [
