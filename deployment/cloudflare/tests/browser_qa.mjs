@@ -17,6 +17,7 @@ const QA1="qa04.lawyer@ai-law.invalid",QA2="qa02.dual@ai-law.invalid";
 const db=new DatabaseSync(":memory:");
 db.exec(readFileSync(new URL("../migrations/0001_cf_qa_metadata.sql",import.meta.url),"utf8"));
 db.exec(readFileSync(new URL("../migrations/0002_cf_qa_mobile_auth.sql",import.meta.url),"utf8"));
+db.exec(readFileSync(new URL("../migrations/0003_cf_qa_access_session.sql",import.meta.url),"utf8"));
 const run=(sql,...args)=>db.prepare(sql).run(...args);
 run("INSERT INTO qa_tenants VALUES(?,?,?)",I,T,"organization");
 run("INSERT INTO qa_tenants VALUES(?,?,?)",I,P,"personal");
