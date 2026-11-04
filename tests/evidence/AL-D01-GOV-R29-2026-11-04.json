@@ -1,0 +1,66 @@
+{
+  "run_id": "AL-D01-GOV-TR-20261104-R29",
+  "source": "Private SRS v1.1.15: decision_register.csv, release_gates.csv, role_registry.json, iam_minimal.sql",
+  "owner_approval": "APPROVED_POLICY_IN_CHAT_2026_11_04",
+  "signature": "NOT_PROVIDED",
+  "legal_entity": "NOT_PROVIDED",
+  "decree_356_service_applicability": "PENDING_INDEPENDENT_LEGAL_OPINION",
+  "gates": {
+    "GATE-D01-R0": "PENDING_EVIDENCE",
+    "GATE-LEGAL-DATA": "PENDING_APPROVAL"
+  },
+  "checks": [
+    {
+      "name": "SRS source baseline and D01 two release gates",
+      "status": "PASS_SOURCE_REVIEW"
+    },
+    {
+      "name": "Legal sources 91/2025/QH15, 356/2025/NĐ-CP, 60/2024/QH15, Law on Lawyers art25",
+      "status": "PASS_SOURCE_LOOKUP_ONLY_NOT_LEGAL_CLEARANCE"
+    },
+    {
+      "name": "Private D01 docx rendered 6 pages and ZIP manifest hash check",
+      "status": "PASS_LOCAL"
+    },
+    {
+      "name": "Owner decision: customer model approved, signed form",
+      "status": "PARTIAL_POLICY_APPROVED_SIGNATURE_MISSING"
+    },
+    {
+      "name": "Real PostgreSQL RLS/IdP/ACL and TC12A/B app E2E",
+      "status": "NOT_RUN"
+    },
+    {
+      "name": "Real client Pilot / production",
+      "status": "NOT_AUTHORIZED"
+    },
+    {
+      "name": "GitHub code & PCS regression suite",
+      "status": "PASS_9_D01_AND_195_TOTAL_GITHUB_RUN_41747231230"
+    }
+  ],
+  "srs_baseline_modified": false,
+  "public_repo_contains_private_document": false,
+  "owner_final": "POLICY_APPROVED_NOT_REAL_DATA_ACTIVATION",
+  "review_cycles": [
+    {
+      "round": 1,
+      "result": "EXPECTED_FAIL",
+      "ci_run": 41746898291,
+      "notes": "D01 policy tests authored before public governance record/PCS checkpoint."
+    },
+    {
+      "round": 2,
+      "result": "PASS",
+      "ci_run": 41747231230,
+      "notes": "9 D01 policy guardrail tests, 195 total repository suite; no gate bypass."
+    }
+  ],
+  "private_artifacts": {
+    "docx": "RENDERED_6_PAGES_CHECKED",
+    "zip": "ZIP_AND_SHA256_MANIFEST_PASS",
+    "google_docs": "PRIVATE_CREATED_READBACK_AND_FOLDER_VERIFIED",
+    "raw_docx_to_drive": "NOT_UPLOADED_RAW_BINARY"
+  },
+  "last_ci": "PASS_195_OF_195_RUN_41747231230"
+}

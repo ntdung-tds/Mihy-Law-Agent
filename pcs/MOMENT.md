@@ -1,10 +1,18 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `28` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-03T23:45:50.144Z`.
-- **Phase:** R28 grouped internal getRun API seam TECH_DONE with synthetic 186/186 CI and local loopback HTTP; real IdP/PostgreSQL/RLS/app staging remain NOT_RUN. R25 UI preview unchanged.
+- **PCS revision:** `29` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T00:29:20.259Z`.
+- **Phase:** Owner-approved D01 policy recorded for R0 synthetic assumptions; GATE-D01-R0 and real-client-data Pilot remain PENDING_EVIDENCE/PENDING_APPROVAL. R28 code and R25 visual preview unchanged.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R29 — D01 Owner policy approval, formal/legal/security evidence still open
+
+- **DEC-011 / AL-D01-GOV-001:** Owner explicitly approved the D01 multi-tenant customer/data-control policy on 2026-11-04. Personal and organization tenants; multiple membership; no silent cross-tenant files, no implicit tenant_admin/platform_operator matter read, no default client document model training or vendor processing. Per-flow legal roles require actual assessment. Policy approval does **not** equal a signed legal decision, certificate, data processing agreement, or production approval.
+- **Source-of-truth:** Locked SRS v1.1.15 baseline has two relevant decisions: `GATE-D01-R0=PENDING_EVIDENCE` for activation of real identity/tenant, and `GATE-LEGAL-DATA=PENDING_APPROVAL` for Pilot with customer data. Synthetic R0 fixture work may proceed. D03/D05/D07 and scope-dependent D02/D04 remain separate.
+- **Factual gates:** Named supplier legal entity not provided; written determination of Decree 356/2025/NĐ-CP Articles 21–25 applicability pending; DPA, actual data-flow role mapping and signed Owner evidence absent. Actual PostgreSQL RLS, MatterACL, verified identity and TC12 E2E NOT_RUN.
+- **Artifacts:** Public-safe `pcs/decisions/D01_POLICY_R29.{json,md}`, D01 governance unit tests **9/9 PASS** and full repo **195/195 PASS** (CI `41747231230`); private Word/role/flow/gate/QA dossier rendered and its archive checksum verified. Private SRS was read only; source file, OpenAPI, release decision register and production unaffected.
+- **Next:** Obtain formal evidence, legal conclusions, contract/vendor approvals and actual E2E before opening either release gate.
 
 ## R28 — grouped 3-task GET /v1/runs/{id} implementation, 4 review loops
 

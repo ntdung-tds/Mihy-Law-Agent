@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 28,
-  "updated_at": "2026-11-03T23:45:50.144Z",
+  "revision": 29,
+  "updated_at": "2026-11-04T00:29:20.259Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -637,6 +637,42 @@
         ],
         "owner_acceptance": "PENDING_REAL_INTEGRATION_AND_OWNER",
         "notes": "Part of R28 single batched PR; not a deployed product API or a real JWT/RLS/ACL implementation."
+      },
+      {
+        "id": "AL-D01-GOV-001",
+        "title": "Finalize Owner-approved D01 policy and keep real-data/identity release gates evidence-based",
+        "priority": "P0",
+        "status": "POLICY_RECORDED",
+        "scope": "Governance-only D01 decision, control matrix, legal diligence checklist, open gate evidence and regression tests. No feature code, no private SRS publication, no live service/real data/production.",
+        "acceptance": [
+          "Owner policy approval recorded separately from formal signed evidence",
+          "Two relevant release gates remain unpassed and real-data/production deny-by-default",
+          "Multi-tenant customer model, case data rights, admin/engineer ACL, no default AI training or external provider access unchanged",
+          "Legal entity, DPA and Decree 356/2025 Articles 21-25 applicability recorded as pending external legal review",
+          "PCS record and policy metadata consistency tested, CI green, Owner final acceptance limited to policy"
+        ],
+        "tests": {
+          "d01_policy_invariants": "PASS_9_OF_9_GITHUB_RUN_41747231230",
+          "source_contract_crosscheck": "PASS_PRIVATE_SRS_V1_1_15_DECISION_REGISTER_AND_RELEASE_GATES_REVIEW",
+          "live_rls_tc12": "NOT_RUN",
+          "legal_applicability_opinion": "NOT_PROVIDED",
+          "signed_owner_decision": "NOT_PROVIDED",
+          "production": "NOT_DEPLOYED",
+          "full_repo_ci": "PASS_195_OF_195_GITHUB_RUN_41747231230",
+          "private_policy_docx_render": "PASS_6_PAGES_RENDERED_AND_ZIP_SHA256_VERIFIED",
+          "drive_doc": "PASS_PRIVATE_GOOGLE_DOC_READBACK_AND_PARENT_VERIFIED",
+          "real_client_data": "NOT_AUTHORIZED"
+        },
+        "evidence": [
+          "pcs/decisions/D01_POLICY_R29.json",
+          "pcs/decisions/D01_POLICY_R29.md",
+          "tests/test_d01_policy.py",
+          "Private D01 decision/role/gate/QA pack prepared; no private SRS bytes on public GitHub",
+          "GitHub Actions run 41747231230 (195/195 PASS); 9 D01 governance cases PASS",
+          "Private Word/JSON/CSV ZIP locally rendered and checksummed; private Google Doc created and verified in dedicated Drive folder (no raw private SRS in repo)"
+        ],
+        "owner_acceptance": "APPROVED_POLICY_ONLY",
+        "notes": "Owner explicitly approved principle/model. Due SRS R0/Pilot evidence gates, this task does not close live IAM or real-data compliance. Separate authorized approval and real E2E still required."
       }
     ],
     "features": [
@@ -762,6 +798,12 @@
         "topic": "Owner-approved R25 flat block refinement on R0 Overview",
         "value": "Refine only the 11-UC group A/B/C Overview into flat, clearly bordered function-first blocks with stronger R0 visual distinction and responsive legibility. Fix the directly discovered one-line catalog informational modal binding defect; no new legal workflows, no real AI/API, no SRS baseline or production changes. This is permission to implement the UI refinement, not the final mobile visual acceptance.",
         "authority": "Owner explicit 'Ok' in chat after the R25 Flat block refinement proposal on 2026-11-04."
+      },
+      {
+        "id": "DEC-011",
+        "topic": "D01 customer/tenant model and data-processing policy approved by Owner; release gates remain locked",
+        "value": "Approve personal+organization tenants on one SaaS platform, scoped multi-membership, no automatic document transfer, no implicit admin/operator matter read, per-flow controller/processor assessment, no default client-data AI training or unapproved external processing. APPROVED_POLICY_ONLY by Owner 2026-11-04; this is not signed evidence, a legal finding on Decree 356/2025, production permission or real-data Pilot approval. GATE-D01-R0=PENDING_EVIDENCE; GATE-LEGAL-DATA=PENDING_APPROVAL. Unchanged SRS v1.1.15.",
+        "authority": "Owner explicit 2026-11-04 approval of detailed D01 policy and request to finalize governance batch; no signature or legal entity identification supplied."
       }
     ],
     "risks": [
@@ -1014,18 +1056,30 @@
       {
         "path": "tests/evidence/AL-R0-R28-GETRUN-TR-2026-11-04.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
+      },
+      {
+        "path": "pcs/decisions/D01_POLICY_R29.json",
+        "visibility": "PUBLIC_SAFE_DECISION_METADATA"
+      },
+      {
+        "path": "pcs/decisions/D01_POLICY_R29.md",
+        "visibility": "PUBLIC_SAFE_DECISION_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-D01-GOV-R29-2026-11-04.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
       }
     ],
     "current": {
-      "active_task": "AL-R0-FN-006",
-      "last_completed_step": "R28 batch PR42 merged: verified session seam + SRS-approved GET /v1/runs/{id} WSGI handler + tenant/ACL fail-closed read + loopback HTTP tests. Four red-green review loops, final GitHub Actions 186/186 PASS (41741449670). No live IdP, actual PostgreSQL/RLS, real ACL or production API.",
-      "next_action": "Next gated release: establish D01 security approvals and selected real IdP/session provider; provision isolated PostgreSQL/RLS/MatterACL and approved application backend; only then connect getRun to staging and perform authentic 401/403/404/503, cross-tenant and concurrent-revocation browser/API E2E. Preserve R25 UI and SRS baseline.",
+      "active_task": "AL-D01-GOV-001",
+      "last_completed_step": "R29: Owner-approved D01 policy recorded as DEC-011 without unblocking real-data/identity gates. 9 new guardrail tests green and 195/195 full repo CI PASS (run 41747231230). Private 6-page D01 Word pack rendered, ZIP integrity verified, private Google Doc folder readback PASS. No SRS change, client data or production.",
+      "next_action": "Obtain named legal entity, signed D01 approval record and processing-role/DPA review; independent legal opinion on whether the actual AI Law offering falls under Decree 356/2025 arts.21–25; then conduct real isolated PostgreSQL FORCE RLS/MatterACL/IdP/TC12A/B before considering gate opening. Keep synthetic work under approved SRS unchanged.",
       "blockers": [
-        "D01 security/role/IAM approval still pending and SRS remains read-only.",
-        "JWT signature verification, actual IdP and session store/MFA remain NOT_RUN; tests use injected fake verifier.",
-        "PostgreSQL schema/migrations/FORCE RLS, true MatterACL and run storage are NOT_RUN; tenant/ACL callbacks in R28 are test fixtures.",
-        "R28 WSGI ran on ephemeral loopback test server only; no staging/production API deploy or physical browser E2E.",
-        "Private Drive test-run folder created, raw GitHub CI logs not uploaded because connector requires file_uri."
+        "Owner approved D01 policy in chat, but no signed/evidenced D01 form was provided for GATE-D01-R0.",
+        "Legal entity/operator, processing roles per real data flow, DPA/privacy notice and service certificate applicability opinion are pending.",
+        "GATE-LEGAL-DATA remains PENDING_APPROVAL; D03/D05/D07 and conditional D02/D04 have not been closed for a real-data Pilot.",
+        "Real IdP/JWT, PostgreSQL RLS, MatterACL/session revocation/job tests and TC12A/B full application E2E still NOT_RUN.",
+        "R29 is governance only. No real client data, staging login or production deployment authorized."
       ]
     },
     "policy": {
