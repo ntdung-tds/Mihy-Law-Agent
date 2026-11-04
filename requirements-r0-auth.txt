@@ -1,0 +1,2 @@
+# R34 JWT access-token signature verification; production wheel must be reviewed/pinned.
+PyJWT[crypto]==2.15.1

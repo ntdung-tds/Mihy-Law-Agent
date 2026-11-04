@@ -1,10 +1,19 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `33` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T03:06:28.924Z`.
+- **PCS revision:** `34` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T03:24:40.989Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; IAICT operates the platform. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R34 — Concrete signed JWT + real PostgreSQL16 HTTP integration
+
+- **Owner-directed R0 implementation:** `r0_core/jwks_verifier.py` now implements an actual cryptographic RS256 JWKS verifier for trusted `at+jwt` access tokens and verified `sid`, using server-controlled issuer/audience and HTTPS JWKS URL. This is not a Cloudflare Access/customer login integration or a persisted session.
+- **Signed JWT real code tests:** RSA keys created ephemeral in CI; real RSA signature, kid/key selection, tampered signature, token-confusion, issuer/audience/expiry checks; revoked or missing session/principal fails closed.
+- **Signed HTTP + actual disposable PostgreSQL16:** Existing GET /v1/runs/{id} test now uses cryptographically signed token at real local HTTP; PostgreSQL 16 RLS/MatterACL checks for authorization, tenant switch, membership revocation, forged token 401. Run content and key-server lookup remain in-memory test fixtures.
+- **CI evidence (pre-checkpoint):** runs `41766637661` and `41766669235` on source head `5eb958ecdc37be6524e9dbe8e0bb690665c61548` **completed/success**; unit 245 tests (23 DB-only skipped), postgres-rls 19 + R31 17 tests PASS. Evidence `tests/evidence/AL-R0-R34-JWKS-2026-11-04.json`.
+- **Readiness:** REAL_IDP_JWT_MFA PARTIAL_TESTED only (crypto implementation), actual IdP/account login/JWKS network fetch/real session/MFA/browser TC12A/B NOT_RUN or NOT_IMPLEMENTED, D01 policy already APPROVED, production still NOT_AUTHORIZED, Owner final approval PENDING.
+- **Next:** `AL-R0-IAM-REAL-001` remains IN_PROGRESS; approved actual identity provider connection, secure account provisioning under IAICT and isolated staging real-role E2E. No private SRS edit.
 
 ## R33 — Owner clarification: actual product with IAICT-managed real test accounts
 

@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 33,
-  "updated_at": "2026-11-04T03:06:28.924Z",
+  "revision": 34,
+  "updated_at": "2026-11-04T03:24:40.989Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -884,8 +884,8 @@
         "scope": "Public-safe metadata, acceptance cases and readiness reporting only; do not alter private SRS or deploy",
         "owner_acceptance": "PENDING",
         "tests": {
-          "governance_regressions": "PENDING_PR_CI",
-          "full_ci": "PENDING_PR_CI",
+          "governance_regressions": "PASS_MAIN_CI_41765113778",
+          "full_ci": "PASS_MAIN_CI_41765113778",
           "real_idp_login": "NOT_RUN"
         },
         "evidence": [
@@ -900,7 +900,7 @@
         "id": "AL-R0-IAM-REAL-001",
         "title": "Implement real approved IdP-backed customer test logins, IAICT operator and TC12A/B multi-tenant role E2E",
         "priority": "P0",
-        "status": "PLANNED",
+        "status": "IN_PROGRESS",
         "scope": "Real isolated nonproduction IAM wiring, approved provider issuer/JWKS verifier, user/session/role provision and actual browser+API cross-tenant/revocation tests. No new unapproved SRS APIs or real client data.",
         "owner_acceptance": "PENDING_REAL_E2E",
         "tests": {
@@ -908,13 +908,41 @@
           "tc12a": "NOT_RUN",
           "tc12b": "NOT_RUN",
           "iaict_admin": "NOT_RUN",
-          "browser_e2e": "NOT_RUN"
+          "browser_e2e": "NOT_RUN",
+          "cryptographic_jwt": "PASS_PR_CI_41766637661"
         },
         "blockers": [
-          "Approved real identity provider tenant/issuer/JWKS runtime configuration and access have not been evidenced in the project repository.",
+          "Real approved IdP issuer/client/audience/JWKS runtime configuration and access NOT_FOUND; standalone signed-JWT crypto CI now PASS but external provider and account provisioning NOT_RUN.",
           "Actual isolated staging app/service/session store for role login has not been verified. Do not fabricate user accounts or report static demo as real login."
         ],
         "acceptance_ref": "tests/acceptance/R0_REAL_ROLE_ACCOUNTS.md"
+      },
+      {
+        "id": "AL-R0-IAM-JWKS-001",
+        "title": "R34 SRS R0 concrete JWKS RS256 access-token verifier and signed HTTP PostgreSQL16 integration",
+        "priority": "P0",
+        "status": "TECH_DONE",
+        "owner_acceptance": "PENDING",
+        "scope": "Only concrete signature verification, temporary RSA/JWKS test keys in process, GET /v1/runs/{id} HTTP+real disposable PG16 RLS/MatterACL integration and negative tests; no actual IdP test accounts, no customer data, no deploy.",
+        "baseline": "SRS v1.1.15 unchanged",
+        "tests": {
+          "real_rsa_signature_and_JWKS_selection": "PASS_PR_CI_41766637661",
+          "invalid_signature_rejection_before_membership": "PASS_PR_CI_41766637661",
+          "actual_loopback_HTTP_and_real_PG16_RLS": "PASS_PR_CI_41766637661",
+          "unit_and_postgres_workflows": "PASS_41766637661_AND_41766669235",
+          "external_IdP_HTTPS_JWKS": "NOT_RUN",
+          "real_role_test_account_login": "NOT_RUN",
+          "browser_TC12AB": "NOT_RUN",
+          "production": "NOT_AUTHORIZED"
+        },
+        "evidence": [
+          "r0_core/jwks_verifier.py",
+          "tests/test_r0_jwks_verifier.py",
+          "tests/test_r0_postgres_integration.py",
+          "tests/evidence/AL-R0-R34-JWKS-2026-11-04.json",
+          "GitHub Actions 41766637661 completed/success (unit + postgres-rls)",
+          "GitHub Actions 41766669235 completed/success"
+        ]
       }
     ],
     "features": [
@@ -1370,15 +1398,19 @@
       {
         "path": "tests/acceptance/R0_REAL_ROLE_ACCOUNTS.md",
         "visibility": "PUBLIC_SAFE_TEST_PLAN"
+      },
+      {
+        "path": "tests/evidence/AL-R0-R34-JWKS-2026-11-04.json",
+        "visibility": "PUBLIC_SAFE_TECHNICAL_CI_EVIDENCE"
       }
     ],
     "current": {
       "active_task": "AL-R0-IAM-REAL-001",
-      "last_completed_step": "R33 corrected misinterpreted demo target: D01 already approved and IAICT Owner-designated operator; real role-based test accounts and real SRS R0 are target. Decision/reporting changes on PR branch pending CI. R31 static demo remains a fixture, not customer IAM E2E.",
-      "next_action": "Implement actual SRS-compatible approved IdP cryptographic JWT verification and session store, provision role-differentiated real staging test accounts under IAICT, run TC12A/B actual browser/API/RLS tests; then implement persistent TaskRun, UC03/04/07 slices. Never claim these are done until evidenced.",
+      "last_completed_step": "R34 concrete RS256+JWKS at+jwt verifier, real cryptographic tests and signed local HTTP GET /v1/runs/{id} with actual disposable PostgreSQL16/RLS PASS at PR-head 41766637661 and 41766669235. Does not supply external IdP, real login or sessions.",
+      "next_action": "Attach an Owner/IAICT-approved real IdP provider configuration (trusted issuer, audience, JWKS, access-token profile with sid), provision non-sensitive real role accounts with persistent session/identity mapping on isolated staging, test TC12A/B with real browser/API. Continue small task/PR and CI. No production or real client data without separate gates.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
-        "Actual JWT/OIDC provider and persistent authenticated sessions/MFA not integrated; R30 uses synthetic bearer verifier and in-memory run content.",
+        "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
         "Real PostgreSQL16 FORCE RLS verified in disposable CI only; real production-equivalent service roles, connection pooling/SQL-injection GUC spoofing, all search/download/jobs, and independent security audit NOT_RUN.",
         "Full audit/outbox, cache/invalidation propagation, TaskRun storage/matter mapping and schema rollback or production migration NOT_RUN.",
         "Owner final functional E2E, actual TC12A/TC12B and live browser test NOT_RUN; no staging/production deployment authorized.",
