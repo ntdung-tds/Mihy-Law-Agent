@@ -2,7 +2,7 @@
   "schema_version": 1,
   "baseline": "SRS v1.1.15",
   "release_target": "R0",
-  "checkpoint": "R37",
+  "checkpoint": "R38",
   "assessment_date": "2026-11-04",
   "synthetic_demo_customers_created": true,
   "live_customer_accounts_created": false,
@@ -68,9 +68,10 @@
       "status": "PARTIAL_TESTED",
       "evidence": [
         "tests/evidence/AL-R0-R34-JWKS-2026-11-04.json",
-        "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41766637661 (signed RS256 CI unit + PostgreSQL16 HTTP/RLS both PASS)"
+        "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41766637661 (signed RS256 CI unit + PostgreSQL16 HTTP/RLS both PASS)",
+        "tests/evidence/AL-R0-R38-STANDALONE-LOGIN-2026-11-04.json (local isolated test auth ONLY; not external production IdP)"
       ],
-      "need": "Cryptographic RS256 JWKS profile tests PASS with injected public key set; actual approved external IdP HTTPS JWKS fetch, real customer test account provisioning/login, persistent revocable session, MFA/step-up, browser TC12A/B are NOT_RUN or NOT_IMPLEMENTED. Do not mark complete."
+      "need": "R34 cryptographic JWT and R38 local Argon2id nonproduction login/passphrase/session tests PASS. Approved production IdP/issuance model, MFA/step-up, persistent customer account provisioning, external JWKS HTTPS, browser TC12A/B and threat modeling NOT_RUN. Never treat R38 test accounts as real service activation."
     },
     {
       "id": "REAL_TENANT_RLS_SECURITY",
@@ -156,9 +157,11 @@
         "pcs/STATE.json DEC-015 Owner-approved implementation requirement",
         "deployment/standalone/compose.yaml (isolated nonproduction database bootstrap, NOT complete AI Law app)",
         "tests/evidence/AL-R0-R37-STANDALONE-HTTP-2026-11-04.json",
-        "GitHub Actions 41774950797: real 2-instance Docker API+Postgres16, JWT/SQL sessions/MatterACL PASSED"
+        "GitHub Actions 41774950797: real 2-instance Docker API+Postgres16, JWT/SQL sessions/MatterACL PASSED",
+        "tests/evidence/AL-R0-R38-STANDALONE-LOGIN-2026-11-04.json",
+        "GitHub Actions 41781535393: real local Argon2id password HTTP login, 2 isolated auth/API+PostgreSQL16 stacks, sessions and ACL PASS"
       ],
-      "need": "Real isolated API+PostgreSQL16 nonproduction GET /v1/runs/{id} with signed JWT and SQL fixture sessions PASS; actual approved identity provider, customer accounts, canonical TaskRun, document storage, UC03/04/07, UI, browser E2E, backup/restore, production migration, Owner final acceptance NOT_RUN."
+      "need": "R38 genuine nonproduction email/password test account login in disposable standalone Docker is PASS (random Argon2id secrets, signed JWT, roles/membership/session, logout, disable/lockout). No durable real customer accounts or approved production IdP/OIDC, MFA, canonical SRS IAM/TaskRun schema, full UI, files/UC03/04/07, browser E2E, backup/restore or Owner acceptance. Do not mark dedicated deployment ready."
     }
   },
   "delivery_modes_owner_approved": "2026-11-04; both SaaS and dedicated REQUIRED for AI Law product target, not either-or",
@@ -167,5 +170,10 @@
   "iaict_in_dedicated_mode": "ORDINARY_ORGANIZATION_CUSTOMER_NO_PLATFORM_PRIVILEGE",
   "dedicated_owner_final_acceptance": "PENDING",
   "dedicated_production_deployment": "NOT_AUTHORIZED",
-  "standalone_nonprod_api_http_status": "PASS_CI_41774950797"
+  "standalone_nonprod_api_http_status": "PASS_CI_41774950797",
+  "standalone_nonprod_password_login_status": "PASS_CI_41781535393",
+  "standalone_ephemeral_internal_test_accounts_created": true,
+  "real_customer_accounts_on_persistent_staging": "NOT_CREATED",
+  "standalone_auth_provider_type": "LOCAL_ARGON2ID_TEST_ONLY_NOT_PRODUCTION_APPROVED",
+  "standalone_operator": "CUSTOMER_OR_APPROVED_CONTRACTOR_PER_INSTALLATION"
 }
