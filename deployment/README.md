@@ -1,6 +1,8 @@
 # AI Law — two required delivery modes (Owner decision, 2026-11-04)
 
-**Decision:** build and test both (1) IAICT-hosted SaaS and (2) isolated dedicated customer deployment. Neither is optional or postponed to a hypothetical future product. This decision supersedes the earlier assistant's incorrect “dedicated deployment later/outside R0” assumption. The approved SRS v1.1.15 stays unchanged; any wording requiring formal synchronization is logged in `srs_changed.md` for Owner final decision.
+**Current delivery priority (Owner DEC-016): implement and accept standalone first, treating IAICT as an ordinary organization in the standalone installation; IAICT-hosted SaaS is postponed, not cancelled. The dedicated starter is `deployment/standalone/README.md` (DB only, no app/login).**
+
+**Long-term decision:** build and test both (1) IAICT-hosted SaaS and (2) isolated dedicated customer deployment. Neither is optional or postponed to a hypothetical future product. This decision supersedes the earlier assistant's incorrect “dedicated deployment later/outside R0” assumption. The approved SRS v1.1.15 stays unchanged; any wording requiring formal synchronization is logged in `srs_changed.md` for Owner final decision.
 
 ## One application, two delivery configurations
 
