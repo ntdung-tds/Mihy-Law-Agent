@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 30,
-  "updated_at": "2026-11-04T01:01:42.890Z",
+  "revision": 31,
+  "updated_at": "2026-11-04T02:44:22.227Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -786,6 +786,49 @@
           "unit_skip_note": "18_DB_TESTS_SKIPPED_IN_NON_DB_JOB_RUN_IN_POSTGRES_JOB",
           "prod_gate": "PENDING"
         }
+      },
+      {
+        "priority": "P0",
+        "status": "TECH_DONE",
+        "owner_acceptance": "PENDING",
+        "baseline": "SRS v1.1.15 unchanged",
+        "evidence": [
+          "db/demo/customer_catalog.json",
+          "db/demo/seed_r31_synthetic.sql",
+          "db/demo/README.md",
+          "tests/evidence/AL-R0-R31-DEMO-2026-11-04.json",
+          "GitHub Actions 41762583625 (both jobs PASS)"
+        ],
+        "id": "AL-R0-DEMO-001",
+        "title": "R31-01: fictional demo customer and second-tenant negative-control PostgreSQL seed",
+        "scope": "Only synthetic database fixtures and RLS tests in disposable PostgreSQL; no real account or credentials.",
+        "tests": {
+          "postgres_fixture": "PASS_CI_41762583625",
+          "actual_login": "NOT_RUN",
+          "real_customer": "NOT_CREATED"
+        }
+      },
+      {
+        "priority": "P0",
+        "status": "TECH_DONE",
+        "owner_acceptance": "PENDING",
+        "baseline": "SRS v1.1.15 unchanged",
+        "evidence": [
+          "db/demo/customer_catalog.json",
+          "db/demo/seed_r31_synthetic.sql",
+          "db/demo/README.md",
+          "tests/evidence/AL-R0-R31-DEMO-2026-11-04.json",
+          "GitHub Actions 41762583625 (both jobs PASS)"
+        ],
+        "id": "AL-R0-RELEASE-001",
+        "title": "R31-02: SRS product release readiness and blocked-gate checklist",
+        "scope": "Document gaps and release gates; do not promote preview to production.",
+        "tests": {
+          "readiness_matrix": "DOCUMENTED",
+          "staging": "NOT_DEPLOYED",
+          "production": "NOT_DEPLOYED",
+          "owner_acceptance": "PENDING"
+        }
       }
     ],
     "features": [
@@ -843,7 +886,9 @@
           "AL-R0-DB-001",
           "AL-R0-DB-002",
           "AL-R0-DB-003",
-          "AL-R0-DB-004"
+          "AL-R0-DB-004",
+          "AL-R0-DEMO-001",
+          "AL-R0-RELEASE-001"
         ]
       }
     ],
@@ -927,6 +972,12 @@
         "topic": "Owner-approved R30 four-task disposable PostgreSQL IAM/RLS integration batch",
         "value": "Execute R30-01..04 as one branch/PR, real PostgreSQL16 synthetic integration only: migrate spec-aligned IAM tables, enforce FORCE RLS and MatterACL/versions with non-BYPASS runtime test role, connect R26/R28 authorization query to real database and test HTTP loopback using synthetic verifier and in-memory run. No production/staging, no customer data, no baseline change, no identity provider or run store. Owner reserves final acceptance; D01 and legal-data gates remain locked.",
         "authority": "Owner explicit conversation 2026-11-04: 'Ok, tôi đồng ý' after proposed R30 grouped task plan."
+      },
+      {
+        "id": "DEC-013",
+        "topic": "Owner request to create demo customer and complete product launch preparation",
+        "value": "Use fictional isolated PostgreSQL customer and negative-control tenant; no real IdP account, credentials or production deploy before all SRS security and legal-data gates and final owner acceptance. Prepare release readiness checklist and execute only safe fixture tests in this PR.",
+        "authority": "Owner message 2026-11-04: 'Tạo khách hàng demo, để hoàn thành dự án, và hoàn thành các bước để lên product'."
       }
     ],
     "risks": [
@@ -1199,18 +1250,27 @@
       {
         "path": "tests/evidence/AL-R0-R30-POSTGRES-2026-11-04.json",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
+      },
+      {
+        "path": "db/demo/customer_catalog.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_METADATA"
+      },
+      {
+        "path": "tests/evidence/AL-R0-R31-DEMO-2026-11-04.json",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_METADATA"
       }
     ],
     "current": {
-      "active_task": "AL-R0-DB-004",
-      "last_completed_step": "R30: one PR batch with 4 scoped tasks. Actual isolated PostgreSQL16 schema/FORCE RLS/MatterACL/version triggers and R26/R28 DB-backed synthetic HTTP tested; 18/18 PG16 integration + 195/195 non-DB unit tests PASS, last observed CI 41750910297. Original D01 and real-client-data gates unchanged; no staging or production.",
-      "next_action": "R31 only after separate approval of actual IdP JWT/JWKS/session design and a safe staging environment. Formal D01 evidence, DPA/provider legal conclusions, production-grade DB role/pool/security review, real TaskRun store, outbox/audit propagation and full TC12A/B app E2E remain required before product IAM can be accepted.",
+      "active_task": "AL-R0-RELEASE-001",
+      "last_completed_step": "R31: created fictional demo customer and second tenant in isolated PostgreSQL seed; tested membership and MatterACL via actual PostgreSQL16 CI run 41762583625 (unit and postgres-rls both PASS). Product release readiness documented. No live IdP user or staging/production deploy.",
+      "next_action": "Build approved IdP/JWKS/session and durable TaskRun, deploy to isolated staging with synthetic identities only after prerequisites, complete full SRS R0 UC03/04/07 E2E and security/Word/browser QA; require D01 and legal-data approvals plus Owner final production release acceptance.",
       "blockers": [
         "Owner approved technical R30 batch and D01 policy in chat, but GATE-D01-R0 is still PENDING_EVIDENCE, GATE-LEGAL-DATA remains PENDING_APPROVAL.",
         "Actual JWT/OIDC provider and persistent authenticated sessions/MFA not integrated; R30 uses synthetic bearer verifier and in-memory run content.",
         "Real PostgreSQL16 FORCE RLS verified in disposable CI only; real production-equivalent service roles, connection pooling/SQL-injection GUC spoofing, all search/download/jobs, and independent security audit NOT_RUN.",
         "Full audit/outbox, cache/invalidation propagation, TaskRun storage/matter mapping and schema rollback or production migration NOT_RUN.",
-        "Owner final functional E2E, actual TC12A/TC12B and live browser test NOT_RUN; no staging/production deployment authorized."
+        "Owner final functional E2E, actual TC12A/TC12B and live browser test NOT_RUN; no staging/production deployment authorized.",
+        "R31 fictional demo is a PostgreSQL test fixture only: cannot log in, no credentials, no real client data; product not complete and release gates remain blocked."
       ]
     },
     "policy": {
