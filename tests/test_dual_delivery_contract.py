@@ -20,7 +20,9 @@ class DualDeliveryContractTests(unittest.TestCase):
     def test_both_modes_are_required_in_one_product(self):
         m = self.modes
         self.assertTrue(m["same_core_source"])
-        self.assertEqual(m["platform_operator"], "IAICT")
+        self.assertEqual(m["saas_future_operator"], "IAICT")
+        self.assertNotIn("platform_operator", m)
+        self.assertEqual(m["standalone_operator"], "PER_INSTALLATION_CUSTOMER_OR_APPROVED_CONTRACTOR")
         self.assertEqual({d["id"] for d in m["delivery_modes"]}, {"saas", "dedicated"})
         self.assertTrue(all(d["required"] for d in m["delivery_modes"]))
         self.assertTrue(all(d["end_to_end"] == "NOT_RUN" for d in m["delivery_modes"]))
