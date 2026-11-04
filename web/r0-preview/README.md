@@ -31,3 +31,8 @@ python -m http.server 8765 --directory web/r0-preview
 - `node --check web/r0-preview/app.js` for syntax.
 - `python -m unittest tests.test_r0_preview -v` for static contract checks.
 - Actual browser UX checks on narrow mobile and desktop viewports, interactions, console and layout overflow. They are only visual-shell E2E, not SRS workflow E2E.
+## R45 — QA login on the original R0 preview URL
+
+At Cloudflare the R0 preview uses `deployment/cloudflare/src/r0_preview_worker.mjs`. Its internal `QA_AUTH` Service Binding points at the existing R44 `ai-law-standalone-cf-qa` Worker. The preview has no passwords, OAuth credentials, D1 bindings or customer files. Its authenticated R0 shell remains synthetic (11 UCs are status-only). `/api/qa/login`, `/api/qa/session`, and `/api/qa/logout` are same-origin routes, forwarded only to the R44 QA backend. Anonymous `/#documents` requests show the login first. The original bottom mobile navigation is replaced by a right-side rail/drawer.
+
+To assemble deployable JavaScript module parts from canonical UI files: `node tools/build_cf_r0_preview.mjs /tmp/ai-law-r0-preview-build`. Cloudflare multipart upload metadata: `main_module: "r0_preview_worker.mjs"`, `bindings: [{type:"service",name:"QA_AUTH",service:"ai-law-standalone-cf-qa"}]`. Upload all seven generated modules. Keep the Worker nonproduction. Avoid uploading or printing private credentials. Test: `node --test deployment/cloudflare/tests/preview_worker.test.mjs`. Full live phone positive login remains an Owner acceptance gate. Do not infer that the SRS legal features are connected.

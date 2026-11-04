@@ -172,6 +172,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/mobile.test.mjs
       - name: Execute actual authz queries and FK/deny rules against SQLite
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_sqlite_acl.py' -v
+      - name: Verify unified R0 preview QA auth, CSRF, 11-function right rail (synthetic mocks)
+        run: node --test deployment/cloudflare/tests/preview_worker.test.mjs
 
   cloudflare-live-qa:
     # Only R43 feature branch: public nonproduction endpoint with ZERO secrets.
