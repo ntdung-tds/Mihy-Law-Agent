@@ -58,3 +58,19 @@ jobs:
       - uses: actions/checkout@v4
       - name: Two real standalone installation DBs + isolation + restart
         run: bash deployment/standalone/smoke_isolation.sh
+
+  standalone-api:
+    # R37 actual two isolated API+Postgres16 containers and cryptographic JWT.
+    # R37 test-only persisted fixtures, NOT actual IdP login or production.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install ephemeral fixture signing dependencies
+        run: python -m pip install -r requirements-r0-auth.txt
+      - name: Verify R37 smoke script syntax (without echoing secrets)
+        run: bash -n deployment/standalone/smoke_api.sh
+      - name: Real nonproduction standalone API HTTP + PG16 signed JWT isolation
+        run: bash deployment/standalone/smoke_api.sh
