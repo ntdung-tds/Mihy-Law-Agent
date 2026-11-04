@@ -100,6 +100,38 @@
   }
   $$('[data-view]').forEach(n => n.addEventListener('click', () => goto(n.dataset.view)));
   $$('[data-go]').forEach(n => n.addEventListener('click', () => goto(n.dataset.go)));
+
+  const drawer = $('#function-drawer'), backdrop = $('#drawer-backdrop'), trigger = $('#rail-features');
+  function closeFunctionDrawer(restoreFocus = true) {
+    drawer.hidden = true; backdrop.hidden = true; drawer.setAttribute('aria-hidden', 'true');
+    trigger.setAttribute('aria-expanded', 'false'); document.body.classList.remove('drawer-open');
+    if (restoreFocus) trigger.focus();
+  }
+  function openFunctionDrawer() {
+    drawer.hidden = false; backdrop.hidden = false; drawer.setAttribute('aria-hidden', 'false');
+    trigger.setAttribute('aria-expanded', 'true'); document.body.classList.add('drawer-open');
+    $('#drawer-close').focus();
+  }
+  trigger.addEventListener('click', openFunctionDrawer);
+  $('#drawer-close').addEventListener('click', () => closeFunctionDrawer());
+  backdrop.addEventListener('click', () => closeFunctionDrawer());
+  $$('[data-drawer-view]').forEach(n => n.addEventListener('click', () => {
+    goto(n.dataset.drawerView); closeFunctionDrawer(false);
+  }));
+  $$('[data-feature-jump]').forEach(n => n.addEventListener('click', () => {
+    const target = $('[data-feature="' + n.dataset.featureJump + '"]');
+    goto('overview'); closeFunctionDrawer(false);
+    if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); target.focus({ preventScroll: true }); }
+  }));
+  drawer.addEventListener('keydown', event => {
+    if (event.key !== 'Tab') return;
+    const focusables = [...drawer.querySelectorAll('button:not([disabled])')];
+    if (!focusables.length) return;
+    if (event.shiftKey && document.activeElement === focusables[0]) { event.preventDefault(); focusables[focusables.length-1].focus(); }
+    if (!event.shiftKey && document.activeElement === focusables[focusables.length-1]) { event.preventDefault(); focusables[0].focus(); }
+  });
+  window.addEventListener('keydown', event => { if (event.key === 'Escape' && !drawer.hidden) closeFunctionDrawer(); });
+
   $$('[data-demo-action]').forEach(n => n.addEventListener('click', () => {
     const isR0 = n.dataset.stage === 'r0';
     const description = isR0

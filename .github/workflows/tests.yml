@@ -172,6 +172,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/mobile.test.mjs
       - name: Execute actual authz queries and FK/deny rules against SQLite
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_sqlite_acl.py' -v
+      - name: Verify unified R0 preview QA auth, CSRF, 11-function right rail (synthetic mocks)
+        run: node --test deployment/cloudflare/tests/preview_worker.test.mjs
 
   cloudflare-live-qa:
     # Only R43 feature branch: public nonproduction endpoint with ZERO secrets.
@@ -199,3 +201,39 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Real HTTPS Cloudflare login page Chromium 320/390/430/1440 + invalid credentials
         run: python deployment/cloudflare/tests/live_mobile_browser.py
+
+  cloudflare-preview-live:
+    # R45 only: live Cloudflare preview QA login screen and anonymous denial;
+    # authorized workspace menu tested locally in Chromium with synthetic UI.
+    if: github.ref_name == 'feat/r45-r0-preview-login-right-menu' || github.head_ref == 'feat/r45-r0-preview-login-right-menu'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Chromium and Playwright
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: HTTPS live login denial and mobile right-rail Chromium
+        run: python deployment/cloudflare/tests/live_r0_preview_browser.py
+
+  cloudflare-preview-fast-smoke:
+    if: github.ref_name == 'feat/r45-r0-preview-login-right-menu' || github.head_ref == 'feat/r45-r0-preview-login-right-menu'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Live HTTPS health, login UI, anonymous denial and CSRF (no credentials)
+        run: |
+          set -euo pipefail
+          for base in "https://ai-law-r0-preview-r45-qa.iaict-platform.workers.dev" "https://ai-law-r0-preview.iaict-platform.workers.dev"; do
+            echo "Checking configured QA and original R0 preview: $base"
+            test "$(curl -sSL --max-time 25 -o /tmp/ai-law-health -w '%{http_code}' "$base/health")" = 200
+            grep -q 'qa_only' /tmp/ai-law-health
+            test "$(curl -sSL --max-time 25 -o /tmp/ai-law-login -w '%{http_code}' "$base/?utm_source=chatgpt.com")" = 200
+            grep -q 'id="login-form"' /tmp/ai-law-login
+            test "$(curl -sSL --max-time 25 -o /dev/null -w '%{http_code}' "$base/app.js")" = 401
+            test "$(curl -sSL --max-time 25 -o /dev/null -w '%{http_code}' "$base/api/qa/session")" = 401
+            test "$(curl -sSL --max-time 25 -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://attacker.invalid' -H 'Content-Type: application/json' -d '{}' "$base/api/qa/logout")" = 403
+          done

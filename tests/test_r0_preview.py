@@ -212,6 +212,15 @@ class R0PreviewTests(unittest.TestCase):
 
 
 
+    def test_r45_right_menu_multi_selector_and_11_srs_shortcuts(self):
+        """Regression for the real Chromium error: querySelector is not a NodeList."""
+        for selector in ("[data-go]", "[data-drawer-view]", "[data-feature-jump]"):
+            self.assertIn("$$('"+selector+"').forEach", self.js)
+            self.assertNotIn("$('"+selector+"').forEach", self.js.replace("$$('"+selector+"').forEach",""))
+        self.assertEqual(self.html.count('data-feature-jump="UC'), 11)
+        self.assertIn('id="rail-features"', self.html)
+        self.assertIn('id="drawer-logout"', self.html)
+
     def test_r25_every_catalog_tile_binds_info_modal(self):
         """A single element .forEach would throw and abort all later JS binding."""
         self.assertIn("$$('[data-demo-action]').forEach", self.js)

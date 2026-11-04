@@ -1,0 +1,50 @@
+{
+  "id": "AL-R0-R45-PREVIEW-LOGIN-RIGHT-MENU-2026-11-04",
+  "date": "2026-11-04",
+  "approved_scope": "Owner-directed QA sign-in at existing R0 preview, mobile menu from bottom to right",
+  "deployment": {
+    "host": "https://ai-law-r0-preview.iaict-platform.workers.dev/",
+    "worker": "ai-law-r0-preview",
+    "backend_binding": "QA_AUTH -> ai-law-standalone-cf-qa",
+    "new_database": false,
+    "secrets_committed": false,
+    "environment": "NONPRODUCTION_QA",
+    "prior_cloudflare_worker_version": "378da38b-5752-46da-8844-9eb8faf3129d"
+  },
+  "tests": {
+    "original_hostname_live_https_health_login_csrf_anon": {
+      "status": "PASS_CI",
+      "run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41854104335",
+      "note": "Original production-looking preview hostname is still QA; no approved positive private user secret in CI"
+    },
+    "staging_chromium_and_local_11_uc_menu": {
+      "status": "PASS_CI",
+      "run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41853343847",
+      "note": "Real Chromium visits staging QA login on HTTPS; authenticated R0 synthetic UI visual/menu tests use localhost HTTP fixtures"
+    },
+    "worker_service_binding_auth_contract": {
+      "status": "PASS_MOCK",
+      "run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41853343847"
+    },
+    "owner_correct_password_original_hostname": {
+      "status": "NOT_RUN_OWNER"
+    },
+    "owner_real_mobile_reload_logout_right_menu": {
+      "status": "NOT_RUN_OWNER"
+    },
+    "actual_legal_workflow_drive_upload": {
+      "status": "NOT_RUN"
+    }
+  },
+  "bugs_fixed": [
+    "Live Chromium detected querySelector().forEach with three selector strings incorrectly rewritten from querySelectorAll; fixed all and added regression.",
+    "Fixed browser test harness behavior on same-document navigation and local file scheme by testing local HTTP."
+  ],
+  "limitations": [
+    "No real legal data",
+    "No production approval",
+    "SRS v1.1.15 unchanged",
+    "R41 on-prem kit preserved, SaaS deferred",
+    "The 11 workflows are informational-only until implemented"
+  ]
+}

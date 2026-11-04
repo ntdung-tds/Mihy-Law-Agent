@@ -1,10 +1,18 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `45` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T13:58:00Z`.
+- **PCS revision:** `46` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-04T15:08:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R45 — original R0 preview now uses R44 QA login and right mobile menu (Owner pending)
+
+- **Owner direction:** Use `https://ai-law-r0-preview.iaict-platform.workers.dev/?utm_source=chatgpt.com#documents` as the entry URL. Before login, show R44 real QA credential form; after valid QA session, show *existing* R0 preview's four areas and all 11 SRS workflow discovery tiles, not the simple QA dashboard. On phones, the former bottom bar is replaced with a right-side rail and expandable 11-feature drawer, plus sign-out in the drawer.
+- **Deployment / isolation:** Nonproduction Cloudflare `ai-law-r0-preview` updated with seven ESM modules; Cloudflare readback confirms `QA_AUTH` Worker Service Binding -> `ai-law-standalone-cf-qa`. No new D1, password/token copied to code, customer data, Google Drive OAuth, or real legal function activation. Previous preview deployment version `378da38b-5752-46da-8844-9eb8faf3129d` retained in Cloudflare history.
+- **Actual test evidence:** Original preview hostname + staging hostname HTTPS `/health` and `/` login 200, anonymous `/app.js` and `/api/qa/session` 401, foreign-origin logout 403, all **PASS** on GitHub run `41854104335` fast smoke. Real staging HTTPS Chromium login at 320/390/430/1440, local HTTP authenticated-UI fixture right drawer 11 UC and no overflow **PASS** run `41853343847`. Mock QA service binding login/logout/CSRF, Python preview regressions PASS. Fixed reproduced `querySelector().forEach` JS bug and added regression.
+- **Owner gate:** Positive real password sign-in, authenticated original R0 workspace, reload/logout/right navigation on Owner's phone at the **original URL** = **NOT_RUN_OWNER**; never overclaim from mock/staging tests. All legal workflows remain unavailable, SRS v1.1.15 unchanged, R41 host parked and SaaS deferred. Owner's previous R44 success at a DIFFERENT QA Worker does not independently prove new URL success.
+- **Files:** `web/r0-preview/`, `deployment/cloudflare/src/r0_preview_worker.mjs`, `deployment/cloudflare/tests/{preview_worker.test.mjs,live_r0_preview_browser.py}`, `tools/build_cf_r0_preview.mjs`, `tests/evidence/AL-R0-R45-PREVIEW-LOGIN-RIGHT-MENU-2026-11-04.json`. Work in PR #62.
 
 ## R44 — positive mobile sign-in confirmed by Owner (QA milestone)
 
