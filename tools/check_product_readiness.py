@@ -21,6 +21,7 @@ REQUIRED_PRODUCT_GATES = frozenset({
     "UC03_TRANSLATE", "UC04_SUMMARIZE", "UC07_GRAMMAR",
     "RUNS_JOBS_AUDIT", "APPLICATION_E2E", "OPERATIONS_RELEASE",
 })
+REQUIRED_DELIVERY_MODES = frozenset({"saas", "dedicated"})
 
 
 def _has_required_gates(items: list, required: frozenset[str]) -> bool:
@@ -46,10 +47,26 @@ def evaluate_readiness(data: dict) -> dict:
         raise ValueError("A JSON release-readiness object is required")
     demo = data.get("demo_gates", [])
     hard = data.get("gates", [])
+    delivery = data.get("delivery_modes", {})
     if not isinstance(demo, list) or not isinstance(hard, list):
         raise ValueError("Invalid gate collection")
 
     demo_ready = _has_required_gates(demo, REQUIRED_DEMO_GATES) and _complete(demo)
+    # Owner DEC-015: a complete SaaS deployment alone cannot satisfy the AI Law
+    # product target while dedicated installation is unimplemented.
+    delivery_ready = (
+        isinstance(delivery, dict) and
+        set(delivery) == REQUIRED_DELIVERY_MODES and
+        all(
+            isinstance(delivery[mode], dict) and
+            delivery[mode].get("required") is True and
+            delivery[mode].get("status") == "PASS" and
+            delivery[mode].get("deployment_e2e") == "PASS" and
+            isinstance(delivery[mode].get("evidence"), list) and
+            bool(delivery[mode]["evidence"])
+            for mode in REQUIRED_DELIVERY_MODES
+        )
+    )
     blockers = [g.get("id", "UNKNOWN") for g in hard
                 if g.get("status") != "PASS" or not g.get("evidence")]
     owner_accepted = data.get("owner_final_acceptance") == "APPROVED"
@@ -59,7 +76,8 @@ def evaluate_readiness(data: dict) -> dict:
     if not production_permitted:
         blockers.append("PRODUCTION_AUTHORIZATION")
 
-    product_ready = (demo_ready and _has_required_gates(hard, REQUIRED_PRODUCT_GATES) and _complete(hard) and
+    product_ready = (demo_ready and delivery_ready and
+                     _has_required_gates(hard, REQUIRED_PRODUCT_GATES) and _complete(hard) and
                      owner_accepted and production_permitted and
                      data.get("live_customer_accounts_created") is True and
                      data.get("srs_changed") is False)
@@ -70,11 +88,21 @@ def evaluate_readiness(data: dict) -> dict:
     if not demo_ready:
         blockers.extend(g.get("id", "DEMO_UNKNOWN") for g in demo
                         if g.get("status") != "PASS" or not g.get("evidence"))
+    if not delivery_ready:
+        if not isinstance(delivery, dict) or set(delivery) != REQUIRED_DELIVERY_MODES:
+            blockers.append("REQUIRED_DELIVERY_MODES_MISSING_OR_DUPLICATED")
+        for mode in REQUIRED_DELIVERY_MODES:
+            v = delivery.get(mode) if isinstance(delivery, dict) else None
+            if (not isinstance(v, dict) or v.get("required") is not True or
+                    v.get("status") != "PASS" or v.get("deployment_e2e") != "PASS" or
+                    not isinstance(v.get("evidence"), list) or not v.get("evidence")):
+                blockers.append("DELIVERY_MODE_" + mode.upper() + "_NOT_VERIFIED")
     if data.get("live_customer_accounts_created") is not True:
         blockers.append("REAL_CUSTOMER_IDENTITY_INTEGRATION")
 
     return {
         "demo_ready": bool(demo_ready),
+        "delivery_modes_ready": bool(delivery_ready),
         "product_ready": bool(product_ready),
         "blockers": sorted(set(blockers)),
         "baseline": data.get("baseline"),
