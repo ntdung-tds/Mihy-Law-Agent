@@ -42,6 +42,6 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install isolated PostgreSQL test driver
-        run: python -m pip install "psycopg[binary]>=3.2,<3.4"
+        run: python -m pip install "psycopg[binary]==3.3.7"
       - name: Real PostgreSQL 16 RLS and IAM contract tests (synthetic fixtures only)
         run: python -m unittest discover -s tests -p 'test_r0_postgres_integration.py' -v
