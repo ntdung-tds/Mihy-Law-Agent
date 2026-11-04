@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 import {webcrypto as crypto} from "node:crypto";
 import {mobileApi,COOKIE_SESSION_SQL} from "../src/mobile_auth.mjs";
 import {MOBILE_HTML,MOBILE_CSS,MOBILE_JS} from "../src/mobile_assets.mjs";
-globalThis.crypto=crypto;
 const INSTALL="a1a1a1a1-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const TENANT="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const USER="40404040-0000-4000-8000-000000000004";
