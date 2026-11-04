@@ -1,0 +1,44 @@
+{
+  "id": "AL-R0-R34-JWKS-2026-11-04",
+  "recorded_at": "2026-11-04T03:23:47.983Z",
+  "baseline": "SRS v1.1.15 unchanged",
+  "operator": "IAICT",
+  "d01_policy": "OWNER_APPROVED",
+  "head_sha": "5eb958ecdc37be6524e9dbe8e0bb690665c61548",
+  "ci_runs": [
+    {
+      "url": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41766637661",
+      "status": "PASS",
+      "jobs": [
+        "unit",
+        "postgres-rls"
+      ],
+      "tests": "245 Python unit discovered (23 PG-only skipped), PG16 19 R0 and 17 R31 real DB tests PASS"
+    },
+    {
+      "url": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41766669235",
+      "status": "PASS",
+      "jobs": [
+        "unit",
+        "postgres-rls"
+      ]
+    }
+  ],
+  "tests": {
+    "cryptographically_checked_RSA_signature": "PASS_EARLIER_HEAD_CI",
+    "key_selection_and_unknown_kid_denial": "PASS_EARLIER_HEAD_CI",
+    "wrong_issuer_audience_expiry_sid_type_denial": "PASS_EARLIER_HEAD_CI",
+    "forged_signature_denied_before_DB": "PASS_EARLIER_HEAD_CI",
+    "actual_loopback_HTTP_200_401_404": "PASS_EARLIER_HEAD_CI",
+    "actual_disposable_PostgreSQL_16_RLS_MatterACL": "PASS_EARLIER_HEAD_CI",
+    "real_external_IdP_account": "NOT_RUN",
+    "real_JWKS_https_fetch": "NOT_RUN",
+    "persistent_session_and_MFA": "NOT_IMPLEMENTED",
+    "real_browser_TC12": "NOT_RUN",
+    "production": "NOT_AUTHORIZED"
+  },
+  "scope": "Trusted JWT verifier plus cryptographic RSA fixture tests and actual PostgreSQL16 loopback HTTP; not live provider auth",
+  "credentials_saved": false,
+  "customer_data_used": false,
+  "notes": "CI generated in-memory disposable RSA private keys; public JWKS returned from test-only in-process fixture. No actual IdP endpoint contacted. Real client account creation and actual login remain NOT_RUN."
+}
