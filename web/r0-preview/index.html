@@ -8,6 +8,7 @@
   <title>AI Law · Workspace Preview R0</title>
   <link rel="stylesheet" href="./styles.css" />
   <script src="./app.js" defer></script>
+  <script src="./session.js" defer></script>
 </head>
 <body>
   <svg aria-hidden="true" class="svg-sprite" xmlns="http://www.w3.org/2000/svg">
@@ -50,14 +51,14 @@
       <nav class="side-nav"><button class="nav-item" id="side-guide"><svg class="icon"><use href="#i-shield"/></svg><span>Về bản xem trước</span></button></nav>
       <div class="sidebar-spacer"></div>
       <div class="sidebar-note"><div class="side-note-icon"><svg class="icon"><use href="#i-spark"/></svg></div><strong>Pháp lý, đơn giản hơn.</strong><p>Một không gian để tập trung vào công việc quan trọng.</p><button id="sidebar-explore">Khám phá giao diện <span>↗</span></button></div>
-      <div class="sidebar-footer"><div class="profile-circle">AL</div><div><strong>Demo Workspace</strong><small>Chưa có đăng nhập</small></div><svg class="icon tiny"><use href="#i-dots"/></svg></div>
+      <div class="sidebar-footer"><div class="profile-circle">AL</div><div><strong id="profile-identity">Không gian QA</strong><small id="profile-role">Đã xác thực · Chỉ dữ liệu mẫu</small></div><svg class="icon tiny"><use href="#i-dots"/></svg></div>
     </aside>
 
     <div class="page-main">
       <header class="topbar">
         <div class="mobile-brand"><div class="mobile-mark"><svg class="icon"><use href="#i-scale"/></svg></div><strong>AI<span>LAW</span></strong></div>
         <div class="breadcrumbs"><span>Workspace</span><svg class="icon tiny"><use href="#i-chevron"/></svg><strong id="breadcrumb-current">Tổng quan</strong></div>
-        <div class="top-actions"><span class="preview-dot"><i></i>R0 Preview</span><button class="icon-btn search-shortcut" id="search-shortcut" aria-label="Tìm kiếm" title="Tìm kiếm"><svg class="icon"><use href="#i-search"/></svg></button><button class="icon-btn" id="notifications" aria-label="Thông báo" title="Thông báo"><svg class="icon"><use href="#i-bell"/></svg><span class="unread-dot"></span></button><div class="user-avatar" aria-label="Không gian demo">AL</div></div>
+        <div class="top-actions"><span class="preview-dot"><i></i>R0 Preview</span><button class="icon-btn search-shortcut" id="search-shortcut" aria-label="Tìm kiếm" title="Tìm kiếm"><svg class="icon"><use href="#i-search"/></svg></button><button class="icon-btn" id="notifications" aria-label="Thông báo" title="Thông báo"><svg class="icon"><use href="#i-bell"/></svg><span class="unread-dot"></span></button><button type="button" id="preview-logout" class="top-logout" aria-label="Đăng xuất khỏi AI Law">Đăng xuất</button><div class="user-avatar" aria-label="Không gian QA">AL</div></div>
       </header>
       <div class="mobile-demo-label"><span class="live-dot"></span> Bản xem trước giao diện · Dữ liệu minh họa</div>
 
@@ -123,11 +124,37 @@
           <div class="research-principles"><div><svg class="icon"><use href="#i-link"/></svg><h3>Nguồn truy xuất</h3><p>Các kết quả sau này cần dẫn được về văn bản và điều khoản.</p></div><div><svg class="icon"><use href="#i-clock"/></svg><h3>Hiệu lực theo thời gian</h3><p>Phân biệt thời điểm áp dụng của từng quy định.</p></div><div><svg class="icon"><use href="#i-shield"/></svg><h3>Kiểm chứng trước sử dụng</h3><p>Hỗ trợ người dùng tự đối chiếu thông tin quan trọng.</p></div></div>
         </section>
       </main>
-      <footer class="page-footer"><span>© <span id="year">2026</span> AI Law · R0 Interface Preview</span><span>Chỉ sử dụng dữ liệu minh họa · Chưa có backend</span></footer>
+      <footer class="page-footer"><span>© <span id="year">2026</span> AI Law · R0 Interface Preview</span><span>Chỉ sử dụng dữ liệu minh họa · Nghiệp vụ AI chưa kết nối</span></footer>
     </div>
   </div>
 
-  <nav class="mobile-bottom-nav" aria-label="Điều hướng trên điện thoại"><button class="bottom-item active" data-view="overview"><svg class="icon"><use href="#i-grid"/></svg><span>Tổng quan</span></button><button class="bottom-item" data-view="documents"><svg class="icon"><use href="#i-file"/></svg><span>Tài liệu</span></button><button class="bottom-item bottom-ai" data-view="assistant"><span class="bottom-ai-circle"><svg class="icon"><use href="#i-spark"/></svg></span><span>Trợ lý AI</span></button><button class="bottom-item" data-view="research"><svg class="icon"><use href="#i-search"/></svg><span>Tra cứu</span></button></nav>
+  <nav class="mobile-right-rail" aria-label="Điều hướng trên điện thoại">
+    <button type="button" class="rail-item active" data-view="overview" aria-label="Tổng quan"><svg class="icon"><use href="#i-grid"/></svg><span>Tổng quan</span></button>
+    <button type="button" class="rail-item" data-view="documents" aria-label="Tài liệu"><svg class="icon"><use href="#i-file"/></svg><span>Tài liệu</span></button>
+    <button type="button" class="rail-item" data-view="assistant" aria-label="Trợ lý AI"><svg class="icon"><use href="#i-spark"/></svg><span>Trợ lý</span></button>
+    <button type="button" class="rail-item" data-view="research" aria-label="Tra cứu pháp lý"><svg class="icon"><use href="#i-search"/></svg><span>Tra cứu</span></button>
+    <button type="button" class="rail-item rail-feature-button" id="rail-features" aria-label="Mở 11 chức năng AI Law" aria-expanded="false" aria-controls="function-drawer"><svg class="icon"><use href="#i-menu"/></svg><span>Chức năng</span></button>
+  </nav>
+  <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+  <aside class="function-drawer" id="function-drawer" aria-label="Danh sách 11 chức năng AI Law" aria-hidden="true" hidden>
+    <div class="drawer-heading"><div><small>AI LAW · R0</small><h2>Chức năng pháp lý</h2><p>11 nghiệp vụ theo SRS · Xem trạng thái triển khai</p></div><button type="button" id="drawer-close" aria-label="Đóng menu chức năng"><svg class="icon"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-groups">
+      <p class="drawer-subtitle">CÁC KHU VỰC</p>
+      <button type="button" data-drawer-view="overview">Tổng quan</button><button type="button" data-drawer-view="documents">Tài liệu</button><button type="button" data-drawer-view="assistant">Trợ lý AI</button><button type="button" data-drawer-view="research">Tra cứu pháp lý</button>
+      <p class="drawer-subtitle">11 NGHIỆP VỤ</p>
+      <button type="button" data-feature-jump="UC01"><span>Soạn hợp đồng / văn bản</span><small>R1 · Sắp triển khai</small></button>
+      <button type="button" data-feature-jump="UC02"><span>Rà soát hợp đồng</span><small>R1 · Sắp triển khai</small></button>
+      <button type="button" data-feature-jump="UC03"><span>Dịch tài liệu, hợp đồng</span><small>R0 · Đang triển khai</small></button>
+      <button type="button" data-feature-jump="UC07"><span>Sửa lỗi ngữ pháp</span><small>R0 · Đang triển khai</small></button>
+      <button type="button" data-feature-jump="UC04"><span>Tóm tắt văn bản</span><small>R0 · Đang triển khai</small></button>
+      <button type="button" data-feature-jump="UC05"><span>Phân tích văn bản</span><small>R1 · Sắp triển khai</small></button>
+      <button type="button" data-feature-jump="UC08"><span>Đọc và phân tích nhiều hồ sơ</span><small>R1 · Sắp triển khai</small></button>
+      <button type="button" data-feature-jump="UC09"><span>Trả lời câu hỏi pháp lý</span><small>R1 · Sắp triển khai</small></button>
+      <button type="button" data-feature-jump="UC10"><span>Tìm bản án theo chủ đề</span><small>R1 · Sắp triển khai</small></button>
+      <button type="button" data-feature-jump="UC11"><span>Tìm quy định theo chủ đề</span><small>R1 · Sắp triển khai</small></button>
+      <button type="button" data-feature-jump="UC06"><span>So sánh hai văn bản QPPL</span><small>R1 · Sắp triển khai</small></button>
+    </div>
+  </aside>
   <div id="modal-backdrop" class="modal-backdrop" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="modal-close icon-btn" id="modal-close" aria-label="Đóng"><svg class="icon"><use href="#i-x"/></svg></button><div class="modal-icon"><svg class="icon"><use href="#i-spark"/></svg></div><h2 id="modal-title">Bản xem trước</h2><p id="modal-description">Các tính năng nghiệp vụ đang được phát triển trong giai đoạn R0.</p><div id="modal-meta" class="modal-meta" hidden></div><button class="btn btn-primary modal-ack" id="modal-ack">Đã hiểu</button></div></div>
   <div role="status" aria-live="polite" id="toast" class="toast" hidden></div>
 </body>
