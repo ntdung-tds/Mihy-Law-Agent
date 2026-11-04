@@ -111,3 +111,20 @@ jobs:
           bash -n deployment/standalone/smoke_login_extension.sh
       - name: Actual Chromium desktop+mobile login/tenant/ACL/logout against Docker PostgreSQL16
         run: R38_ENABLE=1 R39_ENABLE=1 bash deployment/standalone/smoke_api.sh
+
+  standalone-qa:
+    # R40 reusable QA credential bundle + actual Docker/Postgres16 account
+    # provisioning and persistence. CI data destroyed when run completes;
+    # not a customer-accessible, long-lived staging server.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install QA hash and signed bearer test dependencies
+        run: python -m pip install -r requirements-r0-auth.txt "argon2-cffi==25.1.0"
+      - name: Check bash provisioning syntax
+        run: bash -n deployment/standalone/smoke_qa.sh
+      - name: Real 10-account QA role provisioning, signed HTTP login, ACL, no-rotation, volume survival
+        run: bash deployment/standalone/smoke_qa.sh
