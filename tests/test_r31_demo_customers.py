@@ -80,6 +80,10 @@ class DemoFixtureContracts(unittest.TestCase):
         org = next(s for s in self.fixture["scenarios"] if s["key"] == "organization")
         self.assertTrue(set(own["expected_doc_ids"]).isdisjoint(org["expected_doc_ids"]))
 
+    def test_static_web_uses_exact_server_fixture_copy(self):
+        browser_fixture = json.loads((SITE / "customers.json").read_text(encoding="utf-8"))
+        self.assertEqual(browser_fixture, self.fixture)
+
     def test_demo_web_is_explicit_simulation_not_fake_auth(self):
         html = (SITE / "index.html").read_text(encoding="utf-8")
         js = (SITE / "app.js").read_text(encoding="utf-8")
