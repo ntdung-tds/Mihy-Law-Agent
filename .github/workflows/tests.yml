@@ -95,7 +95,7 @@ jobs:
     # Real Chromium E2E: two locally isolated standalone installations.
     # No public port; no screenshots/passwords/tokens are uploaded to GitHub.
     # This is NONPRODUCTION test fixture UI, not released customer staging.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
