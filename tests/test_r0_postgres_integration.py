@@ -186,11 +186,18 @@ class RealPostgresRlsTests(unittest.TestCase):
 
     def test_active_membership_requires_valid_role_at_commit(self):
         invalid="99999999-9999-4999-8999-999999999999"
-        with self.assertRaises(psycopg.Error):
+        third_user="33333333-3333-4333-8333-333333333333"
+        with self.assertRaises(psycopg.Error) as caught:
             with self.admin.transaction():
+                self.admin.execute(
+                    "INSERT INTO ai_law.principals VALUES (%s,%s,'active')",
+                    (third_user,"fixture-unassigned"),
+                )
                 self.admin.execute("""INSERT INTO ai_law.memberships(
                    membership_id,tenant_id,user_id,status,authz_version,role_registry_version,joined_at)
-                   VALUES (%s,%s,%s,'active',1,'1.1.15',now())""",(invalid,A,U))
+                   VALUES (%s,%s,%s,'active',1,'1.1.15',now())""",
+                   (invalid,A,third_user))
+        self.assertIn("active membership must have a registered role",str(caught.exception))
         count=self.admin.execute("SELECT count(*) FROM ai_law.memberships WHERE membership_id=%s",(invalid,)).fetchone()[0]
         self.assertEqual(count,0)
 
