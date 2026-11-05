@@ -5,12 +5,14 @@
   async function check() {
     try {
       const r = await fetch('/api/qa/session', {credentials:'same-origin',cache:'no-store'});
-      if (r.status === 401) { location.replace('/' + location.hash); return; }
+      if (r.status === 401) { location.replace('/login'); return; }
       if (!r.ok) throw Error('session');
       const data = await r.json();
       el('#profile-identity').textContent = data.email || 'Tài khoản QA';
-      const kind = data.workspace_type === 'personal' ? 'Cá nhân' : 'Tổ chức';
-      const role = data.role === 'tenant_admin' ? 'Quản trị đơn vị' : 'Luật sư';
+      const kind = data.workspace_type === 'personal' ? 'Cá nhân' :
+        data.workspace_type === 'organization' ? 'Tổ chức' : 'Loại không gian chưa xác định';
+      const role = data.role === 'tenant_admin' ? 'Quản trị đơn vị' :
+        data.role === 'lawyer' ? 'Luật sư' : 'Vai trò chưa xác định';
       el('#profile-role').textContent = kind + ' · ' + role + ' · QA';
     } catch { el('#profile-role').textContent = 'Không thể kiểm tra phiên'; }
   }

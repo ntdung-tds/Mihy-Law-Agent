@@ -8,6 +8,18 @@
   const note=(message,isError=false)=>{
     const n=$('#matter-feedback');n.textContent=message;n.style.color=isError?'#a52c35':'#267653';
   };
+  // Invalidate previously rendered matter metadata as soon as the server revokes access.
+  // This is client-side privacy cleanup, not an authorization decision.
+  function sessionExpired(){
+    matters=[];
+    list.replaceChildren();
+    const recent=$('#recent-documents');if(recent)recent.replaceChildren();
+    for(const selector of ['#matter-total','#nav-matter-count','#dashboard-matter-count']){
+      const counter=$(selector);if(counter)counter.textContent='0';
+    }
+    note('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.',true);
+    location.replace('/login');
+  }
   const dateOf=epoch=>new Intl.DateTimeFormat('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'})
       .format(new Date(Number(epoch)*1000));
   function show(){
@@ -48,7 +60,7 @@
     fetchInProgress=true;$('#matter-refresh').disabled=true;
     try{
       const res=await fetch('/api/qa/matters',{credentials:'same-origin',cache:'no-store'});
-      if(res.status===401){note('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.',true);return;}
+      if(res.status===401){sessionExpired();return;}
       if(!res.ok)throw Error('server');
       const payload=await res.json();
       if(!Array.isArray(payload.matters))throw Error('invalid');
@@ -67,6 +79,7 @@
     try{
       const res=await fetch('/api/qa/matters',{method:'POST',credentials:'same-origin',cache:'no-store',
         headers:{'Content-Type':'application/json'},body:JSON.stringify({title})});
+      if(res.status===401){sessionExpired();return;}
       if(!res.ok){
         const obj=await res.json().catch(()=>({}));
         note(obj.error||'Không thể tạo hồ sơ QA.',true);return;
