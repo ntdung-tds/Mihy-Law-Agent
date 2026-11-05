@@ -14,14 +14,6 @@
    window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!menu.hidden){setOpen(false);toggle.focus();}});
    window.matchMedia('(min-width: 971px)').addEventListener('change',e=>{if(e.matches)setOpen(false);});
  }
- // Dismiss the narrow marketing ribbon for this page; no tracking/storage.
- const bannerClose=document.querySelector('[data-banner-dismiss]');
- if(bannerClose){
-   bannerClose.addEventListener('click',()=>{
-     const banner=bannerClose.closest('.announcement,.detail-announcement');
-     if(banner){banner.hidden=true;document.querySelector('.site-header .brand')?.focus();}
-   });
- }
  // Decorative reveal only: no content is hidden by default, and reduced-motion is honored.
  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
  if(!reduce&&'IntersectionObserver' in window){
