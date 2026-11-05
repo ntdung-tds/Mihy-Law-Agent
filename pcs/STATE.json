@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 59,
-  "updated_at": "2026-11-05T11:06:16.879Z",
+  "revision": 60,
+  "updated_at": "2026-11-05T12:16:32.797Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1063,7 +1063,9 @@
           "cf_r59_marketing_browser_7routes_8widths_both_hosts": "PASS_GITHUB_ACTIONS_42011652749_AND_42011664583",
           "cf_r59_public_worker_deployments": "PASS_NONPROD_QA_5ed1b8f6_PRIMARY_03fbcbc1_IDENTICAL_18_MODULES_QA_AUTH_UNCHANGED",
           "cf_r59_desktop_screen_visual": "VIEWED_CLOUDFLARE_BROWSER_1440x900_AND_FULL_PAGE_NOT_PERSISTED_AS_FILE",
-          "cf_r59_owner_final_device_release_acceptance": "NOT_RUN_SEPARATE_FROM_APPROVED_SAMPLE"
+          "cf_r59_owner_final_device_release_acceptance": "PASS_OWNER_STATED_UI_OK_2026_11_05_DEVICE_UNSPECIFIED_MARKETING_ONLY",
+          "cf_r60_session_revocation_js": "PASS_PR_CI_42025141035_MERGED_MAIN",
+          "cf_r60_cloudflare_live_change": "NOT_DEPLOYED"
         },
         "evidence": [
           "deployment/modes.json",
@@ -1136,6 +1138,34 @@
           "Cloudflare QA Worker version 5ed1b8f6-9706-4300-8b90-bf0d43dc5051; primary NONPRODUCTION Worker 03fbcbc1-0a08-4e80-b8af-a89304711298; same 18 modules; QA_AUTH unchanged",
           "Cloudflare Browser Rendering desktop 1440x900 and full-page images inspected in owner chat on 2026-11-05; screenshots not stored in repository/Drive"
         ]
+      },
+      {
+        "id": "AL-R0-IAM-UX-R60-001",
+        "title": "R60 bounded QA session expiry and revoked-matter display cleanup",
+        "status": "TECH_DONE",
+        "priority": "P0",
+        "scope": "Only existing Cloudflare QA R0 workspace JS and Node regression CI; no server IAM expansion, new API, login provider, new real accounts or Cloudflare deployment.",
+        "acceptance": [
+          "Expired QA sessions navigate to /login rather than the public landing page",
+          "Server-side 401 on QA matter list/create clears previously rendered synthetic matter titles and count indicators",
+          "Only recognized role keys render their approved labels; unknown/prototype-like keys do not inherit lawyer privileges or label",
+          "GitHub PR-head full CI passes before merge; SRS and approved marketing UI unchanged"
+        ],
+        "tests": {
+          "node_vm_browser_ui_behavior": "PASS_CI_42025141035",
+          "qa_cloudflare_contract": "PASS_CI_42025141035",
+          "full_github_workflow": "PASS_RUN_42025141035",
+          "live_cf_worker_deploy": "NOT_RUN",
+          "real_owner_phone_session_revocation": "NOT_RUN",
+          "real_tc12ab": "NOT_RUN"
+        },
+        "evidence": [
+          "GitHub PR #79 merged as 03e11794b4e1a71f19592c0834e6267b73be3ddf",
+          "GitHub Actions https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42025141035 completed/success",
+          "deployment/cloudflare/tests/session_ui_r60.test.mjs"
+        ],
+        "owner_acceptance": "NOT_REQUESTED_FUNCTIONAL_QA",
+        "notes": "CI uses isolated synthetic VM objects to exercise client logic; no claim of a live authenticated browser sign-in with private QA password."
       }
     ],
     "features": [
@@ -1339,6 +1369,12 @@
         "topic": "Owner-approved Mẫu 11 marketing banner across 7 public pages",
         "value": "After rejection and rollback of R56, public UI refinements R57 and R58 were replaced by Owner-approved Mẫu 11/R59. Desktop banner displays the sentence and inline gold 'Tìm hiểu thêm ↗' with three indicators below. Mobile keeps the same inline link but uses 10.8px text (10.3px at <=350px) and hides indicators; no ×, previous or next buttons. Three accurately scoped marketing messages rotate at 3.8 seconds; reduced-motion pauses auto-rotation. Preserve approved tilted MIHY brand and existing real routes. Applies only to public marketing HTML/CSS/JS and NONPRODUCTION deployment, not legal AI capability acceptance, IAM, customer data, SaaS or SRS baseline.",
         "authority": "Owner 2026-11-05: 'Ok chốt' after approving Mẫu 11 mobile layout (smaller text, hidden three dots, inline gold CTA). PR #77 merged; dual-host real-browser QA PASS."
+      },
+      {
+        "id": "DEC-023",
+        "topic": "Owner accepts Mẫu 11 UI and authorizes beginning functional Batch 1",
+        "value": "Owner explicitly confirmed 'Giao diện đã ok', so record Owner marketing UI acceptance and prioritize real QA authentication/role coverage next. This is not approval of production release, client-file processing, billing/SaaS, or full SRS functionality. First scoped R60 code changes improve session expiry, revoked-matter data cleanup and safe role labels; no new routes or identity privileges.",
+        "authority": "Owner 2026-11-05: 'Giao diện đã ok, liệt kê công việc tiếp theo' followed by 'Ok, bắt đầu' for the agreed login/permission Batch 1."
       }
     ],
     "risks": [
@@ -1647,12 +1683,16 @@
       {
         "path": "tests/evidence/AL-R0-R38-STANDALONE-LOGIN-2026-11-04.json",
         "visibility": "PUBLIC_SAFE_TECHNICAL_CI_EVIDENCE"
+      },
+      {
+        "path": "deployment/cloudflare/tests/session_ui_r60.test.mjs",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_TEST"
       }
     ],
     "current": {
-      "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R59 Owner-approved Mẫu 11 public Mihy Law AI Agent header/banner is deployed to QA and primary NONPRODUCTION Cloudflare and merged in GitHub PR #77 (merge commit 991e944f1036a54104c993e1fd7134a143788795). Desktop white sentence + inline gold 'Tìm hiểu thêm ↗', three dots underneath; mobile 10.8px, 10.3px for <=350px, dots hidden; no × or prev/next controls; three messages auto-rotate each 3.8s respecting reduced-motion. Tilted MIHY logo and actual navigation retained. Seven public pages × eight widths real Chromium PASS on BOTH hosts, GitHub Actions 42011652749 and 42011664583 (10/10 jobs PASS); QA Worker version 5ed1b8f6-9706-4300-8b90-bf0d43dc5051 and primary nonprod 03fbcbc1-0a08-4e80-b8af-a89304711298 have identical 18 modules with QA_AUTH service binding unchanged. Browser Rendering desktop 1440×900 and full-page screenshots viewed in this chat but no durable screenshot file saved. R56 design was rejected/reverted via PR #74; R57/#75 and R58/#76 are superseded by approved R59/#77. This is marketing UI only, not production legal AI readiness.",
-      "next_action": "Owner to inspect deployed R59 Mẫu 11 at https://ai-law-web.iaict-platform.workers.dev/ on physical desktop/mobile; design specimen is Owner-approved, but a separate final device/browser release acceptance is not yet recorded. Continue standalone AI Law functional E2E and private storage/IAM/production gates independently. SRS v1.1.15 remains unchanged; do not treat public marketing banner as approval of SaaS, billing or real client legal-data processing.",
+      "active_task": "AL-R0-IAM-REAL-001",
+      "last_completed_step": "R60 first bounded Batch 1 auth UX: Owner accepted Mẫu 11 marketing UI, QA-only session-expiry role labels and revoked-matter title cleanup implemented in PR #79, merged main 03e11794b4e1a71f19592c0834e6267b73be3ddf after complete GitHub Actions 42025141035 SUCCESS. This is code+synthetic JS CI, NOT deployed live Worker, not a full real-IDP/role-based IAM acceptance.",
+      "next_action": "Next QA IAM slice: Cloudflare D1 live read-only census confirms 10 synthetic principals and 12 memberships but only 1 active login verifier and 0 matters. Complete secure QA-only credential provisioning for remaining approved actors via private Owner-controlled secrets, then real HTTPS browser role login/session/revocation/MatterACL matrix and TC12A/B; keep production, real client data, SaaS, Google Drive OAuth gates closed. Review R60 code rollout separately on nonproduction only.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1681,7 +1721,8 @@
         "R53 mobile aesthetic approval NOT_RUN_OWNER; final PR #70 CI after primary nonproduction promotion PENDING at checkpoint; SaaS future-only and real customer files/production still blocked.",
         "R54 final Owner physical-mobile aesthetic review NOT_RUN_OWNER. Last-code CI for primary nonproduction QA run 41979935336 pending at checkpoint. Facebook official fanpage URL unverified; subscription and real legal AI still unlaunched, production/customer data blocked.",
         "R55 final Owner mobile aesthetics NOT_RUN_OWNER, despite real nonproduction Chromium passing across QA and primary. Production legal AI, real customer files, SaaS and IAM approval remain blocked.",
-        "R56 final Owner phone aesthetic acceptance NOT_RUN_OWNER despite real Chromium QA/primary NONPRODUCTION passes. Do not infer actual product legal AI or SaaS readiness from marketing header design."
+        "R56 final Owner phone aesthetic acceptance NOT_RUN_OWNER despite real Chromium QA/primary NONPRODUCTION passes. Do not infer actual product legal AI or SaaS readiness from marketing header design.",
+        "2026-11-05 live Cloudflare QA D1 read-only check: 10 principals, 12 memberships, only 1 active login verifier; other 9 role-based QA sign-ins are NOT_ACTIVE. R60 fixes are merged source-only, not live Worker deployed."
       ]
     },
     "policy": {
