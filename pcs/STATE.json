@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
   "revision": 65,
-  "updated_at": "2026-11-05T20:23:53.367Z",
+  "updated_at": "2026-11-05T20:38:38.233Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1359,13 +1359,15 @@
           "documented_private_runbook": "PASS_SOURCE_WRITTEN_BRANCH_PR89",
           "production": "NOT_RUN",
           "review_second_pass": "FIXED_R65_REVOKED_QA06_TENANT_DENIAL_CI_REAL_CREDENTIAL_BLOCK_COOKIE_FLAGS_DUPLICATE_WORKSPACE_UI_TENANT_AFTER_SWITCH",
-          "qa_d1_readonly_reaudit": "PASS_AGGREGATE_2026_11_06_11_PRINCIPALS_13_MEMBERSHIPS_2_ACTIVE_VERIFIERS_0_ACTIVE_SESSIONS_0_ORPHAN_MEMBERSHIPS_0_QA_MATTERS"
+          "qa_d1_readonly_reaudit": "PASS_AGGREGATE_2026_11_06_11_PRINCIPALS_13_MEMBERSHIPS_2_ACTIVE_VERIFIERS_0_ACTIVE_SESSIONS_0_ORPHAN_MEMBERSHIPS_0_QA_MATTERS",
+          "owner_qa_password_rotation": "BLOCKED_CONNECTOR_SAFETY_BEFORE_UPDATE_OLD_PASSWORD_UNCHANGED",
+          "owner_qa_session_revocation": "PASS_CLOUDFLARE_D1_3_SESSIONS_REVOKED_0_UNREVOKED_READBACK"
         },
         "evidence": [
           "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/89",
           "Owner-private AI Law Test Evidence Drive document: R65 QA Identity & Role E2E Batch (do not publish ID or URL)"
         ],
-        "notes": "R40 private bundle metadata is owner-only in Drive; no cross-connector credential transfer. R65 operator harness requires safe local 0600 private bundle. After 7 R40 active + 1 disabled inserted idempotently, expected D1 verifier totals 9 active plus 1 disabled including existing QA04 and Owner QA personal verifier; QA10 separate. No live positive sign-in currently demonstrated. Second code-security review added explicit QA06 revoked-tenant switch denial, CI fail-closed real-login gate, HTTPS cookie attributes, duplicate workspace response check, and QA02 post-switch UI selector refresh; synthetic unit tests added. Final PR HEAD CI required."
+        "notes": "R40 private bundle metadata is owner-only in Drive; no cross-connector credential transfer. R65 operator harness requires safe local 0600 private bundle. After 7 R40 active + 1 disabled inserted idempotently, expected D1 verifier totals 9 active plus 1 disabled including existing QA04 and Owner QA personal verifier; QA10 separate. No live positive sign-in currently demonstrated. Second code-security review added explicit QA06 revoked-tenant switch denial, CI fail-closed real-login gate, HTTPS cookie attributes, duplicate workspace response check, and QA02 post-switch UI selector refresh; synthetic unit tests added. Final PR HEAD CI required. Owner QA security containment: all 3 previously unrevoked sessions explicitly revoked, 0 left. Requested password update did not occur because connector safety controls blocked verifier change. Owner must use authorized private reset channel and re-test before security closure."
       }
     ],
     "features": [
@@ -1708,8 +1710,8 @@
         "id": "RISK-013",
         "level": "HIGH",
         "title": "Transient QA-only password literal exposed in a public PR branch test assertion",
-        "status": "BRANCH_HISTORY_REWRITTEN_ROTATION_PENDING",
-        "mitigation": "Removed literal, rebuilt R65 branch history from main with sanitized files and force-with-lease moved PR head to clean commits. Old GitHub PR refs or caches cannot be guaranteed purged; rotate affected nonproduction QA password via approved private mechanism. No password value in PCS, GitHub diff or Drive evidence."
+        "status": "REQUIRES_PRIVATE_PASSWORD_ROTATION_OLD_SESSIONS_REVOKED",
+        "mitigation": "Sanitized source and rewrote PR #89 branch history, but archived GitHub refs/cache cannot be guaranteed purged. Owner requested QA-only password rotation. Password-verifier mutation was blocked before execution by connector safety controls; NO PASSWORD CHANGE occurred. Separately revoked 3 unrevoked D1 sessions for Owner personal QA actor; D1 readback confirmed 0 remaining unrevoked. Old credential may create new sessions, so authorized private password rotation and old-denied/new-accepted real login checks remain REQUIRED. Never store the new or old password, hash or SID in public PCS."
       }
     ],
     "artifacts": [
@@ -1984,8 +1986,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R65 one full extra source/security review: initial clean HEAD Actions 42079616896 completed success 9/9 executed, 21 skips. Fixes on PR #89: explicit QA06 revoked tenant deny, fail-closed no real credentials on CI, session cookie HttpOnly/Secure/SameSite, duplicate workspace fail-close, and QA02 browser selector after switching; synthetic regression tests. Cloudflare QA direct read-only recount PASS (11 principals, 13 memberships, 2 active verifiers, 0 active sessions/orphans/matters). No infrastructure or production writes. Must validate final reviewed HEAD CI and merge only after PASS.",
-      "next_action": "Wait for latest reviewed PR #89 head GitHub Actions success and no secret scan issues, then merge source/PCS revision 65 to main. Private R40 safe operator activation and authenticated multi-role/tenant/MatterACL/30m expiry remain blocked, as does QA password rotation following prior public PR assertion; no production deployment or R62 primary site rollout. Owner final acceptance last.",
+      "last_completed_step": "R65 QA security containment: Cloudflare QA personal Owner actor matched active principal/verifier/membership; password reset attempt blocked before execution by connector safety; no password change. Authorized separate D1 operation revoked 3 old sessions, readback 0 remaining. Evidence recorded Owner-private Drive. Prior R65 branch review/CI gates remain separately pending.",
+      "next_action": "URGENT: Authorized private operator must rotate the affected Owner QA account password via trusted admin channel, verify old password denied/new password accepted in real login, and revoke all sessions again. Do not use chat-pasted password as long-term private secret. Continue R65 final PR CI and merge only after PASS. R40 multi-role E2E still BLOCKED; production not authorized.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -2020,7 +2022,8 @@
         "R62 2026-11-05: Attempt to publish merged authentication source through Cloudflare connector was blocked by tool safety; read-back confirms backend d22f928f, site QA ea55af9f, primary nonproduction 71f406a3 remain previous R61/R44 versions. Public source/test CI PASS 30/30, but R62 live Cloudflare remains BLOCKED and multi-account real sign-in NOT_RUN.",
         "R63 2026-11-05: QA UI deployed and source readback PASS, but Browser Rendering actual live test was HTTP429; Owner physical mobile acceptance and QA positive login NOT_RUN. Live Cloudflare backend/site do not yet run R62 authentication/workspace source, so R62 IAM feature acceptance remains BLOCKED.",
         "R64 2026-11-06: Cloudflare QA R62 backend/site code + primary NONPRODUCTION R63 UI source deployed; real Chromium anonymous boundaries PASS (Actions 42072937167). D1 has only 2 active verifiers (1 existing QA04 and 1 Owner-controlled actor) of 11 principals, so saved R40 role accounts still NOT activated. Real multi-role password sign-in, tenant switch/MatterACL HTTP E2E, 30-minute expiry, Owner R64 acceptance remain NOT_RUN/BLOCKED. Browser Rendering via CF returned HTTP429. Primary NONPRODUCTION shares backend with QA; production unchanged.",
-        "R65 2026-11-06: QA D1 has 2 active verifiers, R40 private bundle remains owner-private in Drive and not activated on Cloudflare; positive multi-role login, session rotation, revoked/disabled and MatterACL remain BLOCKED/NOT_RUN. Cleaned PR #89 CI is QUEUED due GitHub standalone-browser job; source not merged. QA-only password exposed transiently in public PR commit history requires rotation, force rewriting active branch does not guarantee GitHub cache deletion."
+        "R65 2026-11-06: QA D1 has 2 active verifiers, R40 private bundle remains owner-private in Drive and not activated on Cloudflare; positive multi-role login, session rotation, revoked/disabled and MatterACL remain BLOCKED/NOT_RUN. Cleaned PR #89 CI is QUEUED due GitHub standalone-browser job; source not merged. QA-only password exposed transiently in public PR commit history requires rotation, force rewriting active branch does not guarantee GitHub cache deletion.",
+        "Owner QA password reset requested 2026-11-06: verifier update connector BLOCKED by safety controls before execution; old password still valid for new sessions. Independent QA D1 session revocation PASS (3 rows; 0 unrevoked readback). Private operator password rotation, verification and repeat session revocation required before marking RISK-013 resolved."
       ]
     },
     "policy": {
