@@ -1,10 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `56` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T06:24:25.640Z`.
+- **PCS revision:** `57` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T07:21:24.970Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R55 — Owner's three mobile banner screenshots: compact and refined
+
+- **Visual changes:** Miniaturize left-aligned MIHY AGENT ⚖ landing banners across six pages; reduce the homepage announcement strip but retain complete copy and warm-yellow text-only “Khám phá lợi ích ↗”; replace giant underlined offering sentence with two distinct short direct links, no dangling arrows. Public site CSS and homepage HTML only.
+- **Real deploy:** Cloudflare QA `ai-law-web-qa` `78c7abfe-2479-4d3c-a018-a5598acbe4af` and primary NONPRODUCTION `ai-law-web` `645c8592-3911-439e-95cc-747f252ef2ae`, both 100% with identical 18 modules and unchanged `QA_AUTH` binding.
+- **Test evidence:** GitHub Actions `41986135487` real Chromium R55 7 pages × 8 sizes on **each hostname PASS**; existing R54 compact-header/gold-link/copyright checks on **both PASS**. Node contract plus suite previously PASS; final docs-only checkpoint CI to be checked.
+- **Scope:** `srs_changed.md` SC-014. SRS v1.1.15 frozen, no production/customer data, login/IAM, R46 D1, SaaS, payments or AI law function changes. Owner real-phone final visual sign-off remains `NOT_RUN_OWNER`.
+- **PR:** https://github.com/ntdung-tds/Mihy-Law-Agent/pull/72
+
+
 
 ## R54 — Owner mobile review: gold text CTA, left banners and grouped © 2026
 
