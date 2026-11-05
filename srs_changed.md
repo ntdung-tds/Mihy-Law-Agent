@@ -80,3 +80,10 @@
 - **Visual identity:** Keep the Mihy Agent M mark but replace the `✳` accent with legal scales `⚖`; refine future/subscription (not yet launched) areas from disliked pink-purple to a professional navy/teal palette.
 - **Public contact supplied by Owner:** Mihy Agent; Số 9 Tôn Thất Thuyết, Cầu Giấy, Hà Nội; phone `+84588550000`; email `dungnt.myh@outlook.com`. Facebook is requested, but an official public page URL has not been supplied or independently verified, therefore the marketing footer uses a clearly labeled Facebook search URL until an official link is provided. Do not invent corporate social account ownership.
 - **SRS change policy:** UI/copy/contact and public educational pages only. Keep SRS v1.1.15 as approved baseline; do not add new legal operations, service entitlement, payments, hosted SaaS implementation or production permissions. Existing dedicated deployment remains implementation priority. Owner final visual acceptance pending.
+
+## SC-011 — 2026-11-05 — Owner approval: unified brand color, mobile typography and richer public landing content
+
+- Owner approved an iteration of the public Mihy Law AI Agent website following mobile screenshots. Keep original approved legal slogans, but prevent “luận” from wrapping alone in the first sentence; ensure mobile paragraphs, CTAs, menu and contact sections are readable, compact and visually balanced.
+- Return to a consistent violet/lilac/navy professional legal design across home, public navigation and six existing landing pages, including the prospective but not-yet-operational SaaS service.
+- Expand editorial depth on `/gioi-thieu`, `/giai-phap`, `/chuc-nang`, `/an-toan-du-lieu`, `/trien-khai-rieng` and `/dich-vu-theo-goi`. Add restrained animations and transitions, respecting reduced motion and accessibility.
+- This is visual design/public educational copy only. Do not add SRS use cases, commercial tiers, real AI legal operations, payments, tenant changes, new data flows, login requirements or production authorization. SRS v1.1.15 remains frozen pending Owner document synchronization. Screenshots are review feedback, not authority for new deployment permissions.

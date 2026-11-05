@@ -14,6 +14,17 @@
    window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!menu.hidden){setOpen(false);toggle.focus();}});
    window.matchMedia('(min-width: 971px)').addEventListener('change',e=>{if(e.matches)setOpen(false);});
  }
+ // Decorative reveal only: no content is hidden by default, and reduced-motion is honored.
+ const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(!reduce&&'IntersectionObserver' in window){
+   const targets=document.querySelectorAll('.home-story,.home-audience-card,.detail-value,.detail-use-grid>article,.editorial-value-card,.editorial-step,.deep-dive-card,.perspective-copy,.solution-card');
+   const observer=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){entry.target.classList.add('motion-enter');observer.unobserve(entry.target);}
+      });
+   },{threshold:.08,rootMargin:'0px 0px -18px 0px'});
+   targets.forEach(el=>observer.observe(el));
+ }
  const year=document.getElementById('footer-year');
  if(year)year.textContent=String(new Date().getFullYear());
 })();
