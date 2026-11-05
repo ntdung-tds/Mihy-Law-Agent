@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 60,
-  "updated_at": "2026-11-05T12:16:32.797Z",
+  "revision": 61,
+  "updated_at": "2026-11-05T12:51:54.385Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1065,7 +1065,18 @@
           "cf_r59_desktop_screen_visual": "VIEWED_CLOUDFLARE_BROWSER_1440x900_AND_FULL_PAGE_NOT_PERSISTED_AS_FILE",
           "cf_r59_owner_final_device_release_acceptance": "PASS_OWNER_STATED_UI_OK_2026_11_05_DEVICE_UNSPECIFIED_MARKETING_ONLY",
           "cf_r60_session_revocation_js": "PASS_PR_CI_42025141035_MERGED_MAIN",
-          "cf_r60_cloudflare_live_change": "NOT_DEPLOYED"
+          "cf_r60_cloudflare_live_change": "NOT_DEPLOYED",
+          "cf_r61_qa_worker_source": "PASS_18_MODULES_VERSION_ea55af9f-8a7e-413f-9f65-93aaa09b66a2",
+          "cf_r61_primary_worker_source": "PASS_18_MODULES_VERSION_71f406a3-75d3-43f7-8b59-22d7ca6c0745",
+          "cf_r61_qa_primary_module_equivalence": "PASS_CLOUDFLARE_API_18_OF_18",
+          "cf_r61_qa_browser_live_anonymous": "PASS_GITHUB_ACTIONS_42028912106_320_390_430_1440",
+          "cf_r61_primary_login_browser_visual": "PASS_CLOUDFLARE_BROWSER_390PX",
+          "cf_r61_primary_anon_app_browser": "PASS_CLOUDFLARE_BROWSER_1440PX",
+          "cf_r61_simulated_revocation_browser": "PASS_GITHUB_ACTIONS_42028912106_ROLE_LAWYER_ADMIN_UNKNOWN",
+          "cf_r61_full_ci": "PASS_29_JOBS_42028912106",
+          "cf_r61_multi_role_positive_login": "NOT_RUN",
+          "cf_r61_qa_login_verifier_count": "ONLY_1_ACTIVE_OF_10_SYNTHETIC_PRINCIPALS",
+          "cf_r61_real_tc12_ab": "NOT_RUN"
         },
         "evidence": [
           "deployment/modes.json",
@@ -1136,7 +1147,10 @@
           "GitHub PR #77: R59 Owner-approved Sample 11 inline headers, merged commit 991e944f1036a54104c993e1fd7134a143788795",
           "GitHub Actions 42011652749 and 42011664583: PASS on 7 public pages x 8 widths on both NONPRODUCTION Workers; 10 CI jobs PASS",
           "Cloudflare QA Worker version 5ed1b8f6-9706-4300-8b90-bf0d43dc5051; primary NONPRODUCTION Worker 03fbcbc1-0a08-4e80-b8af-a89304711298; same 18 modules; QA_AUTH unchanged",
-          "Cloudflare Browser Rendering desktop 1440x900 and full-page images inspected in owner chat on 2026-11-05; screenshots not stored in repository/Drive"
+          "Cloudflare Browser Rendering desktop 1440x900 and full-page images inspected in owner chat on 2026-11-05; screenshots not stored in repository/Drive",
+          "PR #81 merged 547710ac7a15e91fc82e574f40abc09403b48764; full CI 42028912106 PASS (29/29), Chromium 4 live widths + 3 mocked revocation actor cases.",
+          "Cloudflare nonproduction QA R61 version ea55af9f-8a7e-413f-9f65-93aaa09b66a2 and primary R61 version 71f406a3-75d3-43f7-8b59-22d7ca6c0745, 18 identical modules; QA_AUTH unchanged.",
+          "Owner-private Google Drive R61 test report (no private link published)."
         ]
       },
       {
@@ -1166,6 +1180,38 @@
         ],
         "owner_acceptance": "NOT_REQUESTED_FUNCTIONAL_QA",
         "notes": "CI uses isolated synthetic VM objects to exercise client logic; no claim of a live authenticated browser sign-in with private QA password."
+      },
+      {
+        "id": "AL-R0-QA-BROWSER-R61-001",
+        "title": "R61 real Chromium nonproduction QA anonymous gates + scoped simulated revoked session browser tests",
+        "priority": "P0",
+        "status": "TECH_DONE",
+        "scope": "Verify R60 approved QA-only UI source on both nonproduction Cloudflare Workers. Playwright real HTTPS tests the unauthenticated login/protected routes at 320/390/430/1440px; role/revocation browser tests use mock API only. No new users, legal documents, IdP or production.",
+        "acceptance": [
+          "Chromium live HTTPS QA login page and anonymous private endpoints fail closed at 320,390,430,1440",
+          "Chromium role label for lawyer/admin/unrecognized and revoked session redirect PASS with explicit simulated API fixture",
+          "QA and primary nonproduction Worker modules match and QA_AUTH service binding is preserved",
+          "No test credentials or cookies committed; full GitHub Actions PASS before merge"
+        ],
+        "tests": {
+          "live_qa_browser_4_widths": "PASS_CI_42028912106",
+          "simulated_roles_and_revocation_3_scenarios": "PASS_CI_42028912106_MOCK_API",
+          "full_github_actions": "PASS_29_OF_29_42028912106",
+          "cf_qa_live_deploy": "PASS_VERSION_ea55af9f-8a7e-413f-9f65-93aaa09b66a2",
+          "cf_primary_nonproduction_live_deploy": "PASS_VERSION_71f406a3-75d3-43f7-8b59-22d7ca6c0745",
+          "real_browser_positive_password_and_tenant_role_matrix": "NOT_RUN",
+          "real_tc12a_tc12b": "NOT_RUN",
+          "production": "NOT_AUTHORIZED"
+        },
+        "evidence": [
+          "PR #81 merged main 547710ac7a15e91fc82e574f40abc09403b48764",
+          "GitHub Actions 42028912106 completed/success, cloudflare-site-r61 Chromium PASS + full 29/29 jobs success",
+          "deployment/cloudflare/tests/live_r61_qa_auth_browser.py",
+          "Cloudflare direct Browser Rendering real main nonprod login form at 390px and unauthenticated /app at 1440px PASS",
+          "Owner-only private Drive QA R61 report saved in AI Law Test Evidence; identifier not published"
+        ],
+        "owner_acceptance": "PENDING_FINAL_FUNCTIONAL_ACCEPTANCE",
+        "notes": "No actual positive live password login test and no 10-account Cloudflare role provisioning. A temporary synthetic D1 session used for an attempted browser probe was removed; that probe did not PASS."
       }
     ],
     "features": [
@@ -1375,6 +1421,12 @@
         "topic": "Owner accepts Mẫu 11 UI and authorizes beginning functional Batch 1",
         "value": "Owner explicitly confirmed 'Giao diện đã ok', so record Owner marketing UI acceptance and prioritize real QA authentication/role coverage next. This is not approval of production release, client-file processing, billing/SaaS, or full SRS functionality. First scoped R60 code changes improve session expiry, revoked-matter data cleanup and safe role labels; no new routes or identity privileges.",
         "authority": "Owner 2026-11-05: 'Giao diện đã ok, liệt kê công việc tiếp theo' followed by 'Ok, bắt đầu' for the agreed login/permission Batch 1."
+      },
+      {
+        "id": "DEC-024",
+        "topic": "Owner delegates continued QA browser execution of standalone AI Law deployment",
+        "value": "Proceed with nonproduction R0 login/authorization/browser test batches without separate routine implementation approval. Preserve Owner-approved Mẫu 11; no production or real customer data. This consent does not authorize publishing credentials, circumventing cross-app secret controls, or treating browser mock sessions as actual signed-in TC12A/B acceptance.",
+        "authority": "Owner 2026-11-05: 'Bước tiếp theo bạn tự làm nhé, test luôn trên trình duyệt của bạn'."
       }
     ],
     "risks": [
@@ -1687,12 +1739,16 @@
       {
         "path": "deployment/cloudflare/tests/session_ui_r60.test.mjs",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_QA_TEST"
+      },
+      {
+        "path": "deployment/cloudflare/tests/live_r61_qa_auth_browser.py",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_BROWSER_QA_TEST"
       }
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R60 first bounded Batch 1 auth UX: Owner accepted Mẫu 11 marketing UI, QA-only session-expiry role labels and revoked-matter title cleanup implemented in PR #79, merged main 03e11794b4e1a71f19592c0834e6267b73be3ddf after complete GitHub Actions 42025141035 SUCCESS. This is code+synthetic JS CI, NOT deployed live Worker, not a full real-IDP/role-based IAM acceptance.",
-      "next_action": "Keep AL-R0-DEPLOY-001 as canonical standalone-first active task. Its next QA IAM subtask: Cloudflare D1 real read-only census confirms 10 synthetic principals/12 memberships but only 1 active login verifier and 0 matters. Securely provision remaining approved QA actor credentials via private Owner storage, then live role-based sign-in/session/revocation/MatterACL TC12A/B tests. R60 source fixes merged but nonproduction Worker deploy remains NOT_RUN; production/customer data/SaaS closed.",
+      "last_completed_step": "R61 browser QA real testing and rollout: Cloudflare QA and primary NONPRODUCTION workers now both host same 18-module R60 workspace source with QA_AUTH unchanged. QA version ea55af9f, primary version 71f406a3, both 100% deployed. Real Chromium 320/390/430/1440 login & anonymous boundary PASS; 3 mocked role/revocation UI cases PASS; GitHub PR #81 merged 547710ac and Actions 42028912106 complete 29/29 PASS. Cloudflare Browser Rendering on primary verified login 390px and anon /app 1440px. Owner-only Drive QA report saved. Actual 10-account live login still NOT_RUN.",
+      "next_action": "R62 bounded Cloudflare QA IAM provisioning with supported secret handling: only 1 active verifier for 10 synthetic principal rows; register approved per-actor QA credentials through private Owner-controlled tooling and preserve disabled/revoked semantics, then positive live browser login/CSRF/logout/session expiry and real tenant/MatterACL TC12A/B. Respect security tool controls; no public repo credential movement. Continue SRS v1.1.15 standalone-first; production/SaaS/real data/Drive OAuth closed.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1722,7 +1778,8 @@
         "R54 final Owner physical-mobile aesthetic review NOT_RUN_OWNER. Last-code CI for primary nonproduction QA run 41979935336 pending at checkpoint. Facebook official fanpage URL unverified; subscription and real legal AI still unlaunched, production/customer data blocked.",
         "R55 final Owner mobile aesthetics NOT_RUN_OWNER, despite real nonproduction Chromium passing across QA and primary. Production legal AI, real customer files, SaaS and IAM approval remain blocked.",
         "R56 final Owner phone aesthetic acceptance NOT_RUN_OWNER despite real Chromium QA/primary NONPRODUCTION passes. Do not infer actual product legal AI or SaaS readiness from marketing header design.",
-        "2026-11-05 live Cloudflare QA D1 read-only check: 10 principals, 12 memberships, only 1 active login verifier; other 9 role-based QA sign-ins are NOT_ACTIVE. R60 fixes are merged source-only, not live Worker deployed."
+        "2026-11-05 live Cloudflare QA D1 read-only check: 10 principals, 12 memberships, only 1 active login verifier; other 9 role-based QA sign-ins are NOT_ACTIVE. R60 fixes are merged source-only, not live Worker deployed.",
+        "R61 2026-11-05: Cross-app credential transfer for new Cloudflare QA accounts was blocked by tool safety controls; no new verifier records were inserted. D1 remains 10 synthetic principals, 12 memberships, 1 active QA login verifier, zero matter catalog records; full positive role-account Chromium E2E and TC12A/B NOT_RUN."
       ]
     },
     "policy": {
