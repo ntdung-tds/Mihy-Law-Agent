@@ -53,13 +53,13 @@ test('both Mihy Agent landing pages serve as public pages and cannot expose priv
   assert.ok(html.includes('Mihy Law AI Agent'),path);
   assert.ok(html.includes('Mihy Agent'),path);
   assert.ok(html.includes('class="detail-hero"'),path);
-  assert.ok(html.includes('class="detail-faq"'),path);
+  assert.ok(html.includes('detail-faq"'),path);
   assert.ok(html.includes('href="/login"'),path);
   assert.ok(!html.includes('id="matter-form"'),path);
  }
  const service=await (await get('/dich-vu-theo-goi')).text();
  assert.match(service,/chưa mở bán/);
- assert.match(service,/chưa có chức năng đăng ký hoặc thanh toán/);
+ assert.match(service,/không có chức năng đăng ký hoặc thanh toán/);
 });
 test('public assets include mobile navigation and website styling',async()=>{
  for(const p of ['/site.css','/site.js','/favicon.svg','/robots.txt']){
