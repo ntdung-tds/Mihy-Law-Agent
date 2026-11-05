@@ -1272,3 +1272,77 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 
 /* R53 mobile: hide decorative dot so announcement text aligns exactly with hero left edge. */
 @media(max-width:700px){.announcement .pulse-dot{display:none}}
+
+/* R54 — screenshot-driven mobile refinements; gold text links, compact shared
+   announcement and copyright grouping. Scope: public marketing UI only. */
+.announcement{display:block;text-align:left;background:#241d3e;padding:0}
+.announcement-inner{display:block;min-height:0;padding:10px 0 11px;text-align:left;line-height:1.65}
+.announcement-copy{display:inline;color:#f9f5ff;font-size:12.5px;line-height:1.65;font-weight:650}
+.announcement-sub{display:inline;color:#cdc2dd;font-weight:550}
+.announcement-action{display:inline!important;max-width:none!important;padding:0!important;margin:0 0 0 5px!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;color:#f7d176!important;font-size:12.5px;font-weight:900;line-height:1.65;white-space:normal;text-decoration:none!important;text-underline-offset:4px}
+.announcement-action:hover,.announcement-action:focus-visible{color:#ffe8a1!important;text-decoration:underline!important;background:none!important}
+.announcement-action>span{white-space:nowrap}
+
+/* Landing-page top banner is an editorial strip, not a tall centered hero. */
+.detail-announcement{display:block;min-height:0;justify-content:initial;align-items:initial;flex-wrap:initial;gap:0;padding:0;background:#1b1733;text-align:left}
+.detail-announcement-inner{display:flex;align-items:center;justify-content:flex-start;gap:12px;flex-wrap:wrap;min-height:0;padding:11px 0}
+.detail-announcement-brand{display:inline-flex;align-items:center;gap:7px;color:#f3e7ff;font-size:11px;font-weight:900;letter-spacing:.9px;white-space:nowrap;line-height:1.4}
+.detail-announcement-brand>span{color:#e4b6d5;font-size:15px;line-height:1}
+.detail-announcement-copy{flex:1;min-width:180px;color:#d7cbe5;font-size:12px;font-weight:550;line-height:1.6}
+.detail-announcement-action{display:inline!important;flex:0 0 auto;color:#f7d176!important;text-decoration:none!important;text-underline-offset:4px;font-weight:900;font-size:12px;line-height:1.5}
+.detail-announcement-action:hover,.detail-announcement-action:focus-visible{color:#ffe8a1!important;text-decoration:underline!important}
+.detail-announcement-action>span{white-space:nowrap}
+
+/* Copyright is a single semantic unit (including the year) on every page. */
+.footer-copyright{display:inline-flex;align-items:baseline;gap:4px;color:#e3dbea;white-space:nowrap;font-weight:750;line-height:1.65}
+.footer-disclaimer{display:block;min-width:0;flex:1;font-size:11px;color:#c0b5d0;line-height:1.7}
+.detail-footer-bottom{align-items:center;gap:18px;justify-content:space-between}
+.detail-footer-bottom>a{flex-shrink:0}
+.footer-base .footer-copyright{font-size:11px}
+
+/* Taller reading sizes, reduced distance below navigation on mobile. */
+@media(max-width:700px){
+ .announcement{min-height:0!important;padding:0!important;text-align:left!important;letter-spacing:0!important}
+ .announcement-inner{display:block!important;min-height:0;padding:10px 0 11px!important;line-height:1.6}
+ .announcement-copy{display:inline!important;flex:none!important;font-size:12.4px!important;line-height:1.6!important;color:#f9f5ff}
+ .announcement-sub{display:inline!important;color:#d4c6df;font-weight:550}
+ .announcement-action{display:inline!important;font-size:12.5px!important;line-height:1.6!important;max-width:none!important;margin:0 0 0 4px!important;padding:0!important;text-align:left!important;color:#f7d176!important;border:0!important;border-radius:0!important;background:none!important}
+ .detail-announcement{padding:0!important;font-size:inherit;line-height:inherit;text-align:left!important}
+ .detail-announcement-inner{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:4px;min-height:0;padding:10px 0 11px}
+ .detail-announcement-brand{font-size:11px;letter-spacing:1px}
+ .detail-announcement-brand>span{font-size:15px}
+ .detail-announcement-copy{min-width:0;font-size:12.5px;line-height:1.53}
+ .detail-announcement-action{font-size:13px;font-weight:900;line-height:1.45}
+ .editorial-hero-grid{padding-top:30px!important;padding-bottom:36px!important;gap:22px!important}
+ .detail-hero-grid{padding-top:29px!important;padding-bottom:39px!important;gap:22px!important}
+ .editorial-hero h1,.detail-hero h1{margin-top:15px!important;margin-bottom:17px!important}
+ .editorial-overline{font-size:11px!important;line-height:1.5}
+ .detail-overline{font-size:11px!important;line-height:1.6}
+ .editorial-hero-ribbon{font-size:10px!important;line-height:1.6;letter-spacing:.4px;padding:17px 0 18px}
+ .detail-hero-baseline{font-size:10px!important;letter-spacing:.4px;line-height:1.6;padding:13px 0 16px}
+ .editorial-lede,.detail-lede{font-size:14px!important;line-height:1.78!important}
+ .editorial-value-card p,.editorial-step p,.editorial-story-grid>div:last-child>p:not(.detail-kicker),.editorial-choice .container>div:first-child>p:not(.detail-kicker),.detail-value p,.detail-use-grid p,.detail-tier p,.detail-faq-list details p,.deep-dive-card p,.perspective-copy li{font-size:13.3px!important;line-height:1.8!important}
+ .editorial-value-card h3,.editorial-step h3{font-size:18px}
+ .editorial-art-chips span{font-size:10px!important;line-height:1.4}
+ .editorial-art-center small{font-size:9.5px;line-height:1.6;letter-spacing:.8px}
+ .detail-hero-note,.detail-choice-note,.detail-package-notice p{font-size:12px!important;line-height:1.75!important}
+ .detail-faq-list details summary,.faq-list details summary{font-size:14px!important;line-height:1.65!important}
+ .detail-footer{padding-top:33px}
+ .detail-footer-main{padding-bottom:24px}
+ .detail-footer-main p{font-size:13px;line-height:1.75}
+ .detail-footer-main nav{gap:15px 22px;margin-top:22px}
+ .detail-footer-main nav a{font-size:13px;line-height:1.6}
+ .detail-footer-bottom{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:7px;padding:17px 0 22px}
+ .detail-footer-bottom .footer-copyright{display:inline-flex;gap:4px;flex:0 0 auto;font-size:12.5px;white-space:nowrap}
+ .detail-footer-bottom .footer-disclaimer{flex:none;font-size:11.5px;line-height:1.6}
+ .detail-footer-bottom a{font-size:12px;margin-top:1px}
+ .footer-base{align-items:flex-start;justify-content:flex-start;gap:8px;font-size:11.5px}
+ .footer-base .footer-copyright{font-size:12.5px}
+ .footer-release-note{font-size:11.5px!important;line-height:1.7}
+}
+@media(max-width:380px){
+ .announcement-copy,.announcement-action{font-size:12px!important}
+ .detail-announcement-copy{font-size:12px}
+ .detail-announcement-action{font-size:12.5px}
+ .detail-footer-bottom{gap:8px}
+}
