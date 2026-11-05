@@ -1,10 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `61` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T12:51:54.385Z`.
+- **PCS revision:** `62` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T14:14:08.742Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+
+## R62 — hardened QA identity/tenant code; live activation and deployment remain BLOCKED (2026-11-05)
+
+- **Owner instruction:** Deliver the R62 account/role/login/tenant isolation batch in one pass, real browser testing and self-QA. SRS v1.1.15 remains unchanged; Owner-approved public Mẫu 11 untouched; no production authorization.
+- **Source implementation:** QA cookie session is now matched to exact configured issuer and login verifier subject, active principal/membership, valid SID and expiry. Added server-owned active workspace listing and same-origin, CSRF-checked tenant switching that atomically rotates session SID and rejects revoked/unauthorized tenants. Existing R0 workspace has a compact dual-membership selector in desktop sidebar and mobile right drawer, and purges previous tenant matter metadata before reload.
+- **Tests:** PR [#83](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/83) merged source commit `829a63393dcb85cd46fb5b7929026f15f522c02b`. [GitHub Actions 42041284336](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42041284336) **completed/success 30/30 jobs**. Real SQLite SQL tests cover revoked/disabled, subject/issuer mismatch, rotated session, two tenants and explicit deny-vs-allow ACL; Node tests cover WebCrypto login and same-origin relay/CSRF; Playwright/Chromium desktop 1440 and mobile 320/390 exercised real R62 DOM but **simulated positive role/session API responses**, not real password login. Prior R61 live HTTPS anonymous protection tests also PASS as regression.
+- **Private QA credential preparation:** Public-safe `deployment/cloudflare/tools/render_r62_qa_verifiers.py` and `QA_R62_PROVISION.md` synthesize/test offline verifier generation only; no private password in GitHub. Expected active account setup on the existing QA installation: 7 new active + 1 disabled QA07, preserve QA04 R44 active (=8 active + 1 disabled), QA10 stays separate. The helper **has not been run with real private credentials and has not written D1**.
+- **Live deploy & blocker:** Connection-side Cloudflare source publication was blocked by safety controls; no bypass. Read-only verification confirmed existing Backend `d22f928f-b70c-4283-babe-beef5af406ce`, site QA `ea55af9f-8a7e-413f-9f65-93aaa09b66a2`, public-facing **NONPRODUCTION** `71f406a3-75d3-43f7-8b59-22d7ca6c0745` **unchanged**. D1 still has 10 synthetic principal rows, 12 memberships, **only one active login verifier**. R62 live authorized roles, real password login, real tenant switch, TC12A/B, and Owner final R62 functional acceptance **NOT_RUN/BLOCKED**.
+- **Private evidence:** R62 QA implementation and test-run report is saved in the existing Owner-only `AI Law Test Evidence` Google Drive folder; no private document link or ID in this public repo.
+- **Next:** Authorized operator connector may deploy R62 to isolated Cloudflare QA backend + site first, test actual live browser and permissions, then promote the same module content to `ai-law-web` NONPRODUCTION. Authorized private credential handling is needed for existing R40 bundle activation; avoid default/public passwords or security bypasses. Full legal AI workflows, Google Drive OAuth, customer data and production remain gated.
 
 
 ## R61 — real Chromium QA and nonproduction rollout; real multi-account IAM still open (2026-11-05)
