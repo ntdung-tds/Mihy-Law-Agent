@@ -185,6 +185,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/preview_worker.test.mjs
       - name: Verify real QA matter list/create role boundary and D1 transaction contract
         run: node --test deployment/cloudflare/tests/matter_workspace.test.mjs
+      - name: Regress R60 mobile/desktop QA session revocation and stale matter cleanup
+        run: node --test deployment/cloudflare/tests/session_ui_r60.test.mjs
       - name: Verify public website and protected workspace R47 routes
         run: node --test deployment/cloudflare/tests/site_worker.test.mjs
       - name: Guard customer-facing benefit claims and 320px layout fixes
