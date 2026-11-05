@@ -636,7 +636,7 @@ jobs:
   cloudflare-site-r62:
     # R62: real browser DOM on mobile/desktop with explicitly simulated positive API.
     # Live HTTPS anonymous protection is tested separately, not a positive-login claim.
-    if: github.ref_name == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.head_ref == 'feat/r62-qa-session-subject-and-workspace-boundary'
+    if: github.ref_name == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.head_ref == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.ref_name == 'design/r63-mobile-bottom-navigation' || github.head_ref == 'design/r63-mobile-bottom-navigation'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
