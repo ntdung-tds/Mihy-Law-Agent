@@ -87,3 +87,9 @@
 - Return to a consistent violet/lilac/navy professional legal design across home, public navigation and six existing landing pages, including the prospective but not-yet-operational SaaS service.
 - Expand editorial depth on `/gioi-thieu`, `/giai-phap`, `/chuc-nang`, `/an-toan-du-lieu`, `/trien-khai-rieng` and `/dich-vu-theo-goi`. Add restrained animations and transitions, respecting reduced motion and accessibility.
 - This is visual design/public educational copy only. Do not add SRS use cases, commercial tiers, real AI legal operations, payments, tenant changes, new data flows, login requirements or production authorization. SRS v1.1.15 remains frozen pending Owner document synchronization. Screenshots are review feedback, not authority for new deployment permissions.
+
+## SC-012 — 2026-11-05 — Owner requested responsive homepage composition correction
+
+- **UI-only delta:** Left-align the announcement/CTA; reduce excessive white space between site header and hero eyebrow; keep approved “Sắc bén trong lập luận. Mạch lạc trong từng hồ sơ.” text, enlarge/balance mobile headline with a legal-themed decorative accent, and prevent a single terminal word wrapping alone. Convert the oversized uppercase value strip into concise readable benefit labels and reduce awkward hero-to-solutions gap.
+- **Public communication:** Enrich the public homepage with detailed, non-misleading explanations of document intake, legal reasoning, source verification and the responsibility of a human legal professional. No claims that planned AI features or real document intake are available.
+- **Excluded:** Does not change legal SRS use cases, storage/auth requirements, SaaS activation, account plans, production readiness or customer data permissions. Baseline SRS v1.1.15 remains frozen; this log is for later Owner-controlled document alignment.
