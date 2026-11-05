@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
 :root{color-scheme:light;--ink:#17223a;--ink-soft:#34415a;--muted:#69758a;--line:#e6e7eb;--purple:#7754bc;--indigo:#5343aa;--paper:#faf9f6;--white:#fff;--coral:#edb6a1;--max:1220px}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:104px}
@@ -1384,3 +1384,103 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
  .hero-offering.hero-offering-choices{padding:11px 12px}
  .hero-offering.hero-offering-choices .hero-offering-choices-links a{font-size:11.7px}
 }
+
+/* R56 — Adapted from the Owner-supplied MIHY header design sample, not a
+   verbatim mockup. Be Vietnam Pro is scoped to the two public headers only.
+   Keep actual links, future SaaS status, product permissions, login and footer. */
+.site-page .announcement,.site-page .detail-announcement,.site-page .site-header{
+ font-family:'Be Vietnam Pro','DM Sans',system-ui,sans-serif;
+}
+.site-page .announcement,.site-page .detail-announcement{background:#1d1938!important;color:#eeeaf8;text-align:left!important;min-height:0!important}
+.site-page .announcement-inner{position:relative;display:block!important;padding:9px 40px 9px 0!important;min-height:0;line-height:1.5!important}
+.site-page .announcement-copy{display:inline!important;flex:none!important;color:#f7f4ff!important;font-size:12.5px!important;line-height:1.55!important;font-weight:700!important;letter-spacing:0!important}
+.site-page .announcement-sub{color:#d0c8e2!important;font-weight:500!important}
+.site-page .announcement-action{display:inline!important;white-space:nowrap!important;margin-left:6px!important;padding:0!important;background:none!important;box-shadow:none!important;border:0!important;color:#ffd873!important;font-size:12.5px!important;font-weight:800!important;line-height:1.55!important;text-decoration:none!important}
+.site-page .announcement-action:hover,.site-page .detail-announcement-action:hover{text-decoration:underline!important;text-underline-offset:4px}
+.site-page .detail-announcement-inner{display:flex;flex-direction:row;align-items:center;flex-wrap:nowrap;justify-content:flex-start;gap:12px;min-height:0;padding:8px 0}
+.site-page .detail-announcement-brand{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;white-space:nowrap;color:#f8f4ff;font-size:11.5px;line-height:1.5;font-weight:800;letter-spacing:.035em}
+.site-page .detail-announcement-brand>span{color:#ffd873;font-size:14px}
+.site-page .detail-announcement-copy{flex:1 1 auto;min-width:0;color:#d4cde5;font-size:12px;line-height:1.55;font-weight:500}
+.site-page .detail-announcement-action{display:inline!important;flex:0 0 auto;color:#ffd873!important;font-size:12.5px;font-weight:800;line-height:1.55;text-decoration:none!important;white-space:nowrap}
+.site-page .banner-close{position:relative;flex:0 0 auto;display:grid;place-items:center;width:30px;height:30px;padding:0;background:#ffffff16;color:#f0eafd;border:1px solid #ffffff19;border-radius:50%;font-size:18px;line-height:1;cursor:pointer;transition:background .2s}
+.site-page .banner-close:hover,.site-page .banner-close:focus-visible{background:#ffffff35}
+.site-page .announcement .banner-close{position:absolute;right:0;top:50%;transform:translateY(-50%)}
+.site-page .announcement[hidden],.site-page .detail-announcement[hidden]{display:none!important}
+
+/* Main navigation: the sample's crisp white header, compact MIHY lockup,
+   44px finger-sized menu button and genuine customer destinations. */
+.site-page .site-header{background:rgba(255,255,255,.97)!important;border-bottom:1px solid #ebe7f3!important;box-shadow:0 2px 14px #21143b08}
+.site-page .site-header .header-inner{height:74px;gap:20px}
+.site-page .site-header .brand{gap:11px;min-width:0}
+.site-page .site-header .brand-symbol{display:grid;place-items:center;width:46px;height:46px;border-radius:13px;transform:none;background:#1d1938;color:#fbeed3;box-shadow:0 6px 15px #1d193822;flex:0 0 auto}
+.site-page .site-header .brand-glyph{font:800 29px/1 Georgia,serif;transform:none;letter-spacing:-1px}
+.site-page .site-header .glyph-star{font-family:Arial,sans-serif;font-size:17px;top:-7px;right:-11px;color:#f2c14e;filter:drop-shadow(0 1px 1px #120e2355)}
+.site-page .site-header .brand-name{display:flex;flex-direction:column;align-items:flex-start;gap:3px;position:static;padding:0;margin:0;color:#1d1938;font-family:'Be Vietnam Pro',system-ui,sans-serif;font-size:22px;font-weight:900;line-height:1.1;letter-spacing:0}
+.site-page .site-header .brand-name>span{display:block;margin:0;white-space:nowrap;font-size:10.5px;font-weight:750;letter-spacing:.12em;line-height:1.3;color:#7457d6}
+.site-page .site-header .brand-name small{display:none}
+.site-page .site-header .desktop-nav{gap:8px;margin-left:auto}
+.site-page .site-header .desktop-nav a{display:inline-flex;align-items:center;min-height:42px;padding:9px 11px;border-radius:9px;font-size:14px;font-weight:650;line-height:1.45;color:#3d355e;transition:background .2s,color .2s}
+.site-page .site-header .desktop-nav a:hover,.site-page .site-header .desktop-nav a:focus-visible{background:#f3f0fd;color:#5f43bd}
+.site-page .site-header .header-actions{gap:11px}
+.site-page .site-header .login-link{font-size:13.5px;font-weight:750;color:#1d1938}
+.site-page .site-header .header-cta{min-height:44px;padding:10px 14px;font-size:13px;font-weight:750;background:#1d1938;color:#fff;border-radius:11px;box-shadow:none}
+.site-page .site-header .header-cta:hover{background:#30274e}
+.site-page .site-header .menu-toggle{width:44px;height:44px;border:1.5px solid #ddd5f5;border-radius:12px;background:#f3f0fd;color:#1d1938}
+.site-page .site-header .menu-toggle .open-icon,.site-page .site-header .menu-toggle .close-icon{font-size:21px;line-height:1}
+.site-page .site-header .mobile-menu:not([hidden]){background:#fff;box-shadow:0 16px 28px #21143b1a;border-top:1px solid #eae5f2}
+.site-page .site-header .mobile-menu:not([hidden]) a{min-height:44px;font-family:'Be Vietnam Pro',system-ui,sans-serif;font-size:14.5px;line-height:1.55;font-weight:650}
+.site-page .site-header .mobile-menu-caption{font-family:'Be Vietnam Pro',system-ui,sans-serif;letter-spacing:.06em;font-size:10.5px}
+.site-page .site-header .mobile-menu .mobile-signin{font-weight:800!important;background:#1d1938;color:#fff!important;border:0;border-radius:12px;padding:12px 15px;margin-top:12px}
+@media(max-width:1100px) and (min-width:971px){
+ .site-page .site-header .desktop-nav{gap:2px}
+ .site-page .site-header .desktop-nav a{font-size:12.5px;padding:8px 7px}
+ .site-page .site-header .header-cta{font-size:12px;padding:9px 10px}
+ .site-page .site-header .login-link{font-size:12px}
+}
+@media(max-width:970px){
+ .site-page .site-header .header-inner{height:68px}
+ .site-page .site-header .desktop-nav{display:none}
+ .site-page .site-header .menu-toggle{display:grid}
+ .site-page .site-header .header-cta,.site-page .site-header .login-link{display:none}
+}
+@media(max-width:700px){
+ .site-page .site-header .header-inner{height:65px}
+ .site-page .site-header .brand-symbol{width:40px;height:40px;border-radius:11px}
+ .site-page .site-header .brand-glyph{font-size:25px}
+ .site-page .site-header .glyph-star{font-size:15px}
+ .site-page .site-header .brand-name{font-size:20px;line-height:1.08;gap:2px}
+ .site-page .site-header .brand-name>span{font-size:9.5px;letter-spacing:.09em}
+ .site-page .site-header .menu-toggle{width:44px;height:44px}
+ .site-page .announcement-inner{padding:8px 35px 8px 0!important;line-height:1.48!important}
+ .site-page .announcement-copy,.site-page .announcement-action{font-size:12.3px!important;line-height:1.5!important}
+ .site-page .detail-announcement-inner{display:flex!important;flex-direction:row!important;align-items:center!important;flex-wrap:nowrap!important;gap:9px!important;padding:8px 0!important}
+ .site-page .detail-announcement-brand{font-size:11px;letter-spacing:0}
+ .site-page .detail-announcement-brand>span{font-size:12px}
+ .site-page .detail-announcement-copy{font-size:11.5px}
+ .site-page .detail-announcement-action{grid-column:auto!important;font-size:12px!important;line-height:1.45!important}
+ .site-page .banner-close{width:28px;height:28px}
+ .site-page .site-header .mobile-menu:not([hidden]){padding:8px 18px 17px}
+ .site-page .site-header .mobile-menu:not([hidden]) a{font-size:15px}
+}
+@media(max-width:560px){
+ /* Same responsive editorial reduction as the supplied phone preview:
+    shorten marketing copy visually, without changing approved full text. */
+ .site-page .announcement-sub{display:none!important}
+ .site-page .detail-announcement-copy{display:none!important}
+ .site-page .announcement-copy,.site-page .announcement-action{font-size:12px!important}
+ .site-page .detail-announcement-inner{justify-content:flex-start}
+ .site-page .detail-announcement-action{margin-left:auto;font-size:11.7px!important}
+ .site-page .detail-announcement-brand{font-size:10.6px}
+}
+@media(max-width:350px){
+ .site-page .site-header .brand-name{font-size:19px}
+ .site-page .site-header .brand-name>span{font-size:9px}
+ .site-page .detail-announcement-inner{gap:5px!important}
+ .site-page .detail-announcement-brand{font-size:10px}
+ .site-page .detail-announcement-action{font-size:11.2px!important}
+ .site-page .announcement-copy,.site-page .announcement-action{font-size:11.7px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .site-page .banner-close{transition:none}
+}
+

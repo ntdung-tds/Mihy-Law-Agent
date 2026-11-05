@@ -52,7 +52,7 @@ def check(page,width,route):
 
  if route=="/":
   assert page.locator(".announcement-copy").count()==1
-  assert "Khám phá điều làm nên khác biệt." in page.locator(".announcement").inner_text()
+  assert "Khám phá điều làm nên khác biệt." in page.locator(".announcement").text_content()  # full desktop copy remains in DOM; mobile shortens visually
   link=page.locator(".announcement-action")
   assert link.count()==1
   style=link.evaluate("""e=>{const x=getComputedStyle(e);return {display:x.display,bg:x.backgroundColor,border:x.borderTopWidth,color:x.color,font:x.fontSize}}""")
