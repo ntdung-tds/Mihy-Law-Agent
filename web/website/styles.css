@@ -1414,7 +1414,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 .site-page .site-header .brand-symbol{width:42px;height:42px;border-radius:12px;background:#28203d;color:#f9e6d5;transform:none;box-shadow:0 4px 12px #3022451a;flex:0 0 auto}
 .site-page .site-header .brand-glyph{font-family:Georgia,serif;font-size:27px;transform:none}
 .site-page .site-header .glyph-star{font-family:Arial,sans-serif;top:-7px;right:-9px;font-size:13px;color:#f1c974}
-.site-page .site-header .brand-name{display:flex;flex-direction:column;align-items:flex-start;gap:3px;color:#241f39;font-size:18px;font-weight:900;line-height:1.05;letter-spacing:.01em;position:static;padding:0}
+.site-page .site-header .brand-name{display:flex;flex-direction:column;align-items:flex-start;gap:3px;color:#241f39;font-family:inherit;font-size:18px;font-weight:900;line-height:1.05;letter-spacing:.01em;position:static;padding:0}
 .site-page .site-header .brand-name>span{display:block;margin:0;color:#7856a6;font-size:9px;line-height:1.3;letter-spacing:.07em;font-weight:800}
 .site-page .site-header .brand-name small{display:none}
 .site-page .site-header .desktop-nav{gap:5px;margin-left:auto}
