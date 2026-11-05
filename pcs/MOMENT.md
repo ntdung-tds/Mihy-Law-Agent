@@ -1,10 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `59` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T11:06:16.879Z`.
+- **PCS revision:** `60` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T12:16:32.797Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+
+## R60 — Owner accepts marketing UI; Batch 1 QA authentication started (2026-11-05)
+
+- **Owner approval:** Owner said "Giao diện đã ok" for Mẫu 11 and approved starting the login/permissions batch. Marketing design accepted; physical device/browser detail not independently recorded. Neither full IAM nor legal-product/production release is accepted.
+- **First bounded implementation:** Existing R0 QA workspace session 401 redirects to `/login`; revoked/expired `/api/qa/matters` GET and POST clear previously displayed synthetic matter titles, recent rows and counters before redirect; role display never defaults unknown keys to "Luật sư", including inherited JS prototype names.
+- **Actual GitHub evidence:** PR [#79](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/79) merged `03e11794b4e1a71f19592c0834e6267b73be3ddf` after [GitHub Actions 42025141035](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42025141035) **completed/success** (including the new VM behavioral regression tests). This is QA code + synthetic browser-object tests, **not live deployed browser QA or physical-device test**.
+- **Read-only real D1 check:** Existing `ai-law-standalone-cf-qa` database has **10 synthetic principals, 12 memberships, 1 active login verifier and 0 matter-catalog records**. Thus 9 other QA actors cannot currently authenticate to this Cloudflare QA deployment. No credentials, users, secrets or schema were changed by this read.
+- **Deployment/control:** R60 source merged to `main` but **not deployed to Cloudflare** in this task; marketing R59 remains the live nonproduction website. SRS v1.1.15 unchanged; D01 previously approved, formal security/legal-data/production gates remain separately closed. No customer files or sensitive data published.
+- **Next:** Securely provision remaining role-specific nonproduction QA login verifiers using Owner-controlled private credential storage; validate live HTTPS login, session refresh/logout/revocation, tenant/MatterACL denials, TC12A/B. Do not claim 10 live accounts merely because 10 principal rows exist.
+
 
 ## R59 — Owner-approved Mẫu 11 is current (2026-11-05)
 
