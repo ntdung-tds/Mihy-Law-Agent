@@ -28,7 +28,7 @@ const publicAssets=new Map([
  ['/site.js',[SITE_JS,'application/javascript; charset=utf-8']],
  ['/site-login.js',[LOGIN_JS,'application/javascript; charset=utf-8']]
 ]);
-const svgIcon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#26233c"/><path d="M16 47 31 14h4l15 33h-8l-3-8H27l-3 8h-8Zm17-24-4 10h8z" fill="#f8e5d8"/><circle cx="49" cy="15" r="5" fill="#e8b8d2"/></svg>`;
+const svgIcon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#26233c"/><path d="M13 48V17h8l11 17 11-17h8v31h-8V31L32 47 21 31v17z" fill="#f8e5d8"/><circle cx="49" cy="15" r="5" fill="#e8b8d2"/></svg>`;
 const csp="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'";
 function headers(type,{publicPage=false}={}){
  return {
