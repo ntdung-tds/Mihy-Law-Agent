@@ -1,10 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `57` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T07:21:24.970Z`.
+- **PCS revision:** `58` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T08:07:18.804Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R56 — Owner reference file: two redesigned headers, Be Vietnam Pro on mobile
+
+- **Reference:** Owner-provided `MIHY - Mẫu thiết kế lại Header và Footer.html`; adapted design from its light navigation variant, compact navy/gold ribbon, 44px burger and readable Vietnamese `Be Vietnam Pro` font. These two banner patterns are deployed consistently on the homepage and all six landing routes. The actual approved copy, real navigation and product identity remain; the mockup's fictional free-trial/pricing/social actions are excluded.
+- **Implementation:** Seven public HTML banners include accessible × close control; shared `styles.css` updates font, logo/nav hierarchy, responsive stripped-down mobile copy; `site.js` supports banner dismissal without storing/tracking users. Footer and login/workspace/auth/D1 code untouched.
+- **Real QA:** `ai-law-web-qa` `ecab3437-6245-4d09-ba1b-75989345c794` and primary **NONPRODUCTION** `ai-law-web` `0170de1b-1743-4923-91d4-98fb5e2f9134`, both 100% with QA_AUTH service binding unchanged. GitHub Actions `41991605264` Chromium **7 routes × 11 widths on both hosts PASS**, including toggle/Escape and dismiss, older R54 banner/footer visual regression PASS. Public contract Node PASS. Final documentation-only CI and PR merge verified separately.
+- **Control:** `srs_changed.md` SC-015. Original SRS v1.1.15 unchanged, no hosted SaaS rollout, actual client files, production deployment, legal AI actions or new privileges. Owner final physical-mobile aesthetic approval `NOT_RUN_OWNER`.
+- **PR:** https://github.com/ntdung-tds/Mihy-Law-Agent/pull/73
+
+
 
 ## R55 — Owner's three mobile banner screenshots: compact and refined
 
