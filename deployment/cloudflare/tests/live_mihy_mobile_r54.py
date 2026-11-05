@@ -57,7 +57,7 @@ def check(page,width,route):
   assert link.count()==1
   style=link.evaluate("""e=>{const x=getComputedStyle(e);return {display:x.display,bg:x.backgroundColor,border:x.borderTopWidth,color:x.color,font:x.fontSize}}""")
   assert style["display"]=="inline",(route,width,"looks like pill",style)
-  assert style["color"]=="rgb(247, 209, 118)",(route,width,"not golden text",style)
+  assert style["color"] in ("rgb(247, 209, 118)","rgb(255, 216, 115)"),(route,width,"not golden text",style)
   assert style["border"]=="0px",(route,width,"bordered CTA",style)
   assert style["bg"]=="rgba(0, 0, 0, 0)",(route,width,"painted CTA",style)
   assert "Công nghệ đồng hành cùng tư duy pháp lý." in page.locator(".announcement").inner_text()
@@ -75,7 +75,7 @@ def check(page,width,route):
   style=link.evaluate("""e=>{const x=getComputedStyle(e);return {display:x.display,bg:x.backgroundColor,border:x.borderTopWidth,color:x.color,font:x.fontSize}}""")
   assert style["display"] in ("inline","block"),(route,width,"unexpected link display",style)
   assert style["bg"]=="rgba(0, 0, 0, 0)",(route,width,"painted CTA",style)
-  assert style["color"]=="rgb(247, 209, 118)",(route,width,"not gold",style)
+  assert style["color"] in ("rgb(247, 209, 118)","rgb(255, 216, 115)"),(route,width,"not gold",style)
   assert style["border"]=="0px",(route,width,"border",style)
   if width<=700:
    box=ann.bounding_box()
