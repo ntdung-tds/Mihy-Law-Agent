@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 51,
-  "updated_at": "2026-11-05T02:21:35.077Z",
+  "revision": 52,
+  "updated_at": "2026-11-05T02:23:59.329Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1631,8 +1631,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R50: Owner corrected provider to Mihy Agent and product to Mihy Law AI Agent. New rich 9-section public landing pages /trien-khai-rieng and /dich-vu-theo-goi, symmetrical homepage cards, login/workspace visible rebrand, preserved R44 QA session and R46 MatterACL backend. Both Cloudflare NONPRODUCTION QA Workers updated at 100%: staging 1410e0b7-a913-4431-ae57-7ee59d4e54a9; primary 1ebedf67-cd37-47eb-923a-12d4897f02a5; service binding QA_AUTH intact. Real Chromium 11-size homepage and two detail-page geometry and mobile-menu tests PASS on staging+primary (R50 PR #67 initial Actions run 41954329310); Cloudflare contract corrected test PASS on follow-up 41954455098. SaaS remains marketing future only, no active plans/payment/signup, SRS v1.1.15 unchanged.",
-      "next_action": "R50 Owner opens https://ai-law-web.iaict-platform.workers.dev/ and both live detail URLs on a physical mobile and gives final visual acceptance. CI on final checkpoint commit must be green before PR #67 merge; production, customer legal files and deferred SaaS remain blocked. Next functional effort follows standalone-first SRS and authorized Drive integration.",
+      "last_completed_step": "R50: Owner corrected provider to Mihy Agent and product to Mihy Law AI Agent. New rich 9-section public landing pages /trien-khai-rieng and /dich-vu-theo-goi, symmetrical homepage cards, login/workspace visible rebrand, preserved R44 QA session and R46 MatterACL backend. Both Cloudflare NONPRODUCTION QA Workers updated at 100%: staging 6715f3d3-adbc-4e4f-8295-3d31718f4cf3; primary d2a9b4e1-8664-48cb-91e8-7d4e1ac264f9; service binding QA_AUTH intact. Real Chromium 11-size homepage and two detail-page geometry and mobile-menu tests PASS on staging+primary (R50 PR #67 Actions run 41954329310 (home+both landings, 11 sizes, both hosts)); Cloudflare contract corrected test PASS on follow-up 41954455098. SaaS remains marketing future only, no active plans/payment/signup, SRS v1.1.15 unchanged.",
+      "next_action": "Confirm final PR #67 branch Actions run 41954822648 and final PCS-only CI are green; then merge to main. Owner visual acceptance on physical mobile remains NOT_RUN_OWNER. Public QA: https://ai-law-web.iaict-platform.workers.dev/ , /trien-khai-rieng , /dich-vu-theo-goi. Shared SaaS deferred, no real customer files, production release blocked.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
