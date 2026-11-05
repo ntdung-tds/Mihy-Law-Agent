@@ -1,11 +1,23 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `63` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T16:51:16.016Z`.
+- **PCS revision:** `64` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T17:28:18.813Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
+
+## R64 — Owner accepted R63; R62 QA rollout + real anonymous Chromium PASS; positive IAM E2E gated (2026-11-06)
+
+- **Owner:** Accepted R63 fixed five-item mobile bottom nav (“Đã ok”) and authorized the R64 nonproduction login/session/roles batch (“Ok, làm luôn đi”). This is **R63 visual acceptance**, not approval of production or full R64 functional release. SRS v1.1.15 remains unchanged.
+- **Cloudflare QA backend:** `ai-law-standalone-cf-qa` deployed 100% version `b6bf1e4b-e341-4430-a5ba-64258fa8240c`, replacing only source `mobile_auth.mjs`. Direct readback compared exact repository source; 5 modules and all 7 bindings unchanged (D1 DB, QA_RATE_PEPPER secret preserved). Previous `d22f928f-b70c-4283-babe-beef5af406ce` is rollback reference.
+- **Cloudflare QA site:** `ai-law-web-qa` 100% version `53379c01-4c3f-4ffb-b0ba-4832224b8c6f`. Updated `site_worker.mjs`, `workspace_session.mjs`, `workspace_matters.mjs` for R62 while preserving R63 bottom nav HTML/CSS. Direct readback 18 modules match merged sources for changed files; `QA_AUTH -> ai-law-standalone-cf-qa` preserved. Previous QA version `b8e6ee03-c201-4f5e-9264-302cfbd48694` is rollback reference.
+- **Primary public-facing NONPRODUCTION:** Promoted **only Owner-accepted R63 HTML/CSS** to `ai-law-web` at 100% version `670463d4-558f-47be-936c-22819cfea0c7`, preserving 18 modules, marketing pages and QA_AUTH. R62 site-level workspace relay **NOT promoted** to primary; previous primary version `71f406a3-75d3-43f7-8b59-22d7ca6c0745` remains rollback reference. Both nonproduction sites use the same QA backend Service Binding, so the backend R62 change affects the shared backend. No production deployment.
+- **Test run:** [PR #87](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/87) merged as `c44d76387d8b62f7eb57c16892d9349fa10150d1`; [Actions 42072937167](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42072937167) **completed/success 10/10 executed PASS, 20 conditional skips**. GitHub-hosted **real Chromium against QA HTTPS** at 320/390/430/1440 passed login page, private asset and session/workspaces/matters anonymous HTTP401, unauthorized tenant switch HTTP401, cross-Origin HTTP403, wrong-method gate, /app redirect. Synthetic-positive browser fixture for R62 tab/tenant UI remains clearly mocked, not real login.
+- **Read-only real D1 check:** 11 principals (10 active, 1 disabled), 13 memberships (12 active, 1 revoked), **2 active login verifiers**, 1 session eligible under new R62 joins; no password, SID, identity or legal matter disclosed. Full synthetic QA role bundle remains not activated. Existing QA04 and new Owner-controlled personal lawyer QA verifier are preserved; R40 private credentials must not be copied into public GitHub, CI, browser logs or operator code.
+- **Remaining:** Cloudflare Browser Rendering returned HTTP429 quota (BLOCKED) but independent GitHub Playwright real anonymous regression PASS. Correct-password Chromium login across all QA roles, 30-minute session expiry, revoked/disabled login, real dual-tenant switch/SID rotation and MatterACL positive/negative E2E **NOT_RUN**. Do not promote R62 site modules to primary or assert R64 full acceptance before private operator and live role tests. Production/real legal data/Google Drive OAuth/AI UC remain gated.
+- **Evidence:** Test report and exact deployment/status recorded in existing **Owner-private** `AI Law Test Evidence` Google Drive folder; public PCS contains no secret or private document ID.
+- **Next:** Safe R40 verifier activation + genuine mobile/desktop password/role/tenant/MatterACL tests; repeat code → test → fix → test; Owner final functional acceptance.
 
 ## R63 — Owner-approved mobile bottom nav, Cloudflare QA UI deployed; Owner live signoff pending (2026-11-05)
 
