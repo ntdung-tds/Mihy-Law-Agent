@@ -42,6 +42,7 @@ def check(page,route,width):
  if width<=700:
   assert m["nav"]["h"]<=68,(route,width,"mobile navbar oversized")
   assert m["normalMessage"]=="none" and m["mobileMessage"]!="none",(route,width,"short message")
+ if width<=970:
   assert page.locator(".menu-toggle").is_visible(),(route,width,"burger")
   page.locator(".menu-toggle").click()
   assert page.locator("#mobile-menu").is_visible(),(route,width)
