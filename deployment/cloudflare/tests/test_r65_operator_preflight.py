@@ -51,6 +51,11 @@ class OperatorPreflightTests(unittest.TestCase):
             link.symlink_to(path)
             with self.assertRaises(module.QAGateError):
                 module.read_private_bundle(str(link))
+            inside_repo_link = Path(temp) / "public_repo"
+            inside_repo_link.symlink_to(module.ROOT, target_is_directory=True)
+            with self.assertRaises(module.QAGateError) as error:
+                module.read_private_bundle(str(inside_repo_link / "tests/acceptance/R40_STANDALONE_QA_INVENTORY.json"))
+            self.assertEqual(str(error.exception), "PRIVATE_PATH_REQUIRED")
 
     def test_rejects_partial_and_wrong_identity_without_disclosing_secret(self):
         with tempfile.TemporaryDirectory() as temp:
