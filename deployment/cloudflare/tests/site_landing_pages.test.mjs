@@ -56,7 +56,7 @@ test('private deployment accurately explains management, AI costs and staged int
   'Google Drive','OneDrive','NAS','máy chủ',
   'phí dùng AI','điều kiện của nhà cung cấp',
   'quyền sở hữu mã nguồn','không mặc định bao gồm chuyển giao',
-  'chưa được phép tiếp nhận hồ sơ khách hàng thật'
+  'chưa tiếp nhận hồ sơ khách hàng thật'
  ])assert.ok(privatePage.toLowerCase().includes(phrase.toLowerCase()),phrase);
  assert.doesNotMatch(privatePage,/đã tích hợp tất cả|100% an toàn|cam kết tiết kiệm \d+%/i);
 });
