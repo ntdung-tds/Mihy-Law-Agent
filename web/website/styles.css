@@ -312,3 +312,78 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 @media(prefers-reduced-motion:reduce){
  html{scroll-behavior:auto}.button,.feature-card,.faq-list summary span{transition:none}
 }
+
+
+/* R48 — MOBILE POLISH: fix clipping at hero headline, CTA and illustration.
+   Carefully scoped to public pages; /app keeps the Owner-approved R0 UI. */
+.hero-grid,.hero-copy,.hero-visual,.section-heading,.feature-card,.workspace-grid,.cta-panel{min-width:0}
+.hero-copy h1{max-width:100%;overflow-wrap:break-word}
+.hero-buttons .button{min-width:0;max-width:100%}
+.hero-buttons .button .icon{flex:0 0 17px}
+.hero-desc,.workspace-copy>p,.feature-card>p{overflow-wrap:break-word}
+.anchor-marker{position:relative;top:-90px;pointer-events:none}
+.footer-release-note{width:min(var(--max),calc(100% - 88px));margin:0 auto;padding:0 0 26px;color:#8f92aa;font-size:10px;line-height:1.7;text-align:center;max-width:1000px}
+@media(min-width:971px){
+ .hero h1{font-size:clamp(46px,4.8vw,67px);letter-spacing:-3px;line-height:1.18}
+}
+@media(max-width:700px){
+ .hero-grid{width:calc(100% - 36px);padding-top:46px;padding-bottom:36px;gap:26px}
+ .hero-copy{width:100%}
+ .hero h1{font-size:clamp(36px,9.2vw,51px);letter-spacing:-1.6px;line-height:1.16;max-width:100%;overflow-wrap:normal}
+ .hero-desc{font-size:13.5px;line-height:1.78}
+ .eyebrow{font-size:9px;letter-spacing:1.05px;gap:7px;flex-wrap:wrap}
+ .eyebrow-line{width:20px}
+ .hero-buttons{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin:24px 0 26px;width:100%}
+ .hero-buttons .button{width:100%;min-width:0;max-width:100%;display:flex;white-space:normal;justify-content:center;text-align:center;gap:9px;padding:12px 11px;line-height:1.4;min-height:52px}
+ .hero-foot{align-items:flex-start;gap:15px}
+ .hero-foot>span:last-child{flex:1;min-width:0;line-height:1.6}
+ .hero-foot small{font-size:10px;margin-top:3px}
+ .hero-visual{display:block;width:100%;max-width:100%;min-height:auto;justify-self:stretch;margin:0}
+ .hero-visual .product-window{width:100%;max-width:100%;min-width:0;margin:0;transform:none;box-shadow:0 20px 44px #6c4d6328;border-radius:16px}
+ .hero-visual .visual-orbit,.hero-visual .floating-pill,.hero-visual .visual-spark{display:none}
+ .hero-visual .window-bar{height:36px;padding:0 12px;font-size:9px}
+ .hero-visual .mock-body{grid-template-columns:43px minmax(0,1fr);min-height:auto}
+ .hero-visual .mock-sidebar{padding:11px 0;gap:13px}
+ .hero-visual .mock-sidebar>span{width:27px;height:27px;font-size:16px}
+ .hero-visual .mock-logo{width:29px;height:30px;font-size:14px}
+ .hero-visual .mock-content{min-width:0;padding:0 12px 16px}
+ .hero-visual .mock-greeting{font-size:16px;letter-spacing:-.6px}
+ .hero-visual .mock-two{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px;margin:10px 0 13px}
+ .hero-visual .mock-stat{min-width:0;padding:8px 6px;grid-template-columns:19px minmax(0,1fr);gap:2px 5px}
+ .hero-visual .mock-stat-glyph{font-size:17px}
+ .hero-visual .mock-stat small{font-size:8px}
+ .hero-visual .mock-stat strong{font-size:10px;overflow-wrap:anywhere}
+ .hero-visual .mock-item{padding:8px 6px;gap:6px;min-width:0}
+ .hero-visual .mock-item b{font-size:9px}
+ .hero-visual .mock-item small{font-size:7.5px;overflow-wrap:break-word}
+ .hero-visual .mock-item-icon{width:26px;height:26px;flex-shrink:0}
+ .hero-visual .mock-section-title{font-size:10px}
+ .section-heading h2,.workspace-copy h2,.trust-grid h2,.faq-grid h2{overflow-wrap:break-word}
+ .feature-card h3{overflow-wrap:break-word}
+ .workspace-image{width:100%;min-width:0;min-height:auto;padding:22px 0 12px}
+ .workspace-notebook{width:100%;max-width:100%;min-width:0;transform:none;box-shadow:0 20px 45px #0d102a55}
+ .notebook-top{gap:8px}
+ .notebook-top span:last-child{overflow-wrap:break-word;text-align:right}
+ .notebook-line span:nth-child(2){min-width:0}
+ .cta-panel h2{font-size:clamp(30px,7.3vw,40px);overflow-wrap:break-word;letter-spacing:-1.4px}
+ .cta-panel>a{max-width:100%;min-width:0;white-space:normal;text-align:center;padding:12px 13px}
+ .footer-release-note{width:calc(100% - 36px);font-size:10px;line-height:1.7}
+}
+@media(max-width:380px){
+ .hero-grid{width:calc(100% - 30px)}
+ .hero h1{font-size:clamp(33px,10.5vw,38px);letter-spacing:-1.3px}
+ .hero-visual .product-window{min-width:0;transform:none}
+ .hero-buttons .button{font-size:12px}
+ .hero-visual .mock-content{padding:0 9px 14px}
+ .hero-visual .mock-greeting{font-size:15px}
+ .hero-visual .mock-stat small{font-size:7px}
+ .hero-visual .mock-stat strong{font-size:9px}
+ .hero-visual .mock-item small{font-size:7px}
+ .feature-card{padding:22px 19px}
+ .workspace-notebook{padding:17px 13px}
+ .notebook-line{padding:10px 8px;gap:8px}
+ .notebook-icon{width:35px;height:35px}
+ .notebook-heading strong{font-size:22px}
+ .cta-panel{padding:28px 22px}
+ .footer-release-note{width:calc(100% - 30px)}
+}

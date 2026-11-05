@@ -2,7 +2,7 @@
   "schema_version": 1,
   "baseline": "SRS v1.1.15",
   "release_target": "R0",
-  "checkpoint": "R47_PROFESSIONAL_PUBLIC_QA_SITE_NOT_PRODUCTION_READY",
+  "checkpoint": "R48_CUSTOMER_BENEFIT_HOMEPAGE_MOBILE_FIX_QA_NOT_PRODUCTION_READY",
   "assessment_date": "2026-11-04",
   "synthetic_demo_customers_created": true,
   "live_customer_accounts_created": false,
@@ -224,5 +224,5 @@
   "cloudflare_qa_owner_credential": "SAVED_OWNER_ONLY_DRIVE_R44_SEPARATE_FROM_R40",
   "cloudflare_mobile_owner_acceptance": "PENDING",
   "public_website_qa_url": "https://ai-law-web.iaict-platform.workers.dev/",
-  "public_website_qa_status": "QA_DEPLOYED_REAL_HTTPS_BROWSER_320_390_430_1440_PASS_OWNER_VISUAL_LOGIN_PENDING"
+  "public_website_qa_status": "R48_OWNER_VISUAL_ACCEPTANCE_PENDING; staging/primary HTTPS Chrome 11 mobile-desktop viewport sizes PASS, SRS workflows unreleased."
 }
