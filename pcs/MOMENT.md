@@ -1,10 +1,22 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `58` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T08:07:18.804Z`.
+- **PCS revision:** `59` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T11:06:16.879Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R59 — Owner-approved Mẫu 11 is current (2026-11-05)
+
+- **Status:** Owner approved Mẫu 11 after iterative desktop/mobile header reviews. R56 was rejected and rolled back (PR #74); R57 spacing/font (PR #75), R58 Mẫu 08 ticker (PR #76) and final R59 (PR #77) form the intervening public-site history. **R59 is the current GitHub `main` and Cloudflare NONPRODUCTION version**, not R56.
+- **Approved UI:** Both top banner patterns use the same three marketing messages, navy background and **gold `Tìm hiểu thêm ↗` immediately after white text**; no “Thông điệp 1/2/3” headline, no separators, no × or previous/next buttons. Desktop keeps **three small indicator dots beneath** the inline text; mobile text is **10.8px** (320–350px **10.3px**), dots hidden, copy and gold CTA wrap naturally. Rotation **3.8 seconds**, reduced-motion preference honored. Approved tilted MIHY logo and the existing navbar remain.
+- **Implementation:** Seven public routes (`/`, `/gioi-thieu`, `/giai-phap`, `/chuc-nang`, `/an-toan-du-lieu`, `/trien-khai-rieng`, `/dich-vu-theo-goi`); `web/website/*.html`, `styles.css`, `site.js`. GitHub PR [#77](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/77) merged as `991e944f1036a54104c993e1fd7134a143788795`.
+- **Actual QA:** GitHub Actions [42011652749](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42011652749) and [42011664583](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42011664583) **PASS**, 10/10 CI jobs, real Chromium seven routes × eight desktop/mobile sizes on both live Workers (including inline CTA, indicators, rotation and mobile menu). Cloudflare `ai-law-web-qa` `5ed1b8f6-9706-4300-8b90-bf0d43dc5051`, public-site **NONPRODUCTION** `ai-law-web` `03fbcbc1-0a08-4e80-b8af-a89304711298`, each 100% deployed, identical 18 modules and unchanged `QA_AUTH -> ai-law-standalone-cf-qa` service binding.
+- **Desktop capture:** Real browser screenshot **1440×900** plus whole-page view were generated and shown in the Owner chat on 2026-11-05. **No durable PNG/JPG or Drive screenshot file was saved**; do not claim archived visual evidence.
+- **Limits/acceptance:** Mẫu 11 design approved by Owner; live website physical-device final aesthetic acceptance **NOT_RUN_OWNER**. Standalone AI Law functionality, production IAM, legal data handling, Google Drive OAuth/storage, SaaS subscription and production release are **not accepted**. No SRS v1.1.15 baseline change, no secret/customer record commit. Public repository checkpoint is technical/marketing metadata only.
+- **Next:** Owner may compare actual desktop/mobile R59 on <https://ai-law-web.iaict-platform.workers.dev/>. Continue functional scope only under existing separate approval/test gates.
+
+
 
 ## R56 — Owner reference file: two redesigned headers, Be Vietnam Pro on mobile
 
