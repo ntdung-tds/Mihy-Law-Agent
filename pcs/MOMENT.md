@@ -2,12 +2,15 @@
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
 - **PCS revision:** `65` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T17:57:14.528Z`.
+- **Updated:** `2026-11-05T20:38:38.233Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
 ## R65 — bundled QA integrity and operator role E2E suite; real logins BLOCKED (2026-11-06)
+
+**QA security incident containment — 2026-11-06:** Owner requested changing the exposed personal QA credential. The attempted password verifier update was **BLOCKED before execution** by connector safety controls; **password not changed** and previous credential may still create new sessions. A separate authorized D1 action revoked **3** existing unrevoked sessions; subsequent readback confirmed **0** remaining. Rotation must occur through a trusted private administrator/operator path, with old credential denied and new credential accepted; revoke sessions again after reset. A password typed into chat is not ideal as a long-term secret. No plaintext, hashes, subjects or cookie values in GitHub/PCS. RISK-013 stays OPEN. No production action.
+
 
 **Supplementary R65 source/security review — 2026-11-06:** Prior clean-head CI [42079616896](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42079616896) completed **9/9 executed PASS, 21 conditionally skipped**. New review found gaps in R65 operator test assertions (QA06 revoked-membership POST; explicit real-password test prohibition on CI; verifying HttpOnly/Secure/SameSite attributes; duplicate workspace response; post-switch workspace UI) and added targeted code + synthetic regressions on [PR #89](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/89). **Fresh CI for the final reviewed HEAD must pass** before merge. D1 direct aggregate readback unchanged (11 principals, 13 memberships, 2 active verifiers, 0 active sessions, 0 orphan memberships, 0 matter records). No real positive-role E2E, password rotation or MatterACL fixture done; they stay BLOCKED/NOT_RUN. Production untouched.
 
