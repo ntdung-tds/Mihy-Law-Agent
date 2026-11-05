@@ -516,3 +516,21 @@ jobs:
           MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_brand_landings.py
       - name: Primary four editorial landing regressions
         run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_editorials.py
+
+  cloudflare-site-r55:
+    # Seven-page, 8-width real Chromium QA against the staged R55 Worker.
+    if: github.ref_name == 'fix/r55-mobile-mini-banner-and-two-solution-links' || github.head_ref == 'fix/r55-mobile-mini-banner-and-two-solution-links'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Playwright Chromium
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: Seven pages x eight viewport widths, gold text and no wrapping/overflow
+        run: python deployment/cloudflare/tests/live_mihy_mobile_r55.py
+      - name: Existing R54 grouped footer and header spacing regression
+        run: python deployment/cloudflare/tests/live_mihy_mobile_r54.py
