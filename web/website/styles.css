@@ -1085,3 +1085,59 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
  .contact-item a{font-size:12.5px}
  .mobile-menu a{font-size:14px;min-height:44px}
 }
+
+/* R52: two additional, authored editorial sections on every deep landing. */
+.deep-dive-section{background:linear-gradient(145deg,#fcfaff,#f3eef9);padding:96px 0 100px;position:relative;overflow:hidden}
+.deep-dive-section::after{content:"⚖";position:absolute;right:-75px;top:-75px;color:#a682ce0b;font-size:330px;pointer-events:none;line-height:1}
+.deep-dive-section>.container{position:relative;z-index:1}
+.deep-dive-header{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:75px;align-items:end;margin-bottom:39px}
+.deep-dive-header h2,.perspective-copy h2{font-family:Manrope,'DM Sans',sans-serif;font-size:clamp(32px,3.5vw,49px);font-weight:850;line-height:1.2;letter-spacing:-1.9px;margin:0}
+.deep-dive-header h2 em{font-style:normal;color:#9269ba}
+.deep-dive-header>p{font-size:13px;color:#677085;line-height:1.95;margin:0}
+.deep-dive-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.deep-dive-card{display:flex;flex-direction:column;min-width:0;padding:30px 26px;border-radius:19px;border:1px solid #e6dced;background:#fff;box-shadow:0 12px 30px #2b23440b}
+.deep-dive-count{color:#927cac;letter-spacing:1.5px;font-size:9px;font-weight:900}
+.deep-dive-count span{color:#b8aac8}
+.deep-dive-icon{display:grid;place-items:center;width:53px;height:53px;border-radius:14px;background:#f3eafa;color:#8561a8;font-size:29px;margin:29px 0 22px}
+.deep-dive-card h3{font-family:Manrope,'DM Sans',sans-serif;font-size:21px;letter-spacing:-.7px;line-height:1.35;margin:0 0 14px}
+.deep-dive-card p{font-size:12px;line-height:1.9;color:#697386;margin:0}
+.perspective-section{background:linear-gradient(128deg,#2a2444,#52386d);padding:89px 0;color:#fff;overflow:hidden}
+.perspective-layout{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr);gap:87px;align-items:center}
+.perspective-symbol{min-height:365px;border-radius:24px;border:1px solid #ffffff35;background:radial-gradient(ellipse at center,#c4a0ea3d,transparent 58%),#ffffff0a;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:13px;box-shadow:inset 0 0 0 26px #ffffff06;position:relative}
+.perspective-symbol::after{content:"";position:absolute;width:170px;height:170px;border-radius:50%;border:1px solid #ffffff42}
+.perspective-symbol>span{font-family:Georgia,serif;font-size:121px;font-weight:700;line-height:1;color:#f2e4ff;position:relative;z-index:1}
+.perspective-symbol>small{font-size:10px;letter-spacing:2px;color:#dbc6f0;font-weight:900}
+.perspective-symbol>strong{font-size:9px;letter-spacing:1.5px;color:#c9b5df}
+.perspective-copy .detail-kicker{color:#d5b8ef}
+.perspective-copy h2{color:#fff}
+.perspective-copy ul{display:grid;gap:15px;list-style:none;margin:28px 0 19px;padding:0}
+.perspective-copy li{position:relative;padding-left:30px;color:#e8dff0;font-size:13px;line-height:1.85}
+.perspective-copy li::before{content:"⚖";position:absolute;left:0;top:0;font-size:14px;color:#d6b7f2}
+.perspective-note{border-top:1px solid #ffffff35;padding-top:18px;color:#cfc0de;font-size:11.5px;line-height:1.8}
+@media(prefers-reduced-motion:no-preference){
+ .deep-dive-card{transition:transform .25s ease,box-shadow .25s ease}
+ .deep-dive-card:hover{transform:translateY(-4px);box-shadow:0 20px 40px #30234720}
+}
+@media(max-width:970px){
+ .deep-dive-header{grid-template-columns:minmax(0,1fr);gap:15px}
+ .deep-dive-grid{gap:12px}
+ .deep-dive-card{padding:25px 20px}
+ .perspective-layout{gap:40px}
+}
+@media(max-width:700px){
+ .deep-dive-section{padding:66px 0}
+ .deep-dive-header{gap:15px;margin-bottom:26px}
+ .deep-dive-header h2,.perspective-copy h2{font-size:clamp(32px,7.8vw,41px);letter-spacing:-1.25px}
+ .deep-dive-header>p{font-size:13.5px;line-height:1.85}
+ .deep-dive-grid{grid-template-columns:minmax(0,1fr);gap:11px}
+ .deep-dive-card{padding:24px 21px}
+ .deep-dive-icon{margin:14px 0;font-size:25px;width:46px;height:46px}
+ .deep-dive-card h3{font-size:19px}
+ .deep-dive-card p{font-size:13px;line-height:1.85}
+ .perspective-section{padding:63px 0}
+ .perspective-layout{grid-template-columns:minmax(0,1fr);gap:25px}
+ .perspective-symbol{min-height:240px;max-height:260px}
+ .perspective-symbol>span{font-size:88px}
+ .perspective-copy li{font-size:13px}
+ .perspective-note{font-size:12px}
+}
