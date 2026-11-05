@@ -9,8 +9,10 @@
       if (!r.ok) throw Error('session');
       const data = await r.json();
       el('#profile-identity').textContent = data.email || 'Tài khoản QA';
-      const kind = ({personal:'Cá nhân',organization:'Tổ chức'})[data.workspace_type] || 'Loại không gian chưa xác định';
-      const role = ({tenant_admin:'Quản trị đơn vị',lawyer:'Luật sư'})[data.role] || 'Vai trò chưa xác định';
+      const kind = data.workspace_type === 'personal' ? 'Cá nhân' :
+        data.workspace_type === 'organization' ? 'Tổ chức' : 'Loại không gian chưa xác định';
+      const role = data.role === 'tenant_admin' ? 'Quản trị đơn vị' :
+        data.role === 'lawyer' ? 'Luật sư' : 'Vai trò chưa xác định';
       el('#profile-role').textContent = kind + ' · ' + role + ' · QA';
     } catch { el('#profile-role').textContent = 'Không thể kiểm tra phiên'; }
   }
