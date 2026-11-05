@@ -5,6 +5,11 @@
 import { SITE_HTML } from './public_html.mjs';
 import { LANDING_PRIVATE_HTML } from './landing_private_html.mjs';
 import { LANDING_SUBSCRIPTION_HTML } from './landing_subscription_html.mjs';
+import { LANDING_ABOUT_HTML } from './landing_about_html.mjs';
+import { LANDING_SOLUTIONS_HTML } from './landing_solutions_html.mjs';
+import { LANDING_FEATURES_HTML } from './landing_features_html.mjs';
+import { LANDING_SECURITY_HTML } from './landing_security_html.mjs';
+import { FOOTER_CONTACT_HTML } from './footer_contact_html.mjs';
 import { SITE_CSS } from './public_css.mjs';
 import { SITE_JS } from './public_js.mjs';
 import { LOGIN_HTML } from './login_html.mjs';
@@ -28,7 +33,7 @@ const publicAssets=new Map([
  ['/site.js',[SITE_JS,'application/javascript; charset=utf-8']],
  ['/site-login.js',[LOGIN_JS,'application/javascript; charset=utf-8']]
 ]);
-const svgIcon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#26233c"/><path d="M13 48V17h8l11 17 11-17h8v31h-8V31L32 47 21 31v17z" fill="#f8e5d8"/><circle cx="49" cy="15" r="5" fill="#e8b8d2"/></svg>`;
+const svgIcon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#26233c"/><path d="M13 48V17h8l11 17 11-17h8v31h-8V31L32 47 21 31v17z" fill="#f8e5d8"/><path d="M43 16h16m-8-6v16m-7-10-4 7h8l-4-7zm14 0-4 7h8l-4-7zm-7 12v3m-6 1h12" stroke="#d7e8dc" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const csp="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'";
 function headers(type,{publicPage=false}={}){
  return {
@@ -87,9 +92,9 @@ const app=WORKSPACE_HTML
 export async function handleSite(req,env){
  const url=new URL(req.url),path=url.pathname;
  if(req.method!=='GET' && !API.has(path))return missing();
- if(req.method==='GET' && (path==='/'||path==='/index.html'))return respond(SITE_HTML,'text/html; charset=utf-8',200,{publicPage:true});
- if(req.method==='GET' && path==='/trien-khai-rieng')return respond(LANDING_PRIVATE_HTML,'text/html; charset=utf-8',200,{publicPage:true});
- if(req.method==='GET' && path==='/dich-vu-theo-goi')return respond(LANDING_SUBSCRIPTION_HTML,'text/html; charset=utf-8',200,{publicPage:true});
+ const PUBLIC_PAGES=[['/gioi-thieu',LANDING_ABOUT_HTML],['/giai-phap',LANDING_SOLUTIONS_HTML],['/chuc-nang',LANDING_FEATURES_HTML],['/an-toan-du-lieu',LANDING_SECURITY_HTML],['/trien-khai-rieng',LANDING_PRIVATE_HTML],['/dich-vu-theo-goi',LANDING_SUBSCRIPTION_HTML]];
+ const page=(path==='/'||path==='/index.html')?SITE_HTML:PUBLIC_PAGES.find(([route])=>route===path)?.[1];
+ if(req.method==='GET' && page)return respond(page.replace('</footer>',FOOTER_CONTACT_HTML+'</footer>'),'text/html; charset=utf-8',200,{publicPage:true});
  if(req.method==='GET'&&path==='/login')return respond(LOGIN_HTML);
  if(req.method==='GET'&&path==='/favicon.svg')return respond(svgIcon,'image/svg+xml; charset=utf-8',200,{publicPage:true});
  if(req.method==='GET'&&path==='/robots.txt')return respond('User-agent: *\nDisallow: /app\nDisallow: /login\nDisallow: /api/\n','text/plain; charset=utf-8',200,{publicPage:true});
