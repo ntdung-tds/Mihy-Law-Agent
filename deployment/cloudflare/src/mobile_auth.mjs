@@ -36,7 +36,7 @@ async function allowAttempt(db,install,key,now){
   return Number(row?.attempts||0)<=10;
 }
 export const COOKIE_SESSION_SQL=[
- "SELECT s.user_id,s.tenant_id,s.expires_at,v.email,m.role_key,t.kind FROM qa_sessions s",
+ "SELECT s.user_id,s.tenant_id,s.subject,s.expires_at,v.email,m.role_key,t.kind FROM qa_sessions s",
  "JOIN qa_principals p ON p.installation_id=s.installation_id AND p.user_id=s.user_id AND p.status='active'",
  "JOIN qa_memberships m ON m.installation_id=s.installation_id AND m.tenant_id=s.tenant_id AND m.user_id=s.user_id AND m.status='active'",
  "JOIN qa_tenants t ON t.installation_id=s.installation_id AND t.tenant_id=s.tenant_id",
