@@ -80,6 +80,23 @@ class OperatorPreflightTests(unittest.TestCase):
                 module.run(["--preflight", "--bundle", str(path)])
             self.assertEqual(str(e.exception), "QA_ONLY_ACK_REQUIRED")
 
+    def test_real_credentials_cannot_run_inside_ci(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as temp:
+            path = self.write_bundle(temp)
+            with patch.dict(os.environ, {"CI": "true"}):
+                with self.assertRaises(module.QAGateError) as error:
+                    module.run(["--qa-only", "--bundle", str(path)])
+                self.assertEqual(str(error.exception), "LIVE_QA_ROLE_TEST_FORBIDDEN_IN_CI")
+                self.assertEqual(module.run([
+                    "--qa-only", "--preflight", "--bundle", str(path)]), 0)
+
+    def test_revoked_membership_path_is_an_explicit_live_assertion(self):
+        src = FILE.read_text(encoding="utf8")
+        self.assertIn('actor_id == "QA-06"', src)
+        self.assertIn('"REVOKED_MEMBERSHIP_ALLOWED"', src)
+        self.assertIn('"REVOKED_SWITCH_ROTATED_SID"', src)
+
     def test_live_target_is_fixed_and_secret_source_is_not_repo(self):
         self.assertEqual(module.QA_URL,
                          "https://ai-law-web-qa.iaict-platform.workers.dev")
