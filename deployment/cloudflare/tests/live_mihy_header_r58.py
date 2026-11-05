@@ -90,6 +90,9 @@ def autoplay(browser):
  context=browser.new_context(viewport={"width":390,"height":844})
  page=context.new_page()
  page.goto(BASE+"/",wait_until="domcontentloaded",timeout=40000)
+ # Default Playwright pointer (0,0) can hover the top banner, which must pause
+ # rotation per the approved sample. Move it away before testing autoplay.
+ page.mouse.move(300,700)
  page.wait_for_timeout(4200)
  assert page.locator(".mihy08-dots button").nth(1).get_attribute("aria-pressed")=="true","autoplay did not reach second slide after 3.8s"
  print("R58 AUTO ROTATION PASS",flush=True)
