@@ -75,8 +75,8 @@ def run():
                 page.route(BASE + "/**", route_mock)
                 page.goto(BASE + "/app#documents", wait_until="domcontentloaded")
                 page.locator(".matter-row").wait_for()
-                page.locator("#workspace-switch-desktop-select").wait_for()
-                page.locator("#workspace-switch-drawer-select").wait_for()
+                page.locator("#workspace-switch-desktop-select").wait_for(state="attached")
+                page.locator("#workspace-switch-drawer-select").wait_for(state="attached")
                 assert page.locator(".matter-row").count() == 1
                 assert OLD in page.locator("#matter-list").inner_text()
                 assert page.locator("#workspace-switch-desktop-select").input_value() == ORG
