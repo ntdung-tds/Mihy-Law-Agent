@@ -1690,9 +1690,9 @@
       }
     ],
     "current": {
-      "active_task": "AL-R0-IAM-REAL-001",
+      "active_task": "AL-R0-DEPLOY-001",
       "last_completed_step": "R60 first bounded Batch 1 auth UX: Owner accepted Mẫu 11 marketing UI, QA-only session-expiry role labels and revoked-matter title cleanup implemented in PR #79, merged main 03e11794b4e1a71f19592c0834e6267b73be3ddf after complete GitHub Actions 42025141035 SUCCESS. This is code+synthetic JS CI, NOT deployed live Worker, not a full real-IDP/role-based IAM acceptance.",
-      "next_action": "Next QA IAM slice: Cloudflare D1 live read-only census confirms 10 synthetic principals and 12 memberships but only 1 active login verifier and 0 matters. Complete secure QA-only credential provisioning for remaining approved actors via private Owner-controlled secrets, then real HTTPS browser role login/session/revocation/MatterACL matrix and TC12A/B; keep production, real client data, SaaS, Google Drive OAuth gates closed. Review R60 code rollout separately on nonproduction only.",
+      "next_action": "Keep AL-R0-DEPLOY-001 as canonical standalone-first active task. Its next QA IAM subtask: Cloudflare D1 real read-only census confirms 10 synthetic principals/12 memberships but only 1 active login verifier and 0 matters. Securely provision remaining approved QA actor credentials via private Owner storage, then live role-based sign-in/session/revocation/MatterACL TC12A/B tests. R60 source fixes merged but nonproduction Worker deploy remains NOT_RUN; production/customer data/SaaS closed.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
