@@ -5,7 +5,7 @@ const html=readFileSync('web/website/index.html','utf8');
 const css=readFileSync('web/website/styles.css','utf8');
 test('public Mihy Law AI Agent home communicates outcome and benefit rather than QA process',()=>{
  for(const phrase of [
-   'Bớt việc lặp lại','Thêm thời gian','cho pháp lý.',
+   'Sắc bén trong lập luận.','Mạch lạc','trong từng hồ sơ.',
    'GIÁ TRỊ MIHY LAW AI AGENT MANG LẠI','Chuẩn bị văn bản','Nắm bắt hồ sơ',
    'Tiếp cận căn cứ','Tập trung chuyên môn','Mục tiêu: bớt công tìm kiếm',
    'Mihy Law AI Agent có gì khác công cụ AI dùng chung?',
@@ -79,5 +79,9 @@ test('delivery model navigation and future-service honesty across mobile',()=>{
  assert.ok(!html.includes('MihiAgent'));
  assert.ok(!html.includes('Mihi Agent'));
  assert.ok(!html.includes('MIHIAGENT'));
+ assert.match(html,/href="\/gioi-thieu"/);
+ assert.match(html,/href="\/giai-phap"/);
+ assert.match(html,/href="\/chuc-nang"/);
+ assert.match(html,/href="\/an-toan-du-lieu"/);
  assert.ok(html.includes('href="/login">Bắt đầu với Mihy Law AI Agent'));
 });
