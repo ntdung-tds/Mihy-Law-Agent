@@ -14,7 +14,7 @@ Primary Cloudflare Worker: `ai-law-web`; current **NONPRODUCTION QA** URL: https
 
 ## Build and test
 
-`node tools/build_cf_site.mjs /tmp/ai-law-web-build`: generates 13 ESM modules from canonical source (no duplicated content). Cloudflare upload metadata: `main_module:"site_worker.mjs"`, `compatibility_date:"2026-11-04"`, `bindings:[{type:"service",name:"QA_AUTH",service:"ai-law-standalone-cf-qa"}]`. Upload all generated modules. DO NOT upload any actual QA password, secrets or real legal files. Dedicated test: `node --test deployment/cloudflare/tests/site_worker.test.mjs`, then Cloudflare HTTPS Chromium job `cloudflare-site-live` covering 320/390/430/1440px on staging and main Worker. Legacy redirects tested separately.
+`node tools/build_cf_site.mjs /tmp/ai-law-web-build`: generates 18 ESM modules from canonical source (no duplicated content). Cloudflare upload metadata: `main_module:"site_worker.mjs"`, `compatibility_date:"2026-11-04"`, `bindings:[{type:"service",name:"QA_AUTH",service:"ai-law-standalone-cf-qa"}]`. Upload all generated modules. DO NOT upload any actual QA password, secrets or real legal files. Dedicated test: `node --test deployment/cloudflare/tests/site_worker.test.mjs`, then Cloudflare HTTPS Chromium job `cloudflare-site-live` covering 320/390/430/1440px on staging and main Worker. Legacy redirects tested separately.
 
 ## Security/product gate
 
