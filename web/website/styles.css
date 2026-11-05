@@ -1633,3 +1633,62 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
  .site-page .announcement-copy,.site-page .detail-announcement-copy,
  .site-page .mihy08-dots button{transition:none!important}
 }
+
+/* R59 — Approved Mẫu 11: inline gold CTA, no ‹ › or ×, desktop dots only.
+   Mobile 10.8px (320–350px: 10.3px). Header logo/menu remain as R58. */
+.site-page .announcement,.site-page .detail-announcement{
+ background:linear-gradient(112deg,#171233 0%,#1d163d 65%,#25194c 100%)!important;
+}
+.site-page .announcement-inner,.site-page .detail-announcement-inner{
+ display:block!important;position:relative;max-width:1230px;
+ padding:11px 0 8px!important;min-height:0!important;text-align:left!important;
+ font-family:'Be Vietnam Pro',system-ui,sans-serif!important;
+}
+.site-page .mihy11-line{
+ display:block!important;color:#efeafa!important;
+ font-size:12.7px!important;line-height:1.65!important;font-weight:500!important;
+ letter-spacing:0!important;min-width:0;
+}
+.site-page .mihy11-line .announcement-copy,.site-page .mihy11-line .detail-announcement-copy{
+ display:inline!important;flex:none!important;min-width:0!important;
+ padding:0!important;margin:0!important;
+ font:inherit!important;color:inherit!important;line-height:inherit!important;
+ background:none!important;
+}
+.site-page .mihy11-line strong{font-weight:800!important;color:#fff!important}
+.site-page .mihy11-line .announcement-action,.site-page .mihy11-line .detail-announcement-action{
+ display:inline!important;position:static!important;
+ white-space:nowrap!important;vertical-align:baseline!important;
+ padding:0!important;margin:0!important;
+ font:inherit!important;line-height:inherit!important;font-weight:800!important;
+ color:#f6c453!important;background:none!important;box-shadow:none!important;
+ border:0!important;text-decoration:none!important;
+}
+.site-page .mihy11-line .announcement-action:hover,.site-page .mihy11-line .detail-announcement-action:hover{
+ text-decoration:underline!important;text-underline-offset:3px;
+}
+.site-page .announcement-inner>.mihy08-dots,.site-page .detail-announcement-inner>.mihy08-dots{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ gap:6px!important;height:14px!important;margin-top:5px!important;padding:0!important;
+ width:100%!important;
+}
+.site-page .mihy08-dots button{width:7px;height:7px;min-width:7px;border-radius:999px}
+.site-page .mihy08-dots button.on{width:20px;background:#f6c453}
+.site-page .mihy08-dots button:focus-visible,.site-page .mihy11-line a:focus-visible{
+ outline:2px solid #a693ff!important;outline-offset:3px;
+}
+@media(max-width:700px){
+ .site-page .announcement-inner,.site-page .detail-announcement-inner{
+  display:block!important;padding:8px 14px 9px!important;max-width:none!important;
+ }
+ .site-page .mihy11-line{font-size:10.8px!important;line-height:1.58!important;letter-spacing:0!important}
+ .site-page .announcement-inner>.mihy08-dots,.site-page .detail-announcement-inner>.mihy08-dots{display:none!important}
+}
+@media(max-width:350px){
+ .site-page .mihy11-line{font-size:10.3px!important;line-height:1.55!important}
+ .site-page .announcement-inner,.site-page .detail-announcement-inner{padding-left:12px!important;padding-right:12px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .site-page .mihy11-line .announcement-copy,.site-page .mihy11-line .detail-announcement-copy{transition:none!important}
+}
+

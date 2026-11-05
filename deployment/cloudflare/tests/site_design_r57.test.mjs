@@ -15,8 +15,8 @@ test('two editorial header patterns have mobile hide for secondary text, full co
  assert.match(p,/\.site-page \.announcement-sub\{display:none!important\}/);
  assert.match(p,/\.site-page \.detail-announcement-copy\{display:none!important\}/);
  assert.match(p,/color:#f7d176!important/);
- assert.match(pages['index.html'],/Khám phá điều làm nên khác biệt/);
- for(const h of Object.values(pages).slice(1))assert.match(h,/Mihy Law AI Agent — công nghệ đồng hành cùng chuyên môn pháp lý/);
+ assert.match(pages['index.html'],/Tra cứu &amp; soạn thảo văn bản pháp lý bằng AI/);
+ for(const h of Object.values(pages).slice(1))assert.match(h,/Tra cứu &amp; soạn thảo văn bản pháp lý bằng AI/);
 });
 test('unified seven public page headers preserve real links and 7-link mobile menus',()=>{
  for(const [name,html] of Object.entries(pages)){

@@ -205,6 +205,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/site_design_r57.test.mjs
       - name: Verify Owner Mẫu 08 shared rotating header, logo and real destinations
         run: node --test deployment/cloudflare/tests/site_header_r58.test.mjs
+      - name: Verify approved Mẫu 11 inline link, compact mobile copy and hidden dots
+        run: node --test deployment/cloudflare/tests/site_header_r59.test.mjs
       - name: Verify safe redirects from retired preview hostname
         run: node --test deployment/cloudflare/tests/legacy_redirect.test.mjs
 
