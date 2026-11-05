@@ -1269,3 +1269,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
  .hero-law-medallion{width:49px;height:49px;font-size:26px}
  .hero-baseline .baseline-values>span{font-size:10.8px}
 }
+
+/* R53 mobile: hide decorative dot so announcement text aligns exactly with hero left edge. */
+@media(max-width:700px){.announcement .pulse-dot{display:none}}
