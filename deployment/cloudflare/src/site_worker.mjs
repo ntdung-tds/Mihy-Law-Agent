@@ -3,6 +3,8 @@
    No marketing copy claims that legal AI, Google Drive or production IAM is live.
  */
 import { SITE_HTML } from './public_html.mjs';
+import { LANDING_PRIVATE_HTML } from './landing_private_html.mjs';
+import { LANDING_SUBSCRIPTION_HTML } from './landing_subscription_html.mjs';
 import { SITE_CSS } from './public_css.mjs';
 import { SITE_JS } from './public_js.mjs';
 import { LOGIN_HTML } from './login_html.mjs';
@@ -79,13 +81,15 @@ async function authenticated(req,env){
  return null;
 }
 const app=WORKSPACE_HTML
- .replace('<title>AI Law · Workspace Preview R0</title>','<title>AI Law · Không gian làm việc</title>')
- .replace('<meta name="description" content="AI Law — R0 mobile-first user interface preview, synthetic demonstration data only." />','<meta name="description" content="Không gian làm việc AI Law dành cho tài khoản đã được xác thực." /><meta name="robots" content="noindex,nofollow" />')
- .replace('R0 Preview</span>','AI LAW · QA</span>');
+ .replace('<title>Mihy Law AI Agent · Workspace Preview R0</title>','<title>Mihy Law AI Agent · Không gian làm việc</title>')
+ .replace('<meta name="description" content="Mihy Law AI Agent — R0 mobile-first user interface preview, synthetic demonstration data only." />','<meta name="description" content="Không gian làm việc Mihy Law AI Agent dành cho tài khoản đã được xác thực." /><meta name="robots" content="noindex,nofollow" />')
+ .replace('R0 Preview</span>','MIHY LAW AI AGENT · QA</span>');
 export async function handleSite(req,env){
  const url=new URL(req.url),path=url.pathname;
  if(req.method!=='GET' && !API.has(path))return missing();
  if(req.method==='GET' && (path==='/'||path==='/index.html'))return respond(SITE_HTML,'text/html; charset=utf-8',200,{publicPage:true});
+ if(req.method==='GET' && path==='/trien-khai-rieng')return respond(LANDING_PRIVATE_HTML,'text/html; charset=utf-8',200,{publicPage:true});
+ if(req.method==='GET' && path==='/dich-vu-theo-goi')return respond(LANDING_SUBSCRIPTION_HTML,'text/html; charset=utf-8',200,{publicPage:true});
  if(req.method==='GET'&&path==='/login')return respond(LOGIN_HTML);
  if(req.method==='GET'&&path==='/favicon.svg')return respond(svgIcon,'image/svg+xml; charset=utf-8',200,{publicPage:true});
  if(req.method==='GET'&&path==='/robots.txt')return respond('User-agent: *\nDisallow: /app\nDisallow: /login\nDisallow: /api/\n','text/plain; charset=utf-8',200,{publicPage:true});
