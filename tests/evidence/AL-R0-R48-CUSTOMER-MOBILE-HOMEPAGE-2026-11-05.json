@@ -1,0 +1,50 @@
+{
+  "id": "AL-R0-R48-CUSTOMER-MOBILE-HOMEPAGE-2026-11-05",
+  "date": "2026-11-05",
+  "scope": "Customer-benefit website copy and visual mobile overflow fixes; preserve R0 workspace, auth and SRS",
+  "primary_url": "https://ai-law-web.iaict-platform.workers.dev/",
+  "staging_url": "https://ai-law-web-qa.iaict-platform.workers.dev/",
+  "worker_primary": "ai-law-web",
+  "worker_primary_version": "bcb44d86-0ace-4f4f-b236-1593ef97479b",
+  "bug_reproduced": "R47 mobile @media(max-width:380px) .product-window had min-width:390px despite 320px viewport; headline/CTA and decorative elements could be visually clipped even if document.scrollWidth looked safe.",
+  "fix": [
+    "Override and remove 390px minimum on hero illustration for mobile, width 100% without transform",
+    "Use single-column full-width flexible CTA buttons, responsive heading/text",
+    "Reduce mockup min widths, constrain notebook and CTA grid/hero elements",
+    "Refocus public content and FAQ on lawyer outcomes rather than QA/access mechanics",
+    "Retain minimal truthful trial disclaimer in footer; no quantified/unverified benefits"
+  ],
+  "tests": {
+    "copy_contract": "PASS_CI_CLOUDFLARE_CONTRACT_41945848834",
+    "staging_chromium_geometry_11_widths": "PASS_CI_41945270281_ATTEMPT_2",
+    "primary_chromium_geometry_11_widths": "PASS_CI_41945848834",
+    "widths_px": [
+      320,
+      360,
+      375,
+      390,
+      393,
+      414,
+      430,
+      600,
+      768,
+      1024,
+      1440
+    ],
+    "first_qa_smoke_before_deployment": "FAIL_STALE_WORKER_COPY_41945270281_ATTEMPT_1_RETEST_PASS_AFTER_DEPLOY",
+    "original_R0_login_D1_unchanged": "PASS_REGRESSION",
+    "owner_mobile_visual_signoff": "NOT_RUN_OWNER",
+    "production_legal_data_go_live": "NOT_AUTHORIZED"
+  },
+  "links": {
+    "pull_request": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/65",
+    "ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/41945848834"
+  },
+  "warnings": [
+    "No real customer legal records",
+    "Future AI legal features not falsely advertised as complete",
+    "Product SRS v1.1.15 baseline unchanged",
+    "No image screenshots stored on GitHub; evidence is CI test logs",
+    "Owner acceptance pending"
+  ]
+}

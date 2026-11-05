@@ -1,10 +1,18 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `48` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-04T16:48:00Z`.
+- **PCS revision:** `49` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T01:04:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R48 — customer-benefit public homepage, real mobile visual overflow fixes
+
+- **Owner direction:** Website is the customer-facing product introduction; prominently explain benefits to lawyers, not how to log in or technical QA/SRS/version milestones. Owner observed clipped mobile text/buttons around "Bắt đầu với AI Law" and "Không gian làm việc mới".
+- **Content:** Hero now "Bớt việc lặp lại. Thêm thời gian cho pháp lý." Other sections highlight systematic case organization, legal document preparation, directed research, time to focus on analysis and advice. FAQ answers benefits, differentiation, audience and lawyer accountability. No invented success metrics, false feature availability or claim of completed legal AI. Public page technical labels QA/R0/R1/SRS removed, with discreet truthful footer note that trial cannot take real client files.
+- **Mobile:** Removed old 390px minimum-width illustration at 320px; controlled CTA grid width, headline typography, product mockup, notebook and headings. Header, footer, homepage and /login remain R47 branded design. No changes to protected /app or matter API.
+- **Live QA:** Cloudflare `ai-law-web-qa` and primary `ai-law-web` both updated. Version readback on primary `bcb44d86-0ace-4f4f-b236-1593ef97479b`; service binding `QA_AUTH -> ai-law-standalone-cf-qa` preserved. GitHub Node copy regressions PASS; live Chromium 11 widths [320,360,375,390,393,414,430,600,768,1024,1440] checked *glyph and element geometry*, CSS and content, PASS on staging and primary (GitHub run `41945848834` browser job; earlier staging rerun `41945270281` PASS). Originally early test raced with Cloudflare rollout, observed old copy and failed; rerun after deployment PASS. Do not hide or conflate first transient failure with a copy bug.
+- **Owner gate:** Owner visual approval on their own phone NOT_RUN_OWNER. Existing real-password login /app final acceptance still per R47. SRS v1.1.15 unchanged; production and real client documents blocked. PR #65: https://github.com/ntdung-tds/Mihy-Law-Agent/pull/65
 
 ## R47 — public AI Law website + login-gated R0 workspace; main Worker ai-law-web
 
