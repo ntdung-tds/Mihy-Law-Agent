@@ -61,6 +61,18 @@ test('both Mihy Agent landing pages serve as public pages and cannot expose priv
  assert.match(service,/chưa mở bán/);
  assert.match(service,/không có chức năng đăng ký hoặc thanh toán/);
 });
+test('four rich editorial routes remain public with shared company contact and no credential leaks',async()=>{
+ for(const route of ['/gioi-thieu','/giai-phap','/chuc-nang','/an-toan-du-lieu']){
+  const r=await get(route,{});
+  assert.equal(r.status,200,route);
+  const html=await r.text();
+  assert.match(html,/id="editorial-title"/);
+  assert.match(html,/Số 9 Tôn Thất Thuyết/);
+  assert.match(html,/href="tel:\+84588550000"/);
+  assert.match(html,/href="mailto:dungnt.myh@outlook.com"/);
+  assert.ok(!html.includes('id="matter-form"'));
+ }
+});
 test('public assets include mobile navigation and website styling',async()=>{
  for(const p of ['/site.css','/site.js','/favicon.svg','/robots.txt']){
   const r=await get(p);

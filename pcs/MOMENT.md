@@ -1,10 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `52` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T02:23:59.329Z`.
+- **PCS revision:** `53` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T03:07:48.103Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R51 — compelling legal homepage, four menu article pages and official contact details
+
+- **Owner direction:** Replace weak homepage "Bớt việc lặp lại" with **"Sắc bén trong lập luận. Mạch lạc trong từng hồ sơ."**, enrich public home with four real long articles and three audience cards. Mobile menu items **Giới thiệu**, **Giải pháp**, **Chức năng**, **An toàn dữ liệu** must link to independent, detailed landing pages instead of anchors; both existing solution pages retain full status.
+- **Brand/visual:** Retain Mihy Agent M but change Claude-like `✳` to `⚖` legal scales (homepage header/footer/login and all landing headers; plus favicon). Future **Mihy Agent**-operated proposed service restyled professional ink-navy/teal throughout its homepage card, hero, tier highlight and CTA.
+- **Public routes:** Four new multi-section educational pages `/gioi-thieu`, `/giai-phap`, `/chuc-nang`, `/an-toan-du-lieu`, alongside existing `/trien-khai-rieng` and `/dich-vu-theo-goi`. Public Worker bundles 18 modules and inserts shared contact footer server-side on all seven public marketing routes. Login, app and D1 MatterACL remain unchanged.
+- **Contact supplied by Owner:** Mihy Agent; **Số 9 Tôn Thất Thuyết, Cầu Giấy, Hà Nội**; **+84 588 550 000** (`tel:+84588550000`); **dungnt.myh@outlook.com**. Facebook **search link only** until Owner supplies official verified fanpage URL; do not misrepresent corporate social profile.
+- **Cloudflare NONPRODUCTION QA deployment:** `ai-law-web-qa` version `d3875952-28c5-4102-a727-7c1ad7b9b559` and `ai-law-web` version `d35e91e6-0c67-4b46-b20b-e76387151b1d`, both deployed 100% with `QA_AUTH -> ai-law-standalone-cf-qa`. Cloudflare Browser Rendering showed live new article page and contact block. GitHub Actions run `41959269264` contract PASS, live Chromium main+staging homepage/two delivery pages at 11 viewport widths PASS, four additional articles at 6 viewport widths PASS; standalone staging kit still running at evidence checkpoint.
+- **Scope and gates:** SRS v1.1.15 unchanged; marketing-only request recorded `SC-010` in `srs_changed.md`. No SaaS signup/billing, no false AI capability claims, no production deploy or real customer legal data. Owner physical mobile aesthetic/visual acceptance `NOT_RUN_OWNER`.
+- **PR:** https://github.com/ntdung-tds/Mihy-Law-Agent/pull/68
 
 ## R50 — official Mihy Agent brand and two deep, equally prominent landing pages
 

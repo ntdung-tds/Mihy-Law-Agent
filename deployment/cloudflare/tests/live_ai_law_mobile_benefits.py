@@ -12,6 +12,7 @@ GEOMETRY_JS=r"""() => {
  const cssSelectors=['#hero-title','.hero-buttons .button','.hero-visual .product-window',
  '.section-heading h2','.feature-card','.workspace-copy h2','.workspace-notebook',
  '.cta-panel h2','.cta-panel>a','.solution-card','.solution-card h3',
+ '.home-story','.home-audience-card','.contact-item',
  '.solution-action','.solution-intro h2'];
  const bad=[];
  for(const selector of cssSelectors){
@@ -58,7 +59,11 @@ def run():
    page.evaluate('document.fonts.ready')
    page.wait_for_timeout(180)
    text=page.locator('#hero-title').inner_text()
-   assert 'Bớt việc lặp lại.' in text,(width,text)
+   assert 'Sắc bén trong lập luận.' in text,(width,text)
+   assert page.locator('.home-story').count()==4
+   assert page.locator('.home-audience-card').count()==3
+   assert page.locator('.contact-item').count()==4
+   assert page.locator('a[href="tel:+84588550000"]').count()==1
    assert page.locator('.solution-card').count()==2
    assert page.locator('.solution-private').is_visible()
    assert page.locator('.solution-service').is_visible()
@@ -82,7 +87,7 @@ def run():
    if width<=970:
     page.locator('#menu-toggle').click()
     assert page.locator('#mobile-menu').is_visible()
-    page.locator('#mobile-menu a[href="#solutions"]').click()
+    page.locator('#mobile-menu a[href="/giai-phap"]').click()
     assert page.locator('#mobile-menu').is_hidden()
    assert not errors,('JS errors',width,errors)
    if width<=700:

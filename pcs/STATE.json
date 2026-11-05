@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 52,
-  "updated_at": "2026-11-05T02:23:59.329Z",
+  "revision": 53,
+  "updated_at": "2026-11-05T03:07:48.103Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1631,8 +1631,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R50: Owner corrected provider to Mihy Agent and product to Mihy Law AI Agent. New rich 9-section public landing pages /trien-khai-rieng and /dich-vu-theo-goi, symmetrical homepage cards, login/workspace visible rebrand, preserved R44 QA session and R46 MatterACL backend. Both Cloudflare NONPRODUCTION QA Workers updated at 100%: staging 6715f3d3-adbc-4e4f-8295-3d31718f4cf3; primary d2a9b4e1-8664-48cb-91e8-7d4e1ac264f9; service binding QA_AUTH intact. Real Chromium 11-size homepage and two detail-page geometry and mobile-menu tests PASS on staging+primary (R50 PR #67 Actions run 41954329310 (home+both landings, 11 sizes, both hosts)); Cloudflare contract corrected test PASS on follow-up 41954455098. SaaS remains marketing future only, no active plans/payment/signup, SRS v1.1.15 unchanged.",
-      "next_action": "Confirm final PR #67 branch Actions run 41954822648 and final PCS-only CI are green; then merge to main. Owner visual acceptance on physical mobile remains NOT_RUN_OWNER. Public QA: https://ai-law-web.iaict-platform.workers.dev/ , /trien-khai-rieng , /dich-vu-theo-goi. Shared SaaS deferred, no real customer files, production release blocked.",
+      "last_completed_step": "R51: Owner-directed marketing refinement on Mihy Law AI Agent public QA website. Hero changed to 'Sắc bén trong lập luận. Mạch lạc trong từng hồ sơ.' Four long editorial pages /gioi-thieu /giai-phap /chuc-nang /an-toan-du-lieu now linked by homepage and all public mobile menus, plus 4-story + 3-audience homepage sections. Brand M uses ⚖ legal scales, future hosted SaaS card/landing ink-navy/teal. Shared server-rendered company contacts Mihy Agent, Số 9 Tôn Thất Thuyết, Cầu Giấy, Hà Nội, +84588550000, dungnt.myh@outlook.com; Facebook search is labeled unverified, no official page invented. Both Cloudflare QA Workers deployed with QA_AUTH preserved: staging d3875952-28c5-4102-a727-7c1ad7b9b559 and primary d35e91e6-0c67-4b46-b20b-e76387151b1d at 100%. GitHub PR #68 Actions 41959269264 Cloudflare contract PASS and live Chromium QA PASS for home + two delivery pages (11 widths) and four editorial pages (6 widths) on BOTH QA hosts. R44 login/R46 D1 ACL unchanged, full legal AI and Drive gating remain, SRS v1.1.15 unchanged; final Owner visual acceptance pending.",
+      "next_action": "After PR #68 full CI and checkpoint CI PASS, merge to main; Owner to visually review mobile and desktop live QA https://ai-law-web.iaict-platform.workers.dev/ plus new article links and report final acceptance. Owner to provide official Facebook fanpage URL to replace temporary clearly labeled search; do not assume page ownership. Continue SRS standalone-first legal tasks only under existing approval and security gates; no production or real client data.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1655,7 +1655,8 @@
         "R47 website visual Owner acceptance, correct-password mobile /login -> /app and reload/logout on new ai-law-web hostname NOT_RUN_OWNER. Branded custom domain not configured; current workers.dev QA is not a production legal platform. Existing full SRS security and Google Drive/AI gates remain blocked.",
         "R48 public website visual acceptance on Owner physical mobile remains NOT_RUN_OWNER; only QA site fixed. Real AI UC, Drive OAuth, production MFA/IdP, real customer data and full SRS product release remain not ready.",
         "R49 two-delivery public marketing is not Owner-accepted on their physical mobile. Subscription SaaS is a FUTURE offering only, not launched; no pricing, quota billing, signup, production IdP or real client data authorized.",
-        "R50 branding/dual long-form public landing page Owner physical mobile visual acceptance NOT_RUN_OWNER; official typo correction means Mihy Agent is official provider and Mihy Law AI Agent official product. Not a SaaS billing launch or permission to process real legal case files."
+        "R50 branding/dual long-form public landing page Owner physical mobile visual acceptance NOT_RUN_OWNER; official typo correction means Mihy Agent is official provider and Mihy Law AI Agent official product. Not a SaaS billing launch or permission to process real legal case files.",
+        "R51 public site final Owner physical mobile visual acceptance NOT_RUN_OWNER. Official Mihy Agent Facebook page URL not supplied/verified; current link is only labeled search, not a verified brand profile. SaaS remains future-only, production and real customer legal files blocked."
       ]
     },
     "policy": {

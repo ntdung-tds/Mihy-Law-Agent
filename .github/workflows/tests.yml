@@ -191,6 +191,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/site_benefits.test.mjs
       - name: Verify Mihy Agent rebrand and two editorial landing pages
         run: node --test deployment/cloudflare/tests/site_landing_pages.test.mjs
+      - name: Verify four long article routes, updated legal branding and company contacts
+        run: node --test deployment/cloudflare/tests/site_editorial.test.mjs
       - name: Verify safe redirects from retired preview hostname
         run: node --test deployment/cloudflare/tests/legacy_redirect.test.mjs
 
@@ -396,3 +398,29 @@ jobs:
         run: AI_LAW_WEBSITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
       - name: Test both landing pages across 11 sizes on primary nonproduction QA
         run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_brand_landings.py
+
+  cloudflare-site-r51:
+    # R51 only. Two Cloudflare NONPRODUCTION QA Workers; no login secrets or legal files.
+    if: github.ref_name == 'feat/r51-home-editorial-legal-brand-contact-20261105' || github.head_ref == 'feat/r51-home-editorial-legal-brand-contact-20261105'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Playwright Chromium for mobile QA
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: Live new homepage regression on QA staging and primary
+        run: |
+          python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
+          AI_LAW_WEBSITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
+      - name: Live two delivery pages and mobile links on QA staging and primary
+        run: |
+          python deployment/cloudflare/tests/live_mihy_brand_landings.py
+          MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_brand_landings.py
+      - name: Live four editorial landings, contacts and clipped-text tests on both QA Workers
+        run: |
+          python deployment/cloudflare/tests/live_mihy_editorials.py
+          MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_editorials.py
