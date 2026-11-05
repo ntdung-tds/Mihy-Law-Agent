@@ -1,10 +1,18 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `53` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T03:07:48.103Z`.
+- **PCS revision:** `54` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T04:23:27.058Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R52 — owner-approved purple cohesion, mobile slogan/menu/contact and longer landings
+
+- **Owner direction:** Use original successful purple visual palette across homepage, all six landing pages, and all mobile menus; fix owner mobile screenshot where lone “luận” wrapped to another line in “Sắc bén trong lập luận.”; increase small mobile font sizes; make overly tall stacked contact cards smaller; enrich each article/landing to a long visually engaging presentation; tasteful movement only, keep professional legal identity.
+- **Implementation:** Homepage hero first sentence uses `hero-headline-first` no-wrap span with responsive font metrics, preserving both original approved slogan sentences. Shared 7-link mobile/desktop nav with consistent violet surfaces, compact spacing and prominent sign-in CTA. Mobile contact cards use grid with icon-left, details-right. Violet/lilac/navy/cream palette replaces inconsistent teal blocks across homepage, four editorial article pages and both delivery-model pages (SaaS remains visibly future-only). Mobile text sizes increased across descriptions, cards, FAQs, labels and contact areas. All six landing pages add two genuinely detailed sections: three context-specific legal analysis articles and a visual decision-principles rail. Article pages now at least 9 sections each, delivery pages at least 11 sections each. IntersectionObserver-on-entry and subtle hover effects honor reduced motion and never hide text by default.
+- **QA and evidence:** Cloudflare NONPRODUCTION staging `ai-law-web-qa` version `e5caa330-66ae-44e4-8b06-4d105c5e93dc`, primary `ai-law-web` version `9ddcb074-95e1-461c-9154-f9dba118c1cf`, both deployed 100%, same `QA_AUTH -> ai-law-standalone-cf-qa` private service binding. GitHub Actions `41967061706` **10/10 PASS** after staged rollout, including live Chromium first-line no-wrap at 320/360/375/390/414/430px and layout/menu/contact tests, all six deeper landing pages, existing browser/API/auth/ACL/staging-kit regression suites. An earlier run briefly failed primary readback before primary deployment; rerun on synchronized QA hosts PASS. No real customer files used.
+- **Scope/gates:** Frozen SRS v1.1.15 not edited; record UI-only delta as `SC-011` in `srs_changed.md`. No legal AI functionality, real Drive OAuth, SaaS signup/billing, IAM, D1 data schema or production deploy changes. Physical-device visual acceptance remains `NOT_RUN_OWNER`. Mihy Agent Facebook link still clearly labelled search, not an official verified profile.
+- **PR:** https://github.com/ntdung-tds/Mihy-Law-Agent/pull/69
 
 ## R51 — compelling legal homepage, four menu article pages and official contact details
 
