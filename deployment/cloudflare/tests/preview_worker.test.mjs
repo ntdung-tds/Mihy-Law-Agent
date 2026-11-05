@@ -55,7 +55,7 @@ test('authenticated preview serves all four areas and 11 right-drawer functions'
   const html=await r.text();
   for(const id of ['UC01','UC02','UC03','UC04','UC05','UC06','UC07','UC08','UC09','UC10','UC11'])
     assert.match(html,new RegExp('data-feature-jump="'+id+'"'));
-  assert.match(html,/mobile-right-rail/);assert.match(html,/id="preview-logout"/);
+  assert.match(html,/mobile-bottom-nav/);assert.match(html,/id="preview-logout"/);
   for(const file of ['/styles.css','/app.js','/session.js','/matters.js'])
     assert.equal((await handlePreview(new Request(origin+file),env)).status,200);
 });

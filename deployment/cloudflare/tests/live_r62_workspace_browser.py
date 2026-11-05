@@ -74,6 +74,26 @@ def run():
 
                 page.route(BASE + "/**", route_mock)
                 page.goto(BASE + "/app#documents", wait_until="domcontentloaded")
+                # R63 browser checks the actual 5-item fixed bottom bar; authorization is mocked.
+                nav = page.locator(".mobile-bottom-nav")
+                if width <= 820:
+                    assert nav.is_visible(), width
+                    bounds = nav.bounding_box()
+                    assert bounds is not None and abs(bounds["width"] - width) <= 2, (width, bounds)
+                    assert abs(bounds["y"] + bounds["height"] - 850) <= 2, (width, bounds)
+                    columns = page.evaluate(
+                        "getComputedStyle(document.querySelector('.mobile-bottom-nav')).gridTemplateColumns.split(' ').length"
+                    )
+                    assert columns == 5, (width, columns)
+                    assert page.locator(".sidebar").is_hidden()
+                    page.locator('.mobile-bottom-nav [data-view="overview"]').click()
+                    assert page.locator("#view-overview").is_visible()
+                    page.locator('.mobile-bottom-nav [data-view="documents"]').click()
+                    assert page.locator("#view-documents").is_visible()
+                    assert page.locator('.mobile-bottom-nav [data-view="documents"]').get_attribute("aria-current") == "page"
+                else:
+                    assert nav.is_hidden()
+                    assert page.locator(".sidebar").is_visible()
                 page.locator(".matter-row").wait_for(state="attached")
                 page.locator("#workspace-switch-desktop-select").wait_for(state="attached")
                 page.locator("#workspace-switch-drawer-select").wait_for(state="attached")

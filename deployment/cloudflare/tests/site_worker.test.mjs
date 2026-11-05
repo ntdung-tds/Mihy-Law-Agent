@@ -114,7 +114,7 @@ test('authenticated workspace retains R0 11 functions and R46 real matter UI',as
  const html=await r.text();
  assert.match(html,/Không gian làm việc/);
  assert.match(html,/id="matter-form"/);
- assert.match(html,/mobile-right-rail/);
+ assert.match(html,/mobile-bottom-nav/);
  for(let i=1;i<=11;i++)assert.match(html,new RegExp('data-feature-jump="UC'+String(i).padStart(2,'0')+'"'));
  assert.equal(r.headers.get('X-Robots-Tag'),'noindex,nofollow,noarchive');
  for(const p of ['/styles.css','/app.js','/session.js','/matters.js']){
