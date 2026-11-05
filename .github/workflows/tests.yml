@@ -506,3 +506,11 @@ jobs:
         run: python deployment/cloudflare/tests/live_mihy_brand_landings.py
       - name: Staging four editorial pages / all old widths
         run: python deployment/cloudflare/tests/live_mihy_editorials.py
+      - name: Primary NONPRODUCTION website same seven-page mobile and copyright checks
+        run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_mobile_r54.py
+      - name: Primary mobile home and delivery-model regressions
+        run: |
+          MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_home_r53.py
+          MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_brand_landings.py
+      - name: Primary four editorial landing regressions
+        run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_editorials.py
