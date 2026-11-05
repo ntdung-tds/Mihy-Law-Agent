@@ -187,6 +187,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/matter_workspace.test.mjs
       - name: Verify public website and protected workspace R47 routes
         run: node --test deployment/cloudflare/tests/site_worker.test.mjs
+      - name: Guard customer-facing benefit claims and 320px layout fixes
+        run: node --test deployment/cloudflare/tests/site_benefits.test.mjs
       - name: Verify safe redirects from retired preview hostname
         run: node --test deployment/cloudflare/tests/legacy_redirect.test.mjs
 
@@ -331,3 +333,20 @@ jobs:
           test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$new/app")" = 302
           test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$new/app.js")" = 401
           test "$(curl -sS --max-time 25 -o /dev/null -w '%{http_code}' "$new/api/qa/matters")" = 401
+
+  cloudflare-site-benefits:
+    # R48 only: actual browser visual text and bounding-box overflow checks.
+    # No screenshots or real customer data are uploaded to GitHub.
+    if: github.ref_name == 'feat/r48-mobile-homepage-benefits-20261105' || github.head_ref == 'feat/r48-mobile-homepage-benefits-20261105'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Chromium and Playwright
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: Check real QA homepage visible text, CTA and mobile width 320–1440
+        run: python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
