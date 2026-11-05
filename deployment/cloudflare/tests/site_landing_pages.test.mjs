@@ -54,7 +54,7 @@ test('private deployment accurately explains management, AI costs and staged int
  for(const phrase of [
   'Chủ động quản trị','Chủ động dữ liệu','Chủ động dịch vụ AI',
   'Google Drive','OneDrive','NAS','máy chủ',
-  'phí dùng AI','theo chính sách của nhà cung cấp',
+  'phí dùng AI','điều kiện của nhà cung cấp',
   'quyền sở hữu mã nguồn','không mặc định bao gồm chuyển giao',
   'chưa được phép tiếp nhận hồ sơ khách hàng thật'
  ])assert.ok(privatePage.toLowerCase().includes(phrase.toLowerCase()),phrase);
@@ -63,7 +63,7 @@ test('private deployment accurately explains management, AI costs and staged int
 
 test('subscription remains future-only: no invented prices, entitlement, payment, order buttons',()=>{
  for(const phrase of [
-  'ĐANG PHÁT TRIỂN','chưa mở bán','chưa có chức năng đăng ký',
+  'ĐANG PHÁT TRIỂN','chưa mở bán','không có chức năng đăng ký',
   'Chưa công bố giá & hạn mức','minh họa định hướng phân gói',
   'không phải sản phẩm đang bán','môi trường thử nghiệm',
   'chưa có chính sách chính thức'
