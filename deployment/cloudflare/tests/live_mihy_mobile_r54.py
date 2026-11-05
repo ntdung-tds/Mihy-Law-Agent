@@ -73,7 +73,8 @@ def check(page,width,route):
   link=ann.locator(".detail-announcement-action")
   assert link.count()==1
   style=link.evaluate("""e=>{const x=getComputedStyle(e);return {display:x.display,bg:x.backgroundColor,border:x.borderTopWidth,color:x.color,font:x.fontSize}}""")
-  assert style["display"]=="inline",(route,width,"looks like button",style)
+  assert style["display"] in ("inline","block"),(route,width,"unexpected link display",style)
+  assert style["bg"]=="rgba(0, 0, 0, 0)",(route,width,"painted CTA",style)
   assert style["color"]=="rgb(247, 209, 118)",(route,width,"not gold",style)
   assert style["border"]=="0px",(route,width,"border",style)
   if width<=700:
