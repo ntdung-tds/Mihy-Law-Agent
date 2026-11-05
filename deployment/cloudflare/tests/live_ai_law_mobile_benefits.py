@@ -62,10 +62,10 @@ def run():
    assert page.locator('.solution-card').count()==2
    assert page.locator('.solution-private').is_visible()
    assert page.locator('.solution-service').is_visible()
-   assert page.locator('#solutions').inner_text().count('MihiAgent')>=2
+   assert page.locator('#solutions').inner_text().count('Mihy Agent')>=2
    assert 'Dịch vụ chưa mở bán' in page.locator('.solution-service').inner_text()
-   assert page.locator('.solution-private .solution-action').get_attribute('href')=='#faq-deployment'
-   assert page.locator('.solution-service .solution-action').get_attribute('href')=='#faq-saas'
+   assert page.locator('.solution-private .solution-action').get_attribute('href')=='/trien-khai-rieng'
+   assert page.locator('.solution-service .solution-action').get_attribute('href')=='/dich-vu-theo-goi'
    assert page.locator('.feature-card').count()==3
    assert page.locator('.footer-release-note').count()==1
    assert page.locator('text=Có cần đăng nhập để dùng chức năng không?').count()==0

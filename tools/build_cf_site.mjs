@@ -8,6 +8,8 @@ fs.mkdirSync(out,{recursive:true});
 const modules=[
  ['site_worker.mjs','deployment/cloudflare/src/site_worker.mjs'],
  ['public_html.mjs','web/website/index.html','SITE_HTML'],
+ ['landing_private_html.mjs','web/website/private.html','LANDING_PRIVATE_HTML'],
+ ['landing_subscription_html.mjs','web/website/subscription.html','LANDING_SUBSCRIPTION_HTML'],
  ['public_css.mjs','web/website/styles.css','SITE_CSS'],
  ['public_js.mjs','web/website/site.js','SITE_JS'],
  ['login_html.mjs','web/website/login.html','LOGIN_HTML'],

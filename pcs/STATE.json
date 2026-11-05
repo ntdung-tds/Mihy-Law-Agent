@@ -1,12 +1,12 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 50,
-  "updated_at": "2026-11-05T01:51:03.031Z",
+  "revision": 52,
+  "updated_at": "2026-11-05T02:23:59.329Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
     "slug": "mihy-law-agent",
-    "name": "AI Law — Mihy Law Agent",
+    "name": "Mihy Law AI Agent",
     "phase": "R0",
     "source_refs": [
       {
@@ -1631,8 +1631,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R49: public AI Law homepage now features two MihiAgent offerings: customer-managed/private deployment with direct AI-provider usage fees, versus future hosted AI Law subscription tiers with limits. Added responsive two-card comparison, anchors, FAQ and footer. Staging ai-law-web-qa deployed and R49 Chromium 11 viewport browser QA PASS (GitHub Actions 41950720221); primary nonproduction QA ai-law-web deployed version 581d7523-19a1-4914-a3cd-6d52c8410041, Cloudflare real HTML/mobile readback PASS. R49 source/Cloudflare contract CI PASS. Login/app and backend unchanged; final Owner visual acceptance pending, production blocked, SRS unchanged.",
-      "next_action": "R49 primary QA real Chromium regression is being rerun after deployment; verify at https://ai-law-web.iaict-platform.workers.dev/#solutions and await Owner design acceptance on physical mobile. Continue standalone implementation/Drive/legal workflows under SRS only after relevant auth/data gates; MihiAgent hosted SaaS model is public roadmap marketing, not an activated service or new implementation scope.",
+      "last_completed_step": "R50: Owner corrected provider to Mihy Agent and product to Mihy Law AI Agent. New rich 9-section public landing pages /trien-khai-rieng and /dich-vu-theo-goi, symmetrical homepage cards, login/workspace visible rebrand, preserved R44 QA session and R46 MatterACL backend. Both Cloudflare NONPRODUCTION QA Workers updated at 100%: staging 6715f3d3-adbc-4e4f-8295-3d31718f4cf3; primary d2a9b4e1-8664-48cb-91e8-7d4e1ac264f9; service binding QA_AUTH intact. Real Chromium 11-size homepage and two detail-page geometry and mobile-menu tests PASS on staging+primary (R50 PR #67 Actions run 41954329310 (home+both landings, 11 sizes, both hosts)); Cloudflare contract corrected test PASS on follow-up 41954455098. SaaS remains marketing future only, no active plans/payment/signup, SRS v1.1.15 unchanged.",
+      "next_action": "Confirm final PR #67 branch Actions run 41954822648 and final PCS-only CI are green; then merge to main. Owner visual acceptance on physical mobile remains NOT_RUN_OWNER. Public QA: https://ai-law-web.iaict-platform.workers.dev/ , /trien-khai-rieng , /dich-vu-theo-goi. Shared SaaS deferred, no real customer files, production release blocked.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1654,7 +1654,8 @@
         "R46 matter metadata create/list is implemented QA-only, but positive owner-device POST+reload, all requested legal document file storage/Google Drive OAuth, AI UC03/04/07, full MatterACL/RLS parity, security/operational gates and production approval remain pending. Original URL is still NONPRODUCTION_QA.",
         "R47 website visual Owner acceptance, correct-password mobile /login -> /app and reload/logout on new ai-law-web hostname NOT_RUN_OWNER. Branded custom domain not configured; current workers.dev QA is not a production legal platform. Existing full SRS security and Google Drive/AI gates remain blocked.",
         "R48 public website visual acceptance on Owner physical mobile remains NOT_RUN_OWNER; only QA site fixed. Real AI UC, Drive OAuth, production MFA/IdP, real customer data and full SRS product release remain not ready.",
-        "R49 two-delivery public marketing is not Owner-accepted on their physical mobile. Subscription SaaS is a FUTURE offering only, not launched; no pricing, quota billing, signup, production IdP or real client data authorized."
+        "R49 two-delivery public marketing is not Owner-accepted on their physical mobile. Subscription SaaS is a FUTURE offering only, not launched; no pricing, quota billing, signup, production IdP or real client data authorized.",
+        "R50 branding/dual long-form public landing page Owner physical mobile visual acceptance NOT_RUN_OWNER; official typo correction means Mihy Agent is official provider and Mihy Law AI Agent official product. Not a SaaS billing launch or permission to process real legal case files."
       ]
     },
     "policy": {

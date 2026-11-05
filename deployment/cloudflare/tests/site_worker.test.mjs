@@ -33,12 +33,33 @@ test('website is an indexable public home with header, footer, real product desc
  const r=await get('/');
  assert.equal(r.status,200);
  const html=await r.text();
- for(const text of ['Không gian','<header','<footer','Giải pháp','Câu hỏi','href="/login"','id="hero-title"','AI Law'])assert.ok(html.includes(text),text);
+ for(const text of ['Không gian','<header','<footer','Giải pháp','Câu hỏi','href="/login"','id="hero-title"','Mihy Law AI Agent'])assert.ok(html.includes(text),text);
  for(const id of ['about','features','workspace','trust','faq'])assert.ok(html.includes('id="'+id+'"'),id);
  assert.equal(r.headers.get('X-Robots-Tag'),null,'public page is indexable');
  assert.ok(!html.includes('id="matter-form"'),'private workspace not in public HTML');
  const noEnv=await get('/',{});
  assert.equal(noEnv.status,200,'public home works when login service is unavailable');
+});
+test('both Mihy Agent landing pages serve as public pages and cannot expose private workspace',async()=>{
+ for(const [path,heading] of [
+  ['/trien-khai-rieng','AI pháp lý của bạn.'],
+  ['/dich-vu-theo-goi','Việc pháp lý của bạn.']
+ ]){
+  const r=await get(path,{});
+  assert.equal(r.status,200,path);
+  assert.equal(r.headers.get('X-Robots-Tag'),null);
+  const html=await r.text();
+  assert.ok(html.includes(heading),path);
+  assert.ok(html.includes('Mihy Law AI Agent'),path);
+  assert.ok(html.includes('Mihy Agent'),path);
+  assert.ok(html.includes('class="detail-hero"'),path);
+  assert.ok(html.includes('detail-faq"'),path);
+  assert.ok(html.includes('href="/login"'),path);
+  assert.ok(!html.includes('id="matter-form"'),path);
+ }
+ const service=await (await get('/dich-vu-theo-goi')).text();
+ assert.match(service,/chưa mở bán/);
+ assert.match(service,/không có chức năng đăng ký hoặc thanh toán/);
 });
 test('public assets include mobile navigation and website styling',async()=>{
  for(const p of ['/site.css','/site.js','/favicon.svg','/robots.txt']){
