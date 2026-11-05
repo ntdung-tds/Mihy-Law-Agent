@@ -39,7 +39,7 @@ def verify():
                     data=json.dumps({"tenant_id": TENANT}),
                 )
                 assert post.status == 401, (width, "unauthorized tenant switch", post.status)
-                assert "Set-Cookie" not in post.headers, ("anonymous switch issued SID", width)
+                assert post.headers.get("set-cookie") is None, ("anonymous switch issued SID", width)
 
                 # Invalid Origin blocked before proxying to backend.
                 outside = page.request.post(
