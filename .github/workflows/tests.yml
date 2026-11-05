@@ -199,6 +199,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/site_home_r53.test.mjs
       - name: Verify mobile warm-gold text links, six shared page banners, grouped footer year and readable fonts
         run: node --test deployment/cloudflare/tests/site_mobile_r54.test.mjs
+      - name: Verify R55 mobile micro-banners and the two compact delivery links
+        run: node --test deployment/cloudflare/tests/site_mobile_r55.test.mjs
       - name: Verify safe redirects from retired preview hostname
         run: node --test deployment/cloudflare/tests/legacy_redirect.test.mjs
 
