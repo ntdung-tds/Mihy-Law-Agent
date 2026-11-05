@@ -237,5 +237,25 @@ class R0PreviewTests(unittest.TestCase):
         self.assertIn("n.dataset.stage === 'r0'", self.js)
 
 
+    def test_r63_owner_approved_five_item_fixed_mobile_bottom_nav(self):
+        """R63 replaces the right rail only on mobile, keeping drawer and desktop sidebar."""
+        import re
+        bar = re.search(r'<nav class="mobile-bottom-nav"[^>]*>(.*?)</nav>', self.html, re.DOTALL)
+        self.assertIsNotNone(bar)
+        self.assertEqual(len(re.findall(r'class="rail-item', bar.group(1))), 5)
+        self.assertEqual(re.findall(r'data-view="(overview|documents|assistant|research)"', bar.group(1)),
+                         ['overview', 'documents', 'assistant', 'research'])
+        self.assertIn('id="rail-features"', bar.group(1))
+        self.assertNotIn('class="mobile-right-rail"', self.html)
+        css = self.css.split('/* R63 Owner-approved mobile bottom navigation:', 1)[1]
+        self.assertIn('grid-template-columns:repeat(5,minmax(0,1fr))', css)
+        self.assertIn('position:fixed;inset:auto 0 0;display:grid!important', css)
+        self.assertIn('env(safe-area-inset-bottom)', css)
+        self.assertIn('.main-content{padding-left:17px!important;padding-right:17px!important}', css)
+        self.assertIn('.mobile-bottom-nav .rail-item.active', css)
+        self.assertIn('.mobile-bottom-nav .rail-feature-button[aria-expanded="true"]', css)
+        self.assertIn('aria-current', self.js)
+
+
 if __name__ == '__main__':
     unittest.main()
