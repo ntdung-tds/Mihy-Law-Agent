@@ -26,7 +26,8 @@ test('R60: active role label is accurate and unrecognized roles never appear as 
   for(const [role,kind,expected] of [
     ['tenant_admin','organization','Tổ chức · Quản trị đơn vị · QA'],
     ['lawyer','personal','Cá nhân · Luật sư · QA'],
-    ['unexpected','unexpected','Loại không gian chưa xác định · Vai trò chưa xác định · QA']
+    ['unexpected','unexpected','Loại không gian chưa xác định · Vai trò chưa xác định · QA'],
+    ['constructor','toString','Loại không gian chưa xác định · Vai trò chưa xác định · QA']
   ]){
     const dom=elements(),navigations=[];
     runInNewContext(session,{
