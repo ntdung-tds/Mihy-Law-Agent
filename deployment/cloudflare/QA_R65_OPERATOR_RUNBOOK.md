@@ -20,8 +20,10 @@
     python deployment/cloudflare/tools/r65_live_role_e2e.py --qa-only --preflight --bundle /private/qa_r40_bundle.json
     python deployment/cloudflare/tools/r65_live_role_e2e.py --qa-only --bundle /private/qa_r40_bundle.json
 
-5. The suite uses **no mocked positive sessions**. It checks QA01, QA02, QA03, QA05, QA06, QA08 and QA09 sign-in, roles, membership isolation, session cookie, display at mobile/desktop sizes, QA02 dual-tenant switch and SID rotation/old-SID revocation, unauthorized organization switch denial and logout revocation. **QA07 disabled** must return HTTP401; HTTP429 is not a false PASS. It prints only QA actor IDs and PASS/FAIL codes, never credentials.
+5. The suite uses **no mocked positive sessions**. It checks QA01, QA02, QA03, QA05, QA06, QA08 and QA09 sign-in, roles, membership isolation, session cookie, display at mobile/desktop sizes, QA02 dual-tenant switch, SID rotation/old-SID revocation and actual UI workspace selector refresh, QA06 revoked organization denial, unauthorized organization switch denial and logout revocation. **QA07 disabled** must return HTTP401; HTTP429 is not a false PASS. It prints only QA actor IDs and PASS/FAIL codes, never credentials.
 6. Continue other SRS acceptance conditions separately: QA04 existing R44 account via its private channel; disabled/revoked **after** session issuance; natural 30-minute expiry; and positive/negative **MatterACL** using approved synthetic matters (none currently seeded). No production, client matter or Google Drive OAuth activity is allowed.
+
+7. **Security gate:** If an Owner QA password was previously exposed in a public branch, rotate that affected QA password privately before declaring a secure acceptance. Do not place replacement passwords in this runbook, GitHub Actions or the public PCS. The operator live suite rejects real credential use when `CI` is set; synthetic `--preflight` remains allowed.
 
 ## Truthful report and owner acceptance
 
