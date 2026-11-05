@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `51` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T02:21:35.077Z`.
+- **PCS revision:** `52` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T02:23:59.329Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -11,7 +11,7 @@
 - **Owner correction:** Provider **Mihy Agent**, product **Mihy Law AI Agent**. Previous MihiAgent / AI Law public names corrected. Historical SRS v1.1.15 not changed; log branding delta as SC-009 in `srs_changed.md`.
 - **Public experience:** Two homepage offerings now have equal visual prominence, contrast and comparable layout: `/trien-khai-rieng` (customer-managed own infrastructure/data/user permissions, pays selected AI-provider usage and Mihy Agent delivery services separately) and `/dich-vu-theo-goi` (future Mihy Agent-operated subscription with planned limits, explicitly not for sale). Each page has 9 extensive sections, strong CSS architecture/experience illustration, benefits, model-specific steps or tier examples, use cases, in-depth FAQs, decision guidance and cross-navigation. Tier ideas are explicitly hypothetical, no invented prices, quota values or launch date.
 - **Preserved SRS/auth:** `/login` and R0 `/app` visible product name updated; the existing QA credentials, service binding, protected routes, R46 D1 metadata/MatterACL and all legal AI/Drive integration gates are unchanged. Public static packaging now 13 ESM modules. No new signups, payments, SaaS backend, real client files or production deployment.
-- **Actual nonproduction Cloudflare:** `ai-law-web-qa` version `1410e0b7-a913-4431-ae57-7ee59d4e54a9` 100%; `ai-law-web` version `1ebedf67-cd37-47eb-923a-12d4897f02a5` 100%. Both retain `QA_AUTH -> ai-law-standalone-cf-qa`. Cloudflare Browser Rendering verified live private landing response. Full GitHub Actions Chromium 11 widths on BOTH QA hosts: home + two detailed landings PASS in initial R50 run `41954329310`. Brand/Worker/unit contractual tests corrected after false-negative test asserting script `href` instead of `src`; corrected job PASS `41954455098` (overall run/other jobs require final result check).
+- **Actual nonproduction Cloudflare:** `ai-law-web-qa` version `6715f3d3-adbc-4e4f-8295-3d31718f4cf3` 100%; `ai-law-web` version `d2a9b4e1-8664-48cb-91e8-7d4e1ac264f9` 100%. Both retain `QA_AUTH -> ai-law-standalone-cf-qa`. Cloudflare Browser Rendering verified live private landing response. Full GitHub Actions Chromium 11 widths on BOTH QA hosts: home + two detailed landings PASS in initial R50 run `41954329310`. Final nonproduction QA deployment includes Mihy M favicon and mock logo, binding reverified; recheck live Chromium on PR head before merge. Brand/Worker/unit contractual tests corrected after false-negative test asserting script `href` instead of `src`; corrected job PASS `41954455098` (overall run/other jobs require final result check).
 - **Owner gate:** Physical mobile visual signoff `NOT_RUN_OWNER`; production release and customer data `BLOCKED`; subscription service is still deferred. CI on final checkpoint commit should pass before merge PR #67.
 - **PR:** https://github.com/ntdung-tds/Mihy-Law-Agent/pull/67
 
