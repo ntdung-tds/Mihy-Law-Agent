@@ -140,10 +140,19 @@ def verify_account(playwright, browser, actor_id, actor, private, width):
         assert old_sid, "MISSING_HTTPONLY_SESSION"
         # Each blocked tenant must leave both SID and current workspace intact.
         deny_tenant = OTHER_ORG if actor_id != "QA-09" else ORG
+        assert deny_tenant not in memberships, "EXPECTED_FOREIGN_TENANT"
         denied = api_post(context, "/api/qa/switch-workspace", {"tenant_id": deny_tenant})
-        if deny_tenant not in memberships:
-            assert denied.status == 404, "UNAUTHORIZED_TENANT_ALLOWED"
-            assert get_sid(context) == old_sid, "DENIED_SWITCH_ROTATED_SID"
+        assert denied.status == 404, "UNAUTHORIZED_TENANT_ALLOWED"
+        assert get_sid(context) == old_sid, "DENIED_SWITCH_ROTATED_SID"
+        if actor_id == "QA-06":
+            # Existing revoked organization membership must not become an active tenant.
+            revoked_targets = [m["tenant_id"] for m in actor["memberships"]
+                               if m["status"] == "revoked"]
+            assert len(revoked_targets) == 1, "REVOKED_FIXTURE_REQUIRED"
+            rejected = api_post(context, "/api/qa/switch-workspace",
+                                {"tenant_id": revoked_targets[0]})
+            assert rejected.status == 404, "REVOKED_MEMBERSHIP_ALLOWED"
+            assert get_sid(context) == old_sid, "REVOKED_SWITCH_ROTATED_SID"
         # QA-02 has two active memberships; verify atomic session rotation.
         if actor_id == "QA-02":
             targets = [tenant for tenant in memberships if tenant != data["tenant_id"]]
@@ -181,6 +190,8 @@ def run(argv=None):
     if args.preflight:
         print("PASS R65 private QA bundle shape/actors/mode; NO LIVE TEST", flush=True)
         return 0
+    if os.environ.get("CI"):
+        raise QAGateError("LIVE_QA_ROLE_TEST_FORBIDDEN_IN_CI")
     # R40 synthetic actors only, no Owner personal account and no QA04 R44 password.
     from playwright.sync_api import sync_playwright
     with sync_playwright() as pw:
