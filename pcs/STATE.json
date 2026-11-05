@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 58,
-  "updated_at": "2026-11-05T08:07:18.804Z",
+  "revision": 59,
+  "updated_at": "2026-11-05T11:06:16.879Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1058,7 +1058,12 @@
           "cf_r48_owner_mobile_visual_acceptance": "NOT_RUN_OWNER",
           "cf_r48_production_gate": "NOT_READY",
           "cf_r55_public_mobile_7pages_8sizes_both_hosts": "PASS_CI_41986135487_REAL_CHROMIUM",
-          "cf_r56_both_headers_live_browser_7pages_11widths_both_hosts": "PASS_CI_41991605264_REAL_CHROMIUM"
+          "cf_r56_both_headers_live_browser_7pages_11widths_both_hosts": "PASS_CI_41991605264_REAL_CHROMIUM",
+          "cf_r59_sample11_owner_design": "APPROVED_OWNER_2026_11_05_MAU11_SAMPLE",
+          "cf_r59_marketing_browser_7routes_8widths_both_hosts": "PASS_GITHUB_ACTIONS_42011652749_AND_42011664583",
+          "cf_r59_public_worker_deployments": "PASS_NONPROD_QA_5ed1b8f6_PRIMARY_03fbcbc1_IDENTICAL_18_MODULES_QA_AUTH_UNCHANGED",
+          "cf_r59_desktop_screen_visual": "VIEWED_CLOUDFLARE_BROWSER_1440x900_AND_FULL_PAGE_NOT_PERSISTED_AS_FILE",
+          "cf_r59_owner_final_device_release_acceptance": "NOT_RUN_SEPARATE_FROM_APPROVED_SAMPLE"
         },
         "evidence": [
           "deployment/modes.json",
@@ -1122,7 +1127,14 @@
           "R44 Owner self-reported positive physical mobile sign-in on 2026-11-04 (conversation confirmation only, no independent device recording). Previous PR #60 live Chromium test and main CI PASS; reload/logout on Owner phone pending. Public-safe checkpoint: tests/evidence/AL-R0-R44-OWNER-MOBILE-SIGNIN-2026-11-04.json.",
           "tests/evidence/AL-R0-R45-PREVIEW-LOGIN-RIGHT-MENU-2026-11-04.json (public-safe; original URL live smoke PASS, QA Chromium staging PASS, positive Owner login original URL pending)",
           "tests/evidence/AL-R0-R47-PUBLIC-WEBSITE-AI-LAW-WEB-2026-11-04.json",
-          "tests/evidence/AL-R0-R48-CUSTOMER-MOBILE-HOMEPAGE-2026-11-05.json"
+          "tests/evidence/AL-R0-R48-CUSTOMER-MOBILE-HOMEPAGE-2026-11-05.json",
+          "GitHub PR #74: revert rejected R56 header to R55 (merged)",
+          "GitHub PR #75: R57 typography/spacing updates (merged, superseded by R59)",
+          "GitHub PR #76: R58 Sample 08 rotating banners (merged, superseded by R59)",
+          "GitHub PR #77: R59 Owner-approved Sample 11 inline headers, merged commit 991e944f1036a54104c993e1fd7134a143788795",
+          "GitHub Actions 42011652749 and 42011664583: PASS on 7 public pages x 8 widths on both NONPRODUCTION Workers; 10 CI jobs PASS",
+          "Cloudflare QA Worker version 5ed1b8f6-9706-4300-8b90-bf0d43dc5051; primary NONPRODUCTION Worker 03fbcbc1-0a08-4e80-b8af-a89304711298; same 18 modules; QA_AUTH unchanged",
+          "Cloudflare Browser Rendering desktop 1440x900 and full-page images inspected in owner chat on 2026-11-05; screenshots not stored in repository/Drive"
         ]
       }
     ],
@@ -1321,6 +1333,12 @@
         "topic": "Owner-directed R48 customer-value public homepage and mobile visual fit",
         "value": "AI Law public marketing website should speak to prospective lawyer/customer outcomes (less repetitive work, clearer matter overview, structured document preparation, more focus on legal analysis and consulting) rather than foreground QA/login mechanics, SRS/version labels or feature rollout internals. Preserve truthful phrasing: anticipated AI benefits are direction/goal, not claimed complete, quantified or guaranteed. Keep concise notice in footer about trial/no real client records and clear protected QA login. Fix mobile <380px hero overflow by removing the inherited 390px minimum on illustration, constraining CTA widths, responsive text sizes and notebook/CTA layout. Preserve Cloudflare ai-law-web identity, private /app, R44 session and R46 matter ACL; no production authorization or SRS v1.1.15 baseline edit.",
         "authority": "Owner 2026-11-05: 'Trên Mobile một số chỗ chưa đẹp, bị tràn màn hình, ví du chỗ bắt đầu với AI law, không gian làm việc mới; ... website thật, đang giới thiệu đến khách hàng ... nhấn mạnh việc bạn dùng AI law sẽ mang lại gì?'"
+      },
+      {
+        "id": "DEC-022",
+        "topic": "Owner-approved Mẫu 11 marketing banner across 7 public pages",
+        "value": "After rejection and rollback of R56, public UI refinements R57 and R58 were replaced by Owner-approved Mẫu 11/R59. Desktop banner displays the sentence and inline gold 'Tìm hiểu thêm ↗' with three indicators below. Mobile keeps the same inline link but uses 10.8px text (10.3px at <=350px) and hides indicators; no ×, previous or next buttons. Three accurately scoped marketing messages rotate at 3.8 seconds; reduced-motion pauses auto-rotation. Preserve approved tilted MIHY brand and existing real routes. Applies only to public marketing HTML/CSS/JS and NONPRODUCTION deployment, not legal AI capability acceptance, IAM, customer data, SaaS or SRS baseline.",
+        "authority": "Owner 2026-11-05: 'Ok chốt' after approving Mẫu 11 mobile layout (smaller text, hidden three dots, inline gold CTA). PR #77 merged; dual-host real-browser QA PASS."
       }
     ],
     "risks": [
@@ -1633,8 +1651,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R56 Owner's HTML header design reference integrated into seven public Mihy Law AI Agent routes. Be Vietnam Pro and Header A-inspired white MIHY logo/nav, two small navy/gold banner patterns, mobile shortened secondary copy, dismiss controls, 44px burger and original real destinations. Cloudflare QA version ecab3437-6245-4d09-ba1b-75989345c794 and primary NONPRODUCTION version 0170de1b-1743-4923-91d4-98fb5e2f9134 both 100%, QA_AUTH service binding unchanged. GitHub Actions 41991605264 R56 real Chromium 7 routes x 11 mobile-to-desktop widths on BOTH hosts PASS, R54 regression PASS. SC-015 logged and original SRS frozen. No production, customer legal files or SaaS activation.",
-      "next_action": "After final R56 documentation CI and PR #73 merge, Owner visually reviews the new two header patterns on physical mobile at https://ai-law-web.iaict-platform.workers.dev/; final aesthetic signoff NOT_RUN_OWNER. Keep all other standalone AI Law product-security, Google Drive, IAM, SaaS and production gates in place.",
+      "last_completed_step": "R59 Owner-approved Mẫu 11 public Mihy Law AI Agent header/banner is deployed to QA and primary NONPRODUCTION Cloudflare and merged in GitHub PR #77 (merge commit 991e944f1036a54104c993e1fd7134a143788795). Desktop white sentence + inline gold 'Tìm hiểu thêm ↗', three dots underneath; mobile 10.8px, 10.3px for <=350px, dots hidden; no × or prev/next controls; three messages auto-rotate each 3.8s respecting reduced-motion. Tilted MIHY logo and actual navigation retained. Seven public pages × eight widths real Chromium PASS on BOTH hosts, GitHub Actions 42011652749 and 42011664583 (10/10 jobs PASS); QA Worker version 5ed1b8f6-9706-4300-8b90-bf0d43dc5051 and primary nonprod 03fbcbc1-0a08-4e80-b8af-a89304711298 have identical 18 modules with QA_AUTH service binding unchanged. Browser Rendering desktop 1440×900 and full-page screenshots viewed in this chat but no durable screenshot file saved. R56 design was rejected/reverted via PR #74; R57/#75 and R58/#76 are superseded by approved R59/#77. This is marketing UI only, not production legal AI readiness.",
+      "next_action": "Owner to inspect deployed R59 Mẫu 11 at https://ai-law-web.iaict-platform.workers.dev/ on physical desktop/mobile; design specimen is Owner-approved, but a separate final device/browser release acceptance is not yet recorded. Continue standalone AI Law functional E2E and private storage/IAM/production gates independently. SRS v1.1.15 remains unchanged; do not treat public marketing banner as approval of SaaS, billing or real client legal-data processing.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
