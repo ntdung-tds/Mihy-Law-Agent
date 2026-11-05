@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
   "revision": 65,
-  "updated_at": "2026-11-05T17:57:14.528Z",
+  "updated_at": "2026-11-05T20:23:53.367Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1346,24 +1346,26 @@
       {
         "id": "AL-R0-QA-R65-001",
         "title": "R65 bundled QA account integrity, private credential operator E2E gates and CI preflight",
-        "status": "IN_PROGRESS_CI_QUEUED_LIVE_MULTI_ROLE_BLOCKED",
+        "status": "REVIEW_FIXED_PENDING_FINAL_CI_MULTI_ROLE_BLOCKED",
         "priority": "P0",
         "scope": "Existing isolated nonproduction Cloudflare QA only; testing/runbook and integrity evidence, no infrastructure or API write",
         "tests": {
           "d1_live_readonly": "PASS_11_PRINCIPALS_13_MEMBERSHIPS_2_ACTIVE_VERIFIERS_ZERO_ACTIVE_SESSIONS_ZERO_ORPHANS_ZERO_INVALID_SESSIONS_ZERO_MATTERS",
           "private_bundle_exists_owner_only": "PASS_METADATA_ONLY_NO_SECRET_READ_OR_TRANSFER",
-          "operator_preflight_synthetic": "PASS_PREVIOUS_CI_CLOUDFLARE_CONTRACT_BEFORE_CLEAN_HISTORY; FINAL_CLEAN_HEAD_CI_QUEUED",
-          "operator_live_R40_multi_role": "BLOCKED_VERIFIERS_NOT_ACTIVATED_NO_PRIVATE_OPERATOR",
+          "operator_preflight_synthetic": "PASS_CI_42079616896_ON_PRE_REVIEW_HEAD_9_SUCCESS_21_SKIPPED; NEW_REVIEW_HEAD_REQUIRES_FRESH_CI",
+          "operator_live_R40_multi_role": "BLOCKED_R40_PRIVATE_VERIFIERS_NOT_ACTIVATED",
           "password_good_bad_disabled": "NOT_RUN_ON_LIVE_R40",
           "real_session_rotation_tenant_matter_acl": "NOT_RUN",
           "documented_private_runbook": "PASS_SOURCE_WRITTEN_BRANCH_PR89",
-          "production": "NOT_RUN"
+          "production": "NOT_RUN",
+          "review_second_pass": "FIXED_R65_REVOKED_QA06_TENANT_DENIAL_CI_REAL_CREDENTIAL_BLOCK_COOKIE_FLAGS_DUPLICATE_WORKSPACE_UI_TENANT_AFTER_SWITCH",
+          "qa_d1_readonly_reaudit": "PASS_AGGREGATE_2026_11_06_11_PRINCIPALS_13_MEMBERSHIPS_2_ACTIVE_VERIFIERS_0_ACTIVE_SESSIONS_0_ORPHAN_MEMBERSHIPS_0_QA_MATTERS"
         },
         "evidence": [
           "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/89",
           "Owner-private AI Law Test Evidence Drive document: R65 QA Identity & Role E2E Batch (do not publish ID or URL)"
         ],
-        "notes": "R40 private bundle metadata is owner-only in Drive; no cross-connector credential transfer. R65 operator harness requires safe local 0600 private bundle. After 7 R40 active + 1 disabled inserted idempotently, expected D1 verifier totals 9 active plus 1 disabled including existing QA04 and Owner QA personal verifier; QA10 separate. No live positive sign-in currently demonstrated."
+        "notes": "R40 private bundle metadata is owner-only in Drive; no cross-connector credential transfer. R65 operator harness requires safe local 0600 private bundle. After 7 R40 active + 1 disabled inserted idempotently, expected D1 verifier totals 9 active plus 1 disabled including existing QA04 and Owner QA personal verifier; QA10 separate. No live positive sign-in currently demonstrated. Second code-security review added explicit QA06 revoked-tenant switch denial, CI fail-closed real-login gate, HTTPS cookie attributes, duplicate workspace response check, and QA02 post-switch UI selector refresh; synthetic unit tests added. Final PR HEAD CI required."
       }
     ],
     "features": [
@@ -1982,8 +1984,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R65 staged on PR #89: Cloudflare D1 read-only integrity census PASS; private R40 bundle existence/owner-only metadata PASS; operator-controlled Chromium real-role suite, private mode/identity tests, QA-only read-only SQL and runbook prepared. Public PR branch was rebuilt from sanitized files and force-with-lease moved; credential rotation REQUIRED. No production changes. Full clean-head CI remains queued behind prolonged standalone-browser job; no merge claim.",
-      "next_action": "Obtain SUCCESS for PR #89 clean-head CI, inspect no-secret diffs then merge; use authorized owner-private operator workstation to activate seven active+one disabled R40 QA verifiers without overwriting QA04 or separate owner actor, then run real password/role/tenant/session/MatterACL tests and record evidence. Rotate affected QA-only password due transient public branch history exposure; do not copy private bundle across connectors or deploy production. Owner acceptance last.",
+      "last_completed_step": "R65 one full extra source/security review: initial clean HEAD Actions 42079616896 completed success 9/9 executed, 21 skips. Fixes on PR #89: explicit QA06 revoked tenant deny, fail-closed no real credentials on CI, session cookie HttpOnly/Secure/SameSite, duplicate workspace fail-close, and QA02 browser selector after switching; synthetic regression tests. Cloudflare QA direct read-only recount PASS (11 principals, 13 memberships, 2 active verifiers, 0 active sessions/orphans/matters). No infrastructure or production writes. Must validate final reviewed HEAD CI and merge only after PASS.",
+      "next_action": "Wait for latest reviewed PR #89 head GitHub Actions success and no secret scan issues, then merge source/PCS revision 65 to main. Private R40 safe operator activation and authenticated multi-role/tenant/MatterACL/30m expiry remain blocked, as does QA password rotation following prior public PR assertion; no production deployment or R62 primary site rollout. Owner final acceptance last.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
