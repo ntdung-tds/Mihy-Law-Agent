@@ -62,6 +62,14 @@ def mock_workspace(browser, role):
                        {"email": ACTOR, "role": role, "workspace_type": "organization"})
             return route.fulfill(status=401 if revoked["value"] else 200,
                                  content_type="application/json", body=json.dumps(payload))
+        if path.endswith("/api/qa/workspaces"):
+            # R62 now calls this route even in R61 simulated-role UI smoke.
+            # A synthetic single-workspace response must not be mistaken for live auth.
+            return route.fulfill(status=401 if revoked["value"] else 200,
+                                 content_type="application/json",
+                                 body=json.dumps({"error": "expired"} if revoked["value"] else
+                                                 {"current_tenant_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+                                                  "workspaces": []}))
         if path.endswith("/api/qa/matters"):
             payload = ({"error": "expired"} if revoked["value"] else {"matters": dataset})
             return route.fulfill(status=401 if revoked["value"] else 200,

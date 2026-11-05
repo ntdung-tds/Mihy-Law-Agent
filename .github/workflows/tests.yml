@@ -636,7 +636,7 @@ jobs:
   cloudflare-site-r62:
     # R62: real browser DOM on mobile/desktop with explicitly simulated positive API.
     # Live HTTPS anonymous protection is tested separately, not a positive-login claim.
-    if: github.ref_name == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.head_ref == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.ref_name == 'design/r63-mobile-bottom-navigation' || github.head_ref == 'design/r63-mobile-bottom-navigation'
+    if: github.ref_name == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.head_ref == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.ref_name == 'design/r63-mobile-bottom-navigation' || github.head_ref == 'design/r63-mobile-bottom-navigation' || github.ref_name == 'test/r64-live-qa-session-tenant-gates' || github.head_ref == 'test/r64-live-qa-session-tenant-gates'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -651,3 +651,6 @@ jobs:
         run: python deployment/cloudflare/tests/live_r62_workspace_browser.py
       - name: Regress real nonproduction Cloudflare login and anonymous role boundaries
         run: python deployment/cloudflare/tests/live_r61_qa_auth_browser.py
+      - name: R64 live Cloudflare QA anonymous tenant/session/CSRF on 320/390/430/1440
+        if: github.ref_name == 'test/r64-live-qa-session-tenant-gates' || github.head_ref == 'test/r64-live-qa-session-tenant-gates'
+        run: python deployment/cloudflare/tests/live_r64_qa_browser.py

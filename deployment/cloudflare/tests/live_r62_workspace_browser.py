@@ -29,7 +29,7 @@ def run():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         try:
-            for width in (320, 390, 1440):
+            for width in (320, 390, 430, 1440):
                 state = {"tenant": ORG, "switches": 0}
                 errors = []
                 context = browser.new_context(viewport={"width": width, "height": 850})
