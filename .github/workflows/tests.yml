@@ -474,3 +474,11 @@ jobs:
         run: python deployment/cloudflare/tests/live_mihy_brand_landings.py
       - name: Real staging four editorial landings at 6 widths
         run: python deployment/cloudflare/tests/live_mihy_editorials.py
+      - name: Verify primary QA website mobile hero and homepage rhythm at 11 widths
+        run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_home_r53.py
+      - name: Ensure primary homepage and dual-offering regression at 11 widths
+        run: |
+          AI_LAW_WEBSITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
+          MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_brand_landings.py
+      - name: Ensure primary editorial pages at 6 widths
+        run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_editorials.py
