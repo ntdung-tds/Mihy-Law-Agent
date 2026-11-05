@@ -46,7 +46,7 @@ def check(page,width,route):
   if route=="/":
    assert page.locator(".announcement-sub").is_hidden(),(route,width)
   else:
-   assert page.locator(".detail-announcement-copy").is_hidden(),(route,width)
+   assert page.locator(".detail-announcement-copy").is_visible(),(route,width)  # R58 ticker now displays a mobile-short message
  if width<=970:
   toggle=page.locator('#menu-toggle')
   toggle.click()

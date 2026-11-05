@@ -203,6 +203,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/site_mobile_r55.test.mjs
       - name: Verify R57 unified typography, dual headers and mobile section rhythm
         run: node --test deployment/cloudflare/tests/site_design_r57.test.mjs
+      - name: Verify Owner Mẫu 08 shared rotating header, logo and real destinations
+        run: node --test deployment/cloudflare/tests/site_header_r58.test.mjs
       - name: Verify safe redirects from retired preview hostname
         run: node --test deployment/cloudflare/tests/legacy_redirect.test.mjs
 
@@ -557,4 +559,26 @@ jobs:
       - name: R57 seven pages x eight widths on QA
         run: python deployment/cloudflare/tests/live_mihy_r57.py
       - name: R57 seven pages x eight widths on primary nonproduction
+        run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_r57.py
+
+  cloudflare-site-r58:
+    # Owner-approved Sample 08, real public NONPRODUCTION browser checks.
+    if: github.ref_name == 'design/r58-mihy-header-sample08-rotating' || github.head_ref == 'design/r58-mihy-header-sample08-rotating'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Chromium and Playwright
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: R58 QA sample08 ticker, real links, 7 pages, desktop/mobile, controls
+        run: python deployment/cloudflare/tests/live_mihy_header_r58.py
+      - name: R58 QA preexisting marketing/section regression
+        run: python deployment/cloudflare/tests/live_mihy_r57.py
+      - name: R58 primary nonproduction sample08, mobile, 3.8s controls, all pages
+        run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_header_r58.py
+      - name: R58 primary nonproduction old marketing/section regression
         run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_r57.py

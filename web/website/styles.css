@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
 :root{color-scheme:light;--ink:#17223a;--ink-soft:#34415a;--muted:#69758a;--line:#e6e7eb;--purple:#7754bc;--indigo:#5343aa;--paper:#faf9f6;--white:#fff;--coral:#edb6a1;--max:1220px}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:104px}
@@ -1481,4 +1481,155 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
  .site-page .announcement-copy,.site-page .announcement-action{font-size:11.5px!important}
  .site-page .detail-announcement-brand{font-size:10px!important}
  .site-page .detail-announcement-action{font-size:10.9px!important}
+}
+
+/* R58 — Owner-approved Mẫu 08: three-message navy ticker + white MIHY
+   navigation. Original tilted MIHY brand retained, no fictitious free trial. */
+.site-page .announcement,.site-page .detail-announcement{
+ display:block!important;padding:0!important;min-height:0!important;
+ background:#171233!important;color:#efeaff!important;text-align:left!important;
+ border:0!important;
+}
+.site-page .announcement-inner,.site-page .detail-announcement-inner{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ flex-direction:row!important;flex-wrap:nowrap!important;gap:10px!important;
+ position:relative;min-height:0!important;padding:10px 30px 10px 0!important;
+ font-family:'Be Vietnam Pro',system-ui,sans-serif;
+ font-size:13px!important;line-height:1.5!important;text-align:left!important;
+}
+.site-page .announcement-copy,.site-page .detail-announcement-copy{
+ display:block!important;min-width:0!important;flex:1 1 auto!important;
+ color:#efeaff!important;font-size:13px!important;font-weight:500!important;
+ line-height:1.55!important;letter-spacing:0!important;
+ transition:opacity .35s ease;
+}
+.site-page .announcement-copy .mihy08-full-copy,
+.site-page .detail-announcement-copy .mihy08-full-copy{font-weight:650;color:#fff}
+.site-page .announcement-sub{display:inline!important;font-weight:400!important;color:#ded7ee!important}
+.site-page .mihy08-mobile-copy{display:none!important}
+.site-page .announcement-action,.site-page .detail-announcement-action{
+ display:inline-flex!important;align-items:center!important;justify-content:flex-start!important;
+ gap:3px!important;flex:0 0 auto!important;grid-column:auto!important;
+ margin:0!important;padding:0!important;border:0!important;background:transparent!important;
+ color:#f6c453!important;font-size:12.5px!important;line-height:1.5!important;
+ font-weight:800!important;text-decoration:none!important;white-space:nowrap!important;
+ box-shadow:none!important;border-radius:0!important;
+}
+.site-page .announcement-action:hover,.site-page .detail-announcement-action:hover{text-decoration:underline!important;text-underline-offset:3px}
+.site-page .detail-announcement-brand{
+ display:inline-flex!important;flex:0 0 auto!important;gap:5px!important;align-items:center!important;
+ color:#faf7ff!important;font-size:10px!important;letter-spacing:.055em!important;
+ line-height:1.5!important;font-weight:800!important;white-space:nowrap!important;
+}
+.site-page .detail-announcement-brand>span{font-size:12px!important;color:#ecc2e3!important}
+.site-page :is(.mihy08-prev,.mihy08-next,.mihy08-close){
+ appearance:none;display:grid!important;place-items:center;flex:0 0 auto;
+ border:0!important;box-shadow:none!important;background:transparent!important;
+ color:#c4badb!important;padding:0!important;width:24px;height:30px;
+ font-family:Arial,sans-serif!important;font-size:21px;font-weight:400;line-height:1;
+ cursor:pointer;
+}
+.site-page :is(.mihy08-prev,.mihy08-next,.mihy08-close):hover{color:#f6c453!important}
+.site-page .mihy08-close{
+ position:absolute!important;right:0!important;top:50%!important;transform:translateY(-50%)!important;
+ color:#bcb1d1!important;font-size:19px;
+}
+.site-page .mihy08-dots{display:inline-flex!important;flex:0 0 auto;gap:5px;align-items:center;justify-content:center}
+.site-page .mihy08-dots button{
+ appearance:none;display:block;width:7px;height:7px;min-width:7px;border:0;
+ padding:0;background:#7b7194;border-radius:50%;cursor:pointer;transition:width .2s,background .2s;
+}
+.site-page .mihy08-dots button.on{width:18px;background:#f6c453;border-radius:999px}
+.site-page .announcement[hidden],.site-page .detail-announcement[hidden]{display:none!important}
+
+/* Sample-08 white navigation, still wired to the project's real destinations. */
+.site-page .site-header{background:#fff!important;border-bottom:1px solid #e6e0f5!important;box-shadow:0 3px 15px #17123308}
+.site-page .site-header .header-inner{height:74px;gap:22px}
+.site-page .site-header .brand{gap:12px;align-items:center;min-width:0}
+.site-page .site-header .brand-symbol{
+ width:52px;height:52px;flex:0 0 auto;border-radius:15px;
+ background:#171233;color:#f7e8d5;transform:rotate(-4deg)!important;
+ box-shadow:0 8px 18px #1712332b;
+}
+.site-page .site-header .brand-glyph{font-family:'Playfair Display',Georgia,serif;font-size:32px;letter-spacing:-2px;transform:rotate(4deg)!important}
+.site-page .site-header .glyph-star{font-family:Arial,sans-serif;font-size:15px;right:-9px;top:-7px;color:#f6c453}
+.site-page .site-header .brand-name{
+ display:flex;flex-direction:column;gap:3px;align-items:flex-start;position:static;padding:0;
+ color:#1c1838;font-family:'Be Vietnam Pro',system-ui,sans-serif;
+ font-size:23px;line-height:1.05;letter-spacing:-.02em;font-weight:900;
+}
+.site-page .site-header .brand-name>span{display:block;margin:0;font-size:11px;line-height:1.4;letter-spacing:.10em;font-weight:800;color:#6d4bd8}
+.site-page .site-header .brand-name small{display:none!important}
+.site-page .site-header .desktop-nav{gap:5px;margin-left:auto}
+.site-page .site-header .desktop-nav a{font-size:13px;font-weight:650;color:#2c2757;min-height:41px;padding:10px 9px}
+.site-page .site-header .desktop-nav a:hover,.site-page .site-header .desktop-nav a[aria-current="page"]{background:#f1ecfc;color:#6d4bd8}
+.site-page .site-header .header-actions{gap:10px}
+.site-page .site-header .login-link{font-size:13px;color:#2c2757}
+.site-page .site-header .header-cta{
+ min-height:42px;padding:10px 14px;border-radius:999px;
+ background:#f6c453;color:#171233;font-size:12.5px;font-weight:800;
+ box-shadow:0 4px 12px #eeb32c29;
+}
+.site-page .site-header .header-cta:hover{background:#eeb32c}
+.site-page .site-header .menu-toggle{
+ width:48px;height:48px;border-radius:14px;border:1.5px solid #d9cff7;
+ background:#e9e3fb;color:#4a3d8f;
+}
+.site-page .site-header .mobile-menu:not([hidden]){background:#fff;border-bottom:1px solid #e6e0f5}
+.site-page .site-header .mobile-menu a{font-family:'Be Vietnam Pro',system-ui,sans-serif}
+@media(max-width:1100px) and (min-width:971px){
+ .site-page .site-header .header-inner{gap:12px}
+ .site-page .site-header .desktop-nav a{font-size:11.8px;padding:9px 5px}
+ .site-page .site-header .header-cta{font-size:11.5px;padding:9px 10px}
+}
+@media(max-width:970px){
+ .site-page .site-header .desktop-nav{display:none}
+ .site-page .site-header .menu-toggle{display:grid}
+ .site-page .site-header .header-inner{height:68px}
+ .site-page .site-header .login-link,.site-page .site-header .header-cta{display:none}
+}
+@media(max-width:700px){
+ .site-page .site-header .header-inner{height:66px}
+ .site-page .site-header .brand-symbol{width:44px;height:44px;border-radius:12px}
+ .site-page .site-header .brand-glyph{font-size:27px}
+ .site-page .site-header .glyph-star{font-size:13px}
+ .site-page .site-header .brand-name{font-size:20px}
+ .site-page .site-header .brand-name>span{font-size:10px;letter-spacing:.09em}
+ .site-page .site-header .menu-toggle{width:48px;height:48px}
+ .site-page .detail-announcement-brand{display:none!important}
+ .site-page .announcement-inner,.site-page .detail-announcement-inner{
+  display:grid!important;grid-template-columns:23px minmax(0,1fr) 27px 20px;
+  grid-template-rows:auto auto;grid-template-areas:"prev msg next close" ". link dots .";
+  column-gap:7px!important;row-gap:2px!important;
+  justify-content:stretch!important;align-items:center!important;
+  padding:7px 0!important;min-height:0!important;
+ }
+ .site-page .mihy08-prev{grid-area:prev}
+ .site-page .mihy08-next{grid-area:next}
+ .site-page .mihy08-close{grid-area:close;position:static!important;transform:none!important;width:20px}
+ .site-page .announcement-copy,.site-page .detail-announcement-copy{
+  grid-area:msg;display:block!important;font-size:12px!important;line-height:1.45!important;
+  font-weight:600!important;
+ }
+ .site-page .announcement-copy .mihy08-full-copy,.site-page .detail-announcement-copy .mihy08-full-copy{display:none!important}
+ .site-page .announcement-sub{display:none!important}
+ .site-page .announcement-copy .mihy08-mobile-copy,.site-page .detail-announcement-copy .mihy08-mobile-copy{display:inline!important;color:#fff;font-weight:650}
+ .site-page .announcement-action,.site-page .detail-announcement-action{
+  grid-area:link;display:inline-flex!important;justify-self:start!important;
+  margin:0!important;font-size:11.6px!important;line-height:1.4!important;
+ }
+ .site-page .mihy08-dots{grid-area:dots;gap:3px}
+ .site-page .mihy08-dots button{width:5px;min-width:5px;height:5px}
+ .site-page .mihy08-dots button.on{width:12px}
+ .site-page :is(.mihy08-prev,.mihy08-next){height:29px;width:23px;font-size:20px}
+}
+@media(max-width:359px){
+ .site-page .announcement-copy,.site-page .detail-announcement-copy{font-size:11.5px!important}
+ .site-page .announcement-action,.site-page .detail-announcement-action{font-size:11.2px!important}
+ .site-page .site-header .brand-name{font-size:19px}
+ .site-page .site-header .brand-name>span{font-size:9.5px}
+}
+@media(prefers-reduced-motion:reduce){
+ .site-page .announcement-copy,.site-page .detail-announcement-copy,
+ .site-page .mihy08-dots button{transition:none!important}
 }
