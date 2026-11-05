@@ -1,11 +1,27 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `64` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T17:28:18.813Z`.
+- **PCS revision:** `65` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T20:38:38.233Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
+
+## R65 — bundled QA integrity and operator role E2E suite; real logins BLOCKED (2026-11-06)
+
+**QA security incident containment — 2026-11-06:** Owner requested changing the exposed personal QA credential. The attempted password verifier update was **BLOCKED before execution** by connector safety controls; **password not changed** and previous credential may still create new sessions. A separate authorized D1 action revoked **3** existing unrevoked sessions; subsequent readback confirmed **0** remaining. Rotation must occur through a trusted private administrator/operator path, with old credential denied and new credential accepted; revoke sessions again after reset. A password typed into chat is not ideal as a long-term secret. No plaintext, hashes, subjects or cookie values in GitHub/PCS. RISK-013 stays OPEN. No production action.
+
+
+**Supplementary R65 source/security review — 2026-11-06:** Prior clean-head CI [42079616896](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42079616896) completed **9/9 executed PASS, 21 conditionally skipped**. New review found gaps in R65 operator test assertions (QA06 revoked-membership POST; explicit real-password test prohibition on CI; verifying HttpOnly/Secure/SameSite attributes; duplicate workspace response; post-switch workspace UI) and added targeted code + synthetic regressions on [PR #89](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/89). **Fresh CI for the final reviewed HEAD must pass** before merge. D1 direct aggregate readback unchanged (11 principals, 13 memberships, 2 active verifiers, 0 active sessions, 0 orphan memberships, 0 matter records). No real positive-role E2E, password rotation or MatterACL fixture done; they stay BLOCKED/NOT_RUN. Production untouched.
+
+
+- **Owner:** requested one bundled next task. SRS v1.1.15 frozen, no production deployment or real case files.
+- **Live D1 read-only:** 11 principals (10 active/1 disabled), 13 memberships (12 active/1 revoked), 2 active verifiers, 0 active sessions, 0 orphan memberships, 0 invalid active sessions, 0 QA matter catalog records. Verified no D1 writes. The R40 Owner-private credential bundle exists on Drive and has owner-only metadata; it was **not fetched/transferred across apps**. After private R40 activation expect 9 active + 1 disabled verifiers (including QA04 and the extra Owner-created personal QA account).
+- **Code on [PR #89](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/89):** secure operator-only `r65_live_role_e2e.py` (real Playwright QA roles, disabled login, tenant switch, SID rotation, logout), synthetic preflight tests, aggregate D1 audit SQL and private-operator runbook. **R40 positive live browser test remains BLOCKED/NOT_RUN**, because remaining QA verifiers not activated and no authorized private operator channel; MatterACL positive/negative requires approved synthetic fixtures. R65 is not production IAM.
+- **CI:** R65 synthetic preflight initially PASS on an earlier PR head; cleaned final branch CI is **QUEUED**, with unrelated GitHub standalone-browser installation running unusually long. Do **not merge** until clean-head CI succeeds; do not label real positive E2E PASS.
+- **Security remediation:** A QA-only password literal was inadvertently included in a public draft test assertion. It was removed; the active PR branch was force-with-lease rewritten from clean `main` plus sanitized code. Existing PR refs/cache may retain historical content; affected nonproduction QA password **must be rotated privately**. No credential value is in final PR diff or PCS, and no activation/rotation was falsely claimed.
+- **Evidence:** Owner-private AI Law Test Evidence Google Doc for R65, verified private; public PCS includes no private Drive ID, credential, SID or subject.
+- **Next:** finish CI/merge safe PR, activate private R40 synthetic QA verifiers through trusted operator, run actual multi-role mobile/desktop browser/MatterACL/expiry tests, fix and retest until PASS, then Owner final acceptance. No production promotion.
 
 ## R64 — Owner accepted R63; R62 QA rollout + real anonymous Chromium PASS; positive IAM E2E gated (2026-11-06)
 
