@@ -368,4 +368,6 @@ jobs:
           python -m pip install 'playwright==1.55.0'
           python -m playwright install --with-deps chromium
       - name: Verify two MihiAgent delivery cards, navigation and mobile boundaries at 11 widths
-        run: python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
+        run: |
+          python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
+          AI_LAW_WEBSITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
