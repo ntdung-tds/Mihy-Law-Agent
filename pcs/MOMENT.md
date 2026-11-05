@@ -1,10 +1,18 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `55` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T05:05:30.374Z`.
+- **PCS revision:** `56` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T06:24:25.640Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R54 — Owner mobile review: gold text CTA, left banners and grouped © 2026
+
+- **Owner screenshots:** The new home announcement looked like an oversized framed pill; restore the previously accepted full “Công nghệ đồng hành cùng tư duy pháp lý. Khám phá điều làm nên khác biệt.” and make “Khám phá lợi ích ↗” a bold **warm-gold plain-text link**, left aligned. Landing-page top “MIHY AGENT ⚖ / Khám phá hai giải pháp” block was visually too tall and centered; make it short, left-aligned and matched to home. Mobile footer had “©” at far left and year “2026” at far right; fix grouping. Tighten the gap between logo/header and next hero section, increase tiny mobile body/FAQ/footer fonts.
+- **Code:** Public `web/website/index.html` and six existing `about.html`, `solutions.html`, `features.html`, `security.html`, `private.html`, `subscription.html` updated with standardized strip `detail-announcement-inner`. All pages contain one `footer-copyright` containing the full **© 2026 Mihy Agent** unit, with disclaimer separate. Shared `styles.css` R54 overrides for 320–700px eliminate unwanted CTA pill borders, keep real yellow link and left alignment, compact layout and raise text sizes. JS year update continues normally. No changes to protected `/app`, `/login`, R44 session, R46 D1 ACL, billing, legal AI or SRS.
+- **Real QA:** Staging Cloudflare `ai-law-web-qa` version `016c64b3-b7f6-43d9-8e20-7f974d3f8ff6`, primary NONPRODUCTION `ai-law-web` version `a8217511-8907-4555-8536-79b7a0683642`, both 100% rolled out with `QA_AUTH -> ai-law-standalone-cf-qa` unchanged. New static contract `site_mobile_r54.test.mjs`, Chromium `live_mihy_mobile_r54.py` covers 39 real public page/viewport combinations plus old suites. One overly strict test initially failed because `innerText` includes flex-item newlines and another checked `display:inline` in a flex-column (blockification); tests corrected to inspect actual grouped geometry and visual text-link appearance, no product code rollback. GitHub Actions staging `41979459057` **10/10 PASS**. Dual-host CI `41979935336` queued at this checkpoint; verify current head CI before merge.
+- **Scope and gates:** `SC-013` logged in `srs_changed.md`, SRS v1.1.15 frozen. No real customer documents, production releases, SaaS payments, unsupported capabilities or official Facebook fanpage claim. Owner physical-device final visual review `NOT_RUN_OWNER`.
+- **PR:** https://github.com/ntdung-tds/Mihy-Law-Agent/pull/71
 
 ## R53 — Owner mobile screenshots: rebalance hero, tighten spacing, enrich home
 
