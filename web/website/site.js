@@ -47,6 +47,7 @@
      arrow.setAttribute('aria-hidden','true');arrow.textContent='↗';
      link.replaceChildren(document.createTextNode(s.label+' '),arrow);
      dots.forEach((dot,i)=>{dot.classList.toggle('on',i===index);dot.setAttribute('aria-pressed',String(i===index));});
+     if(!mq.matches&&typeof copy.animate==='function')copy.animate([{opacity:0.4},{opacity:1}],{duration:350,easing:'ease-out'});
    }
    function stop(){if(timer!==null){clearInterval(timer);timer=null;}}
    function start(){if(timer!==null||mq.matches||document.hidden||banner.hidden)return;timer=setInterval(()=>show(index+1),3800);}
