@@ -1,10 +1,18 @@
 # AI Law — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `49` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T01:04:00Z`.
+- **PCS revision:** `50` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T01:51:03.031Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R49 — two MihiAgent offering options prominently on the homepage (marketing only)
+
+- **Owner direction:** On the real customer-facing AI Law homepage, distinguish **MihiAgent customer-managed/private deployment** (MihiAgent supplies/implements the solution; customer controls infrastructure, data, user administration and pays AI-provider usage fees) from **MihiAgent-operated AI Law subscriptions** (planned tier/usage-limited SaaS service). This updates the marketing presentation; standalone-first execution remains the priority and SaaS implementation remains deferred.
+- **Implementation:** New responsive, contrasted two-card `#solutions` section directly after homepage hero; desktop/mobile header navigation and footer links; hero prompt, detailed `#faq-deployment` / `#faq-saas` anchors and FAQ. No invented fixed costs, quotas, release dates, availability or guarantees. SaaS card explicitly says `Đang phát triển` and `Dịch vụ chưa mở bán`.
+- **Cloudflare QA:** Staging `ai-law-web-qa` redeployed with `QA_AUTH` binding intact, version `fba9d444-c7c9-4fca-8afb-c09a0413c109`. Real Cloudflare Browser Rendering readback confirmed two cards, disclaimer and login. R49 Chromium 11 viewport widths and Cloudflare contract tests PASS on PR CI run `41950720221`. Nonproduction primary `ai-law-web` redeployed version `581d7523-19a1-4914-a3cd-6d52c8410041` with same binding; real Cloudflare HTML/mobile readback PASS; post-promotion two-host Chromium CI run pending at checkpoint.
+- **No backend scope change:** `/login`, protected `/app`, R44 auth, R46 D1 matter register, external Drive OAuth and legal AI workflows unchanged. Existing SRS v1.1.15 remains private/unchanged. No payment, billing, subscription accounts, customer secrets or production deployment. Owner mobile visual signoff `NOT_RUN_OWNER`.
+- **PR:** https://github.com/ntdung-tds/Mihy-Law-Agent/pull/66
 
 ## R48 — customer-benefit public homepage, real mobile visual overflow fixes
 
