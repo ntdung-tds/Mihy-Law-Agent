@@ -94,6 +94,7 @@ def assert_workspaces(actual, actor):
     expected = {row["tenant_id"]: row["role_key"] for row in actor["memberships"]
                 if row["status"] == "active"}
     got = {row["tenant_id"]: row["role"] for row in actual["workspaces"]}
+    assert len(got) == len(actual["workspaces"]), "DUPLICATE_WORKSPACE"
     assert got == expected, "MEMBERSHIP_ISOLATION"
     assert actual["current_tenant_id"] in expected, "SESSION_TENANT_NOT_ACTIVE"
     return expected
@@ -138,6 +139,12 @@ def verify_account(playwright, browser, actor_id, actor, private, width):
 
         old_sid = get_sid(context)
         assert old_sid, "MISSING_HTTPONLY_SESSION"
+        session_cookies = [c for c in context.cookies(QA_URL)
+                           if c["name"] == "al_qa_session"]
+        assert len(session_cookies) == 1, "SESSION_COOKIE_DUPLICATE"
+        assert session_cookies[0].get("httpOnly") is True, "SESSION_COOKIE_NOT_HTTPONLY"
+        assert session_cookies[0].get("secure") is True, "SESSION_COOKIE_NOT_SECURE"
+        assert session_cookies[0].get("sameSite") == "Strict", "SESSION_COOKIE_SAMESITE"
         # Each blocked tenant must leave both SID and current workspace intact.
         deny_tenant = OTHER_ORG if actor_id != "QA-09" else ORG
         assert deny_tenant not in memberships, "EXPECTED_FOREIGN_TENANT"
