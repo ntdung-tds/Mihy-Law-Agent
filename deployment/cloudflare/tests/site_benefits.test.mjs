@@ -52,7 +52,7 @@ test('MihiAgent offers exactly two prominent, distinct delivery models',()=>{
  for(const phrase of [
    'HAI GIẢI PHÁP TỪ MIHIAGENT','MihiAgent cung cấp giải pháp',
    'Hệ thống của bạn.','Quyền chủ động của bạn.',
-   'thanh toán phí sử dụng AI','theo mức dùng','phân quyền và kiểm soát dữ liệu',
+   'Thanh toán phí sử dụng AI','theo mức dùng','phân quyền và kiểm soát dữ liệu',
    'DỊCH VỤ AI LAW THEO GÓI','Chọn gói và sử dụng.',
    'hạn mức sử dụng','Đang phát triển','Dịch vụ chưa mở bán',
    'gói, mức phí và hạn mức sẽ được công bố'
