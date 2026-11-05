@@ -97,6 +97,24 @@ class OperatorPreflightTests(unittest.TestCase):
         self.assertIn('"REVOKED_MEMBERSHIP_ALLOWED"', src)
         self.assertIn('"REVOKED_SWITCH_ROTATED_SID"', src)
 
+    def test_workspace_response_rejects_revoked_and_duplicate_rows(self):
+        actor = next(a for a in self.inv["accounts"] if a["id"] == "QA-06")
+        active = next(m for m in actor["memberships"] if m["status"] == "active")
+        revoked = next(m for m in actor["memberships"] if m["status"] == "revoked")
+        response = {"current_tenant_id": active["tenant_id"],
+                    "workspaces": [{"tenant_id": active["tenant_id"],
+                                    "role": active["role_key"]}]}
+        self.assertEqual(module.assert_workspaces(response, actor),
+                         {active["tenant_id"]: active["role_key"]})
+        response["workspaces"].append({"tenant_id": revoked["tenant_id"],
+                                       "role": revoked["role_key"]})
+        with self.assertRaises(AssertionError):
+            module.assert_workspaces(response, actor)
+        response["workspaces"][-1]["tenant_id"] = active["tenant_id"]
+        with self.assertRaises(AssertionError) as e:
+            module.assert_workspaces(response, actor)
+        self.assertEqual(str(e.exception), "DUPLICATE_WORKSPACE")
+
     def test_live_target_is_fixed_and_secret_source_is_not_repo(self):
         self.assertEqual(module.QA_URL,
                          "https://ai-law-web-qa.iaict-platform.workers.dev")
