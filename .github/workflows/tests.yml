@@ -201,6 +201,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/site_mobile_r54.test.mjs
       - name: Verify R55 mobile micro-banners and the two compact delivery links
         run: node --test deployment/cloudflare/tests/site_mobile_r55.test.mjs
+      - name: Verify R57 unified typography, dual headers and mobile section rhythm
+        run: node --test deployment/cloudflare/tests/site_design_r57.test.mjs
       - name: Verify safe redirects from retired preview hostname
         run: node --test deployment/cloudflare/tests/legacy_redirect.test.mjs
 
@@ -538,3 +540,21 @@ jobs:
         run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_mobile_r55.py
       - name: Primary R54 gold text, grouped copyright and header spacing regression
         run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_mobile_r54.py
+
+  cloudflare-site-r57:
+    # Real Chromium screenshots/geometry on both NONPRODUCTION public Workers.
+    if: github.ref_name == 'design/r57-mobile-consistency-and-headers' || github.head_ref == 'design/r57-mobile-consistency-and-headers'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Chromium
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: R57 seven pages x eight widths on QA
+        run: python deployment/cloudflare/tests/live_mihy_r57.py
+      - name: R57 seven pages x eight widths on primary nonproduction
+        run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_r57.py
