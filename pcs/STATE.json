@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 64,
-  "updated_at": "2026-11-05T17:28:18.813Z",
+  "revision": 65,
+  "updated_at": "2026-11-05T17:57:14.528Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1342,6 +1342,28 @@
           "Owner-private AI Law Test Evidence folder; R64 Google Docs evidence (do not publish credential, document id or private URL in public PCS)"
         ],
         "notes": "The nonproduction primary ai-law-web shares QA_AUTH backend with ai-law-web-qa, so backend R62 was visible to both site frontends; only R63 visual modules promoted to primary. The private R40 verifier bundle is not imported, 2 active QA verifiers exist after user-provided QA actor creation, multi-role activation remains BLOCKED; never claim full E2E."
+      },
+      {
+        "id": "AL-R0-QA-R65-001",
+        "title": "R65 bundled QA account integrity, private credential operator E2E gates and CI preflight",
+        "status": "IN_PROGRESS_CI_QUEUED_LIVE_MULTI_ROLE_BLOCKED",
+        "priority": "P0",
+        "scope": "Existing isolated nonproduction Cloudflare QA only; testing/runbook and integrity evidence, no infrastructure or API write",
+        "tests": {
+          "d1_live_readonly": "PASS_11_PRINCIPALS_13_MEMBERSHIPS_2_ACTIVE_VERIFIERS_ZERO_ACTIVE_SESSIONS_ZERO_ORPHANS_ZERO_INVALID_SESSIONS_ZERO_MATTERS",
+          "private_bundle_exists_owner_only": "PASS_METADATA_ONLY_NO_SECRET_READ_OR_TRANSFER",
+          "operator_preflight_synthetic": "PASS_PREVIOUS_CI_CLOUDFLARE_CONTRACT_BEFORE_CLEAN_HISTORY; FINAL_CLEAN_HEAD_CI_QUEUED",
+          "operator_live_R40_multi_role": "BLOCKED_VERIFIERS_NOT_ACTIVATED_NO_PRIVATE_OPERATOR",
+          "password_good_bad_disabled": "NOT_RUN_ON_LIVE_R40",
+          "real_session_rotation_tenant_matter_acl": "NOT_RUN",
+          "documented_private_runbook": "PASS_SOURCE_WRITTEN_BRANCH_PR89",
+          "production": "NOT_RUN"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/89",
+          "Owner-private AI Law Test Evidence Drive document: R65 QA Identity & Role E2E Batch (do not publish ID or URL)"
+        ],
+        "notes": "R40 private bundle metadata is owner-only in Drive; no cross-connector credential transfer. R65 operator harness requires safe local 0600 private bundle. After 7 R40 active + 1 disabled inserted idempotently, expected D1 verifier totals 9 active plus 1 disabled including existing QA04 and Owner QA personal verifier; QA10 separate. No live positive sign-in currently demonstrated."
       }
     ],
     "features": [
@@ -1575,6 +1597,12 @@
         "topic": "Owner accepted mobile navigation R63 and authorized bounded R64 QA login/session/permissions batch",
         "value": "Owner has accepted R63 mobile UX. R64 approved: deploy previously merged R62 hardened QA session/backend and site modules to isolated Cloudflare QA, test real anonymous route guards and 320/390/430/1440 Chromium; promote only Owner-approved R63 HTML/CSS to existing public-facing NONPRODUCTION ai-law-web while retaining marketing UI and service binding. Real role-based sign-in, tenant switches, revoked MatterACL and private QA verifier activation remain separate test/credential gates; no production or legal customer data.",
         "authority": "Owner 2026-11-06: 'Đã ok, bước tiếp theo là gì' followed by 'Ok, làm luôn đi' for R64 plan."
+      },
+      {
+        "id": "DEC-028",
+        "topic": "R65 bundling, private-operator-only positive QA role gates",
+        "value": "Owner requested grouping the next AI Law tasks. Deliver QA-only read-only D1 census, private-bundle validation, real-role Chromium operator harness, test coverage and evidence. No copying private R40 credentials between Drive and Cloudflare connectors, no unapproved password default, no production or SRS scope change. Inaccessible credential activation and positive live E2E must be recorded BLOCKED/NOT_RUN; Owner final acceptance mandatory.",
+        "authority": "Owner 2026-11-06: 'Bước tiếp theo, gộp task nhé' after R64 checkpoint."
       }
     ],
     "risks": [
@@ -1673,6 +1701,13 @@
         "title": "POC1 single Word-result verifier and DOCX generators had mismatched safety gates / false STATIC_PASS",
         "status": "MITIGATED_IN_SCOPED_POC",
         "mitigation": "4 reproduced red-green CI cycles (96→99→103→105 tests); final 105/105 GitHub Actions success; R12 synthetic kit CRC and one-page renders inspected. True Word desktop UI and application E2E remain NOT_RUN."
+      },
+      {
+        "id": "RISK-013",
+        "level": "HIGH",
+        "title": "Transient QA-only password literal exposed in a public PR branch test assertion",
+        "status": "BRANCH_HISTORY_REWRITTEN_ROTATION_PENDING",
+        "mitigation": "Removed literal, rebuilt R65 branch history from main with sanitized files and force-with-lease moved PR head to clean commits. Old GitHub PR refs or caches cannot be guaranteed purged; rotate affected nonproduction QA password via approved private mechanism. No password value in PCS, GitHub diff or Drive evidence."
       }
     ],
     "artifacts": [
@@ -1927,12 +1962,28 @@
       {
         "path": "private/AI Law Test Evidence/R64 QA evidence Google Doc",
         "visibility": "OWNER_PRIVATE_GOOGLE_DRIVE_RECORD_NOT_IN_REPOSITORY"
+      },
+      {
+        "path": "deployment/cloudflare/tools/r65_live_role_e2e.py",
+        "visibility": "PUBLIC_SAFE_SOURCE_NO_SECRETS_PENDING_CI"
+      },
+      {
+        "path": "deployment/cloudflare/tests/test_r65_operator_preflight.py",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_TEST_ONLY_PENDING_CI"
+      },
+      {
+        "path": "deployment/cloudflare/tests/r65_qa_d1_readonly_audit.sql",
+        "visibility": "PUBLIC_SAFE_AGGREGATE_SQL"
+      },
+      {
+        "path": "deployment/cloudflare/QA_R65_OPERATOR_RUNBOOK.md",
+        "visibility": "PUBLIC_SAFE_OPERATOR_INSTRUCTIONS"
       }
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R64: Owner accepted R63 mobile nav; QA backend deployed R62 b6bf1e4b and QA site 53379c01, 100% each; primary NONPRODUCTION R63 HTML/CSS UI-only at 670463d4 100%. All Worker module/binding readbacks PASS. PR #87 merged c44d76387d8b62f7eb57c16892d9349fa10150d1; Actions 42072937167 completed/success 10/10 executed, 20 skips. Real HTTPS anonymous Chromium 320/390/430/1440 PASS, positive roles still NOT_RUN. Evidence saved in Owner-private Google Drive AI Law Test Evidence. No production deploy.",
-      "next_action": "Use authorized private QA-credential/operator channel to activate remaining synthetic QA account verifiers from Owner-private R40 bundle without overwriting existing QA04 or new Owner-controlled QA actor; test full live mobile/password multi-role session, logout, expiry, revoked accounts, tenant switch SID rotation, MatterACL and negative cross-tenant cases in Chromium; after live QA PASS optionally promote R62 site modules to ai-law-web NONPRODUCTION, then Owner final acceptance. Do not bypass connector safety or deploy production.",
+      "last_completed_step": "R65 staged on PR #89: Cloudflare D1 read-only integrity census PASS; private R40 bundle existence/owner-only metadata PASS; operator-controlled Chromium real-role suite, private mode/identity tests, QA-only read-only SQL and runbook prepared. Public PR branch was rebuilt from sanitized files and force-with-lease moved; credential rotation REQUIRED. No production changes. Full clean-head CI remains queued behind prolonged standalone-browser job; no merge claim.",
+      "next_action": "Obtain SUCCESS for PR #89 clean-head CI, inspect no-secret diffs then merge; use authorized owner-private operator workstation to activate seven active+one disabled R40 QA verifiers without overwriting QA04 or separate owner actor, then run real password/role/tenant/session/MatterACL tests and record evidence. Rotate affected QA-only password due transient public branch history exposure; do not copy private bundle across connectors or deploy production. Owner acceptance last.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1966,7 +2017,8 @@
         "R61 2026-11-05: Cross-app credential transfer for new Cloudflare QA accounts was blocked by tool safety controls; no new verifier records were inserted. D1 remains 10 synthetic principals, 12 memberships, 1 active QA login verifier, zero matter catalog records; full positive role-account Chromium E2E and TC12A/B NOT_RUN.",
         "R62 2026-11-05: Attempt to publish merged authentication source through Cloudflare connector was blocked by tool safety; read-back confirms backend d22f928f, site QA ea55af9f, primary nonproduction 71f406a3 remain previous R61/R44 versions. Public source/test CI PASS 30/30, but R62 live Cloudflare remains BLOCKED and multi-account real sign-in NOT_RUN.",
         "R63 2026-11-05: QA UI deployed and source readback PASS, but Browser Rendering actual live test was HTTP429; Owner physical mobile acceptance and QA positive login NOT_RUN. Live Cloudflare backend/site do not yet run R62 authentication/workspace source, so R62 IAM feature acceptance remains BLOCKED.",
-        "R64 2026-11-06: Cloudflare QA R62 backend/site code + primary NONPRODUCTION R63 UI source deployed; real Chromium anonymous boundaries PASS (Actions 42072937167). D1 has only 2 active verifiers (1 existing QA04 and 1 Owner-controlled actor) of 11 principals, so saved R40 role accounts still NOT activated. Real multi-role password sign-in, tenant switch/MatterACL HTTP E2E, 30-minute expiry, Owner R64 acceptance remain NOT_RUN/BLOCKED. Browser Rendering via CF returned HTTP429. Primary NONPRODUCTION shares backend with QA; production unchanged."
+        "R64 2026-11-06: Cloudflare QA R62 backend/site code + primary NONPRODUCTION R63 UI source deployed; real Chromium anonymous boundaries PASS (Actions 42072937167). D1 has only 2 active verifiers (1 existing QA04 and 1 Owner-controlled actor) of 11 principals, so saved R40 role accounts still NOT activated. Real multi-role password sign-in, tenant switch/MatterACL HTTP E2E, 30-minute expiry, Owner R64 acceptance remain NOT_RUN/BLOCKED. Browser Rendering via CF returned HTTP429. Primary NONPRODUCTION shares backend with QA; production unchanged.",
+        "R65 2026-11-06: QA D1 has 2 active verifiers, R40 private bundle remains owner-private in Drive and not activated on Cloudflare; positive multi-role login, session rotation, revoked/disabled and MatterACL remain BLOCKED/NOT_RUN. Cleaned PR #89 CI is QUEUED due GitHub standalone-browser job; source not merged. QA-only password exposed transiently in public PR commit history requires rotation, force rewriting active branch does not guarantee GitHub cache deletion."
       ]
     },
     "policy": {
