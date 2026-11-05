@@ -11,7 +11,8 @@ GEOMETRY_JS=r"""() => {
  const width=document.documentElement.clientWidth;
  const cssSelectors=['#hero-title','.hero-buttons .button','.hero-visual .product-window',
  '.section-heading h2','.feature-card','.workspace-copy h2','.workspace-notebook',
- '.cta-panel h2','.cta-panel>a'];
+ '.cta-panel h2','.cta-panel>a','.solution-card','.solution-card h3',
+ '.solution-action','.solution-intro h2'];
  const bad=[];
  for(const selector of cssSelectors){
   for(const el of document.querySelectorAll(selector)){
@@ -23,7 +24,7 @@ GEOMETRY_JS=r"""() => {
   }
  }
  for(const selector of ['#hero-title','.hero-buttons .button','.cta-panel h2',
-   '.workspace-copy h2','.section-heading h2']){
+   '.workspace-copy h2','.section-heading h2','.solution-card h3','.solution-intro h2']){
   for(const el of document.querySelectorAll(selector)){
    const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
    let n;
@@ -58,6 +59,13 @@ def run():
    page.wait_for_timeout(180)
    text=page.locator('#hero-title').inner_text()
    assert 'Bớt việc lặp lại.' in text,(width,text)
+   assert page.locator('.solution-card').count()==2
+   assert page.locator('.solution-private').is_visible()
+   assert page.locator('.solution-service').is_visible()
+   assert page.locator('#solutions').inner_text().count('MihiAgent')>=2
+   assert 'Dịch vụ chưa mở bán' in page.locator('.solution-service').inner_text()
+   assert page.locator('.solution-private .solution-action').get_attribute('href')=='#faq-deployment'
+   assert page.locator('.solution-service .solution-action').get_attribute('href')=='#faq-saas'
    assert page.locator('.feature-card').count()==3
    assert page.locator('.footer-release-note').count()==1
    assert page.locator('text=Có cần đăng nhập để dùng chức năng không?').count()==0
@@ -74,9 +82,14 @@ def run():
    if width<=970:
     page.locator('#menu-toggle').click()
     assert page.locator('#mobile-menu').is_visible()
-    page.locator('#mobile-menu a[href="#features"]').click()
+    page.locator('#mobile-menu a[href="#solutions"]').click()
     assert page.locator('#mobile-menu').is_hidden()
    assert not errors,('JS errors',width,errors)
+   if width<=700:
+    for card in page.locator('.solution-card').all():
+     box=card.bounding_box()
+     assert box['width']>=width-65,('offering card too narrow',width,box)
+     assert box['x']>=0 and box['x']+box['width']<=width+2,('offering clipped',width,box)
    print('R48 PASS visual mobile geometry',width,'px',flush=True)
    ctx.close()
   browser.close()
