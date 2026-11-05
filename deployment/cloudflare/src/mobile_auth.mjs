@@ -36,17 +36,58 @@ async function allowAttempt(db,install,key,now){
   return Number(row?.attempts||0)<=10;
 }
 export const COOKIE_SESSION_SQL=[
- "SELECT s.user_id,s.tenant_id,v.email,m.role_key,t.kind FROM qa_sessions s",
+ "SELECT s.user_id,s.tenant_id,s.subject,s.expires_at,v.email,m.role_key,t.kind FROM qa_sessions s",
  "JOIN qa_principals p ON p.installation_id=s.installation_id AND p.user_id=s.user_id AND p.status='active'",
  "JOIN qa_memberships m ON m.installation_id=s.installation_id AND m.tenant_id=s.tenant_id AND m.user_id=s.user_id AND m.status='active'",
  "JOIN qa_tenants t ON t.installation_id=s.installation_id AND t.tenant_id=s.tenant_id",
- "JOIN qa_login_verifiers v ON v.installation_id=s.installation_id AND v.user_id=s.user_id AND v.status='active'",
- "WHERE s.installation_id=? AND s.sid=? AND s.revoked_at IS NULL AND s.expires_at>? LIMIT 1"
+ "JOIN qa_login_verifiers v ON v.installation_id=s.installation_id AND v.user_id=s.user_id AND v.subject=s.subject AND v.status='active'",
+ "WHERE s.installation_id=? AND s.sid=? AND s.issuer=? AND s.revoked_at IS NULL AND s.expires_at>? LIMIT 1"
 ].join(" ");
 export async function mobileSession(req,env,now){
   const sid=getCookie(req);if(!sid)return null;
-  const p=await env.DB.prepare(COOKIE_SESSION_SQL).bind(env.INSTALLATION_ID,sid,now).first();
+  const p=await env.DB.prepare(COOKIE_SESSION_SQL).bind(env.INSTALLATION_ID,sid,env.JWT_ISSUER,now).first();
   return p?{sid,...p}:null;
+}
+// Bound to a verified QA cookie session, not an arbitrary caller-selected tenant.
+const WORKSPACES_SQL=[
+ "SELECT m.tenant_id,m.role_key,t.kind FROM qa_memberships m",
+ "JOIN qa_tenants t ON t.installation_id=m.installation_id AND t.tenant_id=m.tenant_id",
+ "WHERE m.installation_id=? AND m.user_id=? AND m.status='active'",
+ "ORDER BY t.kind DESC,m.tenant_id LIMIT 20"
+].join(" ");
+async function workspaces(req,env,now){
+  try{
+    const p=await mobileSession(req,env,now);if(!p)return deny();
+    const rows=await env.DB.prepare(WORKSPACES_SQL).bind(env.INSTALLATION_ID,p.user_id).all();
+    return json(200,{current_tenant_id:p.tenant_id,workspaces:(rows.results||[]).map(w=>({
+      tenant_id:w.tenant_id,workspace_type:w.kind,role:w.role_key
+    }))});
+  }catch{return json(503,{error:"Dịch vụ QA tạm thời không khả dụng."});}
+}
+const SWITCH_SQL=[
+ "UPDATE qa_sessions SET sid=?,tenant_id=?",
+ "WHERE installation_id=? AND sid=? AND issuer=? AND subject=? AND user_id=? AND tenant_id=?",
+ "AND revoked_at IS NULL AND expires_at>?",
+ "AND EXISTS(SELECT 1 FROM qa_memberships m WHERE m.installation_id=?",
+ "AND m.tenant_id=? AND m.user_id=? AND m.status='active')"
+].join(" ");
+async function switchWorkspace(req,env,now){
+  if(!sameOrigin(req)||!req.headers.get("Content-Type")?.startsWith("application/json")||
+     Number(req.headers.get("Content-Length")||0)>256)return reject();
+  let data;try{const raw=await req.text();if(raw.length>256)return reject();data=JSON.parse(raw);}catch{return reject();}
+  if(!data||!UUID.test(data.tenant_id||""))return reject();
+  try{
+    const p=await mobileSession(req,env,now);if(!p)return deny();
+    // Rotate the cookie/session ID atomically so old tabs cannot keep a previous tenant session.
+    const rotated=crypto.randomUUID();
+    const changed=await env.DB.prepare(SWITCH_SQL).bind(
+      rotated,data.tenant_id,env.INSTALLATION_ID,p.sid,env.JWT_ISSUER,p.subject,
+      p.user_id,p.tenant_id,now,env.INSTALLATION_ID,data.tenant_id,p.user_id
+    ).run();
+    if(changed.meta?.changes!==1)return json(404,{error:"Không tìm thấy không gian được phép truy cập."});
+    const seconds=Math.max(1,Math.min(SESSION_LIFETIME,Number(p.expires_at)-now));
+    return json(200,{ok:true},{"Set-Cookie":setCookie(rotated,seconds)});
+  }catch{return json(503,{error:"Không thể chuyển không gian lúc này."});}
 }
 async function login(req,env,now){
   if(!sameOrigin(req)||!req.headers.get("Content-Type")?.startsWith("application/json")||Number(req.headers.get("Content-Length")||0)>MAX_BODY)return reject();
@@ -97,6 +138,8 @@ export async function mobileApi(req,env,opts={}){
   const path=new URL(req.url).pathname,now=opts.now??Math.floor(Date.now()/1000);
   if(path==="/api/qa/login"&&req.method==="POST")return login(req,env,now);
   if(path==="/api/qa/session"&&req.method==="GET")return me(req,env,now);
+  if(path==="/api/qa/workspaces"&&req.method==="GET")return workspaces(req,env,now);
+  if(path==="/api/qa/switch-workspace"&&req.method==="POST")return switchWorkspace(req,env,now);
   if(path==="/api/qa/logout"&&req.method==="POST")return logout(req,env,now);
   return json(404,{error:"Không tìm thấy."});
 }

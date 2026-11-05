@@ -10,13 +10,16 @@
   };
   // Invalidate previously rendered matter metadata as soon as the server revokes access.
   // This is client-side privacy cleanup, not an authorization decision.
-  function sessionExpired(){
+  function scrubMatters(){
     matters=[];
     list.replaceChildren();
     const recent=$('#recent-documents');if(recent)recent.replaceChildren();
     for(const selector of ['#matter-total','#nav-matter-count','#dashboard-matter-count']){
       const counter=$(selector);if(counter)counter.textContent='0';
     }
+  }
+  function sessionExpired(){
+    scrubMatters();
     note('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.',true);
     location.replace('/login');
   }
@@ -95,5 +98,6 @@
   search.addEventListener('input',show);
   $('#matter-refresh').addEventListener('click',load);
   window.addEventListener('ai-law:documents-open',load);
+  window.addEventListener('ai-law:workspace-switch',scrubMatters);
   load();
 })();

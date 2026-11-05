@@ -21,7 +21,7 @@ import { WORKSPACE_SESSION } from './workspace_session.mjs';
 import { WORKSPACE_MATTERS } from './workspace_matters.mjs';
 
 const AUTH_ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
-const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters']);
+const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/workspaces','/api/qa/switch-workspace']);
 const privateAssets=new Map([
  ['/styles.css',[WORKSPACE_CSS,'text/css; charset=utf-8']],
  ['/app.js',[WORKSPACE_JS,'application/javascript; charset=utf-8']],
@@ -106,9 +106,9 @@ export async function handleSite(req,env){
   return respond(body,type,200,{publicPage:true});
  }
  if(API.has(path)){
-  if((path==='/api/qa/session'&&req.method!=='GET') ||
+  if((['/api/qa/session','/api/qa/workspaces'].includes(path)&&req.method!=='GET') ||
     (path==='/api/qa/matters'&&!['GET','POST'].includes(req.method)) ||
-    (!['/api/qa/session','/api/qa/matters'].includes(path)&&req.method!=='POST'))return missing();
+    (['/api/qa/login','/api/qa/logout','/api/qa/switch-workspace'].includes(path)&&req.method!=='POST'))return missing();
   try{return await relay(req,env,path);}catch{return unavailable();}
  }
  if(req.method==='GET'&&path==='/app/')return redirect('/app'+url.search,308);
