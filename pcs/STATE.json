@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 55,
-  "updated_at": "2026-11-05T05:05:04.217Z",
+  "revision": 56,
+  "updated_at": "2026-11-05T06:23:55.164Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1631,8 +1631,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R53: Public Mihy Law AI Agent homepage visual update based on Owner mobile screenshots: left-aligned two-part announcement and link, decorative mobile dot removed to align exactly with hero; reduced header-to-eyebrow gap/hero padding; approved two-sentence slogan retained with larger first line and right-side law-scale medallion; replaced awkward oversized uppercase hero baseline with three compact value pills. Added two substantive new homepage sections: 4-stage case journey and expert-led legal reasoning/source-validation diagram and content; future AI workflows honestly identified as planned. Cloudflare NONPRODUCTION staging ai-law-web-qa version af665dcd-1617-4503-a0d1-21bcc1c8ff2a and primary ai-law-web version 57f8c033-556b-4675-8bed-35fd467b8216, both 100% and QA_AUTH -> ai-law-standalone-cf-qa unchanged. R53 staging real 11-width browser and existing regressions PASS via GitHub Actions 41971165250 (10 jobs PASS). Primary also deployed from identical source; PR #70 final dual-host CI 41971510719 QUEUED at checkpoint; do not claim green until completed. SRS v1.1.15 unchanged; marketing delta SC-012 logged, production/real customer files and SaaS activation blocked.",
-      "next_action": "Run/verify final PR #70 GitHub Actions 41971510719 primary/staging Chromium 11-width suite and security regression; merge PR to main only after success. Owner then visually reviews https://ai-law-web.iaict-platform.workers.dev/ on physical mobile, especially announcement, slogan medallion, 3 benefit pills, hero-to-solutions spacing and two new content chapters. Maintain standalone-first SRS v1.1.15, no production or customer legal files.",
+      "last_completed_step": "R54: Owner-requested mobile marketing visual corrections deployed to both NONPRODUCTION public Cloudflare Workers. Homepage announcement original full copy restored left-aligned with inline bold yellow non-button 'Khám phá lợi ích ↗'. All six public landing-page announcements unified as compact left-aligned MIHY AGENT ⚖ with plain gold 'Khám phá hai giải pháp ↗' and reduced mobile header-to-hero gaps; increased previously undersized mobile body, FAQ, footer and legal-caption font sizes. Fixed split '©' and '2026' in flex footer by grouping © 2026 Mihy Agent as one semantic nonwrapping inline-flex element on all seven marketing pages, disclaimer separate. Real staged Chromium 39 mobile/responsive page-visits and prior homepage/delivery/editorial regression PASS; staging CI run 41979459057 10/10 PASS. Cloudflare deployed staging ai-law-web-qa 016c64b3-b7f6-43d9-8e20-7f974d3f8ff6 and primary ai-law-web a8217511-8907-4555-8536-79b7a0683642, both 100% with unchanged QA_AUTH -> ai-law-standalone-cf-qa binding. PR #71 public UI-only, final primary live CI run 41979935336 QUEUED at this checkpoint. SRS v1.1.15 unchanged and UI delta logged SC-013, no SaaS activation, production or real legal files.",
+      "next_action": "Confirm final R54 primary AND staging Chromium GitHub CI including copyright visual grouping, link appearance, mobile fonts and all landing route regression PASS before PR #71 merge to main. Owner then reviews mobile on https://ai-law-web.iaict-platform.workers.dev/ especially yellow text link, shorter left-aligned MIHY AGENT intro, © 2026 Mihy Agent in one row and reduced logo-to-section gaps. Owner final aesthetic acceptance required; do not deploy production or accept client legal files.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1658,7 +1658,8 @@
         "R50 branding/dual long-form public landing page Owner physical mobile visual acceptance NOT_RUN_OWNER; official typo correction means Mihy Agent is official provider and Mihy Law AI Agent official product. Not a SaaS billing launch or permission to process real legal case files.",
         "R51 public site final Owner physical mobile visual acceptance NOT_RUN_OWNER. Official Mihy Agent Facebook page URL not supplied/verified; current link is only labeled search, not a verified brand profile. SaaS remains future-only, production and real customer legal files blocked.",
         "R52 marketing UI final Owner physical-device aesthetic acceptance NOT_RUN_OWNER; do not claim any production legal AI readiness, customer data processing permission or subscription availability. Official Facebook fanpage URL still not verified.",
-        "R53 mobile aesthetic approval NOT_RUN_OWNER; final PR #70 CI after primary nonproduction promotion PENDING at checkpoint; SaaS future-only and real customer files/production still blocked."
+        "R53 mobile aesthetic approval NOT_RUN_OWNER; final PR #70 CI after primary nonproduction promotion PENDING at checkpoint; SaaS future-only and real customer files/production still blocked.",
+        "R54 final Owner physical-mobile aesthetic review NOT_RUN_OWNER. Last-code CI for primary nonproduction QA run 41979935336 pending at checkpoint. Facebook official fanpage URL unverified; subscription and real legal AI still unlaunched, production/customer data blocked."
       ]
     },
     "policy": {

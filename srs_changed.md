@@ -93,3 +93,10 @@
 - **UI-only delta:** Left-align the announcement/CTA; reduce excessive white space between site header and hero eyebrow; keep approved “Sắc bén trong lập luận. Mạch lạc trong từng hồ sơ.” text, enlarge/balance mobile headline with a legal-themed decorative accent, and prevent a single terminal word wrapping alone. Convert the oversized uppercase value strip into concise readable benefit labels and reduce awkward hero-to-solutions gap.
 - **Public communication:** Enrich the public homepage with detailed, non-misleading explanations of document intake, legal reasoning, source verification and the responsibility of a human legal professional. No claims that planned AI features or real document intake are available.
 - **Excluded:** Does not change legal SRS use cases, storage/auth requirements, SaaS activation, account plans, production readiness or customer data permissions. Baseline SRS v1.1.15 remains frozen; this log is for later Owner-controlled document alignment.
+
+## SC-013 — 2026-11-05 — Owner requested mobile banner/footer typography correction
+
+- Restore homepage public announcement's original full copy in left-aligned treatment; link **“Khám phá lợi ích ↗”** should be warm-yellow bold *text*, without pill/button treatment, on mobile and desktop.
+- Across all six public editorial/solution landing pages, redesign the top **MIHY AGENT ⚖ / Khám phá hai giải pháp** marketing strip as a compact, left-aligned, shared mobile layout, reducing unnecessary spacing from navigation/logo to the hero content.
+- Fix split footer “©” and “2026” by keeping **© 2026 Mihy Agent** as one semantic, nonwrapping copyright element. Keep existing legal disclaimer and back-to-top link separately; increase mobile reading sizes of selected body/FAQ/footer copy.
+- **Implementation scope only:** Public presentation markup and shared CSS. No legal AI functionality, SaaS activation, user roles, login endpoints, storage, payment, data access, Cloudflare production deployment or SRS baseline adjustments. SRS v1.1.15 remains unchanged; Owner final visual acceptance pending.

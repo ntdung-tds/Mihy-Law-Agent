@@ -197,6 +197,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/site_visual_r52.test.mjs
       - name: Verify left-aligned announcement, compact hero rhythm and rich homepage stories
         run: node --test deployment/cloudflare/tests/site_home_r53.test.mjs
+      - name: Verify mobile warm-gold text links, six shared page banners, grouped footer year and readable fonts
+        run: node --test deployment/cloudflare/tests/site_mobile_r54.test.mjs
       - name: Verify safe redirects from retired preview hostname
         run: node --test deployment/cloudflare/tests/legacy_redirect.test.mjs
 
@@ -481,4 +483,34 @@ jobs:
           AI_LAW_WEBSITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
           MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_brand_landings.py
       - name: Ensure primary editorial pages at 6 widths
+        run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_editorials.py
+
+  cloudflare-site-r54:
+    # Visual-only R54 nonproduction site QA. User-approved standalone SRS unchanged.
+    if: github.ref_name == 'feat/r54-mobile-banner-footer-typography-20261105' || github.head_ref == 'feat/r54-mobile-banner-footer-typography-20261105'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Playwright Chromium
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: Real staging mobile yellow link, compact headers and copyrights on seven pages
+        run: python deployment/cloudflare/tests/live_mihy_mobile_r54.py
+      - name: Staging homepage layout and last screenshot regression
+        run: python deployment/cloudflare/tests/live_mihy_home_r53.py
+      - name: Staging two delivery landing pages / all old widths
+        run: python deployment/cloudflare/tests/live_mihy_brand_landings.py
+      - name: Staging four editorial pages / all old widths
+        run: python deployment/cloudflare/tests/live_mihy_editorials.py
+      - name: Primary NONPRODUCTION website same seven-page mobile and copyright checks
+        run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_mobile_r54.py
+      - name: Primary mobile home and delivery-model regressions
+        run: |
+          MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_home_r53.py
+          MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_brand_landings.py
+      - name: Primary four editorial landing regressions
         run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_editorials.py
