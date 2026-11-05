@@ -24,8 +24,8 @@ function mock({disabled=false,revoked=false,noUser=false}={}){
         if(sql.includes("SELECT m.tenant_id FROM qa_memberships")){
           return revoked?null:{tenant_id:TENANT};
         }
-        if(sql===COOKIE_SESSION_SQL){return db.session&&!revoked&&!disabled&&db.session.sid===params[1]&&db.session.exp>params[2]?
-          {email:EMAIL,user_id:USER,tenant_id:TENANT,role_key:"lawyer",kind:"organization"}:null;}
+        if(sql===COOKIE_SESSION_SQL){return db.session&&!revoked&&!disabled&&db.session.sid===params[1]&&db.session.exp>params[3]?
+          {email:EMAIL,user_id:USER,tenant_id:TENANT,role_key:"lawyer",kind:"organization",subject:"qa04-lawyer",expires_at:db.session.exp}:null;}
         throw Error("Unknown first:"+sql.slice(0,80));
       },async run(){
         if(sql.includes("INSERT INTO qa_login_rate"))db.attempts++;
@@ -48,8 +48,8 @@ function mock({disabled=false,revoked=false,noUser=false}={}){
         email:EMAIL,user_id:USER,subject:"qa04-lawyer",password_salt:SALT,password_hash:hash,
         pbkdf2_iterations:ITERATIONS,status:disabled?"disabled":"active",failures:0,locked_until:null};
       if(sql.includes("SELECT m.tenant_id FROM qa_memberships"))return revoked?null:{tenant_id:TENANT};
-      if(sql===COOKIE_SESSION_SQL)return db.session&&!revoked&&!disabled&&db.session.sid===params[1]&&db.session.exp>params[2]?{
-        email:EMAIL,user_id:USER,tenant_id:TENANT,role_key:"lawyer",kind:"organization"}:null;
+      if(sql===COOKIE_SESSION_SQL)return db.session&&!revoked&&!disabled&&db.session.sid===params[1]&&db.session.exp>params[3]?{
+        email:EMAIL,user_id:USER,tenant_id:TENANT,role_key:"lawyer",kind:"organization",subject:"qa04-lawyer",expires_at:db.session.exp}:null;
       throw Error("Unhandled SQL SELECT");
     },async run(){if(sql.includes("INSERT INTO qa_login_rate"))db.attempts++;if(sql.includes("UPDATE qa_sessions SET revoked_at"))db.session=null;return {};}
     };
