@@ -37,7 +37,7 @@ def check(page,width,route):
  page.wait_for_timeout(100)
  copyright=page.locator(".footer-copyright")
  assert copyright.count()==1,(route,width,"copyright missing")
- assert copyright.inner_text().replace("\\n"," ").strip()=="© 2026 Mihy Agent",(route,width,copyright.inner_text())
+ assert " ".join(copyright.inner_text().split())=="© 2026 Mihy Agent",(route,width,copyright.inner_text())
  # A child year must not appear in a different row/column far from ©.
  positions=copyright.evaluate("""el=>{
   const y=el.querySelector('#footer-year').getBoundingClientRect(),
