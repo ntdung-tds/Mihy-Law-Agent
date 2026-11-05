@@ -7,26 +7,26 @@ const css=readFileSync('web/website/styles.css','utf8');
 const js=readFileSync('web/website/site.js','utf8');
 test('Mẫu 08 is shared by both approved header types, all seven pages',()=>{
  for(const [name,html] of Object.entries(h)){
-  assert.equal((html.match(/class="mihy08-prev"/g)||[]).length,1,name);
-  assert.equal((html.match(/class="mihy08-next"/g)||[]).length,1,name);
-  assert.equal((html.match(/class="mihy08-close"/g)||[]).length,1,name);
+  assert.equal((html.match(/class="mihy08-prev"/g)||[]).length,0,name);
+  assert.equal((html.match(/class="mihy08-next"/g)||[]).length,0,name);
+  assert.equal((html.match(/class="mihy08-close"/g)||[]).length,0,name);
   assert.equal((html.match(/class="mihy08-dots"/g)||[]).length,1,name);
   assert.equal((html.match(/aria-label="Thông điệp [1-3]"/g)||[]).length,3,name);
-  assert.match(html,/class="mihy08-mobile-copy"/,name);
+  assert.match(html,/class="mihy11-line"/,name);
   assert.match(html,/href="\/giai-phap" class="header-cta"/.test(html)?/MIHY/:/class="button button-dark header-cta" href="\/giai-phap"/);
   assert.ok(!html.includes('Dùng thử miễn phí'),name);
  }
- assert.match(h['index.html'],/href="#benefits" class="announcement-action">Khám phá lợi ích/);
- for(const name of names.slice(1))assert.match(h[name],/href="\/giai-phap" class="detail-announcement-action">Khám phá hai giải pháp/);
+ assert.match(h['index.html'],/href="#benefits" class="announcement-action">Tìm hiểu thêm/);
+ for(const name of names.slice(1))assert.match(h[name],/href="\/#benefits" class="detail-announcement-action">Tìm hiểu thêm/);
 });
-test('Mẫu 08 has 3.8s rotation, close, keyboard/focus/hover and reduced-motion support',()=>{
+test('Mẫu 11 has 3.8s rotation, keyboard/focus/hover and reduced-motion support',()=>{
  assert.match(js,/setInterval\(\(\)=>show\(index\+1\),3800\)/);
  assert.match(js,/banner\.addEventListener\('mouseenter',stop\)/);
  assert.match(js,/banner\.addEventListener\('focusin',stop\)/);
- assert.match(js,/banner\.hidden=true/);
+ assert.doesNotMatch(js,/banner\.hidden=true/);
  assert.match(js,/prefers-reduced-motion: reduce/);
  assert.match(js,/visibilitychange/);
- assert.match(js,/link\.setAttribute\('href',s\.href\)/);
+ assert.match(js,/link\.setAttribute\('href',s\.url\)/);
  assert.doesNotMatch(js,/Dùng thử miễn phí/);
 });
 test('R58 retains tilted MIHY logo and realistic current destinations',()=>{

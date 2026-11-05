@@ -20,7 +20,7 @@ test('R55 home makes the two delivery models distinct, accessible non-wrapping t
 });
 
 test('R55 small mobile strip keeps the exact approved full home wording and warm gold action',()=>{
- for(const text of ['Công nghệ đồng hành cùng tư duy pháp lý.','Khám phá điều làm nên khác biệt.','Khám phá lợi ích'])assert.ok(home.includes(text));
+ for(const text of ['Tra cứu &amp; soạn thảo văn bản pháp lý bằng AI','nhanh hơn, vẫn chuẩn chuyên môn.','Tìm hiểu thêm'])assert.ok(home.includes(text));
  const mobile=css.slice(css.indexOf('/* R55 —'));
  assert.ok(mobile.includes('.announcement-copy,.announcement-action{font-size:11.2px!important'));
  assert.ok(mobile.includes('.announcement-inner{padding:7px 0 8px!important'));
@@ -29,9 +29,9 @@ test('R55 small mobile strip keeps the exact approved full home wording and warm
 
 test('R55 all landing pages retain banner content, with compact grid on mobile',()=>{
  for(const page of pages){
-  assert.match(page,/class="detail-announcement-brand">MIHY AGENT/);
-  assert.match(page,/Khám phá hai giải pháp/);
-  assert.match(page,/Mihy Law AI Agent — công nghệ đồng hành cùng chuyên môn pháp lý/);
+  assert.match(page,/class="mihy11-line"/);
+  assert.match(page,/Tìm hiểu thêm/);
+  assert.match(page,/Tra cứu &amp; soạn thảo văn bản pháp lý bằng AI/);
  }
  const override=css.slice(css.indexOf('/* R55 —'));
  assert.match(override,/\.detail-announcement-inner\{display:grid;grid-template-columns:auto minmax\(0,1fr\)/);

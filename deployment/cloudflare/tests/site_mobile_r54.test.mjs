@@ -12,9 +12,9 @@ test('home announcement uses original full copy, warm gold plain text link on le
  const banner=home.match(/<div class="announcement"><div class="container announcement-inner">[\s\S]*?<\/div><\/div>/)?.[0];
  assert.ok(banner);
  for(const expected of [
-   'Công nghệ đồng hành cùng tư duy pháp lý.',
-   'Khám phá điều làm nên khác biệt.',
-   'Khám phá lợi ích',
+   'Tra cứu &amp; soạn thảo văn bản pháp lý bằng AI',
+   'nhanh hơn, vẫn chuẩn chuyên môn.',
+   'Tìm hiểu thêm',
    'class="announcement-action"'
  ])assert.ok(banner.includes(expected),expected);
  assert.doesNotMatch(banner,/class="pulse-dot"/);
@@ -28,9 +28,9 @@ test('all six landing banners are short, left-aligned and use a warm yellow edit
  for(const [file,page] of sources){
   const banner=page.match(/<div class="detail-announcement"><div class="container detail-announcement-inner">[\s\S]*?<\/div><\/div>/)?.[0];
   assert.ok(banner,'missing structured banner '+file);
-  assert.match(banner,/MIHY AGENT/);
-  assert.match(banner,/Mihy Law AI Agent — công nghệ đồng hành cùng chuyên môn pháp lý/);
-  assert.match(banner,/href="\/giai-phap" class="detail-announcement-action">Khám phá hai giải pháp/);
+  assert.match(banner,/Tra cứu &amp; soạn thảo văn bản pháp lý bằng AI/);
+  assert.match(banner,/Tìm hiểu thêm/);
+  assert.match(banner,/href="\/#benefits" class="detail-announcement-action">Tìm hiểu thêm/);
   assert.ok(!banner.includes('✳') && !banner.includes('✦'),file);
  }
  assert.ok(css.includes('.detail-announcement-inner{display:flex;align-items:center'));

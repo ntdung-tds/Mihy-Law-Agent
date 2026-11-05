@@ -205,6 +205,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/site_design_r57.test.mjs
       - name: Verify Owner Mẫu 08 shared rotating header, logo and real destinations
         run: node --test deployment/cloudflare/tests/site_header_r58.test.mjs
+      - name: Verify approved Mẫu 11 inline link, compact mobile copy and hidden dots
+        run: node --test deployment/cloudflare/tests/site_header_r59.test.mjs
       - name: Verify safe redirects from retired preview hostname
         run: node --test deployment/cloudflare/tests/legacy_redirect.test.mjs
 
@@ -582,3 +584,21 @@ jobs:
         run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_header_r58.py
       - name: R58 primary nonproduction old marketing/section regression
         run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_r57.py
+
+  cloudflare-site-r59:
+    # R59 Owner-approved Mẫu 11, real Chromium on public NONPRODUCTION Workers.
+    if: github.ref_name == 'design/r59-approved-mau11-inline-mobile' || github.head_ref == 'design/r59-approved-mau11-inline-mobile'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Chromium
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: R59 QA seven routes x eight viewports, inline copy, dots and rotation
+        run: python deployment/cloudflare/tests/live_mihy_header_r59.py
+      - name: R59 primary nonproduction seven routes x eight viewports
+        run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_header_r59.py

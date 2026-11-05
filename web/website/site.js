@@ -15,46 +15,33 @@
    window.matchMedia('(min-width: 971px)').addEventListener('change',e=>{if(e.matches)setOpen(false);});
  }
 
- // Mẫu 08: shared marketing ribbon across home and editorial pages.
- // Claims are deliberately nonabsolute: deep AI capabilities are in development.
+ // Mẫu 11 (Owner-approved): inline text + gold link. Desktop dots;
+ // mobile hides dots but keeps 3.8-second rotation and all real destinations.
  const banners=document.querySelectorAll('.announcement,.detail-announcement');
  for(const banner of banners){
    const home=banner.classList.contains('announcement');
    const copy=banner.querySelector('.announcement-copy,.detail-announcement-copy');
-   const full=copy?.querySelector('.mihy08-full-copy'),short=copy?.querySelector('.mihy08-mobile-copy');
-   const extra=copy?.querySelector('.announcement-sub');
    const link=banner.querySelector('.announcement-action,.detail-announcement-action');
-   const prev=banner.querySelector('.mihy08-prev'),next=banner.querySelector('.mihy08-next');
-   const close=banner.querySelector('.mihy08-close');
    const dots=[...banner.querySelectorAll('.mihy08-dots button')];
-   if(!full||!short||!link||!prev||!next||!close||dots.length!==3)continue;
+   if(!copy||!link||dots.length!==3)continue;
    const slides=[
-     home
-       ? {full:'Công nghệ đồng hành cùng tư duy pháp lý.',short:'Công nghệ đồng hành cùng tư duy pháp lý.',extra:'Khám phá điều làm nên khác biệt.',label:'Khám phá lợi ích',href:'#benefits'}
-       : {full:'Mihy Law AI Agent — công nghệ đồng hành cùng chuyên môn pháp lý.',short:'Công nghệ đồng hành cùng chuyên môn pháp lý.',extra:'',label:'Khám phá hai giải pháp',href:'/giai-phap'},
-     {full:'Hai hướng sử dụng linh hoạt: triển khai riêng hoặc dịch vụ theo gói.',short:'Triển khai riêng hoặc dịch vụ theo gói.',extra:'',label:'Xem hai giải pháp',href:'/giai-phap'},
-     {full:'Tư duy pháp lý dẫn dắt. Công nghệ hỗ trợ từng bước làm việc.',short:'Chuyên môn pháp lý luôn là trọng tâm.',extra:'',label:'Tìm hiểu cách tiếp cận',href:'/gioi-thieu'}
+     {html:'Tra cứu &amp; soạn thảo văn bản pháp lý bằng AI — <strong>nhanh hơn, vẫn chuẩn chuyên môn.</strong>',url:home?'#benefits':'/#benefits'},
+     {html:'Hai giải pháp linh hoạt: <strong>triển khai riêng cho tổ chức</strong> hoặc <strong>dùng theo gói.</strong>',url:'/giai-phap'},
+     {html:'Dữ liệu của bạn được bảo mật — <strong>con người luôn là người quyết định cuối cùng.</strong>',url:'/an-toan-du-lieu'}
    ];
-   let index=0,timer=null;
    const mq=window.matchMedia('(prefers-reduced-motion: reduce)');
+   let index=0,timer=null;
    function show(n){
      index=(n+slides.length)%slides.length;
      const s=slides[index];
-     full.textContent=s.full;short.textContent=s.short;
-     if(extra)extra.textContent=s.extra;
-     link.setAttribute('href',s.href);
-     const arrow=document.createElement('span');
-     arrow.setAttribute('aria-hidden','true');arrow.textContent='↗';
-     link.replaceChildren(document.createTextNode(s.label+' '),arrow);
-     dots.forEach((dot,i)=>{dot.classList.toggle('on',i===index);dot.setAttribute('aria-pressed',String(i===index));});
-     if(!mq.matches&&typeof copy.animate==='function')copy.animate([{opacity:0.4},{opacity:1}],{duration:350,easing:'ease-out'});
+     copy.innerHTML=s.html; // Trusted, fixed marketing strings only.
+     link.setAttribute('href',s.url);
+     dots.forEach((dot,i)=>{const active=i===index;dot.classList.toggle('on',active);dot.setAttribute('aria-pressed',String(active));});
+     if(!mq.matches&&typeof copy.animate==='function')copy.animate([{opacity:.4},{opacity:1}],{duration:250,easing:'ease-out'});
    }
    function stop(){if(timer!==null){clearInterval(timer);timer=null;}}
-   function start(){if(timer!==null||mq.matches||document.hidden||banner.hidden)return;timer=setInterval(()=>show(index+1),3800);}
-   prev.addEventListener('click',()=>show(index-1));
-   next.addEventListener('click',()=>show(index+1));
-   dots.forEach((dot,i)=>dot.addEventListener('click',()=>show(i)));
-   close.addEventListener('click',()=>{stop();banner.hidden=true;});
+   function start(){if(timer!==null||mq.matches||document.hidden)return;timer=setInterval(()=>show(index+1),3800);}
+   dots.forEach((dot,i)=>dot.addEventListener('click',()=>{show(i);stop();start();}));
    banner.addEventListener('mouseenter',stop);
    banner.addEventListener('mouseleave',start);
    banner.addEventListener('focusin',stop);
