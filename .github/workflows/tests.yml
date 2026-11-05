@@ -188,6 +188,10 @@ jobs:
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r62_qa_session_sql.py' -v
       - name: Validate R62 secure offline QA verifier renderer (synthetic credentials only)
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r62_provision.py' -v
+      - name: R65 private credential operator E2E preflight (synthetic secrets, no live login)
+        run: |
+          python -m py_compile deployment/cloudflare/tools/r65_live_role_e2e.py
+          python -m unittest discover -s deployment/cloudflare/tests -p 'test_r65_operator_preflight.py' -v
       - name: Verify R62 same-origin service relay, method gates and rotated cookies
         run: node --test deployment/cloudflare/tests/r62_site_relay.test.mjs
       - name: Execute actual authz queries and FK/deny rules against SQLite
