@@ -317,3 +317,16 @@ body.drawer-open{overflow:hidden}
 .matter-row small{display:block;font-size:12px;color:#61738b;margin-top:4px}
 .matter-row .matter-read-label{font-size:11px;font-weight:800;color:#24634c;background:#e7f6ed;padding:5px 8px;border-radius:20px;flex-shrink:0}
 @media(max-width:620px){.matter-card{padding:14px}.matter-form-row button{width:100%}.matter-row{align-items:flex-start;flex-direction:column}.matter-row .matter-read-label{align-self:flex-start}}
+
+/* R50 public-facing product rebrand, no changes to workspace routes or behavior. */
+.brand-copy strong{font-size:15px;letter-spacing:-.65px;white-space:normal;line-height:1.18}
+.brand-copy strong span{font-size:12px;letter-spacing:-.3px}
+@media(max-width:820px){
+ .mobile-brand{min-width:0}
+ .mobile-brand strong{font-size:14px;letter-spacing:-.55px;line-height:1.14;overflow-wrap:break-word}
+ .mobile-brand strong span{font-size:12px;letter-spacing:-.2px}
+}
+@media(max-width:390px){
+ .mobile-brand strong{font-size:12.5px}
+ .mobile-brand strong span{font-size:10.5px}
+}
