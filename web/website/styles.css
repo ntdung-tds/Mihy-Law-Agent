@@ -723,3 +723,30 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 @media(prefers-reduced-motion:reduce){
  .detail-button,.detail-value{transition:none}
 }
+
+/* R50: both offering cards receive equal visual priority, symmetric actions. */
+.solution-private,.solution-service{
+ min-height:595px;
+ border:1px solid #ffffff35;
+ box-shadow:0 23px 53px #2d28422c;
+ color:#fff;
+}
+.solution-private{background:radial-gradient(circle at 86% 15%,#65588c,transparent 40%),linear-gradient(145deg,#1e2947,#34315c);}
+.solution-service{background:radial-gradient(circle at 84% 15%,#ae718d,transparent 40%),linear-gradient(145deg,#3a2644,#663a5a);}
+.solution-private .solution-number,.solution-service .solution-number{color:#f9e9f5;opacity:.85}
+.solution-private .solution-symbol,.solution-service .solution-symbol{background:#ffffff21;color:#fae5fb}
+.solution-private .solution-type,.solution-service .solution-type{color:#f2ceeb!important}
+.solution-private .solution-description,.solution-service .solution-description{color:#e2d9e9}
+.solution-private .solution-highlights li,.solution-service .solution-highlights li{color:#f7ecf5}
+.solution-private .solution-highlights li::before,.solution-service .solution-highlights li::before{background:#ffffff27;color:#fce5ef}
+.solution-private .solution-card-bottom,.solution-service .solution-card-bottom{border-color:#ffffff35}
+.solution-private .solution-note,.solution-service .solution-note{color:#dcd0df}
+.solution-private .solution-action,.solution-service .solution-action{background:#f9efff;color:#3c2947}
+.solution-private .solution-action:hover,.solution-service .solution-action:hover{background:#fff}
+.solution-private .solution-stage,.solution-service .solution-stage{background:#ffffff26;color:#ffecf0;border:1px solid #ffffff44}
+@media(max-width:970px){
+ .solution-private,.solution-service{min-height:620px}
+}
+@media(max-width:700px){
+ .solution-private,.solution-service{min-height:0}
+}
