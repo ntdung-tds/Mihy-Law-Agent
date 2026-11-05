@@ -193,6 +193,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/site_landing_pages.test.mjs
       - name: Verify four long article routes, updated legal branding and company contacts
         run: node --test deployment/cloudflare/tests/site_editorial.test.mjs
+      - name: Assert unified violet brand, compact mobile menu, hero no-wrap and full editorial scope
+        run: node --test deployment/cloudflare/tests/site_visual_r52.test.mjs
       - name: Verify safe redirects from retired preview hostname
         run: node --test deployment/cloudflare/tests/legacy_redirect.test.mjs
 
@@ -424,3 +426,27 @@ jobs:
         run: |
           python deployment/cloudflare/tests/live_mihy_editorials.py
           MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_editorials.py
+
+  cloudflare-site-r52:
+    # Dedicated R52 live Chromium QA on NONPRODUCTION Workers only.
+    if: github.ref_name == 'feat/r52-visual-polish-violet-mobile-longforms-20261105' || github.head_ref == 'feat/r52-visual-polish-violet-mobile-longforms-20261105'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Playwright Chromium
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: Check real staging R52 hero no-wrap, mobile UI and all six detailed landing pages
+        run: python deployment/cloudflare/tests/live_mihy_visual_r52.py
+      - name: Regression all 11 staging homepage widths
+        run: python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
+      - name: Regression 11 staging widths for private and subscription landings
+        run: python deployment/cloudflare/tests/live_mihy_brand_landings.py
+      - name: Regression 6 staging widths for 4 editorial pages
+        run: python deployment/cloudflare/tests/live_mihy_editorials.py
+      - name: Check real primary NONPRODUCTION QA R52 hero, menu and six pages
+        run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_visual_r52.py
