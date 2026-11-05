@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 49,
-  "updated_at": "2026-11-05T01:04:00Z",
+  "revision": 50,
+  "updated_at": "2026-11-05T01:51:03.031Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1631,8 +1631,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R48 real mobile design/content fix deployed to ai-law-web QA primary and staging. Customer-facing homepage now prioritizes professional benefits vs technical QA/login FAQ; no invented performance metrics. Responsive hero heading, buttons, mockup (old min-width 390 on 320 screen), cards and notebook. Real Chromium mobile visible text/box bounds PASS 320,360,375,390,393,414,430,600,768,1024,1440 on staging + main Worker; Node copy/protection regression PASS, R44/R46 unchanged. Full-product QA/production gates remain blocked.",
-      "next_action": "Owner opens https://ai-law-web.iaict-platform.workers.dev/ on mobile and reviews hero typography/buttons and benefits sections; report design PASS/FAIL or screenshots for visual refinement. R44 login at /login and protected R0 workspace /app unchanged. After Owner final website acceptance continue SRS-driven Drive OAuth/real legal workflow delivery without using real client data until separately authorized.",
+      "last_completed_step": "R49: public AI Law homepage now features two MihiAgent offerings: customer-managed/private deployment with direct AI-provider usage fees, versus future hosted AI Law subscription tiers with limits. Added responsive two-card comparison, anchors, FAQ and footer. Staging ai-law-web-qa deployed and R49 Chromium 11 viewport browser QA PASS (GitHub Actions 41950720221); primary nonproduction QA ai-law-web deployed version 581d7523-19a1-4914-a3cd-6d52c8410041, Cloudflare real HTML/mobile readback PASS. R49 source/Cloudflare contract CI PASS. Login/app and backend unchanged; final Owner visual acceptance pending, production blocked, SRS unchanged.",
+      "next_action": "R49 primary QA real Chromium regression is being rerun after deployment; verify at https://ai-law-web.iaict-platform.workers.dev/#solutions and await Owner design acceptance on physical mobile. Continue standalone implementation/Drive/legal workflows under SRS only after relevant auth/data gates; MihiAgent hosted SaaS model is public roadmap marketing, not an activated service or new implementation scope.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1653,7 +1653,8 @@
         "R45 preview UI is deployed on original URL and anonymous/auth-boundary HTTPS tested; Owner positive sign-in into full original UI, session persistence and logout on physical mobile remain NOT_RUN. No claim of production-ready IAM, legal AI functionality, Google Drive OAuth, full D1 RLS parity or TC12.",
         "R46 matter metadata create/list is implemented QA-only, but positive owner-device POST+reload, all requested legal document file storage/Google Drive OAuth, AI UC03/04/07, full MatterACL/RLS parity, security/operational gates and production approval remain pending. Original URL is still NONPRODUCTION_QA.",
         "R47 website visual Owner acceptance, correct-password mobile /login -> /app and reload/logout on new ai-law-web hostname NOT_RUN_OWNER. Branded custom domain not configured; current workers.dev QA is not a production legal platform. Existing full SRS security and Google Drive/AI gates remain blocked.",
-        "R48 public website visual acceptance on Owner physical mobile remains NOT_RUN_OWNER; only QA site fixed. Real AI UC, Drive OAuth, production MFA/IdP, real customer data and full SRS product release remain not ready."
+        "R48 public website visual acceptance on Owner physical mobile remains NOT_RUN_OWNER; only QA site fixed. Real AI UC, Drive OAuth, production MFA/IdP, real customer data and full SRS product release remain not ready.",
+        "R49 two-delivery public marketing is not Owner-accepted on their physical mobile. Subscription SaaS is a FUTURE offering only, not launched; no pricing, quota billing, signup, production IdP or real client data authorized."
       ]
     },
     "policy": {
