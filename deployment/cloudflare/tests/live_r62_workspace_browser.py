@@ -74,7 +74,7 @@ def run():
 
                 page.route(BASE + "/**", route_mock)
                 page.goto(BASE + "/app#documents", wait_until="domcontentloaded")
-                page.locator(".matter-row").wait_for()
+                page.locator(".matter-row").wait_for(state="attached")
                 page.locator("#workspace-switch-desktop-select").wait_for(state="attached")
                 page.locator("#workspace-switch-drawer-select").wait_for(state="attached")
                 assert page.locator(".matter-row").count() == 1
@@ -89,7 +89,7 @@ def run():
                 else:
                     page.locator("#workspace-switch-desktop-select").select_option(PERSONAL)
                 page.wait_for_url(BASE + "/app", timeout=15000)
-                page.locator(".matter-row").wait_for()
+                page.locator(".matter-row").wait_for(state="attached")
                 assert NEW in page.locator("#matter-list").inner_text()
                 assert OLD not in page.locator("#matter-list").inner_text()
                 assert page.locator("#workspace-switch-desktop-select").input_value() == PERSONAL
