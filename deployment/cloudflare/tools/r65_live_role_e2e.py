@@ -29,7 +29,9 @@ class QAGateError(Exception):
 
 def read_private_bundle(filename):
     path = Path(filename).expanduser().absolute()
-    if path.is_symlink() or path == ROOT or ROOT in path.parents:
+    resolved = path.resolve(strict=False)
+    if (path.is_symlink() or path == ROOT or ROOT in path.parents
+            or resolved == ROOT or ROOT in resolved.parents):
         raise QAGateError("PRIVATE_PATH_REQUIRED")
     try:
         info = path.stat()
