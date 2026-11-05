@@ -8,8 +8,8 @@ from playwright.sync_api import sync_playwright
 BASE=os.environ.get('MIHY_SITE_URL','https://ai-law-web-qa.iaict-platform.workers.dev').rstrip('/')
 WIDTHS=(320,360,375,390,393,414,430,600,768,1024,1440)
 PAGES=(
- ('/trien-khai-rieng','AI pháp lý của bạn.','#advantages'),
- ('/dich-vu-theo-goi','Việc pháp lý của bạn.','#experience')
+ ('/trien-khai-rieng','AI pháp lý của bạn.','/gioi-thieu'),
+ ('/dich-vu-theo-goi','Việc pháp lý của bạn.','/chuc-nang')
 )
 GEOMETRY=r"""() => {
  const width=document.documentElement.clientWidth;
