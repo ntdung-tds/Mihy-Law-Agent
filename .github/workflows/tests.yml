@@ -195,6 +195,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/site_editorial.test.mjs
       - name: Assert unified violet brand, compact mobile menu, hero no-wrap and full editorial scope
         run: node --test deployment/cloudflare/tests/site_visual_r52.test.mjs
+      - name: Verify left-aligned announcement, compact hero rhythm and rich homepage stories
+        run: node --test deployment/cloudflare/tests/site_home_r53.test.mjs
       - name: Verify safe redirects from retired preview hostname
         run: node --test deployment/cloudflare/tests/legacy_redirect.test.mjs
 
@@ -450,3 +452,33 @@ jobs:
         run: python deployment/cloudflare/tests/live_mihy_editorials.py
       - name: Check real primary NONPRODUCTION QA R52 hero, menu and six pages
         run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_visual_r52.py
+
+  cloudflare-site-r53:
+    # Owner visual iteration: staging live first; primary checked after staged promotion.
+    if: github.ref_name == 'feat/r53-home-mobile-hero-spaces-content-20261105' || github.head_ref == 'feat/r53-home-mobile-hero-spaces-content-20261105'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Playwright Chromium
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: Real staging mobile announcement, headline and spacing at 11 widths
+        run: python deployment/cloudflare/tests/live_mihy_home_r53.py
+      - name: Existing staging homepage regression at 11 widths
+        run: python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
+      - name: Real staging two delivery landings at 11 widths
+        run: python deployment/cloudflare/tests/live_mihy_brand_landings.py
+      - name: Real staging four editorial landings at 6 widths
+        run: python deployment/cloudflare/tests/live_mihy_editorials.py
+      - name: Verify primary QA website mobile hero and homepage rhythm at 11 widths
+        run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_home_r53.py
+      - name: Ensure primary homepage and dual-offering regression at 11 widths
+        run: |
+          AI_LAW_WEBSITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
+          MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_brand_landings.py
+      - name: Ensure primary editorial pages at 6 widths
+        run: MIHY_SITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_mihy_editorials.py

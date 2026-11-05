@@ -1,10 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `54` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T04:23:27.058Z`.
+- **PCS revision:** `55` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T05:05:30.374Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+## R53 — Owner mobile screenshots: rebalance hero, tighten spacing, enrich home
+
+- **Specific review:** Owner wanted “Công nghệ đồng hành cùng tư duy pháp lý” benefit announcement anchored left, less excessive header-to-eyebrow whitespace, stronger balance across mobile hero slogan, a professional replacement for the oversized uppercase three-benefit strip, less distance between visual sections, and substantially more useful content on the homepage. Both approved slogan sentences remain unchanged.
+- **Presentation changes:** Announcement now uses a shared left-aligned `announcement-inner` with a distinct benefits CTA; hide mobile-only decorative dot so text matches the hero left margin. Hero responsive first-line type is larger with `white-space:nowrap`, lavender “Mạch lạc” paired with an accessible decorative ⚖ legal medallion. Mobile hero top padding, button spacing and excessive hero/next-section whitespace reduced. Remove ugly letterspacing/ribbon and use three compact numbered values in the `hero-baseline`. All headline graphics avoid actual legal-client data.
+- **Two substantive homepage chapters:** `#case-journey` depicts intake → analysis → legal-source checks → professional opinion, clearly identifying pending AI capabilities; `#expertise` adds source validation, access control, and ultimate lawyer responsibility with a CSS illustration. No new SRS AI functions, product scope or fabricated metrics.
+- **Nonproduction deployments:** `ai-law-web-qa` version `af665dcd-1617-4503-a0d1-21bcc1c8ff2a` and `ai-law-web` version `57f8c033-556b-4675-8bed-35fd467b8216`; 100%, `QA_AUTH` service binding still `ai-law-standalone-cf-qa`. Existing login/workspace/dataset untouched. R53 real staging Chromium 11-width screenshot geometry/regressions passed in GitHub Actions `41971165250` (**10/10 PASS**). Primary was then promoted with the exact 18-module source package. Final dual-host Chromium CI `41971510719` queued at checkpoint; do not claim completed prior to actually checking.
+- **Gates:** Marketing/visual-only `SC-012` logged in `srs_changed.md`; baseline SRS v1.1.15 unchanged. No production, customer legal data, customer SaaS, subscriptions, or hidden API permissions. Owner final phone aesthetic acceptance remains `NOT_RUN_OWNER`.
+- **PR:** https://github.com/ntdung-tds/Mihy-Law-Agent/pull/70
 
 ## R52 — owner-approved purple cohesion, mobile slogan/menu/contact and longer landings
 
