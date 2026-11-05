@@ -10,6 +10,11 @@ const modules=[
  ['public_html.mjs','web/website/index.html','SITE_HTML'],
  ['landing_private_html.mjs','web/website/private.html','LANDING_PRIVATE_HTML'],
  ['landing_subscription_html.mjs','web/website/subscription.html','LANDING_SUBSCRIPTION_HTML'],
+ ['landing_about_html.mjs','web/website/about.html','LANDING_ABOUT_HTML'],
+ ['landing_solutions_html.mjs','web/website/solutions.html','LANDING_SOLUTIONS_HTML'],
+ ['landing_features_html.mjs','web/website/features.html','LANDING_FEATURES_HTML'],
+ ['landing_security_html.mjs','web/website/security.html','LANDING_SECURITY_HTML'],
+ ['footer_contact_html.mjs','web/website/contact.html','FOOTER_CONTACT_HTML'],
  ['public_css.mjs','web/website/styles.css','SITE_CSS'],
  ['public_js.mjs','web/website/site.js','SITE_JS'],
  ['login_html.mjs','web/website/login.html','LOGIN_HTML'],
@@ -24,4 +29,4 @@ for(const [name,src,exported] of modules){
  const text=fs.readFileSync(path.join(root,src),'utf8');
  fs.writeFileSync(path.join(out,name),exported?('export const '+exported+'='+JSON.stringify(text)+';\n'):text);
 }
-console.log('AI Law website QA modules prepared: '+modules.length);
+console.log('Mihy Law AI Agent website QA modules prepared: '+modules.length);
