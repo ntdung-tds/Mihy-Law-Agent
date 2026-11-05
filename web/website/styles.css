@@ -1346,3 +1346,41 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
  .detail-announcement-action{font-size:12.5px}
  .detail-footer-bottom{gap:8px}
 }
+
+/* R55 — 2026-11-05: quiet editorial micro-banners and two balanced
+   mobile offering links. Keeps the approved full homepage banner wording. */
+.announcement-inner{padding:8px 0 9px}
+.announcement-copy,.announcement-action{font-size:11.5px;line-height:1.55}
+.detail-announcement-inner{gap:10px;padding:8px 0}
+.detail-announcement-brand{font-size:10px;letter-spacing:.55px;gap:5px}
+.detail-announcement-brand>span{font-size:13px}
+.detail-announcement-copy{font-size:11px;line-height:1.45}
+.detail-announcement-action{font-size:11px;line-height:1.45;font-weight:800}
+.hero-offering.hero-offering-choices{display:flex;align-items:center;flex-wrap:wrap;gap:8px 17px;max-width:100%;margin:-8px 0 25px;padding:11px 14px;border:1px solid #e7ddec;border-left:3px solid #906db3;border-radius:10px;background:linear-gradient(110deg,#fffafc,#f8f4fc);box-shadow:0 5px 18px #392a6309}
+.hero-offering-kicker{color:#77618d;font-size:9.5px;line-height:1.4;font-weight:850;letter-spacing:.85px;white-space:nowrap}
+.hero-offering-choices-links{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;min-width:0}
+.hero-offering.hero-offering-choices .hero-offering-choices-links a{display:inline-flex;align-items:center;flex-wrap:nowrap;gap:5px;white-space:nowrap;color:#63418e;font-size:12px;font-weight:850;line-height:1.45;text-decoration:none;text-underline-offset:4px}
+.hero-offering.hero-offering-choices .hero-offering-choices-links a:hover,.hero-offering.hero-offering-choices .hero-offering-choices-links a:focus-visible{color:#493071;text-decoration:underline}
+.hero-offering.hero-offering-choices .hero-offering-choices-links a .icon{width:12px;height:12px;flex-shrink:0}
+@media(max-width:700px){
+ .announcement-inner{padding:7px 0 8px!important;line-height:1.5!important}
+ .announcement-copy,.announcement-action{font-size:11.2px!important;line-height:1.5!important}
+ .announcement-action{font-weight:850!important}
+ .detail-announcement-inner{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:baseline;column-gap:9px;row-gap:4px;padding:7px 0 9px;min-height:0}
+ .detail-announcement-brand{font-size:9.5px;line-height:1.35;letter-spacing:.45px;gap:4px}
+ .detail-announcement-brand>span{font-size:12px}
+ .detail-announcement-copy{min-width:0;font-size:10.7px;line-height:1.42;letter-spacing:-.12px}
+ .detail-announcement-action{grid-column:1/-1;justify-self:start;font-size:11px;line-height:1.35;font-weight:800}
+ .hero-offering.hero-offering-choices{display:grid;gap:8px;margin:-6px 0 19px;padding:12px 14px}
+ .hero-offering-kicker{font-size:9.5px;letter-spacing:.7px}
+ .hero-offering-choices-links{gap:8px 15px}
+ .hero-offering.hero-offering-choices .hero-offering-choices-links a{font-size:12px;line-height:1.45}
+}
+@media(max-width:380px){
+ .announcement-copy,.announcement-action{font-size:10.9px!important}
+ .detail-announcement-brand{font-size:9px}
+ .detail-announcement-copy{font-size:10.3px}
+ .detail-announcement-action{font-size:10.8px}
+ .hero-offering.hero-offering-choices{padding:11px 12px}
+ .hero-offering.hero-offering-choices .hero-offering-choices-links a{font-size:11.7px}
+}
