@@ -166,6 +166,7 @@ jobs:
         run: |
           node --check deployment/cloudflare/src/worker.mjs
           node --check deployment/cloudflare/src/mobile_auth.mjs
+          python -m py_compile deployment/cloudflare/tools/render_r62_qa_verifiers.py
           node --check web/r0-preview/session.js
           node --check deployment/cloudflare/src/google_drive.mjs
           node --check deployment/cloudflare/src/matter_workspace.mjs
@@ -185,6 +186,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r62_workspaces.test.mjs
       - name: Execute real SQLite R62 session/issuer/subject and tenant-MatterACL isolation
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r62_qa_session_sql.py' -v
+      - name: Validate R62 secure offline QA verifier renderer (synthetic credentials only)
+        run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r62_provision.py' -v
       - name: Verify R62 same-origin service relay, method gates and rotated cookies
         run: node --test deployment/cloudflare/tests/r62_site_relay.test.mjs
       - name: Execute actual authz queries and FK/deny rules against SQLite
