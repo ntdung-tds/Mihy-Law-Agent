@@ -161,7 +161,13 @@ def verify_account(playwright, browser, actor_id, actor, private, width):
             assert changed.status == 200, "AUTHORIZED_TENANT_SWITCH"
             rotated = get_sid(context)
             assert rotated and rotated != old_sid, "SID_NOT_ROTATED"
-            assert context.request.get(QA_URL + "/api/qa/session").json()["tenant_id"] == targets[0], "TENANT_NOT_SWITCHED"
+            switched_session = context.request.get(QA_URL + "/api/qa/session")
+            assert switched_session.status == 200, "ROTATED_SESSION_UNAVAILABLE"
+            assert switched_session.json()["tenant_id"] == targets[0], "TENANT_NOT_SWITCHED"
+            # Verify the actual client workspace selector reloads from the new tenant.
+            page.reload(wait_until="domcontentloaded")
+            page.locator("#workspace-switch-desktop-select").wait_for(state="attached", timeout=15000)
+            assert page.locator("#workspace-switch-desktop-select").input_value() == targets[0], "UI_TENANT_STALE"
             # Independent request context replays *only* old cookie; never print it.
             old_request = playwright.request.new_context(
                 extra_http_headers={"Cookie": "al_qa_session=" + old_sid})
