@@ -44,3 +44,35 @@ test('public CTA and benefit section preserve direct navigation, SRS workspace u
  assert.ok(html.includes('id="faq"'));
  assert.ok(html.includes('class="faq-list"'));
 });
+
+test('MihiAgent offers exactly two prominent, distinct delivery models',()=>{
+ assert.equal((html.match(/class="solution-card solution-/g)||[]).length,2);
+ assert.ok(html.indexOf('id="solutions"')>html.indexOf('id="hero-title"'));
+ assert.ok(html.indexOf('id="solutions"')<html.indexOf('id="features"'));
+ for(const phrase of [
+   'HAI GIẢI PHÁP TỪ MIHIAGENT','MihiAgent cung cấp giải pháp',
+   'Hệ thống của bạn.','Quyền chủ động của bạn.',
+   'thanh toán phí sử dụng AI','theo mức dùng','phân quyền và kiểm soát dữ liệu',
+   'DỊCH VỤ AI LAW THEO GÓI','Chọn gói và sử dụng.',
+   'hạn mức sử dụng','Đang phát triển','Dịch vụ chưa mở bán',
+   'gói, mức phí và hạn mức sẽ được công bố'
+ ])assert.ok(html.includes(phrase),'Missing grounded offering claim: '+phrase);
+ assert.match(html,/id="faq-deployment"/);
+ assert.match(html,/id="faq-saas"/);
+ assert.match(html,/href="#faq-deployment"/);
+ assert.match(html,/href="#faq-saas"/);
+ assert.match(html,/href="#solutions"/);
+ assert.ok(!html.includes('10.000đ/tháng'));
+ assert.ok(!html.includes('Đăng ký gói ngay'));
+});
+test('delivery model navigation and future-service honesty across mobile',()=>{
+ const section=html.slice(html.indexOf('id="solutions"'),html.indexOf('id="features"'));
+ assert.equal((section.match(/<article class="solution-card/g)||[]).length,2);
+ assert.match(section,/mô hình dịch vụ trực tuyến/);
+ assert.match(section,/dịch vụ AI Law theo gói/);
+ assert.match(section,/chưa mở bán/);
+ assert.ok(css.includes('.solution-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))'));
+ assert.ok(css.includes('.solution-grid{grid-template-columns:minmax(0,1fr);gap:15px}'));
+ assert.ok(css.includes('.solution-card{padding:23px 20px 22px}'));
+ assert.ok(html.includes('href="/login">Bắt đầu với AI Law'));
+});
