@@ -348,5 +348,7 @@ jobs:
         run: |
           python -m pip install 'playwright==1.55.0'
           python -m playwright install --with-deps chromium
-      - name: Check real QA homepage visible text, CTA and mobile width 320–1440
-        run: python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
+      - name: Verify staging and primary website visual geometry at 11 viewport widths
+        run: |
+          python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
+          AI_LAW_WEBSITE_URL=https://ai-law-web.iaict-platform.workers.dev python deployment/cloudflare/tests/live_ai_law_mobile_benefits.py
