@@ -58,7 +58,7 @@ def run():
    page.evaluate('document.fonts.ready')
    page.wait_for_timeout(180)
    text=page.locator('#hero-title').inner_text()
-   assert 'Bớt việc lặp lại.' in text,(width,text)
+   assert 'Sắc bén trong lập luận.' in text,(width,text)
    assert page.locator('.solution-card').count()==2
    assert page.locator('.solution-private').is_visible()
    assert page.locator('.solution-service').is_visible()
@@ -82,7 +82,7 @@ def run():
    if width<=970:
     page.locator('#menu-toggle').click()
     assert page.locator('#mobile-menu').is_visible()
-    page.locator('#mobile-menu a[href="#solutions"]').click()
+    page.locator('#mobile-menu a[href="/giai-phap"]').click()
     assert page.locator('#mobile-menu').is_hidden()
    assert not errors,('JS errors',width,errors)
    if width<=700:
