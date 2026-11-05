@@ -87,7 +87,7 @@ def render(bundle: dict, inventory: dict, salt_function=secrets.token_bytes) -> 
         "-- PRIVATE R62 QA ONLY: 8 salted PBKDF2 verifiers (7 active, 1 disabled).\n"
         "-- Run only against existing isolated ai-law-standalone-cf-qa D1.\n"
         "-- No plaintext passwords. NEVER commit this generated SQL.\n"
-        "BEGIN TRANSACTION;\n" + "\n".join(rows) + "\nCOMMIT;\n"
+        "\n".join(rows) + "\n"
     )
 
 
