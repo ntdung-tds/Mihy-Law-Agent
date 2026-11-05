@@ -1,10 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `60` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T12:16:32.797Z`.
+- **PCS revision:** `61` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T12:51:54.385Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
+
+
+## R61 — real Chromium QA and nonproduction rollout; real multi-account IAM still open (2026-11-05)
+
+- **Owner direction:** Owner delegated next functional QA work with browser testing, while retaining SRS v1.1.15 and existing R0 standalone-first / D01-approved policy.
+- **Live Cloudflare:** Existing `ai-law-web-qa` QA Worker updated only `workspace_session.mjs` and `workspace_matters.mjs` from merged R60 source, version `ea55af9f-8a7e-413f-9f65-93aaa09b66a2` 100%. After scoped Chromium QA PASS, the same exact 18-module source was promoted to the public-facing **NONPRODUCTION** `ai-law-web` Worker version `71f406a3-75d3-43f7-8b59-22d7ca6c0745` 100%. QA and primary module content equal 18/18; both keep `QA_AUTH -> ai-law-standalone-cf-qa` service binding. No production deployment.
+- **Browser QA (actual):** [GitHub Actions 42028912106](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42028912106) completed/success **29/29 jobs**. Real Playwright/Chromium connected to live QA HTTPS at widths 320, 390, 430, 1440: login form, show/hide password, horizontal overflow and anonymous `/app`, session/matter/assets protected with HTTP 401 all PASS. Separate Playwright script executed actual checked-in R60 JS in Chromium with **mocked API data** for lawyer/admin/unknown role and session revocation redirect; PASS, *not actual live user login*. Cloudflare Browser Rendering also inspected nonproduction primary login at 390px and confirmed anonymous `/app` redirects to login at 1440px.
+- **PR:** [#81](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/81) merged `547710ac7a15e91fc82e574f40abc09403b48764`. Test source `deployment/cloudflare/tests/live_r61_qa_auth_browser.py`; all test logs public-safe, no passwords, private cookies or client content.
+- **Owner-private evidence:** R61 QA test report saved in the existing private **AI Law Test Evidence** Drive folder (owner-only, verified not shared). Do not include that private document URL/ID or QA credentials in this public repository.
+- **Remaining IAM:** Direct D1 recheck confirmed **10 synthetic principals, 12 memberships, only 1 active login verifier, zero real QA matter-catalog rows**. Credential provisioning by cross-app automation was blocked by safety controls; no new accounts/password verifiers created. QA04 not currently locked. A temporary synthetic session made for a browser probe was deleted; that positive-browser probe did **not** pass. Actual IdP/role-account positive login, TC12A/B, full MatterACL security and physical Owner functional acceptance remain NOT_RUN.
+- **Next:** Securely activate separately authorized QA accounts (without public/CI credential exposure) and run live positive role, logout/session-expiry, organization isolation and MatterACL E2E. Production, real customer file processing, IAICT-hosted SaaS, and Drive OAuth remain gated.
 
 
 ## R60 — Owner accepts marketing UI; Batch 1 QA authentication started (2026-11-05)
