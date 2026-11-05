@@ -1,11 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `62` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T14:14:08.742Z`.
+- **PCS revision:** `63` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-05T16:51:16.016Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
+
+## R63 — Owner-approved mobile bottom nav, Cloudflare QA UI deployed; Owner live signoff pending (2026-11-05)
+
+- **Owner approval:** Replace protected R0 mobile right-side floating menu with a full-width **fixed five-item bottom bar** (Tổng quan, Tài liệu, Trợ lý, Tra cứu, Chức năng), 320/390px safe-area and bottom clearance; keep 11-feature drawer, four workspace views and desktop sidebar unchanged. No change to approved public Mẫu 11 or SRS v1.1.15.
+- **GitHub:** [PR #85](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/85) merged main `6703868cb4101ed1128bc75b8d65e258f165d402`; [Actions 42065743204](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42065743204) **completed/success, 10/10 executed jobs PASS**, 20 conditional skips. R63 Playwright/Chromium 320/390/1440 checked actual R0 DOM with *simulated positive QA API*, switching tabs and preserving desktop; not live password login.
+- **QA deployment only:** Cloudflare Worker `ai-law-web-qa` new version `b8e6ee03-c201-4f5e-9264-302cfbd48694` at 100%. Replaced **only** `workspace_html.mjs` and `workspace_css.mjs` from merged source; direct Cloudflare source readback matches GitHub exactly, all 18 modules remain present, `QA_AUTH -> ai-law-standalone-cf-qa` service binding unchanged. Prior QA version `ea55af9f-8a7e-413f-9f65-93aaa09b66a2` retained as rollback reference. **No deployment to `ai-law-web` primary NONPRODUCTION or production.**
+- **Remaining QA:** Cloudflare Browser Rendering live page test returned **HTTP 429 rate limit**. Owner authenticated physical-phone check of five bottom tabs and function drawer **NOT_RUN**; no claim of live positive login. R62 backend/session/tenant switching source **remains not deployed** on QA, despite merged GitHub source; this R63 change is presentation-only over the older live QA modules. No credentials, QA password hashes, actual legal files or customer data committed.
+- **Next:** Owner mobile verify QA `/app` once signed in; retry actual live browser when Browser Rendering quota permits; independently deploy/test R62 IAM and tenant switching in isolated QA under private credential/operator gates before any nonproduction primary promotion. Final Owner acceptance required.
 
 ## R62 — hardened QA identity/tenant code; live activation and deployment remain BLOCKED (2026-11-05)
 
