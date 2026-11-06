@@ -31,8 +31,73 @@ def _unsafe_catalog(catalog) -> bool:
     return False
 
 
+def _check_text_display_safety(page) -> None:
+    """Conservatively reject PDF text not faithfully represented by layout mode.
+
+    This is NOT visual-fidelity proof. Overlay painting, custom font maps and
+    unusual PDF constructs can still differ from the rendered page; downstream
+    users must visually verify source content before relying on legal results.
+    """
+    # Layout extraction can silently omit text nested in Form XObjects.
+    # Reject until recursively verified text extraction/source anchors exist.
+    resources = page.get("/Resources")
+    resources = resources.get_object() if resources else {}
+    objects = resources.get("/XObject", {})
+    objects = objects.get_object() if hasattr(objects, "get_object") else objects
+    for child in objects.values():
+        child = child.get_object() if hasattr(child, "get_object") else child
+        if child.get("/Subtype") == "/Form":
+            raise SourceDocumentError("PDF Form XObject text may be omitted by layout extraction")
+    rect = page.cropbox
+    xmin, ymin = float(rect.left), float(rect.bottom)
+    xmax, ymax = float(rect.right), float(rect.top)
+    if not all(abs(v) < 1e9 for v in (xmin, ymin, xmax, ymax)) or xmin >= xmax or ymin >= ymax:
+        raise SourceDocumentError("Invalid PDF crop box")
+    problems = []
+
+    def before(operator, arguments, _ctm, _text_matrix):
+        if operator == b"Tr" and arguments:
+            if int(arguments[0]) in (3, 7):
+                problems.append("invisible/clip-only text render mode")
+        if operator == b"gs" and arguments:
+            resource = page.get("/Resources")
+            resource = resource.get_object() if resource else {}
+            states = resource.get("/ExtGState", {})
+            states = states.get_object() if hasattr(states, "get_object") else states
+            key = arguments[0]
+            state = states.get(key) if states else None
+            state = state.get_object() if hasattr(state, "get_object") else state
+            if state and (float(state.get("/ca", 1)) == 0 or float(state.get("/CA", 1)) == 0):
+                problems.append("zero-opacity graphics state")
+
+    def visible_text(text, ctm, tm, _font, size):
+        if not text.strip():
+            return
+        # pypdf's layout-mode extraction silently discards rotated text.
+        a = ctm[0] * tm[0] + ctm[2] * tm[1]
+        b = ctm[1] * tm[0] + ctm[3] * tm[1]
+        c = ctm[0] * tm[2] + ctm[2] * tm[3]
+        d = ctm[1] * tm[2] + ctm[3] * tm[3]
+        x = ctm[0] * tm[4] + ctm[2] * tm[5] + ctm[4]
+        y = ctm[1] * tm[4] + ctm[3] * tm[5] + ctm[5]
+        scale = max(abs(a), abs(b), abs(c), abs(d), 1e-12)
+        if abs(b) > scale * .001 or abs(c) > scale * .001:
+            problems.append("rotated/skewed text omitted by PDF layout extraction")
+        margin = max(12., abs(float(size)) * 2.)
+        if not xmin-margin <= x <= xmax+margin or not ymin-margin <= y <= ymax+margin:
+            problems.append("text begins outside visible crop area")
+
+    # In contrast to layout mode, plain mode supplies visitor positions and
+    # PDF graphics operators. Reject known invisible/missing text BEFORE
+    # creating a numbered source map; do not silently discard legal clauses.
+    page.extract_text(extraction_mode="plain",
+                      visitor_operand_before=before, visitor_text=visible_text)
+    if problems:
+        raise SourceDocumentError("PDF display cannot be trusted: " + problems[0])
+
+
 def extract_pdf_segments(blob: bytes, *, source_scope: str) -> tuple[SourceSegment, ...]:
-    """Extract visible text-only pages; `p{page}:l{line}` anchors are 1-based.
+    """Extract bounded text streams; `p{page}:l{line}` anchors are 1-based.
 
     Plain PDF text has no guaranteed reading order or DOCX-like table structure.
     Downstream translation requires review of page layout and source integrity.
@@ -62,6 +127,7 @@ def extract_pdf_segments(blob: bytes, *, source_scope: str) -> tuple[SourceSegme
             # Includes inline images and images nested inside Form XObjects.
             if list(page.images):
                 raise SourceDocumentError("Image or scanned PDF needs OCR and human verification")
+            _check_text_display_safety(page)
             raw = page.extract_text(extraction_mode="layout")
             if not isinstance(raw, str) or not raw.strip():
                 raise SourceDocumentError("PDF page lacks extractable text; OCR needed")

@@ -1,11 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `69` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T07:43:19.711Z`.
+- **PCS revision:** `70` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T08:32:16.909Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
+
+## R70 — Independent R69 source-integrity audit, actual false-positive/false-negative defects corrected (2026-11-06)
+
+- **Owner:** Requested one further review of R69. No new features, baseline SRS v1.1.15 remains unchanged/private, R67 Account Center still paused.
+- **Confirmed by real synthetic PDF/DOCX bytes, not just static review:** (1) pypdf included off-page text; (2) render mode 3 and alpha-zero PDF text were extracted though invisible; (3) rotated and Form XObject visible PDF text were silently missing in layout mode; (4) Word inline/inherited hidden text was included as normal; (5) visible header/footer text was silently omitted from DOCX source map.
+- **Fix:** `poc_docx/pdf_segments.py` rejects these PDF cases using a second plain-mode visitor and Form XObject check, while `poc_docx/source_segments.py` rejects hidden paragraph/style text and non-empty unprocessed headers/footers. These are deliberate fail-closed limitations, **not** general PDF renderer-equivalence or full Word document support. More complex PDFs (vector overlays, redactions, unusual fonts, nonvisible clipping) require visual verification/expanded coverage.
+- **Evidence:** Rendered the hidden-PDF sample as a real PNG and verified the page does not display the text that the old extractor emitted. Local targeted suites **PASS 34/34** (R68 11, R69 12, R70 11), generated actual DOCX/PDF files; no client data. [PR #95](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/95) contains regressions. CI run [#42187917547](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42187917547) started for code HEAD, final PR HEAD must pass before merge.
+- **Release limits:** No Cloudflare QA or production deployment; this is a local Python source library not wired into Workers. No real account upload, Drive storage, OCR, translation, grammar, summary, or release acceptance; all remain NOT_RUN. Do not interpret the numeric unit-test pass as legal document completeness.
+- **Next:** CI → fix/retest on failure → merge only on successful final HEAD; then work on controlled authenticated document intake and provenance. Owner final acceptance required.
 
 ## R69 — PDF + unified DOCX/PDF source ingestion batch (2026-11-06)
 
@@ -13,7 +22,7 @@
 - **R69-01 PDF:** `poc_docx/pdf_segments.py` parses **text-only PDFs** using pypdf (pinned 5.9.0), retains deterministic page/line anchors and rejects encryption, scanned/mixed raster pages, no-text pages, interactive PDF/attachments, oversized/malformed pages and files. PDF layout/reading order is NOT certified; pages need user review prior to legal conclusions. No OCR implemented.
 - **R69-02 common document map:** `poc_docx/document_intake.py` dispatches by validated PDF/DOCX extension to actual format parser, produces immutable source segments, SHA256 of original bytes and explicit `document_only` source scope. It does NOT persist content, upload, expand approved legal corpus, run AI or perform tenant/MatterACL authorization; caller must verify identity, tenant, source, storage and audit first.
 - **R69-03 real bytes tests:** `tests/test_document_intake.py` creates real 1/2/51-page PDFs, mixed image/text PDF, encrypted PDF, attached-file PDF and real DOCX with a table, testing positional anchors, scope/format mismatch, path traversal, OCR-needed, limits and corrupted files. **12/12 PASS** locally. PDF sample render inspected. Existing GitHub [Actions #42182261096](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42182261096) completed **9/9 executed PASS**, 21 conditional skipped, no failing jobs.
-- **GitHub:** [PR #94](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/94). PCS/head documentation update requires final CI on final commit before merge; do not claim merged until readback.
+- **GitHub:** [PR #94](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/94). final CI [#42182761375](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42182761375) **PASS 9/9**; PR #94 squash-merged to main commit `d92269c81f95d59d213d9e3631fe2ac21cd65224`.
 - **Boundaries & next:** This is **Python local module only**, not deployed to Cloudflare Free Worker and **NOT** authenticated mobile/desktop upload; UC03/UC04/UC07 complete legal AI flows NOT_RUN. Next add authorized QA runtime intake (no production), then real translation/QA/export; prioritize Owner R0 functions. Private original v1.1.15 ZIP not accessible here; use historical hash and verified constraints only, no fabricated clause mapping. R65 role E2E and QA password-rotation security remain open.
 
 ## R68-01 — Implemented first missing R0 document pipeline task (2026-11-06)

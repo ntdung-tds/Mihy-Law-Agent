@@ -47,7 +47,7 @@ def _parse_xml(raw: bytes):
         raise SourceDocumentError("Malformed DOCX XML") from exc
 
 
-def _safe_zip(blob: bytes) -> tuple[bytes, bytes]:
+def _safe_zip(blob: bytes) -> tuple[bytes, bytes, bytes | None, tuple[bytes, ...]]:
     if not isinstance(blob, bytes) or not blob or len(blob) > MAX_INPUT:
         raise SourceDocumentError("Expected non-empty DOCX bytes within size limit")
     try:
@@ -79,7 +79,13 @@ def _safe_zip(blob: bytes) -> tuple[bytes, bytes]:
                 raise SourceDocumentError("DOCX body exceeds XML limit")
             if package.testzip() is not None:
                 raise SourceDocumentError("DOCX package integrity check failed")
-            return package.read(DOCUMENT_PART), package.read("[Content_Types].xml")
+            # Body-only parsing must not silently omit header or footer content.
+            presentation_parts = tuple(package.read(name) for name in sorted(names)
+                                       if name.startswith(("word/header", "word/footer"))
+                                       and name.endswith(".xml"))
+            return (package.read(DOCUMENT_PART), package.read("[Content_Types].xml"),
+                    package.read("word/styles.xml") if "word/styles.xml" in names else None,
+                    presentation_parts)
     except (BadZipFile, EOFError, OSError, RuntimeError) as exc:
         raise SourceDocumentError("Invalid or damaged DOCX archive") from exc
 
@@ -114,7 +120,7 @@ def extract_docx_segments(blob: bytes, *, source_scope: str) -> tuple[SourceSegm
     """
     if source_scope != "document_only":
         raise SourceDocumentError("Explicit document_only source scope is required")
-    document_xml, types_xml = _safe_zip(blob)
+    document_xml, types_xml, styles_xml, presentation_parts = _safe_zip(blob)
     types = _parse_xml(types_xml)
     if types.tag != CT + "Types" or not any(
         child.tag == CT + "Override" and
@@ -122,6 +128,18 @@ def extract_docx_segments(blob: bytes, *, source_scope: str) -> tuple[SourceSegm
         child.get("ContentType") == MAIN_TYPE for child in types
     ):
         raise SourceDocumentError("DOCX content type is not valid")
+    # Header/footer notices, identifiers and page-number fields are visible
+    # document content. Until mapped explicitly, fail closed instead of losing
+    # legal clauses that a reader could see in Microsoft Word.
+    presentation_content = {W + tag for tag in (
+        "t", "delText", "instrText", "fldChar", "drawing", "pict",
+        "object", "tab", "br", "cr", "sym",
+    )}
+    for raw_part in presentation_parts:
+        part = _parse_xml(raw_part)
+        if any(el.tag in presentation_content and
+               (el.tag != W + "t" or bool((el.text or "").strip())) for el in part.iter()):
+            raise SourceDocumentError("DOCX header/footer contains unextracted content")
     root = _parse_xml(document_xml)
     body = root.find(W + "body")
     if root.tag != W + "document" or body is None:
@@ -133,8 +151,15 @@ def extract_docx_segments(blob: bytes, *, source_scope: str) -> tuple[SourceSegm
         "delText", "sym", "footnoteReference", "endnoteReference",
         "commentReference", "ptab",
     )}
-    if any(element.tag in unsupported for element in body.iter()):
-        raise SourceDocumentError("DOCX has unreviewed or unsupported content")
+    invisible = {W + "vanish", W + "webHidden", W + "specVanish"}
+    if any(element.tag in unsupported or element.tag in invisible for element in body.iter()):
+        raise SourceDocumentError("DOCX has unreviewed, hidden or unsupported content")
+    # Inherited character/paragraph styles may hide text without a w:vanish
+    # marker on the original paragraph or text run.
+    if styles_xml is not None:
+        styles = _parse_xml(styles_xml)
+        if any(element.tag in invisible for element in styles.iter()):
+            raise SourceDocumentError("DOCX includes hidden text style definitions")
     collected = []
     chars = 0
 
