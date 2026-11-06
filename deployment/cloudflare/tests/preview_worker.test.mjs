@@ -23,6 +23,12 @@ const env={QA_AUTH:{async fetch(req){
   if(u.pathname==='/api/qa/matters') {
     return Response.json(req.method==='GET'?{matters:[]}:{id:'f0000000-0000-4000-8000-000000000001',title:'QA case',created_at:1800000000},{status:req.method==='GET'?200:201});
   }
+  if(u.pathname==='/api/qa/change-password'){
+    if(!logged)return new Response('{"error":"expired"}',{status:401});
+    logged=false;
+    return new Response('{"ok":true}',{headers:{'Content-Type':'application/json',
+      'Set-Cookie':'al_qa_session=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0'}});
+  }
   if(u.pathname==='/api/qa/logout'){
     logged=false;
     return new Response('{"ok":true}',{headers:{'Set-Cookie':'al_qa_session=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Strict'}});
@@ -73,6 +79,22 @@ test('R46 real matter API GET/POST are same-origin, service-bound and not public
     method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:'{"title":"QA case"}'}),env);
   assert.equal(created.status,201);
   assert.equal(requests.at(-1).origin,'https://ai-law-standalone-cf-qa.iaict-platform.workers.dev');
+});
+test('R66 password change is QA service-bound, CSRF protected and clears the old session',async()=>{
+ logged=true;
+ const page=await handlePreview(new Request(origin+'/',{headers:{Cookie:'al_qa_session=mock'}}),env);
+ assert.match(await page.text(),/id="change-password-dialog"/);
+ const noGet=await handlePreview(new Request(origin+'/api/qa/change-password'),env);
+ assert.equal(noGet.status,404);
+ const csrf=await handlePreview(new Request(origin+'/api/qa/change-password',{method:'POST',
+   headers:{Origin:'https://untrusted.invalid','Content-Type':'application/json'},body:'{}'}),env);
+ assert.equal(csrf.status,403);
+ const res=await handlePreview(new Request(origin+'/api/qa/change-password',{method:'POST',
+   headers:{Origin:origin,'Sec-Fetch-Site':'same-origin','Content-Type':'application/json'},
+   body:JSON.stringify({current_password:'only-test-old',new_password:'only-test-new'})}),env);
+ assert.equal(res.status,200);
+ assert.match(res.headers.get('Set-Cookie'),/Max-Age=0/);
+ assert.equal(requests.at(-1).origin,'https://ai-law-standalone-cf-qa.iaict-platform.workers.dev');
 });
 test('logout is CSRF protected and clears session',async()=>{
   const bad=await handlePreview(new Request(origin+'/api/qa/logout',{method:'POST',headers:{Origin:'https://evil.invalid'},body:'{}'}),env);
