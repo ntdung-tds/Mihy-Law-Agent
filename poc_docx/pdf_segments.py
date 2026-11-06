@@ -38,6 +38,16 @@ def _check_text_display_safety(page) -> None:
     unusual PDF constructs can still differ from the rendered page; downstream
     users must visually verify source content before relying on legal results.
     """
+    # Layout extraction can silently omit text nested in Form XObjects.
+    # Reject until recursively verified text extraction/source anchors exist.
+    resources = page.get("/Resources")
+    resources = resources.get_object() if resources else {}
+    objects = resources.get("/XObject", {})
+    objects = objects.get_object() if hasattr(objects, "get_object") else objects
+    for child in objects.values():
+        child = child.get_object() if hasattr(child, "get_object") else child
+        if child.get("/Subtype") == "/Form":
+            raise SourceDocumentError("PDF Form XObject text may be omitted by layout extraction")
     rect = page.cropbox
     xmin, ymin = float(rect.left), float(rect.bottom)
     xmax, ymax = float(rect.right), float(rect.top)
