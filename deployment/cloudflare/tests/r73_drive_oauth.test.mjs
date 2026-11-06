@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {oauthDriveApi,tenantDriveAdapter,ready,CHECK_SESSION_SQL} from '../src/oauth_drive.mjs';
+import {oauthDriveApi,tenantDriveAdapter,ready,CHECK_SESSION_SQL,PERSONAL_OWNER_SQL} from '../src/oauth_drive.mjs';
 import {COOKIE_SESSION_SQL} from '../src/mobile_auth.mjs';
 const I='11111111-1111-4111-8111-111111111111';
 const T='22222222-2222-4222-8222-222222222222';
@@ -9,7 +9,8 @@ const SID='44444444-4444-4444-8444-444444444444';
 const ROOT='qaDriveFolder_123456789';
 const BASE='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
 const now=1800000000;
-function fixture({role='tenant_admin',active=true,configured=true,tokenDenied=false}={}){
+function fixture({role='tenant_admin',active=true,configured=true,tokenDenied=false,
+ personal=false,personalMembers=1}={}){
  const statements=[];const pending=new Map(),connections=new Map(),calls=[];
  const env={AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,JWT_ISSUER:'https://issuer.qa.test',
   ...(configured?{GOOGLE_OAUTH_CLIENT_ID:'12345-demo.apps.googleusercontent.com',
@@ -19,6 +20,10 @@ function fixture({role='tenant_admin',active=true,configured=true,tokenDenied=fa
    if(sql===COOKIE_SESSION_SQL)return active?{sid:SID,user_id:U,tenant_id:T,role_key:role,
      subject:'synthetic',expires_at:now+600}:null;
    if(sql===CHECK_SESSION_SQL)return active?{user_id:U,tenant_id:T,role_key:role}:null;
+   if(sql===PERSONAL_OWNER_SQL){
+    assert.deepEqual(params,[I,T,U]);
+    return active&&personal&&role==='lawyer'&&personalMembers===1?{ok:1}:null;
+   }
    if(sql.startsWith('SELECT tenant_id,user_id,sid_cipher'))return pending.get(params[1])||null;
    if(sql.startsWith('SELECT root_id FROM qa_drive_connections'))return connections.get(params[1])||null;
    if(sql.startsWith('SELECT connected_at FROM qa_drive_connections'))return connections.get(params[1])||null;
@@ -146,4 +151,53 @@ test('Google denied token exchange leaves no connection and consumes state',asyn
  assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,303);
  assert.equal(x.connections.size,0);
  assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,303);
+});
+
+test('sole active member of personal workspace may connect their own Drive',async()=>{
+ const x=fixture({role:'lawyer',personal:true});
+ const status=await oauthDriveApi(req('/api/qa/drive/status'),x.env,x.opts);
+ assert.equal(status.status,200);
+ assert.equal((await status.json()).can_connect,true);
+ const start=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
+ assert.equal(start.status,200);
+ const u=new URL((await start.json()).authorization_url);
+ assert.equal(u.origin,'https://accounts.google.com');
+ assert.equal(u.searchParams.get('scope'),'https://www.googleapis.com/auth/drive.file');
+ const callback=req('/api/qa/drive/callback?state='+u.searchParams.get('state')+'&code=synthetic-code',
+  'GET',{cookie:false});
+ const completed=await oauthDriveApi(callback,x.env,x.opts);
+ assert.equal(completed.status,303);
+ assert.equal(completed.headers.get('Location'),
+  'https://ai-law-web-qa.iaict-platform.workers.dev/app?drive=connected#documents');
+ assert.equal(x.connections.get(T)?.root_id,ROOT);
+ assert.equal(x.statements.filter(s=>s.sql===PERSONAL_OWNER_SQL).length>=4,true);
+});
+test('organization lawyers and shared personal memberships cannot connect',async()=>{
+ for(const options of [
+  {role:'lawyer',personal:false},
+  {role:'lawyer',personal:true,personalMembers:2}
+ ]){
+  const x=fixture(options);
+  const status=await oauthDriveApi(req('/api/qa/drive/status'),x.env,x.opts);
+  assert.equal((await status.json()).can_connect,false);
+  const start=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
+  assert.equal(start.status,403);
+  assert.equal(x.pending.size,0);
+  assert.equal(x.calls.length,0);
+ }
+});
+test('personal owner loses sole membership during consent and callback fails closed',async()=>{
+ const x=fixture({role:'lawyer',personal:true});
+ const start=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
+ const url=new URL((await start.json()).authorization_url);
+ const prior=x.calls.length;
+ const original=x.env.DB.prepare;
+ x.env.DB.prepare=sql=>sql===PERSONAL_OWNER_SQL?
+  {bind:()=>({first:async()=>null})}:original(sql);
+ const completed=await oauthDriveApi(req('/api/qa/drive/callback?state='+
+  url.searchParams.get('state')+'&code=synthetic-code','GET',{cookie:false}),x.env,x.opts);
+ assert.equal(completed.status,303);
+ assert.match(completed.headers.get('Location'),/drive=failed/);
+ assert.equal(x.connections.size,0);
+ assert.equal(x.calls.length,prior);
 });
