@@ -1970,7 +1970,7 @@
       }
     ],
     "current": {
-      "active_task": "AL-R0-IAM-QA-R66-001",
+      "active_task": "AL-R0-DEPLOY-001",
       "last_completed_step": "R66: PR #90 merged 956532641a600abf1fe73f40c586c06500257b3d, Actions #42143772358 completed/success 10/10 executed. Cloudflare QA auth 6797bc2d and QA site 1e2abba8 deployed 100%; direct readback changed files matches merged main, bindings preserved, R63 bottom mobile nav intact. Browser Rendering real HTTPS anonymous login and unauthenticated /app redirect PASS, remaining rendering calls 429. Owner has not yet changed real password; no production deploy. Owner-private Drive test evidence saved.",
       "next_action": "Owner signs in at https://ai-law-web-qa.iaict-platform.workers.dev/login, opens Đổi mật khẩu in desktop top bar or mobile Chức năng, enters current password and a NEW unique password directly on website; then verifies old credential DENY, new credential PASS and all previous sessions revoked. Preserve R65 PR89 independent unmerged until reconciled with latest main and its CI revalidated; activate remaining R40 QA only through trusted operator. Do not self-deploy production.",
       "blockers": [
