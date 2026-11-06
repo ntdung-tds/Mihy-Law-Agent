@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 73,
-  "updated_at": "2026-11-06T11:44:32Z",
+  "revision": 74,
+  "updated_at": "2026-11-06T12:38:00Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1564,6 +1564,44 @@
           "No real tenant_admin Google consent, Drive refresh/ACL or PDF/DOCX live E2E without the above provider grant"
         ],
         "owner_acceptance": "PENDING"
+      },
+      {
+        "id": "AL-R0-GDRIVE-R76-PERSONAL-OWNER",
+        "title": "R76 fix Google Drive connect button hidden for personal workspace owner",
+        "status": "CODE_CI_PASS_DEPLOYED_QA_OWNER_CONSENT_PENDING",
+        "priority": "P1",
+        "scope": "Existing Google OAuth connection UX in isolated QA; permit sole active personal workspace member to authorize their own Drive while retaining org tenant_admin restriction, without schema, SRS, credential or production changes.",
+        "acceptance": [
+          "Personal sole active member with lawyer role sees Google connect button after OAuth setup",
+          "Organization lawyer and personal tenant with another active member are denied before OAuth pending state",
+          "After beginning, callback revalidates membership; invalidated grant cannot exchange token",
+          "Web and backend remain correct, existing Cloudflare config/secret bindings remain preserved"
+        ],
+        "test_results": {
+          "github_actions": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42218494031",
+          "ci": "PASS_9_OF_9_EXECUTED",
+          "oauth_node": "PASS_7_OF_7",
+          "ui_node": "PASS_6_OF_6",
+          "live_qa_d1_readonly": "PASS_TWO_ELIGIBLE_ACTIVE_PERSONAL_SESSIONS",
+          "cloudflare_backend_source": "PASS_MATCHED_GITHUB",
+          "cloudflare_web_source": "PASS_MATCHED_GITHUB",
+          "cloudflare_existing_bindings": "PASS_PRESERVED",
+          "cloudflare_traffic": "PASS_100_PERCENT_QA_BOTH_WORKERS",
+          "real_google_consent": "NOT_RUN_OWNER_ACTION",
+          "persisted_google_grant": "0_AT_CHECK",
+          "pdf_docx_upload_download": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/103",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42218494031",
+          "Cloudflare QA content-only upload module hash readback; 2026-11-06T12:36:48Z and 12:37:18Z deployments"
+        ],
+        "blockers": [
+          "Owner must click Google Drive consent from authenticated personal QA workspace",
+          "No authenticated real Google refresh/Drive file E2E until owner consents"
+        ],
+        "owner_acceptance": "PENDING"
       }
     ],
     "features": [
@@ -2170,8 +2208,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R75 PR101 squash-merged into main f542633dc419a5968ebc0e545b47ab26255e71c4 after final-head GitHub Actions #42211692868 completed SUCCESS 9/9 executed jobs. R75 synthetic DOM QA connect 6/6 PASS; R73 OAuth callback test 4/4 PASS. Cloudflare API deployed only changed source modules to ai-law-standalone-cf-qa and ai-law-web-qa through content-only upload; readback hashes PASS and pre-existing bindings unchanged. Cloudflare Browser Rendering confirmed QA /login renders; logged-in Google consent and document E2E NOT_RUN because OAuth client credentials not configured. Production untouched. R73 OAuth source and R74 UC03 bounded review-draft source exist, but no real OAuth grant or deployed UC03 complete workflow.",
-      "next_action": "One-time Google Cloud OAuth web application registration by an authorized Google organization/project administrator: authorize exact QA callback, approve drive.file scope, configure GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET privately as QA Worker bindings (NEVER in GitHub or chat). Then tenant_admin presses 'Kết nối Google Drive' once and approves Google consent; verify D1 grant, private root, synthetic PDF/DOCX upload/list/download/ACL revoke and refresh behavior in actual authenticated browser. UC03 legal quality, source mapping and DOCX export remain separate SRS gates; production and client data forbidden without final approval.",
+      "last_completed_step": "R76 PR#103 merged main 1c42efb14ad84ebdafdf13ec3c1f12887c823084 after GitHub Actions #42218494031 SUCCESS 9/9 executed; R73 OAuth Node 7/7 PASS and R75 UI Node 6/6 PASS. Actual QA D1 read-only query confirms two active personal sessions whose personal tenant has only one active member. Guarded personal-owner Google Drive OAuth permission implemented on status/start/callback, with organization tenant_admin-only preserved and negative tests. Both actual QA Workers updated by content-only API, source hash readback PASS, 100% QA deployment, existing bindings/secrets and unrelated modules unchanged. No owner Google consent or document transfer yet; D1 grants and receipts still zero. Production untouched.",
+      "next_action": "Owner reloads https://ai-law-web-qa.iaict-platform.workers.dev/app#documents in personal workspace and clicks 'Kết nối Google Drive'; Google selection and consent are Owner-only. If Google access blocked check OAuth consent screen testing users and Drive API enablement, no secrets in chat. After owner consent verify D1 grant and synthetic PDF/DOCX upload/list/download, ACL cross-tenant denial/refresh on authenticated browser; not label PASS before actual run. Production and customer files forbidden without separate approval.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -2209,7 +2247,7 @@
         "R66 as of 2026-11-06: QA password-change UI/API deployed and source/readback PASS but owner real password rotation NOT_RUN, so exposed credential remains potentially usable for new sessions. Prior 3 sessions revoked; no confirmation old denied/new accepted. Cloudflare Browser Rendering limited follow-up via HTTP429. R65 PR89 still OPEN/unmerged; separate credentials/roles/MatterACL testing BLOCKED.",
         "R68-01: DOCX source helper merged PR93 PASS but still not invoked by Cloudflare Worker; original SRS v1.1.15 ZIP not mounted; backend storage, upload, PDF/OCR and AI E2E separate tasks.",
         "R69+R70: source PDF/DOCX extraction and integrity guards are CI-PASS and merged, but NOT integrated with Cloudflare QA Worker or Google Drive; no real authenticated upload/read, OCR or UC03/04/07 AI E2E. Original private SRS 1.1.15 ZIP inaccessible for exact mapping; do not claim full PDF/Word display parity.",
-        "R72/R73/R75 Cloudflare QA API + website source is deployed and source/readback matches approved code. Google OAuth Client ID/Secret are still absent from QA Worker bindings; D1 has zero approved Drive connections and receipts. Google consent, authenticated file upload/list/download, revoked grant and tenant-isolation live browser E2E remain BLOCKED/NOT_RUN. R74 UC03 source-only review draft is not a deployed approved legal translation workflow."
+        "R72/R73/R75/R76 Cloudflare QA API + website OAuth source merged and deployed; Google Client ID/Secret are now present and valid in QA secrets/bindings. R76 personal-workspace sole member may initiate consent, and only org tenant_admin may connect organization Drive. Actual Owner Google consent, persisted Drive grant and authenticated synthetic PDF/DOCX file E2E still NOT_RUN (D1 grant count 0); legal UC03 full workflow remains NOT_RUN."
       ]
     },
     "policy": {
