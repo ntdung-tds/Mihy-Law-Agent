@@ -119,7 +119,7 @@
         }
         // The server revokes all sessions and clears the old cookie.
         form.reset();dialog.close();
-        location.replace('/login?changed=1');
+        location.replace(location.pathname==='/'?'/?password_changed=1':'/login?changed=1');
       }catch{report('Không thể kết nối dịch vụ QA. Vui lòng thử lại.');}
       finally{submit.disabled=false;}
     });
