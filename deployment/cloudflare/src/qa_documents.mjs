@@ -2,6 +2,7 @@
    Storage needs a customer-authorized Google Drive grant; no customer records in tests. */
 import {mobileSession} from './mobile_auth.mjs';
 import {GoogleDriveAdapter} from './google_drive.mjs';
+import {tenantDriveAdapter} from './oauth_drive.mjs';
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const MAX_FILE=1500000,MAX_REQUEST=1800000;
 const PDF='application/pdf',DOCX='application/vnd.openxmlformats-officedocument.wordprocessingml.document';
@@ -60,10 +61,12 @@ async function permit(env,p,matter,permission,now){
   p.user_id,permission,now,now).first();
  return !!row;
 }
-function driveAdapter(env,opts){
- if(typeof env.GOOGLE_DRIVE_ACCESS_TOKEN!=='string'||!env.GOOGLE_DRIVE_ROOT_ID)throw Error('No OAuth grant');
- return new GoogleDriveAdapter({accessToken:env.GOOGLE_DRIVE_ACCESS_TOKEN,
-  rootId:env.GOOGLE_DRIVE_ROOT_ID,fetcher:opts.driveFetch??fetch});
+async function driveAdapter(env,p,opts){
+ // Fixture injection is exclusively an internal server-side test option, never HTTP input.
+ if(opts.driveFetch&&typeof env.GOOGLE_DRIVE_ACCESS_TOKEN==='string'&&env.GOOGLE_DRIVE_ROOT_ID)
+  return new GoogleDriveAdapter({accessToken:env.GOOGLE_DRIVE_ACCESS_TOKEN,
+   rootId:env.GOOGLE_DRIVE_ROOT_ID,fetcher:opts.driveFetch});
+ return tenantDriveAdapter(env,p,opts);
 }
 async function readForm(req){
  const type=req.headers.get('Content-Type')||'';
@@ -89,7 +92,7 @@ async function list(req,env,p,now){
 }
 async function upload(req,env,p,now,opts){
  if(!csrf(req))return result(403,{error:'CSRF_DENIED'});
- let drive;try{drive=driveAdapter(env,opts);}catch{return unavailable();}
+ let drive;try{drive=await driveAdapter(env,p,opts);}catch{return unavailable();}
  let file,matter,name,mime,bytes;
  try{
   if(Number(req.headers.get('Content-Length')||0)>MAX_REQUEST)throw Error('too_large');
@@ -133,7 +136,7 @@ async function download(env,p,id,now,opts){
  if(!UUID.test(id||''))return forbidden();
  const r=await env.DB.prepare(READ_SQL).bind(env.INSTALLATION_ID,p.tenant_id,id).first();
  if(!r||r.provider!=='google_drive'||!await permit(env,p,r.matter_id,'read',now))return forbidden();
- const drive=driveAdapter(env,opts),response=await drive.download(r.provider_object_id);
+ const drive=await driveAdapter(env,p,opts),response=await drive.download(r.provider_object_id);
  if(Number(response.headers.get('Content-Length')||0)>MAX_FILE)throw Error('Too large');
  const bytes=new Uint8Array(await response.arrayBuffer());
  if(bytes.length!==Number(r.byte_length)||bytes.length>MAX_FILE||await sha256(bytes)!==r.sha256)

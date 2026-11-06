@@ -1,0 +1,144 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {oauthDriveApi,tenantDriveAdapter,ready,CHECK_SESSION_SQL} from '../src/oauth_drive.mjs';
+import {COOKIE_SESSION_SQL} from '../src/mobile_auth.mjs';
+const I='11111111-1111-4111-8111-111111111111';
+const T='22222222-2222-4222-8222-222222222222';
+const U='33333333-3333-4333-8333-333333333333';
+const SID='44444444-4444-4444-8444-444444444444';
+const ROOT='qaDriveFolder_123456789';
+const BASE='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
+const now=1800000000;
+function fixture({role='tenant_admin',active=true,configured=true,tokenDenied=false}={}){
+ const statements=[];const pending=new Map(),connections=new Map(),calls=[];
+ const env={AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,JWT_ISSUER:'https://issuer.qa.test',
+  ...(configured?{GOOGLE_OAUTH_CLIENT_ID:'12345-demo.apps.googleusercontent.com',
+   GOOGLE_OAUTH_CLIENT_SECRET:'synthetic-app-secret',QA_DRIVE_TOKEN_KEY:'a'.repeat(64)}:{})};
+ env.DB={prepare(sql){return {bind(...params){statements.push({sql,params});return {
+  async first(){
+   if(sql===COOKIE_SESSION_SQL)return active?{sid:SID,user_id:U,tenant_id:T,role_key:role,
+     subject:'synthetic',expires_at:now+600}:null;
+   if(sql===CHECK_SESSION_SQL)return active?{user_id:U,tenant_id:T,role_key:role}:null;
+   if(sql.startsWith('SELECT tenant_id,user_id,sid_cipher'))return pending.get(params[1])||null;
+   if(sql.startsWith('SELECT root_id FROM qa_drive_connections'))return connections.get(params[1])||null;
+   if(sql.startsWith('SELECT connected_at FROM qa_drive_connections'))return connections.get(params[1])||null;
+   if(sql.startsWith('SELECT encrypted_refresh,root_id FROM qa_drive_connections'))return connections.get(params[1])||null;
+   return null;
+  },
+  async run(){
+   if(sql.startsWith('INSERT INTO qa_drive_oauth_pending')){
+    pending.set(params[1],{tenant_id:params[2],user_id:params[3],sid_cipher:params[4],
+     verifier_cipher:params[5],expires_at:params[7],used_at:null});
+    return {meta:{changes:1}};
+   }
+   if(sql.startsWith('UPDATE qa_drive_oauth_pending')){
+    const x=pending.get(params[2]);
+    if(!x||x.used_at!==null||x.expires_at<=params[3])return {meta:{changes:0}};
+    x.used_at=params[0];return {meta:{changes:1}};
+   }
+   if(sql.startsWith('INSERT INTO qa_drive_connections')){
+    connections.set(params[1],{encrypted_refresh:params[2],root_id:params[3],
+     connected_at:params[6]});
+    return {meta:{changes:1}};
+   }
+   throw Error('unhandled SQL '+sql);
+  }
+ };}};}};
+ async function googleFetch(url,options={}){
+  calls.push({url,method:options.method});
+  if(url==='https://oauth2.googleapis.com/token'){
+   if(tokenDenied)return Response.json({error:'invalid_grant'},{status:400});
+   const body=new URLSearchParams(options.body);
+   const grant=body.get('grant_type');
+   assert.equal(body.get('client_secret'),'synthetic-app-secret');
+   if(grant==='authorization_code'){
+    assert.match(body.get('code_verifier')||'',/^[A-Za-z0-9_-]{43}$/);
+    return Response.json({access_token:'synthetic-access-token-1234567',
+     token_type:'Bearer',refresh_token:'synthetic-refresh-token-1234567',scope:'https://www.googleapis.com/auth/drive.file'});
+   }
+   if(grant==='refresh_token'){
+    assert.equal(body.get('refresh_token'),'synthetic-refresh-token-1234567');
+    return Response.json({access_token:'synthetic-refreshed-token-1234567',token_type:'Bearer'});
+   }
+  }
+  if(url.startsWith('https://www.googleapis.com/drive/v3/files?')){
+   assert.equal(options.method,'POST');
+   return Response.json({id:ROOT,mimeType:'application/vnd.google-apps.folder',trashed:false});
+  }
+  if(url.startsWith('https://www.googleapis.com/drive/v3/files/'+ROOT)){
+   return Response.json({id:ROOT,mimeType:'application/vnd.google-apps.folder',trashed:false});
+  }
+  throw Error('Unexpected remote URL');
+ }
+ const opts={now,googleFetch};
+ return {env,statements,pending,connections,calls,opts};
+}
+function req(path,method='GET',{cookie=true,origin=BASE}={}){
+ const headers={};
+ if(cookie)headers.Cookie='al_qa_session='+SID;
+ if(method==='POST'){headers.Origin=origin;headers['Sec-Fetch-Site']='same-origin';}
+ return new Request(BASE+path,{method,headers});
+}
+test('deny OAuth before configured and require role + same origin',async()=>{
+ let x=fixture({configured:false});assert.equal(ready(x.env),false);
+ assert.equal((await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts)).status,503);
+ x=fixture({active:false});
+ assert.equal((await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts)).status,401);
+ x=fixture({role:'lawyer'});
+ assert.equal((await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts)).status,403);
+ x=fixture();
+ assert.equal((await oauthDriveApi(req('/api/qa/drive/connect','POST',{origin:'https://evil.invalid'}),x.env,x.opts)).status,403);
+ assert.equal(x.pending.size,0);
+});
+test('full PKCE state consent, callback sans strict cookie, tenant-root refresh, replay deny',async()=>{
+ const x=fixture();
+ assert.equal(ready(x.env),true);
+ const started=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
+ assert.equal(started.status,200);
+ const {authorization_url}=await started.json();
+ const url=new URL(authorization_url);
+ assert.equal(url.origin,'https://accounts.google.com');
+ assert.equal(url.searchParams.get('scope'),'https://www.googleapis.com/auth/drive.file');
+ assert.equal(url.searchParams.get('code_challenge_method'),'S256');
+ assert.equal(url.searchParams.get('redirect_uri'),BASE+'/api/qa/drive/callback');
+ assert.equal(x.pending.size,1);
+ const pending=[...x.pending.values()][0];
+ assert.notEqual(pending.sid_cipher,SID);
+ assert.equal(pending.sid_cipher.includes(SID),false);
+ const callback=req('/api/qa/drive/callback?state='+url.searchParams.get('state')+'&code=qa-synthetic-code',
+  'GET',{cookie:false});
+ const completed=await oauthDriveApi(callback,x.env,x.opts);
+ assert.equal(completed.status,303);
+ assert.equal(completed.headers.get('Location'),'https://ai-law-web-qa.iaict-platform.workers.dev/app?drive=connected');
+ assert.equal(x.connections.size,1);
+ const record=x.connections.get(T);
+ assert.equal(record.root_id,ROOT);
+ assert.ok(!record.encrypted_refresh.includes('synthetic-refresh-token'));
+ const status=await oauthDriveApi(req('/api/qa/drive/status'),x.env,x.opts);
+ assert.deepEqual((await status.json()).connected,true);
+ const adapter=await tenantDriveAdapter(x.env,{tenant_id:T},x.opts);
+ assert.equal(adapter.rootId,ROOT);
+ assert.equal(adapter.accessToken,'synthetic-refreshed-token-1234567');
+ assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,400);
+});
+test('revoked session blocks callback and token endpoint is never invoked',async()=>{
+ const x=fixture();const r=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
+ const url=new URL((await r.json()).authorization_url);
+ const startCalls=x.calls.length;
+ // Revoke after initiating consent, before callback.
+ x.env.DB.prepare=(()=>{const original=x.env.DB.prepare.bind(x.env.DB);
+  return sql=>sql===CHECK_SESSION_SQL?{bind:()=>({first:async()=>null})}:original(sql);
+ })();
+ const done=await oauthDriveApi(req('/api/qa/drive/callback?state='+url.searchParams.get('state')+'&code=synthetic-code','GET',{cookie:false}),x.env,x.opts);
+ assert.equal(done.status,400);
+ assert.equal(x.calls.length,startCalls);
+});
+test('Google denied token exchange leaves no connection and consumes state',async()=>{
+ const x=fixture({tokenDenied:true});
+ const r=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
+ const url=new URL((await r.json()).authorization_url);
+ const callback=req('/api/qa/drive/callback?state='+url.searchParams.get('state')+'&code=test-code','GET',{cookie:false});
+ assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,503);
+ assert.equal(x.connections.size,0);
+ assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,400);
+});
