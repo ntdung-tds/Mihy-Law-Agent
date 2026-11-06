@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `73` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T11:44:32Z`.
+- **PCS revision:** `74` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T12:38:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R76 — Personal Drive consent button hidden: root cause fixed and QA deployed (2026-11-06)
+
+- **Owner report:** Google Drive card showed 'Google Drive chưa kết nối. Quản trị đơn vị cần nhấn kết nối một lần.' with no button. Root cause was R73 `role_key==='tenant_admin'` condition, even though QA live sessions operate in `personal` workspaces with `lawyer` membership.
+- **Security-preserving fix:** Only the **sole active member** of an explicitly `kind='personal'` tenant may initiate OAuth to their **own personal tenant-scoped Drive**. Per-organization storage still requires `tenant_admin`. The predicate is verified using actual membership and tenant tables on status, consent initiation, and before/after token grant exchange; multi-member personal or ordinary organization lawyers cannot connect. No ownership elevation, schema change or production changes.
+- **GitHub:** [PR #103](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/103) merged to main commit `1c42efb14ad84ebdafdf13ec3c1f12887c823084` after [Actions #42218494031](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42218494031) **PASS 9/9 executed jobs**; R73 OAuth Node **7/7** PASS (personal success, organization/shared denial, consent-time revoke) and R75 UI Node **6/6** PASS. CI first caught a UI text-case assertion, fixed and rerun.
+- **Actual QA tests:** Live D1 read-only predicate returned **2 eligible active personal sessions**, not a simulated database. Cloudflare QA `ai-law-standalone-cf-qa` and `ai-law-web-qa` were updated **content-only** (2026-11-06 12:36:48Z / 12:37:18Z); deployed modules verified against GitHub hashes, unrelated modules and all 10 backend Worker bindings preserved; current deployments carry 100% QA traffic. Registered Google OAuth Client ID (plain text) and Secret (Cloudflare secret text) remain configured. D1 still **0 approved Drive grants / 0 uploaded receipts**; authenticated consent/file end-to-end **NOT_RUN**; no real customer data or production touch.
+- **User action:** Reload [QA Documents](https://ai-law-web-qa.iaict-platform.workers.dev/app#documents) under personal workspace, press 'Kết nối Google Drive', then consent via Google's screen. Check actual D1 connection after owner approval; then authenticated synthetic upload/list/download, revoked permissions/tenant isolation and refresh E2E. Do not claim final Google integration success before this is observed. SRS v1.1.15 unchanged, Owner final acceptance pending.
 
 ## R75 — One-tap Google Drive consent QA: deployed code, provider enrollment gate (2026-11-06)
 
