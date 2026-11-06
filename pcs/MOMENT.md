@@ -1,12 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `74` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T12:38:00Z`.
+- **PCS revision:** `75` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T13:19:02.211Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R77 — Google Drive consent callback loses QA login: fixed on QA, consent retest pending (2026-11-06)
+
+- **Live blocker verified:** QA D1 showed 3 OAuth starts, 2 consumed callbacks and **0** stored Drive grants or uploaded documents. The direct backend Google callback 303 redirect to protected `/app` could cause the QA `Secure; HttpOnly; SameSite=Strict` session cookie to be withheld across the cross-site navigation. This is separate from provider grant/folder creation failing; the underlying provider failure was previously hidden.
+- **Scoped fix:** Backend callback sends only a fixed status and bounded safe issue (`consent`, `session`, `provider`, `drive`, `save`) to public site `/drive-return`; the site responds HTTP **200** with a first-party HTML/meta refresh and fallback link to `/app#documents`. QA Strict session cookie, PKCE, encrypted refresh tokens, CSRF, D1 tenant/membership checks and access controls are preserved. Browser code checks backend Drive connection and never trusts a query-string success as proof of authorization. No OAuth secrets or customer data in URLs, HTML, test artifacts or public GitHub.
+- **GitHub and CI:** [PR #105](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/105) squash merged main `8137b211ccc666056f3fbb7b622277878b00a18a`; final-head [Actions #42223444318](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42223444318) **PASS 9/9 executed jobs**, including OAuth Node **8/8**, Drive UI Node **8/8**, site worker **12/12**, and **actual Chromium desktop+mobile local synthetic cross-site consent / Strict-cookie redirect PASS**.
+- **QA deployment:** `ai-law-standalone-cf-qa` updated at 2026-11-06T13:16:08Z and `ai-law-web-qa` at 13:16:53Z by guarded **content-only** Cloudflare Worker upload. Live read-back hashes match merged GitHub sources; all unrelated modules and preexisting secret/OAuth bindings unchanged, each deployment 100% QA traffic. Production untouched.
+- **Acceptance boundary:** Local browser proof is **not** a real Google consent or authenticated remote file E2E. D1 still had **0 grants** and **0 uploaded receipts** after deployment. Owner needs to retry signed-in [QA Drive connection](https://ai-law-web-qa.iaict-platform.workers.dev/app#documents), approve Google consent, and report the safe issue if any. If `issue=drive`, verify Google Drive API is enabled with the authorized Google Cloud project admin; then D1 receipt and synthetic upload/list/download/ACL E2E. No real customer legal files. Owner final acceptance pending.
+- **Policy note:** QA login page contains no public Privacy Policy link/document. Owner previously deferred Google publication/verification to production; do not invent a legally binding privacy policy as part of this OAuth bug fix. Original SRS v1.1.15 remains unchanged.
 
 ## R76 — Personal Drive consent button hidden: root cause fixed and QA deployed (2026-11-06)
 
