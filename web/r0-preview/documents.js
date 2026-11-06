@@ -181,7 +181,33 @@
    let result={};
    try{result=await res.json();}catch{}
    if(!res.ok){
-    const error=new Error(result.error||'Tải lên chưa thành công.');
+    let description=result.error||'Tải lên chưa thành công.';
+    if(result.code==='DRIVE_UPLOAD_UNAVAILABLE'){
+     const stage=result.stage,code=result.provider_status;
+     const reasons={
+      storageQuotaExceeded:'Dung lượng Google Drive đã đầy.',
+      insufficientFilePermissions:'Tài khoản Google không có quyền ghi vào thư mục lưu trữ.',
+      appNotAuthorizedToFile:'Quyền ứng dụng Google chưa cho phép truy cập thư mục.',
+      accessNotConfigured:'Google Drive API chưa được bật cho ứng dụng.',
+      rateLimitExceeded:'Google đang giới hạn tần suất yêu cầu.',
+      userRateLimitExceeded:'Google đang giới hạn tần suất yêu cầu.'
+     };
+     if(stage==='verify')
+      description='Google có thể đã nhận tệp nhưng AI Law chưa xác minh được thư mục hoặc nội dung. Đừng tải lại ngay để tránh trùng tệp; báo quản trị QA kiểm tra.';
+     else if(stage==='response')
+      description='Google đã trả lời nhưng thông tin tệp không hợp lệ. Vui lòng báo quản trị QA.';
+     else if(stage==='transport')
+      description='Không thể truyền tệp đến Google Drive. Vui lòng thử lại khi đường truyền ổn định.';
+     else if(stage==='provider')
+      description=(reasons[result.provider_reason]||
+       (code===400?'Google từ chối định dạng yêu cầu tải lên.':
+        code===401?'Google từ chối xác thực khi tải tệp.':
+        code===403?'Google từ chối quyền tải tệp; chưa thể kết luận do dung lượng.':
+        code===429?'Google tạm giới hạn số yêu cầu.':
+        'Google Drive từ chối hoặc chưa xử lý yêu cầu.'))+
+       (Number.isInteger(code)?' (HTTP '+code+')':'');
+    }
+    const error=new Error(description);
     error.code=result.code||'';
     throw error;
    }
