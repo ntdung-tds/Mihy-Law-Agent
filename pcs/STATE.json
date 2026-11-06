@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 66,
-  "updated_at": "2026-11-06T02:42:24.795Z",
+  "revision": 68,
+  "updated_at": "2026-11-06T07:18:32.046Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1369,6 +1369,49 @@
           "Owner-private AI Law Test Evidence Google Drive R66 report, no document ID or secret in public PCS"
         ],
         "notes": "The deployed backend is shared with ai-law-web NONPRODUCTION primary via QA_AUTH, but the primary site front-end/relay remains at version 670463d4-558f-47be-936c-22819cfea0c7, so R66 UI/route appears only on ai-law-web-qa. Existing leaked QA password still needs rotation through safe UI, previous three sessions had been revoked. R65 PR #89 is OPEN, and remains an independent role-testing suite blocked on authorized private credential operator."
+      },
+      {
+        "id": "AL-R0-ACCOUNT-QA-R67-001",
+        "title": "R67 separate account center on isolated Cloudflare QA (paused by Owner)",
+        "status": "QA_DEPLOYED_PAUSED_PENDING_OWNER_E2E",
+        "test_results": {
+          "source": "PASS_PR92_MERGED_MAIN_46DE858227E54B31947CEB3C87EED0B46652C98B",
+          "ci": "PASS_42156282903_10_EXECUTED_SUCCESS",
+          "backend_qa": "PASS_DEPLOYED_VERSION_B610BB89_DEF0_407A_B45F_240B7DB0E947",
+          "site_qa": "PASS_DEPLOYED_VERSION_BD948618_89EB_4AA9_97D8_91D112ECAF8A",
+          "live_anonymous": "PASS_AUTH_REDIRECT",
+          "owner_password_change": "NOT_RUN",
+          "owner_avatar_upload": "NOT_RUN",
+          "owner_roles_and_tier": "NOT_RUN",
+          "production": "NOT_RUN"
+        },
+        "notes": "Owner 2026-11-06 explicitly paused this feature after R67; prioritize genuine AI legal workflows. No new account scope without new instruction."
+      },
+      {
+        "id": "AL-R0-DOC-INGEST-R68-01",
+        "title": "R68-01 deterministic DOCX paragraph/table segmentation and source anchors for document-only UC03/04/07",
+        "status": "TECH_DONE_LOCAL_AND_CI_NOT_INTEGRATED",
+        "acceptance": [
+          "Actual DOCX byte extraction preserves paragraph/table-cell text order and deterministic local source paths",
+          "Explicit document_only scope; reject unsupported revisions, fields, images/OCR, macros, malformed/oversized/zip bomb content without claiming silent completeness",
+          "Unit tests generated actual synthetic DOCX and exercise positive/negative cases",
+          "Real CI on final PR HEAD must PASS before merging",
+          "No customer files, AI provider, QA runtime integration or SRS baseline changes"
+        ],
+        "test_results": {
+          "local_python_docx_real_ooXML": "PASS_11_UNIT_TESTS_2026_11_06",
+          "github_pr": "PR93_FINAL_HEAD_RETEST_PENDING_AFTER_PCS_UPDATE",
+          "github_ci": "PASS_RUN_42180047004_9_EXECUTED_SUCCESS_21_CONDITIONAL_SKIPS",
+          "full_srs_1_1_15_trace": "BLOCKED_ORIGINAL_PRIVATE_ZIP_NOT_MOUNTED_THIS_SESSION",
+          "real_qa_docx_upload_e2e": "NOT_RUN",
+          "pdf_extraction": "NOT_RUN",
+          "ocr": "NOT_RUN",
+          "ai_uc03_translation_e2e": "NOT_RUN",
+          "ai_uc04_summary_e2e": "NOT_RUN",
+          "ai_uc07_grammar_e2e": "NOT_RUN",
+          "production": "NOT_RUN"
+        },
+        "notes": "Python-only non-networked source helper, not Cloudflare Worker API; SRS v1.1.15 original archive was historically checksum-verified but inaccessible in current active file context. Archived v1.0 has FR03-01/02/04 and TC03A/B examples for provisional context only; no claim 1.1.15 exact trace."
       }
     ],
     "features": [
@@ -1971,8 +2014,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R66: PR #90 merged 956532641a600abf1fe73f40c586c06500257b3d, Actions #42143772358 completed/success 10/10 executed. Cloudflare QA auth 6797bc2d and QA site 1e2abba8 deployed 100%; direct readback changed files matches merged main, bindings preserved, R63 bottom mobile nav intact. Browser Rendering real HTTPS anonymous login and unauthenticated /app redirect PASS, remaining rendering calls 429. Owner has not yet changed real password; no production deploy. Owner-private Drive test evidence saved.",
-      "next_action": "Owner signs in at https://ai-law-web-qa.iaict-platform.workers.dev/login, opens Đổi mật khẩu in desktop top bar or mobile Chức năng, enters current password and a NEW unique password directly on website; then verifies old credential DENY, new credential PASS and all previous sessions revoked. Preserve R65 PR89 independent unmerged until reconciled with latest main and its CI revalidated; activate remaining R40 QA only through trusted operator. Do not self-deploy production.",
+      "last_completed_step": "R68-01 actual DOCX paragraph/table text segmentation with source anchors and explicit document_only scope: local 11/11 unittest PASS; main technical CI run 42180047004 fully completed 9/9 executing jobs PASS, 21 conditional skips. PR #93 open and final PCS-doc update CI pending; no QA runtime integration or UC03/04/07 E2E.",
+      "next_action": "After final PR#93 HEAD CI PASS, squash-merge to main, verify new PCS revision 68. Follow with a separate small document ingestion task, then wire into QA via an authorized runtime and test real E2E before claiming UC03/04/07 ready. Exact original SRS v1.1.15 ZIP must be available for detailed trace. Keep R67 account enhancements on hold; no production.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -2007,7 +2050,8 @@
         "R62 2026-11-05: Attempt to publish merged authentication source through Cloudflare connector was blocked by tool safety; read-back confirms backend d22f928f, site QA ea55af9f, primary nonproduction 71f406a3 remain previous R61/R44 versions. Public source/test CI PASS 30/30, but R62 live Cloudflare remains BLOCKED and multi-account real sign-in NOT_RUN.",
         "R63 2026-11-05: QA UI deployed and source readback PASS, but Browser Rendering actual live test was HTTP429; Owner physical mobile acceptance and QA positive login NOT_RUN. Live Cloudflare backend/site do not yet run R62 authentication/workspace source, so R62 IAM feature acceptance remains BLOCKED.",
         "R64 2026-11-06: Cloudflare QA R62 backend/site code + primary NONPRODUCTION R63 UI source deployed; real Chromium anonymous boundaries PASS (Actions 42072937167). D1 has only 2 active verifiers (1 existing QA04 and 1 Owner-controlled actor) of 11 principals, so saved R40 role accounts still NOT activated. Real multi-role password sign-in, tenant switch/MatterACL HTTP E2E, 30-minute expiry, Owner R64 acceptance remain NOT_RUN/BLOCKED. Browser Rendering via CF returned HTTP429. Primary NONPRODUCTION shares backend with QA; production unchanged.",
-        "R66 as of 2026-11-06: QA password-change UI/API deployed and source/readback PASS but owner real password rotation NOT_RUN, so exposed credential remains potentially usable for new sessions. Prior 3 sessions revoked; no confirmation old denied/new accepted. Cloudflare Browser Rendering limited follow-up via HTTP429. R65 PR89 still OPEN/unmerged; separate credentials/roles/MatterACL testing BLOCKED."
+        "R66 as of 2026-11-06: QA password-change UI/API deployed and source/readback PASS but owner real password rotation NOT_RUN, so exposed credential remains potentially usable for new sessions. Prior 3 sessions revoked; no confirmation old denied/new accepted. Cloudflare Browser Rendering limited follow-up via HTTP429. R65 PR89 still OPEN/unmerged; separate credentials/roles/MatterACL testing BLOCKED.",
+        "R68-01: v1.1.15 archived ZIP was historically verified but source bytes unavailable in this active session; no full requirement-by-requirement compliance claim. Python DOCX source helper not yet invoked by Cloudflare Worker or exposed to users, PDF/OCR/Drive and UC03/04/07 E2E not built. GitHub CI PR93 pending. R67 account work paused by Owner."
       ]
     },
     "policy": {
