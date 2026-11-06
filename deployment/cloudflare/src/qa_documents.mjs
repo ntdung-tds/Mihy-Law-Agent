@@ -103,6 +103,86 @@ async function list(req,env,p,now){
   sha256:x.sha256,status:x.verification_status,created_at:x.created_at
  }))});
 }
+// R86 direct upload control plane: requests contain only a bounded JSON
+// manifest. Google Drive, not this Worker, receives the PDF/DOCX bytes.
+async function readManifest(req){
+ if(!/^application\/json(?:;|$)/i.test(req.headers.get('Content-Type')||''))throw Error('BAD_JSON');
+ const reader=req.body?.getReader();if(!reader)throw Error('BAD_JSON');
+ const chunks=[];let n=0;
+ while(true){
+  const {done,value}=await reader.read();if(done)break;
+  n+=value.byteLength;if(n>4096){await reader.cancel().catch(()=>{});throw Error('TOO_LARGE');}
+  chunks.push(value);
+ }
+ return JSON.parse(new TextDecoder().decode(new Blob(chunks).stream?
+  await new Response(new Blob(chunks)).arrayBuffer():new Uint8Array()));
+}
+async function startDirect(req,env,p,now,opts){
+ if(!csrf(req))return result(403,{error:'CSRF_DENIED'});
+ let v;
+ try{v=await readManifest(req);}catch{return result(400,{error:'Yêu cầu khởi tạo tệp chưa hợp lệ.'});}
+ if(!v||Object.keys(v).sort().join(',')!=='byte_length,file_name,matter_id,mime_type,sha256')
+  return result(400,{error:'Yêu cầu tệp không hợp lệ.'});
+ const matter=v.matter_id,name=v.file_name,mime=v.mime_type,size=v.byte_length,sha=v.sha256;
+ if(!UUID.test(matter||'')||!validName(name)||
+    !Number.isInteger(size)||size<22||size>MAX_FILE||
+    !/^[a-f0-9]{64}$/.test(sha||'')||
+    !((name.toLowerCase().endsWith('.pdf')&&mime===PDF)||
+      (name.toLowerCase().endsWith('.docx')&&mime===DOCX)))
+  return result(400,{error:'Chỉ chấp nhận metadata PDF/DOCX QA nhỏ hơn 1,5 MB.'});
+ if(!await permit(env,p,matter,'write',now))return forbidden();
+ const pending=await env.DB.prepare('SELECT COUNT(*) AS n FROM qa_document_upload_tickets WHERE installation_id=? AND tenant_id=? AND user_id=? AND consumed_at IS NULL AND expires_at>?')
+  .bind(env.INSTALLATION_ID,p.tenant_id,p.user_id,now).first();
+ if(Number(pending?.n||0)>=3)return result(429,{error:'Đã có 3 lượt tải lên đang chờ. Vui lòng hoàn tất hoặc thử lại sau.'});
+ const counts=await env.DB.prepare('SELECT COUNT(*) AS n FROM qa_file_links WHERE installation_id=? AND tenant_id=? AND matter_id=?')
+  .bind(env.INSTALLATION_ID,p.tenant_id,matter).first();
+ if(Number(counts?.n||0)>=20)return result(429,{error:'Hồ sơ QA đạt giới hạn tệp.'});
+ let drive;try{drive=await driveAdapter(env,p,opts);}
+ catch{return storageIssue('DRIVE_GRANT_UNAVAILABLE');}
+ const ticket=crypto.randomUUID();
+ let uploadUrl;try{uploadUrl=await drive.beginResumable({
+  name,mimeType:mime,size,ticketId:ticket
+ });}catch(e){return storageIssue('DRIVE_UPLOAD_UNAVAILABLE',e);}
+ try{
+  await env.DB.prepare('INSERT INTO qa_document_upload_tickets (installation_id,tenant_id,ticket_id,user_id,matter_id,file_name,mime_type,byte_length,sha256,created_at,expires_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(env.INSTALLATION_ID,p.tenant_id,ticket,p.user_id,matter,name,mime,size,sha,now,now+600).run();
+ }catch{return storageIssue('QA_RECEIPT_UNAVAILABLE');}
+ // Sensitive capability for one Google-created file. Never log or persist the
+ // URI in browser localStorage, D1, HTML attributes, or URL query parameters.
+ return result(200,{ticket,upload_url:uploadUrl,expires_in:600});
+}
+async function finishDirect(req,env,p,now,opts){
+ if(!csrf(req))return result(403,{error:'CSRF_DENIED'});
+ let v;try{v=await readManifest(req);}catch{return result(400,{error:'Yêu cầu xác nhận chưa hợp lệ.'});}
+ if(!v||Object.keys(v).sort().join(',')!=='file_id,ticket'||
+    !UUID.test(v.ticket||'')||
+    !/^[A-Za-z0-9_-]{10,200}$/.test(v.file_id||''))
+  return forbidden();
+ const row=await env.DB.prepare('SELECT ticket_id,user_id,matter_id,file_name,mime_type,byte_length,sha256 FROM qa_document_upload_tickets WHERE installation_id=? AND tenant_id=? AND ticket_id=? AND user_id=? AND expires_at>? AND consumed_at IS NULL LIMIT 1')
+  .bind(env.INSTALLATION_ID,p.tenant_id,v.ticket,p.user_id,now).first();
+ if(!row||!await permit(env,p,row.matter_id,'write',now))return forbidden();
+ let drive;try{drive=await driveAdapter(env,p,opts);}
+ catch{return storageIssue('DRIVE_GRANT_UNAVAILABLE');}
+ try{await drive.verifyDirectUpload(v.file_id,{
+  ticketId:v.ticket,name:row.file_name,mimeType:row.mime_type,size:row.byte_length
+ });}catch{return result(409,{code:'DRIVE_VERIFY_DENIED',
+  error:'Google Drive chưa xác minh được tệp đúng thư mục và phiên tải lên.'});}
+ if(!await permit(env,p,row.matter_id,'write',now))return forbidden();
+ try{
+  const op=await env.DB.batch([
+   env.DB.prepare('UPDATE qa_document_upload_tickets SET consumed_at=?,provider_object_id=? WHERE installation_id=? AND tenant_id=? AND ticket_id=? AND user_id=? AND consumed_at IS NULL AND expires_at>?')
+    .bind(now,v.file_id,env.INSTALLATION_ID,p.tenant_id,v.ticket,p.user_id,now),
+   env.DB.prepare("INSERT INTO qa_file_links(installation_id,tenant_id,file_id,matter_id,provider,provider_object_id,mime_type) SELECT installation_id,tenant_id,ticket_id,matter_id,'google_drive',provider_object_id,mime_type FROM qa_document_upload_tickets WHERE installation_id=? AND tenant_id=? AND ticket_id=? AND user_id=? AND consumed_at=? AND provider_object_id=?")
+    .bind(env.INSTALLATION_ID,p.tenant_id,v.ticket,p.user_id,now,v.file_id),
+   env.DB.prepare("INSERT INTO qa_document_receipts(installation_id,tenant_id,file_id,file_name,mime_type,byte_length,sha256,verification_status,uploaded_by,created_at) SELECT installation_id,tenant_id,ticket_id,file_name,mime_type,byte_length,sha256,'unverified',user_id,? FROM qa_document_upload_tickets WHERE installation_id=? AND tenant_id=? AND ticket_id=? AND user_id=? AND consumed_at=? AND provider_object_id=?")
+    .bind(now,env.INSTALLATION_ID,p.tenant_id,v.ticket,p.user_id,now,v.file_id)
+  ]);
+  if(op?.length!==3||op.some(x=>x.success===false)||
+     op.some(x=>x.meta?.changes!==1))throw Error('Commit rejected');
+  return result(201,{id:v.ticket,name:row.file_name,status:'unverified',
+   note:'Tệp đã được Google Drive xác nhận; nội dung chưa dùng cho AI.'});
+ }catch{return storageIssue('QA_RECEIPT_UNAVAILABLE');}
+}
 async function upload(req,env,p,now,opts){
  if(!csrf(req))return result(403,{error:'CSRF_DENIED'});
  // Do not call Google or refresh OAuth for an invalid local input.
@@ -175,8 +255,11 @@ async function download(env,p,id,now,opts){
 export async function documentsApi(req,env,opts={}){
  if(!configured(env))return unavailable();
  const url=new URL(req.url),match=/^\/api\/qa\/documents\/([0-9a-f-]{36})\/download$/.exec(url.pathname);
- if(url.pathname!=='/api/qa/documents'&&!match)return forbidden();
- if(match&&req.method!=='GET'||!match&&!['GET','POST'].includes(req.method))
+ const directStart=url.pathname==='/api/qa/documents/upload/start';
+ const directFinish=url.pathname==='/api/qa/documents/upload/finish';
+ if(url.pathname!=='/api/qa/documents'&&!match&&!directStart&&!directFinish)return forbidden();
+ if((directStart||directFinish)&&req.method!=='POST')return result(405,{error:'Method not allowed'});
+ if(match&&req.method!=='GET'||!match&&!directStart&&!directFinish&&!['GET','POST'].includes(req.method))
   return result(405,{error:'Method not allowed'});
  const now=opts.now??Math.floor(Date.now()/1000);
  try{
@@ -184,6 +267,8 @@ export async function documentsApi(req,env,opts={}){
   if(!p||!UUID.test(p.user_id)||!UUID.test(p.tenant_id))return result(401,{error:'Phiên không hợp lệ.'});
   if(!['lawyer','tenant_admin'].includes(p.role_key))return forbidden();
   if(match)return await download(env,p,match[1],now,opts);
+  if(directStart)return await startDirect(req,env,p,now,opts);
+  if(directFinish)return await finishDirect(req,env,p,now,opts);
   return req.method==='GET'?await list(req,env,p,now):await upload(req,env,p,now,opts);
  }catch{return unavailable();}
 }
