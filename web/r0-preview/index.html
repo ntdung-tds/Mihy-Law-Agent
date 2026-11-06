@@ -59,7 +59,7 @@
       <header class="topbar">
         <div class="mobile-brand"><div class="mobile-mark"><svg class="icon"><use href="#i-scale"/></svg></div><strong>MIHY<span>LAW AI AGENT</span></strong></div>
         <div class="breadcrumbs"><span>Workspace</span><svg class="icon tiny"><use href="#i-chevron"/></svg><strong id="breadcrumb-current">Tổng quan</strong></div>
-        <div class="top-actions"><span class="preview-dot"><i></i>R0 Preview</span><button class="icon-btn search-shortcut" id="search-shortcut" aria-label="Tìm kiếm" title="Tìm kiếm"><svg class="icon"><use href="#i-search"/></svg></button><button class="icon-btn" id="notifications" aria-label="Thông báo" title="Thông báo"><svg class="icon"><use href="#i-bell"/></svg><span class="unread-dot"></span></button><button type="button" id="preview-logout" class="top-logout" aria-label="Đăng xuất khỏi Mihy Law AI Agent">Đăng xuất</button><div class="user-avatar" aria-label="Không gian QA">AL</div></div>
+        <div class="top-actions"><span class="preview-dot"><i></i>R0 Preview</span><button class="icon-btn search-shortcut" id="search-shortcut" aria-label="Tìm kiếm" title="Tìm kiếm"><svg class="icon"><use href="#i-search"/></svg></button><button class="icon-btn" id="notifications" aria-label="Thông báo" title="Thông báo"><svg class="icon"><use href="#i-bell"/></svg><span class="unread-dot"></span></button><button type="button" id="change-password-top" class="top-change-password">Đổi mật khẩu</button><button type="button" id="preview-logout" class="top-logout" aria-label="Đăng xuất khỏi Mihy Law AI Agent">Đăng xuất</button><div class="user-avatar" aria-label="Không gian QA">AL</div></div>
       </header>
       <div class="mobile-demo-label"><span class="live-dot"></span> Ứng dụng QA · Danh mục hồ sơ lưu thật trên D1 · Không sử dụng hồ sơ khách hàng</div>
 
@@ -175,9 +175,27 @@
       <button type="button" data-feature-jump="UC11"><span>Tìm quy định theo chủ đề</span><small>R1 dự kiến</small></button>
       <button type="button" data-feature-jump="UC06"><span>So sánh hai văn bản QPPL</span><small>R1 dự kiến</small></button>
       <div id="workspace-switch-drawer" class="qa-workspace-switch" hidden></div>
+      <button type="button" id="change-password-drawer" class="drawer-change-password">Đổi mật khẩu</button>
       <button type="button" id="drawer-logout" class="drawer-signout">Đăng xuất</button>
     </div>
   </aside>
+  <dialog class="change-password-dialog" id="change-password-dialog" aria-labelledby="change-password-heading">
+    <div class="password-dialog-heading">
+      <div><small>BẢO MẬT TÀI KHOẢN · QA</small><h2 id="change-password-heading">Đổi mật khẩu</h2>
+      <p>Nhập mật khẩu hiện tại để bảo vệ tài khoản. Sau khi thay đổi, tất cả phiên đăng nhập sẽ kết thúc.</p></div>
+      <button type="button" id="change-password-close" class="password-dialog-close" aria-label="Đóng">✕</button>
+    </div>
+    <form id="change-password-form">
+      <label for="current-password">Mật khẩu hiện tại</label>
+      <input id="current-password" name="current_password" type="password" autocomplete="current-password" required maxlength="512"/>
+      <label for="new-password">Mật khẩu mới (ít nhất 8 ký tự)</label>
+      <input id="new-password" name="new_password" type="password" autocomplete="new-password" required minlength="8" maxlength="256"/>
+      <label for="confirm-password">Nhập lại mật khẩu mới</label>
+      <input id="confirm-password" name="confirm_password" type="password" autocomplete="new-password" required minlength="8" maxlength="256"/>
+      <p id="change-password-error" class="password-form-feedback" role="alert" hidden></p>
+      <button type="submit" id="change-password-submit" class="password-submit">Lưu mật khẩu mới</button>
+    </form>
+  </dialog>
   <div id="modal-backdrop" class="modal-backdrop" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="modal-close icon-btn" id="modal-close" aria-label="Đóng"><svg class="icon"><use href="#i-x"/></svg></button><div class="modal-icon"><svg class="icon"><use href="#i-spark"/></svg></div><h2 id="modal-title">Bản xem trước</h2><p id="modal-description">Các tính năng nghiệp vụ đang được phát triển trong giai đoạn R0.</p><div id="modal-meta" class="modal-meta" hidden></div><button class="btn btn-primary modal-ack" id="modal-ack">Đã hiểu</button></div></div>
   <div role="status" aria-live="polite" id="toast" class="toast" hidden></div>
 </body>
