@@ -111,6 +111,8 @@ jobs:
           bash -n deployment/standalone/smoke_login_extension.sh
       - name: Actual Chromium desktop+mobile login/tenant/ACL/logout against Docker PostgreSQL16
         run: R38_ENABLE=1 R39_ENABLE=1 bash deployment/standalone/smoke_api.sh
+      - name: R77 real Chromium desktop+mobile Google return with Strict session cookie
+        run: python deployment/cloudflare/tests/live_r77_strict_cookie_browser.py
 
   standalone-qa:
     # R40 reusable QA credential bundle + actual Docker/Postgres16 account

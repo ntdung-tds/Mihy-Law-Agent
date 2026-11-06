@@ -6,7 +6,7 @@ const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const FILE_ID=/^[A-Za-z0-9_-]{10,200}$/;
 const SCOPE='https://www.googleapis.com/auth/drive.file';
 const CALLBACK='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev/api/qa/drive/callback';
-const RETURN_URL='https://ai-law-web-qa.iaict-platform.workers.dev/app';
+const RETURN_URL='https://ai-law-web-qa.iaict-platform.workers.dev/drive-return';
 const te=new TextEncoder(),td=new TextDecoder();
 const out=(status,data)=>new Response(JSON.stringify(data),{status,headers:{
   'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
@@ -101,13 +101,21 @@ async function begin(req,env,now){
   code_challenge:b64(await digest(verifier))}).toString();
  return out(200,{authorization_url:u.toString(),expires_in:600});
 }
-function failed(){
- // Fail closed without revealing the Google authorization code or OAuth state.
- // Return to the same document screen even when the user cancels consent.
+// The Google callback is cross-site. A direct 303 to /app can hide the
+// SameSite=Strict QA session cookie and trigger an unnecessary login screen.
+// A public first-party /drive-return document (HTTP 200) makes the next
+// same-origin navigation to /app without relaxing cookie security.
+function finished(kind,reason){
+ const target=new URL(RETURN_URL);
+ target.searchParams.set('drive',kind);
+ if(kind==='failed'&&['consent','session','provider','drive','save'].includes(reason))
+  target.searchParams.set('issue',reason);
+ // Never put authorization code, state, session or provider token in a URL.
  return new Response(null,{status:303,headers:{
-  Location:RETURN_URL+'?drive=failed#documents','Cache-Control':'no-store',
+  Location:target.toString(),'Cache-Control':'no-store',
   'Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'}});
 }
+const failed=reason=>finished('failed',reason||'consent');
 async function folder(access,opts,existing){
  const f=opts.googleFetch??fetch;
  if(existing){
@@ -144,20 +152,26 @@ async function callback(req,env,now,opts){
  const verifier=await decrypt(record.verifier_cipher,env,'pkce',record.tenant_id);
  const params=[env.INSTALLATION_ID,sid,env.JWT_ISSUER,record.tenant_id,record.user_id,now];
  const actor=await env.DB.prepare(CHECK_SESSION_SQL).bind(...params).first();
- if(!actor||!await canConnect(env,actor))return failed();
- const grant=await token({grant_type:'authorization_code',code,
-  redirect_uri:CALLBACK,code_verifier:verifier},env,opts);
- if(typeof grant.refresh_token!=='string'||grant.refresh_token.length<15)return failed();
+ if(!actor||!await canConnect(env,actor))return failed('session');
+ let grant;
+ try{
+  grant=await token({grant_type:'authorization_code',code,
+   redirect_uri:CALLBACK,code_verifier:verifier},env,opts);
+ }catch{return failed('provider');}
+ if(typeof grant.refresh_token!=='string'||grant.refresh_token.length<15)return failed('provider');
  const old=await env.DB.prepare('SELECT root_id FROM qa_drive_connections WHERE installation_id=? AND tenant_id=?')
   .bind(env.INSTALLATION_ID,record.tenant_id).first();
- const root=await folder(grant.access_token,opts,old?.root_id);
+ let root;
+ try{root=await folder(grant.access_token,opts,old?.root_id);}
+ catch{return failed('drive');}
  const after=await env.DB.prepare(CHECK_SESSION_SQL).bind(...params).first();
- if(!after||!await canConnect(env,after))return failed();
+ if(!after||!await canConnect(env,after))return failed('session');
  const secret=await encrypt(grant.refresh_token,env,'refresh',record.tenant_id);
- await env.DB.prepare('INSERT INTO qa_drive_connections (installation_id,tenant_id,encrypted_refresh,root_id,scope,connected_by,connected_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(installation_id,tenant_id) DO UPDATE SET encrypted_refresh=excluded.encrypted_refresh,root_id=excluded.root_id,connected_by=excluded.connected_by,connected_at=excluded.connected_at')
-  .bind(env.INSTALLATION_ID,record.tenant_id,secret,root,SCOPE,record.user_id,now).run();
- return new Response(null,{status:303,headers:{Location:RETURN_URL+'?drive=connected#documents',
-  'Cache-Control':'no-store','Referrer-Policy':'no-referrer'}});
+ try{
+  await env.DB.prepare('INSERT INTO qa_drive_connections (installation_id,tenant_id,encrypted_refresh,root_id,scope,connected_by,connected_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(installation_id,tenant_id) DO UPDATE SET encrypted_refresh=excluded.encrypted_refresh,root_id=excluded.root_id,connected_by=excluded.connected_by,connected_at=excluded.connected_at')
+   .bind(env.INSTALLATION_ID,record.tenant_id,secret,root,SCOPE,record.user_id,now).run();
+ }catch{return failed('save');}
+ return finished('connected');
 }
 async function status(req,env,now){
  // The signed-in user's UI must receive a useful status even before the
@@ -179,7 +193,7 @@ export async function oauthDriveApi(req,env,opts={}){
   if(path==='/api/qa/drive/connect'&&req.method==='POST')return await begin(req,env,now);
   if(path==='/api/qa/drive/callback'&&req.method==='GET')return await callback(req,env,now,opts);
   return out(405,{error:'Method not allowed'});
- }catch{return path==='/api/qa/drive/callback'?failed():unavailable();}
+ }catch{return path==='/api/qa/drive/callback'?failed('save'):unavailable();}
 }
 export async function tenantDriveAdapter(env,p,opts={}){
  if(!ready(env)||!UUID.test(p?.tenant_id||''))throw Error('OAuth unavailable');

@@ -9,7 +9,7 @@ const SID='44444444-4444-4444-8444-444444444444';
 const ROOT='qaDriveFolder_123456789';
 const BASE='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
 const now=1800000000;
-function fixture({role='tenant_admin',active=true,configured=true,tokenDenied=false,
+function fixture({role='tenant_admin',active=true,configured=true,tokenDenied=false,driveDenied=false,
  personal=false,personalMembers=1}={}){
  const statements=[];const pending=new Map(),connections=new Map(),calls=[];
  const env={AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,JWT_ISSUER:'https://issuer.qa.test',
@@ -68,6 +68,7 @@ function fixture({role='tenant_admin',active=true,configured=true,tokenDenied=fa
   }
   if(url.startsWith('https://www.googleapis.com/drive/v3/files?')){
    assert.equal(options.method,'POST');
+   if(driveDenied)return Response.json({error:{code:403}},{status:403});
    return Response.json({id:ROOT,mimeType:'application/vnd.google-apps.folder',trashed:false});
   }
   if(url.startsWith('https://www.googleapis.com/drive/v3/files/'+ROOT)){
@@ -118,7 +119,7 @@ test('full PKCE state consent, callback sans strict cookie, tenant-root refresh,
   'GET',{cookie:false});
  const completed=await oauthDriveApi(callback,x.env,x.opts);
  assert.equal(completed.status,303);
- assert.equal(completed.headers.get('Location'),'https://ai-law-web-qa.iaict-platform.workers.dev/app?drive=connected#documents');
+ assert.equal(completed.headers.get('Location'),'https://ai-law-web-qa.iaict-platform.workers.dev/drive-return?drive=connected');
  assert.equal(x.connections.size,1);
  const record=x.connections.get(T);
  assert.equal(record.root_id,ROOT);
@@ -140,7 +141,7 @@ test('revoked session blocks callback and token endpoint is never invoked',async
  })();
  const done=await oauthDriveApi(req('/api/qa/drive/callback?state='+url.searchParams.get('state')+'&code=synthetic-code','GET',{cookie:false}),x.env,x.opts);
  assert.equal(done.status,303);
- assert.equal(done.headers.get('Location'),'https://ai-law-web-qa.iaict-platform.workers.dev/app?drive=failed#documents');
+ assert.equal(done.headers.get('Location'),'https://ai-law-web-qa.iaict-platform.workers.dev/drive-return?drive=failed&issue=session');
  assert.equal(x.calls.length,startCalls);
 });
 test('Google denied token exchange leaves no connection and consumes state',async()=>{
@@ -148,7 +149,10 @@ test('Google denied token exchange leaves no connection and consumes state',asyn
  const r=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
  const url=new URL((await r.json()).authorization_url);
  const callback=req('/api/qa/drive/callback?state='+url.searchParams.get('state')+'&code=test-code','GET',{cookie:false});
- assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,303);
+ const rejected=await oauthDriveApi(callback,x.env,x.opts);
+ assert.equal(rejected.status,303);
+ assert.equal(rejected.headers.get('Location'),
+  'https://ai-law-web-qa.iaict-platform.workers.dev/drive-return?drive=failed&issue=provider');
  assert.equal(x.connections.size,0);
  assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,303);
 });
@@ -168,7 +172,7 @@ test('sole active member of personal workspace may connect their own Drive',asyn
  const completed=await oauthDriveApi(callback,x.env,x.opts);
  assert.equal(completed.status,303);
  assert.equal(completed.headers.get('Location'),
-  'https://ai-law-web-qa.iaict-platform.workers.dev/app?drive=connected#documents');
+  'https://ai-law-web-qa.iaict-platform.workers.dev/drive-return?drive=connected');
  assert.equal(x.connections.get(T)?.root_id,ROOT);
  assert.equal(x.statements.filter(s=>s.sql===PERSONAL_OWNER_SQL).length>=4,true);
 });
@@ -200,4 +204,17 @@ test('personal owner loses sole membership during consent and callback fails clo
  assert.match(completed.headers.get('Location'),/drive=failed/);
  assert.equal(x.connections.size,0);
  assert.equal(x.calls.length,prior);
+});
+
+test('Google consent may succeed while Drive API denies root creation; no grant is stored',async()=>{
+ const x=fixture({driveDenied:true});
+ const started=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
+ assert.equal(started.status,200);
+ const state=new URL((await started.json()).authorization_url).searchParams.get('state');
+ const callback=req('/api/qa/drive/callback?state='+state+'&code=synthetic-test-code','GET',{cookie:false});
+ const response=await oauthDriveApi(callback,x.env,x.opts);
+ assert.equal(response.status,303);
+ assert.equal(response.headers.get('Location'),
+  'https://ai-law-web-qa.iaict-platform.workers.dev/drive-return?drive=failed&issue=drive');
+ assert.equal(x.connections.size,0);
 });

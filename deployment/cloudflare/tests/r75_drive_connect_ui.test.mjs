@@ -64,7 +64,7 @@ test('ready admin has one-step Google redirect and no credential form',async()=>
 });
 test('Google cancel returns to documents with retry and cleaned result URL',async()=>{
  const t=await mount({connected:false,configuration_ready:true,can_connect:true},
-  {query:'?drive=failed'});
+  {query:'?drive=failed&issue=consent'});
  assert.equal(t.els['drive-connect'].hidden,false);
  assert.match(t.els['drive-status'].textContent,/Google chưa cấp quyền/);
  assert.deepEqual(t.historyUrls,['/app#documents']);
@@ -89,4 +89,19 @@ test('unsafe redirect from API is refused and shown as an actionable error',asyn
  await t.els['drive-connect'].listeners.click();
  assert.deepEqual(t.assignments,[]);
  assert.equal(t.els['drive-setup'].dataset.state,'error');
+});
+
+test('drive failure after Google consent explains the missing Drive API setup and clears callback query',async()=>{
+ const t=await mount({connected:false,configuration_ready:true,can_connect:true},
+  {query:'?drive=failed&issue=drive'});
+ assert.equal(t.els['drive-connect'].hidden,false);
+ assert.match(t.els['drive-status'].textContent,/Google Drive API/);
+ assert.deepEqual(t.historyUrls,['/app#documents']);
+});
+test('expired QA session during OAuth is explained without revealing a token',async()=>{
+ const t=await mount({connected:false,configuration_ready:true,can_connect:true},
+  {query:'?drive=failed&issue=session'});
+ assert.match(t.els['drive-status'].textContent,/Phiên đăng nhập AI Law/);
+ assert.equal(t.els['drive-setup'].dataset.state,'disconnected');
+ assert.deepEqual(t.historyUrls,['/app#documents']);
 });

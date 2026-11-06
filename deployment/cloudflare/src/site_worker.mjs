@@ -103,9 +103,33 @@ export async function handleSite(req,env){
  const PUBLIC_PAGES=[['/gioi-thieu',LANDING_ABOUT_HTML],['/giai-phap',LANDING_SOLUTIONS_HTML],['/chuc-nang',LANDING_FEATURES_HTML],['/an-toan-du-lieu',LANDING_SECURITY_HTML],['/trien-khai-rieng',LANDING_PRIVATE_HTML],['/dich-vu-theo-goi',LANDING_SUBSCRIPTION_HTML]];
  const page=(path==='/'||path==='/index.html')?SITE_HTML:PUBLIC_PAGES.find(([route])=>route===path)?.[1];
  if(req.method==='GET' && page)return respond(page.replace('</footer>',FOOTER_CONTACT_HTML+'</footer>'),'text/html; charset=utf-8',200,{publicPage:true});
+ // Public, first-party landing for cross-site Google OAuth redirects.
+ // The site's Strict session cookie may be withheld during a redirect chain
+ // from accounts.google.com, so DO NOT authenticate or 302 straight to /app.
+ // The browser loads this harmless HTML first, then navigates same-origin.
+ if(req.method==='GET'&&path==='/drive-return'){
+  const result=url.searchParams.get('drive');
+  if(!['connected','failed'].includes(result))return missing();
+  const issue=url.searchParams.get('issue');
+  const allowed=new Set(['consent','session','provider','drive','save']);
+  const next='/app?drive='+result+
+   (result==='failed'&&allowed.has(issue)?'&issue='+issue:'')+'#documents';
+  const label=result==='connected'?'Đang trở lại AI Law sau khi cấp quyền Google…':
+   'Đang trở lại AI Law để kiểm tra kết nối…';
+  const html='<!doctype html><html lang="vi"><head><meta charset="utf-8">'+
+   '<meta name="viewport" content="width=device-width,initial-scale=1">'+
+   '<meta name="robots" content="noindex,nofollow,noarchive">'+
+   '<meta http-equiv="refresh" content="0;url='+next+'">'+
+   '<title>Trở lại AI Law</title></head><body>'+
+   '<main><p>'+label+'</p><p><a href="'+next+
+   '">Tiếp tục đến tài liệu AI Law</a></p></main></body></html>';
+  const h=headers('text/html; charset=utf-8');
+  h['Referrer-Policy']='no-referrer';
+  return new Response(html,{status:200,headers:h});
+ }
  if(req.method==='GET'&&path==='/login')return respond(LOGIN_HTML);
  if(req.method==='GET'&&path==='/favicon.svg')return respond(svgIcon,'image/svg+xml; charset=utf-8',200,{publicPage:true});
- if(req.method==='GET'&&path==='/robots.txt')return respond('User-agent: *\nDisallow: /app\nDisallow: /account\nDisallow: /login\nDisallow: /api/\n','text/plain; charset=utf-8',200,{publicPage:true});
+ if(req.method==='GET'&&path==='/robots.txt')return respond('User-agent: *\nDisallow: /app\nDisallow: /account\nDisallow: /login\nDisallow: /drive-return\nDisallow: /api/\n','text/plain; charset=utf-8',200,{publicPage:true});
  if(req.method==='GET'&&path==='/health')return respond(JSON.stringify({
   status:'online',environment:'qa_nonproduction',workspace_auth_binding:typeof env?.QA_AUTH?.fetch==='function'
  }), 'application/json; charset=utf-8',200,{publicPage:true});
