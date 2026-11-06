@@ -57,6 +57,24 @@
       controls.forEach(select=>select.addEventListener('change',()=>{void change(select.value);}));
     }catch{/* Fail closed: do not show a fabricated workspace selector. */}
   }
+  async function loadAccountSummary(){
+    try{
+      const response=await fetch('/api/qa/profile',{credentials:'same-origin',cache:'no-store'});
+      if(!response.ok)return;
+      const data=await response.json();
+      const name=typeof data.profile?.display_name==='string'?data.profile.display_name.trim():'';
+      if(name){const label=el('#profile-identity');if(label)label.textContent=name;}
+      const initials=(name||data.email||'AL').trim().split(/\\s+/);
+      const small=(initials.length>1?initials[0].slice(0,1)+initials[initials.length-1].slice(0,1):(initials[0]||'AL').slice(0,2)).toUpperCase();
+      for(const selector of ['#top-account-avatar','.profile-circle']){
+        const target=el(selector);if(!target)continue;
+        if(typeof data.profile?.avatar_data==='string'&&data.profile.avatar_data.startsWith('data:image/jpeg;base64,')){
+          target.style.backgroundImage='url('+JSON.stringify(data.profile.avatar_data)+')';
+          target.textContent='';
+        }else{target.style.backgroundImage='';target.textContent=small;}
+      }
+    }catch{/* Leave existing account indicator if optional profile service is unavailable. */}
+  }
   async function check() {
     try {
       const r = await fetch('/api/qa/session', {credentials:'same-origin',cache:'no-store'});
@@ -69,6 +87,7 @@
       const role = data.role === 'tenant_admin' ? 'Quản trị đơn vị' :
         data.role === 'lawyer' ? 'Luật sư' : 'Vai trò chưa xác định';
       el('#profile-role').textContent = kind + ' · ' + role + ' · QA';
+      void loadAccountSummary();
       void loadWorkspaces();
     } catch { el('#profile-role').textContent = 'Không thể kiểm tra phiên'; }
   }
