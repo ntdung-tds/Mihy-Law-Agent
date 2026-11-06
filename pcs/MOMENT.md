@@ -1,11 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `66` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T02:42:24.795Z`.
+- **PCS revision:** `68` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T07:18:32.046Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
+
+## R68-01 — Implemented first missing R0 document pipeline task (2026-11-06)
+
+- **Owner direction:** Pause R67/R68 account work; return to SRS v1.1.15 requirements and implement actually missing functions. R0 UC03 translation, UC04 summarization and UC07 grammar still only visual cards, not usable AI workflows.
+- **Selected small prerequisite:** A pure Python `poc_docx/source_segments.py` extracts real DOCX text into reproducible source paths for paragraphs and table cells, enforcing explicit `source_scope=document_only`. It fails closed on tracked revisions/fields/footnotes/images/unsupported layout, malformed OOXML and oversized/zip-bomb archives. No external reference retrieval, secret, customer file, AI/provider call, tenant authorization, storage or deployment is added; this is **not** UC03/04/07 E2E.
+- **Test-first/QA:** `tests/test_source_segments.py` generates actual DOCX OOXML bytes and verifies seven-element paragraph/table order/anchors plus 10 negative/semantic cases; **local PASS 11/11**. [PR #93](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/93), [CI run #42179825211](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42179825211) **PENDING final** at initial PCS checkpoint; do not merge unless final CI PASS.
+- **SRS gate:** The private v1.1.15 ZIP was SHA-verified and summarized in PCS previously but source file is **not accessible in this turn**. The archived v1.0 reference corroborates that document/source anchoring is needed but cannot substitute for exact v1.1.15 trace. This task adds an internal safely-bounded prerequisite only; no new SRS requirements are invented.
+- **Next:** CI → fix → CI PASS → merge; then source-checked next task PDF/Drive integration and UC03 true translation pipeline. Owner final acceptance only after real end-to-end QA.
+- **R67 checkpoint catch-up:** [PR #92](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/92) merged `46de858227e54b31947ceb3c87eed0b46652c98b` and isolated Cloudflare QA account page deployed (auth backend `b610bb89`, QA website `bd948618`). R67 real Owner avatar/password acceptance remains NOT_RUN. Owner explicitly paused further account polish.
+- **Security:** R65 private role E2E remains OPEN/unmerged; leaked QA credential rotation not confirmed; no production. Keep those risks open while delivering safe independent R0 tasks.
 
 ## R66 — QA self-service password change deployed, Owner real rotation pending (2026-11-06)
 
