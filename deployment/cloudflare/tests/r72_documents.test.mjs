@@ -95,7 +95,7 @@ test('anonymous, missing grant, CSRF and wrong matter permissions fail closed',a
 });
 test('spoofed PDF fails before Drive upload or D1 mutation',async()=>{
  const f=fixture();
- const r=await documentsApi(request('/api/qa/documents','POST',{fileBytes:new TextEncoder().encode('not a real PDF file')}),f.env,{now,driveFetch:f.driveFetch});
+ const r=await documentsApi(request('/api/qa/documents','POST',{fileBytes:new TextEncoder().encode('this is not a real PDF format despite its filename and mime')}),f.env,{now,driveFetch:f.driveFetch});
  assert.equal(r.status,415);assert.equal(f.uploads.length,0);
  assert.equal(f.calls.some(x=>x.sql.includes('INSERT INTO')),false);
 });
