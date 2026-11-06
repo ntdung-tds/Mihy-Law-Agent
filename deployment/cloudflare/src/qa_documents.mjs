@@ -268,6 +268,13 @@ export async function documentsApi(req,env,opts={}){
   if(match)return await download(env,p,match[1],now,opts);
   if(directStart)return await startDirect(req,env,p,now,opts);
   if(directFinish)return await finishDirect(req,env,p,now,opts);
-  return req.method==='GET'?await list(req,env,p,now):await upload(req,env,p,now,opts);
+  if(req.method==='GET')return await list(req,env,p,now);
+  // Retire the original body-proxy in live QA. Only pre-existing isolated
+  // synthetic contract tests can explicitly opt in; never let normal clients
+  // bypass the browser→Google direct file plane.
+  if(env.ALLOW_LEGACY_DOCUMENT_PROXY!=='synthetic-tests-only')
+   return result(410,{code:'DIRECT_GOOGLE_UPLOAD_REQUIRED',
+    error:'Luồng tải qua máy chủ đã đóng. Vui lòng tải trực tiếp lên Google Drive từ giao diện mới.'});
+  return await upload(req,env,p,now,opts);
  }catch{return unavailable();}
 }
