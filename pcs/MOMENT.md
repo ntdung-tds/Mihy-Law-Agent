@@ -1,18 +1,26 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `70` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T08:32:16.909Z`.
+- **PCS revision:** `71` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T08:40:48.126Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
+
+## R71 — R70 final merge/CI checkpoint (2026-11-06)
+
+- **Final readback:** R70 [PR #95](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/95) squash-merged to main at `43b6c1903181e2f6765c20136e01cd7fdfdce581`. Final [GitHub Actions #42188426422](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42188426422) **completed SUCCESS 9/9 executed jobs, 21 conditional skips**; original code-head Actions #42187917547 likewise SUCCESS.
+- **R69 audit result:** Five real synthetic DOCX/PDF source-integrity fault groups corrected with conservative refusal (PDF off-crop/invisible/transparent/rotated/Form XObject, DOCX hidden/style and non-empty header/footer); prior 23 targeted + 11 new regression tests **PASS 34/34 locally**. Rendered hidden text PDF as PNG for visual confirmation. Original R69 PR #94 was previously CI-PASS and merged.
+- **Owner-private evidence:** Existing R69 report in the private `AI Law Test Evidence` Drive folder has appended verified R70 findings, CI, commit and explicit NOT_RUN gates. No private document IDs, client files or secrets are committed publicly.
+- **Residual/open:** PDF vector overlays/redaction and unusual fonts can still defeat rendered-text equivalence; user-facing OCR/Word complete parsing and authenticated Cloudflare QA upload/download/storage, UC03/04/07 legal AI, physical mobile and production acceptance remain NOT_RUN. SRS 1.1.15 original ZIP not available for precise clause trace. R67 account polish paused; QA password rotation/real role sign-ins not closed.
+- **Next functional work:** stop repeating source-only review; connect authorized PDF/DOCX intake through real nonproduction QA session/MatterACL/storage, then proceed UC03 true translation and result export. SRS baseline unchanged. Owner accepts final result.
 
 ## R70 — Independent R69 source-integrity audit, actual false-positive/false-negative defects corrected (2026-11-06)
 
 - **Owner:** Requested one further review of R69. No new features, baseline SRS v1.1.15 remains unchanged/private, R67 Account Center still paused.
 - **Confirmed by real synthetic PDF/DOCX bytes, not just static review:** (1) pypdf included off-page text; (2) render mode 3 and alpha-zero PDF text were extracted though invisible; (3) rotated and Form XObject visible PDF text were silently missing in layout mode; (4) Word inline/inherited hidden text was included as normal; (5) visible header/footer text was silently omitted from DOCX source map.
 - **Fix:** `poc_docx/pdf_segments.py` rejects these PDF cases using a second plain-mode visitor and Form XObject check, while `poc_docx/source_segments.py` rejects hidden paragraph/style text and non-empty unprocessed headers/footers. These are deliberate fail-closed limitations, **not** general PDF renderer-equivalence or full Word document support. More complex PDFs (vector overlays, redactions, unusual fonts, nonvisible clipping) require visual verification/expanded coverage.
-- **Evidence:** Rendered the hidden-PDF sample as a real PNG and verified the page does not display the text that the old extractor emitted. Local targeted suites **PASS 34/34** (R68 11, R69 12, R70 11), generated actual DOCX/PDF files; no client data. [PR #95](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/95) contains regressions. CI run [#42187917547](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42187917547) started for code HEAD, final PR HEAD must pass before merge.
+- **Evidence:** Rendered the hidden-PDF sample as a real PNG and verified the page does not display the text that the old extractor emitted. Local targeted suites **PASS 34/34** (R68 11, R69 12, R70 11), generated actual DOCX/PDF files; no client data. [PR #95](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/95) contains regressions. CI run #42187917547 PASS on code HEAD; final-head #42188426422 PASS 9/9; PR #95 squash-merged commit `43b6c1903181e2f6765c20136e01cd7fdfdce581`.
 - **Release limits:** No Cloudflare QA or production deployment; this is a local Python source library not wired into Workers. No real account upload, Drive storage, OCR, translation, grammar, summary, or release acceptance; all remain NOT_RUN. Do not interpret the numeric unit-test pass as legal document completeness.
 - **Next:** CI → fix/retest on failure → merge only on successful final HEAD; then work on controlled authenticated document intake and provenance. Owner final acceptance required.
 

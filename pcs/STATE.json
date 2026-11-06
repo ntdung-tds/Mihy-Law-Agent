@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 70,
-  "updated_at": "2026-11-06T08:32:16.909Z",
+  "revision": 71,
+  "updated_at": "2026-11-06T08:40:48.126Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1450,14 +1450,15 @@
           "real_pdf_ocr": "NOT_RUN",
           "uc03_uc04_uc07_ai_e2e": "NOT_RUN",
           "owner_mobile_acceptance": "NOT_RUN",
-          "production": "NOT_RUN"
+          "production": "NOT_RUN",
+          "r70_source_integrity_followup": "PASS_PR95_CI42188426422"
         },
         "notes": "Uses pypdf 5.9.0 and reportlab 4.4.9 dev fixture dependencies. Requires source_scope=document_only; no external document retrieval, AI inference, upload, Drive OAuth, OCR, exact PDF layout verification, identity/tenant authorization or storage. Private SRS v1.1.15 was checksum-verified historically but source not present in active Files/Drive searches; no clause-by-clause assertion. Owner paused R67 account enhancements; leave as is. R70 follow-up source integrity review identified and corrected silent PDF/DOCX omissions; see AL-R0-DOC-INTAKE-R70-REVIEW."
       },
       {
         "id": "AL-R0-DOC-INTAKE-R70-REVIEW",
         "title": "Independent R69 PDF/DOCX source integrity audit: reject hidden, rotated and silently omitted legal text",
-        "status": "SCOPED_SOURCE_FIX_IMPLEMENTED_QA_RUNTIME_NOT_DEPLOYED",
+        "status": "TECH_DONE_CI_PASS_NOT_QA_INTEGRATED",
         "scope": "R69 bug fix only; no new features, no modification of frozen SRS v1.1.15",
         "findings": [
           "R70-F01: PDF text outside visible CropBox was accepted into source map (actual ReportLab fixture)",
@@ -1478,13 +1479,15 @@
           "review_regression_pdf_docx_tests": "PASS_11_OF_11_LOCAL",
           "existing_r68_docx_tests": "PASS_11_OF_11_LOCAL",
           "combined_targeted": "PASS_34_OF_34_LOCAL",
-          "github_pr": "PR95_LINKED_TO_FINAL_COMMIT_CI",
-          "github_actions_initial": "RUN_42187917547_SEE_PR_CHECKS",
+          "github_pr": "PASS_PR95_SQUASH_MERGED_MAIN_43B6C1903181E2F6765C20136E01CD7FDFDCE581",
+          "github_actions_initial": "PASS_RUN_42187917547_9_EXECUTED_21_SKIPPED",
           "real_pdf_visual_render": "PASS_SYNTHETIC_INVISIBLE_TEXT_DIFF_2026_11_06",
           "real_qa_cloudflare_upload_and_browse": "NOT_RUN",
           "actual_word_approval_and_pdf_render_full_fidelity": "NOT_RUN",
           "regression_unusual_fonts_covered_text_vector_redaction": "KNOWN_LIMITATION_NOT_FULLY_VERIFIED",
-          "production": "NOT_RUN"
+          "production": "NOT_RUN",
+          "github_actions_final": "PASS_RUN_42188426422_9_EXECUTED_21_SKIPPED",
+          "private_qa_evidence": "PASS_SAVED_IN_OWNER_PRIVATE_AI_LAW_TEST_EVIDENCE_FOLDER"
         },
         "notes": "Conservative source integrity guard: may reject real PDFs with rotated text or Form XObjects or Word documents with nonempty header/footer until richer parsing exists. Does not certify visual/rendered equivalence of all PDFs (e.g., text covered by vector overlays). Owner final acceptance not granted; no real client files, API secrets, or production changes."
       }
@@ -2089,8 +2092,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R69 PR#94 merged commit d92269c81f95d59d213d9e3631fe2ac21cd65224 and final CI 42182761375 PASS 9/9. R70 real-file source-integrity review found 5 silent omission/invisible-content cases and corrected in source branch PR95; 34/34 targeted synthetic real PDF/DOCX tests PASS locally. Full PR CI see linked runs, QA runtime AI UC03/04/07 NOT_RUN.",
-      "next_action": "Verify final-head CI and merge R70 scoped parser regression fix if all executing jobs PASS. Next integrate authorized PDF/DOCX intake with QA real identity+MatterACL and file storage; then UC03 actual translation QA/export. Require human visual/source review for complex PDFs and DOCX headers/footers until full extraction supported. SRS v1.1.15 unchanged, R67 account polish paused, no production.",
+      "last_completed_step": "R70 independent R69 review found 5 source integrity defect groups and fixed by PR95 merged main 43b6c1903181e2f6765c20136e01cd7fdfdce581; local real synthetic PDF/DOCX regression 34/34 PASS, final CI run 42188426422 completed SUCCESS 9/9 jobs executed, 21 conditional skip; original R69 PR94 merged and CI passed. PCS R71 checkpoint. No Cloudflare QA runtime upload or legal AI E2E deployed, no production, Owner final acceptance pending.",
+      "next_action": "Begin small authenticated R0 document intake using actual QA user+tenant+MatterACL and authorized file storage; then UC03 translation provider/QA/DOCX export (UC04/07 later) according to SRS 1.1.15. Maintain fail-closed guards for partially supported PDFs/DOCX and full visual review of complex legal documents. SRS v1.1.15 original private archive required for exact FR/TC trace; no client files/production. R67 account polish deferred.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -2126,8 +2129,8 @@
         "R63 2026-11-05: QA UI deployed and source readback PASS, but Browser Rendering actual live test was HTTP429; Owner physical mobile acceptance and QA positive login NOT_RUN. Live Cloudflare backend/site do not yet run R62 authentication/workspace source, so R62 IAM feature acceptance remains BLOCKED.",
         "R64 2026-11-06: Cloudflare QA R62 backend/site code + primary NONPRODUCTION R63 UI source deployed; real Chromium anonymous boundaries PASS (Actions 42072937167). D1 has only 2 active verifiers (1 existing QA04 and 1 Owner-controlled actor) of 11 principals, so saved R40 role accounts still NOT activated. Real multi-role password sign-in, tenant switch/MatterACL HTTP E2E, 30-minute expiry, Owner R64 acceptance remain NOT_RUN/BLOCKED. Browser Rendering via CF returned HTTP429. Primary NONPRODUCTION shares backend with QA; production unchanged.",
         "R66 as of 2026-11-06: QA password-change UI/API deployed and source/readback PASS but owner real password rotation NOT_RUN, so exposed credential remains potentially usable for new sessions. Prior 3 sessions revoked; no confirmation old denied/new accepted. Cloudflare Browser Rendering limited follow-up via HTTP429. R65 PR89 still OPEN/unmerged; separate credentials/roles/MatterACL testing BLOCKED.",
-        "R68-01: v1.1.15 archived ZIP was historically verified but source bytes unavailable in this active session; no full requirement-by-requirement compliance claim. Python DOCX source helper not yet invoked by Cloudflare Worker or exposed to users, PDF/OCR/Drive and UC03/04/07 E2E not built. GitHub CI PR93 pending. R67 account work paused by Owner.",
-        "R69: PDF/DOCX extracted locally and CI-PASS but NOT integrated with Cloudflare Worker or Google Drive; no real authenticated file upload/read, OCR or UC03/04/07 AI E2E. Current SRS v1.1.15 bytes not accessible for exact clause trace. PR94 pending final CI/merge."
+        "R68-01: DOCX source helper merged PR93 PASS but still not invoked by Cloudflare Worker; original SRS v1.1.15 ZIP not mounted; backend storage, upload, PDF/OCR and AI E2E separate tasks.",
+        "R69+R70: source PDF/DOCX extraction and integrity guards are CI-PASS and merged, but NOT integrated with Cloudflare QA Worker or Google Drive; no real authenticated upload/read, OCR or UC03/04/07 AI E2E. Original private SRS 1.1.15 ZIP inaccessible for exact mapping; do not claim full PDF/Word display parity."
       ]
     },
     "policy": {
