@@ -184,6 +184,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/mobile.test.mjs
       - name: Verify R62 active QA memberships, atomic session rotation and anti-CSRF
         run: node --test deployment/cloudflare/tests/r62_workspaces.test.mjs
+      - name: R66 QA authenticated password change, PBKDF2 rotation, all-session revocation and CSRF
+        run: node --test deployment/cloudflare/tests/r66_password_change.test.mjs
       - name: Execute real SQLite R62 session/issuer/subject and tenant-MatterACL isolation
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r62_qa_session_sql.py' -v
       - name: Validate R62 secure offline QA verifier renderer (synthetic credentials only)
