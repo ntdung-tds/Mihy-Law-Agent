@@ -19,6 +19,7 @@ import { WORKSPACE_CSS } from './workspace_css.mjs';
 import { WORKSPACE_JS } from './workspace_js.mjs';
 import { WORKSPACE_SESSION } from './workspace_session.mjs';
 import { WORKSPACE_MATTERS } from './workspace_matters.mjs';
+import { WORKSPACE_DOCUMENTS } from './workspace_documents.mjs';
 import { ACCOUNT_HTML } from './account_html.mjs';
 import { ACCOUNT_CSS } from './account_css.mjs';
 import { ACCOUNT_JS } from './account_js.mjs';
@@ -79,7 +80,7 @@ async function relay(request,env,path){
   body:request.method==='POST'?request.body:undefined,duplex:'half',redirect:'manual'
  }));
  const out=new Headers(headers('application/json; charset=utf-8'));
- for(const field of ['Content-Type','Set-Cookie','Cache-Control','Cross-Origin-Resource-Policy']){
+ for(const field of ['Content-Type','Set-Cookie','Cache-Control','Cross-Origin-Resource-Policy','Content-Disposition']){
    const value=upstream.headers.get(field);
    if(value)out.set(field,value);
  }
