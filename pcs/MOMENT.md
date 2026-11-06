@@ -1,12 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `76` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T13:45:00Z`.
+- **PCS revision:** `77` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T14:54:43.884Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R79 — Owner mobile QA upload screenshot + 'Lưu trữ QA chưa sẵn sàng' (2026-11-06)
+
+- **Same task, no extra task:** `AL-R0-DOC-TRANSFER-R72` remains the single document workflow. Owner screenshot showed native file chooser with oversized/unwrapped filename, and form-level backend 503 'Lưu trữ QA chưa sẵn sàng'. Selected screenshot DOCX is not approved as a synthetic QA fixture; no user/customer document accessed or uploaded by the agent.
+- **Live diagnosis before fix:** Actual QA D1 has **one persisted private Google Drive OAuth grant**, **one Matter with active read/write ACL**, **one signed-in session in the same workspace** and **zero document receipts**. Current generic backend 503 merged token refresh, Google file write and D1 receipt failures, so root cause of the *old* failed upload could not be isolated from the historical message alone.
+- **Implementation:** [PR #108](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/108) merged main SHA `46282a0982c6f559bdbad462f75cc3258b6967b7`. Accessible compact mobile file picker, selected name wrap, 16px select to avoid iOS zoom, useful 1.5MB feedback. API validates input/MatterACL before contacting Google, safely distinguishes grant failure `DRIVE_GRANT_UNAVAILABLE`, Google write failure `DRIVE_UPLOAD_UNAVAILABLE` and D1 receipt failure `QA_RECEIPT_UNAVAILABLE`; no provider messages, OAuth codes or secrets returned. Mobile File.type empty/octet-stream permitted only with extension and existing signature check. SRS unchanged.
+- **CI evidence:** [Actions #42236990242](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42236990242) **PASS 9/9 executed jobs**; QA document Node **13/13**, Drive UI Node **11/11**, actual local Chromium **desktop+mobile file-picker fits viewport and updates selected filename** PASS.
+- **Live QA rollout:** Worker `ai-law-standalone-cf-qa` updated 2026-11-06 14:51:22Z, website `ai-law-web-qa` 14:52:08Z via guarded content-only Cloudflare API. Postdeploy GitHub-source hash readback **PASS** for 1 API and 3 website modules, unrelated modules and all existing bindings preserved; both Workers carry 100% QA traffic. Cloudflare Browser Rendering public live login page **PASS**. No production change.
+- **Unfinished acceptance:** D1 after deployment still **1 grant, 0 document receipts**; a **real authenticated PDF/DOCX upload to Google Drive has NOT_RUN**, thus the original 503 cannot yet be claimed permanently resolved for every provider state. Owner should retry using a small **synthetic QA file only**, report the new safe error if any; then verify D1 receipt, list/download bytes/SHA256 and cross-tenant/MatterACL denials. Do not reuse screenshot's document as test data. Final Owner acceptance PENDING.
 
 ## R78 — Owner consolidates Google Drive document QA acceptance into ONE existing task (2026-11-06)
 
