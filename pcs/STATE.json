@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 69,
-  "updated_at": "2026-11-06T07:43:19.711Z",
+  "revision": 70,
+  "updated_at": "2026-11-06T08:32:16.909Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1438,8 +1438,8 @@
         ],
         "test_results": {
           "local_actual_generated_pdf_docx": "PASS_12_OF_12_SYNTHETIC_FIXTURES",
-          "github_actions": "PASS_42182261096_9_EXECUTED_SUCCESS_21_CONDITIONAL_SKIP",
-          "github_pull_request": "PR94_OPEN_PENDING_FINAL_PCS_HEAD_CI",
+          "github_actions": "PASS_FINAL_RUN_42182761375_9_EXECUTED_SUCCESS_21_CONDITIONAL_SKIP",
+          "github_pull_request": "PASS_MERGED_PR94_COMMIT_D92269C81F95D59D213D9E3631FE2AC21CD65224",
           "pdf_text_page_links": "PASS_SOURCE_PAGE_LINE",
           "pdf_scanned_raster": "PASS_REJECT_REQUIRES_OCR",
           "pdf_encrypted_embedded_mixed_attachments": "PASS_REJECT",
@@ -1452,7 +1452,41 @@
           "owner_mobile_acceptance": "NOT_RUN",
           "production": "NOT_RUN"
         },
-        "notes": "Uses pypdf 5.9.0 and reportlab 4.4.9 dev fixture dependencies. Requires source_scope=document_only; no external document retrieval, AI inference, upload, Drive OAuth, OCR, exact PDF layout verification, identity/tenant authorization or storage. Private SRS v1.1.15 was checksum-verified historically but source not present in active Files/Drive searches; no clause-by-clause assertion. Owner paused R67 account enhancements; leave as is."
+        "notes": "Uses pypdf 5.9.0 and reportlab 4.4.9 dev fixture dependencies. Requires source_scope=document_only; no external document retrieval, AI inference, upload, Drive OAuth, OCR, exact PDF layout verification, identity/tenant authorization or storage. Private SRS v1.1.15 was checksum-verified historically but source not present in active Files/Drive searches; no clause-by-clause assertion. Owner paused R67 account enhancements; leave as is. R70 follow-up source integrity review identified and corrected silent PDF/DOCX omissions; see AL-R0-DOC-INTAKE-R70-REVIEW."
+      },
+      {
+        "id": "AL-R0-DOC-INTAKE-R70-REVIEW",
+        "title": "Independent R69 PDF/DOCX source integrity audit: reject hidden, rotated and silently omitted legal text",
+        "status": "SCOPED_SOURCE_FIX_IMPLEMENTED_QA_RUNTIME_NOT_DEPLOYED",
+        "scope": "R69 bug fix only; no new features, no modification of frozen SRS v1.1.15",
+        "findings": [
+          "R70-F01: PDF text outside visible CropBox was accepted into source map (actual ReportLab fixture)",
+          "R70-F02: PDF rendering mode 3 and zero-opacity text appeared as extracted legal content",
+          "R70-F03: pypdf layout dropped rotated and Form-XObject visible text without alert",
+          "R70-F04: DOCX inline/inherited hidden style text was extracted as normal",
+          "R70-F05: DOCX non-empty header/footer text was skipped silently"
+        ],
+        "fixes": [
+          "Fail closed using PDF plain-mode visitor check for text rendering visibility, rotation, crop bounds and alpha 0",
+          "Reject Form XObject until true recursive source extraction exists",
+          "Reject hidden DOCX text from paragraph XML and inherited style XML",
+          "Reject DOCX header/footer with content until complete source anchoring is implemented",
+          "Preserve valid simple text-only PDF and DOCX body handling"
+        ],
+        "test_results": {
+          "existing_r69_pdf_docx_tests": "PASS_12_OF_12_LOCAL",
+          "review_regression_pdf_docx_tests": "PASS_11_OF_11_LOCAL",
+          "existing_r68_docx_tests": "PASS_11_OF_11_LOCAL",
+          "combined_targeted": "PASS_34_OF_34_LOCAL",
+          "github_pr": "PR95_LINKED_TO_FINAL_COMMIT_CI",
+          "github_actions_initial": "RUN_42187917547_SEE_PR_CHECKS",
+          "real_pdf_visual_render": "PASS_SYNTHETIC_INVISIBLE_TEXT_DIFF_2026_11_06",
+          "real_qa_cloudflare_upload_and_browse": "NOT_RUN",
+          "actual_word_approval_and_pdf_render_full_fidelity": "NOT_RUN",
+          "regression_unusual_fonts_covered_text_vector_redaction": "KNOWN_LIMITATION_NOT_FULLY_VERIFIED",
+          "production": "NOT_RUN"
+        },
+        "notes": "Conservative source integrity guard: may reject real PDFs with rotated text or Form XObjects or Word documents with nonempty header/footer until richer parsing exists. Does not certify visual/rendered equivalence of all PDFs (e.g., text covered by vector overlays). Owner final acceptance not granted; no real client files, API secrets, or production changes."
       }
     ],
     "features": [
@@ -2055,8 +2089,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R69 batch (R69-01/02/03) PDF text-only source extraction + common PDF/DOCX manifest: generated actual PDF/DOCX tests 12/12 PASS locally; full GitHub CI run 42182261096 completed 9/9 executed PASS, 21 conditional skipped. PR#94 final HEAD readback/CI pending; no QA runtime integration and no AI UC E2E. R68 PR93 final merged and PCS corrected.",
-      "next_action": "Confirm PR#94 final HEAD CI PASS, merge safely to main and verify PCS revision69. Next smallest R0 practical task: authorized document intake through QA runtime with tenant/MatterACL, source provenance and save/reload (Cloudflare Worker JS or separate runtime); then genuine UC03 translation/QA/export using approved provider. Do not confuse Python local extractor with live website ability; exact private SRS v1.1.15 contents needed before detailed compliance claim. Keep R67 account work paused; no production.",
+      "last_completed_step": "R69 PR#94 merged commit d92269c81f95d59d213d9e3631fe2ac21cd65224 and final CI 42182761375 PASS 9/9. R70 real-file source-integrity review found 5 silent omission/invisible-content cases and corrected in source branch PR95; 34/34 targeted synthetic real PDF/DOCX tests PASS locally. Full PR CI see linked runs, QA runtime AI UC03/04/07 NOT_RUN.",
+      "next_action": "Verify final-head CI and merge R70 scoped parser regression fix if all executing jobs PASS. Next integrate authorized PDF/DOCX intake with QA real identity+MatterACL and file storage; then UC03 actual translation QA/export. Require human visual/source review for complex PDFs and DOCX headers/footers until full extraction supported. SRS v1.1.15 unchanged, R67 account polish paused, no production.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
