@@ -393,3 +393,5 @@ body.drawer-open{overflow:hidden}
 .qa-document-box .matter-row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid #e6e9f0;overflow-wrap:anywhere}
 #document-feedback{min-height:20px;font-size:13px;line-height:1.5}
 @media(max-width:600px){.qa-document-box{padding:15px}.qa-document-box form{width:100%}}
+
+.qa-drive-setup{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:10px 0}.qa-drive-setup p{flex:1;margin:0;font-size:13px;line-height:1.5}.qa-drive-setup button{min-height:40px}
