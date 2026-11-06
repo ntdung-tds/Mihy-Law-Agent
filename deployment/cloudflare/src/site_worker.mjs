@@ -25,7 +25,7 @@ import { ACCOUNT_CSS } from './account_css.mjs';
 import { ACCOUNT_JS } from './account_js.mjs';
 
 const AUTH_ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
-const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile','/api/qa/profile/avatar']);
+const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile','/api/qa/profile/avatar','/api/qa/drive/status','/api/qa/drive/connect']);
 const privateAssets=new Map([
  ['/styles.css',[WORKSPACE_CSS,'text/css; charset=utf-8']],
  ['/app.js',[WORKSPACE_JS,'application/javascript; charset=utf-8']],
@@ -116,10 +116,10 @@ export async function handleSite(req,env){
  if(API.has(path)||isDocumentApi){
   if(isDocumentApi&&((path!=='/api/qa/documents'&&req.method!=='GET')||
       (path==='/api/qa/documents'&&!['GET','POST'].includes(req.method))))return missing();
-  if((['/api/qa/session','/api/qa/workspaces'].includes(path)&&req.method!=='GET') ||
+  if((['/api/qa/session','/api/qa/workspaces','/api/qa/drive/status'].includes(path)&&req.method!=='GET') ||
     (path==='/api/qa/profile'&&!['GET','POST'].includes(req.method)) ||
     (path==='/api/qa/matters'&&!['GET','POST'].includes(req.method)) ||
-    (['/api/qa/login','/api/qa/logout','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile/avatar'].includes(path)&&req.method!=='POST'))return missing();
+    (['/api/qa/login','/api/qa/logout','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile/avatar','/api/qa/drive/connect'].includes(path)&&req.method!=='POST'))return missing();
   try{return await relay(req,env,path+(isDocumentApi?url.search:''));}catch{return unavailable();}
  }
  if(req.method==='GET'&&path==='/app/')return redirect('/app'+url.search,308);
