@@ -67,7 +67,7 @@
    if(!res.ok)throw Error('status');
    const data=await res.json();
    if(data.connected===true&&data.configuration_ready===true){
-    setDrive('connected','Đã kết nối Google Drive an toàn cho đơn vị. Có thể tải tệp QA lên.');
+    setDrive('connected','Đã kết nối Google Drive cho không gian làm việc này. Có thể tải tệp QA lên.');
     if(uploadButton)uploadButton.disabled=false;
     return;
    }
@@ -76,7 +76,7 @@
     return;
    }
    if(data.can_connect!==true){
-    setDrive('admin','Google Drive chưa kết nối. Quản trị đơn vị cần nhấn kết nối một lần.');
+    setDrive('admin','Không gian tổ chức chưa kết nối Google Drive. Hãy liên hệ quản trị đơn vị để cấp quyền.');
     return;
    }
    setDrive('disconnected',returned==='failed'
