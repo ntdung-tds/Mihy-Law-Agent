@@ -119,6 +119,45 @@ async function login(req,env,now){
     return json(200,{ok:true,expires_in:SESSION_LIFETIME},{"Set-Cookie":setCookie(sid,SESSION_LIFETIME)});
   }catch{return json(503,{error:"Dịch vụ QA tạm thời không khả dụng."});}
 }
+// R66 isolated QA: self-service password rotation requires BOTH a valid session and
+// the current password. All sessions are revoked atomically with verifier rotation.
+async function changePassword(req,env,now){
+  if(!sameOrigin(req)||!req.headers.get("Content-Type")?.startsWith("application/json")||
+     Number(req.headers.get("Content-Length")||0)>MAX_BODY)return reject();
+  let data;
+  try{const raw=await req.text();if(raw.length>MAX_BODY)return reject();data=JSON.parse(raw);}catch{return reject();}
+  const oldPassword=data?.current_password,newPassword=data?.new_password;
+  if(typeof oldPassword!=="string"||!oldPassword||oldPassword.length>512||
+     typeof newPassword!=="string"||newPassword.length<8||newPassword.length>256||
+     newPassword===oldPassword)return reject();
+  try{
+    const p=await mobileSession(req,env,now);if(!p)return deny();
+    if(typeof env.QA_RATE_PEPPER!=="string"||env.QA_RATE_PEPPER.length<24)
+      return json(503,{error:"Dịch vụ QA chưa sẵn sàng."});
+    if(!await allowAttempt(env.DB,env.INSTALLATION_ID,await ipKey(req,env),now))
+      return json(429,{error:"Thử lại sau vài phút."});
+    const v=await env.DB.prepare("SELECT password_salt,password_hash,pbkdf2_iterations,failures,locked_until FROM qa_login_verifiers WHERE installation_id=? AND user_id=? AND subject=? AND status='active' LIMIT 1")
+      .bind(env.INSTALLATION_ID,p.user_id,p.subject).first();
+    if(!v||(v.locked_until!==null&&v.locked_until>now))return deny();
+    if(!equalHex(await derive(oldPassword,v.password_salt,v.pbkdf2_iterations),v.password_hash)){
+      await env.DB.prepare("UPDATE qa_login_verifiers SET failures=MIN(5,failures+1),locked_until=CASE WHEN failures>=4 THEN ? ELSE locked_until END WHERE installation_id=? AND user_id=? AND subject=? AND status='active'")
+        .bind(now+900,env.INSTALLATION_ID,p.user_id,p.subject).run();
+      return deny();
+    }
+    const newSalt=hex(crypto.getRandomValues(new Uint8Array(16)));
+    const newHash=await derive(newPassword,newSalt,100000);
+    const updates=await env.DB.batch([
+      env.DB.prepare("UPDATE qa_login_verifiers SET password_salt=?,password_hash=?,pbkdf2_iterations=100000,failures=0,locked_until=NULL WHERE installation_id=? AND user_id=? AND subject=? AND status='active' AND password_salt=? AND password_hash=?")
+        .bind(newSalt,newHash,env.INSTALLATION_ID,p.user_id,p.subject,v.password_salt,v.password_hash),
+      env.DB.prepare("UPDATE qa_sessions SET revoked_at=? WHERE installation_id=? AND user_id=? AND revoked_at IS NULL")
+        .bind(now,env.INSTALLATION_ID,p.user_id)
+    ]);
+    if(updates?.[0]?.meta?.changes!==1)return json(409,{error:"Thông tin tài khoản đã thay đổi. Vui lòng đăng nhập lại."},
+      {"Set-Cookie":setCookie("",0)});
+    return json(200,{ok:true,login_required:true},{"Set-Cookie":setCookie("",0)});
+  }catch{return json(503,{error:"Không thể đổi mật khẩu lúc này. Vui lòng thử lại."});}
+}
+
 async function me(req,env,now){
   try{const p=await mobileSession(req,env,now);if(!p)return deny();
     return json(200,{email:p.email,tenant_id:p.tenant_id,role:p.role_key,
@@ -140,6 +179,7 @@ export async function mobileApi(req,env,opts={}){
   if(path==="/api/qa/session"&&req.method==="GET")return me(req,env,now);
   if(path==="/api/qa/workspaces"&&req.method==="GET")return workspaces(req,env,now);
   if(path==="/api/qa/switch-workspace"&&req.method==="POST")return switchWorkspace(req,env,now);
+  if(path==="/api/qa/change-password"&&req.method==="POST")return changePassword(req,env,now);
   if(path==="/api/qa/logout"&&req.method==="POST")return logout(req,env,now);
   return json(404,{error:"Không tìm thấy."});
 }
