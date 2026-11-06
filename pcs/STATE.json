@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 64,
-  "updated_at": "2026-11-05T17:28:18.813Z",
+  "revision": 66,
+  "updated_at": "2026-11-06T02:42:24.795Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1342,6 +1342,33 @@
           "Owner-private AI Law Test Evidence folder; R64 Google Docs evidence (do not publish credential, document id or private URL in public PCS)"
         ],
         "notes": "The nonproduction primary ai-law-web shares QA_AUTH backend with ai-law-web-qa, so backend R62 was visible to both site frontends; only R63 visual modules promoted to primary. The private R40 verifier bundle is not imported, 2 active QA verifiers exist after user-provided QA actor creation, multi-role activation remains BLOCKED; never claim full E2E."
+      },
+      {
+        "id": "AL-R0-IAM-QA-R66-001",
+        "title": "R66 authenticated QA self-service password change, responsive UI and real QA deployment",
+        "status": "QA_DEPLOYED_PENDING_OWNER_REAL_PASSWORD_CHANGE_ACCEPTANCE",
+        "priority": "P0",
+        "scope": "Existing isolated Cloudflare QA only; existing SRS v1.1.15 baseline unchanged; no production, no recovery email",
+        "test_results": {
+          "github_source": "PASS_PR90_SQUASH_MERGED_MAIN_956532641A600ABF1FE73F40C586C06500257B3D",
+          "github_actions": "PASS_42143772358_10_EXECUTED_SUCCESS_20_CONDITIONAL_SKIP",
+          "crypto_unit": "PASS_SYNTHETIC_WEBCRYPTO_PBKDF2_D1_VERIFIER_ROTATION_OLD_PASSWORD_DENY_NEW_PASS_NEW_HASH_ALL_SESSION_REVOCATION",
+          "chromium_browser": "PASS_SYNTHETIC_POSITIVE_API_320_390_1440_PASSWORD_MODAL_MISMATCH_SUCCESS_REDIRECT",
+          "live_backend": "PASS_100_PERCENT_6797BC2D_BBCE_4C76_B1E7_7987E529AD6C",
+          "live_qa_site": "PASS_100_PERCENT_1E2ABBA8_8A67_4532_81C1_4F4ED9C2CC1C",
+          "modules_bindings": "PASS_DIRECT_READBACK_GITHUB_EXACT_MATCH_1_BACKEND_PLUS_7_SITE_MODULES_D1_SECRET_7_BINDINGS_SITE_QA_AUTH_PRESERVED",
+          "live_browser_anonymous": "PASS_CLOUDFLARE_RENDERING_HTTPS_LOGIN_PAGE_AND_APP_ANONYMOUS_REDIRECT",
+          "live_browser_followup": "BLOCKED_BROWSER_RENDERING_HTTP429_QUOTA",
+          "owner_password_change": "NOT_RUN_ACCOUNT_VERIFIER_UNCHANGED",
+          "old_password_denied_new_password_accepted": "NOT_RUN",
+          "production": "NOT_RUN"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/90",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42143772358",
+          "Owner-private AI Law Test Evidence Google Drive R66 report, no document ID or secret in public PCS"
+        ],
+        "notes": "The deployed backend is shared with ai-law-web NONPRODUCTION primary via QA_AUTH, but the primary site front-end/relay remains at version 670463d4-558f-47be-936c-22819cfea0c7, so R66 UI/route appears only on ai-law-web-qa. Existing leaked QA password still needs rotation through safe UI, previous three sessions had been revoked. R65 PR #89 is OPEN, and remains an independent role-testing suite blocked on authorized private credential operator."
       }
     ],
     "features": [
@@ -1575,6 +1602,12 @@
         "topic": "Owner accepted mobile navigation R63 and authorized bounded R64 QA login/session/permissions batch",
         "value": "Owner has accepted R63 mobile UX. R64 approved: deploy previously merged R62 hardened QA session/backend and site modules to isolated Cloudflare QA, test real anonymous route guards and 320/390/430/1440 Chromium; promote only Owner-approved R63 HTML/CSS to existing public-facing NONPRODUCTION ai-law-web while retaining marketing UI and service binding. Real role-based sign-in, tenant switches, revoked MatterACL and private QA verifier activation remain separate test/credential gates; no production or legal customer data.",
         "authority": "Owner 2026-11-06: 'Đã ok, bước tiếp theo là gì' followed by 'Ok, làm luôn đi' for R64 plan."
+      },
+      {
+        "id": "DEC-029",
+        "topic": "R66 approved nonproduction self-service password change UI; separate unfinished R65 role QA",
+        "value": "Owner identified no password-change UI. Implemented authenticated current-password verification and new PBKDF2 verifier + all-session revocation for isolated Cloudflare QA, with desktop/mobile UI and post-change login; QA backend and website deployed 100% after CI PASS. R65 independent PR #89 remains OPEN, not merged and its private R40 role E2E is BLOCKED. Previous credential exposure remains OPEN until Owner genuinely rotates through QA form, old credential denied and new accepted; never claim automatic password reset. No production rollout or SRS baseline change.",
+        "authority": "Owner: 'Đã có chức năng đổi mật khẩu đâu' and 'Triển khai luon đi' (2026-11-06)"
       }
     ],
     "risks": [
@@ -1673,6 +1706,13 @@
         "title": "POC1 single Word-result verifier and DOCX generators had mismatched safety gates / false STATIC_PASS",
         "status": "MITIGATED_IN_SCOPED_POC",
         "mitigation": "4 reproduced red-green CI cycles (96→99→103→105 tests); final 105/105 GitHub Actions success; R12 synthetic kit CRC and one-page renders inspected. True Word desktop UI and application E2E remain NOT_RUN."
+      },
+      {
+        "id": "RISK-013",
+        "level": "HIGH",
+        "title": "QA-only password transiently exposed on public PR history; credential still not rotated",
+        "status": "OPEN_OLD_SESSIONS_REVOKED_SELF_SERVICE_QA_READY",
+        "mitigation": "Previous public branch history sanitized but caches may exist; 3 old sessions revoked; password verifier change through connector blocked. R66 QA authenticated password-change UI now deployed, but real password rotation/old DENY/new PASS have NOT_RUN and require Owner. Use a new unique password entered directly on trusted QA webpage; no password in chat/GitHub/PCS."
       }
     ],
     "artifacts": [
@@ -1930,9 +1970,9 @@
       }
     ],
     "current": {
-      "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R64: Owner accepted R63 mobile nav; QA backend deployed R62 b6bf1e4b and QA site 53379c01, 100% each; primary NONPRODUCTION R63 HTML/CSS UI-only at 670463d4 100%. All Worker module/binding readbacks PASS. PR #87 merged c44d76387d8b62f7eb57c16892d9349fa10150d1; Actions 42072937167 completed/success 10/10 executed, 20 skips. Real HTTPS anonymous Chromium 320/390/430/1440 PASS, positive roles still NOT_RUN. Evidence saved in Owner-private Google Drive AI Law Test Evidence. No production deploy.",
-      "next_action": "Use authorized private QA-credential/operator channel to activate remaining synthetic QA account verifiers from Owner-private R40 bundle without overwriting existing QA04 or new Owner-controlled QA actor; test full live mobile/password multi-role session, logout, expiry, revoked accounts, tenant switch SID rotation, MatterACL and negative cross-tenant cases in Chromium; after live QA PASS optionally promote R62 site modules to ai-law-web NONPRODUCTION, then Owner final acceptance. Do not bypass connector safety or deploy production.",
+      "active_task": "AL-R0-IAM-QA-R66-001",
+      "last_completed_step": "R66: PR #90 merged 956532641a600abf1fe73f40c586c06500257b3d, Actions #42143772358 completed/success 10/10 executed. Cloudflare QA auth 6797bc2d and QA site 1e2abba8 deployed 100%; direct readback changed files matches merged main, bindings preserved, R63 bottom mobile nav intact. Browser Rendering real HTTPS anonymous login and unauthenticated /app redirect PASS, remaining rendering calls 429. Owner has not yet changed real password; no production deploy. Owner-private Drive test evidence saved.",
+      "next_action": "Owner signs in at https://ai-law-web-qa.iaict-platform.workers.dev/login, opens Đổi mật khẩu in desktop top bar or mobile Chức năng, enters current password and a NEW unique password directly on website; then verifies old credential DENY, new credential PASS and all previous sessions revoked. Preserve R65 PR89 independent unmerged until reconciled with latest main and its CI revalidated; activate remaining R40 QA only through trusted operator. Do not self-deploy production.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -1966,7 +2006,8 @@
         "R61 2026-11-05: Cross-app credential transfer for new Cloudflare QA accounts was blocked by tool safety controls; no new verifier records were inserted. D1 remains 10 synthetic principals, 12 memberships, 1 active QA login verifier, zero matter catalog records; full positive role-account Chromium E2E and TC12A/B NOT_RUN.",
         "R62 2026-11-05: Attempt to publish merged authentication source through Cloudflare connector was blocked by tool safety; read-back confirms backend d22f928f, site QA ea55af9f, primary nonproduction 71f406a3 remain previous R61/R44 versions. Public source/test CI PASS 30/30, but R62 live Cloudflare remains BLOCKED and multi-account real sign-in NOT_RUN.",
         "R63 2026-11-05: QA UI deployed and source readback PASS, but Browser Rendering actual live test was HTTP429; Owner physical mobile acceptance and QA positive login NOT_RUN. Live Cloudflare backend/site do not yet run R62 authentication/workspace source, so R62 IAM feature acceptance remains BLOCKED.",
-        "R64 2026-11-06: Cloudflare QA R62 backend/site code + primary NONPRODUCTION R63 UI source deployed; real Chromium anonymous boundaries PASS (Actions 42072937167). D1 has only 2 active verifiers (1 existing QA04 and 1 Owner-controlled actor) of 11 principals, so saved R40 role accounts still NOT activated. Real multi-role password sign-in, tenant switch/MatterACL HTTP E2E, 30-minute expiry, Owner R64 acceptance remain NOT_RUN/BLOCKED. Browser Rendering via CF returned HTTP429. Primary NONPRODUCTION shares backend with QA; production unchanged."
+        "R64 2026-11-06: Cloudflare QA R62 backend/site code + primary NONPRODUCTION R63 UI source deployed; real Chromium anonymous boundaries PASS (Actions 42072937167). D1 has only 2 active verifiers (1 existing QA04 and 1 Owner-controlled actor) of 11 principals, so saved R40 role accounts still NOT activated. Real multi-role password sign-in, tenant switch/MatterACL HTTP E2E, 30-minute expiry, Owner R64 acceptance remain NOT_RUN/BLOCKED. Browser Rendering via CF returned HTTP429. Primary NONPRODUCTION shares backend with QA; production unchanged.",
+        "R66 as of 2026-11-06: QA password-change UI/API deployed and source/readback PASS but owner real password rotation NOT_RUN, so exposed credential remains potentially usable for new sessions. Prior 3 sessions revoked; no confirmation old denied/new accepted. Cloudflare Browser Rendering limited follow-up via HTTP429. R65 PR89 still OPEN/unmerged; separate credentials/roles/MatterACL testing BLOCKED."
       ]
     },
     "policy": {
