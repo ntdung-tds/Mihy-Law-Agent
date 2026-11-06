@@ -11,7 +11,15 @@ const result=(status,data)=>new Response(JSON.stringify(data),{status,headers:{
  'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer'
 }});
 const forbidden=()=>result(404,{error:'Không tìm thấy hoặc không được phép truy cập.'});
-const unavailable=()=>result(503,{error:'Lưu trữ QA chưa sẵn sàng.'});
+const unavailable=()=>result(503,{code:'QA_STORAGE_UNAVAILABLE',error:'Lưu trữ QA đang gián đoạn. Vui lòng thử lại.'});
+// R79: stable public failure codes, never provider token/response text or secrets.
+const storageIssue=code=>result(503,{
+ code,error:{
+  DRIVE_GRANT_UNAVAILABLE:'Không thể sử dụng quyền Google Drive hiện tại. Hãy kết nối lại Drive rồi thử lại.',
+  DRIVE_UPLOAD_UNAVAILABLE:'Google Drive chưa nhận tệp. Vui lòng thử lại hoặc kiểm tra dung lượng lưu trữ.',
+  QA_RECEIPT_UNAVAILABLE:'Tệp chưa được ghi nhận trong AI Law QA. Vui lòng thử lại.'
+ }[code]||'Lưu trữ QA đang gián đoạn.'
+});
 const configured=env=>env?.AI_LAW_CF_MODE==='isolated-qa-only'&&env.DB&&UUID.test(env.INSTALLATION_ID||'');
 const csrf=req=>{const u=new URL(req.url);return u.protocol==='https:'&&req.headers.get('Origin')===u.origin&&req.headers.get('Sec-Fetch-Site')!=='cross-site'};
 const validName=name=>typeof name==='string'&&name.length>=5&&name.length<=120&&
@@ -92,7 +100,7 @@ async function list(req,env,p,now){
 }
 async function upload(req,env,p,now,opts){
  if(!csrf(req))return result(403,{error:'CSRF_DENIED'});
- let drive;try{drive=await driveAdapter(env,p,opts);}catch{return unavailable();}
+ // Do not call Google or refresh OAuth for an invalid local input.
  let file,matter,name,mime,bytes;
  try{
   if(Number(req.headers.get('Content-Length')||0)>MAX_REQUEST)throw Error('too_large');
@@ -104,19 +112,30 @@ async function upload(req,env,p,now,opts){
   if(!validName(name)||file.size<22||file.size>MAX_FILE)throw Error('too_large');
   const ext=name.slice(name.lastIndexOf('.')+1).toLowerCase();
   mime=ext==='pdf'?PDF:ext==='docx'?DOCX:null;
-  if(!mime||file.type!==mime)throw Error('unsupported');
+  // Mobile browsers may omit File.type; signed bytes and extension are still
+  // validated. An explicit contradictory MIME remains forbidden.
+  if(!mime||(file.type&&file.type!=='application/octet-stream'&&file.type!==mime))
+   throw Error('unsupported');
   bytes=new Uint8Array(await file.arrayBuffer());
   if(!magic(bytes,ext))throw Error('unsupported');
  }catch(e){return result(e.message==='too_large'?413:e.message==='unsupported'?415:400,
    {error:'Tệp PDF/DOCX QA hoặc biểu mẫu không hợp lệ.'});}
  if(!await permit(env,p,matter,'write',now))return forbidden();
- const counts=await env.DB.prepare('SELECT COUNT(*) AS n FROM qa_file_links WHERE installation_id=? AND tenant_id=? AND matter_id=?')
+ let counts;
+ try{
+  counts=await env.DB.prepare('SELECT COUNT(*) AS n FROM qa_file_links WHERE installation_id=? AND tenant_id=? AND matter_id=?')
    .bind(env.INSTALLATION_ID,p.tenant_id,matter).first();
+ }catch{return storageIssue('QA_RECEIPT_UNAVAILABLE');}
  if(Number(counts?.n||0)>=20)return result(429,{error:'Hồ sơ QA đạt giới hạn tệp.'});
+ let drive;
+ try{drive=await driveAdapter(env,p,opts);}
+ catch{return storageIssue('DRIVE_GRANT_UNAVAILABLE');}
  const digest=await sha256(bytes);
  let remoteId=null;
  try{
   remoteId=await drive.upload({name,mimeType:mime,bytes});
+ }catch{return storageIssue('DRIVE_UPLOAD_UNAVAILABLE');}
+ try{
   if(!await permit(env,p,matter,'write',now))throw Error('permission changed');
   const id=crypto.randomUUID();
   const actions=await env.DB.batch([
@@ -127,9 +146,10 @@ async function upload(req,env,p,now,opts){
   ]);
   if(actions?.length!==2||actions.some(a=>a.success===false))throw Error('Commit failed');
   return result(201,{id,name,sha256:digest,status:'unverified',note:'Lưu trữ cách ly; chưa dùng cho AI.'});
- }catch{
+ }catch(e){
   if(remoteId)try{await drive.remove(remoteId);}catch{/* operator must reconcile orphan */}
-  return unavailable();
+  if(e?.message==='permission changed')return forbidden();
+  return storageIssue('QA_RECEIPT_UNAVAILABLE');
  }
 }
 async function download(env,p,id,now,opts){
