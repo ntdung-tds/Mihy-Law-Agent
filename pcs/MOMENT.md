@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `75` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T13:19:02.211Z`.
+- **PCS revision:** `76` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T13:45:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R78 — Owner consolidates Google Drive document QA acceptance into ONE existing task (2026-11-06)
+
+- **Only active document task:** `AL-R0-DOC-TRANSFER-R72`. The Owner instructed "Gộp lại thành 1 task". No five child tasks were created; existing R72 task was updated with one integrated flow. Approved SRS v1.1.15 unchanged.
+- **Single scope and acceptance:** Synthetic PDF/DOCX valid/invalid upload → customer-authorized private Google Drive root → tenant-scoped D1 file receipt/list → reload/workspace switch → verified-byte/sha256 download → deny cross-tenant, revoked MatterACL, stale session and wrong file ID → fix/retest → final CI + QA-only acceptance. No legal AI/UC03, OCR, production, real legal files or SaaS additions.
+- **Actual QA baseline:** Cloudflare D1 read-only counts **one persisted Google Drive connection, zero document receipts** on 2026-11-06; connection alone is not proof that file upload/download works. Existing `qa_documents.mjs`, `google_drive.mjs`, `documents.js` and R72 Node 7/7 + SQLite 2/2 test checks already exist and prior code deployed; signed-in actual Google-backed PDF/DOCX E2E **NOT_RUN**. No code re-deploy needed merely to consolidate the task.
+- **Execution gate:** Carry out real signed-in QA synthetic file tests, ACL isolation, defect→fix→retest within this same task; don't access or upload actual customer files or disclose tokens/passwords; production unchanged. Project Owner has final acceptance.
 
 ## R77 — Google Drive consent callback loses QA login: fixed on QA, consent retest pending (2026-11-06)
 
