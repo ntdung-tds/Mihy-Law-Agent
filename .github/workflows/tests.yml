@@ -176,6 +176,7 @@ jobs:
           node --check web/r0-preview/session.js
           node --check deployment/cloudflare/src/google_drive.mjs
           node --check deployment/cloudflare/src/qa_documents.mjs
+          node --check deployment/cloudflare/tests/r86_direct_upload.test.mjs
           node --check deployment/cloudflare/src/oauth_drive.mjs
           node --check web/r0-preview/documents.js
           node --check deployment/cloudflare/src/matter_workspace.mjs
@@ -215,6 +216,10 @@ jobs:
         run: node --test deployment/cloudflare/tests/r72_documents.test.mjs
       - name: R81 Google Drive multipart wire protocol and safe provider error diagnostics
         run: node --test deployment/cloudflare/tests/r81_drive_provider_upload.test.mjs
+      - name: R86 direct browser Drive metadata-only upload tickets and ACL, replay proof
+        run: node --test deployment/cloudflare/tests/r86_direct_upload.test.mjs
+      - name: R86 direct Drive ticket SQLite integrity and tenant constraints
+        run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r86_direct_schema.py' -v
       - name: R72 actual SQLite receipt migration tenant and status constraints
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r72_document_schema.py' -v
       - name: R73 QA Google OAuth PKCE encrypted grants and tenant isolation
