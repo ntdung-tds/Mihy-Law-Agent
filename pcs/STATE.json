@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 68,
-  "updated_at": "2026-11-06T07:18:32.046Z",
+  "revision": 69,
+  "updated_at": "2026-11-06T07:43:19.711Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1400,8 +1400,8 @@
         ],
         "test_results": {
           "local_python_docx_real_ooXML": "PASS_11_UNIT_TESTS_2026_11_06",
-          "github_pr": "PR93_FINAL_HEAD_RETEST_PENDING_AFTER_PCS_UPDATE",
-          "github_ci": "PASS_RUN_42180047004_9_EXECUTED_SUCCESS_21_CONDITIONAL_SKIPS",
+          "github_pr": "PASS_PR93_SQUASH_MERGED_MAIN_85CAEE6E36D7CD5416BD2B012F79E8C3547C1E63",
+          "github_ci": "PASS_FINAL_HEAD_42180621463_9_EXECUTED_21_CONDITIONAL_SKIP",
           "full_srs_1_1_15_trace": "BLOCKED_ORIGINAL_PRIVATE_ZIP_NOT_MOUNTED_THIS_SESSION",
           "real_qa_docx_upload_e2e": "NOT_RUN",
           "pdf_extraction": "NOT_RUN",
@@ -1412,6 +1412,47 @@
           "production": "NOT_RUN"
         },
         "notes": "Python-only non-networked source helper, not Cloudflare Worker API; SRS v1.1.15 original archive was historically checksum-verified but inaccessible in current active file context. Archived v1.0 has FR03-01/02/04 and TC03A/B examples for provisional context only; no claim 1.1.15 exact trace."
+      },
+      {
+        "id": "AL-R0-DOC-INTAKE-R69-01-03",
+        "title": "R69 batched PDF text source parser + common PDF/DOCX manifest + verified safety regressions",
+        "status": "TECH_DONE_LOCAL_AND_CI_NOT_DEPLOYED",
+        "priority": "P0",
+        "scope": "R0 UC03/04/07 prerequisite only: text-only PDF plus existing DOCX source paths, local Python library; SRS v1.1.15 baseline unchanged",
+        "subtasks": [
+          {
+            "id": "R69-01",
+            "title": "PDF 1.0-1.7/2.0 bounded text-only source page-line extraction and fail-closed unsupported input",
+            "status": "TECH_DONE"
+          },
+          {
+            "id": "R69-02",
+            "title": "Common PDF/DOCX immutable source map: original byte digest, format, explicit document-only scope, source anchors",
+            "status": "TECH_DONE"
+          },
+          {
+            "id": "R69-03",
+            "title": "Actual generated PDF/DOCX tests plus full CI, no false UI/AI claims",
+            "status": "TECH_DONE"
+          }
+        ],
+        "test_results": {
+          "local_actual_generated_pdf_docx": "PASS_12_OF_12_SYNTHETIC_FIXTURES",
+          "github_actions": "PASS_42182261096_9_EXECUTED_SUCCESS_21_CONDITIONAL_SKIP",
+          "github_pull_request": "PR94_OPEN_PENDING_FINAL_PCS_HEAD_CI",
+          "pdf_text_page_links": "PASS_SOURCE_PAGE_LINE",
+          "pdf_scanned_raster": "PASS_REJECT_REQUIRES_OCR",
+          "pdf_encrypted_embedded_mixed_attachments": "PASS_REJECT",
+          "pdf_broken_overlarge_page_count": "PASS_REJECT",
+          "docx_reuse": "PASS_R68_01_ANCHORS",
+          "storage_acl_authorization": "NOT_RUN_NO_RUNTIME_INTEGRATION",
+          "cloudflare_qa_deploy": "NOT_RUN_PYTHON_LIBRARY_ONLY",
+          "real_pdf_ocr": "NOT_RUN",
+          "uc03_uc04_uc07_ai_e2e": "NOT_RUN",
+          "owner_mobile_acceptance": "NOT_RUN",
+          "production": "NOT_RUN"
+        },
+        "notes": "Uses pypdf 5.9.0 and reportlab 4.4.9 dev fixture dependencies. Requires source_scope=document_only; no external document retrieval, AI inference, upload, Drive OAuth, OCR, exact PDF layout verification, identity/tenant authorization or storage. Private SRS v1.1.15 was checksum-verified historically but source not present in active Files/Drive searches; no clause-by-clause assertion. Owner paused R67 account enhancements; leave as is."
       }
     ],
     "features": [
@@ -2014,8 +2055,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R68-01 actual DOCX paragraph/table text segmentation with source anchors and explicit document_only scope: local 11/11 unittest PASS; main technical CI run 42180047004 fully completed 9/9 executing jobs PASS, 21 conditional skips. PR #93 open and final PCS-doc update CI pending; no QA runtime integration or UC03/04/07 E2E.",
-      "next_action": "After final PR#93 HEAD CI PASS, squash-merge to main, verify new PCS revision 68. Follow with a separate small document ingestion task, then wire into QA via an authorized runtime and test real E2E before claiming UC03/04/07 ready. Exact original SRS v1.1.15 ZIP must be available for detailed trace. Keep R67 account enhancements on hold; no production.",
+      "last_completed_step": "R69 batch (R69-01/02/03) PDF text-only source extraction + common PDF/DOCX manifest: generated actual PDF/DOCX tests 12/12 PASS locally; full GitHub CI run 42182261096 completed 9/9 executed PASS, 21 conditional skipped. PR#94 final HEAD readback/CI pending; no QA runtime integration and no AI UC E2E. R68 PR93 final merged and PCS corrected.",
+      "next_action": "Confirm PR#94 final HEAD CI PASS, merge safely to main and verify PCS revision69. Next smallest R0 practical task: authorized document intake through QA runtime with tenant/MatterACL, source provenance and save/reload (Cloudflare Worker JS or separate runtime); then genuine UC03 translation/QA/export using approved provider. Do not confuse Python local extractor with live website ability; exact private SRS v1.1.15 contents needed before detailed compliance claim. Keep R67 account work paused; no production.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -2051,7 +2092,8 @@
         "R63 2026-11-05: QA UI deployed and source readback PASS, but Browser Rendering actual live test was HTTP429; Owner physical mobile acceptance and QA positive login NOT_RUN. Live Cloudflare backend/site do not yet run R62 authentication/workspace source, so R62 IAM feature acceptance remains BLOCKED.",
         "R64 2026-11-06: Cloudflare QA R62 backend/site code + primary NONPRODUCTION R63 UI source deployed; real Chromium anonymous boundaries PASS (Actions 42072937167). D1 has only 2 active verifiers (1 existing QA04 and 1 Owner-controlled actor) of 11 principals, so saved R40 role accounts still NOT activated. Real multi-role password sign-in, tenant switch/MatterACL HTTP E2E, 30-minute expiry, Owner R64 acceptance remain NOT_RUN/BLOCKED. Browser Rendering via CF returned HTTP429. Primary NONPRODUCTION shares backend with QA; production unchanged.",
         "R66 as of 2026-11-06: QA password-change UI/API deployed and source/readback PASS but owner real password rotation NOT_RUN, so exposed credential remains potentially usable for new sessions. Prior 3 sessions revoked; no confirmation old denied/new accepted. Cloudflare Browser Rendering limited follow-up via HTTP429. R65 PR89 still OPEN/unmerged; separate credentials/roles/MatterACL testing BLOCKED.",
-        "R68-01: v1.1.15 archived ZIP was historically verified but source bytes unavailable in this active session; no full requirement-by-requirement compliance claim. Python DOCX source helper not yet invoked by Cloudflare Worker or exposed to users, PDF/OCR/Drive and UC03/04/07 E2E not built. GitHub CI PR93 pending. R67 account work paused by Owner."
+        "R68-01: v1.1.15 archived ZIP was historically verified but source bytes unavailable in this active session; no full requirement-by-requirement compliance claim. Python DOCX source helper not yet invoked by Cloudflare Worker or exposed to users, PDF/OCR/Drive and UC03/04/07 E2E not built. GitHub CI PR93 pending. R67 account work paused by Owner.",
+        "R69: PDF/DOCX extracted locally and CI-PASS but NOT integrated with Cloudflare Worker or Google Drive; no real authenticated file upload/read, OCR or UC03/04/07 AI E2E. Current SRS v1.1.15 bytes not accessible for exact clause trace. PR94 pending final CI/merge."
       ]
     },
     "policy": {
