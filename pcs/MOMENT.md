@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `77` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T14:54:43.884Z`.
+- **PCS revision:** `78` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T15:20:24.797Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R80 — Google Drive tenant-scoped disconnect added to existing R72 document QA task (2026-11-06)
+
+- **Owner request:** Add **Ngắt kết nối** beside Google Drive connection in `/app#documents`. The original `AL-R0-DOC-TRANSFER-R72` remains the **one existing document work item**; no expansion to SaaS, production, legal AI or real customer files, no SRS v1.1.15 change.
+- **Security / behavior:** Only active `tenant_admin` or verified **sole personal workspace owner** can disconnect current tenant through same-origin CSRF-guarded `POST /api/qa/drive/disconnect`. The operation transactionally removes that tenant's encrypted refresh grant and outstanding OAuth states only. It **does not delete Google Drive folders/files, D1 document receipts or another tenant's credential**. The Google-account-wide authorization is **not globally revoked** because revocation may disrupt other tenants; users can revoke all authorization through Google Account separately. Upload is disabled after disconnection and a fresh status verification shows **Kết nối Google Drive** to re-authorize. UI requires explicit browser confirmation.
+- **Code / tests:** [PR #110](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/110) squash merged SHA `62a84c17b2d386c27e4fa2de2c8a99a24a890ee1`, [Actions #42241224034](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42241224034) **PASS 9/9 executed**; OAuth Node **12/12**, Drive UI Node **15/15**, website Node **13/13**, including CSRF/anonymous/org-lawyer deny, owner permissions, tenant isolation, pending callback invalidation, cancel confirmation and post-disconnect reconnect UI.
+- **Cloudflare QA deployment:** API `ai-law-standalone-cf-qa` updated 2026-11-06T15:18:34Z, website `ai-law-web-qa` updated 15:19:12Z using guarded content-only patches; exact GitHub source readback matched 2/2 backend and 4/4 website module hashes, unrelated modules and all existing bindings/secrets preserved; 100% QA traffic each. No production changes.
+- **Post-deploy live read-only D1:** One connected Drive workspace **still exists** with **0 document receipts**, **0 file links** and **1 outstanding OAuth state**. The AI did **not** click disconnect or revoke this live grant. Real signed-in disconnect→reconnect and PDF/DOCX provider E2E are **NOT_RUN / Owner acceptance pending**. Final task acceptance is still open.
 
 ## R79 — Owner mobile QA upload screenshot + 'Lưu trữ QA chưa sẵn sàng' (2026-11-06)
 
