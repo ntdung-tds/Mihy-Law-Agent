@@ -64,7 +64,7 @@
       const data=await response.json();
       const name=typeof data.profile?.display_name==='string'?data.profile.display_name.trim():'';
       if(name){const label=el('#profile-identity');if(label)label.textContent=name;}
-      const initials=(name||data.email||'AL').trim().split(/\\s+/);
+      const initials=(name||data.email||'AL').trim().split(/\s+/);
       const small=(initials.length>1?initials[0].slice(0,1)+initials[initials.length-1].slice(0,1):(initials[0]||'AL').slice(0,2)).toUpperCase();
       for(const selector of ['#top-account-avatar','.profile-circle']){
         const target=el(selector);if(!target)continue;
