@@ -81,7 +81,7 @@ test('successful consent is verified by server status; upload enabled only if co
 test('non-admin cannot start tenant Google grant',async()=>{
  const t=await mount({connected:false,configuration_ready:true,can_connect:false});
  assert.equal(t.els['drive-connect'].hidden,true);
- assert.match(t.els['drive-status'].textContent,/Quản trị đơn vị/);
+ assert.match(t.els['drive-status'].textContent,/quản trị đơn vị/i);
 });
 test('unsafe redirect from API is refused and shown as an actionable error',async()=>{
  const t=await mount({connected:false,configuration_ready:true,can_connect:true},

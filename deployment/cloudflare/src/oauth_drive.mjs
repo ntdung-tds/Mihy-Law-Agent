@@ -62,11 +62,31 @@ export const CHECK_SESSION_SQL=[
  'WHERE s.installation_id=? AND s.sid=? AND s.issuer=? AND s.tenant_id=?',
  'AND s.user_id=? AND s.revoked_at IS NULL AND s.expires_at>? LIMIT 1'
 ].join(' ');
+// A personal workspace may be connected only by its sole active member.
+// Organization Drive still requires tenant_admin; role alone never changes
+// another organization's storage grant.
+export const PERSONAL_OWNER_SQL=[
+ 'SELECT 1 AS ok FROM qa_tenants t JOIN qa_memberships m',
+ 'ON m.installation_id=t.installation_id AND m.tenant_id=t.tenant_id',
+ "WHERE t.installation_id=? AND t.tenant_id=? AND t.kind='personal'",
+ "AND m.user_id=? AND m.role_key='lawyer' AND m.status='active'",
+ 'AND NOT EXISTS (SELECT 1 FROM qa_memberships other',
+ 'WHERE other.installation_id=t.installation_id AND other.tenant_id=t.tenant_id',
+ "AND other.user_id<>m.user_id AND other.status='active') LIMIT 1"
+].join(' ');
+async function canConnect(env,session){
+ if(!UUID.test(session?.tenant_id||'')||!UUID.test(session?.user_id||''))return false;
+ if(session.role_key==='tenant_admin')return true;
+ if(session.role_key!=='lawyer')return false;
+ const row=await env.DB.prepare(PERSONAL_OWNER_SQL)
+  .bind(env.INSTALLATION_ID,session.tenant_id,session.user_id).first();
+ return !!row;
+}
 async function begin(req,env,now){
  if(!originOkay(req))return out(403,{error:'CSRF_DENIED'});
  const p=await mobileSession(req,env,now);
  if(!p)return out(401,{error:'Phiên đăng nhập không hợp lệ.'});
- if(p.role_key!=='tenant_admin')return out(403,{error:'Cần quyền quản trị đơn vị.'});
+ if(!await canConnect(env,p))return out(403,{error:'Không có quyền kết nối Drive cho không gian này.'});
  const state=b64(crypto.getRandomValues(new Uint8Array(32)));
  const verifier=b64(crypto.getRandomValues(new Uint8Array(32)));
  const hash=hex(await digest(state));
@@ -124,7 +144,7 @@ async function callback(req,env,now,opts){
  const verifier=await decrypt(record.verifier_cipher,env,'pkce',record.tenant_id);
  const params=[env.INSTALLATION_ID,sid,env.JWT_ISSUER,record.tenant_id,record.user_id,now];
  const actor=await env.DB.prepare(CHECK_SESSION_SQL).bind(...params).first();
- if(!actor||actor.role_key!=='tenant_admin')return failed();
+ if(!actor||!await canConnect(env,actor))return failed();
  const grant=await token({grant_type:'authorization_code',code,
   redirect_uri:CALLBACK,code_verifier:verifier},env,opts);
  if(typeof grant.refresh_token!=='string'||grant.refresh_token.length<15)return failed();
@@ -132,7 +152,7 @@ async function callback(req,env,now,opts){
   .bind(env.INSTALLATION_ID,record.tenant_id).first();
  const root=await folder(grant.access_token,opts,old?.root_id);
  const after=await env.DB.prepare(CHECK_SESSION_SQL).bind(...params).first();
- if(!after||after.role_key!=='tenant_admin')return failed();
+ if(!after||!await canConnect(env,after))return failed();
  const secret=await encrypt(grant.refresh_token,env,'refresh',record.tenant_id);
  await env.DB.prepare('INSERT INTO qa_drive_connections (installation_id,tenant_id,encrypted_refresh,root_id,scope,connected_by,connected_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(installation_id,tenant_id) DO UPDATE SET encrypted_refresh=excluded.encrypted_refresh,root_id=excluded.root_id,connected_by=excluded.connected_by,connected_at=excluded.connected_at')
   .bind(env.INSTALLATION_ID,record.tenant_id,secret,root,SCOPE,record.user_id,now).run();
@@ -148,7 +168,7 @@ async function status(req,env,now){
  const configured=ready(env);
  const row=await env.DB.prepare('SELECT connected_at FROM qa_drive_connections WHERE installation_id=? AND tenant_id=?')
   .bind(env.INSTALLATION_ID,p.tenant_id).first();
- return out(200,{connected:configured&&!!row,can_connect:p.role_key==='tenant_admin',
+ return out(200,{connected:configured&&!!row,can_connect:await canConnect(env,p),
   configuration_ready:configured,connected_at:configured?row?.connected_at||null:null});
 }
 export async function oauthDriveApi(req,env,opts={}){
