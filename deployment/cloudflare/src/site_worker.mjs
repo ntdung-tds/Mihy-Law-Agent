@@ -41,7 +41,7 @@ const publicAssets=new Map([
  ['/site-login.js',[LOGIN_JS,'application/javascript; charset=utf-8']]
 ]);
 const svgIcon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#26233c"/><path d="M13 48V17h8l11 17 11-17h8v31h-8V31L32 47 21 31v17z" fill="#f8e5d8"/><path d="M43 16h16m-8-6v16m-7-10-4 7h8l-4-7zm14 0-4 7h8l-4-7zm-7 12v3m-6 1h12" stroke="#d7e8dc" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-const csp="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'";
+const csp="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://www.googleapis.com; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'";
 function headers(type,{publicPage=false}={}){
  return {
   'Content-Type':type,'Cache-Control':'no-store',
@@ -98,7 +98,9 @@ const app=WORKSPACE_HTML
  .replace('R0 Preview</span>','MIHY LAW AI AGENT · QA</span>');
 export async function handleSite(req,env){
  const url=new URL(req.url),path=url.pathname;
- const isDocumentApi=path==='/api/qa/documents'||/^\/api\/qa\/documents\/[0-9a-f-]{36}\/download$/.test(path);
+ const isDocumentApi=path==='/api/qa/documents'||
+  ['/api/qa/documents/upload/start','/api/qa/documents/upload/finish'].includes(path)||
+  /^\/api\/qa\/documents\/[0-9a-f-]{36}\/download$/.test(path);
  if(req.method!=='GET' && !API.has(path) && !isDocumentApi)return missing();
  const PUBLIC_PAGES=[['/gioi-thieu',LANDING_ABOUT_HTML],['/giai-phap',LANDING_SOLUTIONS_HTML],['/chuc-nang',LANDING_FEATURES_HTML],['/an-toan-du-lieu',LANDING_SECURITY_HTML],['/trien-khai-rieng',LANDING_PRIVATE_HTML],['/dich-vu-theo-goi',LANDING_SUBSCRIPTION_HTML]];
  const page=(path==='/'||path==='/index.html')?SITE_HTML:PUBLIC_PAGES.find(([route])=>route===path)?.[1];
@@ -138,8 +140,11 @@ export async function handleSite(req,env){
   return respond(body,type,200,{publicPage:true});
  }
  if(API.has(path)||isDocumentApi){
-  if(isDocumentApi&&((path!=='/api/qa/documents'&&req.method!=='GET')||
-      (path==='/api/qa/documents'&&!['GET','POST'].includes(req.method))))return missing();
+  if(isDocumentApi&&(
+      (path==='/api/qa/documents'&&!['GET','POST'].includes(req.method))||
+      (path!=='/api/qa/documents'&&path.startsWith('/api/qa/documents/upload/')&&req.method!=='POST')||
+      (path!== '/api/qa/documents'&&!path.startsWith('/api/qa/documents/upload/')&&req.method!=='GET')))
+     return missing();
   if((['/api/qa/session','/api/qa/workspaces','/api/qa/drive/status'].includes(path)&&req.method!=='GET') ||
     (path==='/api/qa/profile'&&!['GET','POST'].includes(req.method)) ||
     (path==='/api/qa/matters'&&!['GET','POST'].includes(req.method)) ||
