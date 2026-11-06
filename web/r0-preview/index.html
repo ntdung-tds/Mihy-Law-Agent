@@ -140,8 +140,15 @@
             <form id="document-upload-form">
               <label for="document-matter">Hồ sơ có quyền ghi</label>
               <select id="document-matter" required disabled><option value="">Chọn hồ sơ QA…</option></select>
-              <label for="document-file">Chọn PDF hoặc DOCX mẫu</label>
-              <input id="document-file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required />
+              <label for="document-file">Tệp PDF hoặc DOCX mẫu</label>
+              <div class="qa-document-picker">
+                <input id="document-file" class="qa-document-file-input" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-describedby="document-file-name document-file-hint" required />
+                <label class="qa-document-file-control" for="document-file">
+                  <span class="qa-document-file-action">Chọn tệp</span>
+                  <span id="document-file-name" class="qa-document-file-name">Chưa có tệp được chọn</span>
+                </label>
+              </div>
+              <small id="document-file-hint" class="qa-document-hint">Chỉ dùng tệp kiểm thử không chứa dữ liệu khách hàng · Tối đa 1,5 MB</small>
               <button type="submit">Lưu tệp QA vào Drive</button>
             </form>
             <p id="document-feedback" role="status" aria-live="polite"></p>

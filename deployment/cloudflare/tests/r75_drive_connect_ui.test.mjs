@@ -16,7 +16,7 @@ function element(id){
  };
 }
 async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}}={}){
- const ids=['document-matter','document-upload-form','document-file','document-feedback',
+ const ids=['document-matter','document-upload-form','document-file','document-file-name','document-feedback',
   'qa-document-list','drive-setup','drive-status','drive-connect'];
  const els=Object.fromEntries(ids.map(x=>[x,element(x)]));
  const submit=element('submit');
@@ -104,4 +104,35 @@ test('expired QA session during OAuth is explained without revealing a token',as
  assert.match(t.els['drive-status'].textContent,/Phiên đăng nhập AI Law/);
  assert.equal(t.els['drive-setup'].dataset.state,'disconnected');
  assert.deepEqual(t.historyUrls,['/app#documents']);
+});
+
+test('R79 mobile document picker displays selected filename without native overflowing control',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true});
+ const name='synthetic-long-qa-file-name-for-small-screen-test.docx';
+ t.els['document-file'].files=[{name,size:4200}];
+ t.els['document-file'].listeners.change();
+ assert.equal(t.els['document-file-name'].textContent,name);
+ t.els['document-file'].files=[];
+ t.els['document-file'].listeners.change();
+ assert.equal(t.els['document-file-name'].textContent,'Chưa có tệp được chọn');
+});
+test('R79 oversized documents are rejected before upload and explained on the form',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true});
+ t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+ t.els['document-file'].files=[{name:'synthetic-big.docx',size:1600000}];
+ await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ assert.equal(t.els['document-feedback'].dataset.state,'error');
+ assert.match(t.els['document-feedback'].textContent,/1,5 MB/);
+ assert.equal(t.calls.some(x=>x.url==='/api/qa/documents'&&x.method==='POST'),false);
+});
+test('R79 upload controls use accessible file label, 16px select and mobile wrapping rules',()=>{
+ const html=readFileSync(new URL('../../../web/r0-preview/index.html',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../../../web/r0-preview/styles.css',import.meta.url),'utf8');
+ assert.match(html,/id="document-file-name"/);
+ assert.match(html,/class="qa-document-picker"/);
+ assert.match(html,/for="document-file"/);
+ assert.match(html,/aria-describedby="document-file-name document-file-hint"/);
+ assert.match(css,/\.qa-document-file-input:focus-visible\+\.qa-document-file-control/);
+ assert.match(css,/#document-matter\{[^}]*font-size:16px/);
+ assert.match(css,/@media\(max-width:600px\)[\s\S]*\.qa-document-file-name\{[^}]*overflow-wrap:anywhere/);
 });

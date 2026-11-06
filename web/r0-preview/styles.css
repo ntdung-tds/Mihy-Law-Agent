@@ -409,3 +409,33 @@ body.drawer-open{overflow:hidden}
 .qa-drive-setup[data-state="error"] #drive-status{color:#ad3939}
 .qa-drive-setup #drive-connect{justify-self:end;background:#2851a1;white-space:normal;line-height:1.4}
 @media(max-width:600px){.qa-drive-setup{grid-template-columns:minmax(0,1fr);padding:13px;gap:9px}.qa-drive-setup #drive-connect{justify-self:stretch;width:100%;min-height:44px}}
+
+/* R79 compact QA file intake: native file input is accessible, but browser-native
+   button/filename rendering cannot overflow small viewports or enlarged text. */
+.qa-document-box{min-width:0;overflow-wrap:anywhere}
+.qa-document-box #document-upload-form{max-width:620px;width:100%;min-width:0;gap:9px}
+.qa-document-box #document-upload-form>label{font-size:13px;font-weight:750;color:#30425f;margin-top:9px}
+.qa-document-box #document-matter{display:block;width:100%;min-width:0;max-width:100%;min-height:46px;padding:10px 12px;border:1px solid #cbd6e8;border-radius:11px;font-size:16px}
+.qa-document-picker{position:relative;min-width:0;width:100%}
+.qa-document-box #document-file.qa-document-file-input{position:absolute;width:1px;height:1px;min-height:0;padding:0;border:0;margin:0;opacity:0;overflow:hidden;pointer-events:none}
+.qa-document-file-control{display:flex;align-items:center;gap:11px;min-width:0;width:100%;border:1px dashed #aebfdb;border-radius:12px;background:#f9fbff;padding:11px;cursor:pointer}
+.qa-document-file-action{display:inline-flex;align-items:center;justify-content:center;min-height:38px;flex:none;border-radius:9px;padding:8px 13px;background:#e7edfa;color:#284c8a;font-size:13px;font-weight:800;white-space:nowrap}
+.qa-document-file-name{display:block;min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#4e5d76;font-size:13px;font-weight:600}
+.qa-document-file-input:focus-visible+.qa-document-file-control{outline:3px solid #8c78db;outline-offset:3px}
+.qa-document-file-control:hover{border-color:#6288cc;background:#f2f6ff}
+.qa-document-hint{font-size:12px;line-height:1.5;color:#758198}
+.qa-document-box #document-upload-form button[type="submit"]{width:100%;max-width:620px;min-height:46px;margin-top:7px;border-radius:11px;font-size:14px;line-height:1.35;padding:11px 14px}
+.qa-document-box #document-feedback{min-height:0;margin:12px 0;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.qa-document-box #document-feedback:empty{display:none}
+.qa-document-box #document-feedback[data-state="error"]{padding:11px 13px;border:1px solid #f2cac8;border-radius:10px;background:#fff6f5;color:#923d37}
+.qa-document-box #document-feedback[data-state="success"]{padding:11px 13px;border:1px solid #bfddcc;border-radius:10px;background:#f3fbf6;color:#276345}
+.qa-document-box #qa-document-list{min-width:0;max-width:100%}
+.qa-document-box #qa-document-list .matter-row{min-width:0}
+@media(max-width:600px){
+ .qa-document-box{padding:15px;border-radius:14px}
+ .qa-document-box #document-upload-form{gap:7px}
+ .qa-document-file-control{align-items:stretch;flex-direction:column;gap:8px}
+ .qa-document-file-name{width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+ .qa-document-file-action{align-self:flex-start;min-height:39px}
+ .qa-document-box #document-upload-form button[type="submit"]{font-size:14px;min-height:48px}
+}

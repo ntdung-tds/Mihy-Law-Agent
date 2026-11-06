@@ -12,8 +12,11 @@ const DRIVEID='syntheticDriveObject_12345',ROOT='syntheticQAroot_12345';
 const ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
 const now=1800000000;
 const pdf=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
-function fixture({authenticated=true,allow=true,grant=true,dbFail=false}={}){
+const docx=Uint8Array.from(Buffer.from('UEsDBBQAAAAIAF11Zl1Rl+gEsQAAABQBAAATAAAAW0NvbnRlbnRfVHlwZXNdLnhtbH2QvQ7CMAyEX6XKilpXDAyo7QKswMALWInbRjQ/StxS3p4UUAcGRvu7O59c3Z6eYjabwcZa9Mx+DxBlTwZj4TzZRFoXDHIaQwce5R07gm1Z7kA6y2Q55yVDNNWRWhwHzk5zWkftbC2SXWSHj245VQv0ftASOWFYKDTVZaIQtKLsioHPaJIKHi4oUE6OJjmL/zGTVT9dc9e2WtLqX9J8cJJi1LYzQ7ESg9puvj3g/YzmBVBLAwQUAAAACABddWZdYXsvQ4kAAADyAAAACwAAAF9yZWxzLy5yZWxzjc87DgIhEAbgqxAOsLNaWBigstnWeAECwyMujwwY9fZSWKzGwnLmn3x/Rpxx1T2W3EKsjT3Smpvkofd6BGgmYNJtKhXzSFyhpPsYyUPV5qo9wn6eD0BbgyuxNdliJafF7ji7PCv+YxfnosFTMbeEuf+o+LoYsiaPXfJ7IQv2vZ4Gy0EJ+HhRvQBQSwMEFAAAAAgAXXVmXSkFsEJ6AAAAngAAABEAAAB3b3JkL2RvY3VtZW50LnhtbEXOwQnDMAwF0FVCBqhCDz0Y19AROkJqu7Ehkoys4mT7xumhl/eRxAfZZgL7D0bSYcOVqmn3MakWA1B9ijjXC5dIx+3NgrMeoyzQWEIR9rHWTAuucJ2mG+CcaXS2mReHvWfpSEfd8zHUnTRFzd5C33TltJz+WvD/yH0BUEsBAhQDFAAAAAgAXXVmXVGX6ASxAAAAFAEAABMAAAAAAAAAAAAAAIABAAAAAFtDb250ZW50X1R5cGVzXS54bWxQSwECFAMUAAAACABddWZdYXsvQ4kAAADyAAAACwAAAAAAAAAAAAAAgAHiAAAAX3JlbHMvLnJlbHNQSwECFAMUAAAACABddWZdKQWwQnoAAACeAAAAEQAAAAAAAAAAAAAAgAGUAQAAd29yZC9kb2N1bWVudC54bWxQSwUGAAAAAAMAAwC5AAAAPQIAAAAA','base64'));
+const DOCX='application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+function fixture({authenticated=true,allow=true,grant=true,dbFail=false,driveUploadDenied=false,asDocx=false}={}){
  const calls=[],uploads=[],removes=[];let saved=null;
+ const bytes=asDocx?docx:pdf,name=asDocx?'synthetic.docx':'synthetic.pdf',mime=asDocx?DOCX:'application/pdf';
  const env={
   AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,JWT_ISSUER:'https://issuer.test',
   ...(grant?{GOOGLE_DRIVE_ACCESS_TOKEN:'synthetic-token-for-tests',
@@ -28,15 +31,15 @@ function fixture({authenticated=true,allow=true,grant=true,dbFail=false}={}){
       if(sql===DOCUMENT_ACL_SQL)return allow?{ok:1}:null;
       if(sql.includes('COUNT(*)'))return {n:0};
       if(sql===READ_SQL&&saved)return {
-        file_id:F,file_name:'synthetic.pdf',mime_type:'application/pdf',
-        byte_length:pdf.length,sha256:saved.sha,matter_id:M,
+        file_id:F,file_name:name,mime_type:mime,
+        byte_length:bytes.length,sha256:saved.sha,matter_id:M,
         provider:'google_drive',provider_object_id:DRIVEID
       };
       return null;
      },
      async all(){if(sql===LIST_SQL&&saved)return {results:[{
-      file_id:F,file_name:'synthetic.pdf',mime_type:'application/pdf',
-      byte_length:pdf.length,sha256:saved.sha,verification_status:'unverified',created_at:now
+      file_id:F,file_name:name,mime_type:mime,
+      byte_length:bytes.length,sha256:saved.sha,verification_status:'unverified',created_at:now
      }]};return {results:[]};}
     };
    }};},
@@ -50,25 +53,26 @@ function fixture({authenticated=true,allow=true,grant=true,dbFail=false}={}){
  };
  async function driveFetch(url,options){
   if(options.method==='POST'){
+   if(driveUploadDenied)return Response.json({error:{code:403}},{status:403});
    assert.match(url,/^https:\/\/www\.googleapis\.com\/upload\/drive\/v3\/files\?/);
    assert.match(options.headers['Content-Type'],/^multipart\/related/);
    uploads.push({url,body:options.body});
-   return Response.json({id:DRIVEID,name:'synthetic.pdf',mimeType:'application/pdf',
+   return Response.json({id:DRIVEID,name,mimeType:mime,
     parents:[ROOT],trashed:false},{status:200});
   }
   if(options.method==='DELETE'){removes.push(url);return new Response(null,{status:204});}
-  if(url.includes('alt=media'))return new Response(pdf,{headers:{'Content-Type':'application/pdf'}});
-  return Response.json({id:DRIVEID,name:'synthetic.pdf',
-   mimeType:'application/pdf',size:String(pdf.length),parents:[ROOT],trashed:false});
+  if(url.includes('alt=media'))return new Response(bytes,{headers:{'Content-Type':mime}});
+  return Response.json({id:DRIVEID,name,
+   mimeType:mime,size:String(bytes.length),parents:[ROOT],trashed:false});
  }
  return {env,calls,uploads,removes,driveFetch};
 }
-function request(path,method='GET',{withCookie=true,origin=ORIGIN,fileBytes=pdf}={}){
+function request(path,method='GET',{withCookie=true,origin=ORIGIN,fileBytes=pdf,fileType='application/pdf',fileName='synthetic.pdf'}={}){
  const headers={};if(withCookie)headers.Cookie='al_qa_session='+S;
  if(method==='POST'){
   headers.Origin=origin;headers['Sec-Fetch-Site']='same-origin';
   const form=new FormData();form.set('matter_id',M);
-  form.set('file',new File([fileBytes],'synthetic.pdf',{type:'application/pdf'}));
+  form.set('file',new File([fileBytes],fileName,{type:fileType}));
   return new Request(ORIGIN+path,{method,headers,body:form});
  }
  return new Request(ORIGIN+path,{method,headers});
@@ -131,4 +135,61 @@ test('Drive root guard forbids out-of-folder material even with token',async()=>
  const adapter=new GoogleDriveAdapter({accessToken:'synthetic-token-for-tests',rootId:ROOT,
   fetcher:async()=>Response.json({id:DRIVEID,trashed:false,mimeType:'application/pdf',parents:['differentRoot_12345']})});
  await assert.rejects(()=>adapter.download(DRIVEID),/approved customer folder/);
+});
+
+test('R79 bad file is denied before any OAuth refresh or Drive availability test',async()=>{
+ const f=fixture({grant:false});
+ const malformed=new TextEncoder().encode('not a PDF, but otherwise large enough for the file picker');
+ const r=await documentsApi(request('/api/qa/documents','POST',{fileBytes:malformed}),f.env,{now,driveFetch:f.driveFetch});
+ assert.equal(r.status,415);
+ assert.equal((await r.json()).error,'Tệp PDF/DOCX QA hoặc biểu mẫu không hợp lệ.');
+ assert.equal(f.calls.some(x=>x.sql.includes('INSERT INTO')),false);
+ assert.equal(f.uploads.length,0);
+});
+test('R79 expired or missing grant reports safe reconnect code, not vague QA unavailable',async()=>{
+ const f=fixture({grant:false});
+ const response=await documentsApi(request('/api/qa/documents','POST'),f.env,{now,driveFetch:f.driveFetch});
+ assert.equal(response.status,503);
+ const body=await response.json();
+ assert.equal(body.code,'DRIVE_GRANT_UNAVAILABLE');
+ assert.match(body.error,/kết nối lại Drive/i);
+ assert.equal(f.uploads.length,0);
+});
+test('R79 Google Drive upload rejection does not create a D1 receipt and exposes bounded code',async()=>{
+ const f=fixture({driveUploadDenied:true});
+ const response=await documentsApi(request('/api/qa/documents','POST'),f.env,{now,driveFetch:f.driveFetch});
+ assert.equal(response.status,503);
+ const body=await response.json();
+ assert.equal(body.code,'DRIVE_UPLOAD_UNAVAILABLE');
+ assert.equal(f.calls.some(x=>x.sql.includes('INSERT INTO qa_document_receipts')),false);
+ assert.ok(!JSON.stringify(body).includes('synthetic-token-for-tests'));
+});
+test('R79 failed D1 receipt returns safe code and attempts remote file cleanup',async()=>{
+ const f=fixture({dbFail:true});
+ const response=await documentsApi(request('/api/qa/documents','POST'),f.env,{now,driveFetch:f.driveFetch});
+ assert.equal(response.status,503);
+ assert.equal((await response.json()).code,'QA_RECEIPT_UNAVAILABLE');
+ assert.equal(f.removes.length,1);
+});
+test('R79 empty mobile File.type accepted only with matching PDF extension and magic',async()=>{
+ const f=fixture();
+ const response=await documentsApi(request('/api/qa/documents','POST',{fileType:''}),f.env,{now,driveFetch:f.driveFetch});
+ assert.equal(response.status,201,await response.clone().text());
+ assert.equal(f.uploads.length,1);
+});
+
+test('R79 genuine synthetic DOCX upload, list and downloaded ZIP bytes with hash + approved Drive root',async()=>{
+ const f=fixture({asDocx:true});
+ const options={now,driveFetch:f.driveFetch};
+ const posted=await documentsApi(request('/api/qa/documents','POST',
+  {fileBytes:docx,fileType:DOCX,fileName:'synthetic.docx'}),f.env,options);
+ assert.equal(posted.status,201,await posted.clone().text());
+ assert.equal(f.uploads.length,1);
+ const listed=await documentsApi(request('/api/qa/documents?matter_id='+M),f.env,options);
+ assert.equal(listed.status,200);
+ assert.equal((await listed.json()).documents[0].mime_type,DOCX);
+ const downloaded=await documentsApi(request('/api/qa/documents/'+F+'/download'),f.env,options);
+ assert.equal(downloaded.status,200);
+ assert.equal(downloaded.headers.get('Content-Type'),DOCX);
+ assert.deepEqual(new Uint8Array(await downloaded.arrayBuffer()),docx);
 });
