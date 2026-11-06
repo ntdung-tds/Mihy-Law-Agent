@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `80` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T16:07:31.654Z`.
+- **PCS revision:** `81` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T16:23:39.192Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R83 — Direct Google Drive upload bypasses Cloudflare: PDF/DOCX PASS; website upload remains FAIL (2026-11-06)
+
+- **Owner request:** A repeated `DRIVE_UPLOAD_UNAVAILABLE`, `stage=transport`, *even after R82* prompted testing upload **without Cloudflare as the file-data conduit**. No more speculative Worker patches, no production changes or real customer documents.
+- **Real direct proof:** The user-connected **Google Drive application connector** (independent OAuth app/session, **not the AI Law website's OAuth client**) successfully created one private test folder, uploaded previously generated wholly synthetic `ai_law_qa_gpt_direct.pdf` (**1753 bytes**) and `ai_law_qa_gpt_direct.docx` (**36761 bytes**), then read back Drive file ID/parent/MIME/size for both. Folder listing returned exactly 2 expected files. **PASS for direct connector.** The folder/files are accessible to the Owner from the ChatGPT conversation, but their private Drive URLs/IDs and any account email are intentionally NOT stored in the public repository.
+- **Limit of proof:** Since the connector has different OAuth client credentials from AI Law, the successful upload does **not** validate the website's OAuth token, tenant Drive root permission, D1 receipt flow or Cloudflare Worker runtime. This demonstrates that Google Drive itself supports a normal PDF/DOCX upload and the user does not need to blame a mobile network or assume storage quota. AI Law website has **1 connected grant, 0 file receipts**, and the Owner explicitly reports the same failure after R82, thus website file upload is still **FAIL**.
+- **Next technical approach within existing single task `AL-R0-DOC-TRANSFER-R72`:** Investigate browser→Google direct file-data upload via a short-lived **resumable upload session URI** initiated only after Cloudflare checks signed-in user, tenant, matter write ACL, filename/MIME/size and destination root; a confirmation call must verify Google file parents/bytes/SHA256 before inserting D1 receipt. Test browser CORS and capability URL security before deploying; **never expose Google refresh tokens** or a general OAuth bearer credential to the browser. Cloudflare can continue hosting the UI, sessions, ACL and D1. If browser direct upload CORS proves unsupported, instrument sanitized Worker transport diagnostics instead of guessing.
+- **State:** Direct standalone Google connector **PASS**. Actual AI Law QA website upload **FAIL**, signed-in file list/download and cross-tenant negative E2E **NOT_RUN**, Owner final acceptance **PENDING**. Production and SRS v1.1.15 unchanged.
 
 ## R82 — Cloudflare outgoing Google Drive upload ReadableStream transport (2026-11-06)
 
