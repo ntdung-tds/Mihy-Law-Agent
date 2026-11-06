@@ -64,7 +64,7 @@ test('ready admin has one-step Google redirect and no credential form',async()=>
 });
 test('Google cancel returns to documents with retry and cleaned result URL',async()=>{
  const t=await mount({connected:false,configuration_ready:true,can_connect:true},
-  {query:'?drive=failed'});
+  {query:'?drive=failed&issue=consent'});
  assert.equal(t.els['drive-connect'].hidden,false);
  assert.match(t.els['drive-status'].textContent,/Google chưa cấp quyền/);
  assert.deepEqual(t.historyUrls,['/app#documents']);
