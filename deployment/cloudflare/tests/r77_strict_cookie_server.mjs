@@ -44,7 +44,7 @@ site.listen(0,'127.0.0.1',()=>{
    return;
   }
   const suffix=req.url==='/bridge'?'/drive-return?drive=connected':'/app?drive=connected#documents';
-  res.writeHead(302,{Location:'http://localhost:'+sitePort+suffix,'Cache-Control':'no-store'});
+  res.writeHead(302,{Location:'http://app.test:'+sitePort+suffix,'Cache-Control':'no-store'});
   res.end();
  });
  other.listen(0,'127.0.0.1',()=>console.log(JSON.stringify({
