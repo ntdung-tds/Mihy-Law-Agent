@@ -395,3 +395,17 @@ body.drawer-open{overflow:hidden}
 @media(max-width:600px){.qa-document-box{padding:15px}.qa-document-box form{width:100%}}
 
 .qa-drive-setup{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:10px 0}.qa-drive-setup p{flex:1;margin:0;font-size:13px;line-height:1.5}.qa-drive-setup button{min-height:40px}
+
+/* R75: one-action Drive connection; readable on mobile, no credential/setup form. */
+.qa-drive-setup{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px 16px;padding:17px;border:1px solid #e0e8f2;border-radius:13px;background:#f8faff;margin:14px 0}
+.qa-drive-provider{grid-column:1/-1;display:flex;align-items:center;gap:11px;min-width:0}
+.qa-drive-provider>span:last-child{display:flex;flex-direction:column;min-width:0;gap:2px}
+.qa-drive-provider strong{font-size:14px;color:#243653}
+.qa-drive-provider small{font-size:12px;line-height:1.5;color:#60708b}
+.qa-drive-mark{display:grid;place-items:center;flex:none;width:37px;height:37px;border-radius:11px;background:white;border:1px solid #dce5f3;color:#3971b8;font-size:19px;font-weight:800}
+.qa-drive-setup #drive-status{font-size:12px;color:#5c6d86;min-width:0;overflow-wrap:anywhere}
+.qa-drive-setup[data-state="connected"]{border-color:#c6e8d6;background:#f5fcf8}
+.qa-drive-setup[data-state="connected"] #drive-status{color:#17633e}
+.qa-drive-setup[data-state="error"] #drive-status{color:#ad3939}
+.qa-drive-setup #drive-connect{justify-self:end;background:#2851a1;white-space:normal;line-height:1.4}
+@media(max-width:600px){.qa-drive-setup{grid-template-columns:minmax(0,1fr);padding:13px;gap:9px}.qa-drive-setup #drive-connect{justify-self:stretch;width:100%;min-height:44px}}

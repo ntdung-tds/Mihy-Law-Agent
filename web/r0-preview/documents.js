@@ -44,31 +44,67 @@
    }
   }catch{message('Tệp Google Drive chưa sẵn sàng hoặc chưa được cấp quyền.');}
  }
+ const driveBox=$('drive-setup'),driveMessage=$('drive-status'),connect=$('drive-connect');
+ const uploadButton=form.querySelector('button[type="submit"]');
+ const returned=new URL(location.href).searchParams.get('drive');
+ if(returned==='connected'||returned==='failed'){
+  const cleaned=new URL(location.href);
+  cleaned.searchParams.delete('drive');
+  history.replaceState(null,'',cleaned.pathname+cleaned.search+cleaned.hash);
+ }
+ function setDrive(state,text){
+  if(driveBox)driveBox.dataset.state=state;
+  if(driveMessage)driveMessage.textContent=text;
+ }
  async function driveStatus(){
-  const messageBox=$('drive-status'),btn=$('drive-connect');
-  if(!messageBox||!btn)return;
-  btn.hidden=true;
+  if(!connect||!driveMessage)return;
+  connect.hidden=true;
+  if(uploadButton)uploadButton.disabled=true;
+  setDrive('loading','Đang kiểm tra kết nối Google Drive…');
   try{
    const res=await fetch('/api/qa/drive/status',{credentials:'same-origin',cache:'no-store'});
-   if(res.status===503){messageBox.textContent='Quản trị hệ thống cần cấu hình Google OAuth Client trên máy chủ QA.';return;}
-   if(!res.ok){messageBox.textContent='Không thể xác minh kết nối Drive.';return;}
+   if(res.status===401){location.replace('/login');return;}
+   if(!res.ok)throw Error('status');
    const data=await res.json();
-   messageBox.textContent=data.connected?'Google Drive của đơn vị đã kết nối.':'Đơn vị chưa kết nối Google Drive.';
-   btn.hidden=!!data.connected||!data.can_connect;
-  }catch{messageBox.textContent='Không thể kiểm tra kết nối Drive.';}
+   if(data.connected===true&&data.configuration_ready===true){
+    setDrive('connected','Đã kết nối Google Drive an toàn cho đơn vị. Có thể tải tệp QA lên.');
+    if(uploadButton)uploadButton.disabled=false;
+    return;
+   }
+   if(data.configuration_ready!==true){
+    setDrive('setup','AI Law đang hoàn tất cấu hình kết nối Google. Bạn chưa cần thực hiện thao tác kỹ thuật.');
+    return;
+   }
+   if(data.can_connect!==true){
+    setDrive('admin','Google Drive chưa kết nối. Quản trị đơn vị cần nhấn kết nối một lần.');
+    return;
+   }
+   setDrive('disconnected',returned==='failed'
+    ?'Google chưa cấp quyền hoặc kết nối bị gián đoạn. Bạn có thể thử lại.'
+    :'Chưa kết nối. Nhấn nút bên dưới, chọn tài khoản Google và Đồng ý.');
+   connect.hidden=false;
+  }catch{
+   setDrive('error','Không thể kiểm tra kết nối Google Drive lúc này. Vui lòng thử lại.');
+  }
  }
- const connect=$('drive-connect');
  if(connect)connect.addEventListener('click',async()=>{
   connect.disabled=true;
+  connect.textContent='Đang mở Google…';
+  setDrive('loading','Đang chuyển đến màn hình cấp quyền Google…');
   try{
    const r=await fetch('/api/qa/drive/connect',{method:'POST',credentials:'same-origin',
     cache:'no-store',headers:{'Content-Type':'application/json'},body:'{}'});
-   if(!r.ok)throw Error('Google OAuth chưa sẵn sàng.');
+   if(r.status===401){location.replace('/login');return;}
+   if(!r.ok)throw Error(r.status===503
+    ?'AI Law chưa hoàn tất cấu hình kết nối Google. Vui lòng thử lại sau.'
+    :'Chưa thể mở trang cấp quyền Google. Vui lòng thử lại.');
    const data=await r.json();
    const url=new URL(data.authorization_url);
-   if(url.origin!=='https://accounts.google.com')throw Error('Đường dẫn Google không hợp lệ.');
+   if(url.origin!=='https://accounts.google.com'||url.protocol!=='https:')
+    throw Error('Liên kết cấp quyền Google không hợp lệ.');
    location.assign(url.toString());
-  }catch(e){message(e.message);connect.disabled=false;}
+  }catch(e){setDrive('error',e.message||'Không thể mở Google.');}
+  finally{connect.disabled=false;connect.textContent='Kết nối Google Drive';}
  });
  void driveStatus();
  form.addEventListener('submit',async e=>{
@@ -88,9 +124,15 @@
    file.value='';message('Đã lưu tệp QA cách ly trên Drive. Chưa xử lý AI.');
    await refreshFiles();
   }catch(e){message(e.message||'Không thể tải tệp.');}
-  finally{submit.disabled=false;}
+  finally{submit.disabled=!(driveBox?.dataset.state==='connected');}
  });
  select.addEventListener('change',()=>{void refreshFiles();});
- window.addEventListener('ai-law:documents-open',()=>{void refreshMatters();});
- window.addEventListener('ai-law:workspace-switch',reset);
+ window.addEventListener('ai-law:documents-open',()=>{void driveStatus();void refreshMatters();});
+ window.addEventListener('ai-law:workspace-switch',()=>{
+  reset();setDrive('loading','Đang chuyển không gian làm việc…');
+  if(connect)connect.hidden=true;
+  if(uploadButton)uploadButton.disabled=true;
+ });
+ // app.js can dispatch documents-open before this deferred script registers its listener.
+ if(location.hash==='#documents')void refreshMatters();
 })();

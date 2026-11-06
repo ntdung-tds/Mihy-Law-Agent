@@ -82,12 +82,11 @@ async function begin(req,env,now){
  return out(200,{authorization_url:u.toString(),expires_in:600});
 }
 function failed(){
- return new Response('<!doctype html><html lang="vi"><meta charset="utf-8"><title>Google Drive QA</title>'+
-  '<p>Kết nối Google Drive chưa thành công. Vui lòng thử lại.</p><a href="'+RETURN_URL+
-  '">Quay lại AI Law QA</a></html>',{status:400,headers:{
-  'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store',
-  'Content-Security-Policy':"default-src 'none'; base-uri 'none'; frame-ancestors 'none'",
-  'Referrer-Policy':'no-referrer'}});
+ // Fail closed without revealing the Google authorization code or OAuth state.
+ // Return to the same document screen even when the user cancels consent.
+ return new Response(null,{status:303,headers:{
+  Location:RETURN_URL+'?drive=failed#documents','Cache-Control':'no-store',
+  'Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'}});
 }
 async function folder(access,opts,existing){
  const f=opts.googleFetch??fetch;
@@ -137,26 +136,30 @@ async function callback(req,env,now,opts){
  const secret=await encrypt(grant.refresh_token,env,'refresh',record.tenant_id);
  await env.DB.prepare('INSERT INTO qa_drive_connections (installation_id,tenant_id,encrypted_refresh,root_id,scope,connected_by,connected_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(installation_id,tenant_id) DO UPDATE SET encrypted_refresh=excluded.encrypted_refresh,root_id=excluded.root_id,connected_by=excluded.connected_by,connected_at=excluded.connected_at')
   .bind(env.INSTALLATION_ID,record.tenant_id,secret,root,SCOPE,record.user_id,now).run();
- return new Response(null,{status:303,headers:{Location:RETURN_URL+'?drive=connected',
+ return new Response(null,{status:303,headers:{Location:RETURN_URL+'?drive=connected#documents',
   'Cache-Control':'no-store','Referrer-Policy':'no-referrer'}});
 }
 async function status(req,env,now){
+ // The signed-in user's UI must receive a useful status even before the
+ // operator has registered this application's Google OAuth client.
+ if(!env?.DB||!UUID.test(env.INSTALLATION_ID||''))return unavailable();
  const p=await mobileSession(req,env,now);
  if(!p)return out(401,{error:'Phiên đăng nhập không hợp lệ.'});
+ const configured=ready(env);
  const row=await env.DB.prepare('SELECT connected_at FROM qa_drive_connections WHERE installation_id=? AND tenant_id=?')
   .bind(env.INSTALLATION_ID,p.tenant_id).first();
- return out(200,{connected:!!row,can_connect:p.role_key==='tenant_admin',
-  connected_at:row?.connected_at||null});
+ return out(200,{connected:configured&&!!row,can_connect:p.role_key==='tenant_admin',
+  configuration_ready:configured,connected_at:configured?row?.connected_at||null:null});
 }
 export async function oauthDriveApi(req,env,opts={}){
- if(!ready(env))return unavailable();
  const path=new URL(req.url).pathname,now=opts.now??Math.floor(Date.now()/1000);
  try{
-  if(path==='/api/qa/drive/connect'&&req.method==='POST')return await begin(req,env,now);
   if(path==='/api/qa/drive/status'&&req.method==='GET')return await status(req,env,now);
+  if(!ready(env))return path==='/api/qa/drive/callback'?failed():unavailable();
+  if(path==='/api/qa/drive/connect'&&req.method==='POST')return await begin(req,env,now);
   if(path==='/api/qa/drive/callback'&&req.method==='GET')return await callback(req,env,now,opts);
   return out(405,{error:'Method not allowed'});
- }catch{return unavailable();}
+ }catch{return path==='/api/qa/drive/callback'?failed():unavailable();}
 }
 export async function tenantDriveAdapter(env,p,opts={}){
  if(!ready(env)||!UUID.test(p?.tenant_id||''))throw Error('OAuth unavailable');
