@@ -166,6 +166,8 @@ jobs:
         run: |
           node --check deployment/cloudflare/src/worker.mjs
           node --check deployment/cloudflare/src/mobile_auth.mjs
+          node --check deployment/cloudflare/src/account_profile.mjs
+          node --check web/account/app.js
           python -m py_compile deployment/cloudflare/tools/render_r62_qa_verifiers.py
           node --check web/r0-preview/session.js
           node --check deployment/cloudflare/src/google_drive.mjs
@@ -182,6 +184,10 @@ jobs:
         run: node --test deployment/cloudflare/tests/worker.test.mjs
       - name: Verify real WebCrypto PBKDF2 QA session cookies, mobile markup and CSRF
         run: node --test deployment/cloudflare/tests/mobile.test.mjs
+      - name: R67 account identity bound profile/avatar, immutable roles and plan, CSRF
+        run: node --test deployment/cloudflare/tests/r67_account_profile.test.mjs
+      - name: R67 account profile SQLite migration and foreign key limits
+        run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r67_account_migration.py' -v
       - name: Verify R62 active QA memberships, atomic session rotation and anti-CSRF
         run: node --test deployment/cloudflare/tests/r62_workspaces.test.mjs
       - name: R66 QA authenticated password change, PBKDF2 rotation, all-session revocation and CSRF
@@ -638,7 +644,7 @@ jobs:
   cloudflare-site-r62:
     # R62: real browser DOM on mobile/desktop with explicitly simulated positive API.
     # Live HTTPS anonymous protection is tested separately, not a positive-login claim.
-    if: github.ref_name == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.head_ref == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.ref_name == 'design/r63-mobile-bottom-navigation' || github.head_ref == 'design/r63-mobile-bottom-navigation' || github.ref_name == 'test/r64-live-qa-session-tenant-gates' || github.head_ref == 'test/r64-live-qa-session-tenant-gates' || github.ref_name == 'feat/r66-qa-self-service-password-change' || github.head_ref == 'feat/r66-qa-self-service-password-change'
+    if: github.ref_name == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.head_ref == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.ref_name == 'design/r63-mobile-bottom-navigation' || github.head_ref == 'design/r63-mobile-bottom-navigation' || github.ref_name == 'test/r64-live-qa-session-tenant-gates' || github.head_ref == 'test/r64-live-qa-session-tenant-gates' || github.ref_name == 'feat/r66-qa-self-service-password-change' || github.head_ref == 'feat/r66-qa-self-service-password-change' || github.ref_name == 'feat/r67-account-center-qa' || github.head_ref == 'feat/r67-account-center-qa'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -653,6 +659,9 @@ jobs:
         run: python deployment/cloudflare/tests/live_r62_workspace_browser.py
       - name: Regress real nonproduction Cloudflare login and anonymous role boundaries
         run: python deployment/cloudflare/tests/live_r61_qa_auth_browser.py
+      - name: R67 real Chromium account profile, photo and security (synthetic API only)
+        if: github.ref_name == 'feat/r67-account-center-qa' || github.head_ref == 'feat/r67-account-center-qa'
+        run: python deployment/cloudflare/tests/live_r67_account_browser.py
       - name: R66 real Chromium password change form on mobile and desktop (synthetic API only)
         if: github.ref_name == 'feat/r66-qa-self-service-password-change' || github.head_ref == 'feat/r66-qa-self-service-password-change'
         run: python deployment/cloudflare/tests/live_r66_password_change_browser.py
