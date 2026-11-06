@@ -1,12 +1,22 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `66` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T02:42:24.795Z`.
+- **PCS revision:** `67` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T03:37:17.557Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+## R67 — Account Center Owner requested, deployed to isolated QA (2026-11-06)
+
+- **Scope:** New protected /account at ai-law-web-qa. Four sections: editable name, phone, job title, bio and avatar; Demo/Pro account tier versus lawyer/tenant_admin memberships; existing R66 password/session; active workspaces. Desktop sidebar and avatar links, mobile Chức năng → Tài khoản của tôi. Approved five-tab mobile bottom nav retained.
+- **Security:** Profile and avatar tied only to validated QA cookie and installation/user ID. User cannot submit plan/role/tenant/email changes. Demo is initial informational tier, Pro label only via administrator and no billing, entitlement or SaaS activated. Photo accepted as small normalized JPEG checked server-side. Frozen SRS v1.1.15 unchanged; Owner delta SC-017 in srs_changed.md.
+- **GitHub:** PR #92 https://github.com/ntdung-tds/Mihy-Law-Agent/pull/92 merged as 46de858227e54b31947ceb3c87eed0b46652c98b. Actions https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42156282903 completed SUCCESS **10/10 executed PASS**, 20 conditional skips. Node identity/role/plan/CSRF/JPEG tests, SQLite FK/migration tests and real Chromium 320/390/1440 UI tests using a **synthetic positive API** passed. Real login not implied.
+- **Live QA DB:** qa_account_profiles table created with nine columns, zero initial rows; previous 11 principals and 13 memberships preserved. No customer legal data, real QA passwords or private evidence put in GitHub.
+- **Cloudflare QA:** Backend ai-law-standalone-cf-qa 100% version b610bb89-def0-407a-b45f-240b7db0e947 (6 modules, 7 bindings incl D1 and secret). Website ai-law-web-qa 100% version bd948618-89eb-4aa9-97d8-91d112ecaf8a (21 modules, QA_AUTH unchanged, R63 mobile nav preserved). Direct Cloudflare readback confirms all 2 backend and 7 website changed modules exact GitHub source. Primary NONPRODUCTION ai-law-web stays 670463d4-558f-47be-936c-22819cfea0c7 and production unchanged.
+- **Browser:** Cloudflare real anonymous /account redirected to /login and did not expose profile content (PASS). Additional live unauthorized assets/API Browser Rendering requests HTTP429 (BLOCKED). Owner genuine password login/profile save/avatar/photo/role visual QA acceptance **NOT_RUN**.
+- **Evidence:** Owner-private AI Law Test Evidence / R67 Account Center Google Doc, readback confirmed private/owner-only. Public PCS stores no secret or private Google Doc ID.
+- **Next:** Owner validates /account on physical mobile/desktop with QA credentials; fix any issues, then consider separate Owner-approved promotion to primary NONPRODUCTION. R65 multi-role activation and historic leaked QA password risk remain open. Production not authorized.
 ## R66 — QA self-service password change deployed, Owner real rotation pending (2026-11-06)
 
 - **Owner correction and authorization:** AI Law lacked a real password-change function. Owner requested its implementation and immediate deployment. Frozen SRS v1.1.15 remains unchanged; feature recorded in `srs_changed.md` as SC-016. No production.
