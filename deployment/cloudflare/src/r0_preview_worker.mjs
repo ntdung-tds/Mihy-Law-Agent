@@ -9,7 +9,7 @@ import { PREVIEW_SESSION_JS } from './preview_session.mjs';
 import { PREVIEW_LOGIN_JS } from './preview_login.mjs';
 import { PREVIEW_MATTERS_JS } from './preview_matters.mjs';
 const AUTH='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
-const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters']);
+const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/change-password']);
 const privatePaths=new Set(['/','/index.html','/styles.css','/app.js','/session.js','/matters.js']);
 const headerMap=(type)=>({
  'Content-Type':type,'Cache-Control':'no-store','Vary':'Cookie',
