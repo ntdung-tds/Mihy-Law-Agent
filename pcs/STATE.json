@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 75,
-  "updated_at": "2026-11-06T13:19:02.211Z",
+  "revision": 76,
+  "updated_at": "2026-11-06T13:45:00Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1493,43 +1493,50 @@
       },
       {
         "id": "AL-R0-DOC-TRANSFER-R72",
-        "title": "QA-only authenticated PDF/DOCX upload/list/download over customer-owned Google Drive",
-        "status": "SOURCE_MERGED_QA_DEPLOYED_PROVIDER_AND_AUTHENTICATED_E2E_BLOCKED",
+        "title": "Một task duy nhất: hoàn thiện và nghiệm thu quản lý PDF/DOCX trên Google Drive trong AI Law QA",
+        "status": "IN_PROGRESS_ONE_BUNDLE_QA_GOOGLE_DRIVE_CONNECTED_E2E_NOT_RUN",
         "priority": "P0",
-        "scope": "Synthetic-only Cloudflare QA transport; existing active QA session and versioned MatterACL. No real files, UC03 translation, OCR, SRS change, production or SaaS.",
+        "scope": "ONE task, not five separately tracked items: complete existing isolated-QA document workflow for synthetic PDF/DOCX upload -> tenant-owned Google Drive private folder -> D1 document receipt/list -> secure download -> cross-tenant and MatterACL denial -> fix/retest until reproducible defects closed. Existing signed-in QA sessions and approved SRS baseline only. No live customer data, legal AI/UC03 processing, OCR, security scope relaxation, production, SaaS or new OAuth app.",
         "acceptance": [
-          "Multipart uploads bounded to 1.5 MB PDF/DOCX with conservative MIME/magic checks and CSRF.",
-          "D1 MatterACL read/write allow-minus-deny per installation/tenant enforced before returning metadata/download or publishing upload receipt.",
-          "Organization-root Google Drive upload + verified private metadata/read; SHA256 and byte-size verified before returning downloads.",
-          "D1 per-file receipt is unverified, quarantined from legal AI; missing Drive consent/token fails closed.",
-          "All required CI jobs pass on final PR head; no QA release before valid organization-owned OAuth grant and QA D1 migration."
+          "AT01 — Signed-in QA user with active workspace and MatterACL write can upload valid synthetic PDF and DOCX within existing 1.5 MB limit; unsupported, malformed, oversized or unauthenticated submissions fail closed.",
+          "AT02 — Uploaded files appear in that workspace's private Google Drive root, with D1 tenant-scoped link and unverified receipt. No document may be fed to legal AI automatically.",
+          "AT03 — Document list is correct for current MatterACL read and tenant; refresh and workspace switch do not reveal other tenants' filenames/metadata.",
+          "AT04 — Authenticated user with MatterACL read can download the exact PDF/DOCX bytes from its approved Drive folder; SHA-256, length and parent-folder integrity are verified before serving.",
+          "AT05 — Organization/personal tenant boundary, denied/revoked MatterACL, forged file ID, stale session and cross-workspace requests must not disclose or download files; failed upload does not leave published D1 receipts.",
+          "AT06 — Run actual QA mobile/desktop/browser flow, synthetic Google-backed upload/list/download + negative ACL checks where a suitable signed-in QA test session exists; record PASS/FAIL/BLOCKED/NOT_RUN honestly. Fix regressions and rerun.",
+          "AT07 — Final-head PR CI is green; deploy only to existing isolated Cloudflare QA after proof, with existing bindings/secrets preserved, production untouched. Owner acceptance is the final gate."
         ],
         "tests": {
-          "node_synthetic": "PASS_7_OF_7_R72",
-          "actual_sqlite": "PASS_2_OF_2_R72_TENANT_FK_STATUS",
-          "github_ci": "PASS_PR97_FINAL_HEAD_1bd61026fd1b194a425b4d9fb4857af2c7975f62_RUN_42194749587_9_OF_9",
-          "github_pr": "MERGED_MAIN_2670f5172ecfb72afb105dcca8e7493c98f3df10",
-          "browser_positive_upload": "NOT_RUN",
-          "cloudflare_qa_deploy": "NOT_RUN_BLOCKED_CUSTOMER_OAUTH",
-          "real_google_drive_upload_download": "BLOCKED_NO_APP_OAUTH_ROOT",
-          "real_uc03_translation_review_docx": "NOT_RUN"
+          "node_synthetic": "PASS_7_OF_7_R72_EXISTING_PDF_CASES",
+          "sqlite_fk": "PASS_2_OF_2_R72_EXISTING",
+          "existing_qa_oauth": "PASS_1_PERSISTED_CONNECTION_D1_READ_ONLY_2026_11_06",
+          "existing_qa_receipts": "0_AS_OF_2026_11_06",
+          "actual_signed_in_pdf_upload": "NOT_RUN",
+          "actual_signed_in_docx_upload": "NOT_RUN",
+          "google_drive_file_presence": "NOT_RUN",
+          "list_after_reload": "NOT_RUN",
+          "download_sha256_size": "NOT_RUN",
+          "cross_tenant_acl_denial": "NOT_RUN",
+          "mobile_browser_e2e": "NOT_RUN",
+          "deployment": "EXISTING_R72_R77_SOURCE_ALREADY_QA_DEPLOYED_NO_NEW_RELEASE_IN_THIS_TASK_CONSOLIDATION",
+          "owner_acceptance": "PENDING"
         },
         "blockers": [
-          "Worker QA bindings readback contains DB/session but no GOOGLE_DRIVE_ACCESS_TOKEN or GOOGLE_DRIVE_ROOT_ID; ChatGPT Google Drive plugin does not grant Worker OAuth.",
-          "QA D1 additive migration r72_qa_document_receipts.sql not applied; no independent backup or real OAuth validation yet.",
-          "Python R68-R70 source segmentation not wired to Worker runtime; uploaded files remain unverified and cannot enter UC03.",
-          "No approved UC03 translation model/provider, traceable review and DOCX export integration or real browser E2E.",
-          "Production, client files and Owner final acceptance not authorized."
+          "A persisted QA OAuth grant exists (1), but no synthetic test file receipt yet. A live signed-in/browser test has not been completed; do not confuse deployed routes with end-to-end acceptance.",
+          "Only 2 working QA login verifiers previously available; any synthetic file test must use an authorized QA session without exposing passwords, OAuth tokens, customer data or modifying unapproved accounts.",
+          "PDF+DOCX positive tests, Drive-backed list/download and denied cross-tenant/matter scenarios remain to be run with actual QA browser/provider. No production deployment or real client files authorized."
         ],
         "evidence": [
           "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/97",
           "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42194749587",
           "deployment/cloudflare/tests/r72_documents.test.mjs",
           "deployment/cloudflare/tests/test_r72_document_schema.py",
-          "deployment/cloudflare/QA_R72_DOCUMENTS.md"
+          "deployment/cloudflare/QA_R72_DOCUMENTS.md",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/105",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42223444318"
         ],
-        "owner_acceptance": "NOT_REQUESTED",
-        "notes": "At the original R72 checkpoint there was no Cloudflare deployment; R75 subsequently deployed the QA source. Password rotation and role E2E remain separately open. Upload signature and checksum are transport integrity only, not legal-text completeness, OCR, malware analysis or translation quality. R75 QA API/site code content deployment verified; organization Google OAuth client still missing; file E2E NOT_RUN."
+        "owner_acceptance": "PENDING_ALL_ACCEPTANCE_CRITERIA",
+        "notes": "Owner on 2026-11-06 directed: 'Gộp lại thành 1 task'. This is a consolidation of the same existing R72 document task, not a new feature or SRS delta. OAuth Google Drive consent has since succeeded (live D1 1 connection); separate OAuth fixes R75-R77 are preserved as historical tasks, not reopened. The current work remains E2E actual synthetic documents and ACL acceptance."
       },
       {
         "id": "AL-R0-GDRIVE-R75-ONE-TAP",
@@ -2250,9 +2257,9 @@
       }
     ],
     "current": {
-      "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R77 QA Google Drive callback return fix PR #105 squash-merged main 8137b211ccc666056f3fbb7b622277878b00a18a after GitHub Actions PR-head #42223444318 SUCCESS 9/9 executed jobs. OAuth Node 8/8 PASS, Drive UI Node 8/8 PASS, site worker Node 12/12 PASS; actual Chromium desktop+mobile synthetic Google cross-site Strict-cookie redirect PASS. Backend and site code updated on Cloudflare QA only using content-only API with source checksum readback PASS; unrelated modules and existing secret bindings preserved, 100% QA traffic each. D1 read-only: 3 OAuth attempts, 2 consumed callbacks, 0 persisted Drive grants/receipts. No real Google consent or owner acceptance; Google API callback integration unverified; production untouched.",
-      "next_action": "Owner signs in to QA site and retries Google Drive connect via /app#documents. The callback now uses public /drive-return 200 first-party page to restore SameSite=Strict session and displays bounded error issue: consent/session/provider/drive/save. If failure code drive occurs, authorized Google project admin should verify Drive API enabled and grant scope, then retry; do not expose secrets. After owner consent read-only check D1 grants and execute synthetic authenticated upload/list/download/ACL rejection. Privacy policy user-facing legal content is not implemented on QA login; production publication/verification remains deferred by Owner.",
+      "active_task": "AL-R0-DOC-TRANSFER-R72",
+      "last_completed_step": "Consolidated the existing R72 PDF/DOCX Google Drive document workflow into one QA acceptance task by explicit Owner instruction; live D1 read-only count 1 Google Drive grant and 0 document receipts; existing upload/list/download API and page are already source-merged/deployed, E2E still NOT_RUN. No code, new SRS scope, production deployment or personal Drive file operations performed in consolidation.",
+      "next_action": "Execute the single task AL-R0-DOC-TRANSFER-R72 as one bundled QA workflow: synthetic PDF+DOCX valid and invalid uploads, receipt/list/reload, authenticated download SHA256 integrity, cross-tenant/MatterACL/session deny, then defect->fix->retest, CI and QA only. Owner confirms final acceptance; no real customer files. Update the same task record, do not create five tasks.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -2290,7 +2297,7 @@
         "R66 as of 2026-11-06: QA password-change UI/API deployed and source/readback PASS but owner real password rotation NOT_RUN, so exposed credential remains potentially usable for new sessions. Prior 3 sessions revoked; no confirmation old denied/new accepted. Cloudflare Browser Rendering limited follow-up via HTTP429. R65 PR89 still OPEN/unmerged; separate credentials/roles/MatterACL testing BLOCKED.",
         "R68-01: DOCX source helper merged PR93 PASS but still not invoked by Cloudflare Worker; original SRS v1.1.15 ZIP not mounted; backend storage, upload, PDF/OCR and AI E2E separate tasks.",
         "R69+R70: source PDF/DOCX extraction and integrity guards are CI-PASS and merged, but NOT integrated with Cloudflare QA Worker or Google Drive; no real authenticated upload/read, OCR or UC03/04/07 AI E2E. Original private SRS 1.1.15 ZIP inaccessible for exact mapping; do not claim full PDF/Word display parity.",
-        "R72-R77 QA Google OAuth source and callback/first-party return fix deployed, OAuth bindings present. Backend state: 3 pending OAuth attempts / 2 consumed callbacks but 0 persisted private Google Drive grants, 0 file receipts. Owner live consent/retry and synthetic authenticated file E2E remain BLOCKED/NOT_RUN; actual cloud Google API eligibility unknown, now exposed via bounded failure issue. No customer data/production."
+        "R72-R77 Google OAuth QA connection now has 1 grant; D1 document receipts remain 0. The single consolidated R72 upload/list/download/ACL E2E is NOT_RUN; must test with synthetic files and authorized browser before acceptance. No production."
       ]
     },
     "policy": {
