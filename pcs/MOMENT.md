@@ -1,11 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `71` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T08:40:48.126Z`.
+- **PCS revision:** `72` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T09:30:20Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
+
+## R72 — QA document transport source merged; Drive OAuth and UC03 blocked (2026-11-06)
+
+- **Actual GitHub:** [PR #97](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/97) merged main commit `2670f5172ecfb72afb105dcca8e7493c98f3df10` after [final PR-head CI #42194749587](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42194749587) completed **SUCCESS 9/9 executed jobs**. R72 synthetic Node **7/7 PASS** and actual SQLite receipt/tenant constraints **2/2 PASS**. No QA or production deployment.
+- **Code delivered:** guarded `/api/qa/documents` multipart PDF/DOCX transport, current cookie session/tenant and versioned MatterACL write/read enforcement, private organization-root Google Drive adapter upload/read, bounded 1.5 MB, SHA-256 receipt integrity and failure cleanup, responsive workspace document UI. Documents remain `unverified`, never translated automatically.
+- **Live Cloudflare blocker verified:** existing QA Worker has no `GOOGLE_DRIVE_ACCESS_TOKEN` or `GOOGLE_DRIVE_ROOT_ID` binding. Neither this chat's Drive connector nor a public repository can supply the application's customer OAuth grant. Additive receipt D1 migration is not applied. Actual signed-in browser upload/download/tenant deny and revoked-ACL E2E **BLOCKED/NOT_RUN**.
+- **UC03 remains unfinished:** R68–R70 Python source extraction still not wired into Cloudflare; no approved AI translation provider, legal source review or downloadable DOCX result. No real legal/client documents were used, no SRS v1.1.15 change, production untouched. Owner final acceptance pending.
+- **Next gate:** valid customer-owned Drive OAuth/refresh and root, secure backup + apply QA receipt migration, QA-only real synthetic browser E2E, then verified PDF/DOCX source mapping and UC03 translation/review/export. Do not report product release readiness.
 
 ## R71 — R70 final merge/CI checkpoint (2026-11-06)
 
