@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 79,
-  "updated_at": "2026-11-06T15:42:49.330Z",
+  "revision": 80,
+  "updated_at": "2026-11-06T16:07:31.654Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1494,7 +1494,7 @@
       {
         "id": "AL-R0-DOC-TRANSFER-R72",
         "title": "Một task duy nhất: hoàn thiện và nghiệm thu quản lý PDF/DOCX trên Google Drive trong AI Law QA",
-        "status": "R81_QA_CODE_DEPLOYED_CI_PASS_LIVE_GOOGLE_UPLOAD_RETEST_PENDING",
+        "status": "R82_STREAM_UPLOAD_FIX_DEPLOYED_QA_CI_PASS_REAL_GOOGLE_FILE_E2E_PENDING",
         "priority": "P0",
         "scope": "ONE task, not five separately tracked items: complete existing isolated-QA document workflow for synthetic PDF/DOCX upload -> tenant-owned Google Drive private folder -> D1 document receipt/list -> secure download -> cross-tenant and MatterACL denial -> fix/retest until reproducible defects closed. Existing signed-in QA sessions and approved SRS baseline only. No live customer data, legal AI/UC03 processing, OCR, security scope relaxation, production, SaaS or new OAuth app.",
         "acceptance": [
@@ -1557,7 +1557,18 @@
           "r81_live_file_receipts": 0,
           "r81_live_session_count_after_deploy": 0,
           "r81_live_google_pdf_docx_upload": "NOT_RUN_NO_AUTHENTICATED_SESSION",
-          "r81_owner_acceptance": "PENDING"
+          "r81_owner_acceptance": "PENDING",
+          "r82_pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/114",
+          "r82_ci": "PASS_9_OF_9_ACTIONS_42247316379",
+          "r82_provider_wire_request": "PASS_6_OF_6_WITH_REAL_REQUEST_AND_STREAM_BODY",
+          "r82_cloudflare_qa_deployment": "PASS_SOURCE_HASH_READBACK_2026_11_06_16_06_08Z",
+          "r82_unrelated_modules_and_bindings": "PASS_PRESERVED",
+          "r82_qa_traffic": "PASS_100_PERCENT",
+          "r82_live_google_connection": 1,
+          "r82_live_receipts": 0,
+          "r82_live_signed_in_pdf_upload": "NOT_RUN_OWNER_SESSION_REQUIRED",
+          "r82_live_signed_in_docx_upload": "NOT_RUN_OWNER_SESSION_REQUIRED",
+          "r82_owner_acceptance": "PENDING"
         },
         "blockers": [
           "Actual authenticated Google Drive file POST remains NOT_RUN; D1 presently holds 1 tenant Drive grant, 1 QA matter with active write ACL and 0 document receipts. Need Owner or approved test browser to re-submit only a synthetic PDF/DOCX under 1.5 MB and inspect the new safe error code if failure persists.",
@@ -1565,7 +1576,8 @@
           "Exact per-tenant negative ACL and fully Google-backed upload/list/download still NOT_RUN and remain Owner acceptance gates. Production untouched.",
           "R80 user-requested disconnect is deployed but not clicked by Owner; original Google Drive connection deliberately preserved. Real signed-in disconnect/reconnect E2E still Owner acceptance pending. Local token deletion does not revoke Google's application-wide authorization; optional Google Account revocation is separate.",
           "R81 real Google upload failure was previously reported as generic DRIVE_UPLOAD_UNAVAILABLE; no captured HTTP response from that request exists. The new bounded provider/stage/HTTP reason diagnostics require Owner's re-login and synthetic retry before the true live failure mechanism can be determined.",
-          "Read-only QA D1 postdeploy has 1 connected Drive grant, 0 receipts and 0 active sessions. No authenticated Google-backed upload, tenant ACL negative real browser or owner acceptance has been completed."
+          "Read-only QA D1 postdeploy has 1 connected Drive grant, 0 receipts and 0 active sessions. No authenticated Google-backed upload, tenant ACL negative real browser or owner acceptance has been completed.",
+          "R82 Cloudflare Workers outgoing fetch previously received Blob body, not a documented RequestInit body. Replaced with Blob.stream()+duplex:half and tested true Request construction, bytes; actual Google-backed upload NOT_RUN. D1 has 1 OAuth grant and 0 receipts; owner should upload a synthetic PDF/DOCX to confirm. If still errors, preserve bounded stage/status and debug further without blaming the user's mobile connection."
         ],
         "evidence": [
           "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/97",
@@ -1580,10 +1592,12 @@
           "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/110",
           "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42241224034",
           "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/112",
-          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42244735658"
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42244735658",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/114",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42247316379"
         ],
-        "owner_acceptance": "PENDING_REAL_PDF_DOCX_UPLOAD_AND_PROVIDER_DIAGNOSTIC",
-        "notes": "R79 Owner screenshot showed native file-picker overflow on mobile plus 503 'Lưu trữ QA chưa sẵn sàng'. PR108 fixed mobile chooser, file-size feedback, safe backend error codes and prevalidation before OAuth refresh; merged commit 46282a0982c6f559bdbad462f75cc3258b6967b7, CI PASS. Live Cloudflare QA backend/site source and bindings readback PASS, only modules for this task changed. Existing single R72 task remains active document work item; no new task created. Real remote upload/Drive file/receipt not yet validated. R80: Owner requested disconnect; implemented confirmed tenant-specific local encrypted OAuth grant removal, pending consent cleanup, preserved Drive files and D1 document receipts, nonadmin/CSRF denial, responsive UI, status check before reconnect; no global provider revocation. CI and live QA deploy verified. Owner must explicitly confirm a real disconnect; ChatGPT did not alter current grant. R81: Google Drive upload error investigated. Standards-aligned multipart/related framing, optional partial create response no longer falsely rejects success, mandatory separate metadata parent/name/MIME/length verification, bounded provider HTTP/reason/stage codes without raw tokens or filenames. CI PASS, actual QA backend and website deployed source-match. Root cause of old live error not asserted without captured provider response. Owner must re-login and retry with synthetic file. No production/user Google data modified."
+        "owner_acceptance": "PENDING_GOOGLE_BACKED_PDF_DOCX_UPLOAD",
+        "notes": "R79 Owner screenshot showed native file-picker overflow on mobile plus 503 'Lưu trữ QA chưa sẵn sàng'. PR108 fixed mobile chooser, file-size feedback, safe backend error codes and prevalidation before OAuth refresh; merged commit 46282a0982c6f559bdbad462f75cc3258b6967b7, CI PASS. Live Cloudflare QA backend/site source and bindings readback PASS, only modules for this task changed. Existing single R72 task remains active document work item; no new task created. Real remote upload/Drive file/receipt not yet validated. R80: Owner requested disconnect; implemented confirmed tenant-specific local encrypted OAuth grant removal, pending consent cleanup, preserved Drive files and D1 document receipts, nonadmin/CSRF denial, responsive UI, status check before reconnect; no global provider revocation. CI and live QA deploy verified. Owner must explicitly confirm a real disconnect; ChatGPT did not alter current grant. R81: Google Drive upload error investigated. Standards-aligned multipart/related framing, optional partial create response no longer falsely rejects success, mandatory separate metadata parent/name/MIME/length verification, bounded provider HTTP/reason/stage codes without raw tokens or filenames. CI PASS, actual QA backend and website deployed source-match. Root cause of old live error not asserted without captured provider response. Owner must re-login and retry with synthetic file. No production/user Google data modified. R82 owner reported transport failure with no Google HTTP code. Cloudflare Workers Request supports ReadableStream; previous implementation passed Blob directly, an unverified but plausible runtime incompatibility. Sent bounded multipart Blob.stream() to outbound Worker fetch with duplex:half and checked real Node Request payload. Code PR114 merged main aff4b3466038ddf1102dc45b0ed0641dff1286d5; full CI PASS 9/9; Cloudflare QA content-only deployed 2026-11-06T16:06:08.848399Z, source readback and preserved bindings PASS. Did NOT upload any real customer file or alter Owner OAuth grant. Actual Google file E2E awaits Owner."
       },
       {
         "id": "AL-R0-GDRIVE-R75-ONE-TAP",
@@ -2305,8 +2319,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R81 upload hardening PR112 merged main SHA 8996be8fc2d564703b983e63e4ac107f7082a752 after final CI #42244735658 PASS 9/9: new provider wire/body tests 6/6 PASS, QA document API 13/13 PASS, existing browser etc PASS. Cloudflare isolated QA content-only guarded deploy API google_drive.mjs+qa_documents.mjs and website workspace_documents.mjs readback exact hash PASS, all unrelated modules and binding names/types preserved, traffic 100%. Live QA D1: 1 Google OAuth grant, zero file receipts/links, zero currently active sessions. Actual retry needs Owner sign-in. No production or customer data changed.",
-      "next_action": "Owner signs in to QA /app#documents with authorized account, retries uploading ONLY a synthetic small PDF/DOCX under 1.5 MB; report safe stage and HTTP status if still failed. Stage provider/status/reason differentiates Google API rejection vs stage verify indicates possible unregistered remote file; do not retry immediately on verify. Check post-Owner retry D1 receipt and then real list/download hash, cross-tenant MatterACL denial; correct regression and repeat within same R72 task. Owner final acceptance gate, production untouched.",
+      "last_completed_step": "R82 QA Google Drive transport failure: backend upload changed from outgoing Blob to ReadableStream/duplex:half, PR114 merged main aff4b3466038ddf1102dc45b0ed0641dff1286d5 after GitHub Actions #42247316379 PASS 9/9 executed. Google multipart Request with real stream constructor + exact PDF media bytes CI PASS. Cloudflare backend google_drive.mjs guarded content-only deploy timestamp 2026-11-06T16:06:08.848399Z, exact GitHub hash readback PASS, other modules and OAuth/bindings unchanged, 100% QA traffic. Actual D1 has one Drive grant and zero receipts; no real Google file upload attempted. Production untouched.",
+      "next_action": "Owner reopens https://ai-law-web-qa.iaict-platform.workers.dev/app#documents and uploads the provided synthetic gpt PDF or DOCX fixture (no real legal/customer data) under 1.5 MB. If successful, verify D1 receipt and actual approved Google folder/list/download SHA256, then cross-tenant/MatterACL denial. If still fails, capture bounded stage/provider HTTP detail and repeat fix/test. Final acceptance remains with Owner; no production deployment.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",

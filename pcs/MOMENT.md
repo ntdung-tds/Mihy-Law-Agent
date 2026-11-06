@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `79` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T15:42:49.330Z`.
+- **PCS revision:** `80` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T16:07:31.654Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R82 — Cloudflare outgoing Google Drive upload ReadableStream transport (2026-11-06)
+
+- **Owner report:** "Không thể truyền tệp đến Google Drive. Vui lòng thử lại khi đường truyền ổn định." This is `DRIVE_UPLOAD_UNAVAILABLE`, `stage=transport` from Worker fetch **before a Google HTTP response**. It does not establish a failure of the Owner's mobile network or Google Drive storage quota.
+- **Narrow probable root cause / correction:** The previous `GoogleDriveAdapter.upload` sent the bounded multipart Google payload as `Blob` directly to outgoing Cloudflare `fetch`. Cloudflare Request documentation specifies `ReadableStream` as an outgoing body type. In [PR #114](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/114), the same Google multipart Blob is now passed as `body.stream()` with `duplex:'half'`; no changes to Drive credentials, MIME/bytes, MatterACL, D1 receipt or SRS scope. True real-Google cause is still **probable, not confirmed** until signed-in upload.
+- **Verification:** [GitHub Actions #42247316379](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42247316379) final-head **PASS 9/9 executed**; R81 multipart regression constructs an actual `Request` with `ReadableStream` and `duplex:'half'` then checks exact bytes. Existing OAuth, document, ACL, UI and browser jobs PASS.
+- **Cloudflare QA:** Source commit `aff4b3466038ddf1102dc45b0ed0641dff1286d5` merged; only API Worker `google_drive.mjs` updated via guarded content-only request at 2026-11-06 16:06:08Z, exact source hash readback PASS, unrelated modules and existing bindings/secrets unchanged, 100% QA traffic. Production untouched.
+- **Owner real test gate:** Live D1 remains 1 persisted Google OAuth grant and 0 Google file receipts; no signed-in PDF/DOCX upload/Drive download proven. Generated two wholly synthetic optional QA fixtures `ai_law_qa_gpt.pdf` (1.7 KB), `ai_law_qa_gpt.docx` (36 KB), both below 1.5 MB and no customer data; stored only in this chat's artifacts, not public GitHub/Drive. Owner should upload **only a synthetic fixture**, check resulting message; agent then verifies D1 receipts and real list/download/ACL. User's existing Google Drive consent not altered.
 
 ## R81 — Google Drive upload rejected / incomplete metadata proof: hardened QA (2026-11-06)
 
