@@ -36,6 +36,13 @@ site.listen(0,'127.0.0.1',()=>{
  // localhost is intentionally a different cookie site than 127.0.0.1.
  const sitePort=site.address().port;
  const other=http.createServer((req,res)=>{
+  if(req.url==='/'){
+   res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});
+   res.end('<!doctype html><html><body>'+
+    '<a id="direct" href="/direct">Approve without bridge</a>'+
+    '<a id="bridge" href="/bridge">Approve with bridge</a></body></html>');
+   return;
+  }
   const suffix=req.url==='/bridge'?'/drive-return?drive=connected':'/app?drive=connected#documents';
   res.writeHead(302,{Location:'http://localhost:'+sitePort+suffix,'Cache-Control':'no-store'});
   res.end();
