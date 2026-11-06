@@ -1,11 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `72` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T09:30:20Z`.
+- **PCS revision:** `73` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T11:44:32Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
+
+
+## R75 — One-tap Google Drive consent QA: deployed code, provider enrollment gate (2026-11-06)
+
+- **GitHub:** [PR #101](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/101) merged to main at `f542633dc419a5968ebc0e545b47ab26255e71c4` after [final-head Actions #42211692868](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42211692868) completed **PASS 9/9 executed jobs**. Existing R73 OAuth protocol regressions **PASS 4/4**; new R75 synthetic DOM/consent UI checks **PASS 6/6**.
+- **Actual Cloudflare QA rollout:** `ai-law-standalone-cf-qa` (one OAuth API module updated) and `ai-law-web-qa` (document HTML/CSS/JS modules updated) via **content-only** Worker API; live module readback exact hash **PASS**, 8/8 backend and 22/22 site module count preserved, unrelated modules and all existing bindings preserved. No production change. Cloudflare Browser Rendering successfully opened real QA `/login` page; it did **not** log in or complete Google consent. Subsequent browser smoke hit API **HTTP 429**, not counted PASS.
+- **UX:** once a provider OAuth app is registered, the tenant administrator taps “Kết nối Google Drive” → chooses a Google account → consents → returns directly to `/app?drive=connected#documents`; cancellations and errors return to the same document screen with retry. Missing OAuth setup shows nontechnical status; upload control disabled until the backend reports a connected tenant. Deep-link page initialization bug fixed.
+- **Remaining real dependency:** QA API Worker has **no `GOOGLE_OAUTH_CLIENT_ID` or `GOOGLE_OAUTH_CLIENT_SECRET`**. A Google Cloud project/organization administrator must register the OAuth web client once and privately supply those two bindings; a ChatGPT Drive connector cannot lend its app credentials to Workers. No live Google consent, refresh/grant, private-root creation or authenticated PDF/DOCX upload/download; **BLOCKED/NOT_RUN**. D1 OAuth/receipt tables were already present, prior read had zero grants/files and no FK violations. No credentials or customer files in public GitHub.
+- **Related but separate:** R74 source-only bounded UC03 bilingual review-draft DOCX is merged in main but still not integrated into protected QA or approved as legal translation. Owner final acceptance and production deploy remain pending. **Next:** one-time OAuth app enrollment → signed-in tenant-admin real consent → synthetic upload/list/download/deny/refresh browser E2E.
 
 ## R72 — QA document transport source merged; Drive OAuth and UC03 blocked (2026-11-06)
 
