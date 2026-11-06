@@ -1692,3 +1692,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
  .site-page .mihy11-line .announcement-copy,.site-page .mihy11-line .detail-announcement-copy{transition:none!important}
 }
 
+
+/* R66: account password change completion, QA only. */
+.login-password-success{padding:12px 14px;margin:12px 0 16px;border-radius:11px;background:#eaf8ef;border:1px solid #b6e2c6;color:#266144;font-size:13px;font-weight:750}
+.login-password-success[hidden]{display:none}
