@@ -24,6 +24,7 @@ const modules=[
  ['workspace_js.mjs','web/r0-preview/app.js','WORKSPACE_JS'],
  ['workspace_session.mjs','web/r0-preview/session.js','WORKSPACE_SESSION'],
  ['workspace_matters.mjs','web/r0-preview/matters.js','WORKSPACE_MATTERS'],
+ ['workspace_documents.mjs','web/r0-preview/documents.js','WORKSPACE_DOCUMENTS'],
  ['account_html.mjs','web/account/index.html','ACCOUNT_HTML'],
  ['account_css.mjs','web/account/styles.css','ACCOUNT_CSS'],
  ['account_js.mjs','web/account/app.js','ACCOUNT_JS']
