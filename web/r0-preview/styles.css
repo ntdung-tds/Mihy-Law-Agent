@@ -383,3 +383,13 @@ body.drawer-open{overflow:hidden}
 .drawer-groups a.drawer-account-link{display:flex;flex-direction:column;gap:3px;justify-content:center;align-items:flex-start;min-height:56px;margin:4px 0 7px;background:linear-gradient(120deg,#eeeafe,#f7f5ff);border:1px solid #dcd5f6;border-radius:11px;color:#51429c;text-decoration:none;padding:10px 13px;font-size:13px;font-weight:900}
 .drawer-account-link small{font-size:9px;font-weight:700;color:#8c82b1}
 #top-account-avatar{display:grid;place-items:center;text-decoration:none;flex:none;background-size:cover;background-position:center;cursor:pointer}
+
+/* R72 QA document section, responsive without modifying R63 five-tab mobile nav. */
+.qa-document-box{margin-top:18px;padding:22px}
+.qa-document-box form{display:grid;gap:10px;max-width:620px}
+.qa-document-box input,.qa-document-box select{max-width:100%;min-height:42px;padding:8px;border:1px solid #d0d9e7;border-radius:8px;background:#fff;color:#25324a}
+.qa-document-box button{min-height:42px;padding:10px 16px;border:0;border-radius:8px;background:#2b52a5;color:white;font-weight:700}
+.qa-document-box button:disabled{opacity:.55}
+.qa-document-box .matter-row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid #e6e9f0;overflow-wrap:anywhere}
+#document-feedback{min-height:20px;font-size:13px;line-height:1.5}
+@media(max-width:600px){.qa-document-box{padding:15px}.qa-document-box form{width:100%}}
