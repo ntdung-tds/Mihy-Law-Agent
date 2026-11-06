@@ -4,6 +4,9 @@
  const $=selector=>document.querySelector(selector);
  const form=$('#login-form'),error=$('#form-error'),submit=$('#submit');
  if(!form)return;
+ if(new URLSearchParams(location.search).get('changed')==='1'){
+   const success=$('#password-change-success');if(success)success.hidden=false;
+ }
  function report(message){error.hidden=!message;error.textContent=message||'';}
  form.addEventListener('submit',async event=>{
    event.preventDefault();report('');submit.disabled=true;
