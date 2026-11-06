@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `81` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T16:23:39.192Z`.
+- **PCS revision:** `82` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T16:36:09.366Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R84 — Owner correction: restore the original browser→Google Drive file data plane (2026-11-06)
+
+- **Owner's confirmed architecture, not a new feature:** Cloudflare is responsible for website hosting, authenticated identities, tenant/membership/MatterACL checks and the metadata/receipt database. **All uploaded PDF/DOCX file bytes go from the browser directly to the tenant's Google Drive, not through a Cloudflare Worker upload proxy.** Google Drive is the sole final file-content storage target. This interpretation governs the existing single `AL-R0-DOC-TRANSFER-R72` document task.
+- **Our mistake acknowledged:** The R72–R82 QA implementation streamed the multipart file body browser→Cloudflare Worker→Google Drive. Although bytes ultimately reside on Drive, this transit contradicts the Owner's intended data plane and repeatedly failed in real user QA. Stop speculative Worker multipart/stream patching; do not continue asking Owner to repeat the same failing upload.
+- **Secure replacement contract:** Cloudflare checks active session, tenant, MatterACL write, file name/MIME/size, account Drive grant and permitted root, then initiates one short-lived Drive resumable upload session for that specific file. Browser transfers raw bytes with direct `PUT` to the returned Google session URI. The browser never receives the general Google OAuth bearer access/refresh token. Finalize via backend status check tied to the initiating user/tenant/matter, verify Drive file ID, name, parent root, MIME and byte size (and receipt integrity) before inserting D1 metadata. Enforce CSRF, expiration, replay protection and denied/cross-tenant paths. The session URI is a sensitive one-file capability; never log or place it in a public URL or repository.
+- **Technical gate:** Google's Drive API documents resumable browser uploads, but actual cross-origin `PUT` CORS with a backend-created session must be verified **in a real QA browser** before relying on it. If it fails, do not silently route bytes back through Worker or expose OAuth tokens; show the blocking result and choose another secure direct data-plane method under the original SRS. Retire old proxy upload only after the new path passes.
+- **Evidence boundary:** Independent connected Google Drive app tests of synthetic PDF/DOCX on R83 PASS, but use a different OAuth app from AI Law. Website Google-backed upload remains FAIL / 0 D1 file receipts; direct-browser upload is **NOT_IMPLEMENTED / NOT_RUN**. This R84 change records the Owner's instruction in PCS only. Production, SRS baseline and private customer data unchanged.
 
 ## R83 — Direct Google Drive upload bypasses Cloudflare: PDF/DOCX PASS; website upload remains FAIL (2026-11-06)
 
