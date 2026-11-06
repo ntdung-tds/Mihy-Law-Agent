@@ -46,11 +46,13 @@
  }
  const driveBox=$('drive-setup'),driveMessage=$('drive-status'),connect=$('drive-connect');
  const uploadButton=form.querySelector('button[type="submit"]');
- const returned=new URL(location.href).searchParams.get('drive');
+ const link=new URL(location.href);
+ const returned=link.searchParams.get('drive');
+ const issue=link.searchParams.get('issue');
  if(returned==='connected'||returned==='failed'){
-  const cleaned=new URL(location.href);
-  cleaned.searchParams.delete('drive');
-  history.replaceState(null,'',cleaned.pathname+cleaned.search+cleaned.hash);
+  link.searchParams.delete('drive');
+  link.searchParams.delete('issue');
+  history.replaceState(null,'',link.pathname+link.search+link.hash);
  }
  function setDrive(state,text){
   if(driveBox)driveBox.dataset.state=state;
@@ -79,9 +81,18 @@
     setDrive('admin','Không gian tổ chức chưa kết nối Google Drive. Hãy liên hệ quản trị đơn vị để cấp quyền.');
     return;
    }
+   const errors={
+    consent:'Google chưa cấp quyền hoặc yêu cầu đã hết hạn. Vui lòng thử lại.',
+    session:'Phiên đăng nhập AI Law đã hết hạn trong khi cấp quyền. Đăng nhập lại rồi kết nối.',
+    provider:'Google chưa trả quyền truy cập hợp lệ. Vui lòng cấp quyền lại.',
+    drive:'Đã nhận quyền Google nhưng chưa tạo được thư mục lưu trữ. Quản trị QA cần kiểm tra Google Drive API đã bật.',
+    save:'Google đã cấp quyền nhưng AI Law chưa lưu được kết nối. Vui lòng thử lại.'
+   };
    setDrive('disconnected',returned==='failed'
-    ?'Google chưa cấp quyền hoặc kết nối bị gián đoạn. Bạn có thể thử lại.'
-    :'Chưa kết nối. Nhấn nút bên dưới, chọn tài khoản Google và Đồng ý.');
+    ?(errors[issue]||'Kết nối chưa hoàn tất. Bạn có thể thử lại.')
+    :returned==='connected'
+     ?'Google đã trả về nhưng kết nối chưa được lưu. Vui lòng thử lại.'
+     :'Chưa kết nối. Nhấn nút bên dưới, chọn tài khoản Google và Đồng ý.');
    connect.hidden=false;
   }catch{
    setDrive('error','Không thể kiểm tra kết nối Google Drive lúc này. Vui lòng thử lại.');
