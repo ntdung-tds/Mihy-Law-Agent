@@ -20,10 +20,12 @@ def main():
         if not ready:
             raise RuntimeError("Synthetic QA browser server not ready")
         ports=json.loads(proc.stdout.readline())
-        website=f"http://localhost:{ports['site_port']}"
-        provider=f"http://127.0.0.1:{ports['external_port']}"
+        website=f"http://app.test:{ports['site_port']}"
+        provider=f"http://google.test:{ports['external_port']}"
         with sync_playwright() as p:
-            browser=p.chromium.launch(headless=True)
+            browser=p.chromium.launch(headless=True,args=[
+                "--host-resolver-rules=MAP app.test 127.0.0.1,MAP google.test 127.0.0.1"
+            ])
             try:
                 for name,viewport in [
                     ("desktop",{"width":1280,"height":850}),
@@ -38,7 +40,7 @@ def main():
                     # different SameSite browser semantics).
                     page.goto(provider+"/")
                     page.locator("#direct").click()
-                    page.wait_for_url("**/login",timeout=15000)
+                    page.wait_for_timeout(600)
                     assert page.url.startswith(website+"/login"), (
                         name+" expected cross-site consent click to withhold Strict cookie, got "+page.url
                     )
