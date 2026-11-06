@@ -19,6 +19,7 @@ import { WORKSPACE_CSS } from './workspace_css.mjs';
 import { WORKSPACE_JS } from './workspace_js.mjs';
 import { WORKSPACE_SESSION } from './workspace_session.mjs';
 import { WORKSPACE_MATTERS } from './workspace_matters.mjs';
+import { WORKSPACE_DOCUMENTS } from './workspace_documents.mjs';
 import { ACCOUNT_HTML } from './account_html.mjs';
 import { ACCOUNT_CSS } from './account_css.mjs';
 import { ACCOUNT_JS } from './account_js.mjs';
@@ -30,6 +31,7 @@ const privateAssets=new Map([
  ['/app.js',[WORKSPACE_JS,'application/javascript; charset=utf-8']],
  ['/session.js',[WORKSPACE_SESSION,'application/javascript; charset=utf-8']],
  ['/matters.js',[WORKSPACE_MATTERS,'application/javascript; charset=utf-8']],
+ ['/documents.js',[WORKSPACE_DOCUMENTS,'application/javascript; charset=utf-8']],
  ['/account.css',[ACCOUNT_CSS,'text/css; charset=utf-8']],
  ['/account.js',[ACCOUNT_JS,'application/javascript; charset=utf-8']]
 ]);
@@ -78,7 +80,7 @@ async function relay(request,env,path){
   body:request.method==='POST'?request.body:undefined,duplex:'half',redirect:'manual'
  }));
  const out=new Headers(headers('application/json; charset=utf-8'));
- for(const field of ['Content-Type','Set-Cookie','Cache-Control','Cross-Origin-Resource-Policy']){
+ for(const field of ['Content-Type','Set-Cookie','Cache-Control','Cross-Origin-Resource-Policy','Content-Disposition']){
    const value=upstream.headers.get(field);
    if(value)out.set(field,value);
  }
@@ -96,7 +98,8 @@ const app=WORKSPACE_HTML
  .replace('R0 Preview</span>','MIHY LAW AI AGENT · QA</span>');
 export async function handleSite(req,env){
  const url=new URL(req.url),path=url.pathname;
- if(req.method!=='GET' && !API.has(path))return missing();
+ const isDocumentApi=path==='/api/qa/documents'||/^\/api\/qa\/documents\/[0-9a-f-]{36}\/download$/.test(path);
+ if(req.method!=='GET' && !API.has(path) && !isDocumentApi)return missing();
  const PUBLIC_PAGES=[['/gioi-thieu',LANDING_ABOUT_HTML],['/giai-phap',LANDING_SOLUTIONS_HTML],['/chuc-nang',LANDING_FEATURES_HTML],['/an-toan-du-lieu',LANDING_SECURITY_HTML],['/trien-khai-rieng',LANDING_PRIVATE_HTML],['/dich-vu-theo-goi',LANDING_SUBSCRIPTION_HTML]];
  const page=(path==='/'||path==='/index.html')?SITE_HTML:PUBLIC_PAGES.find(([route])=>route===path)?.[1];
  if(req.method==='GET' && page)return respond(page.replace('</footer>',FOOTER_CONTACT_HTML+'</footer>'),'text/html; charset=utf-8',200,{publicPage:true});
@@ -110,12 +113,14 @@ export async function handleSite(req,env){
   const [body,type]=publicAssets.get(path);
   return respond(body,type,200,{publicPage:true});
  }
- if(API.has(path)){
+ if(API.has(path)||isDocumentApi){
+  if(isDocumentApi&&((path!=='/api/qa/documents'&&req.method!=='GET')||
+      (path==='/api/qa/documents'&&!['GET','POST'].includes(req.method))))return missing();
   if((['/api/qa/session','/api/qa/workspaces'].includes(path)&&req.method!=='GET') ||
     (path==='/api/qa/profile'&&!['GET','POST'].includes(req.method)) ||
     (path==='/api/qa/matters'&&!['GET','POST'].includes(req.method)) ||
     (['/api/qa/login','/api/qa/logout','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile/avatar'].includes(path)&&req.method!=='POST'))return missing();
-  try{return await relay(req,env,path);}catch{return unavailable();}
+  try{return await relay(req,env,path+(isDocumentApi?url.search:''));}catch{return unavailable();}
  }
  if(req.method==='GET'&&path==='/app/')return redirect('/app'+url.search,308);
  if(req.method==='GET'&&path==='/account/')return redirect('/account',308);

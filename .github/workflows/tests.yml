@@ -171,6 +171,8 @@ jobs:
           python -m py_compile deployment/cloudflare/tools/render_r62_qa_verifiers.py
           node --check web/r0-preview/session.js
           node --check deployment/cloudflare/src/google_drive.mjs
+          node --check deployment/cloudflare/src/qa_documents.mjs
+          node --check web/r0-preview/documents.js
           node --check deployment/cloudflare/src/matter_workspace.mjs
           node --check deployment/cloudflare/src/r0_preview_worker.mjs
           node --check web/r0-preview/matters.js
@@ -204,6 +206,10 @@ jobs:
         run: node --test deployment/cloudflare/tests/preview_worker.test.mjs
       - name: Verify real QA matter list/create role boundary and D1 transaction contract
         run: node --test deployment/cloudflare/tests/matter_workspace.test.mjs
+      - name: R72 Drive document upload/download, MatterACL, integrity and fail-closed QA gates
+        run: node --test deployment/cloudflare/tests/r72_documents.test.mjs
+      - name: R72 actual SQLite receipt migration tenant and status constraints
+        run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r72_document_schema.py' -v
       - name: Regress R60 mobile/desktop QA session revocation and stale matter cleanup
         run: node --test deployment/cloudflare/tests/session_ui_r60.test.mjs
       - name: Verify public website and protected workspace R47 routes

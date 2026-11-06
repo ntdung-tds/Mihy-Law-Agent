@@ -50,4 +50,43 @@ export class GoogleDriveAdapter {
       throw new Error("Drive response invalid");
     return res; // streaming body; no publicly shared URL or redirect
   }
+
+  // R72: upload only into the per-organization approved private root.
+  // The caller must authorize MatterACL and store a D1 receipt before exposing it.
+  async upload({name,mimeType,bytes}){
+    if(typeof name!=='string'||!name||name.length>120||
+       !/^[\p{L}\p{N}._ -]+$/u.test(name)||name.includes('..')||
+       !['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(mimeType)||
+       !(bytes instanceof Uint8Array)||bytes.length<22||bytes.length>1500000)
+      throw Error('Invalid bounded QA document');
+    const boundary='ai_law_'+crypto.randomUUID().replace(/-/g,'');
+    const metadata={name,mimeType,parents:[this.rootId]};
+    const pre='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+
+      JSON.stringify(metadata)+'\r\n--'+boundary+'\r\nContent-Type: '+mimeType+
+      '\r\nContent-Transfer-Encoding: binary\r\n\r\n';
+    const body=new Blob([pre,bytes,'\r\n--'+boundary+'--\r\n']);
+    const url='https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&'+
+      'fields=id,name,mimeType,parents,trashed&supportsAllDrives=true';
+    const res=await this.fetcher(url,{method:'POST',redirect:'manual',headers:{
+      Authorization:'Bearer '+this.accessToken,
+      'Content-Type':'multipart/related; boundary='+boundary
+    },body});
+    if(!res||![200,201].includes(res.status))throw Error('Drive upload unavailable');
+    const out=await res.json();
+    if(!SAFE_FILE.test(out?.id||'')||
+       !Array.isArray(out.parents)||!out.parents.includes(this.rootId)||
+       out.mimeType!==mimeType||out.name!==name||out.trashed===true)
+      throw Error('Drive returned unapproved upload metadata');
+    // Re-read trusted metadata, not merely the upload response.
+    await this.metadata(out.id);
+    return out.id;
+  }
+  async remove(objectId){
+    await this.metadata(objectId);
+    const res=await this.fetcher(
+      'https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(objectId)+
+      '?supportsAllDrives=true',
+      {method:'DELETE',redirect:'manual',headers:{Authorization:'Bearer '+this.accessToken}});
+    if(!res||res.status!==204)throw Error('Drive cleanup failed');
+  }
 }
