@@ -4,10 +4,15 @@
  const $=id=>document.getElementById(id);
  const select=$('document-matter'),form=$('document-upload-form');
  const file=$('document-file'),feedback=$('document-feedback'),list=$('qa-document-list');
+ const fileName=$('document-file-name');
  if(!select||!form||!file||!list)return;
  const uuid=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
- function message(text){feedback.textContent=text;}
- function reset(){select.replaceChildren();list.replaceChildren();message('');file.value='';}
+ function message(text,state=''){feedback.textContent=text;feedback.dataset.state=state;}
+ function showSelectedFile(){
+  if(fileName)fileName.textContent=file.files?.[0]?.name||'Chưa có tệp được chọn';
+ }
+ file.addEventListener('change',showSelectedFile);
+ function reset(){select.replaceChildren();list.replaceChildren();message('');file.value='';showSelectedFile();}
  function opt(value,label){const o=document.createElement('option');o.value=value;o.textContent=label;return o;}
  async function refreshMatters(){
   reset();select.append(opt('','Chọn hồ sơ QA…'));
@@ -68,6 +73,7 @@
    if(res.status===401){location.replace('/login');return;}
    if(!res.ok)throw Error('status');
    const data=await res.json();
+   connect.dataset.canConnect=data.can_connect===true?'true':'false';
    if(data.connected===true&&data.configuration_ready===true){
     setDrive('connected','Đã kết nối Google Drive cho không gian làm việc này. Có thể tải tệp QA lên.');
     if(uploadButton)uploadButton.disabled=false;
@@ -121,8 +127,14 @@
  form.addEventListener('submit',async e=>{
   e.preventDefault();message('');
   const id=select.value,chosen=file.files?.[0];
-  if(!uuid.test(id)||!chosen||chosen.size>1500000||chosen.size<22){
-   message('Chọn hồ sơ và tệp PDF/DOCX QA dưới 1,5 MB.');return;
+  if(!uuid.test(id)||!chosen){
+   message('Chọn hồ sơ và tệp PDF/DOCX mẫu trước khi tải lên.','error');return;
+  }
+  if(chosen.size>1500000||chosen.size<22){
+   message('Tệp chưa hợp lệ hoặc vượt 1,5 MB. Chỉ sử dụng tệp thử nghiệm nhỏ hơn giới hạn.','error');return;
+  }
+  if(!/\.(pdf|docx)$/i.test(chosen.name)){
+   message('Chỉ chấp nhận tệp PDF hoặc DOCX mẫu.','error');return;
   }
   const submit=form.querySelector('button[type="submit"]');submit.disabled=true;
   try{
@@ -130,11 +142,27 @@
    const res=await fetch('/api/qa/documents',{method:'POST',credentials:'same-origin',
     cache:'no-store',body});
    if(res.status===401){location.replace('/login');return;}
-   const result=await res.json();
-   if(!res.ok)throw Error(result.error||'Tải lên chưa thành công.');
-   file.value='';message('Đã lưu tệp QA cách ly trên Drive. Chưa xử lý AI.');
+   let result={};
+   try{result=await res.json();}catch{}
+   if(!res.ok){
+    const error=new Error(result.error||'Tải lên chưa thành công.');
+    error.code=result.code||'';
+    throw error;
+   }
+   file.value='';showSelectedFile();
+   message('Đã lưu tệp thử nghiệm vào Google Drive. Nội dung chưa được dùng cho AI.','success');
    await refreshFiles();
-  }catch(e){message(e.message||'Không thể tải tệp.');}
+  }catch(e){
+   message(e.message||'Không thể tải tệp.','error');
+   if(e.code==='DRIVE_GRANT_UNAVAILABLE'&&connect){
+    // Only show the consent action for an administrator/personal owner who
+    // was already granted connect rights by the verified status endpoint.
+    if(connect.dataset.canConnect==='true'){
+     connect.hidden=false;connect.textContent='Kết nối lại Google Drive';
+     setDrive('error','Phiên cấp quyền lưu trữ cần được kết nối lại.');
+    }
+   }
+  }
   finally{submit.disabled=!(driveBox?.dataset.state==='connected');}
  });
  select.addEventListener('change',()=>{void refreshFiles();});
