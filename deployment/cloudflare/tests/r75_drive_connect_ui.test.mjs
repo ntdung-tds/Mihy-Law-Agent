@@ -32,7 +32,7 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
  };
  const document={
   getElementById(id){return els[id]||null;},
-  createElement(tag){if(tag!=='option')throw Error('Unexpected HTML node');return element(tag);}
+  createElement(tag){if(!['option','p','div','span','a','small'].includes(tag))throw Error('Unexpected HTML node');return element(tag);}
  };
  const fetch=async(url,opts)=>{
   calls.push({url,method:opts?.method||'GET'});
