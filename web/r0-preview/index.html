@@ -10,6 +10,7 @@
   <script src="./app.js" defer></script>
   <script src="./session.js" defer></script>
   <script src="./matters.js" defer></script>
+  <script src="./documents.js" defer></script>
 </head>
 <body>
   <svg aria-hidden="true" class="svg-sprite" xmlns="http://www.w3.org/2000/svg">
@@ -131,6 +132,19 @@
               <p id="matter-empty">Chưa có hồ sơ nào. Tạo hồ sơ thử nghiệm đầu tiên để kiểm tra dữ liệu thật.</p>
               <div id="matter-list" class="matter-list" role="list"></div>
             </div>
+          </section>
+          <section class="matter-card qa-document-box" aria-label="Tệp tài liệu thử nghiệm">
+            <h2>Tệp PDF / DOCX của hồ sơ QA</h2>
+            <p>Chỉ dùng tệp giả lập, dưới 1,5 MB. Tệp lưu riêng trên Google Drive nếu tổ chức đã cấp quyền. Nội dung chưa kiểm chứng và không chuyển tới AI.</p>
+            <form id="document-upload-form">
+              <label for="document-matter">Hồ sơ có quyền ghi</label>
+              <select id="document-matter" required disabled><option value="">Chọn hồ sơ QA…</option></select>
+              <label for="document-file">Chọn PDF hoặc DOCX mẫu</label>
+              <input id="document-file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required />
+              <button type="submit">Lưu tệp QA vào Drive</button>
+            </form>
+            <p id="document-feedback" role="status" aria-live="polite"></p>
+            <div id="qa-document-list" class="matter-list" role="list"></div>
           </section>
           <div class="document-panel" hidden><div class="document-toolbar"><div class="filter-tabs" role="group" aria-label="Lọc trạng thái"><button class="filter-tab selected" data-filter="all">Tất cả <span>0</span></button><button class="filter-tab" data-filter="review">Đang rà soát</button><button class="filter-tab" data-filter="draft">Bản nháp</button><button class="filter-tab" data-filter="done">Hoàn tất</button></div><div class="list-search"><svg class="icon"><use href="#i-search"/></svg><input id="document-search" aria-label="Tìm tài liệu minh họa" placeholder="Chưa có tài liệu" /></div></div><div id="document-list" class="document-rows"></div><div id="empty-docs" class="empty-state" hidden>Chưa có tệp tài liệu.</div></div>
         </section>
