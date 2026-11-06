@@ -15,13 +15,14 @@ function element(id){
   querySelector(){return null;}
  };
 }
-async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}}={}){
+async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true}={}){
  const ids=['document-matter','document-upload-form','document-file','document-file-name','document-feedback',
-  'qa-document-list','drive-setup','drive-status','drive-connect'];
+  'qa-document-list','drive-setup','drive-status','drive-connect','drive-disconnect'];
  const els=Object.fromEntries(ids.map(x=>[x,element(x)]));
  const submit=element('submit');
  els['document-upload-form'].querySelector=()=>submit;
- const calls=[],assignments=[],historyUrls=[];
+ const calls=[],assignments=[],historyUrls=[],confirmations=[];
+ const currentStatus={...status};
  const location={
   href:'https://ai-law-web-qa.iaict-platform.workers.dev/app'+query+'#documents',
   hash:'#documents',
@@ -34,16 +35,21 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
  };
  const fetch=async(url,opts)=>{
   calls.push({url,method:opts?.method||'GET'});
-  if(url==='/api/qa/drive/status')return Response.json(status);
+  if(url==='/api/qa/drive/status')return Response.json(currentStatus);
+  if(url==='/api/qa/drive/disconnect'){
+   currentStatus.connected=false;currentStatus.connected_at=null;
+   return Response.json({connected:false,disconnected:true,files_preserved:true});
+  }
   if(url==='/api/qa/matters')return Response.json({matters:[]});
   if(url==='/api/qa/drive/connect')return Response.json(connectResponse);
   throw Error('Unexpected endpoint '+url);
  };
- const window={addEventListener(){}};
+ const window={addEventListener(){},
+  confirm(text){confirmations.push(text);return confirmDisconnect;}};
  vm.runInNewContext(code,{document,window,location,history:{replaceState(_a,_b,url){historyUrls.push(url);}},
   fetch,URL,Response,console},{filename:'documents.js'});
  await new Promise(resolve=>setImmediate(resolve));
- return {els,submit,calls,assignments,historyUrls};
+ return {els,submit,calls,assignments,historyUrls,confirmations};
 }
 
 test('unconfigured OAuth shows operator-only setup status without a broken consent button',async()=>{
@@ -135,4 +141,41 @@ test('R79 upload controls use accessible file label, 16px select and mobile wrap
  assert.match(css,/\.qa-document-file-input:focus-visible\+\.qa-document-file-control/);
  assert.match(css,/#document-matter\{[^}]*font-size:16px/);
  assert.match(css,/@media\(max-width:600px\)[\s\S]*\.qa-document-file-name\{[^}]*overflow-wrap:anywhere/);
+});
+
+test('R80 connected owner sees disconnect control and a confirmation, then reconnect option',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true});
+ assert.equal(t.els['drive-disconnect'].hidden,false);
+ assert.equal(t.els['drive-connect'].hidden,true);
+ await t.els['drive-disconnect'].listeners.click();
+ assert.equal(t.confirmations.length,1);
+ assert.match(t.confirmations[0],/Tệp trên Google Drive không bị xóa/);
+ assert.equal(t.calls.filter(x=>x.url==='/api/qa/drive/disconnect'&&x.method==='POST').length,1);
+ assert.equal(t.els['drive-disconnect'].hidden,true);
+ assert.equal(t.els['drive-connect'].hidden,false);
+ assert.equal(t.els['drive-setup'].dataset.state,'disconnected');
+ assert.match(t.els['drive-status'].textContent,/Đã ngắt kết nối/);
+ assert.equal(t.submit.disabled,true);
+});
+test('R80 canceled user confirmation does not call disconnect endpoint',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},
+  {confirmDisconnect:false});
+ await t.els['drive-disconnect'].listeners.click();
+ assert.equal(t.calls.some(x=>x.url==='/api/qa/drive/disconnect'),false);
+ assert.equal(t.els['drive-setup'].dataset.state,'connected');
+ assert.equal(t.submit.disabled,false);
+});
+test('R80 organization non-admin and disconnected workspaces never show disconnect',async()=>{
+ for(const state of [{connected:true,configuration_ready:true,can_connect:false},
+  {connected:false,configuration_ready:true,can_connect:true}]){
+  const t=await mount(state);
+  assert.equal(t.els['drive-disconnect'].hidden,true);
+ }
+});
+test('R80 both desktop and mobile styles include safe secondary disconnect and HTML control',()=>{
+ const html=readFileSync(new URL('../../../web/r0-preview/index.html',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../../../web/r0-preview/styles.css',import.meta.url),'utf8');
+ assert.match(html,/id="drive-disconnect" hidden/);
+ assert.match(css,/#drive-disconnect\[hidden\]\{display:none!important\}/);
+ assert.match(css,/@media\(max-width:600px\)[\s\S]*#drive-disconnect/);
 });
