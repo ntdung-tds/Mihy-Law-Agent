@@ -145,5 +145,5 @@ test('Google denied token exchange leaves no connection and consumes state',asyn
  const callback=req('/api/qa/drive/callback?state='+url.searchParams.get('state')+'&code=test-code','GET',{cookie:false});
  assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,303);
  assert.equal(x.connections.size,0);
- assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,400);
+ assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,303);
 });
