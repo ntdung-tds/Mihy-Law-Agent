@@ -439,3 +439,12 @@ body.drawer-open{overflow:hidden}
  .qa-document-file-action{align-self:flex-start;min-height:39px}
  .qa-document-box #document-upload-form button[type="submit"]{font-size:14px;min-height:48px}
 }
+
+/* R80: secondary action for disconnect; only visible when server-authorized. */
+.qa-document-box #drive-disconnect{min-height:42px;justify-self:end;background:transparent;color:#8e3d3d;border:1px solid #d8b6b6;border-radius:9px;font-size:12px;font-weight:750;line-height:1.4}
+.qa-document-box #drive-disconnect:hover{background:#fff3f2;border-color:#bc7575}
+.qa-document-box #drive-disconnect[hidden]{display:none!important}
+.qa-document-box #drive-connect[hidden]{display:none!important}
+@media(max-width:600px){
+ .qa-document-box #drive-disconnect{width:100%;justify-self:stretch;min-height:44px;font-size:13px}
+}
