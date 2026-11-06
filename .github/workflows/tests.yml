@@ -213,6 +213,8 @@ jobs:
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r72_document_schema.py' -v
       - name: R73 QA Google OAuth PKCE encrypted grants and tenant isolation
         run: node --test deployment/cloudflare/tests/r73_drive_oauth.test.mjs
+      - name: Test R75 one-tap Drive QA UI (synthetic DOM)
+        run: node --test deployment/cloudflare/tests/r75_drive_connect_ui.test.mjs
       - name: R73 actual SQLite OAuth tenant schema constraints
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r73_drive_schema.py' -v
       - name: Regress R60 mobile/desktop QA session revocation and stale matter cleanup
