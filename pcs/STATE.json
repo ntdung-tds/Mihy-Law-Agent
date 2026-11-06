@@ -1390,7 +1390,7 @@
       {
         "id": "AL-R0-DOC-INGEST-R68-01",
         "title": "R68-01 deterministic DOCX paragraph/table segmentation and source anchors for document-only UC03/04/07",
-        "status": "SOURCE_IMPLEMENTED_CI_PENDING_NOT_DEPLOYED",
+        "status": "TECH_DONE_LOCAL_AND_CI_NOT_INTEGRATED",
         "acceptance": [
           "Actual DOCX byte extraction preserves paragraph/table-cell text order and deterministic local source paths",
           "Explicit document_only scope; reject unsupported revisions, fields, images/OCR, macros, malformed/oversized/zip bomb content without claiming silent completeness",
@@ -1400,8 +1400,8 @@
         ],
         "test_results": {
           "local_python_docx_real_ooXML": "PASS_11_UNIT_TESTS_2026_11_06",
-          "github_pr": "OPEN_PR93",
-          "github_ci": "IN_PROGRESS_42179825211",
+          "github_pr": "PR93_FINAL_HEAD_RETEST_PENDING_AFTER_PCS_UPDATE",
+          "github_ci": "PASS_RUN_42180047004_9_EXECUTED_SUCCESS_21_CONDITIONAL_SKIPS",
           "full_srs_1_1_15_trace": "BLOCKED_ORIGINAL_PRIVATE_ZIP_NOT_MOUNTED_THIS_SESSION",
           "real_qa_docx_upload_e2e": "NOT_RUN",
           "pdf_extraction": "NOT_RUN",
@@ -2014,8 +2014,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R68-01 DOCX source extractor created with 11 local synthetic genuine OOXML tests PASS; PR #93 opened. Existing R67 Account Center source+Cloudflare QA deployed separately, now paused by Owner. UC03/04/07 still not executable E2E. R68 CI run #42179825211 pending; no production.",
-      "next_action": "Verify final CI for PR #93; fix -> retest any failure before merge. Then reconcile R68 task/PCS result and begin next small document pipeline slice (PDF text input or secure storage) using real current SRS v1.1.15 when accessible. Keep R67 account UX paused. No real client files/production deployment; Owner final acceptance required.",
+      "last_completed_step": "R68-01 actual DOCX paragraph/table text segmentation with source anchors and explicit document_only scope: local 11/11 unittest PASS; main technical CI run 42180047004 fully completed 9/9 executing jobs PASS, 21 conditional skips. PR #93 open and final PCS-doc update CI pending; no QA runtime integration or UC03/04/07 E2E.",
+      "next_action": "After final PR#93 HEAD CI PASS, squash-merge to main, verify new PCS revision 68. Follow with a separate small document ingestion task, then wire into QA via an authorized runtime and test real E2E before claiming UC03/04/07 ready. Exact original SRS v1.1.15 ZIP must be available for detailed trace. Keep R67 account enhancements on hold; no production.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
