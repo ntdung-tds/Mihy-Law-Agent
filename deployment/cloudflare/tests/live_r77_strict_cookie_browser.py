@@ -33,12 +33,18 @@ def main():
                     page=context.new_page()
                     page.goto(website+"/test-login")
                     assert "Local synthetic session established" in page.locator("body").inner_text()
-                    page.goto(provider+"/direct",wait_until="load")
+                    # Simulate a real click on a Google-hosted consent page,
+                    # rather than an address-bar navigation (which can have
+                    # different SameSite browser semantics).
+                    page.goto(provider+"/")
+                    page.locator("#direct").click()
+                    page.wait_for_url("**/login",timeout=15000)
                     assert page.url.startswith(website+"/login"), (
-                        name+" expected direct cross-site 302 to lose Strict cookie, got "+page.url
+                        name+" expected cross-site consent click to withhold Strict cookie, got "+page.url
                     )
                     # Cookie remains in the browser jar; it was only withheld.
-                    page.goto(provider+"/bridge",wait_until="load")
+                    page.goto(provider+"/")
+                    page.locator("#bridge").click()
                     page.wait_for_url("**/app?drive=connected#documents",timeout=15000)
                     assert "Mihy Law AI Agent" in page.locator("body").inner_text(), (
                         name+" failed to restore protected QA app after first-party landing"
