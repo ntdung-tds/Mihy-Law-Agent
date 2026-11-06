@@ -20,6 +20,14 @@ const env={QA_AUTH:{async fetch(request){
   logged=true;
   return new Response('{"ok":true}',{status:200,headers:{'Content-Type':'application/json','Set-Cookie':'al_qa_session=00000000-0000-4000-8000-000000000000; Path=/; HttpOnly; Secure; SameSite=Strict'}});
  }
+ if(u.pathname==='/api/qa/profile')return Response.json(
+   logged?{email:'qa04.lawyer@ai-law.invalid',profile:{display_name:'QA User',phone:'',job_title:'',bio:'',avatar_data:''},
+     plan:{code:'demo',source:'qa_nonproduction',billing_active:false},
+     active_workspace:{tenant_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',role:'lawyer',type:'organization'},
+     workspaces:[{tenant_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',role:'lawyer',type:'organization'}]}
+   :{error:'denied'},{status:logged?200:401});
+ if(u.pathname==='/api/qa/profile/avatar')return Response.json(logged?{ok:true}:{error:'denied'},
+   {status:logged?200:401});
  if(u.pathname==='/api/qa/change-password'){
   if(!logged)return Response.json({error:'denied'},{status:401});
   logged=false;
@@ -101,7 +109,7 @@ test('anonymous workspace and assets are denied, login page remains public',asyn
  assert.equal(login.headers.get('X-Robots-Tag'),'noindex,nofollow,noarchive');
  const r=await get('/app#documents');
  assert.equal(r.status,302);assert.equal(r.headers.get('Location'),'/login');
- for(const p of ['/styles.css','/app.js','/session.js','/matters.js']){
+ for(const p of ['/styles.css','/app.js','/session.js','/matters.js','/account.css','/account.js']){
   const d=await get(p);assert.equal(d.status,401,p);
  }
  assert.equal((await get('/app',{})).status,503,'private gate fails closed without QA_AUTH');
@@ -170,6 +178,46 @@ test('R66 real workspace displays QA password change and same-origin service rel
  assert.match(result.headers.get('Set-Cookie')||'',/Max-Age=0/);
  assert.equal(calls.at(-1).origin,'https://ai-law-standalone-cf-qa.iaict-platform.workers.dev');
  assert.equal((await get('/app')).status,302,'change revokes current session');
+});
+test('R67 private account center shows profile, avatar, plan and permissions with origin-bound APIs',async()=>{
+ logged=false;
+ assert.equal((await get('/account')).status,302);
+ assert.equal((await get('/account.css')).status,401);
+ assert.equal((await get('/account.js')).status,401);
+ const signed=await handleSite(new Request(ORIGIN+'/api/qa/login',{
+   method:'POST',headers:{Origin:ORIGIN,'Content-Type':'application/json'},
+   body:'{"email":"qa@invalid.test","password":"synthetic"}'}),env);
+ assert.equal(signed.status,200);
+ const r=await get('/account');
+ assert.equal(r.status,200);
+ assert.equal(r.headers.get('X-Robots-Tag'),'noindex,nofollow,noarchive');
+ const html=await r.text();
+ for(const id of ['profile-form','avatar-file','plan-name','access-role','workspaces-list',
+                  'account-password-form','profile-email','avatar-remove'])
+   assert.match(html,new RegExp('id="'+id+'"'));
+ for(const path of ['/account.css','/account.js']){
+   const a=await get(path);assert.equal(a.status,200,path);
+ }
+ const workspace=await (await get('/app')).text();
+ assert.match(workspace,/href="\/account"/);
+ assert.equal((await get('/account/')).status,308);
+ const profile=await get('/api/qa/profile');
+ assert.equal(profile.status,200);
+ assert.equal((await profile.json()).plan.code,'demo');
+ const data=JSON.stringify({display_name:'QA X',phone:'',job_title:'',bio:''});
+ const bad=await handleSite(new Request(ORIGIN+'/api/qa/profile',{
+   method:'POST',headers:{Origin:'https://fake.invalid','Content-Type':'application/json'},body:data}),env);
+ assert.equal(bad.status,403);
+ const good=await handleSite(new Request(ORIGIN+'/api/qa/profile',{
+   method:'POST',headers:{Origin:ORIGIN,'Sec-Fetch-Site':'same-origin','Content-Type':'application/json'},
+   body:data}),env);
+ assert.equal(good.status,200);
+ const upload=await handleSite(new Request(ORIGIN+'/api/qa/profile/avatar',{
+   method:'POST',headers:{Origin:ORIGIN,'Sec-Fetch-Site':'same-origin','Content-Type':'application/json'},
+   body:'{"avatar_data":""}'}),env);
+ assert.equal(upload.status,200);
+ assert.equal(calls.at(-1).origin,'https://ai-law-standalone-cf-qa.iaict-platform.workers.dev');
+ assert.equal((await handleSite(new Request(ORIGIN+'/api/qa/profile/avatar'),env)).status,404);
 });
 test('public home still works after logout, health honestly says QA environment',async()=>{
  assert.equal((await get('/')).status,200);

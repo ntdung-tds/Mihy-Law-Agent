@@ -3,6 +3,7 @@
    checks are explicit because SQLite has no PostgreSQL FORCE RLS. */
 import { GoogleDriveAdapter } from "./google_drive.mjs";
 import { mobileApi } from "./mobile_auth.mjs";
+import { accountApi } from "./account_profile.mjs";
 import { matterApi } from "./matter_workspace.mjs";
 import { MOBILE_HTML, MOBILE_CSS, MOBILE_JS } from "./mobile_assets.mjs";
 
@@ -106,6 +107,8 @@ export async function handle(request,env,options={}){
     return new Response(MOBILE_CSS,{headers:{"Content-Type":"text/css; charset=utf-8","Cache-Control":"public, max-age=300","X-Content-Type-Options":"nosniff"}});
   if(url.pathname==="/mobile.js" && request.method==="GET")
     return new Response(MOBILE_JS,{headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"public, max-age=300","X-Content-Type-Options":"nosniff"}});
+  if(url.pathname==="/api/qa/profile"||url.pathname==="/api/qa/profile/avatar")
+    return accountApi(request,env,options);
   if(url.pathname==="/api/qa/matters")return matterApi(request,env,options);
   if(url.pathname.startsWith("/api/qa/"))return mobileApi(request,env,options);
   if(request.method!=="GET"||url.search||request.headers.has("X-AI-LAW-TENANT"))return missing();

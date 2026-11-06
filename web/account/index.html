@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="color-scheme" content="light"/>
+<meta name="theme-color" content="#f7f8fb"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>Tài khoản của tôi | Mihy Law AI Agent</title>
+<link rel="stylesheet" href="/account.css"/>
+<script defer src="/account.js"></script>
+</head>
+<body>
+<a class="skip" href="#profile">Bỏ qua điều hướng</a>
+<div class="account-shell">
+  <aside class="account-sidebar" aria-label="Điều hướng tài khoản">
+    <a class="brand-link" href="/app" aria-label="Trở lại không gian làm việc Mihy Law AI Agent">
+      <span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M24 7v31M10 17h28M16 17l-7 13h14l-7-13zm16 0-7 13h14l-7-13zM17 38h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="brand-text"><strong>MIHY <span>LAW AI AGENT</span></strong><small>Không gian pháp lý</small></span>
+    </a>
+    <div class="sidebar-section-label">TÀI KHOẢN</div>
+    <nav class="account-nav" aria-label="Các phần quản lý tài khoản">
+      <a href="#profile" class="account-nav-link is-current"><span class="nav-icon">◉</span>Thông tin cá nhân</a>
+      <a href="#access" class="account-nav-link"><span class="nav-icon">◇</span>Gói &amp; phân quyền</a>
+      <a href="#security" class="account-nav-link"><span class="nav-icon">◈</span>Bảo mật tài khoản</a>
+      <a href="#workspaces" class="account-nav-link"><span class="nav-icon">⊞</span>Không gian làm việc</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="environment-pill"><span class="status-pulse"></span> Môi trường thử nghiệm QA</div>
+      <p>Trang cá nhân riêng tư. Thông tin chỉ được hiển thị sau khi xác thực.</p>
+      <a class="back-workspace" href="/app">← Về không gian làm việc</a>
+    </div>
+  </aside>
+  <div class="account-content">
+    <header class="account-topbar">
+      <a class="mobile-brand" href="/app"><span class="mobile-brand-mark">M</span><strong>MIHY <span>LAW AI AGENT</span></strong></a>
+      <div class="breadcrumbs"><a href="/app">Workspace</a><span aria-hidden="true">/</span><strong>Tài khoản của tôi</strong></div>
+      <div class="topbar-right"><span class="secure-label"><span aria-hidden="true">●</span> Bảo mật tài khoản</span><a href="/app" class="top-back">Về ứng dụng <span aria-hidden="true">↗</span></a></div>
+    </header>
+    <main id="main" class="account-main">
+      <div class="page-heading">
+        <div><p class="eyebrow">PERSONAL ACCOUNT CENTER</p><h1>Tài khoản của tôi<span>.</span></h1><p>Không gian riêng để kiểm soát hồ sơ, quyền truy cập và bảo mật của bạn.</p></div>
+        <span class="heading-illustration" aria-hidden="true">✦</span>
+      </div>
+      <div class="mobile-sections" aria-label="Đi tới phần quản lý">
+        <a href="#profile">Hồ sơ</a><a href="#access">Gói &amp; quyền</a><a href="#security">Bảo mật</a><a href="#workspaces">Không gian</a>
+      </div>
+
+      <div id="account-loading" class="loading-state" role="status">Đang xác minh tài khoản của bạn…</div>
+      <div id="account-error" class="page-error" role="alert" hidden>Chưa thể tải tài khoản. Kiểm tra kết nối và <button type="button" id="account-retry">thử lại</button>.</div>
+
+      <div id="account-sections" hidden>
+        <section class="profile-hero" aria-label="Tóm tắt tài khoản">
+          <div class="hero-pattern" aria-hidden="true"></div>
+          <div class="hero-main">
+            <div class="hero-avatar-wrap"><div class="avatar-image" id="hero-avatar-initials">AL</div><img id="hero-avatar-img" alt="Ảnh đại diện của bạn" hidden/></div>
+            <div class="hero-details"><p class="hero-overline">HỒ SƠ CỦA BẠN</p><h2 id="hero-name">Tài khoản AI Law</h2><p id="hero-email" class="hero-email">Đang tải…</p>
+              <div class="hero-chips"><span id="hero-plan" class="hero-chip hero-chip-gold">Demo · QA</span><span id="hero-role" class="hero-chip">Vai trò đang xác minh</span></div>
+            </div>
+          </div>
+          <div class="hero-status"><span aria-hidden="true">✧</span><span>Tài khoản được bảo vệ bằng phiên đăng nhập xác thực</span></div>
+        </section>
+
+        <div class="account-grid">
+          <div class="account-primary">
+            <section class="panel" id="profile" aria-labelledby="profile-title">
+              <div class="panel-header"><span class="panel-icon purple">✦</span><div><p class="section-kicker">01 / THÔNG TIN CÁ NHÂN</p><h2 id="profile-title">Hồ sơ của bạn</h2><p>Thông tin hiển thị trong không gian làm việc.</p></div></div>
+              <div class="avatar-editor">
+                <div class="avatar-editor-preview" id="avatar-preview-initials">AL</div><img id="avatar-preview-img" alt="Ảnh đại diện hiện tại" hidden/>
+                <div class="avatar-editor-description"><strong>Ảnh đại diện</strong><p>Chọn ảnh JPG, PNG hoặc WebP. Ảnh được cắt vuông, nén và lưu riêng cho tài khoản QA.</p>
+                  <div class="avatar-actions"><label for="avatar-file" class="secondary-button upload-label">Đổi ảnh</label><input type="file" id="avatar-file" accept="image/jpeg,image/png,image/webp" hidden/><button type="button" id="avatar-remove" class="text-action">Xóa ảnh</button></div>
+                  <p id="avatar-feedback" class="inline-feedback" role="status" aria-live="polite"></p></div>
+              </div>
+              <form id="profile-form">
+                <div class="form-grid">
+                  <div class="field"><label for="profile-display-name">Họ và tên <span aria-hidden="true">*</span></label><input id="profile-display-name" name="display_name" maxlength="80" autocomplete="name" required placeholder="Nhập họ và tên"/><small>Tên hiển thị trong tài khoản của bạn</small></div>
+                  <div class="field"><label for="profile-phone">Số điện thoại</label><input id="profile-phone" name="phone" inputmode="tel" autocomplete="tel" maxlength="24" placeholder="Nhập số điện thoại"/></div>
+                  <div class="field"><label for="profile-email">Email đăng nhập</label><input id="profile-email" type="email" autocomplete="username" readonly aria-describedby="email-help"/><small id="email-help">Email gắn với tài khoản, không sửa trực tiếp để tránh mất quyền truy cập.</small></div>
+                  <div class="field"><label for="profile-job-title">Chức danh / nghề nghiệp</label><input id="profile-job-title" name="job_title" maxlength="80" placeholder="Ví dụ: Luật sư tư vấn"/></div>
+                </div>
+                <div class="field bio-field"><label for="profile-bio">Giới thiệu ngắn</label><textarea id="profile-bio" name="bio" rows="3" maxlength="400" placeholder="Một vài dòng về chuyên môn hoặc công việc…"></textarea><small><span id="bio-length">0</span>/400 ký tự</small></div>
+                <div class="form-actions"><p id="profile-feedback" role="status" aria-live="polite" class="inline-feedback"></p><button type="submit" class="primary-button" id="profile-save">Lưu thay đổi <span aria-hidden="true">→</span></button></div>
+              </form>
+            </section>
+
+            <section class="panel" id="security" aria-labelledby="security-title">
+              <div class="panel-header"><span class="panel-icon rose">♙</span><div><p class="section-kicker">03 / BẢO MẬT</p><h2 id="security-title">Mật khẩu &amp; phiên đăng nhập</h2><p>Chỉ bạn mới có thể thực hiện thay đổi mật khẩu.</p></div></div>
+              <div class="security-tip"><span class="tip-icon" aria-hidden="true">◈</span><div><strong>Tài khoản của bạn đang được bảo vệ</strong><p>Mọi lần đổi mật khẩu yêu cầu mật khẩu hiện tại. Khi đổi thành công, tất cả phiên đăng nhập sẽ kết thúc và bạn phải đăng nhập lại.</p></div></div>
+              <form id="account-password-form">
+                <div class="field"><label for="account-current-password">Mật khẩu hiện tại</label><input id="account-current-password" type="password" autocomplete="current-password" required maxlength="512" placeholder="Nhập mật khẩu hiện tại"/></div>
+                <div class="form-grid"><div class="field"><label for="account-new-password">Mật khẩu mới</label><input id="account-new-password" type="password" autocomplete="new-password" minlength="8" maxlength="256" required placeholder="Từ 8 ký tự"/></div>
+                <div class="field"><label for="account-confirm-password">Nhập lại mật khẩu mới</label><input id="account-confirm-password" type="password" autocomplete="new-password" minlength="8" maxlength="256" required placeholder="Xác nhận mật khẩu mới"/></div></div>
+                <div class="form-actions"><p id="password-feedback" class="inline-feedback" role="alert"></p><button type="submit" id="password-save" class="primary-button">Cập nhật mật khẩu <span aria-hidden="true">→</span></button></div>
+              </form>
+              <div class="session-row"><div><strong>Phiên đăng nhập hiện tại</strong><p>Đang xác thực trên thiết bị này · Phiên QA giới hạn thời gian.</p></div><button id="account-logout" type="button" class="outline-button">Đăng xuất</button></div>
+            </section>
+          </div>
+
+          <div class="account-secondary">
+            <section id="access" class="panel side-panel" aria-labelledby="access-title">
+              <div class="panel-header"><span class="panel-icon gold">◈</span><div><p class="section-kicker">02 / GÓI TÀI KHOẢN</p><h2 id="access-title">Gói &amp; quyền</h2></div></div>
+              <div class="plan-tile">
+                <div class="plan-tile-top"><span class="label-mini">GÓI HIỆN TẠI</span><span class="plan-sparkle" aria-hidden="true">✧</span></div>
+                <strong id="plan-name">Demo</strong><p id="plan-description">Tài khoản thử nghiệm phục vụ kiểm thử AI Law.</p>
+                <span class="plan-status" id="plan-status">QA · Không phát sinh thanh toán</span>
+              </div>
+              <div class="info-divider"></div>
+              <div class="access-data"><div><small>Vai trò hiện tại</small><strong id="access-role">Đang xác minh</strong></div><div><small>Phạm vi truy cập</small><strong id="access-workspace">Đang xác minh</strong></div></div>
+              <div class="plan-explainer"><strong>Demo và Pro khác gì?</strong><p><b>Demo</b> là nhãn gói thử nghiệm. <b>Pro</b> chỉ hiển thị khi được đơn vị quản trị cấp; không phải quyền tự nâng cấp hoặc tính phí trong bản QA này.</p><p>Vai trò Luật sư / Quản trị đơn vị được cấp độc lập theo không gian làm việc.</p></div>
+            </section>
+
+            <section id="workspaces" class="panel side-panel" aria-labelledby="workspaces-title">
+              <div class="panel-header"><span class="panel-icon teal">⊞</span><div><p class="section-kicker">04 / QUYỀN TRUY CẬP</p><h2 id="workspaces-title">Không gian làm việc</h2></div></div>
+              <p class="panel-intro">Chỉ những tổ chức và không gian bạn được cấp quyền mới hiển thị ở đây.</p>
+              <div id="workspaces-list" class="workspaces-list" role="list"></div>
+              <p class="access-note"><span aria-hidden="true">●</span> Quyền được quản lý bởi đơn vị quản trị, không chỉnh sửa trong trang cá nhân.</p>
+              <a href="/app" class="workspace-link">Trở về không gian làm việc <span aria-hidden="true">↗</span></a>
+            </section>
+
+            <section class="help-panel"><div class="help-symbol" aria-hidden="true">✦</div><h3>Cần thay đổi quyền truy cập?</h3><p>Liên hệ quản trị viên đơn vị để cấp hoặc điều chỉnh vai trò. Thông tin tài khoản không thay thế quyền truy cập hồ sơ pháp lý.</p><a href="/app">Quay lại AI Law <span aria-hidden="true">↗</span></a></section>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="account-footer"><span>© 2026 Mihy Law AI Agent</span><span>Tài khoản thử nghiệm QA · Không sử dụng hồ sơ pháp lý thật</span></footer>
+  </div>
+</div>
+<div id="account-toast" class="account-toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

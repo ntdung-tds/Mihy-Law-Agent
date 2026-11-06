@@ -374,3 +374,12 @@ body.drawer-open{overflow:hidden}
 .password-submit{width:100%;min-height:48px;background:#4a45a8;color:#fff;border:none;border-radius:11px;padding:12px;font-weight:800;font-size:14px;cursor:pointer;margin-top:17px}
 .password-submit:disabled{cursor:wait;opacity:.65}
 @media(max-width:390px){.change-password-dialog{padding:16px;max-width:calc(100vw - 20px)}.password-dialog-heading h2{font-size:21px}}
+
+/* R67: the existing five-tab mobile navigation is unchanged; account lives in its drawer. */
+.sidebar-account-link{display:flex;align-items:center;gap:11px;justify-content:space-between;border-radius:10px;color:#6151af;background:#f1eeff;padding:12px 14px;font-size:12px;font-weight:850;text-decoration:none;margin:10px 6px}
+.sidebar-account-link span:first-child{margin-right:auto}
+.sidebar-account-link:hover{background:#e8e2ff}
+.sidebar-account-link:focus-visible,.drawer-account-link:focus-visible,#top-account-avatar:focus-visible{outline:3px solid #8c78db;outline-offset:3px}
+.drawer-groups a.drawer-account-link{display:flex;flex-direction:column;gap:3px;justify-content:center;align-items:flex-start;min-height:56px;margin:4px 0 7px;background:linear-gradient(120deg,#eeeafe,#f7f5ff);border:1px solid #dcd5f6;border-radius:11px;color:#51429c;text-decoration:none;padding:10px 13px;font-size:13px;font-weight:900}
+.drawer-account-link small{font-size:9px;font-weight:700;color:#8c82b1}
+#top-account-avatar{display:grid;place-items:center;text-decoration:none;flex:none;background-size:cover;background-position:center;cursor:pointer}
