@@ -63,7 +63,7 @@ async function fakeDB(){
         state.failures=0;state.locked_until=null;
         updates.push({meta:{changes:1}});
       }else if(sql.startsWith("UPDATE qa_login_verifiers SET password_salt=")){
-        const same=p[6]===state.salt&&p[7]===state.hash;
+        const same=p[5]===state.salt&&p[6]===state.hash;
         if(same){state.salt=p[0];state.hash=p[1];state.failures=0;state.locked_until=null;}
         updates.push({meta:{changes:same?1:0}});
       }else if(sql.startsWith("UPDATE qa_sessions SET revoked_at=")){
