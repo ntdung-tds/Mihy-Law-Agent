@@ -114,8 +114,7 @@ async function readManifest(req){
   n+=value.byteLength;if(n>4096){await reader.cancel().catch(()=>{});throw Error('TOO_LARGE');}
   chunks.push(value);
  }
- return JSON.parse(new TextDecoder().decode(new Blob(chunks).stream?
-  await new Response(new Blob(chunks)).arrayBuffer():new Uint8Array()));
+ return JSON.parse(new TextDecoder().decode(await new Blob(chunks).arrayBuffer()));
 }
 async function startDirect(req,env,p,now,opts){
  if(!csrf(req))return result(403,{error:'CSRF_DENIED'});
