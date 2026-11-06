@@ -34,7 +34,13 @@ test('R81 Drive multipart sends Google-documented framing and byte-perfect media
  assert.match(ct,/^multipart\/related; boundary=ai_law_[a-f0-9]{32}$/);
  assert.equal(request.init.headers.Authorization,'Bearer '+TOKEN);
  const boundary=ct.split('boundary=')[1];
- const raw=new Uint8Array(await request.init.body.arrayBuffer());
+ assert.equal(request.init.body instanceof ReadableStream,true,
+  'Cloudflare Workers outgoing Request body must be ReadableStream, not Blob');
+ assert.equal(request.init.duplex,'half');
+ // Construct a real Fetch Request rather than only inspecting a stubbed
+ // fetch argument, which previously hid the Blob/Workers incompatibility.
+ const transport=new Request(request.url,request.init);
+ const raw=new Uint8Array(await transport.arrayBuffer());
  const text=new TextDecoder().decode(raw);
  assert.match(text,new RegExp('^--'+boundary+'\\r\\nContent-Type: application/json; charset=UTF-8\\r\\n\\r\\n'));
  assert.ok(!text.includes('Content-Transfer-Encoding'));
