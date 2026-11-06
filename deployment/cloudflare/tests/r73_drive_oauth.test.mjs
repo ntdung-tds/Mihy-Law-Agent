@@ -118,7 +118,7 @@ test('full PKCE state consent, callback sans strict cookie, tenant-root refresh,
   'GET',{cookie:false});
  const completed=await oauthDriveApi(callback,x.env,x.opts);
  assert.equal(completed.status,303);
- assert.equal(completed.headers.get('Location'),'https://ai-law-web-qa.iaict-platform.workers.dev/app?drive=connected#documents');
+ assert.equal(completed.headers.get('Location'),'https://ai-law-web-qa.iaict-platform.workers.dev/drive-return?drive=connected');
  assert.equal(x.connections.size,1);
  const record=x.connections.get(T);
  assert.equal(record.root_id,ROOT);
@@ -140,7 +140,7 @@ test('revoked session blocks callback and token endpoint is never invoked',async
  })();
  const done=await oauthDriveApi(req('/api/qa/drive/callback?state='+url.searchParams.get('state')+'&code=synthetic-code','GET',{cookie:false}),x.env,x.opts);
  assert.equal(done.status,303);
- assert.equal(done.headers.get('Location'),'https://ai-law-web-qa.iaict-platform.workers.dev/app?drive=failed#documents');
+ assert.equal(done.headers.get('Location'),'https://ai-law-web-qa.iaict-platform.workers.dev/drive-return?drive=failed&issue=session');
  assert.equal(x.calls.length,startCalls);
 });
 test('Google denied token exchange leaves no connection and consumes state',async()=>{
@@ -148,7 +148,10 @@ test('Google denied token exchange leaves no connection and consumes state',asyn
  const r=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
  const url=new URL((await r.json()).authorization_url);
  const callback=req('/api/qa/drive/callback?state='+url.searchParams.get('state')+'&code=test-code','GET',{cookie:false});
- assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,303);
+ const rejected=await oauthDriveApi(callback,x.env,x.opts);
+ assert.equal(rejected.status,303);
+ assert.equal(rejected.headers.get('Location'),
+  'https://ai-law-web-qa.iaict-platform.workers.dev/drive-return?drive=failed&issue=provider');
  assert.equal(x.connections.size,0);
  assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,303);
 });
@@ -168,7 +171,7 @@ test('sole active member of personal workspace may connect their own Drive',asyn
  const completed=await oauthDriveApi(callback,x.env,x.opts);
  assert.equal(completed.status,303);
  assert.equal(completed.headers.get('Location'),
-  'https://ai-law-web-qa.iaict-platform.workers.dev/app?drive=connected#documents');
+  'https://ai-law-web-qa.iaict-platform.workers.dev/drive-return?drive=connected');
  assert.equal(x.connections.get(T)?.root_id,ROOT);
  assert.equal(x.statements.filter(s=>s.sql===PERSONAL_OWNER_SQL).length>=4,true);
 });
