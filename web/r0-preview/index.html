@@ -50,6 +50,7 @@
       </nav>
       <div class="side-label secondary">HỖ TRỢ</div>
       <nav class="side-nav"><button class="nav-item" id="side-guide"><svg class="icon"><use href="#i-shield"/></svg><span>Về bản xem trước</span></button></nav>
+      <a class="sidebar-account-link" href="/account">◉ <span>Tài khoản của tôi</span> <span aria-hidden="true">↗</span></a>
       <div class="sidebar-spacer"></div>
       <div class="sidebar-note"><div class="side-note-icon"><svg class="icon"><use href="#i-spark"/></svg></div><strong>Pháp lý, đơn giản hơn.</strong><p>Một không gian để tập trung vào công việc quan trọng.</p><button id="sidebar-explore">Khám phá giao diện <span>↗</span></button></div>
       <div class="sidebar-footer"><div class="profile-circle">AL</div><div><strong id="profile-identity">Không gian QA</strong><small id="profile-role">Đã xác thực · Chỉ dữ liệu mẫu</small><div id="workspace-switch-desktop" class="qa-workspace-switch" hidden></div></div><svg class="icon tiny"><use href="#i-dots"/></svg></div>
@@ -59,7 +60,7 @@
       <header class="topbar">
         <div class="mobile-brand"><div class="mobile-mark"><svg class="icon"><use href="#i-scale"/></svg></div><strong>MIHY<span>LAW AI AGENT</span></strong></div>
         <div class="breadcrumbs"><span>Workspace</span><svg class="icon tiny"><use href="#i-chevron"/></svg><strong id="breadcrumb-current">Tổng quan</strong></div>
-        <div class="top-actions"><span class="preview-dot"><i></i>R0 Preview</span><button class="icon-btn search-shortcut" id="search-shortcut" aria-label="Tìm kiếm" title="Tìm kiếm"><svg class="icon"><use href="#i-search"/></svg></button><button class="icon-btn" id="notifications" aria-label="Thông báo" title="Thông báo"><svg class="icon"><use href="#i-bell"/></svg><span class="unread-dot"></span></button><button type="button" id="change-password-top" class="top-change-password">Đổi mật khẩu</button><button type="button" id="preview-logout" class="top-logout" aria-label="Đăng xuất khỏi Mihy Law AI Agent">Đăng xuất</button><div class="user-avatar" aria-label="Không gian QA">AL</div></div>
+        <div class="top-actions"><span class="preview-dot"><i></i>R0 Preview</span><button class="icon-btn search-shortcut" id="search-shortcut" aria-label="Tìm kiếm" title="Tìm kiếm"><svg class="icon"><use href="#i-search"/></svg></button><button class="icon-btn" id="notifications" aria-label="Thông báo" title="Thông báo"><svg class="icon"><use href="#i-bell"/></svg><span class="unread-dot"></span></button><button type="button" id="change-password-top" class="top-change-password">Đổi mật khẩu</button><button type="button" id="preview-logout" class="top-logout" aria-label="Đăng xuất khỏi Mihy Law AI Agent">Đăng xuất</button><a href="/account" class="user-avatar" id="top-account-avatar" aria-label="Mở trang quản lý tài khoản">AL</a></div>
       </header>
       <div class="mobile-demo-label"><span class="live-dot"></span> Ứng dụng QA · Danh mục hồ sơ lưu thật trên D1 · Không sử dụng hồ sơ khách hàng</div>
 
@@ -162,6 +163,7 @@
     <div class="drawer-groups">
       <p class="drawer-subtitle">CÁC KHU VỰC</p>
       <button type="button" data-drawer-view="overview">Tổng quan</button><button type="button" data-drawer-view="documents">Tài liệu</button><button type="button" data-drawer-view="assistant">Trợ lý AI</button><button type="button" data-drawer-view="research">Tra cứu pháp lý</button>
+      <a class="drawer-account-link" href="/account"><span>◉ Tài khoản của tôi</span><small>Hồ sơ · Avatar · Gói &amp; quyền · Bảo mật</small></a>
       <button type="button" id="change-password-drawer" class="drawer-change-password">Đổi mật khẩu</button>
       <p class="drawer-subtitle">11 NGHIỆP VỤ</p>
       <button type="button" data-feature-jump="UC01"><span>Soạn hợp đồng / văn bản</span><small>R1 dự kiến</small></button>
