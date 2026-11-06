@@ -12,7 +12,7 @@ const DRIVEID='syntheticDriveObject_12345',ROOT='syntheticQAroot_12345';
 const ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
 const now=1800000000;
 const pdf=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
-function fixture({authenticated=true,allow=true,grant=true,dbFail=false}={}){
+function fixture({authenticated=true,allow=true,grant=true,dbFail=false,driveUploadDenied=false}={}){
  const calls=[],uploads=[],removes=[];let saved=null;
  const env={
   AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,JWT_ISSUER:'https://issuer.test',
@@ -50,6 +50,7 @@ function fixture({authenticated=true,allow=true,grant=true,dbFail=false}={}){
  };
  async function driveFetch(url,options){
   if(options.method==='POST'){
+   if(driveUploadDenied)return Response.json({error:{code:403}},{status:403});
    assert.match(url,/^https:\/\/www\.googleapis\.com\/upload\/drive\/v3\/files\?/);
    assert.match(options.headers['Content-Type'],/^multipart\/related/);
    uploads.push({url,body:options.body});
@@ -63,12 +64,12 @@ function fixture({authenticated=true,allow=true,grant=true,dbFail=false}={}){
  }
  return {env,calls,uploads,removes,driveFetch};
 }
-function request(path,method='GET',{withCookie=true,origin=ORIGIN,fileBytes=pdf}={}){
+function request(path,method='GET',{withCookie=true,origin=ORIGIN,fileBytes=pdf,fileType='application/pdf'}={}){
  const headers={};if(withCookie)headers.Cookie='al_qa_session='+S;
  if(method==='POST'){
   headers.Origin=origin;headers['Sec-Fetch-Site']='same-origin';
   const form=new FormData();form.set('matter_id',M);
-  form.set('file',new File([fileBytes],'synthetic.pdf',{type:'application/pdf'}));
+  form.set('file',new File([fileBytes],'synthetic.pdf',{type:fileType}));
   return new Request(ORIGIN+path,{method,headers,body:form});
  }
  return new Request(ORIGIN+path,{method,headers});
@@ -131,4 +132,45 @@ test('Drive root guard forbids out-of-folder material even with token',async()=>
  const adapter=new GoogleDriveAdapter({accessToken:'synthetic-token-for-tests',rootId:ROOT,
   fetcher:async()=>Response.json({id:DRIVEID,trashed:false,mimeType:'application/pdf',parents:['differentRoot_12345']})});
  await assert.rejects(()=>adapter.download(DRIVEID),/approved customer folder/);
+});
+
+test('R79 bad file is denied before any OAuth refresh or Drive availability test',async()=>{
+ const f=fixture({grant:false});
+ const malformed=new TextEncoder().encode('not a PDF, but otherwise large enough for the file picker');
+ const r=await documentsApi(request('/api/qa/documents','POST',{fileBytes:malformed}),f.env,{now,driveFetch:f.driveFetch});
+ assert.equal(r.status,415);
+ assert.equal((await r.json()).error,'Tệp PDF/DOCX QA hoặc biểu mẫu không hợp lệ.');
+ assert.equal(f.calls.some(x=>x.sql.includes('INSERT INTO')),false);
+ assert.equal(f.uploads.length,0);
+});
+test('R79 expired or missing grant reports safe reconnect code, not vague QA unavailable',async()=>{
+ const f=fixture({grant:false});
+ const response=await documentsApi(request('/api/qa/documents','POST'),f.env,{now,driveFetch:f.driveFetch});
+ assert.equal(response.status,503);
+ const body=await response.json();
+ assert.equal(body.code,'DRIVE_GRANT_UNAVAILABLE');
+ assert.match(body.error,/kết nối lại Drive/i);
+ assert.equal(f.uploads.length,0);
+});
+test('R79 Google Drive upload rejection does not create a D1 receipt and exposes bounded code',async()=>{
+ const f=fixture({driveUploadDenied:true});
+ const response=await documentsApi(request('/api/qa/documents','POST'),f.env,{now,driveFetch:f.driveFetch});
+ assert.equal(response.status,503);
+ const body=await response.json();
+ assert.equal(body.code,'DRIVE_UPLOAD_UNAVAILABLE');
+ assert.equal(f.calls.some(x=>x.sql.includes('INSERT INTO qa_document_receipts')),false);
+ assert.ok(!JSON.stringify(body).includes('synthetic-token-for-tests'));
+});
+test('R79 failed D1 receipt returns safe code and attempts remote file cleanup',async()=>{
+ const f=fixture({dbFail:true});
+ const response=await documentsApi(request('/api/qa/documents','POST'),f.env,{now,driveFetch:f.driveFetch});
+ assert.equal(response.status,503);
+ assert.equal((await response.json()).code,'QA_RECEIPT_UNAVAILABLE');
+ assert.equal(f.removes.length,1);
+});
+test('R79 empty mobile File.type accepted only with matching PDF extension and magic',async()=>{
+ const f=fixture();
+ const response=await documentsApi(request('/api/qa/documents','POST',{fileType:''}),f.env,{now,driveFetch:f.driveFetch});
+ assert.equal(response.status,201,await response.clone().text());
+ assert.equal(f.uploads.length,1);
 });
