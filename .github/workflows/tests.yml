@@ -113,6 +113,8 @@ jobs:
         run: R38_ENABLE=1 R39_ENABLE=1 bash deployment/standalone/smoke_api.sh
       - name: R77 real Chromium desktop+mobile Google return with Strict session cookie
         run: python deployment/cloudflare/tests/live_r77_strict_cookie_browser.py
+      - name: R85 observe real Chromium cross-origin Google Drive resumable upload CORS
+        run: python deployment/cloudflare/tests/live_r85_direct_drive_cors_probe.py
 
   standalone-qa:
     # R40 reusable QA credential bundle + actual Docker/Postgres16 account
