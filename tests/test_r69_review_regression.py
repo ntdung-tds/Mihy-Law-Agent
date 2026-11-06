@@ -61,6 +61,16 @@ class SourceDisplayReviewTest(unittest.TestCase):
         with self.assertRaisesRegex(SourceDocumentError, "rotated"):
             pdf_source(draw)
 
+    def test_pdf_form_xobject_text_not_silently_omitted(self):
+        def draw(c):
+            c.drawString(40, 700, "Main text")
+            c.beginForm("FormText")
+            c.drawString(40, 650, "LEGAL FORM CONTENT")
+            c.endForm()
+            c.doForm("FormText")
+        with self.assertRaisesRegex(SourceDocumentError, "Form XObject"):
+            pdf_source(draw)
+
     def test_alpha_zero_pdf_text_rejected(self):
         def draw(c):
             c.drawString(40, 700, "Clause one")
