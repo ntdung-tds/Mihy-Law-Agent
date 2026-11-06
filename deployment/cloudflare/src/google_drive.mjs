@@ -96,12 +96,15 @@ export class GoogleDriveAdapter {
     ]);
     const url='https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&'+
       'fields=id,name,mimeType,parents,trashed&supportsAllDrives=true';
+    // Cloudflare Workers RequestInit accepts ReadableStream for outgoing
+    // request bodies, not Blob directly. Stream the exact multipart bytes;
+    // duplex:'half' also satisfies standard Fetch/Node stream handling.
     let res;
     try{
       res=await this.fetcher(url,{method:'POST',redirect:'manual',headers:{
         Authorization:'Bearer '+this.accessToken,
         'Content-Type':'multipart/related; boundary='+boundary
-      },body});
+      },body:body.stream(),duplex:'half'});
     }catch{throw new DriveUploadFailure('transport');}
     if(!res||![200,201].includes(res.status))
       throw new DriveUploadFailure('provider',res?.status||0,res?await providerReason(res):'');
