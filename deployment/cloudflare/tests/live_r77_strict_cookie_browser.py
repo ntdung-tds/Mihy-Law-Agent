@@ -53,6 +53,22 @@ def main():
                         name+" failed to restore protected QA app after first-party landing"
                     )
                     print(f"PASS {name}: direct Google-style redirect withholds Strict cookie; 200 landing restores private workspace")
+                    # R79: actual Chromium sees a readable, accessible file chooser
+                    # in the protected documents panel, not a wide native input.
+                    picker=page.locator(".qa-document-file-control")
+                    picker.wait_for(state="visible",timeout=10000)
+                    box=picker.bounding_box()
+                    assert box and box["x"] >= -1 and box["x"] + box["width"] <= viewport["width"]+2, (
+                        name+" file chooser overflows the viewport: "+str(box)
+                    )
+                    filename="qa-synthetic-filename-that-must-wrap-within-mobile-view.pdf"
+                    page.locator("#document-file").set_input_files({
+                        "name":filename,
+                        "mimeType":"application/pdf",
+                        "buffer":b"%PDF-1.4\\n1 0 obj\\n<< >>\\nendobj\\n%%EOF\\n",
+                    })
+                    assert page.locator("#document-file-name").inner_text()==filename
+                    print(f"PASS {name}: responsive PDF/DOCX picker and selected filename visible without horizontal overflow")
                     context.close()
             finally:
                 browser.close()
