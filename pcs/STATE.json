@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 74,
-  "updated_at": "2026-11-06T12:38:00Z",
+  "revision": 75,
+  "updated_at": "2026-11-06T13:19:02.211Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1602,6 +1602,41 @@
           "No authenticated real Google refresh/Drive file E2E until owner consents"
         ],
         "owner_acceptance": "PENDING"
+      },
+      {
+        "id": "AL-R0-GDRIVE-R77-CALLBACK-RETURN",
+        "title": "R77 fix Google Drive OAuth return to login caused by cross-site SameSite=Strict callback redirect",
+        "status": "CODE_CI_PASS_DEPLOYED_QA_OWNER_GOOGLE_E2E_PENDING",
+        "priority": "P1",
+        "scope": "Isolated QA Google Drive callback/return flow and diagnostics only. Preserve cookie SameSite=Strict, existing Google OAuth provider PKCE/session/MatterACL, no production or client files.",
+        "acceptance": [
+          "Google callback result redirects to fixed first-party no-auth /drive-return 200 page with same-origin meta refresh and fallback link to /app#documents",
+          "OAuth state, authorization code and refresh token never appear in browser-facing return URL",
+          "Return to protected QA app retains Strict cookie in real Chromium desktop and mobile synthetic cross-site trial",
+          "Specific bounded provider, Drive API, persistence and expired-session failures are visible without secrets",
+          "Content-only Cloudflare QA deployment preserves all existing bindings and unrelated modules; no SRS baseline expansion"
+        ],
+        "test_results": {
+          "ci": "PASS_9_OF_9_EXECUTED",
+          "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/105",
+          "ci_run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42223444318",
+          "oauth_node": "PASS_8_OF_8",
+          "ui_node": "PASS_8_OF_8",
+          "site_worker_node": "PASS_12_OF_12",
+          "actual_chromium_local_synthetic": "PASS_DESKTOP_AND_MOBILE_STRICT_COOKIE_BRIDGE",
+          "cloudflare_code_readback": "PASS_BACKEND_AND_SITE_MODULES_MATCH_GITHUB",
+          "cloudflare_existing_binding_preservation": "PASS",
+          "cloudflare_qa_traffic": "PASS_BOTH_WORKERS_100_PERCENT",
+          "d1_connection_state": "0_GRANTS_0_FILES_TWO_CONSUMED_CALLBACKS",
+          "owner_live_google_consent": "NOT_RUN",
+          "real_authenticated_file_upload": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "blockers": [
+          "Owner Google consent must be retried on QA after callback fix; inspect bounded issue and verify D1 grant before declaring PASS",
+          "Google Drive API enablement, refresh grant and signed-in PDF/DOCX E2E not yet independently verified"
+        ],
+        "owner_acceptance": "PENDING"
       }
     ],
     "features": [
@@ -2204,12 +2239,20 @@
       {
         "path": "deployment/cloudflare/tests/r75_drive_connect_ui.test.mjs",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_BROWSER_DOM_NO_CREDENTIALS"
+      },
+      {
+        "path": "deployment/cloudflare/tests/live_r77_strict_cookie_browser.py",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_LOCAL_BROWSER_NO_CREDENTIALS"
+      },
+      {
+        "path": "deployment/cloudflare/tests/r77_strict_cookie_server.mjs",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_LOCAL_ONLY"
       }
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R76 PR#103 merged main 1c42efb14ad84ebdafdf13ec3c1f12887c823084 after GitHub Actions #42218494031 SUCCESS 9/9 executed; R73 OAuth Node 7/7 PASS and R75 UI Node 6/6 PASS. Actual QA D1 read-only query confirms two active personal sessions whose personal tenant has only one active member. Guarded personal-owner Google Drive OAuth permission implemented on status/start/callback, with organization tenant_admin-only preserved and negative tests. Both actual QA Workers updated by content-only API, source hash readback PASS, 100% QA deployment, existing bindings/secrets and unrelated modules unchanged. No owner Google consent or document transfer yet; D1 grants and receipts still zero. Production untouched.",
-      "next_action": "Owner reloads https://ai-law-web-qa.iaict-platform.workers.dev/app#documents in personal workspace and clicks 'Kết nối Google Drive'; Google selection and consent are Owner-only. If Google access blocked check OAuth consent screen testing users and Drive API enablement, no secrets in chat. After owner consent verify D1 grant and synthetic PDF/DOCX upload/list/download, ACL cross-tenant denial/refresh on authenticated browser; not label PASS before actual run. Production and customer files forbidden without separate approval.",
+      "last_completed_step": "R77 QA Google Drive callback return fix PR #105 squash-merged main 8137b211ccc666056f3fbb7b622277878b00a18a after GitHub Actions PR-head #42223444318 SUCCESS 9/9 executed jobs. OAuth Node 8/8 PASS, Drive UI Node 8/8 PASS, site worker Node 12/12 PASS; actual Chromium desktop+mobile synthetic Google cross-site Strict-cookie redirect PASS. Backend and site code updated on Cloudflare QA only using content-only API with source checksum readback PASS; unrelated modules and existing secret bindings preserved, 100% QA traffic each. D1 read-only: 3 OAuth attempts, 2 consumed callbacks, 0 persisted Drive grants/receipts. No real Google consent or owner acceptance; Google API callback integration unverified; production untouched.",
+      "next_action": "Owner signs in to QA site and retries Google Drive connect via /app#documents. The callback now uses public /drive-return 200 first-party page to restore SameSite=Strict session and displays bounded error issue: consent/session/provider/drive/save. If failure code drive occurs, authorized Google project admin should verify Drive API enabled and grant scope, then retry; do not expose secrets. After owner consent read-only check D1 grants and execute synthetic authenticated upload/list/download/ACL rejection. Privacy policy user-facing legal content is not implemented on QA login; production publication/verification remains deferred by Owner.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -2247,7 +2290,7 @@
         "R66 as of 2026-11-06: QA password-change UI/API deployed and source/readback PASS but owner real password rotation NOT_RUN, so exposed credential remains potentially usable for new sessions. Prior 3 sessions revoked; no confirmation old denied/new accepted. Cloudflare Browser Rendering limited follow-up via HTTP429. R65 PR89 still OPEN/unmerged; separate credentials/roles/MatterACL testing BLOCKED.",
         "R68-01: DOCX source helper merged PR93 PASS but still not invoked by Cloudflare Worker; original SRS v1.1.15 ZIP not mounted; backend storage, upload, PDF/OCR and AI E2E separate tasks.",
         "R69+R70: source PDF/DOCX extraction and integrity guards are CI-PASS and merged, but NOT integrated with Cloudflare QA Worker or Google Drive; no real authenticated upload/read, OCR or UC03/04/07 AI E2E. Original private SRS 1.1.15 ZIP inaccessible for exact mapping; do not claim full PDF/Word display parity.",
-        "R72/R73/R75/R76 Cloudflare QA API + website OAuth source merged and deployed; Google Client ID/Secret are now present and valid in QA secrets/bindings. R76 personal-workspace sole member may initiate consent, and only org tenant_admin may connect organization Drive. Actual Owner Google consent, persisted Drive grant and authenticated synthetic PDF/DOCX file E2E still NOT_RUN (D1 grant count 0); legal UC03 full workflow remains NOT_RUN."
+        "R72-R77 QA Google OAuth source and callback/first-party return fix deployed, OAuth bindings present. Backend state: 3 pending OAuth attempts / 2 consumed callbacks but 0 persisted private Google Drive grants, 0 file receipts. Owner live consent/retry and synthetic authenticated file E2E remain BLOCKED/NOT_RUN; actual cloud Google API eligibility unknown, now exposed via bounded failure issue. No customer data/production."
       ]
     },
     "policy": {
