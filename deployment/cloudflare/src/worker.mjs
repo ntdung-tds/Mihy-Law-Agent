@@ -5,6 +5,7 @@ import { GoogleDriveAdapter } from "./google_drive.mjs";
 import { mobileApi } from "./mobile_auth.mjs";
 import { accountApi } from "./account_profile.mjs";
 import { matterApi } from "./matter_workspace.mjs";
+import { documentsApi } from "./qa_documents.mjs";
 import { MOBILE_HTML, MOBILE_CSS, MOBILE_JS } from "./mobile_assets.mjs";
 
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
@@ -110,6 +111,9 @@ export async function handle(request,env,options={}){
   if(url.pathname==="/api/qa/profile"||url.pathname==="/api/qa/profile/avatar")
     return accountApi(request,env,options);
   if(url.pathname==="/api/qa/matters")return matterApi(request,env,options);
+  if(url.pathname==="/api/qa/documents"||
+     /^\/api\/qa\/documents\/[0-9a-f-]{36}\/download$/.test(url.pathname))
+    return documentsApi(request,env,options);
   if(url.pathname.startsWith("/api/qa/"))return mobileApi(request,env,options);
   if(request.method!=="GET"||url.search||request.headers.has("X-AI-LAW-TENANT"))return missing();
   if(url.pathname==="/health")return result(validEnv(env)?200:503,{
