@@ -82,7 +82,11 @@ function req(path,method='GET',{cookie=true,origin=BASE}={}){
 test('deny OAuth before configured and require role + same origin',async()=>{
  let x=fixture({configured:false});assert.equal(ready(x.env),false);
  assert.equal((await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts)).status,503);
+ const status=await oauthDriveApi(req('/api/qa/drive/status'),x.env,x.opts);
+ assert.equal(status.status,200);
+ assert.deepEqual(await status.json(),{connected:false,can_connect:true,configuration_ready:false,connected_at:null});
  x=fixture({active:false});
+ assert.equal((await oauthDriveApi(req('/api/qa/drive/status'),x.env,x.opts)).status,401);
  assert.equal((await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts)).status,401);
  x=fixture({role:'lawyer'});
  assert.equal((await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts)).status,403);
@@ -109,7 +113,7 @@ test('full PKCE state consent, callback sans strict cookie, tenant-root refresh,
   'GET',{cookie:false});
  const completed=await oauthDriveApi(callback,x.env,x.opts);
  assert.equal(completed.status,303);
- assert.equal(completed.headers.get('Location'),'https://ai-law-web-qa.iaict-platform.workers.dev/app?drive=connected');
+ assert.equal(completed.headers.get('Location'),'https://ai-law-web-qa.iaict-platform.workers.dev/app?drive=connected#documents');
  assert.equal(x.connections.size,1);
  const record=x.connections.get(T);
  assert.equal(record.root_id,ROOT);
@@ -119,7 +123,7 @@ test('full PKCE state consent, callback sans strict cookie, tenant-root refresh,
  const adapter=await tenantDriveAdapter(x.env,{tenant_id:T},x.opts);
  assert.equal(adapter.rootId,ROOT);
  assert.equal(adapter.accessToken,'synthetic-refreshed-token-1234567');
- assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,400);
+ assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,303);
 });
 test('revoked session blocks callback and token endpoint is never invoked',async()=>{
  const x=fixture();const r=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
@@ -130,7 +134,8 @@ test('revoked session blocks callback and token endpoint is never invoked',async
   return sql=>sql===CHECK_SESSION_SQL?{bind:()=>({first:async()=>null})}:original(sql);
  })();
  const done=await oauthDriveApi(req('/api/qa/drive/callback?state='+url.searchParams.get('state')+'&code=synthetic-code','GET',{cookie:false}),x.env,x.opts);
- assert.equal(done.status,400);
+ assert.equal(done.status,303);
+ assert.equal(done.headers.get('Location'),'https://ai-law-web-qa.iaict-platform.workers.dev/app?drive=failed#documents');
  assert.equal(x.calls.length,startCalls);
 });
 test('Google denied token exchange leaves no connection and consumes state',async()=>{
@@ -138,7 +143,7 @@ test('Google denied token exchange leaves no connection and consumes state',asyn
  const r=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
  const url=new URL((await r.json()).authorization_url);
  const callback=req('/api/qa/drive/callback?state='+url.searchParams.get('state')+'&code=test-code','GET',{cookie:false});
- assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,503);
+ assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,303);
  assert.equal(x.connections.size,0);
  assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,400);
 });
