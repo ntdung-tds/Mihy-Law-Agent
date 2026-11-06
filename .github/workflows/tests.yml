@@ -211,6 +211,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/matter_workspace.test.mjs
       - name: R72 Drive document upload/download, MatterACL, integrity and fail-closed QA gates
         run: node --test deployment/cloudflare/tests/r72_documents.test.mjs
+      - name: R81 Google Drive multipart wire protocol and safe provider error diagnostics
+        run: node --test deployment/cloudflare/tests/r81_drive_provider_upload.test.mjs
       - name: R72 actual SQLite receipt migration tenant and status constraints
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r72_document_schema.py' -v
       - name: R73 QA Google OAuth PKCE encrypted grants and tenant isolation

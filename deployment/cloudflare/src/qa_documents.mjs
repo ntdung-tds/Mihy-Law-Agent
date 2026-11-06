@@ -1,7 +1,7 @@
 /* R72 isolated QA document transport. NEVER declares PDF/DOCX parsing or UC03 ready.
    Storage needs a customer-authorized Google Drive grant; no customer records in tests. */
 import {mobileSession} from './mobile_auth.mjs';
-import {GoogleDriveAdapter} from './google_drive.mjs';
+import {GoogleDriveAdapter,DriveUploadFailure} from './google_drive.mjs';
 import {tenantDriveAdapter} from './oauth_drive.mjs';
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const MAX_FILE=1500000,MAX_REQUEST=1800000;
@@ -13,12 +13,17 @@ const result=(status,data)=>new Response(JSON.stringify(data),{status,headers:{
 const forbidden=()=>result(404,{error:'Không tìm thấy hoặc không được phép truy cập.'});
 const unavailable=()=>result(503,{code:'QA_STORAGE_UNAVAILABLE',error:'Lưu trữ QA đang gián đoạn. Vui lòng thử lại.'});
 // R79: stable public failure codes, never provider token/response text or secrets.
-const storageIssue=code=>result(503,{
+const storageIssue=(code,detail)=>result(503,{
  code,error:{
   DRIVE_GRANT_UNAVAILABLE:'Không thể sử dụng quyền Google Drive hiện tại. Hãy kết nối lại Drive rồi thử lại.',
-  DRIVE_UPLOAD_UNAVAILABLE:'Google Drive chưa nhận tệp. Vui lòng thử lại hoặc kiểm tra dung lượng lưu trữ.',
+  DRIVE_UPLOAD_UNAVAILABLE:'Google Drive chưa hoàn tất tải tệp. Vui lòng kiểm tra mã lỗi bên dưới.',
   QA_RECEIPT_UNAVAILABLE:'Tệp chưa được ghi nhận trong AI Law QA. Vui lòng thử lại.'
- }[code]||'Lưu trữ QA đang gián đoạn.'
+ }[code]||'Lưu trữ QA đang gián đoạn.',
+ ...(code==='DRIVE_UPLOAD_UNAVAILABLE'&&detail instanceof DriveUploadFailure?{
+  stage:detail.stage,
+  ...(detail.httpStatus?{provider_status:detail.httpStatus}:{}),
+  ...(detail.reason?{provider_reason:detail.reason}:{})
+ }:{})
 });
 const configured=env=>env?.AI_LAW_CF_MODE==='isolated-qa-only'&&env.DB&&UUID.test(env.INSTALLATION_ID||'');
 const csrf=req=>{const u=new URL(req.url);return u.protocol==='https:'&&req.headers.get('Origin')===u.origin&&req.headers.get('Sec-Fetch-Site')!=='cross-site'};
@@ -134,7 +139,7 @@ async function upload(req,env,p,now,opts){
  let remoteId=null;
  try{
   remoteId=await drive.upload({name,mimeType:mime,bytes});
- }catch{return storageIssue('DRIVE_UPLOAD_UNAVAILABLE');}
+ }catch(e){return storageIssue('DRIVE_UPLOAD_UNAVAILABLE',e);}
  try{
   if(!await permit(env,p,matter,'write',now))throw Error('permission changed');
   const id=crypto.randomUUID();

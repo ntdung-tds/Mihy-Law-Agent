@@ -5,6 +5,27 @@
  * This adapter does not replace independent MatterACL checks in the API.
  */
 const SAFE_FILE=/^[A-Za-z0-9_-]{10,200}$/;
+// Only these provider codes may be surfaced to the QA UI; never copy arbitrary
+// Google response bodies, authorization headers or filenames into diagnostics.
+const SAFE_REASONS=new Set(['storageQuotaExceeded','insufficientFilePermissions',
+ 'appNotAuthorizedToFile','rateLimitExceeded','userRateLimitExceeded',
+ 'dailyLimitExceeded','accessNotConfigured','badRequest','notFound','forbidden']);
+export class DriveUploadFailure extends Error{
+ constructor(stage,status=0,reason=''){
+  super('Google Drive upload '+stage);
+  this.name='DriveUploadFailure';
+  this.stage=['transport','provider','response','verify'].includes(stage)?stage:'transport';
+  this.httpStatus=Number.isInteger(status)&&status>=400&&status<=599?status:0;
+  this.reason=SAFE_REASONS.has(reason)?reason:'';
+ }
+}
+async function providerReason(res){
+ try{
+  const d=await res.clone().json();
+  const reason=d?.error?.errors?.[0]?.reason||d?.error?.status||'';
+  return SAFE_REASONS.has(reason)?reason:'';
+ }catch{return '';}
+}
 export class GoogleDriveAdapter {
   constructor({accessToken,rootId,fetcher=fetch}){
     if(typeof accessToken!=="string"||accessToken.length<10||
@@ -61,24 +82,40 @@ export class GoogleDriveAdapter {
       throw Error('Invalid bounded QA document');
     const boundary='ai_law_'+crypto.randomUUID().replace(/-/g,'');
     const metadata={name,mimeType,parents:[this.rootId]};
-    const pre='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+
-      JSON.stringify(metadata)+'\r\n--'+boundary+'\r\nContent-Type: '+mimeType+
-      '\r\nContent-Transfer-Encoding: binary\r\n\r\n';
-    const body=new Blob([pre,bytes,'\r\n--'+boundary+'--\r\n']);
+    // Match Google's published multipart/related format exactly: metadata
+    // first, then media, with CRLF-prefixed delimiters. Do not add legacy
+    // Content-Transfer-Encoding or depend on optional create-response fields.
+    const body=new Blob([
+      '--'+boundary+'\r\n',
+      'Content-Type: application/json; charset=UTF-8\r\n\r\n',
+      JSON.stringify(metadata),
+      '\r\n--'+boundary+'\r\n',
+      'Content-Type: '+mimeType+'\r\n\r\n',
+      bytes,
+      '\r\n--'+boundary+'--'
+    ]);
     const url='https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&'+
       'fields=id,name,mimeType,parents,trashed&supportsAllDrives=true';
-    const res=await this.fetcher(url,{method:'POST',redirect:'manual',headers:{
-      Authorization:'Bearer '+this.accessToken,
-      'Content-Type':'multipart/related; boundary='+boundary
-    },body});
-    if(!res||![200,201].includes(res.status))throw Error('Drive upload unavailable');
-    const out=await res.json();
-    if(!SAFE_FILE.test(out?.id||'')||
-       !Array.isArray(out.parents)||!out.parents.includes(this.rootId)||
-       out.mimeType!==mimeType||out.name!==name||out.trashed===true)
-      throw Error('Drive returned unapproved upload metadata');
-    // Re-read trusted metadata, not merely the upload response.
-    await this.metadata(out.id);
+    let res;
+    try{
+      res=await this.fetcher(url,{method:'POST',redirect:'manual',headers:{
+        Authorization:'Bearer '+this.accessToken,
+        'Content-Type':'multipart/related; boundary='+boundary
+      },body});
+    }catch{throw new DriveUploadFailure('transport');}
+    if(!res||![200,201].includes(res.status))
+      throw new DriveUploadFailure('provider',res?.status||0,res?await providerReason(res):'');
+    let out;
+    try{out=await res.json();}catch{throw new DriveUploadFailure('response');}
+    if(!SAFE_FILE.test(out?.id||''))throw new DriveUploadFailure('response');
+    // The create response may omit optional parent/name attributes even with
+    // a fields mask. The separate files.get is the authoritative folder proof.
+    let proof;
+    try{proof=await this.metadata(out.id);}
+    catch{throw new DriveUploadFailure('verify');}
+    if(proof.name!==name||proof.mimeType!==mimeType||
+       (proof.size!=null&&Number(proof.size)!==bytes.length))
+      throw new DriveUploadFailure('verify');
     return out.id;
   }
   async remove(objectId){
