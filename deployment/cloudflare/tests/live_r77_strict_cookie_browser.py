@@ -45,7 +45,8 @@ def main():
                     # Cookie remains in the browser jar; it was only withheld.
                     page.goto(provider+"/")
                     page.locator("#bridge").click()
-                    page.wait_for_url("**/app#documents",timeout=15000)\n                    # The app removes the one-time ?drive= flag after status verification.
+                    page.wait_for_url("**/app#documents",timeout=15000)
+                    # The app removes the one-time ?drive= flag after status verification.
                     assert "Mihy Law AI Agent" in page.locator("body").inner_text(), (
                         name+" failed to restore protected QA app after first-party landing"
                     )
