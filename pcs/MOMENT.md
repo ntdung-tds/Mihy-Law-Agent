@@ -1,11 +1,23 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `64` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-05T17:28:18.813Z`.
+- **PCS revision:** `66` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T02:42:24.795Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
+
+## R66 — QA self-service password change deployed, Owner real rotation pending (2026-11-06)
+
+- **Owner correction and authorization:** AI Law lacked a real password-change function. Owner requested its implementation and immediate deployment. Frozen SRS v1.1.15 remains unchanged; feature recorded in `srs_changed.md` as SC-016. No production.
+- **Merged source:** [PR #90](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/90), main merge commit `956532641a600abf1fe73f40c586c06500257b3d`; [Actions #42143772358](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42143772358) completed **10/10 executed PASS**, 20 conditional skips. Real WebCrypto/PBKDF2 with synthetic D1 test validated current password, new random salt/verifier, old password denial, new login, all-session revoke and CSRF. Real Chromium with explicitly **mocked positive session API** validated desktop and 320/390 mobile forms, validation and redirect. Not real Owner password change.
+- **QA backend deployed:** `ai-law-standalone-cf-qa` version `6797bc2d-bbce-4c76-b1e7-7987e529ad6c` at 100% (previous `b6bf1e4b-e341-4430-a5ba-64258fa8240c`). Replaced **only** `mobile_auth.mjs`; 5 modules, 7 bindings (D1 and secret QA_RATE_PEPPER) unchanged; direct version/content readback exact GitHub.
+- **QA site deployed:** `ai-law-web-qa` version `1e2abba8-8a67-4532-81c1-4f4ed9c2cc1c` at 100% (previous `53379c01-4c3f-4ffb-b0ba-4832224b8c6f`). Updated 7 modules: site worker, workspace HTML/CSS/session, login HTML/JS and public CSS; all seven read back exact GitHub, remaining 11 modules preserved. QA_AUTH still points to QA backend. Fixed 5-tab mobile navigation R63 preserved.
+- **NONPRODUCTION primary:** `ai-law-web` remains unmodified version `670463d4-558f-47be-936c-22819cfea0c7`. It shares QA backend via Service Binding; R66 UI/relay was **not promoted** to that site. Production untouched.
+- **Live browser:** Cloudflare Browser Rendering GET `/login` displayed login form and post-change message placeholder; anonymous `/app` redirected to public login rather than exposing workspace. Further browser attempts hit quota HTTP429; **BLOCKED**, not PASS.
+- **Security gate remains OPEN:** Owner has NOT yet used the deployed form to rotate the exposed QA password. Prior D1 revoke of 3 sessions had PASS, but old password could mint a new session. Owner must change using a unique password entered directly on QA and verify old DENY/new PASS. Chat-shared password should not be relied upon as a long-term secret; password/hash not recorded in PCS or Drive.
+- **Evidence:** Detailed status in Owner-private `AI Law Test Evidence` Google Drive R66 report; no personal credential, private document ID, cookie or secret in GitHub.
+- **Separate R65:** [PR #89](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/89) remains OPEN/unmerged and must be rebased/reconciled/tested separately; real multi-role R40 and MatterACL are still blocked. **Next: Owner real password-change acceptance, then R65 role E2E by private operator.**
 
 ## R64 — Owner accepted R63; R62 QA rollout + real anonymous Chromium PASS; positive IAM E2E gated (2026-11-06)
 
