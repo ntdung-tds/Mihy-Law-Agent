@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 76,
-  "updated_at": "2026-11-06T13:45:00Z",
+  "revision": 77,
+  "updated_at": "2026-11-06T14:54:43.884Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1494,7 +1494,7 @@
       {
         "id": "AL-R0-DOC-TRANSFER-R72",
         "title": "Một task duy nhất: hoàn thiện và nghiệm thu quản lý PDF/DOCX trên Google Drive trong AI Law QA",
-        "status": "IN_PROGRESS_ONE_BUNDLE_QA_GOOGLE_DRIVE_CONNECTED_E2E_NOT_RUN",
+        "status": "QA_CODE_DEPLOYED_CI_AND_SYNTHETIC_BROWSER_PASS_ACTUAL_GOOGLE_FILE_E2E_PENDING",
         "priority": "P0",
         "scope": "ONE task, not five separately tracked items: complete existing isolated-QA document workflow for synthetic PDF/DOCX upload -> tenant-owned Google Drive private folder -> D1 document receipt/list -> secure download -> cross-tenant and MatterACL denial -> fix/retest until reproducible defects closed. Existing signed-in QA sessions and approved SRS baseline only. No live customer data, legal AI/UC03 processing, OCR, security scope relaxation, production, SaaS or new OAuth app.",
         "acceptance": [
@@ -1519,12 +1519,24 @@
           "cross_tenant_acl_denial": "NOT_RUN",
           "mobile_browser_e2e": "NOT_RUN",
           "deployment": "EXISTING_R72_R77_SOURCE_ALREADY_QA_DEPLOYED_NO_NEW_RELEASE_IN_THIS_TASK_CONSOLIDATION",
-          "owner_acceptance": "PENDING"
+          "owner_acceptance": "PENDING",
+          "r79_node_pdf_docx_and_failures": "PASS_13_OF_13",
+          "r79_node_drive_connect_ui": "PASS_11_OF_11",
+          "r79_real_chromium_responsive_picker": "PASS_DESKTOP_AND_MOBILE",
+          "r79_ci": "PASS_9_OF_9_EXECUTED_ACTIONS_42236990242",
+          "r79_pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/108",
+          "r79_site_code_readback": "PASS_3_OF_3_MODULES",
+          "r79_backend_code_readback": "PASS_1_OF_1_MODULE",
+          "r79_bindings_unchanged": "PASS",
+          "r79_qa_deploy_traffic": "PASS_100_PERCENT_BOTH",
+          "r79_actual_qa_unauth_live_login_page": "PASS_BROWSER_RENDERING",
+          "r79_qa_connected_grants": 1,
+          "r79_qa_document_receipts": 0
         },
         "blockers": [
-          "A persisted QA OAuth grant exists (1), but no synthetic test file receipt yet. A live signed-in/browser test has not been completed; do not confuse deployed routes with end-to-end acceptance.",
-          "Only 2 working QA login verifiers previously available; any synthetic file test must use an authorized QA session without exposing passwords, OAuth tokens, customer data or modifying unapproved accounts.",
-          "PDF+DOCX positive tests, Drive-backed list/download and denied cross-tenant/matter scenarios remain to be run with actual QA browser/provider. No production deployment or real client files authorized."
+          "Actual authenticated Google Drive file POST remains NOT_RUN; D1 presently holds 1 tenant Drive grant, 1 QA matter with active write ACL and 0 document receipts. Need Owner or approved test browser to re-submit only a synthetic PDF/DOCX under 1.5 MB and inspect the new safe error code if failure persists.",
+          "Backend now distinguishes Google refresh grant, Drive upload rejection and D1 receipt errors; specific cause of prior blanket 'Lưu trữ QA chưa sẵn sàng' cannot be established retrospectively from old status, and no real customer files may be tested.",
+          "Exact per-tenant negative ACL and fully Google-backed upload/list/download still NOT_RUN and remain Owner acceptance gates. Production untouched."
         ],
         "evidence": [
           "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/97",
@@ -1533,10 +1545,12 @@
           "deployment/cloudflare/tests/test_r72_document_schema.py",
           "deployment/cloudflare/QA_R72_DOCUMENTS.md",
           "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/105",
-          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42223444318"
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42223444318",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/108",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42236990242"
         ],
-        "owner_acceptance": "PENDING_ALL_ACCEPTANCE_CRITERIA",
-        "notes": "Owner on 2026-11-06 directed: 'Gộp lại thành 1 task'. This is a consolidation of the same existing R72 document task, not a new feature or SRS delta. OAuth Google Drive consent has since succeeded (live D1 1 connection); separate OAuth fixes R75-R77 are preserved as historical tasks, not reopened. The current work remains E2E actual synthetic documents and ACL acceptance."
+        "owner_acceptance": "PENDING_REAL_GOOGLE_BACKED_UPLOAD",
+        "notes": "R79 Owner screenshot showed native file-picker overflow on mobile plus 503 'Lưu trữ QA chưa sẵn sàng'. PR108 fixed mobile chooser, file-size feedback, safe backend error codes and prevalidation before OAuth refresh; merged commit 46282a0982c6f559bdbad462f75cc3258b6967b7, CI PASS. Live Cloudflare QA backend/site source and bindings readback PASS, only modules for this task changed. Existing single R72 task remains active document work item; no new task created. Real remote upload/Drive file/receipt not yet validated."
       },
       {
         "id": "AL-R0-GDRIVE-R75-ONE-TAP",
@@ -2258,8 +2272,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "Consolidated the existing R72 PDF/DOCX Google Drive document workflow into one QA acceptance task by explicit Owner instruction; live D1 read-only count 1 Google Drive grant and 0 document receipts; existing upload/list/download API and page are already source-merged/deployed, E2E still NOT_RUN. No code, new SRS scope, production deployment or personal Drive file operations performed in consolidation.",
-      "next_action": "Execute the single task AL-R0-DOC-TRANSFER-R72 as one bundled QA workflow: synthetic PDF+DOCX valid and invalid uploads, receipt/list/reload, authenticated download SHA256 integrity, cross-tenant/MatterACL/session deny, then defect->fix->retest, CI and QA only. Owner confirms final acceptance; no real customer files. Update the same task record, do not create five tasks.",
+      "last_completed_step": "R79 Owner screenshot mobile document upload layout and opaque 'Lưu trữ QA chưa sẵn sàng' addressed within existing single R72 document task. PR108 merged main SHA 46282a0982c6f559bdbad462f75cc3258b6967b7, CI 9/9 PASS; specialized tests PDF/DOCX 13/13, UI 11/11, Chromium desktop/mobile picker PASS. QA backend/source and website three module hashes verified, all OAuth secrets/bindings unchanged, 100% QA traffic. Browser Rendering public QA login page PASS. Actual QA D1 read-only: 1 Drive connection, 1 matter with write ACL and 0 document receipts. No authenticated real Google file E2E; production untouched.",
+      "next_action": "Owner reopens QA /app#documents and tries uploading ONLY a small synthetic PDF or DOCX under 1.5 MB. If error appears, capture displayed safe failure code/message, distinguish DRIVE_GRANT_UNAVAILABLE (reconnect Google), DRIVE_UPLOAD_UNAVAILABLE (Google write refused/space), QA_RECEIPT_UNAVAILABLE (D1 receipt) and correct specific live blocker; re-test listing/download and denied cross-tenant ACL. Do not mark task PASS until actual Google-backed transfer observed; Owner final acceptance.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -2297,7 +2311,7 @@
         "R66 as of 2026-11-06: QA password-change UI/API deployed and source/readback PASS but owner real password rotation NOT_RUN, so exposed credential remains potentially usable for new sessions. Prior 3 sessions revoked; no confirmation old denied/new accepted. Cloudflare Browser Rendering limited follow-up via HTTP429. R65 PR89 still OPEN/unmerged; separate credentials/roles/MatterACL testing BLOCKED.",
         "R68-01: DOCX source helper merged PR93 PASS but still not invoked by Cloudflare Worker; original SRS v1.1.15 ZIP not mounted; backend storage, upload, PDF/OCR and AI E2E separate tasks.",
         "R69+R70: source PDF/DOCX extraction and integrity guards are CI-PASS and merged, but NOT integrated with Cloudflare QA Worker or Google Drive; no real authenticated upload/read, OCR or UC03/04/07 AI E2E. Original private SRS 1.1.15 ZIP inaccessible for exact mapping; do not claim full PDF/Word display parity.",
-        "R72-R77 Google OAuth QA connection now has 1 grant; D1 document receipts remain 0. The single consolidated R72 upload/list/download/ACL E2E is NOT_RUN; must test with synthetic files and authorized browser before acceptance. No production."
+        "R72-R79 Google Drive OAuth QA has 1 connected grant and working mobile UI/source tests, but 0 uploaded file receipts. Previous 503 now has bounded error codes; actual signed-in synthetic PDF/DOCX remote upload/list/download, cross-tenant ACL and final owner acceptance still NOT_RUN. No production."
       ]
     },
     "policy": {
