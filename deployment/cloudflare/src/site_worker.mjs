@@ -19,14 +19,19 @@ import { WORKSPACE_CSS } from './workspace_css.mjs';
 import { WORKSPACE_JS } from './workspace_js.mjs';
 import { WORKSPACE_SESSION } from './workspace_session.mjs';
 import { WORKSPACE_MATTERS } from './workspace_matters.mjs';
+import { ACCOUNT_HTML } from './account_html.mjs';
+import { ACCOUNT_CSS } from './account_css.mjs';
+import { ACCOUNT_JS } from './account_js.mjs';
 
 const AUTH_ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
-const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password']);
+const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile','/api/qa/profile/avatar']);
 const privateAssets=new Map([
  ['/styles.css',[WORKSPACE_CSS,'text/css; charset=utf-8']],
  ['/app.js',[WORKSPACE_JS,'application/javascript; charset=utf-8']],
  ['/session.js',[WORKSPACE_SESSION,'application/javascript; charset=utf-8']],
- ['/matters.js',[WORKSPACE_MATTERS,'application/javascript; charset=utf-8']]
+ ['/matters.js',[WORKSPACE_MATTERS,'application/javascript; charset=utf-8']],
+ ['/account.css',[ACCOUNT_CSS,'text/css; charset=utf-8']],
+ ['/account.js',[ACCOUNT_JS,'application/javascript; charset=utf-8']]
 ]);
 const publicAssets=new Map([
  ['/site.css',[SITE_CSS,'text/css; charset=utf-8']],
@@ -97,7 +102,7 @@ export async function handleSite(req,env){
  if(req.method==='GET' && page)return respond(page.replace('</footer>',FOOTER_CONTACT_HTML+'</footer>'),'text/html; charset=utf-8',200,{publicPage:true});
  if(req.method==='GET'&&path==='/login')return respond(LOGIN_HTML);
  if(req.method==='GET'&&path==='/favicon.svg')return respond(svgIcon,'image/svg+xml; charset=utf-8',200,{publicPage:true});
- if(req.method==='GET'&&path==='/robots.txt')return respond('User-agent: *\nDisallow: /app\nDisallow: /login\nDisallow: /api/\n','text/plain; charset=utf-8',200,{publicPage:true});
+ if(req.method==='GET'&&path==='/robots.txt')return respond('User-agent: *\nDisallow: /app\nDisallow: /account\nDisallow: /login\nDisallow: /api/\n','text/plain; charset=utf-8',200,{publicPage:true});
  if(req.method==='GET'&&path==='/health')return respond(JSON.stringify({
   status:'online',environment:'qa_nonproduction',workspace_auth_binding:typeof env?.QA_AUTH?.fetch==='function'
  }), 'application/json; charset=utf-8',200,{publicPage:true});
@@ -107,19 +112,22 @@ export async function handleSite(req,env){
  }
  if(API.has(path)){
   if((['/api/qa/session','/api/qa/workspaces'].includes(path)&&req.method!=='GET') ||
+    (path==='/api/qa/profile'&&!['GET','POST'].includes(req.method)) ||
     (path==='/api/qa/matters'&&!['GET','POST'].includes(req.method)) ||
-    (['/api/qa/login','/api/qa/logout','/api/qa/switch-workspace','/api/qa/change-password'].includes(path)&&req.method!=='POST'))return missing();
+    (['/api/qa/login','/api/qa/logout','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile/avatar'].includes(path)&&req.method!=='POST'))return missing();
   try{return await relay(req,env,path);}catch{return unavailable();}
  }
  if(req.method==='GET'&&path==='/app/')return redirect('/app'+url.search,308);
- if(req.method!=='GET'||(path!=='/app'&&!privateAssets.has(path)))return missing();
+ if(req.method==='GET'&&path==='/account/')return redirect('/account',308);
+ if(req.method!=='GET'||(path!=='/app'&&path!=='/account'&&!privateAssets.has(path)))return missing();
  let yes;try{yes=await authenticated(req,env);}catch{return unavailable();}
  if(yes===null)return unavailable();
  if(!yes){
-  if(path==='/app')return redirect('/login');
+  if(path==='/app'||path==='/account')return redirect('/login');
   return respond('Unauthorized','text/plain; charset=utf-8',401);
  }
  if(path==='/app')return respond(app);
+ if(path==='/account')return respond(ACCOUNT_HTML);
  const [body,type]=privateAssets.get(path);
  return respond(body,type);
 }
