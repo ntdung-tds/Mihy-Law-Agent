@@ -53,7 +53,8 @@ function fixture({authenticated=true,allow=true,grant=true,dbFail=false,driveUpl
  };
  async function driveFetch(url,options){
   if(options.method==='POST'){
-   if(driveUploadDenied)return Response.json({error:{code:403}},{status:403});
+   if(driveUploadDenied)return Response.json({error:{code:403,
+    errors:[{reason:'insufficientFilePermissions',message:'private Google error not shown'}]}},{status:403});
    assert.match(url,/^https:\/\/www\.googleapis\.com\/upload\/drive\/v3\/files\?/);
    assert.match(options.headers['Content-Type'],/^multipart\/related/);
    uploads.push({url,body:options.body});
@@ -161,6 +162,10 @@ test('R79 Google Drive upload rejection does not create a D1 receipt and exposes
  assert.equal(response.status,503);
  const body=await response.json();
  assert.equal(body.code,'DRIVE_UPLOAD_UNAVAILABLE');
+ assert.equal(body.stage,'provider');
+ assert.equal(body.provider_status,403);
+ assert.equal(body.provider_reason,'insufficientFilePermissions');
+ assert.ok(!JSON.stringify(body).includes('private Google error'));
  assert.equal(f.calls.some(x=>x.sql.includes('INSERT INTO qa_document_receipts')),false);
  assert.ok(!JSON.stringify(body).includes('synthetic-token-for-tests'));
 });
