@@ -204,5 +204,5 @@ test('R86 PDF bytes go only to Google; Cloudflare sees JSON metadata and receipt
  assert.equal(direct.length,1);
  assert.equal(finishes.length,1);
  assert.equal(t.calls.some(x=>x.url==='/api/qa/documents'&&x.method==='POST'),false);
- assert.equal(t.els['document-feedback'].dataset.state,'success');
+ assert.equal(t.els['document-feedback'].dataset.state,'success', t.els['document-feedback'].textContent);
 });
