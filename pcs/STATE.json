@@ -2257,7 +2257,7 @@
       }
     ],
     "current": {
-      "active_task": "AL-R0-DOC-TRANSFER-R72",
+      "active_task": "AL-R0-DEPLOY-001",
       "last_completed_step": "Consolidated the existing R72 PDF/DOCX Google Drive document workflow into one QA acceptance task by explicit Owner instruction; live D1 read-only count 1 Google Drive grant and 0 document receipts; existing upload/list/download API and page are already source-merged/deployed, E2E still NOT_RUN. No code, new SRS scope, production deployment or personal Drive file operations performed in consolidation.",
       "next_action": "Execute the single task AL-R0-DOC-TRANSFER-R72 as one bundled QA workflow: synthetic PDF+DOCX valid and invalid uploads, receipt/list/reload, authenticated download SHA256 integrity, cross-tenant/MatterACL/session deny, then defect->fix->retest, CI and QA only. Owner confirms final acceptance; no real customer files. Update the same task record, do not create five tasks.",
       "blockers": [
