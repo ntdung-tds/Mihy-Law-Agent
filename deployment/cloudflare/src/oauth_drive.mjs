@@ -173,6 +173,29 @@ async function callback(req,env,now,opts){
  }catch{return failed('save');}
  return finished('connected');
 }
+// Disconnect only the current tenant's AI Law-held credential. Deliberately
+// do not call Google's global revocation endpoint, which could invalidate the
+// same Google account's grant for another tenant, or delete any Drive files.
+// Existing receipts and file links remain for a future reconnection.
+async function disconnect(req,env,now){
+ if(env?.AI_LAW_CF_MODE!=='isolated-qa-only'||!env.DB||!UUID.test(env.INSTALLATION_ID||''))
+  return unavailable();
+ if(!originOkay(req))return out(403,{error:'CSRF_DENIED'});
+ const p=await mobileSession(req,env,now);
+ if(!p)return out(401,{error:'Phiên đăng nhập không hợp lệ.'});
+ if(!await canConnect(env,p))return out(403,{error:'Không có quyền ngắt kết nối Drive của không gian này.'});
+ // A single D1 batch is transactional. Remove stored refresh credentials and
+ // invalidate pending authorizations for this tenant, never other tenants.
+ const changes=await env.DB.batch([
+  env.DB.prepare('DELETE FROM qa_drive_connections WHERE installation_id=? AND tenant_id=?')
+   .bind(env.INSTALLATION_ID,p.tenant_id),
+  env.DB.prepare('DELETE FROM qa_drive_oauth_pending WHERE installation_id=? AND tenant_id=?')
+   .bind(env.INSTALLATION_ID,p.tenant_id)
+ ]);
+ if(!Array.isArray(changes)||changes.length!==2||changes.some(x=>x.success===false))
+  return unavailable();
+ return out(200,{connected:false,disconnected:true,files_preserved:true});
+}
 async function status(req,env,now){
  // The signed-in user's UI must receive a useful status even before the
  // operator has registered this application's Google OAuth client.
@@ -189,6 +212,7 @@ export async function oauthDriveApi(req,env,opts={}){
  const path=new URL(req.url).pathname,now=opts.now??Math.floor(Date.now()/1000);
  try{
   if(path==='/api/qa/drive/status'&&req.method==='GET')return await status(req,env,now);
+  if(path==='/api/qa/drive/disconnect'&&req.method==='POST')return await disconnect(req,env,now);
   if(!ready(env))return path==='/api/qa/drive/callback'?failed():unavailable();
   if(path==='/api/qa/drive/connect'&&req.method==='POST')return await begin(req,env,now);
   if(path==='/api/qa/drive/callback'&&req.method==='GET')return await callback(req,env,now,opts);

@@ -43,13 +43,20 @@
     const row=document.createElement('div');row.className='matter-row';
     const label=document.createElement('span');
     label.textContent=(d.name||'Tệp QA')+' · Chưa kiểm chứng nội dung · '+Math.ceil(Number(d.bytes)/1024)+' KB';
-    const a=document.createElement('a');a.href='/api/qa/documents/'+d.id+'/download';
-    a.textContent='Tải về';a.rel='nofollow';
-    row.append(label,a);list.append(row);
+    if(driveBox?.dataset.state==='connected'){
+     const a=document.createElement('a');a.href='/api/qa/documents/'+d.id+'/download';
+     a.textContent='Tải về';a.rel='nofollow';
+     row.append(label,a);
+    }else{
+     const note=document.createElement('small');note.textContent='Kết nối Drive để tải về';
+     row.append(label,note);
+    }
+    list.append(row);
    }
   }catch{message('Tệp Google Drive chưa sẵn sàng hoặc chưa được cấp quyền.');}
  }
- const driveBox=$('drive-setup'),driveMessage=$('drive-status'),connect=$('drive-connect');
+ const driveBox=$('drive-setup'),driveMessage=$('drive-status'),connect=$('drive-connect'),
+  disconnect=$('drive-disconnect');
  const uploadButton=form.querySelector('button[type="submit"]');
  const link=new URL(location.href);
  const returned=link.searchParams.get('drive');
@@ -66,6 +73,7 @@
  async function driveStatus(){
   if(!connect||!driveMessage)return;
   connect.hidden=true;
+  if(disconnect)disconnect.hidden=true;
   if(uploadButton)uploadButton.disabled=true;
   setDrive('loading','Đang kiểm tra kết nối Google Drive…');
   try{
@@ -77,6 +85,8 @@
    if(data.connected===true&&data.configuration_ready===true){
     setDrive('connected','Đã kết nối Google Drive cho không gian làm việc này. Có thể tải tệp QA lên.');
     if(uploadButton)uploadButton.disabled=false;
+    if(disconnect)disconnect.hidden=data.can_connect!==true;
+    void refreshFiles();
     return;
    }
    if(data.configuration_ready!==true){
@@ -122,6 +132,32 @@
    location.assign(url.toString());
   }catch(e){setDrive('error',e.message||'Không thể mở Google.');}
   finally{connect.disabled=false;connect.textContent='Kết nối Google Drive';}
+ });
+ if(disconnect)disconnect.addEventListener('click',async()=>{
+  // A native confirmation prevents accidental loss of the local Drive grant.
+  if(!window.confirm('Ngắt kết nối Google Drive khỏi không gian làm việc này? Tệp trên Google Drive không bị xóa. Bạn có thể kết nối lại sau.'))return;
+  disconnect.disabled=true;
+  if(connect)connect.hidden=true;
+  if(uploadButton)uploadButton.disabled=true;
+  setDrive('loading','Đang ngắt kết nối Google Drive…');
+  try{
+   const r=await fetch('/api/qa/drive/disconnect',{method:'POST',
+    credentials:'same-origin',cache:'no-store',
+    headers:{'Content-Type':'application/json'},body:'{}'});
+   if(r.status===401){location.replace('/login');return;}
+   let data={};try{data=await r.json();}catch{}
+   if(!r.ok||data.disconnected!==true||data.connected!==false)
+    throw Error(data.error||'Không thể ngắt kết nối Google Drive. Vui lòng thử lại.');
+   await driveStatus();
+   if(driveBox?.dataset.state!=='disconnected')
+    throw Error('Chưa xác minh được trạng thái ngắt kết nối. Vui lòng tải lại trang.');
+   setDrive('disconnected','Đã ngắt kết nối Google Drive. Tệp đã lưu vẫn còn trên Google Drive; kết nối lại để truy cập.');
+   void refreshFiles();
+  }catch(e){
+   setDrive('error',e.message||'Không thể ngắt kết nối. Vui lòng thử lại.');
+   // Keep the upload gate closed until the next verified status response.
+   if(uploadButton)uploadButton.disabled=true;
+  }finally{disconnect.disabled=false;}
  });
  void driveStatus();
  form.addEventListener('submit',async e=>{
@@ -170,6 +206,7 @@
  window.addEventListener('ai-law:workspace-switch',()=>{
   reset();setDrive('loading','Đang chuyển không gian làm việc…');
   if(connect)connect.hidden=true;
+  if(disconnect)disconnect.hidden=true;
   if(uploadButton)uploadButton.disabled=true;
  });
  // app.js can dispatch documents-open before this deferred script registers its listener.
