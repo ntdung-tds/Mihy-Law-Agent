@@ -250,3 +250,28 @@ test('Google Drive return uses public 200 first-party landing, then Strict-cooki
  assert.equal((await get('/drive-return?drive=unexpected',{})).status,404);
  assert.equal((await get('/app')).status,302,'protected app still requires signed-in user');
 });
+
+test('R80 Drive disconnect route is POST-only, relayed with same-origin CSRF and no secret in response',async()=>{
+ const hits=[];
+ const isolated={QA_AUTH:{async fetch(request){
+  hits.push({pathname:new URL(request.url).pathname,method:request.method,
+   origin:request.headers.get('Origin')});
+  return Response.json({connected:false,disconnected:true,files_preserved:true});
+ }}};
+ const url=ORIGIN+'/api/qa/drive/disconnect';
+ const getResult=await handleSite(new Request(url),isolated);
+ assert.equal(getResult.status,404);
+ assert.equal(hits.length,0,'GET is not relayed');
+ const cross=await handleSite(new Request(url,{method:'POST',
+  headers:{Origin:'https://evil.invalid','Sec-Fetch-Site':'cross-site'}}),isolated);
+ assert.equal(cross.status,403);
+ assert.equal(hits.length,0,'cross-origin POST must not reach the backend');
+ const success=await handleSite(new Request(url,{method:'POST',
+  headers:{Origin:ORIGIN,'Sec-Fetch-Site':'same-origin','Content-Type':'application/json'},body:'{}'}),isolated);
+ assert.equal(success.status,200);
+ assert.deepEqual(await success.json(),{connected:false,disconnected:true,files_preserved:true});
+ assert.equal(hits.length,1);
+ assert.equal(hits[0].method,'POST');
+ assert.equal(hits[0].pathname,'/api/qa/drive/disconnect');
+ assert.equal(hits[0].origin,'https://ai-law-standalone-cf-qa.iaict-platform.workers.dev');
+});
