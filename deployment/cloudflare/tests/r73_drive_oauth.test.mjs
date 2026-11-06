@@ -15,7 +15,8 @@ function fixture({role='tenant_admin',active=true,configured=true,tokenDenied=fa
  const env={AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,JWT_ISSUER:'https://issuer.qa.test',
   ...(configured?{GOOGLE_OAUTH_CLIENT_ID:'12345-demo.apps.googleusercontent.com',
    GOOGLE_OAUTH_CLIENT_SECRET:'synthetic-app-secret',QA_DRIVE_TOKEN_KEY:'a'.repeat(64)}:{})};
- env.DB={prepare(sql){return {bind(...params){statements.push({sql,params});return {
+ env.DB={async batch(actions){const result=[];for(const a of actions)result.push({...await a.run(),success:true});return result;},
+  prepare(sql){return {bind(...params){statements.push({sql,params});return {
   async first(){
    if(sql===COOKIE_SESSION_SQL)return active?{sid:SID,user_id:U,tenant_id:T,role_key:role,
      subject:'synthetic',expires_at:now+600}:null;
@@ -45,6 +46,16 @@ function fixture({role='tenant_admin',active=true,configured=true,tokenDenied=fa
     connections.set(params[1],{encrypted_refresh:params[2],root_id:params[3],
      connected_at:params[6]});
     return {meta:{changes:1}};
+   }
+   if(sql.startsWith('DELETE FROM qa_drive_connections')){
+    const present=connections.delete(params[1]);return {meta:{changes:present?1:0}};
+   }
+   if(sql.startsWith('DELETE FROM qa_drive_oauth_pending')){
+    let count=0;
+    for(const [key,item] of pending)if(item.tenant_id===params[1]){
+     pending.delete(key);count++;
+    }
+    return {meta:{changes:count}};
    }
    throw Error('unhandled SQL '+sql);
   }
@@ -217,4 +228,62 @@ test('Google consent may succeed while Drive API denies root creation; no grant 
  assert.equal(response.headers.get('Location'),
   'https://ai-law-web-qa.iaict-platform.workers.dev/drive-return?drive=failed&issue=drive');
  assert.equal(x.connections.size,0);
+});
+
+test('R80 organization admin disconnect deletes only tenant credential and pending consent',async()=>{
+ const x=fixture();
+ const start=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
+ const state=new URL((await start.json()).authorization_url).searchParams.get('state');
+ const callback=req('/api/qa/drive/callback?state='+state+'&code=synthetic','GET',{cookie:false});
+ assert.equal((await oauthDriveApi(callback,x.env,x.opts)).status,303);
+ assert.equal(x.connections.size,1);
+ // A second, pending OAuth request is canceled on disconnect.
+ const second=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
+ const pending=new URL((await second.json()).authorization_url).searchParams.get('state');
+ x.connections.set('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',{encrypted_refresh:'other-tenant-secret',root_id:'other-root1234'});
+ x.pending.set('other-state',{tenant_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',used_at:null});
+ const beforeRemote=x.calls.length;
+ const res=await oauthDriveApi(req('/api/qa/drive/disconnect','POST'),x.env,x.opts);
+ assert.equal(res.status,200);
+ assert.deepEqual(await res.json(),{connected:false,disconnected:true,files_preserved:true});
+ assert.equal(x.connections.has(T),false);
+ assert.equal(x.connections.has('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),true);
+ assert.equal(x.pending.size,1,'only other tenant OAuth remains');
+ assert.equal(x.calls.length,beforeRemote,'local disconnect does not revoke other tenants Google access');
+ assert.equal((await (await oauthDriveApi(req('/api/qa/drive/status'),x.env,x.opts)).json()).connected,false);
+ await assert.rejects(()=>tenantDriveAdapter(x.env,{tenant_id:T},x.opts),/No tenant grant/);
+ const late=await oauthDriveApi(req('/api/qa/drive/callback?state='+pending+'&code=late-consent','GET',{cookie:false}),x.env,x.opts);
+ assert.match(late.headers.get('Location'),/drive=failed/);
+ assert.equal(x.calls.length,beforeRemote,'late callback never exchanges a token');
+ // Safe and idempotent local disconnect.
+ assert.equal((await oauthDriveApi(req('/api/qa/drive/disconnect','POST'),x.env,x.opts)).status,200);
+});
+test('R80 deny anonymous, CSRF and organization lawyer, with no credential deleted',async()=>{
+ const x=fixture({role:'lawyer'});
+ x.connections.set(T,{encrypted_refresh:'nonempty-secret',root_id:ROOT});
+ assert.equal((await oauthDriveApi(req('/api/qa/drive/disconnect','POST'),x.env,x.opts)).status,403);
+ assert.equal((await oauthDriveApi(req('/api/qa/drive/disconnect','POST',{origin:'https://evil.invalid'}),x.env,x.opts)).status,403);
+ assert.equal((await oauthDriveApi(req('/api/qa/drive/disconnect'),x.env,x.opts)).status,405);
+ assert.equal(x.connections.has(T),true);
+ const anon=fixture({active:false});
+ assert.equal((await oauthDriveApi(req('/api/qa/drive/disconnect','POST'),anon.env,anon.opts)).status,401);
+});
+test('R80 sole personal owner can disconnect while shared personal tenant cannot',async()=>{
+ const owner=fixture({role:'lawyer',personal:true});
+ owner.connections.set(T,{encrypted_refresh:'local-only-test',root_id:ROOT});
+ const ok=await oauthDriveApi(req('/api/qa/drive/disconnect','POST'),owner.env,owner.opts);
+ assert.equal(ok.status,200);
+ assert.equal(owner.connections.size,0);
+ const shared=fixture({role:'lawyer',personal:true,personalMembers:2});
+ shared.connections.set(T,{encrypted_refresh:'still-present',root_id:ROOT});
+ assert.equal((await oauthDriveApi(req('/api/qa/drive/disconnect','POST'),shared.env,shared.opts)).status,403);
+ assert.equal(shared.connections.size,1);
+});
+test('R80 local disconnect works when OAuth app secrets are unavailable; never needs Google token',async()=>{
+ const x=fixture({configured:false});
+ x.connections.set(T,{encrypted_refresh:'encrypted-stored-secret',root_id:ROOT});
+ const res=await oauthDriveApi(req('/api/qa/drive/disconnect','POST'),x.env,x.opts);
+ assert.equal(res.status,200);
+ assert.equal(x.connections.size,0);
+ assert.equal(x.calls.length,0);
 });
