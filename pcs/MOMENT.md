@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `78` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T15:20:24.797Z`.
+- **PCS revision:** `79` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-06T15:42:49.330Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R81 — Google Drive upload rejected / incomplete metadata proof: hardened QA (2026-11-06)
+
+- **Owner report:** "Google Drive chưa nhận tệp. Vui lòng thử lại hoặc kiểm tra dung lượng lưu trữ." Actual live D1 read-only at start: **1 private Google Drive OAuth connection, 0 uploaded document receipts, 0 file links**. The historical R79 blanket 503 caught all exceptions from upload and had no provider HTTP status/body diagnostics. **Do not assert storage quota or any other specific Google rejection as the root cause** without new evidence.
+- **Scoped implementation within existing single R72 document task:** [PR #112](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/112) merged main SHA `8996be8fc2d564703b983e63e4ac107f7082a752`. Google provider upload now uses published multipart/related body framing and byte-for-byte media, omits unnecessary Content-Transfer-Encoding, requires valid create response ID then independently checks trusted `files.get` folder/name/MIME/size; a legitimate partial create response is no longer interpreted as failure solely for missing optional metadata. Provider failures expose only allowlisted `stage`, HTTP status and reason to QA; never raw Google errors, bearer tokens, OAuth secrets or user filenames. UI distinguishes provider refusal, transport failure and post-upload metadata verification, and warns against immediate duplicate upload on uncertain verification.
+- **Verification:** [Actions #42244735658](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42244735658) **PASS 9/9 executed CI jobs**; new **6/6** multipart wire protocol, partial response/metadata, HTTP 400/403 and sanitization cases PASS; existing QA document PDF/DOCX API **13/13** PASS. Static/fixture evidence is not proof that Google's live API accepted an upload.
+- **QA deploy:** Cloudflare `ai-law-standalone-cf-qa` backend updated 2026-11-06 15:41:12Z with 2 source-matched modules, website `ai-law-web-qa` updated 15:41:41Z with 1 source-matched module; all unrelated modules and existing OAuth/binding configuration preserved, both 100% QA traffic, no production changes.
+- **Actual postdeploy read-only D1:** still **1 connected grant, 0 receipts, 0 links, 0 active sessions**. Owner must re-login and attempt only a synthetic small PDF/DOCX. If failure, capture bounded stage/status/reason, then fix precisely and repeat. No user customer file uploaded/deleted by agent. Real Google-backed upload/list/download, ACL negative checks and Owner acceptance **NOT_RUN**; do not mark task complete.
 
 ## R80 — Google Drive tenant-scoped disconnect added to existing R72 document QA task (2026-11-06)
 
