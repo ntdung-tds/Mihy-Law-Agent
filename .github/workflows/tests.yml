@@ -184,6 +184,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/mobile.test.mjs
       - name: Verify R62 active QA memberships, atomic session rotation and anti-CSRF
         run: node --test deployment/cloudflare/tests/r62_workspaces.test.mjs
+      - name: R66 QA authenticated password change, PBKDF2 rotation, all-session revocation and CSRF
+        run: node --test deployment/cloudflare/tests/r66_password_change.test.mjs
       - name: Execute real SQLite R62 session/issuer/subject and tenant-MatterACL isolation
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r62_qa_session_sql.py' -v
       - name: Validate R62 secure offline QA verifier renderer (synthetic credentials only)
@@ -636,7 +638,7 @@ jobs:
   cloudflare-site-r62:
     # R62: real browser DOM on mobile/desktop with explicitly simulated positive API.
     # Live HTTPS anonymous protection is tested separately, not a positive-login claim.
-    if: github.ref_name == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.head_ref == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.ref_name == 'design/r63-mobile-bottom-navigation' || github.head_ref == 'design/r63-mobile-bottom-navigation' || github.ref_name == 'test/r64-live-qa-session-tenant-gates' || github.head_ref == 'test/r64-live-qa-session-tenant-gates'
+    if: github.ref_name == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.head_ref == 'feat/r62-qa-session-subject-and-workspace-boundary' || github.ref_name == 'design/r63-mobile-bottom-navigation' || github.head_ref == 'design/r63-mobile-bottom-navigation' || github.ref_name == 'test/r64-live-qa-session-tenant-gates' || github.head_ref == 'test/r64-live-qa-session-tenant-gates' || github.ref_name == 'feat/r66-qa-self-service-password-change' || github.head_ref == 'feat/r66-qa-self-service-password-change'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -651,6 +653,9 @@ jobs:
         run: python deployment/cloudflare/tests/live_r62_workspace_browser.py
       - name: Regress real nonproduction Cloudflare login and anonymous role boundaries
         run: python deployment/cloudflare/tests/live_r61_qa_auth_browser.py
+      - name: R66 real Chromium password change form on mobile and desktop (synthetic API only)
+        if: github.ref_name == 'feat/r66-qa-self-service-password-change' || github.head_ref == 'feat/r66-qa-self-service-password-change'
+        run: python deployment/cloudflare/tests/live_r66_password_change_browser.py
       - name: R64 live Cloudflare QA anonymous tenant/session/CSRF on 320/390/430/1440
         if: github.ref_name == 'test/r64-live-qa-session-tenant-gates' || github.head_ref == 'test/r64-live-qa-session-tenant-gates'
         run: python deployment/cloudflare/tests/live_r64_qa_browser.py

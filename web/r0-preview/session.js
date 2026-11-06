@@ -80,7 +80,52 @@
       location.replace('/');
     } catch { btn.disabled=false; btn.textContent='Thử đăng xuất lại'; }
   }
+  // Passwords are sent only in a same-origin POST, never in URLs or localStorage.
+  function setupPasswordChange(){
+    const dialog=el('#change-password-dialog'),form=el('#change-password-form');
+    const error=el('#change-password-error'),submit=el('#change-password-submit');
+    if(!dialog||!form||!error||!submit)return;
+    const report=message=>{error.textContent=message||'';error.hidden=!message;};
+    const open=()=>{
+      form.reset();report('');
+      dialog.showModal();
+      el('#current-password')?.focus();
+    };
+    for(const id of ['change-password-top','change-password-drawer']){
+      el('#'+id)?.addEventListener('click',open);
+    }
+    el('#change-password-close')?.addEventListener('click',()=>dialog.close());
+    dialog.addEventListener('close',()=>{form.reset();report('');});
+    form.addEventListener('submit',async event=>{
+      event.preventDefault();report('');
+      const current=el('#current-password').value;
+      const next=el('#new-password').value;
+      const confirm=el('#confirm-password').value;
+      if(next.length<8||next.length>256){report('Mật khẩu mới cần từ 8 đến 256 ký tự.');return;}
+      if(current===next){report('Hãy chọn mật khẩu khác mật khẩu hiện tại.');return;}
+      if(next!==confirm){report('Hai lần nhập mật khẩu mới chưa khớp.');return;}
+      submit.disabled=true;
+      try{
+        const response=await fetch('/api/qa/change-password',{
+          method:'POST',credentials:'same-origin',cache:'no-store',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({current_password:current,new_password:next})
+        });
+        if(!response.ok){
+          if(response.status===401)report('Mật khẩu hiện tại không đúng hoặc phiên đã hết hạn.');
+          else if(response.status===429)report('Bạn thao tác quá nhiều lần. Vui lòng thử lại sau.');
+          else report('Không thể đổi mật khẩu. Vui lòng kiểm tra thông tin và thử lại.');
+          return;
+        }
+        // The server revokes all sessions and clears the old cookie.
+        form.reset();dialog.close();
+        location.replace(location.pathname==='/'?'/?password_changed=1':'/login?changed=1');
+      }catch{report('Không thể kết nối dịch vụ QA. Vui lòng thử lại.');}
+      finally{submit.disabled=false;}
+    });
+  }
   el('#preview-logout').addEventListener('click', logout);
   el('#drawer-logout').addEventListener('click', logout);
+  setupPasswordChange();
   check();
 })();

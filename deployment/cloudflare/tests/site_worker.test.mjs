@@ -20,6 +20,14 @@ const env={QA_AUTH:{async fetch(request){
   logged=true;
   return new Response('{"ok":true}',{status:200,headers:{'Content-Type':'application/json','Set-Cookie':'al_qa_session=00000000-0000-4000-8000-000000000000; Path=/; HttpOnly; Secure; SameSite=Strict'}});
  }
+ if(u.pathname==='/api/qa/change-password'){
+  if(!logged)return Response.json({error:'denied'},{status:401});
+  logged=false;
+  return new Response('{"ok":true,"login_required":true}',{status:200,headers:{
+   'Content-Type':'application/json',
+   'Set-Cookie':'al_qa_session=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Strict'
+  }});
+ }
  if(u.pathname==='/api/qa/logout'){
   logged=false;
   return new Response('{"ok":true}',{status:200,headers:{'Set-Cookie':'al_qa_session=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Strict'}});
@@ -138,6 +146,30 @@ test('POST matter, logout and legacy paths do not bypass permissions',async()=>{
  assert.equal((await get('/app')).status,302);
  assert.equal((await get('/app/')).status,308);
  assert.equal((await get('/not-found')).status,404);
+});
+test('R66 real workspace displays QA password change and same-origin service relay works',async()=>{
+ const signIn=await handleSite(new Request(ORIGIN+'/api/qa/login',{
+  method:'POST',headers:{Origin:ORIGIN,'Sec-Fetch-Site':'same-origin','Content-Type':'application/json'},
+  body:JSON.stringify({email:'synthetic@qa.invalid',password:'synthetic-only'})}),env);
+ assert.equal(signIn.status,200);
+ const app=await get('/app');
+ assert.equal(app.status,200);
+ const html=await app.text();
+ for(const id of ['change-password-top','change-password-drawer','change-password-dialog','change-password-form',
+                   'current-password','new-password','confirm-password'])assert.match(html,new RegExp('id="'+id+'"'));
+ const js=await (await get('/session.js')).text();
+ assert.match(js,/\/api\/qa\/change-password/);
+ assert.equal((await get('/api/qa/change-password')).status,404,'GET not supported');
+ const body=JSON.stringify({current_password:'synthetic-old',new_password:'synthetic-new-different'});
+ const csrf=await handleSite(new Request(ORIGIN+'/api/qa/change-password',{method:'POST',
+  headers:{Origin:'https://malicious.invalid','Content-Type':'application/json'},body}),env);
+ assert.equal(csrf.status,403);
+ const result=await handleSite(new Request(ORIGIN+'/api/qa/change-password',{method:'POST',
+  headers:{Origin:ORIGIN,'Sec-Fetch-Site':'same-origin','Content-Type':'application/json'},body}),env);
+ assert.equal(result.status,200);
+ assert.match(result.headers.get('Set-Cookie')||'',/Max-Age=0/);
+ assert.equal(calls.at(-1).origin,'https://ai-law-standalone-cf-qa.iaict-platform.workers.dev');
+ assert.equal((await get('/app')).status,302,'change revokes current session');
 });
 test('public home still works after logout, health honestly says QA environment',async()=>{
  assert.equal((await get('/')).status,200);
