@@ -1529,7 +1529,7 @@
           "deployment/cloudflare/QA_R72_DOCUMENTS.md"
         ],
         "owner_acceptance": "NOT_REQUESTED",
-        "notes": "No Cloudflare deployment; password QA rotation and role E2E remain separately open. Upload signature and checksum are transport integrity only, not legal-text completeness, OCR, malware analysis or translation quality. R75 QA API/site code content deployment verified; organization Google OAuth client still missing; file E2E NOT_RUN."
+        "notes": "At the original R72 checkpoint there was no Cloudflare deployment; R75 subsequently deployed the QA source. Password rotation and role E2E remain separately open. Upload signature and checksum are transport integrity only, not legal-text completeness, OCR, malware analysis or translation quality. R75 QA API/site code content deployment verified; organization Google OAuth client still missing; file E2E NOT_RUN."
       },
       {
         "id": "AL-R0-GDRIVE-R75-ONE-TAP",
