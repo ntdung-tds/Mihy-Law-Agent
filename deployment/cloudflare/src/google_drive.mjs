@@ -49,7 +49,7 @@ export class GoogleDriveAdapter {
   async metadata(objectId){
     if(!SAFE_FILE.test(objectId||""))throw new Error("Bad Drive object ID");
     const params=new URLSearchParams({
-      fields:"id,name,mimeType,size,trashed,parents",
+      fields:"id,name,mimeType,size,trashed,parents,appProperties,createdTime",
       supportsAllDrives:"true",
     });
     const res=await this.request(
@@ -70,6 +70,51 @@ export class GoogleDriveAdapter {
     if(res.headers?.get("Content-Type")?.includes("text/html"))
       throw new Error("Drive response invalid");
     return res; // streaming body; no publicly shared URL or redirect
+  }
+
+  // R86: server creates a tenant-bound session, but the browser uploads
+  // the file bytes directly to Google. This method NEVER accepts file bytes.
+  async beginResumable({name,mimeType,size,ticketId}){
+    if(typeof name!=='string'||name.length<5||name.length>120||
+       !/^[\p{L}\p{N}._ -]+$/u.test(name)||name.includes('..')||
+       !['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(mimeType)||
+       !Number.isInteger(size)||size<22||size>1500000||
+       !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(ticketId))
+      throw Error('Invalid direct-upload metadata');
+    const url='https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable';
+    const metadata={name,mimeType,parents:[this.rootId],
+      appProperties:{ai_law_upload_ticket:ticketId}};
+    let res;
+    try{
+      res=await this.fetcher(url,{method:'POST',redirect:'manual',headers:{
+        Authorization:'Bearer '+this.accessToken,
+        'Content-Type':'application/json; charset=UTF-8',
+        'X-Upload-Content-Type':mimeType,
+        'X-Upload-Content-Length':String(size),
+      },body:JSON.stringify(metadata)});
+    }catch{throw new DriveUploadFailure('transport');}
+    if(!res||res.status!==200)
+      throw new DriveUploadFailure('provider',res?.status||0,res?await providerReason(res):'');
+    const raw=res.headers.get('Location')||'';
+    let u;
+    try{u=new URL(raw);}catch{throw new DriveUploadFailure('response');}
+    if(u.protocol!=='https:'||u.hostname!=='www.googleapis.com'||
+       u.username||u.password||u.hash||
+       u.pathname!=='/upload/drive/v3/files'||
+       u.searchParams.get('uploadType')!=='resumable'||
+       (u.searchParams.get('upload_id')||'').length<10)
+      throw new DriveUploadFailure('response');
+    return u.toString();
+  }
+  // R86: bind a new Drive object to the server-created ticket and approved
+  // root. The browser cannot set/alter these metadata fields during PUT.
+  async verifyDirectUpload(objectId,{ticketId,name,mimeType,size}){
+    const info=await this.metadata(objectId);
+    if(info.name!==name||info.mimeType!==mimeType||
+       Number(info.size)!==size||
+       info.appProperties?.ai_law_upload_ticket!==ticketId)
+      throw new DriveUploadFailure('verify');
+    return info;
   }
 
   // R72: upload only into the per-organization approved private root.
