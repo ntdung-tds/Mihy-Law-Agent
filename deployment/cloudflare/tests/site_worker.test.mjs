@@ -226,3 +226,27 @@ test('public home still works after logout, health honestly says QA environment'
  assert.equal(health.workspace_auth_binding,true);
 });
 after(()=>rmSync(tmp,{recursive:true,force:true}));
+
+test('Google Drive return uses public 200 first-party landing, then Strict-cookie-friendly local navigation',async()=>{
+ logged=false;
+ const first=await get('/drive-return?drive=connected',{});
+ assert.equal(first.status,200,'landing works without session cookies');
+ assert.equal(first.headers.get('Referrer-Policy'),'no-referrer');
+ assert.equal(first.headers.get('X-Robots-Tag'),'noindex,nofollow,noarchive');
+ assert.equal(first.headers.get('Set-Cookie'),null,'landing must not mint sessions');
+ const html=await first.text();
+ assert.match(html,/http-equiv="refresh" content="0;url=\/app\?drive=connected#documents"/);
+ assert.match(html,/href="\/app\?drive=connected#documents"/);
+ assert.ok(!html.includes('code='),'OAuth codes never returned to client');
+ const failed=await get('/drive-return?drive=failed&issue=drive',{});
+ assert.equal(failed.status,200);
+ assert.match(await failed.text(),/\/app\?drive=failed&issue=drive#documents/);
+ const unsafe=await get('/drive-return?drive=failed&issue=%3Cscript%3E&next=https%3A%2F%2Fevil.invalid',{});
+ const safeHtml=await unsafe.text();
+ assert.equal(unsafe.status,200);
+ assert.ok(!safeHtml.includes('evil.invalid'));
+ assert.ok(!safeHtml.includes('<script>'));
+ assert.match(safeHtml,/\/app\?drive=failed#documents/);
+ assert.equal((await get('/drive-return?drive=unexpected',{})).status,404);
+ assert.equal((await get('/app')).status,302,'protected app still requires signed-in user');
+});
