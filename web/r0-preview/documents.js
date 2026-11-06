@@ -44,6 +44,33 @@
    }
   }catch{message('Tệp Google Drive chưa sẵn sàng hoặc chưa được cấp quyền.');}
  }
+ async function driveStatus(){
+  const messageBox=$('drive-status'),btn=$('drive-connect');
+  if(!messageBox||!btn)return;
+  btn.hidden=true;
+  try{
+   const res=await fetch('/api/qa/drive/status',{credentials:'same-origin',cache:'no-store'});
+   if(res.status===503){messageBox.textContent='Quản trị hệ thống cần cấu hình Google OAuth Client trên máy chủ QA.';return;}
+   if(!res.ok){messageBox.textContent='Không thể xác minh kết nối Drive.';return;}
+   const data=await res.json();
+   messageBox.textContent=data.connected?'Google Drive của đơn vị đã kết nối.':'Đơn vị chưa kết nối Google Drive.';
+   btn.hidden=!!data.connected||!data.can_connect;
+  }catch{messageBox.textContent='Không thể kiểm tra kết nối Drive.';}
+ }
+ const connect=$('drive-connect');
+ if(connect)connect.addEventListener('click',async()=>{
+  connect.disabled=true;
+  try{
+   const r=await fetch('/api/qa/drive/connect',{method:'POST',credentials:'same-origin',
+    cache:'no-store',headers:{'Content-Type':'application/json'},body:'{}'});
+   if(!r.ok)throw Error('Google OAuth chưa sẵn sàng.');
+   const data=await r.json();
+   const url=new URL(data.authorization_url);
+   if(url.origin!=='https://accounts.google.com')throw Error('Đường dẫn Google không hợp lệ.');
+   location.assign(url.toString());
+  }catch(e){message(e.message);connect.disabled=false;}
+ });
+ void driveStatus();
  form.addEventListener('submit',async e=>{
   e.preventDefault();message('');
   const id=select.value,chosen=file.files?.[0];
