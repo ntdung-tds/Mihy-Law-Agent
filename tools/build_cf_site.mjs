@@ -23,7 +23,10 @@ const modules=[
  ['workspace_css.mjs','web/r0-preview/styles.css','WORKSPACE_CSS'],
  ['workspace_js.mjs','web/r0-preview/app.js','WORKSPACE_JS'],
  ['workspace_session.mjs','web/r0-preview/session.js','WORKSPACE_SESSION'],
- ['workspace_matters.mjs','web/r0-preview/matters.js','WORKSPACE_MATTERS']
+ ['workspace_matters.mjs','web/r0-preview/matters.js','WORKSPACE_MATTERS'],
+ ['account_html.mjs','web/account/index.html','ACCOUNT_HTML'],
+ ['account_css.mjs','web/account/styles.css','ACCOUNT_CSS'],
+ ['account_js.mjs','web/account/app.js','ACCOUNT_JS']
 ];
 for(const [name,src,exported] of modules){
  const text=fs.readFileSync(path.join(root,src),'utf8');
