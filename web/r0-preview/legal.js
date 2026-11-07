@@ -110,9 +110,14 @@
           sources.append(line);
         }
         if(Array.isArray(data.findings)&&data.findings.length){
-          const found=document.createElement('p');
-          found.textContent='Các đoạn phù hợp: '+data.findings.map(x=>x.source_id).join(', ');
+          const found=document.createElement('strong');
+          found.textContent='Các đoạn nguồn khớp từ khóa:';
           sources.append(found);
+          for(const match of data.findings.slice(0,8)){
+            const paragraph=document.createElement('p');
+            paragraph.textContent='['+match.source_id+'] '+match.excerpt;
+            sources.append(paragraph);
+          }
         }
         result.hidden=false;
         setStatus('Hoàn tất bản nháp QA. Hãy đối chiếu nguồn và kiểm duyệt thủ công.');
