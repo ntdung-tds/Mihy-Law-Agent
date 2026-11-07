@@ -407,7 +407,7 @@
  }
  async function pickGoogleFolder(){
   const r=await fetch('/api/qa/drive/picker-config',{credentials:'same-origin',cache:'no-store'});
-  if(!r.ok)throw Error('Google Picker chưa được cấu hình API Key cho QA. Chưa thể chọn thư mục.');
+  if(!r.ok)throw Error('Chức năng chọn thư mục Drive chưa sẵn sàng. AI Law đang hoàn thiện kết nối; bạn không cần cấu hình gì.');
   const config=await r.json();
   if(!config.configured||!/^AIza[A-Za-z0-9_-]{25,}$/.test(config.api_key||''))
    throw Error('Google Picker chưa sẵn sàng.');
