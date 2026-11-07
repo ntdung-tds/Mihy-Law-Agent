@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `92` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T05:48:30.000Z`.
+- **PCS revision:** `93` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T06:18:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R96 — Google deleted_client root cause confirmed and QA fail-close (2026-11-07)
+
+- **Reported incident:** Owner's Google sign-in in AI Law documents returned `401 deleted_client`. Live **Cloudflare QA backend** settings `ai-law-standalone-cf-qa` showed `GOOGLE_OAUTH_CLIENT_ID` = **deleted legacy web client**, whereas the standalone/embedded browser-only uploader uses the Owner's **new** public OAuth Client ID. Backend has an old private `GOOGLE_OAUTH_CLIENT_SECRET` binding; its value was not accessed or disclosed. Two distinct auth flows were previously presented close together and caused confusion.
+- **Code + CI:** [PR #135](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/135) merged `c9916a90d5261cba93b1f2774fe9fd93642855d8`; [CI #42345963189](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42345963189) **PASS 9/9 jobs**. Documents UI now refuses redirect if backend supplies the known deleted OAuth Client ID and shows recovery instructions; active/new client path unchanged. Embedded QA uploader clarifies it cannot replace organization/MatterACL grants. No file bytes or tokens routed through Cloudflare and no changes to QA D1/ACL.
+- **QA deployment:** `ai-law-web-qa` deployment `016b4f2b-4511-4964-9044-ab83d62922e5`, 2026-11-07T06:16:09Z, **100%**. Cloudflare script readback: **26/26 modules**, deleted-client guard present, new-browser client present, `QA_AUTH` preserved. Live anonymous Chromium `/app#documents` redirected to login (**PASS**); subsequent independent `/drive-blob` Browser Rendering request **BLOCKED 429**, not a regression PASS/FAIL. Signed-in Owner Google E2E **NOT_RUN**.
+- **Required Owner-managed fix (not done):** Google Cloud Authorized redirect URI for backend must include `https://ai-law-standalone-cf-qa.iaict-platform.workers.dev/api/qa/drive/callback`; the previously supplied `/drive-return` is only a post-callback navigation page. Update **both** `GOOGLE_OAUTH_CLIENT_ID` and matching **`GOOGLE_OAUTH_CLIENT_SECRET`** securely in the *QA backend* Cloudflare Worker. Never paste secret into chat or GitHub. Then reconnect tenant Google OAuth and test actual MatterACL/Drive approved parent/D1 receipt/list/download. Do not claim full organization upload fixed; production and private SRS unchanged.
 
 ## R95 — Direct Drive QA widget in authenticated Documents workspace (2026-11-07)
 
