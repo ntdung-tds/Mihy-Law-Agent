@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 95,
-  "updated_at": "2026-11-07T07:44:00.000Z",
+  "revision": 96,
+  "updated_at": "2026-11-07T08:12:00.000Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2451,8 +2451,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R98 Owner identified two different interfaces at backend and frontend QA root. Root cause backend worker served separate R44 mobile QA login shell at GET /; frontend website was canonical /app. PR #139 merged e2a0ad9a0fa266884bf8343a343badfcddcd3989; CI #42352062310 PASS all 9. Deployed QA backend content-only (does not update config) Cloudflare deployment 97db88b5-f7d2-4dfc-bd09-57d20b529c97, 100%, backend GET / now 302 to canonical https://ai-law-web-qa.iaict-platform.workers.dev/. Readback 8 modules, D1 and secret bindings retained, OAuth callback route preserved. Browser Rendering backend root follows redirect and shows canonical website hero PASS; second direct browser probe rate-limited HTTP 429. Google consent/tenant upload/receipt NOT_RUN.",
-      "next_action": "Owner verify only https://ai-law-web-qa.iaict-platform.workers.dev/ for AI Law user UI; legacy backend root now redirects. Backend https://ai-law-standalone-cf-qa.iaict-platform.workers.dev/ remains internal API & Google OAuth callback endpoint; do not move OAuth callback. Revalidate matching secret on QA Google OAuth client, approved callback, then authenticated tenant MatterACL upload/Drive parent/D1 receipt/download. No SRS scope expansion or production deploy.",
+      "last_completed_step": "R99 QA only: Owner reported standalone /drive-blob direct Google multipart upload PASS, while authenticated matter upload failed at browser resumable-session PUT with ambiguous Google/CORS error. PR #141 merged 33ebaf880918d5999c468dcaafd8c7fddebfd6dd, CI #42353851610 PASS 9/9. Changed /api/qa/documents/upload/start to issue ACL/session/tenant-grant-bound D1 ticket + approved Drive root only, no CORS-blocked resumable URL. New /app#documents browser GIS grant, memory-only token, directly POST multipart/related bytes to Google, then existing server MatterACL/parent/ticket/MIME/size proof + D1 receipt. Failed/ambiguous Google network result blocks duplicate retry in-page. QA backend deployment 683845ac-085c-42cb-a299-34c873a26fe9 100%, website deployment 207d717b-e582-4c1a-9d07-d621719034a3 100%, 8+26 modules and D1/secrets/QA_AUTH intact. Anonymous /drive-blob live rendering PASS; authenticated /app probe BLOCKED 429. Real Owner new matter-bound upload, receipt and download NOT_RUN; production unchanged.",
+      "next_action": "Owner physical-mobile acceptance: log in only at https://ai-law-web-qa.iaict-platform.workers.dev/app#documents; ensure organization Drive connector is connected, select matter and synthetic PDF/DOCX; press 'Cấp quyền Google để tải theo hồ sơ' and choose SAME authorized Google account that has write access to organization Drive folder; press 'Lưu tệp QA vào Drive', verify Google folder, D1 matter list and permitted download. Check denied MatterACL actor and ambiguous-error no retry. If provider HTTP 403 or receipt verification 409, do NOT claim PASS; investigate tenant browser grant/folder authorization mismatch. No customer data, no production deployment, SRS v1.1.15 unchanged.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
