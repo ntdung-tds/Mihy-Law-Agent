@@ -1,12 +1,18 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `88` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T04:14:00.000Z`.
+- **PCS revision:** `89` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T05:15:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R93 — New Google OAuth web client for isolated browser Drive QA (2026-11-07)
+
+- **Owner supplied:** new public OAuth **Client ID** only (not a Client Secret) after reconfiguring Google Auth Platform and `drive.file` scope. QA JavaScript origin must be `https://ai-law-web-qa.iaict-platform.workers.dev`; redirected callback path `/drive-return` is not used by isolated popup token client.
+- **Scoped change:** [PR #130](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/130) replaces the old QA `data-google-client-id` in `web/qa/drive-blob.html`, keeping `web/qa/drive-blob.js` unchanged because it already reads the value and passes it to Google Identity Services. Regression checks that HTML and JS are wired to the new ID. Only public client identifier is committed; never a secret, access token, file ID, or real customer data.
+- **At checkpoint:** PR open, final-head CI **PENDING**, QA deployment **NOT_RUN**, Google owner consent and real PDF/DOCX upload **NOT_RUN**. No claim that this fixes Google origin registration or upload until owner-browser proof. Production, baseline SRS, organization document/MatterACL flow unchanged.
 
 ## R92 — SRS Drive upload delta and independent Google Apps Script POC (2026-11-07)
 
