@@ -5,7 +5,7 @@
 import {mobileSession} from './mobile_auth.mjs';
 
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
-const MAX_BODY_BYTES=14500,MAX_SOURCE=5000,MAX_QUESTION=600;
+const MAX_BODY_BYTES=36000,MAX_SOURCE=5000,MAX_QUESTION=600;
 const MAX_OUTPUT=8500,MODEL='@cf/meta/llama-3.1-8b-instruct';
 const TASKS=Object.freeze({
  UC01:['Soạn bản nháp hợp đồng/văn bản','Tạo bản nháp từ các dữ kiện do người dùng cung cấp. Không tự điền tên các bên, điều khoản, số liệu hoặc căn cứ chưa được nêu; đánh dấu [CẦN XÁC MINH].'],
@@ -133,7 +133,8 @@ export async function legalApi(req,env,opts={}){
  if(!originOkay(req)||!req.headers.get('Content-Type')?.startsWith('application/json'))return invalid();
  if(Number(req.headers.get('Content-Length')||0)>MAX_BODY_BYTES)return err(413,'Nội dung QA vượt giới hạn.');
  const now=opts.now??Math.floor(Date.now()/1000);
- const principal=await mobileSession(req,env,now);
+ let principal;
+ try{principal=await mobileSession(req,env,now);}catch{return unavailable();}
  if(!principal||!UUID.test(principal.tenant_id)||!UUID.test(principal.user_id))return err(401,'Phiên AI Law đã hết hạn.');
  if(!['lawyer','tenant_admin'].includes(principal.role_key))return err(403,'Không có quyền sử dụng tác vụ AI.');
  let body;
