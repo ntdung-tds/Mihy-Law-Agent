@@ -106,12 +106,13 @@
  const browserStatus=$('document-google-status');
  const SCOPE='https://www.googleapis.com/auth/drive.file';
  let browserToken='',expiresAt=0,googleScript=null,uploading=false,authorizing=false,uncertainUpload=false,consentSeq=0;
+ let choosingDestination=false,pendingSaveChoice='',grantResumePending=false,restoringGrant=false;
  const browserReady=()=>browserToken.length>10&&Date.now()+60000<expiresAt;
  const storageReady=()=>!destination||
    (storageProvider?.value==='google_drive'&&uuid.test(destination.value));
  const connected=()=>driveBox?.dataset.state==='connected';
  function uploadGate(){
-  if(uploadButton)uploadButton.disabled=uploading||authorizing||uncertainUpload||!connected()||!storageReady();
+  if(uploadButton)uploadButton.disabled=uploading||authorizing||choosingDestination||restoringGrant||uncertainUpload||!connected()||!storageReady();
  }
  async function refreshStorageDestinations(preferred=''){
   if(!destination)return;
@@ -209,15 +210,40 @@
   }).catch(e=>{googleScript=null;throw e;});
   return googleScript;
  }
- function prepareBrowserConsent(){
-  if(browserStatus)browserStatus.textContent=browserReady()
-   ?'Đã sẵn sàng tải tệp vào thư mục Drive của đơn vị.'
-   :'Drive đã kết nối. Bấm Lưu tệp; Google có thể yêu cầu xác nhận một lần trong trình duyệt.';
-  // Preload Google Identity Services before the user submits, so its popup
-  // can be requested synchronously from the save-button gesture.
+ async function prepareBrowserConsent(){
+  // If THIS AI Law user originally connected Google Drive, reuse that
+  // server-held refresh grant to fetch a short-lived browser access token.
+  // A staff member never receives the tenant admin's Google credentials.
+  restoringGrant=true;uploadGate();
+  if(browserStatus)browserStatus.textContent='Đang khôi phục kết nối Google Drive đã có…';
+  try{
+   const r=await fetch('/api/qa/drive/browser-access',{method:'POST',
+    credentials:'same-origin',cache:'no-store',
+    headers:{'Content-Type':'application/json'},body:'{}'});
+   if(r.status===401){location.replace('/login');return;}
+   if(r.ok){
+    const grant=await r.json();
+    if(typeof grant.access_token==='string'&&grant.access_token.length>10&&
+       grant.scope===SCOPE&&Number(grant.expires_in)>=120&&connected()){
+     browserToken=grant.access_token;
+     expiresAt=Date.now()+Math.min(3600,Number(grant.expires_in))*1000;
+     if(browserStatus)browserStatus.textContent='Drive đã kết nối. Bạn có thể chọn nơi lưu ngay.';
+     return;
+    }
+   }
+   if(browserStatus)browserStatus.textContent=r.status===403
+    ?'Drive của đơn vị đã kết nối. Tài khoản của bạn có thể cần cấp quyền Google riêng khi lưu.'
+    :'Kết nối Google cần được xác thực lại khi lưu.';
+  }catch{
+   if(browserStatus)browserStatus.textContent='Chưa khôi phục được quyền Google. Bạn có thể thử Lưu lại.';
+  }finally{
+   restoringGrant=false;uploadGate();
+  }
+  // Google Identity Services is a fallback for users who have not
+  // personally authorized this app; never trigger its popup on load.
   void loadGoogleBrowser().catch(()=>{
    if(connected()&&browserStatus)
-    browserStatus.textContent='Chưa tải được thư viện Google. Hãy kiểm tra mạng và thử Lưu tệp lại.';
+    browserStatus.textContent='Chưa tải được dịch vụ xác thực Google. Hãy thử tải lại trang.';
   });
  }
  function requestBrowserGrant(matterId,selectedFile,selectedDest){
@@ -233,6 +259,13 @@
   }
   const seq=++consentSeq;
   authorizing=true;uploadGate();
+  // Google OAuth may never invoke the callback if its sign-in window is
+  // dismissed or stalls on Android. Never leave the Save button locked.
+  setTimeout(()=>{
+   if(seq!==consentSeq||!authorizing)return;
+   authorizing=false;pendingSaveChoice='';uploadGate();
+   message('Google chưa hoàn tất xác thực. Trở lại AI Law, mở bằng Chrome rồi thử Lưu lại.','error');
+  },45000);
   if(browserStatus)browserStatus.textContent='Đang xác nhận quyền Google để lưu tệp…';
   try{
    const client=window.google.accounts.oauth2.initTokenClient({
@@ -241,6 +274,7 @@
      if(seq!==consentSeq||!connected())return;
      authorizing=false;
      if(answer?.error||typeof answer?.access_token!=='string'||answer.access_token.length<11){
+      pendingSaveChoice='';
       message('Google chưa cấp quyền tải tệp. Hãy kiểm tra tài khoản được chọn.','error');
       uploadGate();return;
      }
@@ -251,12 +285,18 @@
      // Continue the same save intent only when the file and authorized matter
      // have not changed while Google's popup was open.
      if(browserReady()&&select.value===matterId&&file.files?.[0]===selectedFile&&(!destination||destination.value===selectedDest)){
-      form.requestSubmit();
-     }else message('Hồ sơ hoặc tệp đã thay đổi. Hãy bấm Lưu tệp lại.','error');
+      // Google normally replies later. Keep a short pending continuation for
+      // browsers/tests which return the grant before the location dialog closes.
+      if(choosingDestination)grantResumePending=true;
+      else form.requestSubmit();
+     }else{
+      pendingSaveChoice='';
+      message('Hồ sơ hoặc tệp đã thay đổi. Hãy bấm Lưu lại.','error');
+     }
     },
     error_callback:()=>{
      if(seq!==consentSeq)return;
-     authorizing=false;uploadGate();
+     pendingSaveChoice='';authorizing=false;uploadGate();
      message('Không thể mở cửa sổ Google. Hãy kiểm tra popup và thử Lưu tệp lại.','error');
     }
    });
@@ -266,7 +306,7 @@
    // Never persist bearer tokens or expose the tenant's backend refresh grant.
    client.requestAccessToken({prompt:''});
   }catch{
-   if(seq===consentSeq){authorizing=false;uploadGate();}
+   if(seq===consentSeq){pendingSaveChoice='';authorizing=false;uploadGate();}
    message('Không mở được Google. Vui lòng thử Lưu tệp lại.','error');
   }
  }
@@ -287,6 +327,8 @@
   connect.hidden=true;
   if(disconnect)disconnect.hidden=true;
   if(uploadButton)uploadButton.disabled=true;
+  // Never reuse a token from a previously selected workspace/account.
+  browserToken='';expiresAt=0;
   setDrive('loading','Đang kiểm tra kết nối Google Drive…');
   try{
    const res=await fetch('/api/qa/drive/status',{credentials:'same-origin',cache:'no-store'});
@@ -296,7 +338,7 @@
    connect.dataset.canConnect=data.can_connect===true?'true':'false';
    if(data.connected===true&&data.configuration_ready===true){
     setDrive('connected','Đã kết nối Google Drive cho không gian làm việc này. Có thể tải tệp theo hồ sơ.');
-    prepareBrowserConsent();
+    await prepareBrowserConsent();
     void refreshStorageDestinations();
     uploadGate();
     if(disconnect)disconnect.hidden=data.can_connect!==true;
@@ -388,6 +430,116 @@
   }finally{disconnect.disabled=false;}
  });
  void driveStatus();
+ // One Save gesture opens a destination chooser. No admin-created folder wizard.
+ let pickerLoader=null;
+ function loadPicker(){
+  if(window.google?.picker?.PickerBuilder)return Promise.resolve();
+  if(pickerLoader)return pickerLoader;
+  pickerLoader=new Promise((resolve,reject)=>{
+   if(window.gapi?.load){resolve();return;}
+   const s=document.createElement('script');
+   s.src='https://apis.google.com/js/api.js';s.async=true;
+   s.onload=resolve;s.onerror=()=>reject(Error('Không tải được Google Picker.'));
+   document.head.append(s);
+  }).then(()=>new Promise((resolve,reject)=>{
+   window.gapi.load('picker',{callback:resolve,onerror:reject,timeout:15000,
+    ontimeout:()=>reject(Error('Google Picker không phản hồi.'))});
+  })).catch(e=>{pickerLoader=null;throw e;});
+  return pickerLoader;
+ }
+ async function pickGoogleFolder(){
+  const r=await fetch('/api/qa/drive/picker-config',{credentials:'same-origin',cache:'no-store'});
+  if(!r.ok)throw Error('Chức năng chọn thư mục Drive chưa sẵn sàng. AI Law đang hoàn thiện kết nối; bạn không cần cấu hình gì.');
+  const config=await r.json();
+  if(!config.configured||!/^AIza[A-Za-z0-9_-]{25,}$/.test(config.api_key||''))
+   throw Error('Google Picker chưa sẵn sàng.');
+  const clientId=$('drive-blob-test')?.dataset.googleClientId||'';
+  const appId=clientId.split('-')[0];
+  if(!/^\d{8,20}$/.test(appId)||!browserReady())throw Error('Cần kết nối lại tài khoản Google.');
+  await loadPicker();
+  const G=window.google?.picker;
+  if(!G?.PickerBuilder||!G.DocsView||!G.ViewId?.FOLDERS)
+   throw Error('Google Picker chưa được tải đầy đủ.');
+  return new Promise((resolve,reject)=>{
+   try{
+    const view=new G.DocsView(G.ViewId.FOLDERS)
+     .setIncludeFolders(true).setSelectFolderEnabled(true);
+    // Separate Shared Drives tab: Google Picker setEnableDrives(true) filters
+    // to shared-drive items only (not normal My Drive / shared-with-me folders).
+    const sharedView=new G.DocsView(G.ViewId.FOLDERS)
+     .setIncludeFolders(true).setSelectFolderEnabled(true).setEnableDrives(true);
+    const picker=new G.PickerBuilder().setDeveloperKey(config.api_key)
+     .setAppId(appId).setOAuthToken(browserToken).addView(view).addView(sharedView)
+     .setCallback(data=>{
+      if(data.action===G.Action.PICKED){
+       const docs=data[G.Response.DOCUMENTS]||data.docs||[];
+       const id=docs?.[0]?.[G.Document.ID]||docs?.[0]?.id||'';
+       if(!/^[A-Za-z0-9_-]{10,200}$/.test(id))
+        reject(Error('Thư mục Google được chọn chưa hợp lệ.'));
+       else resolve(id);
+      }else if(data.action===G.Action.CANCEL)resolve(null);
+     }).build();
+    picker.setVisible(true);
+   }catch(e){reject(e);}
+  });
+ }
+ // One location chooser appears first. Google authentication, if still
+ // needed for THIS browser, is requested only after the user selects a place.
+ async function pickAndRegisterFolder(){
+  const id=await pickGoogleFolder();
+  if(!id)return null;
+  const r=await fetch('/api/qa/storage/select',{method:'POST',
+   credentials:'same-origin',cache:'no-store',
+   headers:{'Content-Type':'application/json'},body:JSON.stringify({folder_id:id})});
+  const body=await r.json().catch(()=>({}));
+  if(r.status===401){location.replace('/login');throw Error('Phiên AI Law đã hết hạn.');}
+  if(!r.ok||!uuid.test(body.destination?.id||''))
+   throw Error(body.error||'Thư mục này không cho phép lưu tài liệu. Hãy chọn thư mục có quyền ghi.');
+  return body.destination.id;
+ }
+ async function chooseSaveDestination(matterId,selectedFile){
+  // After first-time Google consent, resume the *same* root/folder selection
+  // without opening the location chooser a second time.
+  if(pendingSaveChoice&&browserReady()){
+   const mode=pendingSaveChoice;pendingSaveChoice='';
+   return mode==='root'?'root':pickAndRegisterFolder();
+  }
+  const dialog=$('document-save-dialog');
+  const root=$('document-save-root'),folder=$('document-save-folder'),
+   cancel=$('document-save-cancel');
+  if(!dialog||!root||!folder||!cancel||!dialog.showModal)
+   throw Error('Trình duyệt chưa hỗ trợ chọn nơi lưu.');
+  // A tenant admin's OAuth root is not an employee's own My Drive.
+  // Only admin/personal-owner accounts with a verified tenant grant may use it.
+  root.disabled=connect?.dataset.canConnect!=='true';
+  root.title=root.disabled?'My Drive cá nhân cần kết nối tài khoản Google riêng.':'';
+  return new Promise(resolve=>{
+   let done=false;
+   const finish=value=>{
+    if(done)return;done=true;
+    if(dialog.open)dialog.close();
+    root.onclick=folder.onclick=cancel.onclick=null;
+    dialog.oncancel=null;resolve(value);
+   };
+   const authorizeThenResume=mode=>{
+    // Request Google from the actual button click, not from an asynchronous
+    // task after browser user activation has expired (important on mobile).
+    pendingSaveChoice=mode;
+    finish('oauth_pending');
+    requestBrowserGrant(matterId,selectedFile,destination?.value||'');
+   };
+   root.onclick=()=>browserReady()?finish('root'):authorizeThenResume('root');
+   cancel.onclick=()=>finish(null);
+   dialog.oncancel=e=>{e.preventDefault();finish(null);};
+   folder.onclick=()=>{
+    if(!browserReady()){authorizeThenResume('folder');return;}
+    dialog.close();
+    void pickAndRegisterFolder().then(finish)
+     .catch(e=>{message(e.message||'Không mở được Drive.','error');finish(null);});
+   };
+   try{dialog.showModal();}catch{finish(null);}
+  });
+ }
  form.addEventListener('submit',async e=>{
   e.preventDefault();message('');
   const id=select.value,chosen=file.files?.[0];
@@ -400,15 +552,23 @@
   if(!/\.(pdf|docx)$/i.test(chosen.name)){
    message('Chỉ chấp nhận tệp PDF hoặc DOCX mẫu.','error');return;
   }
-  if(!connected()||uploading||authorizing||uncertainUpload){uploadGate();return;}
-  if(!storageReady()){
-   message('Chọn nhà cung cấp và thư mục đích được cấp quyền trước khi lưu.','error');
-   uploadGate();return;
+  if(!connected()||choosingDestination||uploading||authorizing||uncertainUpload){uploadGate();return;}
+  choosingDestination=true;uploadGate();
+  let selectedDestination;
+  try{selectedDestination=await chooseSaveDestination(id,chosen);}
+  catch(e){pendingSaveChoice='';message(e.message||'Không mở được Drive.','error');return;}
+  finally{
+   choosingDestination=false;uploadGate();
+   if(grantResumePending){grantResumePending=false;form.requestSubmit();}
   }
-  if(!browserReady()){
-   // One save button, no separate browser permission button. Only this first
-   // Google popup is needed to obtain the user's scoped browser access token.
-   requestBrowserGrant(id,chosen,destination?.value||'');return;
+  if(selectedDestination==='oauth_pending')return; // Google popup on first use, not a canceled upload
+  if(!selectedDestination){
+   if(!feedback?.textContent)message('Đã hủy lưu. Không gửi tệp lên Drive.');
+   return;
+  }
+  if(!browserReady()){message('Phiên Google đã hết hạn. Vui lòng nhấn Lưu lại.','error');return;}
+  if(select.value!==id||file.files?.[0]!==chosen||!connected()){
+   message('Hồ sơ, tài khoản Drive hoặc tệp đã thay đổi. Không lưu tệp.','error');return;
   }
   uploading=true;
   const submit=form.querySelector('button[type="submit"]');submit.disabled=true;
@@ -480,7 +640,7 @@
    };
    message('Đang cấp quyền tải lên Google Drive…');
    const manifest={matter_id:id,file_name:chosen.name,mime_type:mime,byte_length:chosen.size,sha256:digest};
-   if(destination)manifest.destination_id=destination.value;
+   manifest.destination_id=selectedDestination;
    const init=await api('/api/qa/documents/upload/start',manifest);
    // Server checked MatterACL and refreshed the tenant Drive grant. The
    // approved parent and single-use upload ticket are the only returned data.
@@ -501,7 +661,7 @@
     '\r\n--'+boundary+'--'
    ],{type:'multipart/related; boundary='+boundary});
    message('Đang gửi tệp trực tiếp đến thư mục Google Drive của đơn vị…');
-   const url='https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id';
+   const url='https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id&supportsAllDrives=true';
    let google;
    try{
     google=await fetch(url,{method:'POST',body,headers:{

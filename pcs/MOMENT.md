@@ -1,12 +1,50 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `100` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T11:07:45.432Z`.
+- **PCS revision:** `105` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T16:30:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R107 — Eliminate duplicate Google browser sign-in for already-connected owner (2026-11-07)
+
+- **Owner repeat failure:** Even after R106 Save-first chooser UX, Android still showed Google Account sign-in splash. Root cause: standalone backend had a connected OAuth refresh grant, while browser demanded a second Google Identity Services token, with no reuse.
+- **Fix:** Authenticated same-origin POST `/api/qa/drive/browser-access` checks the active AI Law login, exact tenant and **connected_by == current user**, authorized connector role, original `drive.file` scope, current encrypted refresh grant, and rechecks session + grant after refresh. Returns only a short-lived access token (never the refresh token). The Documents UI silently retrieves it when the connected owner opens the page; normal **Lưu → My Drive hoặc thư mục** uses that token without triggering another Google login. Other employees cannot borrow the owner's OAuth identity; they still require appropriate separate consent. On disconnect/workspace change the in-memory token is cleared.
+- **CI:** [run 42390901712](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42390901712) **9/9 PASS**, includes cross-origin/anonymous/employee denial, account-switch race, backend relay and no-second-Google-login synthetic Save.
+- **Live QA:** Backend `ai-law-standalone-cf-qa` deployed `e0a70baa-5ab9-4197-ba9d-7fd698e8fa90` (9 modules, 2 changed), website `ai-law-web-qa` `fa7ed99e-955e-498b-ab93-06bb750daf1d` (26 modules, 2 changed). Both 100% traffic, guarded source readback PASS; QA OAuth/D1 bindings and website QA_AUTH + Picker API Key preserved. Anonymous `/health` Chromium PASS.
+- **Read-only QA D1 aggregate:** One active Drive connection and an active login for the same connected principal; no user IDs or Google file IDs saved to this public checkpoint.
+- **Not accepted yet:** Real owner Android Google Picker, My Drive root/shared folder, PDF/DOCX bytes round-trip and mobile E2E remain NOT_RUN. Initial Google consent may still be required if a different user account is signed into AI Law. No original SRS v1.1.15 or production changes; Owner final acceptance pending.
+
+## R106 — Android Google sign-in appeared before Drive chooser (2026-11-07)
+
+- **Owner report:** Android screenshot showed a Google Account sign-in splash rather than the Google Drive folder picker after trying to open/save. QA code inspection confirmed `Lưu` starts a *separate* browser GIS token grant before presenting the destination chooser, even though the tenant Drive connection may already exist.
+- **QA fix:** `Lưu` opens destination selection first, and requests an OAuth browser token only if needed after the user explicitly selects My Drive or a folder; original choice is resumed without duplicate prompts. Cancel invokes no Google auth and creates no upload. A 45-second timeout unlocks the Save button if Google fails to return a result. Existing Drive.file browser→Google file data path and MatterACL remain unchanged; no OAuth secrets moved to frontend.
+- **Evidence:** [CI 42388832874](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42388832874) PASS 9/9, including no-Google-on-cancel and Save-first synthetic Android test. QA website `ai-law-web-qa` deployment `18e3f3be-1a77-43e3-af0f-55d83096e030` 100%; one module replaced, 26 module count preserved, exact source readback and QA_AUTH+GOOGLE_PICKER_API_KEY binding preservation PASS. Public /health browser PASS.
+- **Pending:** Existing tenant-side refresh grant is NOT the same as the user's browser-side OAuth token. On first use or when provider session expires Google **may still ask for sign-in**; real Android user account E2E, shared folder/root actual upload/download, and Owner acceptance NOT_RUN. Do not claim that the screenshot's Google sign-in is completely resolved without Owner device test. Production untouched.
+
+## R104.2 — Google Picker API Key is now configured (2026-11-07)
+
+- Owner set `GOOGLE_PICKER_API_KEY` as Text on `ai-law-web-qa`. Read-only Cloudflare confirmed binding present, Google-shaped value, QA_AUTH retained; deployment `a83efac3-51b1-4168-9731-9dcd3665250a` 100%.
+- QA browser `/health` PASS; authenticated Picker config/browser E2E NOT_RUN because browser-rendering was HTTP 429 on the attempted additional probe. Google Cloud referrer/API restrictions, actual document upload/download, shared-folder and employee OAuth isolation need real testing; **Owner acceptance pending**. Public GitHub contains no API key value.
+- [PR #154 checkpoint](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/154#issuecomment-6709053155); production untouched.
+
+## R104.1 — Google Picker CSP and Shared Drives QA correction (2026-11-07)
+
+- **Owner UX unchanged:** one existing **Lưu** action; explicit My Drive root or choose a Google folder; no client Google Cloud configuration, folder wizard, implicit root, or duplicate upload.
+- **Fix:** Real /app CSP now permits `https://apis.google.com` (Picker JavaScript) and `https://docs.google.com` (Picker iframe), while /login, landing pages, and isolated Blob POC remain restricted. Picker offers a separate Shared Drives view; browser-to-Google multipart requests carry `supportsAllDrives=true`.
+- **Test:** PR #154 [CI run 42383252102](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42383252102), **9/9 PASS**, including R104 CSP, key gating, shared-drive synthetic tests, existing ACL and mobile regression.
+- **Live QA website:** content-only deploy `c7d3b33d-7f21-4203-b4c4-a6946a9c8682` at 100%; exact source readback PASS, all 26 modules and QA_AUTH binding retained; existing backend `a23dc8d3-e8d6-4a77-95dd-a7102e4eab10` unchanged. Anonymous /health Chromium PASS; authenticated /app browser probe BLOCKED HTTP 429.
+- **Blocking operator setup:** Google Cloud project for AI Law must enable Google Picker API and create a referrer/API-restricted API key for QA + `docs.google.com`; the website QA Worker still **lacks GOOGLE_PICKER_API_KEY**. This is the developer/operator's one-time setup, **not** a customer task. Real signed-in Google Picker, root, folder, shared company Drive, file download and employee account E2E remain **NOT_RUN**; OneDrive NOT_IMPLEMENTED; Owner acceptance pending. Production and private SRS v1.1.15 unchanged.
+
+## R104 — One Save opens Google Drive destination chooser (2026-11-07)
+
+- **Owner-approved UX:** Existing AI Law **Lưu** opens choice of **My Drive root explicitly** or existing writable Google folder through Google Picker. Cancellation creates no upload. No separate “Mở Drive”, no app-created folders, no employee-grant wizard, no silent default, no automatic duplicate uploads. Existing AI Law login and Google browser `drive.file` direct multipart flow retained. My Drive root is the actual Google account root, **not** the former AI Law QA private folder.
+- **Source:** [draft PR #154](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/154) branched from still-unmerged R103 PR #151. Tests: [GitHub Actions #42380376897](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42380376897) **PASS 9/9** on code commit `1dd0324586a1706f2a2ce1a6d4b4c94fc7bcd95e`. Synthetic tests cover explicit root, selected writable folder, provider denial, cancel (no ticket), no implicit root, MatterACL, SHA download path, no Worker file-byte proxy.
+- **QA only:** Cloudflare content-only deployments backend `a23dc8d3-e8d6-4a77-95dd-a7102e4eab10` and website `628ee7e0-af3e-4f92-adec-77b79de2a76c` at 100%. Exact source readback: 9 backend / 26 web modules; D1 and OAuth bindings preserved. Anonymous QA health Chromium PASS; authenticated Chromium retry BLOCKED 429.
+- **Blocker:** The Google Picker API requires Google Cloud Picker API enabled and an API Key restricted to QA website + docs.google.com. Site worker **does not have `GOOGLE_PICKER_API_KEY`**; folder-picker selection is visibly unavailable, not silently simulated. The explicit root branch is deployed but actual signed-in owner Google provider upload/download/re-upload **NOT_RUN**. Existing tenant-wide OAuth is not an employee's personal grant; root selection is prohibited to ordinary organization lawyer to avoid storing into admin My Drive. Real employee personal account and company-shared folder flows need per-user connection/authorization QA.
+- **Gate:** OneDrive #153 remains NOT_IMPLEMENTED; source PR unmerged, no production, no private customer data. SRS v1.1.15 original remains unchanged; approved changes tracked in `pcs/SRS_CHANGES.md`. Owner acceptance pending.
 
 ## R103 — QA selectable Google Drive child folders and explicit employee grants (2026-11-07)
 

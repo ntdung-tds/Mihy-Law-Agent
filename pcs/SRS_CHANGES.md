@@ -33,3 +33,11 @@
 ```pcs-change
 {"kind":"DECIDE","id":"CR-20261107-BYOS-02","decision":"APPROVED","actor":"owner","ref":"Current project conversation: Owner 'Ok, làm' after BYOS destination and Google Drive/OneDrive folder assignment proposal","at":"2026-11-07T10:41:27.169Z","verified_external_decision":false}
 ```
+
+
+### R104 implementation refinement — Owner-approved single Save action (2026-11-07)
+
+- **Supersedes R103 customer-facing folder-administration UI:** In the existing AI Law Documents form, the user presses one **Lưu** button, opens Google Drive / OneDrive destination selection, and explicitly chooses an existing permitted folder **or the account's My Drive root**. Cancel does not upload. The application does not create, assign, relocate, or auto-pick folders. Multiple locations are available for browsing, but each Save writes one file to one explicitly selected destination, never to all.
+- Existing AI Law authentication is reused; a separate Google/Microsoft grant is necessary **only if** the user account lacks appropriate provider authorization. The tenant-admin's existing Drive grant cannot be silently treated as an individual employee's Drive account.
+- **Security/technical conditions:** Provider OAuth scopes and folder canAddChildren, user/provider account, installation/tenant and MatterACL, cancellation, duplicate prevention, provider proof and verified download. Google Picker needs an enabled API and a referrer-restricted public key. A successful source CI is not a real user/provider test.
+- **Implementation checkpoint:** PR #154 draft based on R103, GitHub Actions 9/9 PASS and QA Worker readback. The Google Picker API key is not configured, so real folder selection is **BLOCKED**; signed-in Google and mobile end-to-end **NOT_RUN**; OneDrive **NOT_IMPLEMENTED**. No production and no change to private baseline SRS v1.1.15 until Owner final approval.

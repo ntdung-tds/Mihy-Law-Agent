@@ -464,3 +464,15 @@ body.drawer-open{overflow:hidden}
 .qa-storage-actions .qa-storage-secondary{background:#f2f3f9;color:#344158;border:1px solid #dce2ec}
 .qa-storage-actions button:disabled{opacity:.5}
 @media(max-width:600px){.qa-storage-picker{padding:12px}.qa-storage-actions{display:grid;grid-template-columns:1fr}.qa-storage-actions input,.qa-storage-actions button{width:100%}}
+
+/* R104: one Save dialog; intentionally no duplicate folder administration UI. */
+.qa-save-dialog{width:min(420px,calc(100vw - 28px));max-width:100%;border:1px solid #dfe3ec;
+ border-radius:16px;padding:22px;background:#fff;color:#25233d;box-shadow:0 20px 70px #1f253344;}
+.qa-save-dialog::backdrop{background:rgba(23,28,48,.48)}
+.qa-save-dialog h3{font-size:1.12rem;margin:0 0 8px}
+.qa-save-dialog p{margin:0 0 16px;color:#65677b;font-size:.92rem}
+.qa-save-dialog button{display:block;width:100%;min-height:44px;text-align:center;margin:9px 0;
+ background:#322e57;color:white;border:0;border-radius:10px;cursor:pointer;font-weight:600}
+.qa-save-dialog button.qa-save-cancel{background:#f0f1f6;color:#49495e}
+
+.qa-save-dialog button:disabled{opacity:.48;cursor:not-allowed}

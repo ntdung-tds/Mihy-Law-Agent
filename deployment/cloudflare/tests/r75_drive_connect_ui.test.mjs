@@ -14,16 +14,26 @@ function element(id){
   setAttribute(){},removeAttribute(){},click(){this.clicked=true;},remove(){},
   replaceChildren(){this.options=[];},
   append(...x){this.options.push(...x);if(this.id==='document-matter'&&this.options.length===2)this.value=x[0].value;},
-  querySelector(){return null;}
+  querySelector(){return null;},
+  showModal(){this.open=true;},close(){this.open=false;}
  };
 }
-async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false,directStartError=null,directGoogleError='',downloadCase=null,storageSelection=false}={}){
+async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false,directStartError=null,directGoogleError='',downloadCase=null,storageSelection=false,saveChoice='root',serverAccess=false}={}){
  const ids=['document-matter','document-upload-form','document-file','document-file-name','document-feedback',
   'qa-document-list','drive-setup','drive-status','drive-connect','drive-disconnect',
-  'document-google-status','drive-blob-test'];
+  'document-google-status','drive-blob-test','document-save-dialog',
+  'document-save-root','document-save-folder','document-save-cancel'];
  if(storageSelection)ids.push('document-storage-provider','document-destination','document-storage-hint',
   'storage-admin-controls','storage-folder-name','storage-create','storage-member','storage-assign','storage-revoke');
  const els=Object.fromEntries(ids.map(x=>[x,element(x)]));
+ els['document-save-dialog'].showModal=()=>{
+  els['document-save-dialog'].open=true;
+  setImmediate(()=>{
+   if(saveChoice==='root')els['document-save-root'].onclick?.();
+   else if(saveChoice==='cancel')els['document-save-cancel'].onclick?.();
+   else if(saveChoice==='folder')els['document-save-folder'].onclick?.();
+  });
+ };
  const submit=element('submit');
  const pending=[];
  els['document-upload-form'].querySelector=()=>submit;
@@ -52,6 +62,10 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
  const fetch=async(url,opts)=>{
   calls.push({url,method:opts?.method||'GET',headers:opts?.headers||{},body:opts?.body});
   if(url==='/api/qa/drive/status')return Response.json(currentStatus);
+  if(url==='/api/qa/drive/browser-access')return serverAccess?
+   Response.json({access_token:'synthetic-existing-qa-owner-grant-12345678',expires_in:3600,
+    scope:'https://www.googleapis.com/auth/drive.file'}):
+   Response.json({error:'not connected as current owner'},{status:403});
   if(storageSelection&&url==='/api/qa/storage/destinations')
    return Response.json({destinations:[{id:'77777777-7777-4777-8777-777777777777',
     label:'Hồ sơ luật sư A',provider:'google_drive',kind:'organization',assigned:true}],can_manage:false,
@@ -70,6 +84,11 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
   }
   if(directUpload&&directStartError&&url==='/api/qa/documents/upload/start')
    return Response.json(directStartError,{status:503});
+  if(url==='/api/qa/drive/picker-config')return Response.json({
+   configured:true,api_key:'AIza'+'X'.repeat(35)});
+  if(url==='/api/qa/storage/select')return Response.json({
+   destination:{id:'77777777-7777-4777-8777-777777777777',
+    label:'Shared Folder',provider:'google_drive'}});
   if(directUpload&&url==='/api/qa/documents/upload/start')
    return Response.json({ticket:'55555555-5555-4555-8555-555555555555',
     drive_folder_id:'syntheticQAroot_12345'});
@@ -91,6 +110,26 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
    config.callback({access_token:'synthetic-google-browser-token',expires_in:3600});
   }};}}}},
   confirm(text){confirmations.push(text);return confirmDisconnect;}};
+ if(saveChoice==='folder'){
+  class DocsView{
+   constructor(view){this.view=view;}
+   setIncludeFolders(){return this;}
+   setSelectFolderEnabled(){return this;}
+   setEnableDrives(enabled){this.sharedDrivesOnly=enabled;return this;}
+  }
+  class PickerBuilder{
+   constructor(){this.views=[];}
+   setDeveloperKey(){return this;}
+   setAppId(){return this;}
+   setOAuthToken(){return this;}
+   addView(view){this.views.push(view);return this;}
+   setCallback(cb){this.cb=cb;return this;}
+   build(){const cb=this.cb;return {setVisible(){cb({action:'picked',docs:[{id:'sharedTeamFolder123456'}]});}};}
+  }
+  window.google.picker={PickerBuilder,DocsView,
+   ViewId:{FOLDERS:'folders'},Action:{PICKED:'picked',CANCEL:'cancel'},
+   Response:{DOCUMENTS:'docs'},Document:{ID:'id'}};
+ }
  class StubURL extends URL{
   static createObjectURL(blob){savedBlobs.push(blob);return 'blob:synthetic-verified-file';}
   static revokeObjectURL(){}
@@ -100,6 +139,15 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
  await new Promise(resolve=>setImmediate(resolve));
  return {els,submit,calls,assignments,historyUrls,confirmations,pending,savedFiles,savedBlobs,record,googleGrants};
 }
+
+ // The Save chooser now precedes OAuth. Synthetic Google callbacks can resume
+ // a second submit in a microtask; wait for all resulting work to settle.
+ async function settleSave(t){
+  for(let i=0;i<8;i++){
+   await new Promise(resolve=>setImmediate(resolve));
+   await Promise.all(t.pending);
+  }
+ }
 
 test('unconfigured OAuth shows operator-only setup status without a broken consent button',async()=>{
  const t=await mount({connected:false,configuration_ready:false,can_connect:true});
@@ -238,8 +286,8 @@ test('R102 connected Drive upload reuses Google consent and cached browser token
   t.els['document-file'].files=[{name:'qa_'+n+'.pdf',size:original.length,
    async arrayBuffer(){return original.buffer.slice(original.byteOffset,original.byteOffset+original.byteLength);}}];
   await form.listeners.submit({preventDefault(){}});
-  await Promise.all(t.pending);
-  assert.equal(t.els['document-feedback'].dataset.state,'success','save '+n);
+  await settleSave(t);
+  assert.equal(t.els['document-feedback'].dataset.state,'success',JSON.stringify({save:n,calls:t.calls.map(x=>x.url),grants:t.googleGrants.length,feedback:t.els['document-feedback'].textContent,dialog:t.els['document-save-dialog'].open,pending:t.pending.length,submitDisabled:t.submit.disabled}));
  }
  assert.equal(t.googleGrants.length,1,'never request a second Google account chooser in same browser session');
  assert.equal(t.googleGrants[0].prompt,'','do not force consent or select_account');
@@ -258,7 +306,7 @@ test('R99 MatterACL PDF uploads with proven Google multipart POST, then verifies
 
  assert.equal(t.submit.disabled,false,'tenant grant + browser Google consent required');
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
- await Promise.all(t.pending);
+ await settleSave(t);
  const starts=t.calls.filter(x=>x.url==='/api/qa/documents/upload/start');
  const finishes=t.calls.filter(x=>x.url==='/api/qa/documents/upload/finish');
  const direct=t.calls.filter(x=>String(x.url).startsWith('https://www.googleapis.com/upload/drive/v3/files?'));
@@ -287,7 +335,7 @@ test('R99 ambiguous Google network failure never finalizes receipt or silently r
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
 
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
- await Promise.all(t.pending);
+ await settleSave(t);
  assert.equal(t.calls.filter(x=>x.url==='/api/qa/documents/upload/finish').length,0);
  assert.equal(t.calls.filter(x=>String(x.url).includes('uploadType=multipart')).length,1);
  assert.equal(t.submit.disabled,true,'no automatic retry on ambiguous Google response');
@@ -303,7 +351,7 @@ test('R99 browser Google 403 on organization root does not generate receipt',asy
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
 
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
- await Promise.all(t.pending);
+ await settleSave(t);
  assert.equal(t.calls.filter(x=>x.url==='/api/qa/documents/upload/finish').length,0);
  assert.match(t.els['document-feedback'].textContent,/quyền ghi thư mục.*HTTP 403/);
 });
@@ -321,7 +369,7 @@ test('R88 real QA start failure shows bounded stage, provider HTTP and reason, n
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
 
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
- await Promise.all(t.pending);
+ await settleSave(t);
  const msg=t.els['document-feedback'].textContent;
  assert.equal(t.els['document-feedback'].dataset.state,'error');
  assert.match(msg,/stage=provider/);
@@ -343,7 +391,7 @@ test('R88 transport failures show stage without implying a mobile connection def
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
 
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
- await Promise.all(t.pending);
+ await settleSave(t);
  assert.match(t.els['document-feedback'].textContent,/stage=transport/);
  assert.doesNotMatch(t.els['document-feedback'].textContent,/đường truyền.*ổn định/i);
 });
@@ -419,34 +467,109 @@ test('R101 verified browser download keeps a safe (2) filename instead of reject
  assert.match(t.els['document-feedback'].textContent,/SHA-256/);
 });
 
-test('R103 actual form requires provider and assigned folder before starting Google token or uploading',async()=>{
+test('R106 mobile Save opens destination chooser before triggering a Google sign-in screen',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},
+  {directUpload:true,saveChoice:'hold'});
+ const raw=new TextEncoder().encode('%PDF-1.4\\n1 0 obj\\n<< >>\\nendobj\\n%%EOF\\n');
+ t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+ t.els['document-file'].files=[{name:'qa_gpt.pdf',size:raw.length,
+  async arrayBuffer(){return raw.buffer.slice(raw.byteOffset,raw.byteOffset+raw.byteLength);}}];
+ const pending=t.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ await Promise.resolve();
+ assert.equal(t.els['document-save-dialog'].open,true,'destination selection opens on Save');
+ assert.equal(t.googleGrants.length,0,'do not send the user to Google before choosing where to save');
+ assert.equal(t.calls.filter(x=>x.url==='/api/qa/documents/upload/start').length,0,'no upload before location');
+ t.els['document-save-cancel'].onclick();
+ await pending;
+ assert.equal(t.googleGrants.length,0,'cancel must never launch Google sign-in');
+ assert.equal(t.calls.filter(x=>x.url==='/api/qa/documents/upload/start').length,0);
+});
+
+test('R104 Save presents one explicit destination choice and never preselects Google root',async()=>{
  const html=readFileSync(new URL('../../../web/r0-preview/index.html',import.meta.url),'utf8');
  const css=readFileSync(new URL('../../../web/r0-preview/styles.css',import.meta.url),'utf8');
- assert.match(html,/id="document-storage-provider"/);
- assert.match(html,/value="onedrive" disabled/,'unconfigured Microsoft account must not be selectable');
- assert.match(html,/id="document-destination" required disabled/);
- assert.match(html,/id="storage-member"/);
- assert.match(css,/@media\(max-width:600px\)[^\n]*\.qa-storage-picker/);
- const t=await mount({connected:true,configuration_ready:true,can_connect:true},
-  {storageSelection:true,directUpload:true});
- assert.equal(t.submit.disabled,true,'no silent folder default');
- assert.equal(t.googleGrants.length,0,'do not open Google before folder choice');
- t.els['document-storage-provider'].value='google_drive';
- t.els['document-storage-provider'].listeners.change();
+ assert.match(html,/id="document-save-dialog"/);
+ assert.match(html,/id="document-save-root"/);
+ assert.match(html,/id="document-save-folder"/);
+ assert.doesNotMatch(html,/id="storage-member"/,'do not rebuild per-employee folder admin UI');
+ assert.match(html,/<button type="submit">Lưu<\/button>/);
+ assert.match(css,/\.qa-save-dialog::backdrop/);
+ const ready={connected:true,configuration_ready:true,can_connect:true};
+ const original=new TextEncoder().encode('%PDF-1.4\\n1 0 obj\\n<< >>\\nendobj\\n%%EOF\\n');
+ const prepare=t=>{
+  t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+  t.els['document-file'].files=[{name:'qa_gpt.pdf',size:original.length,
+   async arrayBuffer(){return original.buffer.slice(original.byteOffset,original.byteOffset+original.byteLength);}}];
+ };
+ const canceled=await mount(ready,{directUpload:true,saveChoice:'cancel'});
+ prepare(canceled);
+ await canceled.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ await Promise.all(canceled.pending);
+ // Flush simulated modal user cancellation before reading the network calls.
  await new Promise(resolve=>setImmediate(resolve));
- assert.equal(t.els['document-destination'].disabled,false);
- assert.equal(t.els['document-destination'].value,'','even sole folder is not implicitly selected');
- t.els['document-destination'].value='77777777-7777-4777-8777-777777777777';
- t.els['document-destination'].listeners.change();
- assert.equal(t.submit.disabled,false);
- const original=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
+ assert.equal(canceled.calls.filter(x=>x.url==='/api/qa/documents/upload/start').length,0);
+ assert.match(canceled.els['document-feedback'].textContent,/Đã hủy lưu/);
+ const chosen=await mount(ready,{directUpload:true,saveChoice:'root'});
+ prepare(chosen);
+ await chosen.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ await Promise.all(chosen.pending);
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(chosen.els['document-feedback'].dataset.state,'success');
+ const start=chosen.calls.find(x=>x.url==='/api/qa/documents/upload/start');
+ assert.equal(JSON.parse(start.body).destination_id,'root','explicit My Drive selection, not silent fallback');
+ assert.equal(chosen.googleGrants.length,1);
+});
+
+
+test('R104 real Google Picker callback registers folder selected by user before uploading',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},{
+  directUpload:true,saveChoice:'folder'});
+ const bytes=new TextEncoder().encode('%PDF-1.4\\n1 0 obj\\n<< >>\\nendobj\\n%%EOF\\n');
  t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
- t.els['document-file'].files=[{name:'qa_gpt.pdf',size:original.length,
-  async arrayBuffer(){return original.buffer.slice(original.byteOffset,original.byteOffset+original.byteLength);}}];
+ t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
+  async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
- await Promise.all(t.pending);
- assert.equal(t.els['document-feedback'].dataset.state,'success');
- const start=t.calls.find(c=>c.url==='/api/qa/documents/upload/start');
+ await Promise.race([settleSave(t),new Promise((_,reject)=>setTimeout(()=>reject(Error('Picker flow did not finish: '+JSON.stringify({calls:t.calls.map(x=>x.url),feedback:t.els['document-feedback'].textContent,dialog:t.els['document-save-dialog'].open}))),2000))]);
+ const selected=t.calls.find(x=>x.url==='/api/qa/storage/select');
+ assert.ok(selected,'provider choice must be checked with application and Google permissions');
+ assert.equal(JSON.parse(selected.body).folder_id,'sharedTeamFolder123456');
+ const start=t.calls.find(x=>x.url==='/api/qa/documents/upload/start');
+ assert.ok(start);
  assert.equal(JSON.parse(start.body).destination_id,'77777777-7777-4777-8777-777777777777');
- assert.equal(t.googleGrants.length,1);
+ assert.equal(t.els['document-feedback'].dataset.state,'success');
+});
+
+test('R104 authenticated app CSP permits Google Picker JS and docs iframe without weakening public pages',()=>{
+ const source=readFileSync(new URL('../src/site_worker.mjs',import.meta.url),'utf8');
+ const app=source.slice(source.indexOf('const directWorkspaceCsp='),
+   source.indexOf('function directWorkspaceHeaders('));
+ const blob=source.slice(source.indexOf('const driveBlobCsp='),
+   source.indexOf('// Same OAuth popup origin'));
+ const common=source.slice(source.indexOf('const csp='),source.indexOf('const driveBlobCsp='));
+ assert.match(app,/https:\/\/apis\.google\.com/,'picker script must be allowed on /app');
+ assert.match(app,/frame-src https:\/\/accounts\.google\.com https:\/\/docs\.google\.com/);
+ assert.doesNotMatch(blob,/https:\/\/apis\.google\.com/,'isolated upload POC should not gain unrelated picker privileges');
+ assert.doesNotMatch(common,/https:\/\/apis\.google\.com/,'public pages remain restricted');
+ const ui=readFileSync(new URL('../../../web/r0-preview/documents.js',import.meta.url),'utf8');
+ assert.match(ui,/setEnableDrives\(true\)/,'Google Picker includes shared-drive folder tab');
+ assert.match(ui,/supportsAllDrives=true/,'selected shared-drive folders need Drive multipart support');
+});
+
+test('R107 already-connected owner Save opens Drive with server token and NO Google sign-in popup',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},
+  {directUpload:true,saveChoice:'folder',serverAccess:true});
+ const raw=new TextEncoder().encode('%PDF-1.4\\n1 0 obj\\n<< >>\\nendobj\\n%%EOF\\n');
+ t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+ t.els['document-file'].files=[{name:'qa_gpt.pdf',size:raw.length,
+  async arrayBuffer(){return raw.buffer.slice(raw.byteOffset,raw.byteOffset+raw.byteLength);}}];
+ assert.equal(t.submit.disabled,false);
+ await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ await settleSave(t);
+ assert.equal(t.googleGrants.length,0,'never open Google sign-in when connected user has a valid server refresh');
+ assert.equal(t.calls.filter(x=>x.url==='/api/qa/drive/browser-access').length,1);
+ assert.equal(t.calls.filter(x=>x.url==='/api/qa/storage/select').length,1);
+ const direct=t.calls.find(x=>String(x.url).includes('uploadType=multipart'));
+ assert.ok(direct,'must upload exactly once after selected location');
+ assert.equal(direct.headers.Authorization,'Bearer synthetic-existing-qa-owner-grant-12345678');
+ assert.equal(t.els['document-feedback'].dataset.state,'success');
 });

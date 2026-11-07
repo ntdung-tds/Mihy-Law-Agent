@@ -29,7 +29,7 @@ import { DRIVE_INLINE_HTML } from './drive_inline_html.mjs';
 import { DRIVE_INLINE_JS } from './drive_inline_js.mjs';
 
 const AUTH_ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
-const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile','/api/qa/profile/avatar','/api/qa/drive/status','/api/qa/drive/connect','/api/qa/drive/disconnect','/api/qa/storage/destinations','/api/qa/storage/members','/api/qa/storage/assignments']);
+const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile','/api/qa/profile/avatar','/api/qa/drive/status','/api/qa/drive/connect','/api/qa/drive/disconnect','/api/qa/drive/browser-access','/api/qa/storage/destinations','/api/qa/storage/destinations','/api/qa/storage/members','/api/qa/storage/assignments','/api/qa/storage/select']);
 const privateAssets=new Map([
  ['/styles.css',[WORKSPACE_CSS,'text/css; charset=utf-8']],
  ['/app.js',[WORKSPACE_JS,'application/javascript; charset=utf-8']],
@@ -51,9 +51,12 @@ const driveBlobCsp="default-src 'none'; script-src 'self' https://accounts.googl
 // Same OAuth popup origin as the Owner-verified isolated R93 upload page,
 // scoped to the authenticated /app page only; ordinary private assets and
 // all public website routes keep their original restrictive CSP.
+// Google Picker loads its public JS from apis.google.com and opens an
+// embedded docs.google.com chooser. Permit these ONLY on authenticated /app.
+// Never weaken the public landing pages, /login, or isolated Blob POC.
 const directWorkspaceCsp=csp
- .replace("script-src 'self';","script-src 'self' https://accounts.google.com;")
- .replace("connect-src 'self' https://www.googleapis.com;","connect-src 'self' https://www.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com;");
+ .replace("script-src 'self';","script-src 'self' https://accounts.google.com https://apis.google.com;")
+ .replace("connect-src 'self' https://www.googleapis.com;","connect-src 'self' https://www.googleapis.com https://accounts.google.com https://apis.google.com; frame-src https://accounts.google.com https://docs.google.com;");
 function directWorkspaceHeaders(type){
  const h=headers(type); h['Content-Security-Policy']=directWorkspaceCsp;
  h['Cross-Origin-Opener-Policy']='same-origin-allow-popups';
@@ -132,6 +135,17 @@ export async function handleSite(req,env){
  // R90 isolated QA-only page. Cloudflare serves static bytes ONLY; the browser
  // obtains a short-lived Google token itself and POSTs a Blob directly to Google.
  // No QA_AUTH, /api/qa/drive, D1, session or Worker upload is involved.
+ // The Google Picker key is public but must be referrer/API-restricted in Google Cloud.
+ // Only an active AI Law session can fetch this configuration.
+ if(path==='/api/qa/drive/picker-config'&&req.method==='GET'){
+  let allowed;try{allowed=await authenticated(req,env);}catch{return unavailable();}
+  if(allowed===false)return respond(JSON.stringify({error:'UNAUTHENTICATED'}),'application/json; charset=utf-8',401);
+  if(allowed!==true)return unavailable();
+  const key=typeof env?.GOOGLE_PICKER_API_KEY==='string'?env.GOOGLE_PICKER_API_KEY:'';
+  const configured=/^AIza[A-Za-z0-9_-]{25,}$/.test(key);
+  return respond(JSON.stringify({configured,api_key:configured?key:null}),
+   'application/json; charset=utf-8',configured?200:503);
+ }
  if(req.method==='GET'&&path==='/drive-blob')
   return new Response(DRIVE_BLOB_HTML,{status:200,headers:blobHeaders('text/html; charset=utf-8')});
  if(req.method==='GET'&&path==='/drive-blob.js')

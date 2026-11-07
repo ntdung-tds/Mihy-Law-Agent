@@ -140,22 +140,14 @@
             <form id="document-upload-form">
               <label for="document-matter">Hồ sơ có quyền ghi</label>
               <select id="document-matter" required disabled><option value="">Chọn hồ sơ QA…</option></select>
-              <fieldset class="qa-storage-picker" aria-label="Chọn vị trí lưu trữ">
-                <legend>Nơi lưu tài liệu</legend>
-                <label for="document-storage-provider">Nhà cung cấp lưu trữ</label>
-                <select id="document-storage-provider" required><option value="">Chọn dịch vụ lưu trữ…</option><option value="google_drive">Google Drive đã kết nối</option><option value="onedrive" disabled>OneDrive — chưa kết nối</option></select>
-                <label for="document-destination">Thư mục được cấp quyền</label>
-                <select id="document-destination" required disabled><option value="">Chọn thư mục…</option></select>
-                <small id="document-storage-hint" class="qa-document-hint" role="status" aria-live="polite">Chọn nơi lưu và thư mục đích. AI Law không tự chọn thư mục gốc.</small>
-                <div id="storage-admin-controls" class="qa-storage-admin" hidden>
-                  <p class="qa-document-hint">Quản trị thư mục: tạo thư mục con trong Drive đã kết nối và phân quyền cho thành viên.</p>
-                  <label for="storage-folder-name">Tên thư mục mới</label>
-                  <div class="qa-storage-actions"><input id="storage-folder-name" maxlength="80" placeholder="Ví dụ: Hồ sơ luật sư A" /><button id="storage-create" type="button">Tạo thư mục</button></div>
-                  <label for="storage-member">Nhân viên được cấp quyền</label>
-                  <select id="storage-member"><option value="">Chọn nhân viên…</option></select>
-                  <div class="qa-storage-actions"><button id="storage-assign" type="button">Cấp quyền thư mục</button><button id="storage-revoke" type="button" class="qa-storage-secondary">Thu hồi quyền</button></div>
-                </div>
-              </fieldset>
+              <p id="document-storage-hint" class="qa-document-hint" role="status" aria-live="polite">Nhấn Lưu để mở Google Drive và chọn nơi lưu. Bạn có thể lưu ngay tại My Drive hoặc chọn thư mục.</p>
+              <dialog id="document-save-dialog" class="qa-save-dialog" aria-label="Chọn nơi lưu trên Google Drive">
+                <h3>Lưu vào Google Drive</h3>
+                <p>Chọn vị trí lưu tài liệu của bạn.</p>
+                <button id="document-save-root" type="button">Lưu tại My Drive (ngoài thư mục)</button>
+                <button id="document-save-folder" type="button">Chọn thư mục trong Drive…</button>
+                <button id="document-save-cancel" type="button" class="qa-save-cancel">Hủy</button>
+              </dialog>
               <label for="document-file">Tệp PDF hoặc DOCX mẫu</label>
               <div class="qa-document-picker">
                 <input id="document-file" class="qa-document-file-input" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-describedby="document-file-name document-file-hint" required />
@@ -166,7 +158,7 @@
               </div>
               <small id="document-file-hint" class="qa-document-hint">Chỉ dùng tệp kiểm thử không chứa dữ liệu khách hàng · Tối đa 1,5 MB</small>
               <small id="document-google-status" class="qa-document-hint" role="status" aria-live="polite">Đã kết nối Google Drive. Khi lưu tệp lần đầu, Google có thể yêu cầu xác nhận quyền ngay trong thao tác Lưu tệp.</small>
-              <button type="submit">Lưu tệp vào thư mục đã chọn</button>
+              <button type="submit">Lưu</button>
             </form>
             <p id="document-feedback" role="status" aria-live="polite"></p>
             <div id="qa-document-list" class="matter-list" role="list"></div>

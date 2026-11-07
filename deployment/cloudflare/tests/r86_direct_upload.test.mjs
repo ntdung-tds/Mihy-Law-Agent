@@ -8,7 +8,7 @@ const U='22222222-2222-4222-8222-222222222222';
 const T='33333333-3333-4333-8333-333333333333';
 const M='44444444-4444-4444-8444-444444444444';
 const S='55555555-5555-4555-8555-555555555555';
-const ROOT='syntheticQAroot_12345',REMOTE='syntheticDriveFile_67890';
+const ROOT='syntheticQAroot_12345',ACCOUNT_ROOT='actualMyDriveRoot123456',REMOTE='syntheticDriveFile_67890';
 const FOLDER='assignedFolder_1234567',DEST='77777777-7777-4777-8777-777777777777';
 const ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
 const now=1800000000;
@@ -19,7 +19,7 @@ function request(path,body,{cookie=true,origin=ORIGIN}={}){
  if(cookie)headers.Cookie='al_qa_session='+S;
  return new Request(ORIGIN+path,{method:'POST',headers,body:JSON.stringify(body)});
 }
-function fixture({allow=true,grant=true,badProof=false,active=true,sessionMode='ok',destination=false,badFolder=false}={}){
+function fixture({allow=true,grant=true,badProof=false,active=true,sessionMode='ok',destination=false,badFolder=false,role='lawyer',kind='organization'}={}){
  let ticket=null,used=false,receipt=false,storageGrant=true;const requests=[],statements=[];
  const env={AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,
   JWT_ISSUER:'https://issuer.test',
@@ -31,7 +31,7 @@ function fixture({allow=true,grant=true,badProof=false,active=true,sessionMode='
     return {
      async first(){
       if(sql.includes('FROM qa_sessions s'))return active?
-       {user_id:U,tenant_id:T,role_key:'lawyer',subject:'qa',expires_at:now+400}:null;
+       {user_id:U,tenant_id:T,role_key:role,kind,subject:'qa',expires_at:now+400}:null;
       if(sql===DOCUMENT_ACL_SQL)return allow?{ok:1}:null;
       if(sql===ASSIGNED_SQL)return destination&&storageGrant?{
        destination_id:DEST,folder_id:FOLDER,label:'Hồ sơ luật sư A',
@@ -77,12 +77,16 @@ function fixture({allow=true,grant=true,badProof=false,active=true,sessionMode='
     'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=syntheticTicket12345'}});
   }
   if(init.method==='GET'){
+   if(url.includes('/files/root?'))return Response.json({
+    id:ACCOUNT_ROOT,name:'My Drive',mimeType:'application/vnd.google-apps.folder',
+    trashed:false,capabilities:{canAddChildren:true}});
    if(url.includes('/files/'+FOLDER))return Response.json({
     id:FOLDER,name:'Hồ sơ luật sư A',mimeType:'application/vnd.google-apps.folder',
-    parents:[badFolder?'someOutsideRoot12345':ROOT],trashed:false});
+    parents:[badFolder?'someOutsideRoot12345':ROOT],trashed:false,
+    capabilities:{canAddChildren:!badFolder}});
    return Response.json({
     id:REMOTE,name:'qa_gpt.pdf',mimeType:'application/pdf',size:'42',
-    parents:[destination?FOLDER:ROOT],trashed:false,
+    parents:[ticket?.destination_id==='root'?ACCOUNT_ROOT:destination?FOLDER:ROOT],trashed:false,
     appProperties:{ai_law_upload_ticket:badProof?'other-ticket':ticket?.ticket_id}
    });
   }
@@ -269,4 +273,28 @@ test('R103 live upload cannot bypass selected folder with a legacy manifest',asy
  assert.match((await res.json()).error,/chọn thư mục/);
  assert.equal(f.ticket(),null);
  assert.equal(f.receipt(),false);
+});
+
+// R104: Owner explicitly chose to save at My Drive root in a provider chooser.
+// This is distinct from the prohibited implicit default for an empty location.
+test('R104 explicit My Drive root Save succeeds while missing destination still fails closed for live callers',async()=>{
+ const root=fixture({role:'tenant_admin'});
+ const chosen=await documentsApi(request(start,{...MANIFEST,destination_id:'root'}),
+  root.env,{now,driveFetch:root.driveFetch});
+ assert.equal(chosen.status,200,await chosen.clone().text());
+ const ticket=await chosen.json();
+ assert.equal(ticket.drive_folder_id,ACCOUNT_ROOT,'explicit selection must target real My Drive, not AI Law private folder');
+ assert.equal(root.ticket().destination_id,'root','root choice is persisted in the one-use ticket');
+ const done=await documentsApi(request(finish,{ticket:ticket.ticket,file_id:REMOTE}),
+  root.env,{now,driveFetch:root.driveFetch});
+ assert.equal(done.status,201,await done.clone().text());
+ const employee=fixture();
+ const denied=await documentsApi(request(start,{...MANIFEST,destination_id:'root'}),
+  employee.env,{now,driveFetch:employee.driveFetch});
+ assert.equal(denied.status,404,'never save an employee file to tenant admin My Drive');
+ const q=fixture();
+ // The public handler has no driveFetch and still rejects the missing choice before OAuth.
+ const missing=await documentsApi(request(start,MANIFEST),q.env,{now});
+ assert.equal(missing.status,400);
+ assert.match((await missing.json()).error,/chọn thư mục/);
 });

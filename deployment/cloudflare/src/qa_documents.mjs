@@ -60,7 +60,7 @@ export const LIST_SQL=[
  'FROM qa_document_receipts r JOIN qa_file_links f',
  'ON f.installation_id=r.installation_id AND f.tenant_id=r.tenant_id AND f.file_id=r.file_id',
  'WHERE r.installation_id=? AND r.tenant_id=? AND f.matter_id=?',
- 'AND (f.storage_destination_id IS NULL OR EXISTS (SELECT 1 FROM qa_storage_assignments g',
+ "AND (f.storage_destination_id IS NULL OR f.storage_destination_id='root' OR EXISTS (SELECT 1 FROM qa_storage_assignments g",
  'JOIN qa_storage_destinations d ON d.installation_id=g.installation_id AND d.tenant_id=g.tenant_id',
  "AND d.destination_id=g.destination_id AND d.status='active'",
  'WHERE g.installation_id=f.installation_id AND g.tenant_id=f.tenant_id',
@@ -131,13 +131,20 @@ async function startDirect(req,env,p,now,opts){
   return result(400,{error:'Yêu cầu tệp không hợp lệ.'});
  const matter=v.matter_id,name=v.file_name,mime=v.mime_type,size=v.byte_length,sha=v.sha256;
  const destinationId=v.destination_id||null;
- // No implicit root destination in live QA: clients must select a granted folder.
+ // The Owner may explicitly choose My Drive root in the Save chooser. Never
+ // interpret an omitted destination as root (fail closed on cancellation).
+ const explicitRoot=destinationId==='root';
+ // The old OAuth connection is tenant-owned. Do not present the administrator's
+ // My Drive as an ordinary employee's personal My Drive.
+ if(explicitRoot&&p.role_key!=='tenant_admin'&&p.kind!=='personal')
+  return forbidden();
+ // No implicit root destination in live QA: clients must choose a location.
  // Prior R72 synthetic fixtures inject fake Google credentials and an internal
  // fetcher; preserve their historical root-only contract without enabling it
  // for real HTTP callers (the public handle never passes driveFetch).
  const historicalSynthetic=typeof opts.driveFetch==='function'&&
   typeof env.GOOGLE_DRIVE_ACCESS_TOKEN==='string'&&!!env.GOOGLE_DRIVE_ROOT_ID;
- if((!destinationId&&!historicalSynthetic)||(destinationId&&!UUID.test(destinationId)))
+ if((!destinationId&&!historicalSynthetic)||(destinationId&&!UUID.test(destinationId)&&!explicitRoot))
   return result(400,{error:'Hãy chọn thư mục lưu trữ được cấp quyền trước khi lưu tệp.'});
  if(!UUID.test(matter||''))return result(400,{error:'Hồ sơ QA không hợp lệ.'});
  // A mobile/browser download may append (1) or (2). These are safe filename
@@ -162,18 +169,22 @@ async function startDirect(req,env,p,now,opts){
  let drive;try{drive=await driveAdapter(env,p,opts);}
  catch{return storageIssue('DRIVE_GRANT_UNAVAILABLE');}
  let selected=null;
- if(destinationId){
+ if(destinationId&&!explicitRoot){
   try{selected=await assignedDestination(env,p,destinationId);}
   catch{return storageIssue('QA_RECEIPT_UNAVAILABLE');}
   if(!selected)return forbidden();
-  try{await drive.childFolder(selected.folder_id);}
+  try{await drive.writableFolder(selected.folder_id);}
   catch{return result(409,{error:'Thư mục không còn thuộc kho lưu trữ đã cấp quyền.'});}
  }
  // R99: direct browser multipart upload. Google resumable-session PUT from
  // mobile browsers failed CORS; do not create a browser-inaccessible session.
  // The existing OAuth-backed tenant adapter proves the approved Drive root;
  // the browser receives only its folder ID and a short-lived ACL-bound ticket.
- const rootId=selected?.folder_id||drive.rootId;
+ let rootId=selected?.folder_id||drive.rootId;
+ if(explicitRoot){
+  try{rootId=await drive.accountRoot();}
+  catch{return result(409,{error:'Tài khoản Google hiện tại không cho phép lưu tại My Drive.'});}
+ }
  if(typeof rootId!=='string'||!/^[A-Za-z0-9_-]{10,200}$/.test(rootId))
   return storageIssue('DRIVE_GRANT_UNAVAILABLE');
  const ticket=crypto.randomUUID();
@@ -206,9 +217,12 @@ async function finishDirect(req,env,p,now,opts){
  let drive;try{drive=await driveAdapter(env,p,opts);}
  catch{return storageIssue('DRIVE_GRANT_UNAVAILABLE');}
  let approvedParent=drive.rootId;
- if(row.destination_id){
+ if(row.destination_id==='root'){
+  try{approvedParent=await drive.accountRoot();}catch{return forbidden();}
+ }else if(row.destination_id){
   const selected=await assignedDestination(env,p,row.destination_id);
   if(!selected)return forbidden(); // assignment revoked since start
+  try{await drive.writableFolder(selected.folder_id);}catch{return forbidden();}
   approvedParent=selected.folder_id;
  }
  try{await drive.verifyDirectUpload(v.file_id,{
@@ -289,14 +303,17 @@ async function download(env,p,id,now,opts){
  if(!UUID.test(id||''))return forbidden();
  const r=await env.DB.prepare(READ_SQL).bind(env.INSTALLATION_ID,p.tenant_id,id).first();
  if(!r||r.provider!=='google_drive'||!await permit(env,p,r.matter_id,'read',now))return forbidden();
- let approvedParent=null;
- if(r.storage_destination_id){
+ const drive=await driveAdapter(env,p,opts);
+ let approvedParent=drive.rootId;
+ if(r.storage_destination_id==='root'){
+  try{approvedParent=await drive.accountRoot();}catch{return forbidden();}
+ }else if(r.storage_destination_id){
   const selected=await assignedDestination(env,p,r.storage_destination_id);
   if(!selected)return forbidden();
+  try{await drive.writableFolder(selected.folder_id);}catch{return forbidden();}
   approvedParent=selected.folder_id;
  }
- const drive=await driveAdapter(env,p,opts);
- const response=await drive.download(r.provider_object_id,approvedParent||drive.rootId);
+ const response=await drive.download(r.provider_object_id,approvedParent);
  if(Number(response.headers.get('Content-Length')||0)>MAX_FILE)throw Error('Too large');
  const bytes=new Uint8Array(await response.arrayBuffer());
  if(bytes.length!==Number(r.byte_length)||bytes.length>MAX_FILE||await sha256(bytes)!==r.sha256)

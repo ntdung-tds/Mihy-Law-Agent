@@ -331,8 +331,8 @@ test('R97 authenticated QA documents workspace hosts the proven direct Blob uplo
  assert.doesNotMatch(html,/src="https:\/\/accounts\.google\.com\/gsi\/client"/,
   'external OAuth script loads lazily after explicit user opening');
  const csp=r.headers.get('Content-Security-Policy')||'';
- assert.match(csp,/script-src 'self' https:\/\/accounts\.google\.com;/);
- assert.match(csp,/frame-src https:\/\/accounts\.google\.com;/);
+ assert.match(csp,/script-src 'self' https:\/\/accounts\.google\.com https:\/\/apis\.google\.com;/);
+ assert.match(csp,/frame-src https:\/\/accounts\.google\.com https:\/\/docs\.google\.com;/);
  assert.doesNotMatch(csp,/script-src[^;]*\*/);
  assert.equal(r.headers.get('Cross-Origin-Opener-Policy'),'same-origin-allow-popups');
  const js=await get('/drive-inline.js');
@@ -344,6 +344,44 @@ test('R97 authenticated QA documents workspace hosts the proven direct Blob uplo
  assert.doesNotMatch(source,/\/api\/qa\/documents|access_token|refresh_token|localStorage/);
  const login=await get('/login');
  assert.doesNotMatch(login.headers.get('Content-Security-Policy')||'',/accounts\.google\.com/);
+});
+
+test('R104 Google Picker key is checked server-side only for active AI Law sessions',async()=>{
+ logged=false;
+ const key='AIza'+'X'.repeat(35); // synthetic PUBLIC API key shape, not an account credential
+ const withKey={...env,GOOGLE_PICKER_API_KEY:key};
+ const denied=await get('/api/qa/drive/picker-config',withKey);
+ assert.equal(denied.status,401);
+ assert.doesNotMatch(await denied.text(),/AIza/,'no unauthorized API key exposure');
+ logged=true;
+ const unavailable=await get('/api/qa/drive/picker-config');
+ assert.equal(unavailable.status,503,'no silent fake Picker when no key provisioned');
+ assert.equal((await unavailable.json()).configured,false);
+ const configured=await get('/api/qa/drive/picker-config',withKey);
+ assert.equal(configured.status,200);
+ const data=await configured.json();
+ assert.equal(data.configured,true);
+ assert.equal(data.api_key,key);
+ assert.equal(configured.headers.get('Cache-Control'),'no-store');
+ const landing=await get('/');
+ assert.doesNotMatch(landing.headers.get('Content-Security-Policy')||'',/apis\.google\.com/);
+ const login=await get('/login');
+ assert.doesNotMatch(login.headers.get('Content-Security-Policy')||'',/docs\.google\.com/);
+});
+
+test('R107 website forwards owner-scoped browser token request only from same origin',async()=>{
+ const path='/api/qa/drive/browser-access';
+ const before=calls.length;
+ const approved=await handleSite(new Request(ORIGIN+path,{method:'POST',headers:{
+  Origin:ORIGIN,'Sec-Fetch-Site':'same-origin','Content-Type':'application/json'},body:'{}'}),env);
+ assert.equal(approved.status,404,'QA_AUTH fixture has no fake access token, but request must be forwarded');
+ assert.equal(calls.at(-1).path,path,'the existing QA session and service binding are used');
+ assert.equal(calls.length,before+1);
+ assert.equal(calls.at(-1).origin,'https://ai-law-standalone-cf-qa.iaict-platform.workers.dev','website relay rewrites origin to trusted QA backend');
+ const blocked=await handleSite(new Request(ORIGIN+path,{method:'POST',headers:{
+  Origin:'https://untrusted.example','Content-Type':'application/json'},body:'{}'}),env);
+ assert.equal(blocked.status,403,'a cross-site page must not mint the account owner token');
+ assert.equal(calls.length,before+1,'no backend call after cross-origin rejection');
 });
 
 test('R100 download relay preserves exact verified bytes, file type, length and attachment disposition',async()=>{

@@ -29,6 +29,8 @@ function fixture({role='tenant_admin',active=true,configured=true,tokenDenied=fa
    if(sql.startsWith('SELECT root_id FROM qa_drive_connections'))return connections.get(params[1])||null;
    if(sql.startsWith('SELECT connected_at FROM qa_drive_connections'))return connections.get(params[1])||null;
    if(sql.startsWith('SELECT encrypted_refresh,root_id FROM qa_drive_connections'))return connections.get(params[1])||null;
+   if(sql.startsWith('SELECT encrypted_refresh,connected_by,scope FROM qa_drive_connections')){const v=connections.get(params[1]);return v?{...v}:null;}
+   if(sql.startsWith('SELECT connected_by,scope FROM qa_drive_connections'))return connections.get(params[1])||null;
    return null;
   },
   async run(){
@@ -44,7 +46,7 @@ function fixture({role='tenant_admin',active=true,configured=true,tokenDenied=fa
    }
    if(sql.startsWith('INSERT INTO qa_drive_connections')){
     connections.set(params[1],{encrypted_refresh:params[2],root_id:params[3],
-     connected_at:params[6]});
+     scope:params[4],connected_by:params[5],connected_at:params[6]});
     return {meta:{changes:1}};
    }
    if(sql.startsWith('DELETE FROM qa_drive_connections')){
@@ -286,4 +288,61 @@ test('R80 local disconnect works when OAuth app secrets are unavailable; never n
  assert.equal(res.status,200);
  assert.equal(x.connections.size,0);
  assert.equal(x.calls.length,0);
+});
+
+test('R107 connected Google owner gets only a short-lived access token without another consent',async()=>{
+ const x=fixture();
+ const started=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
+ const u=new URL((await started.json()).authorization_url);
+ const connected=await oauthDriveApi(req('/api/qa/drive/callback?state='+u.searchParams.get('state')+'&code=synthetic-code','GET',{cookie:false}),x.env,x.opts);
+ assert.equal(connected.status,303);
+ const prior=x.calls.filter(z=>z.url==='https://oauth2.googleapis.com/token').length;
+ const response=await oauthDriveApi(req('/api/qa/drive/browser-access','POST'),x.env,x.opts);
+ assert.equal(response.status,200,await response.clone().text());
+ const d=await response.json();
+ assert.equal(d.access_token,'synthetic-refreshed-token-1234567');
+ assert.equal(d.scope,'https://www.googleapis.com/auth/drive.file');
+ assert.ok(d.expires_in>=120&&d.expires_in<=3600);
+ assert.equal(response.headers.get('Cache-Control'),'no-store');
+ assert.equal(JSON.stringify(d).includes('refresh_token'),false);
+ assert.equal(JSON.stringify(d).includes('encrypted_refresh'),false);
+ assert.equal(x.calls.filter(z=>z.url==='https://oauth2.googleapis.com/token').length,prior+1,
+  'refresh existing server grant; never repeat Google user consent');
+});
+test('R107 rejects cross-origin, missing login, another employee and replaced Google owner',async()=>{
+ const x=fixture();
+ const started=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
+ const u=new URL((await started.json()).authorization_url);
+ await oauthDriveApi(req('/api/qa/drive/callback?state='+u.searchParams.get('state')+'&code=synthetic-code','GET',{cookie:false}),x.env,x.opts);
+ const path='/api/qa/drive/browser-access';
+ const deniedOrigin=await oauthDriveApi(req(path,'POST',{origin:'https://attacker.invalid'}),x.env,x.opts);
+ assert.equal(deniedOrigin.status,403);
+ const deniedSession=await oauthDriveApi(req(path,'POST',{cookie:false}),x.env,x.opts);
+ assert.equal(deniedSession.status,401);
+ const deniedVerb=await oauthDriveApi(req(path,'GET'),x.env,x.opts);
+ assert.equal(deniedVerb.status,405);
+ const callsBefore=x.calls.length;
+ x.connections.get(T).connected_by='66666666-6666-4666-8666-666666666666';
+ const mismatch=await oauthDriveApi(req(path,'POST'),x.env,x.opts);
+ assert.equal(mismatch.status,403);
+ assert.equal(x.calls.length,callsBefore,'never refresh the admin token for an unrelated user');
+ assert.doesNotMatch(await mismatch.text(),/synthetic-refreshed-token|synthetic-refresh-token/);
+});
+
+test('R107 blocks stale Google token if connected owner switches accounts while refresh is in flight',async()=>{
+ const x=fixture();
+ const started=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
+ const u=new URL((await started.json()).authorization_url);
+ await oauthDriveApi(req('/api/qa/drive/callback?state='+u.searchParams.get('state')+'&code=synthetic-code','GET',{cookie:false}),x.env,x.opts);
+ const original=x.opts.googleFetch;
+ x.opts.googleFetch=async(url,init)=>{
+  const response=await original(url,init);
+  if(url==='https://oauth2.googleapis.com/token'&&String(init.body).includes('grant_type=refresh_token')){
+   x.connections.get(T).encrypted_refresh='synthetic-rotated-encrypted-grant';
+  }
+  return response;
+ };
+ const res=await oauthDriveApi(req('/api/qa/drive/browser-access','POST'),x.env,x.opts);
+ assert.equal(res.status,403,'revocation or reconnect during refresh must not mint a token for stale Google account');
+ assert.doesNotMatch(await res.text(),/synthetic-refreshed-token/);
 });

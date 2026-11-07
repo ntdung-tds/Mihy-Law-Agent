@@ -129,10 +129,46 @@ async function assign(req,env,p,now){
  }
  return respond(200,{updated:true,enabled:data.enabled});
 }
+// A user-selected existing folder needs no AI Law admin grant wizard.
+// The connected provider verifies the folder's real write capability.
+async function selectExisting(req,env,p,now,opts){
+ if(!['lawyer','tenant_admin'].includes(p.role_key))return denied();
+ const v=await readJSON(req);
+ if(!v||Object.keys(v).sort().join(',')!=='folder_id'||!ID.test(v.folder_id||''))
+  return respond(400,{error:'Vị trí được chọn từ Drive chưa hợp lệ.'});
+ let info;
+ try{
+  const drive=opts.storageDrive??await tenantDriveAdapter(env,p,opts);
+  info=await drive.writableFolder(v.folder_id);
+ }catch{return denied();}
+ if(typeof info.name!=='string'||info.name.length<1)return denied();
+ let row=await env.DB.prepare('SELECT destination_id FROM qa_storage_destinations WHERE installation_id=? AND tenant_id=? AND folder_id=? AND status=\'active\' LIMIT 1')
+  .bind(env.INSTALLATION_ID,p.tenant_id,v.folder_id).first();
+ let id=row?.destination_id;
+ if(!id){
+  const cnt=await env.DB.prepare("SELECT COUNT(*) AS n FROM qa_storage_destinations WHERE installation_id=? AND tenant_id=? AND status='active'")
+   .bind(env.INSTALLATION_ID,p.tenant_id).first();
+  if(Number(cnt?.n||0)>=50)return respond(429,{error:'Đã đạt giới hạn vị trí lưu trữ QA.'});
+  id=crypto.randomUUID();
+  const safeLabel=info.name.normalize('NFC').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,80).trim();
+  if(safeLabel.length<3) return respond(400,{error:'Tên thư mục Drive chưa được hỗ trợ.'});
+  await env.DB.prepare("INSERT INTO qa_storage_destinations (installation_id,tenant_id,destination_id,provider,folder_id,label,owner_kind,status,created_by,created_at) VALUES(?,?,?,'google_drive',?,?,?,'active',?,?) ON CONFLICT(installation_id,tenant_id,folder_id) DO NOTHING")
+   .bind(env.INSTALLATION_ID,p.tenant_id,id,v.folder_id,safeLabel,
+    p.kind==='personal'?'personal':'organization',p.user_id,now).run();
+  // An interrupted concurrent selection may have inserted the same folder.
+  row=await env.DB.prepare('SELECT destination_id FROM qa_storage_destinations WHERE installation_id=? AND tenant_id=? AND folder_id=? AND status=\'active\' LIMIT 1')
+   .bind(env.INSTALLATION_ID,p.tenant_id,v.folder_id).first();
+  if(!row)return respond(503,{error:'Không ghi nhận được thư mục Drive đã chọn.'});
+  id=row.destination_id;
+ }
+ await env.DB.prepare('INSERT INTO qa_storage_assignments (installation_id,tenant_id,destination_id,user_id,granted_by,granted_at) VALUES(?,?,?,?,?,?) ON CONFLICT(installation_id,tenant_id,destination_id,user_id) DO NOTHING')
+  .bind(env.INSTALLATION_ID,p.tenant_id,id,p.user_id,p.user_id,now).run();
+ return respond(200,{destination:{id,label:info.name,provider:'google_drive'}});
+}
 export async function storageDestinationApi(req,env,opts={}){
  if(!configured(env))return respond(503,{error:'Lưu trữ QA chưa được cấu hình.'});
  const path=new URL(req.url).pathname;
- if(!['/api/qa/storage/destinations','/api/qa/storage/members','/api/qa/storage/assignments'].includes(path))
+ if(!['/api/qa/storage/destinations','/api/qa/storage/members','/api/qa/storage/assignments','/api/qa/storage/select'].includes(path))
   return denied();
  if(req.method!=='GET'&&req.method!=='POST')return respond(405,{error:'Method not allowed'});
  if(req.method==='POST'&&!csrf(req))return respond(403,{error:'CSRF_DENIED'});
@@ -149,6 +185,8 @@ export async function storageDestinationApi(req,env,opts={}){
    return manage?create(req,env,p,now,opts):denied();
   if(path==='/api/qa/storage/assignments'&&req.method==='POST')
    return manage?assign(req,env,p,now):denied();
+  if(path==='/api/qa/storage/select'&&req.method==='POST')
+   return selectExisting(req,env,p,now,opts);
   return respond(405,{error:'Method not allowed'});
  }catch{return respond(503,{error:'Không thể xác minh vị trí lưu trữ. Vui lòng thử lại.'});}
 }
