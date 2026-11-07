@@ -133,7 +133,7 @@ function modelText(result){
 // anchor. This does NOT establish that the model's conclusions are true.
 export function sourceReferencesExist(answer,sourceRows){
  const valid=new Set(sourceRows.map(x=>x.id));
- const explicit=answer.matchAll(/\[([AB]\d{1,3})\]/g);
+ const explicit=answer.matchAll(/\[([AB]\d+)\]/g);
  for(const match of explicit)if(!valid.has(match[1]))return false;
  return true;
 }
