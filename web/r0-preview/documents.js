@@ -106,13 +106,13 @@
  const browserStatus=$('document-google-status');
  const SCOPE='https://www.googleapis.com/auth/drive.file';
  let browserToken='',expiresAt=0,googleScript=null,uploading=false,authorizing=false,uncertainUpload=false,consentSeq=0;
- let choosingDestination=false,pendingSaveChoice='',grantResumePending=false;
+ let choosingDestination=false,pendingSaveChoice='',grantResumePending=false,restoringGrant=false;
  const browserReady=()=>browserToken.length>10&&Date.now()+60000<expiresAt;
  const storageReady=()=>!destination||
    (storageProvider?.value==='google_drive'&&uuid.test(destination.value));
  const connected=()=>driveBox?.dataset.state==='connected';
  function uploadGate(){
-  if(uploadButton)uploadButton.disabled=uploading||authorizing||choosingDestination||uncertainUpload||!connected()||!storageReady();
+  if(uploadButton)uploadButton.disabled=uploading||authorizing||choosingDestination||restoringGrant||uncertainUpload||!connected()||!storageReady();
  }
  async function refreshStorageDestinations(preferred=''){
   if(!destination)return;
@@ -210,15 +210,40 @@
   }).catch(e=>{googleScript=null;throw e;});
   return googleScript;
  }
- function prepareBrowserConsent(){
-  if(browserStatus)browserStatus.textContent=browserReady()
-   ?'Đã sẵn sàng tải tệp vào thư mục Drive của đơn vị.'
-   :'Drive đã kết nối. Bấm Lưu tệp; Google có thể yêu cầu xác nhận một lần trong trình duyệt.';
-  // Preload Google Identity Services before the user submits, so its popup
-  // can be requested synchronously from the save-button gesture.
+ async function prepareBrowserConsent(){
+  // If THIS AI Law user originally connected Google Drive, reuse that
+  // server-held refresh grant to fetch a short-lived browser access token.
+  // A staff member never receives the tenant admin's Google credentials.
+  restoringGrant=true;uploadGate();
+  if(browserStatus)browserStatus.textContent='Đang khôi phục kết nối Google Drive đã có…';
+  try{
+   const r=await fetch('/api/qa/drive/browser-access',{method:'POST',
+    credentials:'same-origin',cache:'no-store',
+    headers:{'Content-Type':'application/json'},body:'{}'});
+   if(r.status===401){location.replace('/login');return;}
+   if(r.ok){
+    const grant=await r.json();
+    if(typeof grant.access_token==='string'&&grant.access_token.length>10&&
+       grant.scope===SCOPE&&Number(grant.expires_in)>=120&&connected()){
+     browserToken=grant.access_token;
+     expiresAt=Date.now()+Math.min(3600,Number(grant.expires_in))*1000;
+     if(browserStatus)browserStatus.textContent='Drive đã kết nối. Bạn có thể chọn nơi lưu ngay.';
+     return;
+    }
+   }
+   if(browserStatus)browserStatus.textContent=r.status===403
+    ?'Drive của đơn vị đã kết nối. Tài khoản của bạn có thể cần cấp quyền Google riêng khi lưu.'
+    :'Kết nối Google cần được xác thực lại khi lưu.';
+  }catch{
+   if(browserStatus)browserStatus.textContent='Chưa khôi phục được quyền Google. Bạn có thể thử Lưu lại.';
+  }finally{
+   restoringGrant=false;uploadGate();
+  }
+  // Google Identity Services is a fallback for users who have not
+  // personally authorized this app; never trigger its popup on load.
   void loadGoogleBrowser().catch(()=>{
    if(connected()&&browserStatus)
-    browserStatus.textContent='Chưa tải được thư viện Google. Hãy kiểm tra mạng và thử Lưu tệp lại.';
+    browserStatus.textContent='Chưa tải được dịch vụ xác thực Google. Hãy thử tải lại trang.';
   });
  }
  function requestBrowserGrant(matterId,selectedFile,selectedDest){
@@ -302,6 +327,8 @@
   connect.hidden=true;
   if(disconnect)disconnect.hidden=true;
   if(uploadButton)uploadButton.disabled=true;
+  // Never reuse a token from a previously selected workspace/account.
+  browserToken='';expiresAt=0;
   setDrive('loading','Đang kiểm tra kết nối Google Drive…');
   try{
    const res=await fetch('/api/qa/drive/status',{credentials:'same-origin',cache:'no-store'});
@@ -311,7 +338,7 @@
    connect.dataset.canConnect=data.can_connect===true?'true':'false';
    if(data.connected===true&&data.configuration_ready===true){
     setDrive('connected','Đã kết nối Google Drive cho không gian làm việc này. Có thể tải tệp theo hồ sơ.');
-    prepareBrowserConsent();
+    await prepareBrowserConsent();
     void refreshStorageDestinations();
     uploadGate();
     if(disconnect)disconnect.hidden=data.can_connect!==true;
