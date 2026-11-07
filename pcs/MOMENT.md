@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `82` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T01:27:04Z`.
+- **PCS revision:** `85` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T01:42:33.301Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R89 — Root cause of Google Drive `stage=transport` confirmed and fixed in Cloudflare QA (2026-11-07)
+
+- **Actual root reproduced without any customer data or OAuth credential:** a temporary isolated Cloudflare Worker called the exact Google resumable session-init `POST` using intentionally invalid synthetic bearer. Direct native `fetch(url, opts)` returned expected **HTTP 401** from Google; `adapter.fetcher(url, opts)` where `adapter.fetcher = fetch` threw **TypeError: Illegal invocation, incorrect `this` reference**; calling the captured global function through an arrow wrapper returned **HTTP 401**. Therefore general Cloudflare→Google egress works; the repeated R82/R86 `stage=transport` class has a confirmed common programming root. No real Google files/sessions were created in this probe.
+- **Scoped code fix:** `GoogleDriveAdapter` now retains `this.fetcher=(url,init)=>fetcher(url,init)` so native Cloudflare `fetch` is invoked as a bare captured function and not as an adapter method. Applies to Drive session-start, metadata/download and previous legacy upload without changing file data plane: browser still uploads PDF/DOCX bytes directly to Google; Cloudflare remains identity/ACL/metadata.
+- **Tests/source:** [PR #123](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/123) merged as `47c2ac7f193dfab4bed49a852d993ba30b1a570a`. Final-head [GitHub Actions #42325154489](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42325154489) **PASS 9/9 executed jobs**; new strict receiver-sensitive regression covers both resumable start and metadata read.
+- **QA deployment:** `ai-law-standalone-cf-qa` content-only deploy of only `google_drive.mjs` on 2026-11-07 01:42:33Z, previous source checked against GitHub, new source exact readback **PASS**, 7 other modules unchanged, all binding names/types intact (no OAuth secret values read/changed), 100% QA traffic. Live public API `/health` returned `configured`. Cloudflare Browser Rendering unauthenticated documents smoke blocked by HTTP 429 quota, not an app failure. Temporary synthetic diagnostic Worker **deleted and verified absent**. Production/SRS untouched.
+- **Unfinished single-task acceptance:** QA D1 remains 1 connected grant, **0 direct-upload tickets, 0 receipts**. Actual authenticated Google-backed synthetic PDF/DOCX upload, tenant root verification, list/reload, SHA-256 download and negative ACL **NOT_RUN after fix**. No claim that Owner upload already PASS. Owner final acceptance remains pending.
 
 ## R88 — Google Drive session-init failure diagnostic fix deployed to QA; real provider cause still unknown (2026-11-07)
 
