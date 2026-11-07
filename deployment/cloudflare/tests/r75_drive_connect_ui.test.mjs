@@ -351,8 +351,7 @@ test('R100 downloaded original PDF is verified by byte size and SHA before mobil
  assert.ok(row,'authenticated file list rendered');
  const link=row.options.find(x=>x.textContent==='Tải về');
  assert.ok(link);
- link.listeners.click({preventDefault(){}});
- for(let i=0;i<6;i++)await new Promise(r=>setImmediate(r));
+ await link.listeners.click({preventDefault(){}});
  assert.equal(t.savedBlobs.length,1);
  assert.equal(t.savedFiles[0].download,'qa_gpt.pdf');
  assert.deepEqual(new Uint8Array(await t.savedBlobs[0].arrayBuffer()),original);
@@ -365,8 +364,7 @@ test('R100 inflated download response is rejected before saving a corrupted docu
  const t=await mount({connected:true,configuration_ready:true,can_connect:true},{downloadCase:{original,received}});
  const row=t.els['qa-document-list'].options.find(x=>x.className==='matter-row');
  const link=row.options.find(x=>x.textContent==='Tải về');
- link.listeners.click({preventDefault(){}});
- for(let i=0;i<5;i++)await new Promise(r=>setImmediate(r));
+ await link.listeners.click({preventDefault(){}});
  assert.equal(t.savedBlobs.length,0,'never save too large or wrong response as a PDF');
  assert.equal(t.els['document-feedback'].dataset.state,'error');
  assert.match(t.els['document-feedback'].textContent,/vượt giới hạn/);
@@ -376,8 +374,7 @@ test('R100 a login or HTML response is not saved under the original PDF filename
  const t=await mount({connected:true,configuration_ready:true,can_connect:true},
   {downloadCase:{original,httpError:503}});
  const row=t.els['qa-document-list'].options.find(x=>x.className==='matter-row');
- row.options.find(x=>x.textContent==='Tải về').listeners.click({preventDefault(){}});
- for(let i=0;i<4;i++)await new Promise(r=>setImmediate(r));
+ await row.options.find(x=>x.textContent==='Tải về').listeners.click({preventDefault(){}});
  assert.equal(t.savedBlobs.length,0);
  assert.match(t.els['document-feedback'].textContent,/HTTP 503/);
 });
@@ -388,8 +385,7 @@ test('R101 verified browser download keeps a safe (2) filename instead of reject
   {downloadCase:{original,name:'SRS_Drive_gpt (2).pdf'}});
  const row=t.els['qa-document-list'].options.find(x=>x.className==='matter-row');
  assert.ok(row,'authenticated matter file listed');
- row.options.find(x=>x.textContent==='Tải về').listeners.click({preventDefault(){}});
- for(let i=0;i<5;i++)await new Promise(r=>setImmediate(r));
+ await row.options.find(x=>x.textContent==='Tải về').listeners.click({preventDefault(){}});
  assert.equal(t.savedBlobs.length,1,'valid numbered basename must not be blocked; feedback='+t.els['document-feedback'].textContent);
  assert.equal(t.savedFiles[0].download,'SRS_Drive_gpt (2).pdf');
  assert.deepEqual(new Uint8Array(await t.savedBlobs[0].arrayBuffer()),original);
