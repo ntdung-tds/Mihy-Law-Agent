@@ -34,7 +34,7 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
  const matterUuid='44444444-4444-4444-8444-444444444444';
  const raw=downloadCase?.original||new Uint8Array();
  const hash=downloadCase?Buffer.from(await webcrypto.subtle.digest('SHA-256',raw)).toString('hex'):'';
- const record={id:downloadUuid,name:'qa_gpt.pdf',mime_type:'application/pdf',bytes:raw.length,sha256:hash};
+ const record={id:downloadUuid,name:downloadCase?.name||'qa_gpt.pdf',mime_type:'application/pdf',bytes:raw.length,sha256:hash};
  const currentStatus={...status};
  const location={
   href:'https://ai-law-web-qa.iaict-platform.workers.dev/app'+query+'#documents',
@@ -380,4 +380,18 @@ test('R100 a login or HTML response is not saved under the original PDF filename
  for(let i=0;i<4;i++)await new Promise(r=>setImmediate(r));
  assert.equal(t.savedBlobs.length,0);
  assert.match(t.els['document-feedback'].textContent,/HTTP 503/);
+});
+
+test('R101 verified browser download keeps a safe (2) filename instead of rejecting it',async()=>{
+ const original=new TextEncoder().encode('%PDF-1.4\\n1 0 obj\\n<< >>\\nendobj\\n%%EOF\\n');
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},
+  {downloadCase:{original,name:'SRS_Drive_gpt (2).pdf'}});
+ const row=t.els['qa-document-list'].options.find(x=>x.className==='matter-row');
+ assert.ok(row,'authenticated matter file listed');
+ row.options.find(x=>x.textContent==='Tải về').listeners.click({preventDefault(){}});
+ for(let i=0;i<5;i++)await new Promise(r=>setImmediate(r));
+ assert.equal(t.savedBlobs.length,1,'valid numbered basename must not be blocked');
+ assert.equal(t.savedFiles[0].download,'SRS_Drive_gpt (2).pdf');
+ assert.deepEqual(new Uint8Array(await t.savedBlobs[0].arrayBuffer()),original);
+ assert.match(t.els['document-feedback'].textContent,/SHA-256/);
 });
