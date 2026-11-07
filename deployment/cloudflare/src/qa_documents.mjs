@@ -60,7 +60,7 @@ export const LIST_SQL=[
  'FROM qa_document_receipts r JOIN qa_file_links f',
  'ON f.installation_id=r.installation_id AND f.tenant_id=r.tenant_id AND f.file_id=r.file_id',
  'WHERE r.installation_id=? AND r.tenant_id=? AND f.matter_id=?',
- 'AND (f.storage_destination_id IS NULL OR EXISTS (SELECT 1 FROM qa_storage_assignments g',
+ "AND (f.storage_destination_id IS NULL OR f.storage_destination_id='root' OR EXISTS (SELECT 1 FROM qa_storage_assignments g",
  'JOIN qa_storage_destinations d ON d.installation_id=g.installation_id AND d.tenant_id=g.tenant_id',
  "AND d.destination_id=g.destination_id AND d.status='active'",
  'WHERE g.installation_id=f.installation_id AND g.tenant_id=f.tenant_id',
@@ -169,19 +169,23 @@ async function startDirect(req,env,p,now,opts){
   try{selected=await assignedDestination(env,p,destinationId);}
   catch{return storageIssue('QA_RECEIPT_UNAVAILABLE');}
   if(!selected)return forbidden();
-  try{await drive.childFolder(selected.folder_id);}
+  try{await drive.writableFolder(selected.folder_id);}
   catch{return result(409,{error:'Thư mục không còn thuộc kho lưu trữ đã cấp quyền.'});}
  }
  // R99: direct browser multipart upload. Google resumable-session PUT from
  // mobile browsers failed CORS; do not create a browser-inaccessible session.
  // The existing OAuth-backed tenant adapter proves the approved Drive root;
  // the browser receives only its folder ID and a short-lived ACL-bound ticket.
- const rootId=selected?.folder_id||drive.rootId;
+ let rootId=selected?.folder_id||drive.rootId;
+ if(explicitRoot){
+  try{rootId=await drive.accountRoot();}
+  catch{return result(409,{error:'Tài khoản Google hiện tại không cho phép lưu tại My Drive.'});}
+ }
  if(typeof rootId!=='string'||!/^[A-Za-z0-9_-]{10,200}$/.test(rootId))
   return storageIssue('DRIVE_GRANT_UNAVAILABLE');
  const ticket=crypto.randomUUID();
  try{
-  if(destinationId&&!explicitRoot){
+  if(destinationId){
    await env.DB.prepare('INSERT INTO qa_document_upload_tickets (installation_id,tenant_id,ticket_id,user_id,matter_id,file_name,mime_type,byte_length,sha256,created_at,expires_at,destination_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)')
     .bind(env.INSTALLATION_ID,p.tenant_id,ticket,p.user_id,matter,name,mime,size,sha,now,now+600,destinationId).run();
   }else{
@@ -209,9 +213,12 @@ async function finishDirect(req,env,p,now,opts){
  let drive;try{drive=await driveAdapter(env,p,opts);}
  catch{return storageIssue('DRIVE_GRANT_UNAVAILABLE');}
  let approvedParent=drive.rootId;
- if(row.destination_id){
+ if(row.destination_id==='root'){
+  try{approvedParent=await drive.accountRoot();}catch{return forbidden();}
+ }else if(row.destination_id){
   const selected=await assignedDestination(env,p,row.destination_id);
   if(!selected)return forbidden(); // assignment revoked since start
+  try{await drive.writableFolder(selected.folder_id);}catch{return forbidden();}
   approvedParent=selected.folder_id;
  }
  try{await drive.verifyDirectUpload(v.file_id,{
@@ -292,14 +299,17 @@ async function download(env,p,id,now,opts){
  if(!UUID.test(id||''))return forbidden();
  const r=await env.DB.prepare(READ_SQL).bind(env.INSTALLATION_ID,p.tenant_id,id).first();
  if(!r||r.provider!=='google_drive'||!await permit(env,p,r.matter_id,'read',now))return forbidden();
- let approvedParent=null;
- if(r.storage_destination_id){
+ const drive=await driveAdapter(env,p,opts);
+ let approvedParent=drive.rootId;
+ if(r.storage_destination_id==='root'){
+  try{approvedParent=await drive.accountRoot();}catch{return forbidden();}
+ }else if(r.storage_destination_id){
   const selected=await assignedDestination(env,p,r.storage_destination_id);
   if(!selected)return forbidden();
+  try{await drive.writableFolder(selected.folder_id);}catch{return forbidden();}
   approvedParent=selected.folder_id;
  }
- const drive=await driveAdapter(env,p,opts);
- const response=await drive.download(r.provider_object_id,approvedParent||drive.rootId);
+ const response=await drive.download(r.provider_object_id,approvedParent);
  if(Number(response.headers.get('Content-Length')||0)>MAX_FILE)throw Error('Too large');
  const bytes=new Uint8Array(await response.arrayBuffer());
  if(bytes.length!==Number(r.byte_length)||bytes.length>MAX_FILE||await sha256(bytes)!==r.sha256)
