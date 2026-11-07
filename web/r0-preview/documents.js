@@ -174,43 +174,56 @@
   }
   const submit=form.querySelector('button[type="submit"]');submit.disabled=true;
   try{
-   const body=new FormData();body.set('matter_id',id);body.set('file',chosen);
-   const res=await fetch('/api/qa/documents',{method:'POST',credentials:'same-origin',
-    cache:'no-store',body});
-   if(res.status===401){location.replace('/login');return;}
-   let result={};
-   try{result=await res.json();}catch{}
-   if(!res.ok){
-    let description=result.error||'Tải lên chưa thành công.';
-    if(result.code==='DRIVE_UPLOAD_UNAVAILABLE'){
-     const stage=result.stage,code=result.provider_status;
-     const reasons={
-      storageQuotaExceeded:'Dung lượng Google Drive đã đầy.',
-      insufficientFilePermissions:'Tài khoản Google không có quyền ghi vào thư mục lưu trữ.',
-      appNotAuthorizedToFile:'Quyền ứng dụng Google chưa cho phép truy cập thư mục.',
-      accessNotConfigured:'Google Drive API chưa được bật cho ứng dụng.',
-      rateLimitExceeded:'Google đang giới hạn tần suất yêu cầu.',
-      userRateLimitExceeded:'Google đang giới hạn tần suất yêu cầu.'
-     };
-     if(stage==='verify')
-      description='Google có thể đã nhận tệp nhưng AI Law chưa xác minh được thư mục hoặc nội dung. Đừng tải lại ngay để tránh trùng tệp; báo quản trị QA kiểm tra.';
-     else if(stage==='response')
-      description='Google đã trả lời nhưng thông tin tệp không hợp lệ. Vui lòng báo quản trị QA.';
-     else if(stage==='transport')
-      description='Không thể truyền tệp đến Google Drive. Vui lòng thử lại khi đường truyền ổn định.';
-     else if(stage==='provider')
-      description=(reasons[result.provider_reason]||
-       (code===400?'Google từ chối định dạng yêu cầu tải lên.':
-        code===401?'Google từ chối xác thực khi tải tệp.':
-        code===403?'Google từ chối quyền tải tệp; chưa thể kết luận do dung lượng.':
-        code===429?'Google tạm giới hạn số yêu cầu.':
-        'Google Drive từ chối hoặc chưa xử lý yêu cầu.'))+
-       (Number.isInteger(code)?' (HTTP '+code+')':'');
-    }
-    const error=new Error(description);
-    error.code=result.code||'';
-    throw error;
+   // R86: browser→Google Drive direct file data plane. Only JSON manifests
+   // and receipt proofs reach Cloudflare; never the PDF/DOCX bytes.
+   const ext=chosen.name.toLowerCase().endsWith('.pdf')?'pdf':'docx';
+   const mime=ext==='pdf'?'application/pdf':
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+   const bytes=new Uint8Array(await chosen.arrayBuffer());
+   if(ext==='pdf'){
+    const head=new TextDecoder().decode(bytes.slice(0,5));
+    const tail=new TextDecoder().decode(bytes.slice(-1024));
+    if(head!=='%PDF-'||!tail.includes('%%EOF'))throw Error('Tệp PDF mẫu không đúng định dạng.');
+   }else{
+    let endMarker=false;
+    for(let j=bytes.length-22;j>=Math.max(0,bytes.length-65557);j--)
+     if(bytes[j]===80&&bytes[j+1]===75&&bytes[j+2]===5&&bytes[j+3]===6){
+      endMarker=true;break;
+     }
+    if(bytes[0]!==80||bytes[1]!==75||bytes[2]!==3||bytes[3]!==4||!endMarker)
+     throw Error('Tệp DOCX mẫu không đúng định dạng.');
    }
+   const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),
+    b=>b.toString(16).padStart(2,'0')).join('');
+   const api=async(path,body)=>{
+    const r=await fetch(path,{method:'POST',credentials:'same-origin',cache:'no-store',
+     headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(r.status===401){location.replace('/login');throw Error('Cần đăng nhập lại AI Law.');}
+    let data={};try{data=await r.json();}catch{}
+    if(!r.ok){const e=new Error(data.error||'Lưu trữ Google Drive chưa hoàn tất.');
+     e.code=data.code||'';throw e;}
+    return data;
+   };
+   message('Đang cấp quyền tải lên Google Drive…');
+   const init=await api('/api/qa/documents/upload/start',{
+    matter_id:id,file_name:chosen.name,mime_type:mime,byte_length:chosen.size,sha256:digest
+   });
+   let u;try{u=new URL(init.upload_url);}catch{throw Error('Google không trả về phiên tải tệp hợp lệ.');}
+   if(u.protocol!=='https:'||u.hostname!=='www.googleapis.com'||
+      u.pathname!=='/upload/drive/v3/files'||u.searchParams.get('uploadType')!=='resumable')
+    throw Error('Phiên tải lên không thuộc Google Drive.');
+   // Never write the sensitive one-file upload URL to history, DOM, storage or logs.
+   message('Đang tải tệp trực tiếp đến Google Drive…');
+   let google;
+   try{google=await fetch(u.toString(),{method:'PUT',body:chosen,
+    headers:{'Content-Type':mime},credentials:'omit',redirect:'error',mode:'cors'});}
+   catch{throw Error('Trình duyệt chưa gửi được tệp trực tiếp tới Google Drive. Không thử lại ngay để tránh tệp trùng.');}
+   if(!google.ok)throw Error('Google Drive chưa xác nhận tệp (HTTP '+google.status+'). Vui lòng kiểm tra trước khi thử lại.');
+   let remote={};try{remote=await google.json();}catch{}
+   if(!/^[A-Za-z0-9_-]{10,200}$/.test(remote?.id||''))
+    throw Error('Google đã phản hồi nhưng thiếu ID tệp. Không tải lại ngay để tránh trùng.');
+   message('Đang xác minh thư mục và ghi nhận hồ sơ…');
+   await api('/api/qa/documents/upload/finish',{ticket:init.ticket,file_id:remote.id});
    file.value='';showSelectedFile();
    message('Đã lưu tệp thử nghiệm vào Google Drive. Nội dung chưa được dùng cho AI.','success');
    await refreshFiles();

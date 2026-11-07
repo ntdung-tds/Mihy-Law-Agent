@@ -18,7 +18,7 @@ function fixture({authenticated=true,allow=true,grant=true,dbFail=false,driveUpl
  const calls=[],uploads=[],removes=[];let saved=null;
  const bytes=asDocx?docx:pdf,name=asDocx?'synthetic.docx':'synthetic.pdf',mime=asDocx?DOCX:'application/pdf';
  const env={
-  AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,JWT_ISSUER:'https://issuer.test',
+  AI_LAW_CF_MODE:'isolated-qa-only',ALLOW_LEGACY_DOCUMENT_PROXY:'synthetic-tests-only',INSTALLATION_ID:I,JWT_ISSUER:'https://issuer.test',
   ...(grant?{GOOGLE_DRIVE_ACCESS_TOKEN:'synthetic-token-for-tests',
     GOOGLE_DRIVE_ROOT_ID:ROOT}:{}),
   DB:{

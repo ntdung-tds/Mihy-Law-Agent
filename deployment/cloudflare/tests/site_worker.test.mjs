@@ -275,3 +275,12 @@ test('R80 Drive disconnect route is POST-only, relayed with same-origin CSRF and
  assert.equal(hits[0].pathname,'/api/qa/drive/disconnect');
  assert.equal(hits[0].origin,'https://ai-law-standalone-cf-qa.iaict-platform.workers.dev');
 });
+
+test('R86 QA CSP permits only Google Drive API as extra cross-origin upload destination',async()=>{
+ const resp=await get('/login');
+ assert.equal(resp.status,200);
+ const csp=resp.headers.get('Content-Security-Policy')||'';
+ assert.match(csp,/connect-src 'self' https:\/\/www\.googleapis\.com;/);
+ assert.doesNotMatch(csp,/connect-src[^;]*\*/);
+ assert.doesNotMatch(csp,/connect-src[^;]*storage\.googleapis\.com/);
+});

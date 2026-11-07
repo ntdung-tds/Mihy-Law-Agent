@@ -115,6 +115,7 @@ export async function handle(request,env,options={}){
   if(["/api/qa/drive/connect","/api/qa/drive/disconnect","/api/qa/drive/status","/api/qa/drive/callback"].includes(url.pathname))
     return oauthDriveApi(request,env,options);
   if(url.pathname==="/api/qa/documents"||
+     ["/api/qa/documents/upload/start","/api/qa/documents/upload/finish"].includes(url.pathname)||
      /^\/api\/qa\/documents\/[0-9a-f-]{36}\/download$/.test(url.pathname))
     return documentsApi(request,env,options);
   if(url.pathname.startsWith("/api/qa/"))return mobileApi(request,env,options);

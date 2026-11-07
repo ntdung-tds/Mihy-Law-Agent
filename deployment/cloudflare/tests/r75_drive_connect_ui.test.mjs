@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import {webcrypto} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 
 const code=readFileSync(new URL('../../../web/r0-preview/documents.js',import.meta.url),'utf8');
@@ -15,7 +16,7 @@ function element(id){
   querySelector(){return null;}
  };
 }
-async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true}={}){
+async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false}={}){
  const ids=['document-matter','document-upload-form','document-file','document-file-name','document-feedback',
   'qa-document-list','drive-setup','drive-status','drive-connect','drive-disconnect'];
  const els=Object.fromEntries(ids.map(x=>[x,element(x)]));
@@ -31,7 +32,7 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
  };
  const document={
   getElementById(id){return els[id]||null;},
-  createElement(tag){if(tag!=='option')throw Error('Unexpected HTML node');return element(tag);}
+  createElement(tag){if(!['option','p','div','span','a','small'].includes(tag))throw Error('Unexpected HTML node');return element(tag);}
  };
  const fetch=async(url,opts)=>{
   calls.push({url,method:opts?.method||'GET'});
@@ -41,13 +42,22 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
    return Response.json({connected:false,disconnected:true,files_preserved:true});
   }
   if(url==='/api/qa/matters')return Response.json({matters:[]});
+  if(directUpload&&url==='/api/qa/documents/upload/start')
+   return Response.json({ticket:'55555555-5555-4555-8555-555555555555',
+    upload_url:'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=syntheticBrowserToken12345'});
+  if(directUpload&&typeof url==='string'&&url.startsWith('https://www.googleapis.com/upload/drive/v3/files?'))
+   return Response.json({id:'syntheticRemoteDriveId1234'});
+  if(directUpload&&url==='/api/qa/documents/upload/finish')
+   return Response.json({id:'55555555-5555-4555-8555-555555555555',status:'unverified'},{status:201});
+  if(directUpload&&typeof url==='string'&&url.startsWith('/api/qa/documents?'))
+   return Response.json({documents:[]});
   if(url==='/api/qa/drive/connect')return Response.json(connectResponse);
   throw Error('Unexpected endpoint '+url);
  };
  const window={addEventListener(){},
   confirm(text){confirmations.push(text);return confirmDisconnect;}};
  vm.runInNewContext(code,{document,window,location,history:{replaceState(_a,_b,url){historyUrls.push(url);}},
-  fetch,URL,Response,console},{filename:'documents.js'});
+  fetch,URL,Response,console,crypto:webcrypto,Uint8Array,TextDecoder},{filename:'documents.js'});
  await new Promise(resolve=>setImmediate(resolve));
  return {els,submit,calls,assignments,historyUrls,confirmations};
 }
@@ -178,4 +188,21 @@ test('R80 both desktop and mobile styles include safe secondary disconnect and H
  assert.match(html,/id="drive-disconnect" hidden/);
  assert.match(css,/#drive-disconnect\[hidden\]\{display:none!important\}/);
  assert.match(css,/@media\(max-width:600px\)[\s\S]*#drive-disconnect/);
+});
+
+test('R86 PDF bytes go only to Google; Cloudflare sees JSON metadata and receipt only',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},{directUpload:true});
+ const bytes=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
+ t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+ t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
+  async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
+ await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ const starts=t.calls.filter(x=>x.url==='/api/qa/documents/upload/start');
+ const finishes=t.calls.filter(x=>x.url==='/api/qa/documents/upload/finish');
+ const direct=t.calls.filter(x=>String(x.url).startsWith('https://www.googleapis.com/upload/drive/v3/files?'));
+ assert.equal(starts.length,1);
+ assert.equal(direct.length,1);
+ assert.equal(finishes.length,1);
+ assert.equal(t.calls.some(x=>x.url==='/api/qa/documents'&&x.method==='POST'),false);
+ assert.equal(t.els['document-feedback'].dataset.state,'success', t.els['document-feedback'].textContent);
 });
