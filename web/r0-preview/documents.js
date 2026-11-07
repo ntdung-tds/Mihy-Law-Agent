@@ -58,6 +58,82 @@
  const driveBox=$('drive-setup'),driveMessage=$('drive-status'),connect=$('drive-connect'),
   disconnect=$('drive-disconnect');
  const uploadButton=form.querySelector('button[type="submit"]');
+ const browserAuth=$('document-google-authorize'),browserStatus=$('document-google-status');
+ const SCOPE='https://www.googleapis.com/auth/drive.file';
+ let browserToken='',expiresAt=0,googleScript=null,uploading=false,uncertainUpload=false;
+ const browserReady=()=>browserToken.length>10&&Date.now()+60000<expiresAt;
+ const uploaderReady=()=>driveBox?.dataset.state==='connected'&&browserReady();
+ function uploadGate(){
+  if(uploadButton)uploadButton.disabled=uploading||uncertainUpload||!uploaderReady();
+ }
+ function resetGoogleBrowser(){
+  browserToken='';expiresAt=0;
+  if(browserAuth)browserAuth.hidden=true;
+  if(browserStatus)browserStatus.textContent='Đăng nhập Google bằng tài khoản có quyền ghi vào thư mục Drive của đơn vị trước khi tải tệp theo hồ sơ.';
+  uploadGate();
+ }
+ function loadGoogleBrowser(){
+  if(window.google?.accounts?.oauth2?.initTokenClient)return Promise.resolve();
+  if(googleScript)return googleScript;
+  googleScript=new Promise((resolve,reject)=>{
+   const node=document.createElement('script');
+   node.src='https://accounts.google.com/gsi/client';node.async=true;
+   node.onload=()=>resolve();
+   node.onerror=()=>reject(Error('Google Identity Services không tải được.'));
+   document.head.appendChild(node);
+  }).catch(e=>{googleScript=null;throw e;});
+  return googleScript;
+ }
+ function prepareBrowserConsent(){
+  if(!browserAuth||!browserStatus)return;
+  browserAuth.hidden=false;
+  browserAuth.disabled=true;
+  browserStatus.textContent='Đang nạp chức năng cấp quyền Google cho tệp theo hồ sơ…';
+  void loadGoogleBrowser().then(()=>{
+   if(driveBox?.dataset.state==='connected'){
+    browserAuth.disabled=false;
+    browserStatus.textContent=browserReady()
+     ?'Đã cấp quyền Google trong trình duyệt. Tệp sẽ lưu vào thư mục Drive của đơn vị.'
+     :'Chọn cùng tài khoản Google có quyền ghi vào thư mục Drive của đơn vị.';
+   }
+  }).catch(()=>{if(driveBox?.dataset.state==='connected'){
+   browserAuth.disabled=false;
+   browserStatus.textContent='Chưa nạp được Google. Hãy kiểm tra mạng và nhấn cấp quyền để thử lại.';
+  }});
+ }
+ if(browserAuth)browserAuth.addEventListener('click',()=>{
+  if(driveBox?.dataset.state!=='connected')return;
+  const clientId=$('drive-blob-test')?.dataset.googleClientId||'';
+  if(!/^[A-Za-z0-9_.-]+\.apps\.googleusercontent\.com$/.test(clientId)){
+   message('OAuth Client ID chưa hợp lệ trên trang QA.','error');return;
+  }
+  if(!window.google?.accounts?.oauth2?.initTokenClient){
+   browserStatus.textContent='Google chưa tải xong. Hãy thử lại sau khi thư viện đăng nhập sẵn sàng.';
+   void loadGoogleBrowser().then(()=>{browserAuth.disabled=false;}).catch(()=>{browserAuth.disabled=false;});
+   return;
+  }
+  try{
+   const client=window.google.accounts.oauth2.initTokenClient({
+    client_id:clientId,scope:SCOPE,include_granted_scopes:false,
+    callback:answer=>{
+     if(driveBox?.dataset.state!=='connected')return;
+     if(answer?.error||typeof answer?.access_token!=='string'||answer.access_token.length<11){
+      browserStatus.textContent='Google chưa cấp quyền tải tệp theo hồ sơ. Hãy kiểm tra tài khoản được chọn.';
+      uploadGate();return;
+     }
+     browserToken=answer.access_token;
+     expiresAt=Date.now()+Math.max(0,Number(answer.expires_in||0))*1000;
+     browserStatus.textContent='Đã cấp quyền trong trình duyệt. Có thể lưu tệp vào hồ sơ QA.';
+     uploadGate();
+    },
+    error_callback:()=>{
+     browserStatus.textContent='Không mở được Google. Hãy kiểm tra popup và cấu hình JavaScript origin.';
+    }
+   });
+   browserStatus.textContent='Đang mở Google để cấp quyền tải tệp vào thư mục của đơn vị…';
+   client.requestAccessToken({prompt:'consent'});
+  }catch{browserStatus.textContent='Không thể mở Google để cấp quyền. Vui lòng thử lại.';}
+ });
  const link=new URL(location.href);
  const returned=link.searchParams.get('drive');
  const issue=link.searchParams.get('issue');
@@ -83,8 +159,9 @@
    const data=await res.json();
    connect.dataset.canConnect=data.can_connect===true?'true':'false';
    if(data.connected===true&&data.configuration_ready===true){
-    setDrive('connected','Đã kết nối Google Drive cho không gian làm việc này. Có thể tải tệp QA lên.');
-    if(uploadButton)uploadButton.disabled=false;
+    setDrive('connected','Đã kết nối Google Drive cho không gian làm việc này. Để tải theo hồ sơ cần cấp quyền Google trong trình duyệt.');
+    prepareBrowserConsent();
+    uploadGate();
     if(disconnect)disconnect.hidden=data.can_connect!==true;
     void refreshFiles();
     return;
@@ -110,7 +187,9 @@
      ?'Google đã trả về nhưng kết nối chưa được lưu. Vui lòng thử lại.'
      :'Chưa kết nối. Nhấn nút bên dưới, chọn tài khoản Google và Đồng ý.');
    connect.hidden=false;
+   resetGoogleBrowser();
   }catch{
+   resetGoogleBrowser();
    setDrive('error','Không thể kiểm tra kết nối Google Drive lúc này. Vui lòng thử lại.');
   }
  }
@@ -158,6 +237,7 @@
    let data={};try{data=await r.json();}catch{}
    if(!r.ok||data.disconnected!==true||data.connected!==false)
     throw Error(data.error||'Không thể ngắt kết nối Google Drive. Vui lòng thử lại.');
+   resetGoogleBrowser();
    await driveStatus();
    if(driveBox?.dataset.state!=='disconnected')
     throw Error('Chưa xác minh được trạng thái ngắt kết nối. Vui lòng tải lại trang.');
@@ -182,6 +262,11 @@
   if(!/\.(pdf|docx)$/i.test(chosen.name)){
    message('Chỉ chấp nhận tệp PDF hoặc DOCX mẫu.','error');return;
   }
+  if(!uploaderReady()){
+   message('Hãy bấm “Cấp quyền Google để tải theo hồ sơ” trước và dùng tài khoản có quyền ghi vào Drive của đơn vị.','error');
+   uploadGate();return;
+  }
+  uploading=true;
   const submit=form.querySelector('button[type="submit"]');submit.disabled=true;
   try{
    // R86: browser→Google Drive direct file data plane. Only JSON manifests
@@ -253,22 +338,53 @@
    const init=await api('/api/qa/documents/upload/start',{
     matter_id:id,file_name:chosen.name,mime_type:mime,byte_length:chosen.size,sha256:digest
    });
-   let u;try{u=new URL(init.upload_url);}catch{throw Error('Google không trả về phiên tải tệp hợp lệ.');}
-   if(u.protocol!=='https:'||u.hostname!=='www.googleapis.com'||
-      u.pathname!=='/upload/drive/v3/files'||u.searchParams.get('uploadType')!=='resumable')
-    throw Error('Phiên tải lên không thuộc Google Drive.');
-   // Never write the sensitive one-file upload URL to history, DOM, storage or logs.
-   message('Đang tải tệp trực tiếp đến Google Drive…');
+   // Server checked MatterACL and refreshed the tenant Drive grant. The
+   // approved parent and single-use upload ticket are the only returned data.
+   if(!uuid.test(init.ticket||'')||
+      !/^[A-Za-z0-9_-]{10,200}$/.test(init.drive_folder_id||''))
+    throw Error('AI Law chưa xác nhận được thư mục Drive của đơn vị. Không gửi tệp.');
+   if(!browserReady())throw Error('Quyền Google trong trình duyệt đã hết hạn. Cấp quyền lại rồi tải lên.');
+   // R99: Google-supported multipart/related (<1.5 MB), same as the Owner-
+   // verified browser Blob upload. No resumable-session PUT or file relay.
+   const boundary='ai_law_matter_'+crypto.randomUUID().replace(/-/g,'');
+   const metadata=JSON.stringify({name:chosen.name,mimeType:mime,
+    parents:[init.drive_folder_id],appProperties:{ai_law_upload_ticket:init.ticket}});
+   const body=new Blob([
+    '--'+boundary+'\r\n',
+    'Content-Type: application/json; charset=UTF-8\r\n\r\n',
+    metadata,'\r\n--'+boundary+'\r\n',
+    'Content-Type: '+mime+'\r\n\r\n',bytes,
+    '\r\n--'+boundary+'--'
+   ],{type:'multipart/related; boundary='+boundary});
+   message('Đang gửi tệp trực tiếp đến thư mục Google Drive của đơn vị…');
+   const url='https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id';
    let google;
-   try{google=await fetch(u.toString(),{method:'PUT',body:chosen,
-    headers:{'Content-Type':mime},credentials:'omit',redirect:'error',mode:'cors'});}
-   catch{throw Error('Trình duyệt chưa gửi được tệp trực tiếp tới Google Drive. Không thử lại ngay để tránh tệp trùng.');}
-   if(!google.ok)throw Error('Google Drive chưa xác nhận tệp (HTTP '+google.status+'). Vui lòng kiểm tra trước khi thử lại.');
+   try{
+    google=await fetch(url,{method:'POST',body,headers:{
+     'Authorization':'Bearer '+browserToken,
+     'Content-Type':'multipart/related; boundary='+boundary
+    },credentials:'omit',redirect:'error',mode:'cors',cache:'no-store'});
+   }catch{
+    uncertainUpload=true;
+    throw Error('Chưa đọc được phản hồi Google. Hãy kiểm tra Drive trước khi thử lại để tránh tệp trùng.');
+   }
+   if(!google.ok){
+    if(google.status>=500)uncertainUpload=true;
+    throw Error(google.status===403?
+     'Google từ chối quyền ghi thư mục (HTTP 403). Hãy chọn đúng tài khoản Google của đơn vị.':
+     'Google Drive từ chối tải tệp (HTTP '+google.status+').');
+   }
    let remote={};try{remote=await google.json();}catch{}
-   if(!/^[A-Za-z0-9_-]{10,200}$/.test(remote?.id||''))
-    throw Error('Google đã phản hồi nhưng thiếu ID tệp. Không tải lại ngay để tránh trùng.');
-   message('Đang xác minh thư mục và ghi nhận hồ sơ…');
-   await api('/api/qa/documents/upload/finish',{ticket:init.ticket,file_id:remote.id});
+   if(!/^[A-Za-z0-9_-]{10,200}$/.test(remote?.id||'')){
+    uncertainUpload=true;
+    throw Error('Google có thể đã nhận tệp nhưng chưa trả ID. Kiểm tra Drive trước khi thử lại.');
+   }
+   message('Đang xác minh thư mục, quyền và ghi nhận hồ sơ…');
+   try{await api('/api/qa/documents/upload/finish',{ticket:init.ticket,file_id:remote.id});}
+   catch(e){
+    uncertainUpload=true;
+    throw Error('Google đã nhận tệp nhưng AI Law chưa ghi nhận vào hồ sơ. Không tải lại để tránh trùng. '+(e.message||''));
+   }
    file.value='';showSelectedFile();
    message('Đã lưu tệp thử nghiệm vào Google Drive. Nội dung chưa được dùng cho AI.','success');
    await refreshFiles();
@@ -283,7 +399,7 @@
     }
    }
   }
-  finally{submit.disabled=!(driveBox?.dataset.state==='connected');}
+  finally{uploading=false;uploadGate();}
  });
  select.addEventListener('change',()=>{void refreshFiles();});
  window.addEventListener('ai-law:documents-open',()=>{void driveStatus();void refreshMatters();});
@@ -291,6 +407,7 @@
   reset();setDrive('loading','Đang chuyển không gian làm việc…');
   if(connect)connect.hidden=true;
   if(disconnect)disconnect.hidden=true;
+  resetGoogleBrowser();
   if(uploadButton)uploadButton.disabled=true;
  });
  // app.js can dispatch documents-open before this deferred script registers its listener.

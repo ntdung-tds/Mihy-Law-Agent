@@ -82,21 +82,18 @@ function fixture({allow=true,grant=true,badProof=false,active=true,sessionMode='
   ticket:()=>ticket,receipt:()=>receipt};
 }
 const start='/api/qa/documents/upload/start',finish='/api/qa/documents/upload/finish';
-test('R86 server issues one-file Google session only after MatterACL, without file bytes',async()=>{
+test('R99 server issues ACL-bound ticket and approved tenant folder, not CORS-blocked Google upload session',async()=>{
  const f=fixture();
  const r=await documentsApi(request(start,MANIFEST),f.env,{now,driveFetch:f.driveFetch});
  assert.equal(r.status,200,await r.clone().text());
  const data=await r.json();
  assert.match(data.ticket,/^[0-9a-f-]{36}$/);
- assert.match(data.upload_url,/^https:\/\/www\.googleapis\.com\/upload\/drive\/v3\/files\?/);
+ assert.equal(data.drive_folder_id,ROOT);
  assert.equal(data.expires_in,600);
- assert.equal(f.requests.length,1);
- const meta=JSON.parse(f.requests[0].init.body);
- assert.equal(meta.parents[0],ROOT);
- assert.equal(meta.appProperties.ai_law_upload_ticket,data.ticket);
- assert.equal(meta.name,MANIFEST.file_name);
+ assert.equal(Object.hasOwn(data,'upload_url'),false);
+ assert.equal(f.requests.length,0,'no Google resumable session; browser uses multipart POST');
  assert.ok(!JSON.stringify(data).includes('synthetic-drive-access-token'));
- assert.equal(f.receipt(),false,'no receipt until Google confirms');
+ assert.equal(f.receipt(),false,'no D1 receipt until Google metadata confirms');
 });
 test('R86 finalize rechecks authorized file, approved root and app-specific ticket, writes D1 only after proof',async()=>{
  const f=fixture();
@@ -139,24 +136,15 @@ test('R86 only metadata JSON endpoints are accepted, never arbitrary GET',async(
  assert.equal((await documentsApi(requestGet,f.env,{now,driveFetch:f.driveFetch})).status,405);
 });
 
-test('R88 Google initiation failures preserve safe stages and never create upload receipts',async()=>{
- for(const [sessionMode,stage,providerStatus,reason] of [
-  ['transport','transport',undefined,undefined],
-  ['provider403','provider',403,'insufficientFilePermissions'],
-  ['badLocation','response',undefined,undefined]
- ]){
-  const f=fixture({sessionMode});
-  const res=await documentsApi(request(start,MANIFEST),f.env,{now,driveFetch:f.driveFetch});
-  assert.equal(res.status,503,sessionMode);
-  const data=await res.json();
-  assert.equal(data.code,'DRIVE_UPLOAD_UNAVAILABLE');
-  assert.equal(data.stage,stage,sessionMode);
-  assert.equal(data.provider_status,providerStatus,sessionMode);
-  assert.equal(data.provider_reason,reason,sessionMode);
-  assert.equal(f.ticket(),null,sessionMode);
-  assert.equal(f.receipt(),false,sessionMode);
-  assert.ok(!JSON.stringify(data).includes('synthetic-drive-access-token'));
- }
+test('R99 missing organization Drive grant never issues a ticket or exposes file bytes',async()=>{
+ const f=fixture({grant:false});
+ const res=await documentsApi(request(start,MANIFEST),f.env,{now,driveFetch:f.driveFetch});
+ assert.equal(res.status,503);
+ const data=await res.json();
+ assert.equal(data.code,'DRIVE_GRANT_UNAVAILABLE');
+ assert.equal(f.ticket(),null);
+ assert.equal(f.receipt(),false);
+ assert.equal(f.requests.length,0);
 });
 
 test('R89 Cloudflare fetch brand binding: bare invocation works for session start and metadata GET',async()=>{

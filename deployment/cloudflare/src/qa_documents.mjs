@@ -138,17 +138,24 @@ async function startDirect(req,env,p,now,opts){
  if(Number(counts?.n||0)>=20)return result(429,{error:'Hồ sơ QA đạt giới hạn tệp.'});
  let drive;try{drive=await driveAdapter(env,p,opts);}
  catch{return storageIssue('DRIVE_GRANT_UNAVAILABLE');}
+ // R99: direct browser multipart upload. Google resumable-session PUT from
+ // mobile browsers failed CORS; do not create a browser-inaccessible session.
+ // The existing OAuth-backed tenant adapter proves the approved Drive root;
+ // the browser receives only its folder ID and a short-lived ACL-bound ticket.
+ const rootId=drive.rootId;
+ if(typeof rootId!=='string'||!/^[A-Za-z0-9_-]{10,200}$/.test(rootId))
+  return storageIssue('DRIVE_GRANT_UNAVAILABLE');
  const ticket=crypto.randomUUID();
- let uploadUrl;try{uploadUrl=await drive.beginResumable({
-  name,mimeType:mime,size,ticketId:ticket
- });}catch(e){return storageIssue('DRIVE_UPLOAD_UNAVAILABLE',e);}
  try{
   await env.DB.prepare('INSERT INTO qa_document_upload_tickets (installation_id,tenant_id,ticket_id,user_id,matter_id,file_name,mime_type,byte_length,sha256,created_at,expires_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)')
     .bind(env.INSTALLATION_ID,p.tenant_id,ticket,p.user_id,matter,name,mime,size,sha,now,now+600).run();
  }catch{return storageIssue('QA_RECEIPT_UNAVAILABLE');}
+ // No resumable upload capability is created or returned in R99.
+ // The short-lived ticket is written to D1 only after permission checks.
  // Sensitive capability for one Google-created file. Never log or persist the
- // URI in browser localStorage, D1, HTML attributes, or URL query parameters.
- return result(200,{ticket,upload_url:uploadUrl,expires_in:600});
+ // Folder ID is bound to the server-verified tenant grant, while the
+ // file bytes and browser-scoped Google access token never enter this Worker.
+ return result(200,{ticket,drive_folder_id:rootId,expires_in:600});
 }
 async function finishDirect(req,env,p,now,opts){
  if(!csrf(req))return result(403,{error:'CSRF_DENIED'});

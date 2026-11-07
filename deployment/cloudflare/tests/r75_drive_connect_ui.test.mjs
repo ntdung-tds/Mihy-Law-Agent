@@ -16,12 +16,14 @@ function element(id){
   querySelector(){return null;}
  };
 }
-async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false,directStartError=null}={}){
+async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false,directStartError=null,directGoogleError=''}={}){
  const ids=['document-matter','document-upload-form','document-file','document-file-name','document-feedback',
-  'qa-document-list','drive-setup','drive-status','drive-connect','drive-disconnect'];
+  'qa-document-list','drive-setup','drive-status','drive-connect','drive-disconnect',
+  'document-google-authorize','document-google-status','drive-blob-test'];
  const els=Object.fromEntries(ids.map(x=>[x,element(x)]));
  const submit=element('submit');
  els['document-upload-form'].querySelector=()=>submit;
+ els['drive-blob-test'].dataset.googleClientId='748514165913-petg8vmsa7cvkmvutothq5g8keocuvga.apps.googleusercontent.com';
  const calls=[],assignments=[],historyUrls=[],confirmations=[];
  const currentStatus={...status};
  const location={
@@ -35,7 +37,7 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
   createElement(tag){if(!['option','p','div','span','a','small'].includes(tag))throw Error('Unexpected HTML node');return element(tag);}
  };
  const fetch=async(url,opts)=>{
-  calls.push({url,method:opts?.method||'GET'});
+  calls.push({url,method:opts?.method||'GET',headers:opts?.headers||{},body:opts?.body});
   if(url==='/api/qa/drive/status')return Response.json(currentStatus);
   if(url==='/api/qa/drive/disconnect'){
    currentStatus.connected=false;currentStatus.connected_at=null;
@@ -46,9 +48,12 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
    return Response.json(directStartError,{status:503});
   if(directUpload&&url==='/api/qa/documents/upload/start')
    return Response.json({ticket:'55555555-5555-4555-8555-555555555555',
-    upload_url:'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=syntheticBrowserToken12345'});
-  if(directUpload&&typeof url==='string'&&url.startsWith('https://www.googleapis.com/upload/drive/v3/files?'))
+    drive_folder_id:'syntheticQAroot_12345'});
+  if(directUpload&&typeof url==='string'&&url.startsWith('https://www.googleapis.com/upload/drive/v3/files?')){
+   if(directGoogleError==='network')throw Error('synthetic CORS/rejected fetch');
+   if(directGoogleError==='403')return Response.json({error:'forbidden'},{status:403});
    return Response.json({id:'syntheticRemoteDriveId1234'});
+  }
   if(directUpload&&url==='/api/qa/documents/upload/finish')
    return Response.json({id:'55555555-5555-4555-8555-555555555555',status:'unverified'},{status:201});
   if(directUpload&&typeof url==='string'&&url.startsWith('/api/qa/documents?'))
@@ -57,9 +62,12 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
   throw Error('Unexpected endpoint '+url);
  };
  const window={addEventListener(){},
+  google:{accounts:{oauth2:{initTokenClient(config){return{requestAccessToken(){
+   config.callback({access_token:'synthetic-google-browser-token',expires_in:3600});
+  }};}}}},
   confirm(text){confirmations.push(text);return confirmDisconnect;}};
  vm.runInNewContext(code,{document,window,location,history:{replaceState(_a,_b,url){historyUrls.push(url);}},
-  fetch,URL,Response,console,crypto:webcrypto,Uint8Array,TextDecoder},{filename:'documents.js'});
+  fetch,URL,Response,Blob,console,crypto:webcrypto,Uint8Array,TextDecoder},{filename:'documents.js'});
  await new Promise(resolve=>setImmediate(resolve));
  return {els,submit,calls,assignments,historyUrls,confirmations};
 }
@@ -92,7 +100,8 @@ test('successful consent is verified by server status; upload enabled only if co
  const t=await mount({connected:true,configuration_ready:true,can_connect:true},
   {query:'?drive=connected'});
  assert.equal(t.els['drive-connect'].hidden,true);
- assert.equal(t.submit.disabled,false);
+ assert.equal(t.submit.disabled,true,'direct upload also requires browser Google consent');
+ assert.equal(t.els['document-google-authorize'].hidden,false);
  assert.equal(t.els['drive-setup'].dataset.state,'connected');
  assert.deepEqual(t.historyUrls,['/app#documents']);
 });
@@ -175,7 +184,7 @@ test('R80 canceled user confirmation does not call disconnect endpoint',async()=
  await t.els['drive-disconnect'].listeners.click();
  assert.equal(t.calls.some(x=>x.url==='/api/qa/drive/disconnect'),false);
  assert.equal(t.els['drive-setup'].dataset.state,'connected');
- assert.equal(t.submit.disabled,false);
+ assert.equal(t.submit.disabled,true,'browser token is not granted yet');
 });
 test('R80 organization non-admin and disconnected workspaces never show disconnect',async()=>{
  for(const state of [{connected:true,configuration_ready:true,can_connect:false},
@@ -192,23 +201,61 @@ test('R80 both desktop and mobile styles include safe secondary disconnect and H
  assert.match(css,/@media\(max-width:600px\)[\s\S]*#drive-disconnect/);
 });
 
-test('R86 PDF bytes go only to Google; Cloudflare sees JSON metadata and receipt only',async()=>{
+test('R99 MatterACL PDF uploads with proven Google multipart POST, then verifies D1 receipt',async()=>{
  const t=await mount({connected:true,configuration_ready:true,can_connect:true},{directUpload:true});
  const bytes=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
  t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
  t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
+ await t.els['document-google-authorize'].listeners.click();
+ assert.equal(t.submit.disabled,false,'tenant grant + browser Google consent required');
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
  const starts=t.calls.filter(x=>x.url==='/api/qa/documents/upload/start');
  const finishes=t.calls.filter(x=>x.url==='/api/qa/documents/upload/finish');
  const direct=t.calls.filter(x=>String(x.url).startsWith('https://www.googleapis.com/upload/drive/v3/files?'));
  assert.equal(starts.length,1);
  assert.equal(direct.length,1);
+ assert.equal(direct[0].method,'POST');
+ assert.equal(direct[0].headers.Authorization,'Bearer synthetic-google-browser-token');
+ assert.match(direct[0].headers['Content-Type'],/^multipart\/related; boundary=/);
+ const payload=await direct[0].body.text();
+ assert.match(payload,/"parents":\["syntheticQAroot_12345"\]/);
+ assert.match(payload,/"ai_law_upload_ticket":"55555555-5555-4555-8555-555555555555"/);
+ assert.match(payload,/%PDF-1.4/);
+ const aiLawCalls=t.calls.filter(x=>String(x.url).startsWith('/api/qa/'));
+ assert.ok(aiLawCalls.every(x=>!String(x.body||'').includes('%PDF-1.4')));
+ assert.ok(aiLawCalls.every(x=>!String(x.body||'').includes('synthetic-google-browser-token')));
  assert.equal(finishes.length,1);
  assert.equal(t.calls.some(x=>x.url==='/api/qa/documents'&&x.method==='POST'),false);
- assert.equal(t.els['document-feedback'].dataset.state,'success', t.els['document-feedback'].textContent);
+ assert.equal(t.els['document-feedback'].dataset.state,'success',t.els['document-feedback'].textContent);
+});
+test('R99 ambiguous Google network failure never finalizes receipt or silently retries',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},
+  {directUpload:true,directGoogleError:'network'});
+ const bytes=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
+ t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+ t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
+  async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
+ await t.els['document-google-authorize'].listeners.click();
+ await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ assert.equal(t.calls.filter(x=>x.url==='/api/qa/documents/upload/finish').length,0);
+ assert.equal(t.calls.filter(x=>String(x.url).includes('uploadType=multipart')).length,1);
+ assert.equal(t.submit.disabled,true,'no automatic retry on ambiguous Google response');
+ assert.match(t.els['document-feedback'].textContent,/kiểm tra Drive trước khi thử lại/);
 });
 
+test('R99 browser Google 403 on organization root does not generate receipt',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},
+  {directUpload:true,directGoogleError:'403'});
+ const bytes=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
+ t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+ t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
+  async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
+ await t.els['document-google-authorize'].listeners.click();
+ await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ assert.equal(t.calls.filter(x=>x.url==='/api/qa/documents/upload/finish').length,0);
+ assert.match(t.els['document-feedback'].textContent,/quyền ghi thư mục.*HTTP 403/);
+});
 test('R88 real QA start failure shows bounded stage, provider HTTP and reason, never secrets',async()=>{
  const t=await mount({connected:true,configuration_ready:true,can_connect:true},{
   directUpload:true,directStartError:{
@@ -221,6 +268,7 @@ test('R88 real QA start failure shows bounded stage, provider HTTP and reason, n
  t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
  t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
+ await t.els['document-google-authorize'].listeners.click();
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
  const msg=t.els['document-feedback'].textContent;
  assert.equal(t.els['document-feedback'].dataset.state,'error');
@@ -241,6 +289,7 @@ test('R88 transport failures show stage without implying a mobile connection def
  t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
  t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
+ await t.els['document-google-authorize'].listeners.click();
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
  assert.match(t.els['document-feedback'].textContent,/stage=transport/);
  assert.doesNotMatch(t.els['document-feedback'].textContent,/đường truyền.*ổn định/i);
