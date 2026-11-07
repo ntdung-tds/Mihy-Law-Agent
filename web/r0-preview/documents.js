@@ -28,6 +28,46 @@
    if(!select.disabled){select.selectedIndex=1;await refreshFiles();}
   }catch{message('Chưa thể tải hồ sơ QA.');}
  }
+ async function downloadVerified(d,link){
+  const bytesExpected=Number(d.bytes);
+  const id=d.id;
+  if(!uuid.test(id)||!Number.isInteger(bytesExpected)||bytesExpected<22||bytesExpected>1500000||
+     !/^[a-f0-9]{64}$/.test(d.sha256||'')||
+     !['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(d.mime_type)||
+     !/^[\p{L}\p{N}._ -]{5,120}$/u.test(d.name||'')||
+     !/\.(pdf|docx)$/i.test(d.name||'')){
+   message('Thông tin tệp lưu trong hồ sơ không hợp lệ. Không tải xuống.','error');return;
+  }
+  link.textContent='Đang kiểm tra…';link.setAttribute('aria-disabled','true');
+  try{
+   const res=await fetch('/api/qa/documents/'+id+'/download',{
+    credentials:'same-origin',cache:'no-store',redirect:'error'
+   });
+   if(res.status===401){location.replace('/login');return;}
+   if(!res.ok)throw Error('Không tải được tệp gốc (HTTP '+res.status+').');
+   const lengthHeader=res.headers.get('Content-Length');
+   if(lengthHeader&&Number(lengthHeader)>1500000)
+    throw Error('Phản hồi tải xuống vượt giới hạn. Không lưu tệp.');
+   const type=(res.headers.get('Content-Type')||'').split(';')[0].trim();
+   if(type!==d.mime_type)throw Error('Máy chủ trả về kiểu dữ liệu khác tệp gốc. Không lưu tệp.');
+   const bytes=new Uint8Array(await res.arrayBuffer());
+   if(bytes.length!==bytesExpected)
+    throw Error('Kích thước tệp tải về khác tệp đã lưu ('+bytes.length+' / '+bytesExpected+' byte). Không lưu tệp.');
+   const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),
+    b=>b.toString(16).padStart(2,'0')).join('');
+   if(hash!==d.sha256)throw Error('Tệp tải xuống không khớp SHA-256 gốc. Không lưu tệp.');
+   // Save exactly the verified bytes rather than an HTML response rendered by
+   // a mobile webview or intermediate login redirect.
+   const blobUrl=URL.createObjectURL(new Blob([bytes],{type:d.mime_type}));
+   try{
+    const node=document.createElement('a');
+    node.href=blobUrl;node.download=d.name;node.rel='noopener';
+    document.body.appendChild(node);node.click();node.remove();
+   }finally{setTimeout(()=>URL.revokeObjectURL(blobUrl),30000);}
+   message('Đã xác minh tải về: '+bytes.length+' byte, trùng SHA-256 với tệp gốc.','success');
+  }catch(e){message(e?.message||'Không thể xác minh tệp tải về.','error');}
+  finally{link.textContent='Tải về';link.removeAttribute('aria-disabled');}
+ }
  async function refreshFiles(){
   list.replaceChildren();const id=select.value;
   if(!uuid.test(id))return;
@@ -46,6 +86,7 @@
     if(driveBox?.dataset.state==='connected'){
      const a=document.createElement('a');a.href='/api/qa/documents/'+d.id+'/download';
      a.textContent='Tải về';a.rel='nofollow';
+     a.addEventListener('click',e=>{e.preventDefault();void downloadVerified(d,a);});
      row.append(label,a);
     }else{
      const note=document.createElement('small');note.textContent='Kết nối Drive để tải về';
