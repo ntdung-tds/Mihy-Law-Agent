@@ -64,7 +64,7 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
   }};}}}},
   confirm(text){confirmations.push(text);return confirmDisconnect;}};
  vm.runInNewContext(code,{document,window,location,history:{replaceState(_a,_b,url){historyUrls.push(url);}},
-  fetch,URL,Response,console,crypto:webcrypto,Uint8Array,TextDecoder},{filename:'documents.js'});
+  fetch,URL,Response,Blob,console,crypto:webcrypto,Uint8Array,TextDecoder},{filename:'documents.js'});
  await new Promise(resolve=>setImmediate(resolve));
  return {els,submit,calls,assignments,historyUrls,confirmations};
 }
