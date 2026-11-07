@@ -175,8 +175,8 @@ test('R86 only metadata JSON endpoints are accepted, never arbitrary GET',async(
 });
 
 test('R99 missing organization Drive grant never issues a ticket or exposes file bytes',async()=>{
- const f=fixture({grant:false});
- const res=await documentsApi(request(start,MANIFEST),f.env,{now,driveFetch:f.driveFetch});
+ const f=fixture({grant:false,destination:true});
+ const res=await documentsApi(request(start,{...MANIFEST,destination_id:DEST}),f.env,{now,driveFetch:f.driveFetch});
  assert.equal(res.status,503);
  const data=await res.json();
  assert.equal(data.code,'DRIVE_GRANT_UNAVAILABLE');
@@ -241,7 +241,7 @@ test('R103 selected and assigned child folder replaces tenant root in ticket and
 test('R103 missing folder choice, revoked assignment, or outsider folder fail closed',async()=>{
  const enforced=fixture();
  enforced.env.QA_STORAGE_DESTINATIONS='enforced';
- const missing=await documentsApi(request(start,MANIFEST),enforced.env,{now,driveFetch:enforced.driveFetch});
+ const missing=await documentsApi(request(start,MANIFEST),enforced.env,{now});
  assert.equal(missing.status,400);
  assert.equal(enforced.ticket(),null);
  const outside=fixture({destination:true,badFolder:true});
