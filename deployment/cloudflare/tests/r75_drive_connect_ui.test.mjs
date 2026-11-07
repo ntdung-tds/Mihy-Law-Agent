@@ -283,7 +283,7 @@ test('R102 connected Drive upload reuses Google consent and cached browser token
    async arrayBuffer(){return original.buffer.slice(original.byteOffset,original.byteOffset+original.byteLength);}}];
   await form.listeners.submit({preventDefault(){}});
   await settleSave(t);
-  assert.equal(t.els['document-feedback'].dataset.state,'success','save '+n);
+  assert.equal(t.els['document-feedback'].dataset.state,'success',JSON.stringify({save:n,calls:t.calls.map(x=>x.url),grants:t.googleGrants.length,feedback:t.els['document-feedback'].textContent,dialog:t.els['document-save-dialog'].open,pending:t.pending.length,submitDisabled:t.submit.disabled}));
  }
  assert.equal(t.googleGrants.length,1,'never request a second Google account chooser in same browser session');
  assert.equal(t.googleGrants[0].prompt,'','do not force consent or select_account');
