@@ -1,12 +1,18 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `90` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T05:24:00.000Z`.
+- **PCS revision:** `91` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T05:33:32.797Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R94 — Owner confirms isolated Google Drive direct upload QA works (2026-11-07)
+
+- **Owner report:** “Đã ok rồi nhé” in reply to the /drive-blob QA link/test instructions after the new OAuth Web Client ID was deployed. Record **OWNER_REPORTED_PASS** for standalone browser Google connection/upload only, not independent provider receipt evidence or full PDF/DOCX case matrix.
+- **Scope:** QA URL https://ai-law-web-qa.iaict-platform.workers.dev/drive-blob. Prior R93 synthetic CI 9/9 and verified QA deployment remain unchanged. No new code, secrets, file IDs, or private data saved.
+- **Not inferred:** Integrated AI Law /app#documents tenant grants, MatterACL, final D1 receipt, file integrity/download and production remain separate **NOT_RUN/BLOCKED**. Original SRS v1.1.15 baseline and SC-018 change record unchanged.
 
 ## R93 — New Google OAuth web client for isolated browser Drive QA (2026-11-07)
 
