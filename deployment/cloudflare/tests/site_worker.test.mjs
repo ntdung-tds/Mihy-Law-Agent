@@ -364,3 +364,28 @@ test('R100 download relay preserves exact verified bytes, file type, length and 
  assert.match(result.headers.get('Content-Disposition'),/filename\*/);
  assert.deepEqual(new Uint8Array(await result.arrayBuffer()),content);
 });
+
+test('R109 QA legal drafts are POST-only, same origin and protected behind AI Law login',async()=>{
+ const api=ORIGIN+'/api/qa/legal-text';
+ const before=calls.length;
+ const wrongOrigin=await handleSite(new Request(api,{method:'POST',
+  headers:{Origin:'https://untrusted.invalid','Sec-Fetch-Site':'cross-site',
+   'Content-Type':'application/json'},body:'{}'}),env);
+ assert.equal(wrongOrigin.status,403);
+ assert.equal(calls.length,before,'cross-site request must never reach backend');
+ const wrongMethod=await handleSite(new Request(api),env);
+ assert.equal(wrongMethod.status,404);
+ assert.equal(calls.length,before,'GET may not trigger billable AI');
+ const accepted=await handleSite(new Request(api,{method:'POST',
+  headers:{Origin:ORIGIN,'Sec-Fetch-Site':'same-origin','Content-Type':'application/json'},
+  body:JSON.stringify({action:'UC04',text:'Synthetic legal text for nonproduction QA only.'})}),env);
+ assert.equal(accepted.status,404,'fixture backend does not implement AI but relay must forward');
+ assert.equal(calls.length,before+1);
+ assert.equal(calls.at(-1).path,'/api/qa/legal-text');
+ assert.equal(calls.at(-1).method,'POST');
+ assert.equal(calls.at(-1).origin,'https://ai-law-standalone-cf-qa.iaict-platform.workers.dev');
+ const {WORKSPACE_HTML}=await import(pathToFileURL(join(tmp,'workspace_html.mjs')).href);
+ assert.match(WORKSPACE_HTML,/id="legal-text-form"/);
+ assert.match(WORKSPACE_HTML,/id="legal-text-results"/);
+ assert.match(WORKSPACE_HTML,/Không nhập hồ sơ khách hàng thật/);
+});
