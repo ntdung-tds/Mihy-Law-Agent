@@ -2,11 +2,19 @@
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
 - **PCS revision:** `82` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-06T16:36:09.366Z`.
+- **Updated:** `2026-11-07T01:27:04Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R88 — Google Drive session-init failure diagnostic fix deployed to QA; real provider cause still unknown (2026-11-07)
+
+- **User evidence:** Mobile screenshot shows generic `Google Drive chưa hoàn tất tải tệp. Vui lòng kiểm tra mã lỗi bên dưới.` and `Chưa có tệp QA.` after R86 deploy. This does **not** prove Google accepted or stored file content.
+- **Read-only QA D1 after report:** 1 Drive grant, 1 active login session, 1 existing MatterACL write allowance, **0** direct upload tickets and **0** file receipts. Failure occurs **before persisting** a session ticket; provider stage/HTTP response of this attempt was not captured. Do not guess quota, OAuth token, Worker fetch, Google CORS or device network as the cause.
+- **Bug reproduced:** R86 backend returns allowlisted `code`, `stage`, HTTP `provider_status` and `provider_reason`, but R86 UI displayed only generic `error` and mistakenly suggested an error code below. [PR #121](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/121) now exposes only these allowlisted fields, never OAuth secrets, upload-capability URL, private folder/file IDs or raw Google error bodies. Node UI cases verify error visibility/secret exclusion; synthetic API cases verify Google 403, transport exception, malformed Location with no ticket/receipt.
+- **CI/deployment:** PR #121 merged into main as `01ece84df5d59316f6fdf8a876b5354fbe240b1c` after [Actions #42323859888](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42323859888) **9/9 executed jobs PASS**. Cloudflare `ai-law-web-qa` only `workspace_documents.mjs` replaced after original source precondition; readback exact, 21/22 other modules preserved, 100% QA traffic at 2026-11-07 01:27:04Z. Existing OAuth connection unchanged; production and SRS v1.1.15 untouched.
+- **Current gate:** Actual signed-in Google resumable session initiation + PDF/DOCX file upload, D1 receipt, reload/list/download and negative MatterACL E2E are **NOT_RUN after R88 diagnostic patch**. Owner's previously reported Google upload remains **FAIL / NOT ACCEPTED**; no claim of final fix or real provider root-cause confirmation. Continue this one R72 task, not new scope.
 
 ## R87 — Direct browser→Google Drive upload deployed to QA; full authenticated E2E still pending (2026-11-07)
 
