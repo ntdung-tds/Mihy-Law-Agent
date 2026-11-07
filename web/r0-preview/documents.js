@@ -413,7 +413,7 @@
    throw Error('Google Picker chưa sẵn sàng.');
   const clientId=$('drive-blob-test')?.dataset.googleClientId||'';
   const appId=clientId.split('-')[0];
-  if(!/^\\d{8,20}$/.test(appId)||!browserReady())throw Error('Cần kết nối lại tài khoản Google.');
+  if(!/^\d{8,20}$/.test(appId)||!browserReady())throw Error('Cần kết nối lại tài khoản Google.');
   await loadPicker();
   const G=window.google?.picker;
   if(!G?.PickerBuilder||!G.DocsView||!G.ViewId?.FOLDERS)
