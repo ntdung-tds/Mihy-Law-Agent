@@ -15,13 +15,22 @@ function setup({active=true,role='lawyer',quota=true,configured=true}={}){
   AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,
   ...(configured?{AI:{async run(model,input){calls.push({model,input});throw Error('Unmocked real provider must not run');}}}:{})
  };
- env.DB={prepare(sql){return {bind(...args){queries.push({sql,args});return{
-  async first(){
-   if(sql.includes('FROM qa_sessions s'))
-    return active?{user_id:U,tenant_id:T,role_key:role}:null;
-   if(sql===RATE_SQL)return quota?{attempts:1}:null;
-   return null;
-  }}}}};
+ env.DB={
+  prepare(sql){
+   return {
+    bind(...args){
+     queries.push({sql,args});
+     return {
+      async first(){
+       if(sql.includes('FROM qa_sessions s'))
+        return active?{user_id:U,tenant_id:T,role_key:role}:null;
+       if(sql===RATE_SQL)return quota?{attempts:1}:null;
+       return null;
+      }
+     };
+    }
+   };
+  }
  };
  return {env,calls,queries};
 }
