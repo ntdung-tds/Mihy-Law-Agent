@@ -260,3 +260,13 @@ test('R103 missing folder choice, revoked assignment, or outsider folder fail cl
  assert.equal(finishRes.status,404);
  assert.equal(revoked.receipt(),false,'revoked staff must never finalize a D1 receipt');
 });
+
+test('R103 live upload cannot bypass selected folder with a legacy manifest',async()=>{
+ const f=fixture();
+ // No internal fake provider injection; public HTTP never passes driveFetch.
+ const res=await documentsApi(request(start,MANIFEST),f.env,{now});
+ assert.equal(res.status,400);
+ assert.match((await res.json()).error,/chọn thư mục/);
+ assert.equal(f.ticket(),null);
+ assert.equal(f.receipt(),false);
+});
