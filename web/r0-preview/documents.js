@@ -58,18 +58,17 @@
  const driveBox=$('drive-setup'),driveMessage=$('drive-status'),connect=$('drive-connect'),
   disconnect=$('drive-disconnect');
  const uploadButton=form.querySelector('button[type="submit"]');
- const browserAuth=$('document-google-authorize'),browserStatus=$('document-google-status');
+ const browserStatus=$('document-google-status');
  const SCOPE='https://www.googleapis.com/auth/drive.file';
- let browserToken='',expiresAt=0,googleScript=null,uploading=false,uncertainUpload=false;
+ let browserToken='',expiresAt=0,googleScript=null,uploading=false,authorizing=false,uncertainUpload=false,consentSeq=0;
  const browserReady=()=>browserToken.length>10&&Date.now()+60000<expiresAt;
- const uploaderReady=()=>driveBox?.dataset.state==='connected'&&browserReady();
+ const connected=()=>driveBox?.dataset.state==='connected';
  function uploadGate(){
-  if(uploadButton)uploadButton.disabled=uploading||uncertainUpload||!uploaderReady();
+  if(uploadButton)uploadButton.disabled=uploading||authorizing||uncertainUpload||!connected();
  }
  function resetGoogleBrowser(){
-  browserToken='';expiresAt=0;
-  if(browserAuth)browserAuth.hidden=true;
-  if(browserStatus)browserStatus.textContent='Đăng nhập Google bằng tài khoản có quyền ghi vào thư mục Drive của đơn vị trước khi tải tệp theo hồ sơ.';
+  consentSeq++;authorizing=false;browserToken='';expiresAt=0;
+  if(browserStatus)browserStatus.textContent='Drive đã kết nối. Khi lưu tệp lần đầu, Google có thể yêu cầu xác nhận quyền trong trình duyệt.';
   uploadGate();
  }
  function loadGoogleBrowser(){
@@ -85,55 +84,62 @@
   return googleScript;
  }
  function prepareBrowserConsent(){
-  if(!browserAuth||!browserStatus)return;
-  browserAuth.hidden=false;
-  browserAuth.disabled=true;
-  browserStatus.textContent='Đang nạp chức năng cấp quyền Google cho tệp theo hồ sơ…';
-  void loadGoogleBrowser().then(()=>{
-   if(driveBox?.dataset.state==='connected'){
-    browserAuth.disabled=false;
-    browserStatus.textContent=browserReady()
-     ?'Đã cấp quyền Google trong trình duyệt. Tệp sẽ lưu vào thư mục Drive của đơn vị.'
-     :'Chọn cùng tài khoản Google có quyền ghi vào thư mục Drive của đơn vị.';
-   }
-  }).catch(()=>{if(driveBox?.dataset.state==='connected'){
-   browserAuth.disabled=false;
-   browserStatus.textContent='Chưa nạp được Google. Hãy kiểm tra mạng và nhấn cấp quyền để thử lại.';
-  }});
+  if(browserStatus)browserStatus.textContent=browserReady()
+   ?'Đã sẵn sàng tải tệp vào thư mục Drive của đơn vị.'
+   :'Drive đã kết nối. Bấm Lưu tệp; Google có thể yêu cầu xác nhận một lần trong trình duyệt.';
+  // Preload Google Identity Services before the user submits, so its popup
+  // can be requested synchronously from the save-button gesture.
+  void loadGoogleBrowser().catch(()=>{
+   if(connected()&&browserStatus)
+    browserStatus.textContent='Chưa tải được thư viện Google. Hãy kiểm tra mạng và thử Lưu tệp lại.';
+  });
  }
- if(browserAuth)browserAuth.addEventListener('click',()=>{
-  if(driveBox?.dataset.state!=='connected')return;
+ function requestBrowserGrant(matterId,selectedFile){
+  if(!connected()||authorizing||uploading||uncertainUpload)return;
   const clientId=$('drive-blob-test')?.dataset.googleClientId||'';
   if(!/^[A-Za-z0-9_.-]+\.apps\.googleusercontent\.com$/.test(clientId)){
-   message('OAuth Client ID chưa hợp lệ trên trang QA.','error');return;
+   message('Cấu hình Google trên trang QA chưa hợp lệ.','error');return;
   }
   if(!window.google?.accounts?.oauth2?.initTokenClient){
-   browserStatus.textContent='Google chưa tải xong. Hãy thử lại sau khi thư viện đăng nhập sẵn sàng.';
-   void loadGoogleBrowser().then(()=>{browserAuth.disabled=false;}).catch(()=>{browserAuth.disabled=false;});
+   message('Google chưa nạp xong. Hãy thử nhấn Lưu tệp khi trang đã sẵn sàng.','error');
+   void loadGoogleBrowser().catch(()=>{});
    return;
   }
+  const seq=++consentSeq;
+  authorizing=true;uploadGate();
+  if(browserStatus)browserStatus.textContent='Đang xác nhận quyền Google để lưu tệp…';
   try{
    const client=window.google.accounts.oauth2.initTokenClient({
     client_id:clientId,scope:SCOPE,include_granted_scopes:false,
     callback:answer=>{
-     if(driveBox?.dataset.state!=='connected')return;
+     if(seq!==consentSeq||!connected())return;
+     authorizing=false;
      if(answer?.error||typeof answer?.access_token!=='string'||answer.access_token.length<11){
-      browserStatus.textContent='Google chưa cấp quyền tải tệp theo hồ sơ. Hãy kiểm tra tài khoản được chọn.';
+      message('Google chưa cấp quyền tải tệp. Hãy kiểm tra tài khoản được chọn.','error');
       uploadGate();return;
      }
      browserToken=answer.access_token;
      expiresAt=Date.now()+Math.max(0,Number(answer.expires_in||0))*1000;
-     browserStatus.textContent='Đã cấp quyền trong trình duyệt. Có thể lưu tệp vào hồ sơ QA.';
+     if(browserStatus)browserStatus.textContent='Google đã xác nhận quyền cho phiên tải lên.';
      uploadGate();
+     // Continue the same save intent only when the file and authorized matter
+     // have not changed while Google's popup was open.
+     if(browserReady()&&select.value===matterId&&file.files?.[0]===selectedFile){
+      form.requestSubmit();
+     }else message('Hồ sơ hoặc tệp đã thay đổi. Hãy bấm Lưu tệp lại.','error');
     },
     error_callback:()=>{
-     browserStatus.textContent='Không mở được Google. Hãy kiểm tra popup và cấu hình JavaScript origin.';
+     if(seq!==consentSeq)return;
+     authorizing=false;uploadGate();
+     message('Không thể mở cửa sổ Google. Hãy kiểm tra popup và thử Lưu tệp lại.','error');
     }
    });
-   browserStatus.textContent='Đang mở Google để cấp quyền tải tệp vào thư mục của đơn vị…';
    client.requestAccessToken({prompt:'consent'});
-  }catch{browserStatus.textContent='Không thể mở Google để cấp quyền. Vui lòng thử lại.';}
- });
+  }catch{
+   if(seq===consentSeq){authorizing=false;uploadGate();}
+   message('Không mở được Google. Vui lòng thử Lưu tệp lại.','error');
+  }
+ }
  const link=new URL(location.href);
  const returned=link.searchParams.get('drive');
  const issue=link.searchParams.get('issue');
@@ -159,7 +165,7 @@
    const data=await res.json();
    connect.dataset.canConnect=data.can_connect===true?'true':'false';
    if(data.connected===true&&data.configuration_ready===true){
-    setDrive('connected','Đã kết nối Google Drive cho không gian làm việc này. Để tải theo hồ sơ cần cấp quyền Google trong trình duyệt.');
+    setDrive('connected','Đã kết nối Google Drive cho không gian làm việc này. Có thể tải tệp theo hồ sơ.');
     prepareBrowserConsent();
     uploadGate();
     if(disconnect)disconnect.hidden=data.can_connect!==true;
@@ -262,9 +268,11 @@
   if(!/\.(pdf|docx)$/i.test(chosen.name)){
    message('Chỉ chấp nhận tệp PDF hoặc DOCX mẫu.','error');return;
   }
-  if(!uploaderReady()){
-   message('Hãy bấm “Cấp quyền Google để tải theo hồ sơ” trước và dùng tài khoản có quyền ghi vào Drive của đơn vị.','error');
-   uploadGate();return;
+  if(!connected()||uploading||authorizing||uncertainUpload){uploadGate();return;}
+  if(!browserReady()){
+   // One save button, no separate browser permission button. Only this first
+   // Google popup is needed to obtain the user's scoped browser access token.
+   requestBrowserGrant(id,chosen);return;
   }
   uploading=true;
   const submit=form.querySelector('button[type="submit"]');submit.disabled=true;
