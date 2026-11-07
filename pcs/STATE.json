@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 92,
-  "updated_at": "2026-11-07T05:48:30.000Z",
+  "revision": 93,
+  "updated_at": "2026-11-07T06:18:00.000Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2451,8 +2451,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R95 QA-only: reused Owner-verified R93 Google GIS token + multipart Blob direct uploader as a lazy-loaded, explicitly independent diagnostic panel inside authenticated /app#documents. PR #133 merged c89af68d0939ef49fa81820fb7bdc669d82bf3f3; CI #42343916314 9/9 executed jobs PASS. Cloudflare ai-law-web-qa deployment 23b5add4-2070-4eeb-b41c-5c5ff0b74b6b successful at 2026-11-07T05:47:14Z, 100% traffic, 26 modules, QA_AUTH intact. Real Cloudflare Browser Rendering anonymous /app#documents redirected to login PASS. Authenticated actual Google popup/upload from /app NOT_RUN. Existing organization MatterACL, receipt and download paths unchanged, not accepted.",
-      "next_action": "Owner test authenticated https://ai-law-web-qa.iaict-platform.workers.dev/app#documents, open 'Kiểm thử tải trực tiếp lên Google Drive (QA)', select Google test account and synthetic PDF/DOCX. Confirm My Drive and link. This diagnostic does NOT attach files to matters. For actual R72 SRS acceptance, separately reconcile new Google OAuth project with backend organization's grant, approved folder and D1 ticket/receipt; then test authenticated tenant/MatterACL/real signed-in file upload, list, integrity-safe download and denied role. No production deployment or client files.",
+      "last_completed_step": "R96: Owner encountered 401 deleted_client in /app#documents. Cloudflare QA backend settings inspection confirmed GOOGLE_OAUTH_CLIENT_ID still equals old deleted OAuth Web Client while isolated browser Blob direct Drive QA widget uses newly registered public client. R96 PR #135 merged c9916a90d5261cba93b1f2774fe9fd93642855d8, GitHub Actions #42345963189 CI PASS 9/9, client-side fail-close prevents Google redirect to known deleted OAuth client and points Owner to independent diagnostic uploader. Cloudflare ai-law-web-qa QA-only deployment 016b4f2b-4511-4964-9044-ab83d62922e5, 26 modules/binding QA_AUTH preserved, 100% rollout, browser anonymous /app still login-gated. Backend OAuth CLIENT_ID/SECRET not changed; organization upload NOT_FIXED until matching new secret and ID are securely configured.",
+      "next_action": "Owner must add exact backend Google Authorized redirect URI https://ai-law-standalone-cf-qa.iaict-platform.workers.dev/api/qa/drive/callback (not just /drive-return) to NEW OAuth Web Client, and securely configure BOTH new public GOOGLE_OAUTH_CLIENT_ID and matching GOOGLE_OAUTH_CLIENT_SECRET in QA backend Cloudflare Worker without disclosing secret in chat/GitHub. Reconnect organization tenant grant and perform real authenticated MatterACL upload/Drive parent/D1 receipt/download acceptance. Independent /drive-blob Google account direct upload remains separate. No production change.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
