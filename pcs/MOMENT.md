@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `101` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T17:51:19.950Z`.
+- **PCS revision:** `102` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T19:48:33.817Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R110 — Reject invented source anchors and oversized streaming AI inputs (2026-11-08)
+
+- **Scope:** Source-only security hardening of the **existing** R109 11-UC QA panel and `/api/qa/legal/run`, not a second application. Duplicate PR #158 was closed unmerged and never deployed; R109 PR #157 remains the canonical UI.
+- **Source + tests:** [PR #159](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/159). Bound request **stream bytes** to 36KB even if Content-Length is absent, and fail closed if a model response explicitly cites an invented `[A99]`, `[B12]` or longer anchor not present in the source map. Accept safe object-shaped `{answer}` from provider. This validation checks anchor existence, **not factual/legal correctness**.
+- **CI:** [Actions #42407576294](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42407576294) **PASS 9/9**, including source security tests, real SQLite quota regression, account/tenant, Chromium synthetic standalone and install kit.
+- **QA surgical deployment:** `ai-law-standalone-cf-qa` deployment `301ecbe7-5a2e-47f9-9962-56b44ad2b26f`, **100%** traffic. Exactly `qa_legal_workflows.mjs` changed among 10 modules; guarded before/after source readback PASS, the other 9 source modules and all existing AI/D1/OAuth binding names/types preserved. Website unchanged (still 27 R109 modules). Browser-rendered /health online; read-only D1 retained 1 existing QA matter and 1 AI quota row.
+- **Outstanding gates:** signed-in Owner mobile/desktop 11-UC model flow, hallucination/meaning checks, exact private SRS v1.1.15 clause mapping, legal review and final acceptance **NOT_RUN**. All legal AI outputs remain *drafts with human review*. Google Drive/OneDrive paused, production untouched.
 
 ## R109 — Eleven legal workflows: source-limited QA draft and local retrieval (2026-11-08)
 
