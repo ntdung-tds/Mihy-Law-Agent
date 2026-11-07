@@ -1674,14 +1674,15 @@
           "r103_qa_backend": "DEPLOYED_100_PERCENT_3255a194_e90d_43cb_b43e_d6a13d249429",
           "r103_qa_site": "DEPLOYED_100_PERCENT_cfa8549c_454f_4c03_85c1_0018261d5455",
           "r103_prior_full_ci": "PASS_9_OF_9_RUN_42365978857",
-          "r103_final_head_ci": "RUNNING_HEAD_5a799cb0ad601f813f3a263b4618f86151d9e0a7",
+          "r103_final_head_ci": "PASS_9_OF_9_RUN_42366958942_SOURCE_HEAD_c1b585d5878141f6527dc13247cad1af3d6bc082",
           "r103_live_anonymous_mobile": "PASS_LOGIN_GATE_CHROMIUM_390PX",
           "r103_live_anonymous_storage_api": "PASS_401_CHROMIUM_390PX",
           "r103_real_authenticated_google_employee": "NOT_RUN",
           "r103_real_google_picker_personal": "NOT_IMPLEMENTED",
           "r103_real_onedrive": "NOT_IMPLEMENTED",
           "r103_owner_acceptance": "PENDING",
-          "r103_production": "NOT_RUN"
+          "r103_production": "NOT_RUN",
+          "r103_test_fix": "PASS_R86_LEGACY_FIXTURE_EXPECTATIONS_AWAITED_ALL_CI"
         },
         "blockers": [
           "Actual signed-in QA Google Drive resumable upload of synthetic PDF and DOCX, D1 receipt, reload/list/download SHA-256 and denied cross-tenant/MatterACL E2E remain NOT_RUN; 0 receipts and 0 upload tickets observed after QA deployment. Do not mark website upload PASS.",
