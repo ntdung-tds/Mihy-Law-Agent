@@ -23,6 +23,8 @@ import { WORKSPACE_DOCUMENTS } from './workspace_documents.mjs';
 import { ACCOUNT_HTML } from './account_html.mjs';
 import { ACCOUNT_CSS } from './account_css.mjs';
 import { ACCOUNT_JS } from './account_js.mjs';
+import { DRIVE_BLOB_HTML } from './drive_blob_html.mjs';
+import { DRIVE_BLOB_JS } from './drive_blob_js.mjs';
 
 const AUTH_ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
 const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile','/api/qa/profile/avatar','/api/qa/drive/status','/api/qa/drive/connect','/api/qa/drive/disconnect']);
@@ -42,6 +44,14 @@ const publicAssets=new Map([
 ]);
 const svgIcon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#26233c"/><path d="M13 48V17h8l11 17 11-17h8v31h-8V31L32 47 21 31v17z" fill="#f8e5d8"/><path d="M43 16h16m-8-6v16m-7-10-4 7h8l-4-7zm14 0-4 7h8l-4-7zm-7 12v3m-6 1h12" stroke="#d7e8dc" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const csp="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://www.googleapis.com; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'";
+const driveBlobCsp="default-src 'none'; script-src 'self' https://accounts.google.com; style-src 'unsafe-inline'; frame-src https://accounts.google.com; connect-src https://www.googleapis.com https://accounts.google.com; img-src 'self' data: https://accounts.google.com https://*.gstatic.com; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'";
+function blobHeaders(type){
+ const h=headers(type);
+ h['Content-Security-Policy']=driveBlobCsp;
+ h['Referrer-Policy']='no-referrer';
+ h['Cross-Origin-Opener-Policy']='same-origin-allow-popups';
+ return h;
+}
 function headers(type,{publicPage=false}={}){
  return {
   'Content-Type':type,'Cache-Control':'no-store',
@@ -102,6 +112,13 @@ export async function handleSite(req,env){
   ['/api/qa/documents/upload/start','/api/qa/documents/upload/finish'].includes(path)||
   /^\/api\/qa\/documents\/[0-9a-f-]{36}\/download$/.test(path);
  if(req.method!=='GET' && !API.has(path) && !isDocumentApi)return missing();
+ // R90 isolated QA-only page. Cloudflare serves static bytes ONLY; the browser
+ // obtains a short-lived Google token itself and POSTs a Blob directly to Google.
+ // No QA_AUTH, /api/qa/drive, D1, session or Worker upload is involved.
+ if(req.method==='GET'&&path==='/drive-blob')
+  return new Response(DRIVE_BLOB_HTML,{status:200,headers:blobHeaders('text/html; charset=utf-8')});
+ if(req.method==='GET'&&path==='/drive-blob.js')
+  return new Response(DRIVE_BLOB_JS,{status:200,headers:blobHeaders('application/javascript; charset=utf-8')});
  const PUBLIC_PAGES=[['/gioi-thieu',LANDING_ABOUT_HTML],['/giai-phap',LANDING_SOLUTIONS_HTML],['/chuc-nang',LANDING_FEATURES_HTML],['/an-toan-du-lieu',LANDING_SECURITY_HTML],['/trien-khai-rieng',LANDING_PRIVATE_HTML],['/dich-vu-theo-goi',LANDING_SUBSCRIPTION_HTML]];
  const page=(path==='/'||path==='/index.html')?SITE_HTML:PUBLIC_PAGES.find(([route])=>route===path)?.[1];
  if(req.method==='GET' && page)return respond(page.replace('</footer>',FOOTER_CONTACT_HTML+'</footer>'),'text/html; charset=utf-8',200,{publicPage:true});
@@ -131,7 +148,7 @@ export async function handleSite(req,env){
  }
  if(req.method==='GET'&&path==='/login')return respond(LOGIN_HTML);
  if(req.method==='GET'&&path==='/favicon.svg')return respond(svgIcon,'image/svg+xml; charset=utf-8',200,{publicPage:true});
- if(req.method==='GET'&&path==='/robots.txt')return respond('User-agent: *\nDisallow: /app\nDisallow: /account\nDisallow: /login\nDisallow: /drive-return\nDisallow: /api/\n','text/plain; charset=utf-8',200,{publicPage:true});
+ if(req.method==='GET'&&path==='/robots.txt')return respond('User-agent: *\nDisallow: /app\nDisallow: /account\nDisallow: /login\nDisallow: /drive-return\nDisallow: /drive-blob\nDisallow: /api/\n','text/plain; charset=utf-8',200,{publicPage:true});
  if(req.method==='GET'&&path==='/health')return respond(JSON.stringify({
   status:'online',environment:'qa_nonproduction',workspace_auth_binding:typeof env?.QA_AUTH?.fetch==='function'
  }), 'application/json; charset=utf-8',200,{publicPage:true});
