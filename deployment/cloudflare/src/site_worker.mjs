@@ -17,6 +17,7 @@ import { LOGIN_JS } from './login_js.mjs';
 import { WORKSPACE_HTML } from './workspace_html.mjs';
 import { WORKSPACE_CSS } from './workspace_css.mjs';
 import { WORKSPACE_JS } from './workspace_js.mjs';
+import { WORKSPACE_LEGAL_TEXT } from './workspace_legal_text.mjs';
 import { WORKSPACE_SESSION } from './workspace_session.mjs';
 import { WORKSPACE_MATTERS } from './workspace_matters.mjs';
 import { WORKSPACE_DOCUMENTS } from './workspace_documents.mjs';
