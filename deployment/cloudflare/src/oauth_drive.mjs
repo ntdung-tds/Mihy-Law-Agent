@@ -217,10 +217,11 @@ async function browserAccess(req,env,now,opts){
  // Recheck the owner and the active session after remote refresh. A concurrent
  // disconnect/account switch must fail closed.
  const [latest,active]=await Promise.all([
-  env.DB.prepare('SELECT connected_by,scope FROM qa_drive_connections WHERE installation_id=? AND tenant_id=?')
+  env.DB.prepare('SELECT encrypted_refresh,connected_by,scope FROM qa_drive_connections WHERE installation_id=? AND tenant_id=?')
    .bind(env.INSTALLATION_ID,p.tenant_id).first(),
   mobileSession(req,env,now)]);
  if(!latest||latest.connected_by!==p.user_id||latest.scope!==SCOPE||
+    latest.encrypted_refresh!==row.encrypted_refresh||
     !active||active.user_id!==p.user_id||active.tenant_id!==p.tenant_id)
   return out(403,{error:'Kết nối Google đã thay đổi.'});
  return out(200,{access_token:grant.access_token,expires_in:Math.min(3600,Math.max(60,Number(grant.expires_in||3000))),scope:SCOPE});
