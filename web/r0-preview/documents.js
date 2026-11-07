@@ -234,6 +234,13 @@
   }
   const seq=++consentSeq;
   authorizing=true;uploadGate();
+  // Google OAuth may never invoke the callback if its sign-in window is
+  // dismissed or stalls on Android. Never leave the Save button locked.
+  setTimeout(()=>{
+   if(seq!==consentSeq||!authorizing)return;
+   authorizing=false;pendingSaveChoice='';uploadGate();
+   message('Google chưa hoàn tất xác thực. Trở lại AI Law, mở bằng Chrome rồi thử Lưu lại.','error');
+  },45000);
   if(browserStatus)browserStatus.textContent='Đang xác nhận quyền Google để lưu tệp…';
   try{
    const client=window.google.accounts.oauth2.initTokenClient({
