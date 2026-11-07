@@ -63,11 +63,18 @@ export function validatedSource(text){
 const safeString=(x,limit)=>typeof x==='string'&&x.trim().length>0&&
  x.length<=limit&&!/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/u.test(x);
 function validateModel(result,action,lines){
- let str=typeof result==='string'?result:result?.response;
- if(typeof str!=='string'||str.length>30000)throw Error('provider');
- str=str.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
- let data;try{data=JSON.parse(str);}catch{throw Error('provider');}
- if(!data||typeof data!=='object'||Array.isArray(data))throw Error('provider');
+ let raw=typeof result==='string'?result:result?.response;
+ let data;
+ if(raw&&typeof raw==='object'&&!Array.isArray(raw)){
+  // Workers AI sometimes parses valid JSON output into an object already.
+  data=raw;
+ }else{
+  if(typeof raw!=='string'||raw.length>30000)throw Error('provider');
+  raw=raw.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
+  try{data=JSON.parse(raw);}catch{throw Error('provider');}
+ }
+ if(!data||typeof data!=='object'||Array.isArray(data)||
+    JSON.stringify(data).length>30000)throw Error('provider');
  const byId=new Map(lines.map(x=>[x.id,x.text]));
  if(action==='UC03'){
   if(!Array.isArray(data.rows)||data.rows.length!==lines.length)throw Error('incomplete');
