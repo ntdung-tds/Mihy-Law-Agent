@@ -62,7 +62,7 @@ export const LIST_SQL=[
  'WHERE r.installation_id=? AND r.tenant_id=? AND f.matter_id=?',
  'AND (f.storage_destination_id IS NULL OR EXISTS (SELECT 1 FROM qa_storage_assignments g',
  'JOIN qa_storage_destinations d ON d.installation_id=g.installation_id AND d.tenant_id=g.tenant_id',
- 'AND d.destination_id=g.destination_id AND d.status=\\'active\\'',
+ "AND d.destination_id=g.destination_id AND d.status='active'",
  'WHERE g.installation_id=f.installation_id AND g.tenant_id=f.tenant_id',
  'AND g.destination_id=f.storage_destination_id AND g.user_id=?))',
  'ORDER BY r.created_at DESC,r.file_id DESC LIMIT 50'
