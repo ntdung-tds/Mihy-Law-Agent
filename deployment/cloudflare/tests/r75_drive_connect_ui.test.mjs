@@ -14,16 +14,25 @@ function element(id){
   setAttribute(){},removeAttribute(){},click(){this.clicked=true;},remove(){},
   replaceChildren(){this.options=[];},
   append(...x){this.options.push(...x);if(this.id==='document-matter'&&this.options.length===2)this.value=x[0].value;},
-  querySelector(){return null;}
+  querySelector(){return null;},
+  showModal(){this.open=true;},close(){this.open=false;}
  };
 }
-async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false,directStartError=null,directGoogleError='',downloadCase=null,storageSelection=false}={}){
+async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false,directStartError=null,directGoogleError='',downloadCase=null,storageSelection=false,saveChoice='root'}={}){
  const ids=['document-matter','document-upload-form','document-file','document-file-name','document-feedback',
   'qa-document-list','drive-setup','drive-status','drive-connect','drive-disconnect',
-  'document-google-status','drive-blob-test'];
+  'document-google-status','drive-blob-test','document-save-dialog',
+  'document-save-root','document-save-folder','document-save-cancel'];
  if(storageSelection)ids.push('document-storage-provider','document-destination','document-storage-hint',
   'storage-admin-controls','storage-folder-name','storage-create','storage-member','storage-assign','storage-revoke');
  const els=Object.fromEntries(ids.map(x=>[x,element(x)]));
+ els['document-save-dialog'].showModal=()=>{
+  els['document-save-dialog'].open=true;
+  setImmediate(()=>{
+   if(saveChoice==='root')els['document-save-root'].onclick?.();
+   else if(saveChoice==='cancel')els['document-save-cancel'].onclick?.();
+  });
+ };
  const submit=element('submit');
  const pending=[];
  els['document-upload-form'].querySelector=()=>submit;
@@ -419,34 +428,37 @@ test('R101 verified browser download keeps a safe (2) filename instead of reject
  assert.match(t.els['document-feedback'].textContent,/SHA-256/);
 });
 
-test('R103 actual form requires provider and assigned folder before starting Google token or uploading',async()=>{
+test('R104 Save presents one explicit destination choice and never preselects Google root',async()=>{
  const html=readFileSync(new URL('../../../web/r0-preview/index.html',import.meta.url),'utf8');
  const css=readFileSync(new URL('../../../web/r0-preview/styles.css',import.meta.url),'utf8');
- assert.match(html,/id="document-storage-provider"/);
- assert.match(html,/value="onedrive" disabled/,'unconfigured Microsoft account must not be selectable');
- assert.match(html,/id="document-destination" required disabled/);
- assert.match(html,/id="storage-member"/);
- assert.match(css,/@media\(max-width:600px\)[^\n]*\.qa-storage-picker/);
- const t=await mount({connected:true,configuration_ready:true,can_connect:true},
-  {storageSelection:true,directUpload:true});
- assert.equal(t.submit.disabled,true,'no silent folder default');
- assert.equal(t.googleGrants.length,0,'do not open Google before folder choice');
- t.els['document-storage-provider'].value='google_drive';
- t.els['document-storage-provider'].listeners.change();
+ assert.match(html,/id="document-save-dialog"/);
+ assert.match(html,/id="document-save-root"/);
+ assert.match(html,/id="document-save-folder"/);
+ assert.doesNotMatch(html,/id="storage-member"/,'do not rebuild per-employee folder admin UI');
+ assert.match(html,/<button type="submit">Lưu<\/button>/);
+ assert.match(css,/\.qa-save-dialog::backdrop/);
+ const ready={connected:true,configuration_ready:true,can_connect:true};
+ const original=new TextEncoder().encode('%PDF-1.4\\n1 0 obj\\n<< >>\\nendobj\\n%%EOF\\n');
+ const prepare=t=>{
+  t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+  t.els['document-file'].files=[{name:'qa_gpt.pdf',size:original.length,
+   async arrayBuffer(){return original.buffer.slice(original.byteOffset,original.byteOffset+original.byteLength);}}];
+ };
+ const canceled=await mount(ready,{directUpload:true,saveChoice:'cancel'});
+ prepare(canceled);
+ await canceled.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ await Promise.all(canceled.pending);
+ // Flush simulated modal user cancellation before reading the network calls.
  await new Promise(resolve=>setImmediate(resolve));
- assert.equal(t.els['document-destination'].disabled,false);
- assert.equal(t.els['document-destination'].value,'','even sole folder is not implicitly selected');
- t.els['document-destination'].value='77777777-7777-4777-8777-777777777777';
- t.els['document-destination'].listeners.change();
- assert.equal(t.submit.disabled,false);
- const original=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
- t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
- t.els['document-file'].files=[{name:'qa_gpt.pdf',size:original.length,
-  async arrayBuffer(){return original.buffer.slice(original.byteOffset,original.byteOffset+original.byteLength);}}];
- await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
- await Promise.all(t.pending);
- assert.equal(t.els['document-feedback'].dataset.state,'success');
- const start=t.calls.find(c=>c.url==='/api/qa/documents/upload/start');
- assert.equal(JSON.parse(start.body).destination_id,'77777777-7777-4777-8777-777777777777');
- assert.equal(t.googleGrants.length,1);
+ assert.equal(canceled.calls.filter(x=>x.url==='/api/qa/documents/upload/start').length,0);
+ assert.match(canceled.els['document-feedback'].textContent,/Đã hủy lưu/);
+ const chosen=await mount(ready,{directUpload:true,saveChoice:'root'});
+ prepare(chosen);
+ await chosen.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ await Promise.all(chosen.pending);
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(chosen.els['document-feedback'].dataset.state,'success');
+ const start=chosen.calls.find(x=>x.url==='/api/qa/documents/upload/start');
+ assert.equal(JSON.parse(start.body).destination_id,'root','explicit My Drive selection, not silent fallback');
+ assert.equal(chosen.googleGrants.length,1);
 });
