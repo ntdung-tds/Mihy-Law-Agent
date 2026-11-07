@@ -197,5 +197,6 @@ test('R79 genuine synthetic DOCX upload, list and downloaded ZIP bytes with hash
  const downloaded=await documentsApi(request('/api/qa/documents/'+F+'/download'),f.env,options);
  assert.equal(downloaded.status,200);
  assert.equal(downloaded.headers.get('Content-Type'),DOCX);
+ assert.equal(Number(downloaded.headers.get('Content-Length')),docx.length);
  assert.deepEqual(new Uint8Array(await downloaded.arrayBuffer()),docx);
 });
