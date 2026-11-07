@@ -86,7 +86,7 @@
     if(driveBox?.dataset.state==='connected'){
      const a=document.createElement('a');a.href='/api/qa/documents/'+d.id+'/download';
      a.textContent='Tải về';a.rel='nofollow';
-     a.addEventListener('click',e=>{e.preventDefault();void downloadVerified(d,a);});
+     a.addEventListener('click',e=>{e.preventDefault();return downloadVerified(d,a);});
      row.append(label,a);
     }else{
      const note=document.createElement('small');note.textContent='Kết nối Drive để tải về';
