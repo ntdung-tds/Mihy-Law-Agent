@@ -284,3 +284,30 @@ test('R86 QA CSP permits only Google Drive API as extra cross-origin upload dest
  assert.doesNotMatch(csp,/connect-src[^;]*\*/);
  assert.doesNotMatch(csp,/connect-src[^;]*storage\.googleapis\.com/);
 });
+
+test('R90 isolated Blob to Drive page is hosted static, without QA auth or Cloudflare upload',async()=>{
+ logged=false;
+ const before=calls.length;
+ const r=await get('/drive-blob',{});
+ assert.equal(r.status,200);
+ assert.equal(calls.length,before,'no service-binding authentication for public QA probe');
+ assert.equal(r.headers.get('X-Robots-Tag'),'noindex,nofollow,noarchive');
+ const html=await r.text();
+ assert.match(html,/Google Drive/);
+ assert.match(html,/id="drive-blob-test"/);
+ assert.match(html,/data-google-client-id="[A-Za-z0-9_.-]+\.apps\.googleusercontent\.com"/);
+ assert.match(html,/https:\/\/accounts\.google\.com\/gsi\/client/);
+ assert.match(r.headers.get('Content-Security-Policy'),/accounts\.google\.com/);
+ assert.match(r.headers.get('Content-Security-Policy'),/www\.googleapis\.com/);
+ assert.equal((await get('/drive-blob.js',{})).status,200);
+ const js=await (await get('/drive-blob.js',{})).text();
+ assert.match(js,/new Blob\(/);
+ assert.match(js,/uploadType=multipart/);
+ assert.match(js,/google\.accounts\.oauth2\.initTokenClient/);
+ assert.doesNotMatch(js,/fetch\(\s*['"]\/api\/qa\//);
+ assert.doesNotMatch(js,/localStorage|sessionStorage/);
+ assert.equal((await handleSite(new Request(ORIGIN+'/drive-blob',{method:'POST'}),{})).status,404);
+ assert.equal(calls.length,before,'no Cloudflare API route used for Blob test');
+ const robots=await (await get('/robots.txt')).text();
+ assert.match(robots,/Disallow: \/drive-blob/);
+});

@@ -179,6 +179,7 @@ jobs:
           node --check deployment/cloudflare/tests/r86_direct_upload.test.mjs
           node --check deployment/cloudflare/src/oauth_drive.mjs
           node --check web/r0-preview/documents.js
+          node --check web/qa/drive-blob.js
           node --check deployment/cloudflare/src/matter_workspace.mjs
           node --check deployment/cloudflare/src/r0_preview_worker.mjs
           node --check web/r0-preview/matters.js
@@ -232,6 +233,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/session_ui_r60.test.mjs
       - name: Verify public website and protected workspace R47 routes
         run: node --test deployment/cloudflare/tests/site_worker.test.mjs
+      - name: R90 browser-only Blob Google Drive upload contract (synthetic OAuth)
+        run: node --test deployment/cloudflare/tests/r90_drive_blob.test.mjs
       - name: Guard customer-facing benefit claims and 320px layout fixes
         run: node --test deployment/cloudflare/tests/site_benefits.test.mjs
       - name: Verify Mihy Agent rebrand and two editorial landing pages
