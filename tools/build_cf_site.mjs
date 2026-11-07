@@ -25,6 +25,7 @@ const modules=[
  ['workspace_session.mjs','web/r0-preview/session.js','WORKSPACE_SESSION'],
  ['workspace_matters.mjs','web/r0-preview/matters.js','WORKSPACE_MATTERS'],
  ['workspace_documents.mjs','web/r0-preview/documents.js','WORKSPACE_DOCUMENTS'],
+ ['workspace_legal.mjs','web/r0-preview/legal.js','WORKSPACE_LEGAL'],
  ['drive_blob_html.mjs','web/qa/drive-blob.html','DRIVE_BLOB_HTML'],
  ['drive_blob_js.mjs','web/qa/drive-blob.js','DRIVE_BLOB_JS'],
  ['drive_inline_html.mjs','web/qa/drive-inline.html','DRIVE_INLINE_HTML'],
