@@ -34,6 +34,7 @@ const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/m
 const privateAssets=new Map([
  ['/styles.css',[WORKSPACE_CSS,'text/css; charset=utf-8']],
  ['/app.js',[WORKSPACE_JS,'application/javascript; charset=utf-8']],
+ ['/legal-text.js',[WORKSPACE_LEGAL_TEXT,'application/javascript; charset=utf-8']],
  ['/session.js',[WORKSPACE_SESSION,'application/javascript; charset=utf-8']],
  ['/matters.js',[WORKSPACE_MATTERS,'application/javascript; charset=utf-8']],
  ['/documents.js',[WORKSPACE_DOCUMENTS,'application/javascript; charset=utf-8']],
