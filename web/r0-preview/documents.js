@@ -422,8 +422,12 @@
    try{
     const view=new G.DocsView(G.ViewId.FOLDERS)
      .setIncludeFolders(true).setSelectFolderEnabled(true);
+    // Separate Shared Drives tab: Google Picker setEnableDrives(true) filters
+    // to shared-drive items only (not normal My Drive / shared-with-me folders).
+    const sharedView=new G.DocsView(G.ViewId.FOLDERS)
+     .setIncludeFolders(true).setSelectFolderEnabled(true).setEnableDrives(true);
     const picker=new G.PickerBuilder().setDeveloperKey(config.api_key)
-     .setAppId(appId).setOAuthToken(browserToken).addView(view)
+     .setAppId(appId).setOAuthToken(browserToken).addView(view).addView(sharedView)
      .setCallback(data=>{
       if(data.action===G.Action.PICKED){
        const docs=data[G.Response.DOCUMENTS]||data.docs||[];
@@ -591,7 +595,7 @@
     '\r\n--'+boundary+'--'
    ],{type:'multipart/related; boundary='+boundary});
    message('Đang gửi tệp trực tiếp đến thư mục Google Drive của đơn vị…');
-   const url='https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id';
+   const url='https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id&supportsAllDrives=true';
    let google;
    try{
     google=await fetch(url,{method:'POST',body,headers:{
