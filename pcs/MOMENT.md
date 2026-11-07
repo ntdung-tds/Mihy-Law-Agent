@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `95` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T07:44:00.000Z`.
+- **PCS revision:** `96` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T08:12:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R99 — Browser Google multipart replaces failing matter resumable PUT (2026-11-07)
+
+- **Owner report:** Isolated `/drive-blob` direct Google upload **OWNER_REPORTED_PASS**, but authenticated `/app#documents` matter upload failed after start: “Trình duyệt chưa gửi được tệp trực tiếp tới Google Drive. Không thử lại ngay để tránh tệp trùng.” The old per-matter data-plane used a Google resumable **PUT** session, unlike the independently proven browser **multipart POST**. Prior R85 synthetic Chromium CORS probe was not an end-to-end upload PASS. Google officially documents multipart for files under 5 MB; QA is capped at 1.5 MB.
+- **Code / CI:** [PR #141](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/141) merged `33ebaf880918d5999c468dcaafd8c7fddebfd6dd`; [CI #42353851610](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42353851610) **PASS 9/9**. Existing server requires real session, MatterACL write, tenant Drive grant and per-matter limits; now issues only a server-approved Drive folder ID and a short-lived one-use ticket. Browser asks for an explicit Google Identity Services `drive.file` grant (memory-only OAuth access token), POSTs a multipart/related Blob containing the chosen PDF/DOCX, ticket in appProperties and approved parent folder directly to Google. Worker only receives JSON control-plane requests, never file bytes or browser access token. Existing finish rechecks server grant, Drive metadata, folder, ticket, MIME, size and MatterACL before D1 receipt. Ambiguous browser/provider or failed receipt locks retry within that page instance.
+- **QA deployment:** Cloudflare **backend** `ai-law-standalone-cf-qa` deployment `683845ac-085c-42cb-a299-34c873a26fe9` at 2026-11-07T08:07:19Z (8 modules, D1 and OAuth secrets intact), **website** `ai-law-web-qa` deployment `207d717b-e582-4c1a-9d07-d621719034a3` at 2026-11-07T08:08:20Z (26 modules, QA_AUTH intact), both **100%**. Cloudflare source readback verified new ticket/approved parent, direct `multipart POST` and no old browser `PUT`. Anonymous browser live `/drive-blob` PASS, second authenticated `/app` browser probe **BLOCKED 429** (not PASS/FAIL).
+- **Important limitation / remaining acceptance:** Browser OAuth uploader must use a Google account with **write access to the organization's approved folder**. This adds user-facing consent beyond the tenant backend grant and is NOT yet a generalized non-Google-user multi-tenant storage solution. Owner must test authorized matter PDF/DOCX upload, Drive parent, D1 receipt, download and denied MatterACL before marking integrated storage PASS. SRS v1.1.15, production and real customer data unchanged.
 
 ## R98 — One canonical user-facing QA entry point (2026-11-07)
 
