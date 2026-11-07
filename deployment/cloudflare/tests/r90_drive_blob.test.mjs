@@ -89,3 +89,14 @@ test('R90 invalid or oversized files never trigger a Google request',async()=>{
  await b.el['upload-blob'].handlers.click();
  assert.equal(b.calls.length,0);
 });
+
+test('R93 configured QA OAuth Client ID is passed from hosted HTML to the Google JavaScript token client',()=>{
+ const html=readFileSync(new URL('../../../web/qa/drive-blob.html',import.meta.url),'utf8');
+ const match=html.match(/id="drive-blob-test"[^>]*data-google-client-id="([^"]+)"/);
+ assert.ok(match,'QA HTML carries the OAuth client ID');
+ assert.equal(match[1],'748514165913-k1paechitoq2ds8337ondc1q2smk8dut.apps.googleusercontent.com');
+ assert.doesNotMatch(html,/873907439100-vlno9kus5k18ikvfgj6smodoho71djsg/,'old Google project must not be reused');
+ assert.match(script,/root\.dataset\.googleClientId/,'JS reads the configured current client ID');
+ assert.match(script,/client_id:\s*clientId/,'JS passes it to Google Identity Services');
+ assert.match(html,/https:\/\/accounts\.google\.com\/gsi\/client/);
+});
