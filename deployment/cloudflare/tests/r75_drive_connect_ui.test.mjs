@@ -245,3 +245,26 @@ test('R88 transport failures show stage without implying a mobile connection def
  assert.match(t.els['document-feedback'].textContent,/stage=transport/);
  assert.doesNotMatch(t.els['document-feedback'].textContent,/đường truyền.*ổn định/i);
 });
+
+test('R96 deleted Google OAuth client is intercepted before navigation and users are directed to safe direct QA',async()=>{
+ const deleted='873907439100-vlno9kus5k18ikvfgj6smodoho71djsg.apps.googleusercontent.com';
+ const url='https://accounts.google.com/o/oauth2/v2/auth?client_id='+deleted+'&response_type=code';
+ const t=await mount({connected:false,configuration_ready:true,can_connect:true},
+  {connectResponse:{authorization_url:url}});
+ await t.els['drive-connect'].listeners.click();
+ assert.deepEqual(t.assignments,[],'must not navigate to Google 401 deleted_client');
+ assert.equal(t.els['drive-setup'].dataset.state,'error');
+ assert.match(t.els['drive-status'].textContent,/OAuth Client đã bị xóa/);
+ assert.match(t.els['drive-status'].textContent,/Client Secret mới/);
+ assert.match(t.els['drive-status'].textContent,/tệp thử chưa được gắn/);
+ assert.equal(t.calls.filter(x=>x.url==='/api/qa/drive/connect').length,1);
+});
+
+test('R96 new Google OAuth client remains allowed when backend credentials are updated',async()=>{
+ const newClient='748514165913-k1paechitoq2ds8337ondc1q2smk8dut.apps.googleusercontent.com';
+ const url='https://accounts.google.com/o/oauth2/v2/auth?client_id='+newClient+'&response_type=code';
+ const t=await mount({connected:false,configuration_ready:true,can_connect:true},
+  {connectResponse:{authorization_url:url}});
+ await t.els['drive-connect'].listeners.click();
+ assert.deepEqual(t.assignments,[url],'new valid client is not blocked');
+});
