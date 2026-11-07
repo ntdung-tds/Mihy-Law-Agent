@@ -399,3 +399,22 @@ test('R109 AI QA endpoint is same-origin POST-only and protected from anonymous 
   assert.match(html,new RegExp('id="'+id+'"'),'QA legal task editor should be integrated into authenticated app');
  assert.doesNotMatch((await get('/')).headers.get('Content-Security-Policy')||'',/unsafe-eval/);
 });
+
+test('R109 fictional text QA browser assets are private, safe and loadable',async()=>{
+ logged=false;
+ assert.equal((await get('/legal.js')).status,401,'anonymous caller must not download task JS');
+ logged=true;
+ const r=await get('/legal.js');
+ assert.equal(r.status,200);
+ const code=await r.text();
+ assert.match(code,/\/api\/qa\/legal\/run/);
+ assert.match(code,/legal-qa-example/);
+ assert.match(code,/synthetic_consent:true/);
+ assert.doesNotMatch(code,/localStorage|sessionStorage|eval\(/);
+ const app=await get('/app');
+ assert.equal(app.status,200);
+ const html=await app.text();
+ assert.match(html,/id="legal-qa-example"/);
+ assert.match(html,/src="\.\/legal\.js"/);
+ assert.match(html,/id="legal-qa-consent"/);
+});
