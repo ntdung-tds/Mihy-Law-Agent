@@ -390,7 +390,7 @@ test('R101 verified browser download keeps a safe (2) filename instead of reject
  assert.ok(row,'authenticated matter file listed');
  row.options.find(x=>x.textContent==='Tải về').listeners.click({preventDefault(){}});
  for(let i=0;i<5;i++)await new Promise(r=>setImmediate(r));
- assert.equal(t.savedBlobs.length,1,'valid numbered basename must not be blocked');
+ assert.equal(t.savedBlobs.length,1,'valid numbered basename must not be blocked; feedback='+t.els['document-feedback'].textContent);
  assert.equal(t.savedFiles[0].download,'SRS_Drive_gpt (2).pdf');
  assert.deepEqual(new Uint8Array(await t.savedBlobs[0].arrayBuffer()),original);
  assert.match(t.els['document-feedback'].textContent,/SHA-256/);
