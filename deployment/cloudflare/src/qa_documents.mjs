@@ -131,13 +131,16 @@ async function startDirect(req,env,p,now,opts){
   return result(400,{error:'Yêu cầu tệp không hợp lệ.'});
  const matter=v.matter_id,name=v.file_name,mime=v.mime_type,size=v.byte_length,sha=v.sha256;
  const destinationId=v.destination_id||null;
- // No implicit root destination in live QA: clients must select a granted folder.
+ // The Owner may explicitly choose My Drive root in the Save chooser. Never
+ // interpret an omitted destination as root (fail closed on cancellation).
+ const explicitRoot=destinationId==='root';
+ // No implicit root destination in live QA: clients must choose a location.
  // Prior R72 synthetic fixtures inject fake Google credentials and an internal
  // fetcher; preserve their historical root-only contract without enabling it
  // for real HTTP callers (the public handle never passes driveFetch).
  const historicalSynthetic=typeof opts.driveFetch==='function'&&
   typeof env.GOOGLE_DRIVE_ACCESS_TOKEN==='string'&&!!env.GOOGLE_DRIVE_ROOT_ID;
- if((!destinationId&&!historicalSynthetic)||(destinationId&&!UUID.test(destinationId)))
+ if((!destinationId&&!historicalSynthetic)||(destinationId&&!UUID.test(destinationId)&&!explicitRoot))
   return result(400,{error:'Hãy chọn thư mục lưu trữ được cấp quyền trước khi lưu tệp.'});
  if(!UUID.test(matter||''))return result(400,{error:'Hồ sơ QA không hợp lệ.'});
  // A mobile/browser download may append (1) or (2). These are safe filename
@@ -162,7 +165,7 @@ async function startDirect(req,env,p,now,opts){
  let drive;try{drive=await driveAdapter(env,p,opts);}
  catch{return storageIssue('DRIVE_GRANT_UNAVAILABLE');}
  let selected=null;
- if(destinationId){
+ if(destinationId&&!explicitRoot){
   try{selected=await assignedDestination(env,p,destinationId);}
   catch{return storageIssue('QA_RECEIPT_UNAVAILABLE');}
   if(!selected)return forbidden();
@@ -178,7 +181,7 @@ async function startDirect(req,env,p,now,opts){
   return storageIssue('DRIVE_GRANT_UNAVAILABLE');
  const ticket=crypto.randomUUID();
  try{
-  if(destinationId){
+  if(destinationId&&!explicitRoot){
    await env.DB.prepare('INSERT INTO qa_document_upload_tickets (installation_id,tenant_id,ticket_id,user_id,matter_id,file_name,mime_type,byte_length,sha256,created_at,expires_at,destination_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)')
     .bind(env.INSTALLATION_ID,p.tenant_id,ticket,p.user_id,matter,name,mime,size,sha,now,now+600,destinationId).run();
   }else{
