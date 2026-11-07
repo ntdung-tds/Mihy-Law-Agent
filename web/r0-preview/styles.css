@@ -512,3 +512,5 @@ body.drawer-open{overflow:hidden}
  .legal-qa-actions{display:block}.legal-qa-actions button{width:100%}
  #legal-qa-feedback{margin:10px 0 0}
 }
+
+.legal-qa-panel [hidden]{display:none!important}
