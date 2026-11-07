@@ -25,6 +25,8 @@ import { ACCOUNT_CSS } from './account_css.mjs';
 import { ACCOUNT_JS } from './account_js.mjs';
 import { DRIVE_BLOB_HTML } from './drive_blob_html.mjs';
 import { DRIVE_BLOB_JS } from './drive_blob_js.mjs';
+import { DRIVE_INLINE_HTML } from './drive_inline_html.mjs';
+import { DRIVE_INLINE_JS } from './drive_inline_js.mjs';
 
 const AUTH_ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
 const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile','/api/qa/profile/avatar','/api/qa/drive/status','/api/qa/drive/connect','/api/qa/drive/disconnect']);
@@ -35,7 +37,8 @@ const privateAssets=new Map([
  ['/matters.js',[WORKSPACE_MATTERS,'application/javascript; charset=utf-8']],
  ['/documents.js',[WORKSPACE_DOCUMENTS,'application/javascript; charset=utf-8']],
  ['/account.css',[ACCOUNT_CSS,'text/css; charset=utf-8']],
- ['/account.js',[ACCOUNT_JS,'application/javascript; charset=utf-8']]
+ ['/account.js',[ACCOUNT_JS,'application/javascript; charset=utf-8']],
+ ['/drive-inline.js',[DRIVE_INLINE_JS,'application/javascript; charset=utf-8']]
 ]);
 const publicAssets=new Map([
  ['/site.css',[SITE_CSS,'text/css; charset=utf-8']],
@@ -45,6 +48,18 @@ const publicAssets=new Map([
 const svgIcon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#26233c"/><path d="M13 48V17h8l11 17 11-17h8v31h-8V31L32 47 21 31v17z" fill="#f8e5d8"/><path d="M43 16h16m-8-6v16m-7-10-4 7h8l-4-7zm14 0-4 7h8l-4-7zm-7 12v3m-6 1h12" stroke="#d7e8dc" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const csp="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://www.googleapis.com; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'";
 const driveBlobCsp="default-src 'none'; script-src 'self' https://accounts.google.com; style-src 'unsafe-inline'; frame-src https://accounts.google.com; connect-src https://www.googleapis.com https://accounts.google.com; img-src 'self' data: https://accounts.google.com https://*.gstatic.com; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'";
+// Same OAuth popup origin as the Owner-verified isolated R93 upload page,
+// scoped to the authenticated /app page only; ordinary private assets and
+// all public website routes keep their original restrictive CSP.
+const directWorkspaceCsp=csp
+ .replace("script-src 'self';","script-src 'self' https://accounts.google.com;")
+ .replace("connect-src 'self' https://www.googleapis.com;","connect-src 'self' https://www.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com;");
+function directWorkspaceHeaders(type){
+ const h=headers(type); h['Content-Security-Policy']=directWorkspaceCsp;
+ h['Cross-Origin-Opener-Policy']='same-origin-allow-popups';
+ h['Referrer-Policy']='no-referrer';
+ return h;
+}
 function blobHeaders(type){
  const h=headers(type);
  h['Content-Security-Policy']=driveBlobCsp;
@@ -105,7 +120,9 @@ async function authenticated(req,env){
 const app=WORKSPACE_HTML
  .replace('<title>Mihy Law AI Agent · Workspace Preview R0</title>','<title>Mihy Law AI Agent · Không gian làm việc</title>')
  .replace('<meta name="description" content="Mihy Law AI Agent — R0 mobile-first user interface preview, synthetic demonstration data only." />','<meta name="description" content="Không gian làm việc Mihy Law AI Agent dành cho tài khoản đã được xác thực." /><meta name="robots" content="noindex,nofollow" />')
- .replace('R0 Preview</span>','MIHY LAW AI AGENT · QA</span>');
+ .replace('R0 Preview</span>','MIHY LAW AI AGENT · QA</span>')
+ .replace('<div class="document-panel" hidden>',DRIVE_INLINE_HTML+'<div class="document-panel" hidden>')
+ .replace('</head>','<script src="/drive-inline.js" defer></script></head>');
 export async function handleSite(req,env){
  const url=new URL(req.url),path=url.pathname;
  const isDocumentApi=path==='/api/qa/documents'||
@@ -177,7 +194,8 @@ export async function handleSite(req,env){
   if(path==='/app'||path==='/account')return redirect('/login');
   return respond('Unauthorized','text/plain; charset=utf-8',401);
  }
- if(path==='/app')return respond(app);
+ if(path==='/app')return new Response(app,{status:200,
+  headers:directWorkspaceHeaders('text/html; charset=utf-8')});
  if(path==='/account')return respond(ACCOUNT_HTML);
  const [body,type]=privateAssets.get(path);
  return respond(body,type);
