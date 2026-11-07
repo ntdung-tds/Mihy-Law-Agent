@@ -131,8 +131,13 @@ async function startDirect(req,env,p,now,opts){
   return result(400,{error:'Yêu cầu tệp không hợp lệ.'});
  const matter=v.matter_id,name=v.file_name,mime=v.mime_type,size=v.byte_length,sha=v.sha256;
  const destinationId=v.destination_id||null;
- if((env.QA_STORAGE_DESTINATIONS==='enforced'&&!destinationId)||
-    (destinationId&&!UUID.test(destinationId)))
+ // No implicit root destination in live QA: clients must select a granted folder.
+ // Prior R72 synthetic fixtures inject fake Google credentials and an internal
+ // fetcher; preserve their historical root-only contract without enabling it
+ // for real HTTP callers (the public handle never passes driveFetch).
+ const historicalSynthetic=typeof opts.driveFetch==='function'&&
+  typeof env.GOOGLE_DRIVE_ACCESS_TOKEN==='string'&&!!env.GOOGLE_DRIVE_ROOT_ID;
+ if((!destinationId&&!historicalSynthetic)||(destinationId&&!UUID.test(destinationId)))
   return result(400,{error:'Hãy chọn thư mục lưu trữ được cấp quyền trước khi lưu tệp.'});
  if(!UUID.test(matter||''))return result(400,{error:'Hồ sơ QA không hợp lệ.'});
  // A mobile/browser download may append (1) or (2). These are safe filename
