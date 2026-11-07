@@ -31,6 +31,7 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
   setImmediate(()=>{
    if(saveChoice==='root')els['document-save-root'].onclick?.();
    else if(saveChoice==='cancel')els['document-save-cancel'].onclick?.();
+   else if(saveChoice==='folder')els['document-save-folder'].onclick?.();
   });
  };
  const submit=element('submit');
