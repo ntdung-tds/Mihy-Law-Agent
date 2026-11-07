@@ -47,13 +47,16 @@ const publicAssets=new Map([
 ]);
 const svgIcon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#26233c"/><path d="M13 48V17h8l11 17 11-17h8v31h-8V31L32 47 21 31v17z" fill="#f8e5d8"/><path d="M43 16h16m-8-6v16m-7-10-4 7h8l-4-7zm14 0-4 7h8l-4-7zm-7 12v3m-6 1h12" stroke="#d7e8dc" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const csp="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://www.googleapis.com; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'";
-const driveBlobCsp="default-src 'none'; script-src 'self' https://accounts.google.com https://apis.google.com; style-src 'unsafe-inline'; frame-src https://accounts.google.com https://docs.google.com; connect-src https://www.googleapis.com https://accounts.google.com; img-src 'self' data: https://accounts.google.com https://*.gstatic.com; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'";
+const driveBlobCsp="default-src 'none'; script-src 'self' https://accounts.google.com; style-src 'unsafe-inline'; frame-src https://accounts.google.com; connect-src https://www.googleapis.com https://accounts.google.com; img-src 'self' data: https://accounts.google.com https://*.gstatic.com; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'";
 // Same OAuth popup origin as the Owner-verified isolated R93 upload page,
 // scoped to the authenticated /app page only; ordinary private assets and
 // all public website routes keep their original restrictive CSP.
+// Google Picker loads its public JS from apis.google.com and opens an
+// embedded docs.google.com chooser. Permit these ONLY on authenticated /app.
+// Never weaken the public landing pages, /login, or isolated Blob POC.
 const directWorkspaceCsp=csp
- .replace("script-src 'self';","script-src 'self' https://accounts.google.com;")
- .replace("connect-src 'self' https://www.googleapis.com;","connect-src 'self' https://www.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com;");
+ .replace("script-src 'self';","script-src 'self' https://accounts.google.com https://apis.google.com;")
+ .replace("connect-src 'self' https://www.googleapis.com;","connect-src 'self' https://www.googleapis.com https://accounts.google.com https://apis.google.com; frame-src https://accounts.google.com https://docs.google.com;");
 function directWorkspaceHeaders(type){
  const h=headers(type); h['Content-Security-Policy']=directWorkspaceCsp;
  h['Cross-Origin-Opener-Policy']='same-origin-allow-popups';
