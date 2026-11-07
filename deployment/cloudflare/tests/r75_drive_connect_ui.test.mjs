@@ -17,10 +17,12 @@ function element(id){
   querySelector(){return null;}
  };
 }
-async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false,directStartError=null,directGoogleError='',downloadCase=null}={}){
+async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false,directStartError=null,directGoogleError='',downloadCase=null,storageSelection=false}={}){
  const ids=['document-matter','document-upload-form','document-file','document-file-name','document-feedback',
   'qa-document-list','drive-setup','drive-status','drive-connect','drive-disconnect',
   'document-google-status','drive-blob-test'];
+ if(storageSelection)ids.push('document-storage-provider','document-destination','document-storage-hint',
+  'storage-admin-controls','storage-folder-name','storage-create','storage-member','storage-assign','storage-revoke');
  const els=Object.fromEntries(ids.map(x=>[x,element(x)]));
  const submit=element('submit');
  const pending=[];
@@ -50,6 +52,10 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
  const fetch=async(url,opts)=>{
   calls.push({url,method:opts?.method||'GET',headers:opts?.headers||{},body:opts?.body});
   if(url==='/api/qa/drive/status')return Response.json(currentStatus);
+  if(storageSelection&&url==='/api/qa/storage/destinations')
+   return Response.json({destinations:[{id:'77777777-7777-4777-8777-777777777777',
+    label:'Hồ sơ luật sư A',provider:'google_drive',kind:'organization',assigned:true}],can_manage:false,
+    providers:{google_drive:true,onedrive:false}});
   if(url==='/api/qa/drive/disconnect'){
    currentStatus.connected=false;currentStatus.connected_at=null;
    return Response.json({connected:false,disconnected:true,files_preserved:true});
@@ -411,4 +417,36 @@ test('R101 verified browser download keeps a safe (2) filename instead of reject
  assert.equal(t.savedFiles[0].download,'SRS_Drive_gpt (2).pdf');
  assert.deepEqual(new Uint8Array(await t.savedBlobs[0].arrayBuffer()),original);
  assert.match(t.els['document-feedback'].textContent,/SHA-256/);
+});
+
+test('R103 actual form requires provider and assigned folder before starting Google token or uploading',async()=>{
+ const html=readFileSync(new URL('../../../web/r0-preview/index.html',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../../../web/r0-preview/styles.css',import.meta.url),'utf8');
+ assert.match(html,/id="document-storage-provider"/);
+ assert.match(html,/value="onedrive" disabled/,'unconfigured Microsoft account must not be selectable');
+ assert.match(html,/id="document-destination" required disabled/);
+ assert.match(html,/id="storage-member"/);
+ assert.match(css,/@media\(max-width:600px\)[^\n]*\.qa-storage-picker/);
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},
+  {storageSelection:true,directUpload:true});
+ assert.equal(t.submit.disabled,true,'no silent folder default');
+ assert.equal(t.googleGrants.length,0,'do not open Google before folder choice');
+ t.els['document-storage-provider'].value='google_drive';
+ t.els['document-storage-provider'].listeners.change();
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(t.els['document-destination'].disabled,false);
+ assert.equal(t.els['document-destination'].value,'','even sole folder is not implicitly selected');
+ t.els['document-destination'].value='77777777-7777-4777-8777-777777777777';
+ t.els['document-destination'].listeners.change();
+ assert.equal(t.submit.disabled,false);
+ const original=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
+ t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+ t.els['document-file'].files=[{name:'qa_gpt.pdf',size:original.length,
+  async arrayBuffer(){return original.buffer.slice(original.byteOffset,original.byteOffset+original.byteLength);}}];
+ await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ await Promise.all(t.pending);
+ assert.equal(t.els['document-feedback'].dataset.state,'success');
+ const start=t.calls.find(c=>c.url==='/api/qa/documents/upload/start');
+ assert.equal(JSON.parse(start.body).destination_id,'77777777-7777-4777-8777-777777777777');
+ assert.equal(t.googleGrants.length,1);
 });
