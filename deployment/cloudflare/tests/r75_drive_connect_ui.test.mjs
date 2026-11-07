@@ -29,7 +29,7 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
   pending.push(Promise.resolve(els['document-upload-form'].listeners.submit({preventDefault(){}})));
  };
  els['drive-blob-test'].dataset.googleClientId='748514165913-petg8vmsa7cvkmvutothq5g8keocuvga.apps.googleusercontent.com';
- const calls=[],assignments=[],historyUrls=[],confirmations=[],savedFiles=[],savedBlobs=[];
+ const calls=[],assignments=[],historyUrls=[],confirmations=[],savedFiles=[],savedBlobs=[],googleGrants=[];
  const downloadUuid='66666666-6666-4666-8666-666666666666';
  const matterUuid='44444444-4444-4444-8444-444444444444';
  const raw=downloadCase?.original||new Uint8Array();
@@ -80,7 +80,8 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
   throw Error('Unexpected endpoint '+url);
  };
  const window={addEventListener(){},
-  google:{accounts:{oauth2:{initTokenClient(config){return{requestAccessToken(){
+  google:{accounts:{oauth2:{initTokenClient(config){return{requestAccessToken(overrides){
+   googleGrants.push({clientId:config.client_id,scope:config.scope,prompt:overrides?.prompt});
    config.callback({access_token:'synthetic-google-browser-token',expires_in:3600});
   }};}}}},
   confirm(text){confirmations.push(text);return confirmDisconnect;}};
@@ -91,7 +92,7 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
  vm.runInNewContext(code,{document,window,location,history:{replaceState(_a,_b,url){historyUrls.push(url);}},
   fetch,URL:StubURL,Response,Blob,console,crypto:webcrypto,Uint8Array,TextDecoder,setTimeout(){}},{filename:'documents.js'});
  await new Promise(resolve=>setImmediate(resolve));
- return {els,submit,calls,assignments,historyUrls,confirmations,pending,savedFiles,savedBlobs,record};
+ return {els,submit,calls,assignments,historyUrls,confirmations,pending,savedFiles,savedBlobs,record,googleGrants};
 }
 
 test('unconfigured OAuth shows operator-only setup status without a broken consent button',async()=>{
@@ -220,6 +221,26 @@ test('R80 both desktop and mobile styles include safe secondary disconnect and H
  assert.match(html,/id="drive-disconnect" hidden/);
  assert.match(css,/#drive-disconnect\[hidden\]\{display:none!important\}/);
  assert.match(css,/@media\(max-width:600px\)[\s\S]*#drive-disconnect/);
+});
+
+test('R102 connected Drive upload reuses Google consent and cached browser token across successive saves',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},{directUpload:true});
+ const original=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
+ t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+ const form=t.els['document-upload-form'];
+ for(const n of [1,2]){
+  t.els['document-file'].files=[{name:'qa_'+n+'.pdf',size:original.length,
+   async arrayBuffer(){return original.buffer.slice(original.byteOffset,original.byteOffset+original.byteLength);}}];
+  await form.listeners.submit({preventDefault(){}});
+  await Promise.all(t.pending);
+  assert.equal(t.els['document-feedback'].dataset.state,'success','save '+n);
+ }
+ assert.equal(t.googleGrants.length,1,'never request a second Google account chooser in same browser session');
+ assert.equal(t.googleGrants[0].prompt,'','do not force consent or select_account');
+ assert.equal(t.googleGrants[0].scope,'https://www.googleapis.com/auth/drive.file');
+ assert.equal(t.calls.filter(c=>c.url==='/api/qa/documents/upload/start').length,2);
+ assert.equal(t.calls.filter(c=>String(c.url).includes('uploadType=multipart')).length,2);
+ assert.equal(t.calls.filter(c=>c.url==='/api/qa/documents/upload/finish').length,2);
 });
 
 test('R99 MatterACL PDF uploads with proven Google multipart POST, then verifies D1 receipt',async()=>{
