@@ -88,9 +88,9 @@ const unavailable=()=>respond('Không thể xác minh phiên làm việc. Vui l�
 const missing=()=>respond('Không tìm thấy trang.','text/plain; charset=utf-8',404);
 async function relay(request,env,path){
  if(!env||!env.QA_AUTH||typeof env.QA_AUTH.fetch!=='function')throw Error('QA service binding not configured');
- if(request.method!=='GET'&&request.method!=='POST')return respond('Method not allowed','text/plain; charset=utf-8',405);
+ if(!['GET','POST','PATCH'].includes(request.method))return respond('Method not allowed','text/plain; charset=utf-8',405);
  const inbound=new URL(request.url);
- if(request.method==='POST' && (request.headers.get('Origin')!==inbound.origin ||
+ if(request.method!=='GET' && (request.headers.get('Origin')!==inbound.origin ||
    request.headers.get('Sec-Fetch-Site')==='cross-site'))
    return respond(JSON.stringify({error:'Không hợp lệ: nguồn truy cập không được phép.'}),'application/json; charset=utf-8',403);
  const target=new URL(path,AUTH_ORIGIN);
@@ -99,10 +99,10 @@ async function relay(request,env,path){
  if(cookie)h.set('Cookie',cookie);
  const type=request.headers.get('Content-Type');
  if(type)h.set('Content-Type',type);
- if(request.method==='POST'){h.set('Origin',target.origin);h.set('Sec-Fetch-Site','same-origin');}
+ if(request.method!=='GET'){h.set('Origin',target.origin);h.set('Sec-Fetch-Site','same-origin');}
  const upstream=await env.QA_AUTH.fetch(new Request(target,{
   method:request.method,headers:h,
-  body:request.method==='POST'?request.body:undefined,duplex:'half',redirect:'manual'
+  body:request.method!=='GET'?request.body:undefined,duplex:'half',redirect:'manual'
  }));
  const out=new Headers(headers('application/json; charset=utf-8'));
  for(const field of ['Content-Type','Set-Cookie','Cache-Control','Cross-Origin-Resource-Policy','Content-Disposition','Content-Length']){
@@ -173,7 +173,9 @@ export async function handleSite(req,env){
   const [body,type]=publicAssets.get(path);
   return respond(body,type,200,{publicPage:true});
  }
- if(API.has(path)||isDocumentApi){
+ const isMatterRename=/^\/api\/qa\/matters\/[0-9a-f-]{36}$/.test(path);
+ if(API.has(path)||isDocumentApi||isMatterRename){
+  if(isMatterRename&&req.method!=='PATCH')return missing();
   if(isDocumentApi&&(
       (path==='/api/qa/documents'&&!['GET','POST'].includes(req.method))||
       (path!=='/api/qa/documents'&&path.startsWith('/api/qa/documents/upload/')&&req.method!=='POST')||
