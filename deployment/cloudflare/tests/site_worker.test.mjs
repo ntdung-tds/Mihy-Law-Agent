@@ -369,6 +369,21 @@ test('R104 Google Picker key is checked server-side only for active AI Law sessi
  assert.doesNotMatch(login.headers.get('Content-Security-Policy')||'',/docs\.google\.com/);
 });
 
+test('R107 website forwards owner-scoped browser token request only from same origin',async()=>{
+ const path='/api/qa/drive/browser-access';
+ const before=calls.length;
+ const approved=await handleSite(new Request(ORIGIN+path,{method:'POST',headers:{
+  Origin:ORIGIN,'Sec-Fetch-Site':'same-origin','Content-Type':'application/json'},body:'{}'}),env);
+ assert.equal(approved.status,404,'QA_AUTH fixture has no fake access token, but request must be forwarded');
+ assert.equal(calls.at(-1).path,path,'the existing QA session and service binding are used');
+ assert.equal(calls.length,before+1);
+ assert.equal(calls.at(-1).origin,ORIGIN,'website relay rewrites origin to trusted QA backend');
+ const blocked=await handleSite(new Request(ORIGIN+path,{method:'POST',headers:{
+  Origin:'https://untrusted.example','Content-Type':'application/json'},body:'{}'}),env);
+ assert.equal(blocked.status,403,'a cross-site page must not mint the account owner token');
+ assert.equal(calls.length,before+1,'no backend call after cross-origin rejection');
+});
+
 test('R100 download relay preserves exact verified bytes, file type, length and attachment disposition',async()=>{
  const content=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
  const fileId='77777777-7777-4777-8777-777777777777';
