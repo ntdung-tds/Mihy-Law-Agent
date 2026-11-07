@@ -19,7 +19,7 @@ function request(path,body,{cookie=true,origin=ORIGIN}={}){
  if(cookie)headers.Cookie='al_qa_session='+S;
  return new Request(ORIGIN+path,{method:'POST',headers,body:JSON.stringify(body)});
 }
-function fixture({allow=true,grant=true,badProof=false,active=true,sessionMode='ok',destination=false,badFolder=false}={}){
+function fixture({allow=true,grant=true,badProof=false,active=true,sessionMode='ok',destination=false,badFolder=false,role='lawyer',kind='organization'}={}){
  let ticket=null,used=false,receipt=false,storageGrant=true;const requests=[],statements=[];
  const env={AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,
   JWT_ISSUER:'https://issuer.test',
@@ -31,7 +31,7 @@ function fixture({allow=true,grant=true,badProof=false,active=true,sessionMode='
     return {
      async first(){
       if(sql.includes('FROM qa_sessions s'))return active?
-       {user_id:U,tenant_id:T,role_key:'lawyer',subject:'qa',expires_at:now+400}:null;
+       {user_id:U,tenant_id:T,role_key:role,kind,subject:'qa',expires_at:now+400}:null;
       if(sql===DOCUMENT_ACL_SQL)return allow?{ok:1}:null;
       if(sql===ASSIGNED_SQL)return destination&&storageGrant?{
        destination_id:DEST,folder_id:FOLDER,label:'Hồ sơ luật sư A',
@@ -278,7 +278,7 @@ test('R103 live upload cannot bypass selected folder with a legacy manifest',asy
 // R104: Owner explicitly chose to save at My Drive root in a provider chooser.
 // This is distinct from the prohibited implicit default for an empty location.
 test('R104 explicit My Drive root Save succeeds while missing destination still fails closed for live callers',async()=>{
- const root=fixture();
+ const root=fixture({role:'tenant_admin'});
  const chosen=await documentsApi(request(start,{...MANIFEST,destination_id:'root'}),
   root.env,{now,driveFetch:root.driveFetch});
  assert.equal(chosen.status,200,await chosen.clone().text());
@@ -288,6 +288,10 @@ test('R104 explicit My Drive root Save succeeds while missing destination still 
  const done=await documentsApi(request(finish,{ticket:ticket.ticket,file_id:REMOTE}),
   root.env,{now,driveFetch:root.driveFetch});
  assert.equal(done.status,201,await done.clone().text());
+ const employee=fixture();
+ const denied=await documentsApi(request(start,{...MANIFEST,destination_id:'root'}),
+  employee.env,{now,driveFetch:employee.driveFetch});
+ assert.equal(denied.status,404,'never save an employee file to tenant admin My Drive');
  const q=fixture();
  // The public handler has no driveFetch and still rejects the missing choice before OAuth.
  const missing=await documentsApi(request(start,MANIFEST),q.env,{now});
