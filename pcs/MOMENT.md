@@ -8,6 +8,15 @@
 
 
 
+## R87 — Direct browser→Google Drive upload deployed to QA; full authenticated E2E still pending (2026-11-07)
+
+- **Only task:** `AL-R0-DOC-TRANSFER-R72`. Architecture unchanged: Cloudflare website/login/tenant/MatterACL/metadata, browser sends PDF/DOCX file bytes directly to private tenant Google Drive via one-file resumable session; Google OAuth bearer/refresh remain backend-only. No extra features, no production.
+- **Source/CI:** [PR #118](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/118) CORS probe on actual browser PASS (not signed-in upload). [PR #119](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/119) merged into main as `2a6f5d0a0fc50d951429c55fea51136ea667de90`; final head `d02ce6ccc36234079e31f99b2bdbbaac8d2fd709`, [GitHub Actions #42259973790](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42259973790) PASS all 9 executed jobs, live deployment jobs skipped by CI.
+- **D1 migration:** Applied `r86_qa_google_drive_direct_tickets.sql` to **QA D1 only**; table/index present, foreign-key check zero rows. No existing grants, file links, receipts or customer data changed by migration.
+- **QA deploy:** Guarded against exact previous GitHub `main` sources; API `ai-law-standalone-cf-qa` updated exactly `worker.mjs`, `qa_documents.mjs`, `google_drive.mjs` with 5 other modules byte-preserved. Website `ai-law-web-qa` updated `site_worker.mjs`, `workspace_documents.mjs`, 20 other modules preserved. Both source readbacks PASS; deployed revisions receive 100% traffic each at 2026-11-07T00:59Z. Production untouched.
+- **Browser/smoke:** Live public login rendered by Cloudflare Browser Rendering on desktop PASS. Separate mobile rendering was blocked by Cloudflare API HTTP 429 rate limit (not a mobile UI assertion). D1 after deploy: **0 direct-upload tickets, 0 document receipts**. Authenticated website Google Drive PDF/DOCX upload, list/reload/download hash verification and cross-tenant negative E2E remain **NOT_RUN**; do not claim upload fixed or Owner acceptance.
+- **Next within same task:** Execute authorized **synthetic** signed-in PDF/DOCX uploads through `https://ai-law-web-qa.iaict-platform.workers.dev/app#documents`, verify exact Google parent/name/MIME/size plus D1 receipt, then list/download SHA-256 and denied/revoked MatterACL and cross-tenant paths; if any fail, reproduce→fix→test again. Never put OAuth secret, one-file session URI, private folder/file IDs or real legal files into public repo.
+
 ## R84 — Owner correction: restore the original browser→Google Drive file data plane (2026-11-06)
 
 - **Owner's confirmed architecture, not a new feature:** Cloudflare is responsible for website hosting, authenticated identities, tenant/membership/MatterACL checks and the metadata/receipt database. **All uploaded PDF/DOCX file bytes go from the browser directly to the tenant's Google Drive, not through a Cloudflare Worker upload proxy.** Google Drive is the sole final file-content storage target. This interpretation governs the existing single `AL-R0-DOC-TRANSFER-R72` document task.
