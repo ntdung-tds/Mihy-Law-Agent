@@ -200,8 +200,43 @@
      headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     if(r.status===401){location.replace('/login');throw Error('Cần đăng nhập lại AI Law.');}
     let data={};try{data=await r.json();}catch{}
-    if(!r.ok){const e=new Error(data.error||'Lưu trữ Google Drive chưa hoàn tất.');
-     e.code=data.code||'';throw e;}
+    if(!r.ok){
+     // R88: show only allowlisted Google/Worker diagnostics. The server already
+     // returns bounded stage/status/reason; never show raw provider bodies,
+     // OAuth tokens, filenames, or the sensitive single-file upload URL.
+     const stages={
+      transport:'Máy chủ QA chưa khởi tạo được phiên tại Google.',
+      provider:'Google đã từ chối yêu cầu khởi tạo phiên tải tệp.',
+      response:'Google trả về phiên tải tệp không hợp lệ.',
+      verify:'Google chưa xác minh được tệp sau khi truyền.'
+     };
+     const reasons={
+      storageQuotaExceeded:'Dung lượng Google Drive đã đầy.',
+      insufficientFilePermissions:'Thiếu quyền ghi vào thư mục Google Drive.',
+      appNotAuthorizedToFile:'Ứng dụng chưa được phép thao tác trên thư mục.',
+      accessNotConfigured:'Google Drive API chưa được bật.',
+      rateLimitExceeded:'Google đang giới hạn số yêu cầu.',
+      userRateLimitExceeded:'Google đang giới hạn số yêu cầu.',
+      dailyLimitExceeded:'Google đang giới hạn số yêu cầu.',
+      badRequest:'Google từ chối yêu cầu.',
+      notFound:'Google không tìm thấy đối tượng yêu cầu.',
+      forbidden:'Google từ chối quyền truy cập.'
+     };
+     let detail=data.error||'Lưu trữ Google Drive chưa hoàn tất.';
+     if(data.code==='DRIVE_UPLOAD_UNAVAILABLE'){
+      detail=stages[data.stage]||'Không thể khởi tạo phiên tải lên Google Drive.';
+      if(typeof reasons[data.provider_reason]==='string')detail+=' '+reasons[data.provider_reason];
+      const parts=['DRIVE_UPLOAD_UNAVAILABLE'];
+      if(Object.hasOwn(stages,data.stage))parts.push('stage='+data.stage);
+      if(Number.isInteger(data.provider_status)&&data.provider_status>=400&&data.provider_status<=599)
+       parts.push('HTTP '+data.provider_status);
+      if(Object.hasOwn(reasons,data.provider_reason))parts.push('reason='+data.provider_reason);
+      detail+=' Mã chẩn đoán: '+parts.join(' · ')+'.';
+     }else if(['DRIVE_GRANT_UNAVAILABLE','QA_RECEIPT_UNAVAILABLE','QA_STORAGE_UNAVAILABLE'].includes(data.code)){
+      detail+=' Mã chẩn đoán: '+data.code+'.';
+     }
+     const e=new Error(detail);e.code=data.code||'';throw e;
+    }
     return data;
    };
    message('Đang cấp quyền tải lên Google Drive…');
