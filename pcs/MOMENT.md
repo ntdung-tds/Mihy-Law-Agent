@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `91` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T05:33:32.797Z`.
+- **PCS revision:** `92` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T05:48:30.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R95 — Direct Drive QA widget in authenticated Documents workspace (2026-11-07)
+
+- **Owner approval:** “Ok, bước tiếp theo” after standalone `/drive-blob` QA was Owner-reported PASS. Scope chosen: reuse the proven direct browser→Google uploader as an **independent QA diagnostic inside /app#documents**, without claiming integrated tenant document storage is finished.
+- **Source/CI:** [PR #133](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/133) merged `c89af68d0939ef49fa81820fb7bdc669d82bf3f3`, [GitHub Actions #42343916314](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42343916314) **PASS 9/9 executed jobs**. New `web/qa/drive-inline.html`, lazy loader `web/qa/drive-inline.js`, website QA Worker wiring, synthetic JS/anonymous gate/CSP checks. Existing `web/qa/drive-blob.js` remains the exact Owner-tested transfer logic.
+- **QA deploy evidence:** Cloudflare `ai-law-web-qa` deployment `23b5add4-2070-4eeb-b41c-5c5ff0b74b6b` at 2026-11-07T05:47:14Z, version traffic **100%**, readback **26/26** modules (24 preserved plus 2 new), new public Google OAuth client ID present, old client ID absent, `QA_AUTH` service binding preserved. Live Cloudflare Browser Rendering anonymous `/app#documents` routed to login and did not expose the widget.
+- **Acceptance boundary:** Authenticated live mobile Google consent and synthetic PDF/DOCX upload from the new workspace panel **NOT_RUN** (Owner device required). The diagnostic uploads to the selected Google user's **My Drive**; not to the approved organization folder, not linked to a Matter, no D1 receipt or AI processing. Existing R72 tenant/MatterACL upload/list/download remains separately **NOT_ACCEPTED** pending backend credential migration / provider-access consistency and signed-in E2E. No production or private SRS baseline changes.
 
 ## R94 — Owner confirms isolated Google Drive direct upload QA works (2026-11-07)
 
