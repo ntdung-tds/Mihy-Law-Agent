@@ -115,7 +115,7 @@ export async function handle(request,env,options={}){
   if(url.pathname==="/api/qa/profile"||url.pathname==="/api/qa/profile/avatar")
     return accountApi(request,env,options);
   if(url.pathname==="/api/qa/matters")return matterApi(request,env,options);
-  if(["/api/qa/drive/connect","/api/qa/drive/disconnect","/api/qa/drive/status","/api/qa/drive/callback"].includes(url.pathname))
+  if(["/api/qa/drive/connect","/api/qa/drive/disconnect","/api/qa/drive/browser-access","/api/qa/drive/status","/api/qa/drive/callback"].includes(url.pathname))
     return oauthDriveApi(request,env,options);
   if(["/api/qa/storage/destinations","/api/qa/storage/members","/api/qa/storage/assignments","/api/qa/storage/select"].includes(url.pathname))
     return storageDestinationApi(request,env,options);
