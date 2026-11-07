@@ -135,3 +135,12 @@ test('R109 model errors, missing source lines and malformed JSON fail closed wit
  assert.equal(unavailable.status,502);
  assert.doesNotMatch(await unavailable.text(),/sensitive provider/);
 });
+
+test('R109 real Workers AI response may be parsed JSON object rather than JSON string',async()=>{
+ const f=setup();
+ const response=await legalTextApi(req({action:'UC04',text:source}),f.env,{now:NOW,
+  runModel:async()=>({response:{bullets:[{id:'L1',quote:'Bên A có trách nhiệm',
+   summary:'Dòng này nêu trách nhiệm của bên A.'}]}})});
+ assert.equal(response.status,200,await response.clone().text());
+ assert.equal((await response.json()).bullets[0].id,'L1');
+});
