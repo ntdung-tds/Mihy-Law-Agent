@@ -345,3 +345,22 @@ test('R97 authenticated QA documents workspace hosts the proven direct Blob uplo
  const login=await get('/login');
  assert.doesNotMatch(login.headers.get('Content-Security-Policy')||'',/accounts\.google\.com/);
 });
+
+test('R100 download relay preserves exact verified bytes, file type, length and attachment disposition',async()=>{
+ const content=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
+ const fileId='77777777-7777-4777-8777-777777777777';
+ const fake={QA_AUTH:{async fetch(request){
+  assert.equal(new URL(request.url).pathname,'/api/qa/documents/'+fileId+'/download');
+  return new Response(content,{status:200,headers:{
+   'Content-Type':'application/pdf','Content-Length':String(content.length),
+   'Content-Disposition':"attachment; filename*=UTF-8''qa_gpt.pdf",
+   'Cache-Control':'no-store'
+  }});
+ }}};
+ const result=await handleSite(new Request(ORIGIN+'/api/qa/documents/'+fileId+'/download'),fake);
+ assert.equal(result.status,200);
+ assert.equal(result.headers.get('Content-Length'),String(content.length));
+ assert.equal(result.headers.get('Content-Type'),'application/pdf');
+ assert.match(result.headers.get('Content-Disposition'),/filename\*/);
+ assert.deepEqual(new Uint8Array(await result.arrayBuffer()),content);
+});

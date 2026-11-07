@@ -105,7 +105,7 @@ async function relay(request,env,path){
   body:request.method==='POST'?request.body:undefined,duplex:'half',redirect:'manual'
  }));
  const out=new Headers(headers('application/json; charset=utf-8'));
- for(const field of ['Content-Type','Set-Cookie','Cache-Control','Cross-Origin-Resource-Policy','Content-Disposition']){
+ for(const field of ['Content-Type','Set-Cookie','Cache-Control','Cross-Origin-Resource-Policy','Content-Disposition','Content-Length']){
    const value=upstream.headers.get(field);
    if(value)out.set(field,value);
  }

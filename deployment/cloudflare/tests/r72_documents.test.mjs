@@ -129,6 +129,7 @@ test('download requires read ACL, verifies exact SHA and parent before release',
  let r=await documentsApi(request('/api/qa/documents/'+F+'/download'),f.env,{now,driveFetch:f.driveFetch});
  assert.equal(r.status,200);assert.deepEqual(new Uint8Array(await r.arrayBuffer()),pdf);
  assert.match(r.headers.get('Content-Disposition'),/attachment/);
+ assert.equal(Number(r.headers.get('Content-Length')),pdf.length,'download declares the verified original byte size');
  const denied=fixture({allow:false});
  assert.equal((await documentsApi(request('/api/qa/documents/'+F+'/download'),denied.env,{now,driveFetch:denied.driveFetch})).status,404);
 });
@@ -196,5 +197,6 @@ test('R79 genuine synthetic DOCX upload, list and downloaded ZIP bytes with hash
  const downloaded=await documentsApi(request('/api/qa/documents/'+F+'/download'),f.env,options);
  assert.equal(downloaded.status,200);
  assert.equal(downloaded.headers.get('Content-Type'),DOCX);
+ assert.equal(Number(downloaded.headers.get('Content-Length')),docx.length);
  assert.deepEqual(new Uint8Array(await downloaded.arrayBuffer()),docx);
 });
