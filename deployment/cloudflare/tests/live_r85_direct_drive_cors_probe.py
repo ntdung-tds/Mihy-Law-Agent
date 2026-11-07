@@ -70,7 +70,17 @@ def run():
                         {"viewport":name,"mode":mode,"test":"invalid-session-PUT",
                          "result":outcome,"console_classifications":classes},
                         sort_keys=True))
-                    assert outcome["kind"] in ("http","browser_blocked")
+                    # This probe deliberately uses a nonexistent Google session.
+                    # A browser CORS rejection is NOT evidence that real upload works.
+                    if outcome["kind"]=="http":
+                        assert outcome.get("status")==404 and outcome.get("type")=="cors", outcome
+                        print("R91_CORS_PROBE_HTTP_404_SYNTHETIC_ONLY "+name+" "+mode)
+                    elif outcome["kind"]=="browser_blocked":
+                        assert any("blocked by CORS policy" in msg for msg in errors), (
+                            "Browser blocked without a CORS explanation",outcome,errors)
+                        print("R91_CORS_PREFLIGHT_BLOCKED_NOT_UPLOAD_PASS "+name+" "+mode)
+                    else:
+                        raise AssertionError(("Unexpected Chrome request result",outcome))
                     ctx.close()
         finally:
             browser.close()
