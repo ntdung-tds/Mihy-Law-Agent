@@ -465,3 +465,44 @@ body.drawer-open{overflow:hidden}
 @media(max-width:620px){.matter-actions{width:100%;justify-content:space-between}
  .matter-inline-editor{width:100%}.matter-inline-editor label{width:100%}
  .matter-inline-editor input{width:100%}}
+
+/* R109: synthetic-only, source-anchored text draft editor for R0 UC03/04/07. */
+.legal-text-lab{margin:22px auto 30px;max-width:900px;background:#fff;border:1px solid #dce5f1;
+ border-radius:18px;padding:20px;box-shadow:0 8px 24px rgba(25,40,69,.045);overflow-wrap:anywhere}
+.legal-text-lab[hidden],#legal-text-language-group[hidden],#legal-text-results[hidden]{display:none!important}
+.legal-text-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.legal-text-heading h2{font-size:21px;line-height:1.35;color:#202f4f;margin:4px 0}
+.legal-text-lab>p{font-size:13px;color:#4c5c75;line-height:1.7;margin:8px 0 18px}
+.legal-text-lab form{display:flex;flex-direction:column;gap:10px}
+.legal-text-lab label{font-size:13px;font-weight:750;color:#293d5c}
+.legal-text-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.legal-text-controls>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.legal-text-lab select,.legal-text-lab textarea{box-sizing:border-box;width:100%;min-width:0;
+ border:1px solid #c6d1e0;border-radius:10px;padding:11px 12px;background:white;
+ color:#25364f;font:inherit;font-size:16px;line-height:1.5}
+.legal-text-lab textarea{resize:vertical;min-height:145px}
+.legal-text-lab select:focus-visible,.legal-text-lab textarea:focus-visible{
+ outline:2px solid #5576ce;outline-offset:2px}
+.legal-text-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.legal-text-bottom span{font-size:12px;color:#5e6d83;line-height:1.5}
+.legal-text-bottom button{min-width:140px;min-height:44px}
+.legal-text-bottom button:disabled{opacity:.55;cursor:wait}
+#legal-text-feedback{font-size:13px;min-height:19px;color:#31476b;margin:15px 0}
+#legal-text-results{border-top:1px solid #e4eaf3;padding-top:12px}
+#legal-text-results h3{font-size:18px;color:#233552;margin:5px 0}
+.legal-draft-meta{font-size:12px;color:#687992;overflow-wrap:anywhere}
+.legal-draft-item{padding:13px 15px;margin:10px 0;border-radius:12px;
+ background:#f7f9fe;border:1px solid #dfe5f0}
+.legal-draft-item strong{display:block;color:#293b64;font-size:13px;margin-bottom:7px}
+.legal-draft-item p{font-size:13px;line-height:1.6;white-space:pre-wrap;margin:6px 0;color:#283850}
+.legal-draft-item b{color:#3c5374}
+.legal-text-lab .legal-text-caution{font-size:12px;color:#8a5326;
+ background:#fff9ee;padding:11px 12px;border-radius:9px;margin:15px 0 0}
+@media(max-width:620px){
+ .legal-text-lab{padding:14px 12px;border-radius:13px;margin-top:18px}
+ .legal-text-heading{align-items:flex-start;flex-direction:column}
+ .legal-text-heading h2{font-size:18px}
+ .legal-text-controls{grid-template-columns:1fr}
+ .legal-text-bottom{align-items:stretch;flex-direction:column}
+ .legal-text-bottom button{width:100%}
+}
