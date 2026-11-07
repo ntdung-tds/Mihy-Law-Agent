@@ -377,7 +377,7 @@ test('R107 website forwards owner-scoped browser token request only from same or
  assert.equal(approved.status,404,'QA_AUTH fixture has no fake access token, but request must be forwarded');
  assert.equal(calls.at(-1).path,path,'the existing QA session and service binding are used');
  assert.equal(calls.length,before+1);
- assert.equal(calls.at(-1).origin,ORIGIN,'website relay rewrites origin to trusted QA backend');
+ assert.equal(calls.at(-1).origin,'https://ai-law-standalone-cf-qa.iaict-platform.workers.dev','website relay rewrites origin to trusted QA backend');
  const blocked=await handleSite(new Request(ORIGIN+path,{method:'POST',headers:{
   Origin:'https://untrusted.example','Content-Type':'application/json'},body:'{}'}),env);
  assert.equal(blocked.status,403,'a cross-site page must not mint the account owner token');
