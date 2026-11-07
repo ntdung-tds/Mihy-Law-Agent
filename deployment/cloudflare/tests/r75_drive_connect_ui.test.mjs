@@ -136,6 +136,15 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
  return {els,submit,calls,assignments,historyUrls,confirmations,pending,savedFiles,savedBlobs,record,googleGrants};
 }
 
+ // The Save chooser now precedes OAuth. Synthetic Google callbacks can resume
+ // a second submit in a microtask; wait for all resulting work to settle.
+ async function settleSave(t){
+  for(let i=0;i<8;i++){
+   await new Promise(resolve=>setImmediate(resolve));
+   await Promise.all(t.pending);
+  }
+ }
+
 test('unconfigured OAuth shows operator-only setup status without a broken consent button',async()=>{
  const t=await mount({connected:false,configuration_ready:false,can_connect:true});
  assert.equal(t.els['drive-connect'].hidden,true);
@@ -273,7 +282,7 @@ test('R102 connected Drive upload reuses Google consent and cached browser token
   t.els['document-file'].files=[{name:'qa_'+n+'.pdf',size:original.length,
    async arrayBuffer(){return original.buffer.slice(original.byteOffset,original.byteOffset+original.byteLength);}}];
   await form.listeners.submit({preventDefault(){}});
-  await Promise.all(t.pending);
+  await settleSave(t);
   assert.equal(t.els['document-feedback'].dataset.state,'success','save '+n);
  }
  assert.equal(t.googleGrants.length,1,'never request a second Google account chooser in same browser session');
@@ -293,7 +302,7 @@ test('R99 MatterACL PDF uploads with proven Google multipart POST, then verifies
 
  assert.equal(t.submit.disabled,false,'tenant grant + browser Google consent required');
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
- await Promise.all(t.pending);
+ await settleSave(t);
  const starts=t.calls.filter(x=>x.url==='/api/qa/documents/upload/start');
  const finishes=t.calls.filter(x=>x.url==='/api/qa/documents/upload/finish');
  const direct=t.calls.filter(x=>String(x.url).startsWith('https://www.googleapis.com/upload/drive/v3/files?'));
@@ -322,7 +331,7 @@ test('R99 ambiguous Google network failure never finalizes receipt or silently r
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
 
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
- await Promise.all(t.pending);
+ await settleSave(t);
  assert.equal(t.calls.filter(x=>x.url==='/api/qa/documents/upload/finish').length,0);
  assert.equal(t.calls.filter(x=>String(x.url).includes('uploadType=multipart')).length,1);
  assert.equal(t.submit.disabled,true,'no automatic retry on ambiguous Google response');
@@ -338,7 +347,7 @@ test('R99 browser Google 403 on organization root does not generate receipt',asy
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
 
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
- await Promise.all(t.pending);
+ await settleSave(t);
  assert.equal(t.calls.filter(x=>x.url==='/api/qa/documents/upload/finish').length,0);
  assert.match(t.els['document-feedback'].textContent,/quyền ghi thư mục.*HTTP 403/);
 });
@@ -356,7 +365,7 @@ test('R88 real QA start failure shows bounded stage, provider HTTP and reason, n
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
 
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
- await Promise.all(t.pending);
+ await settleSave(t);
  const msg=t.els['document-feedback'].textContent;
  assert.equal(t.els['document-feedback'].dataset.state,'error');
  assert.match(msg,/stage=provider/);
@@ -378,7 +387,7 @@ test('R88 transport failures show stage without implying a mobile connection def
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
 
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
- await Promise.all(t.pending);
+ await settleSave(t);
  assert.match(t.els['document-feedback'].textContent,/stage=transport/);
  assert.doesNotMatch(t.els['document-feedback'].textContent,/đường truyền.*ổn định/i);
 });
@@ -498,7 +507,7 @@ test('R104 real Google Picker callback registers folder selected by user before 
  t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
- await Promise.race([Promise.all(t.pending),new Promise((_,reject)=>setTimeout(()=>reject(Error('Picker flow did not finish: '+JSON.stringify({calls:t.calls.map(x=>x.url),feedback:t.els['document-feedback'].textContent,dialog:t.els['document-save-dialog'].open}))),2000))]);
+ await Promise.race([settleSave(t),new Promise((_,reject)=>setTimeout(()=>reject(Error('Picker flow did not finish: '+JSON.stringify({calls:t.calls.map(x=>x.url),feedback:t.els['document-feedback'].textContent,dialog:t.els['document-save-dialog'].open}))),2000))]);
  const selected=t.calls.find(x=>x.url==='/api/qa/storage/select');
  assert.ok(selected,'provider choice must be checked with application and Google permissions');
  assert.equal(JSON.parse(selected.body).folder_id,'sharedTeamFolder123456');
