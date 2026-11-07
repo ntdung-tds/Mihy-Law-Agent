@@ -388,6 +388,89 @@
   }finally{disconnect.disabled=false;}
  });
  void driveStatus();
+ // One Save gesture opens a destination chooser. No admin-created folder wizard.
+ let pickerLoader=null;
+ function loadPicker(){
+  if(window.google?.picker?.PickerBuilder)return Promise.resolve();
+  if(pickerLoader)return pickerLoader;
+  pickerLoader=new Promise((resolve,reject)=>{
+   if(window.gapi?.load){resolve();return;}
+   const s=document.createElement('script');
+   s.src='https://apis.google.com/js/api.js';s.async=true;
+   s.onload=resolve;s.onerror=()=>reject(Error('Không tải được Google Picker.'));
+   document.head.append(s);
+  }).then(()=>new Promise((resolve,reject)=>{
+   window.gapi.load('picker',{callback:resolve,onerror:reject,timeout:15000,
+    ontimeout:()=>reject(Error('Google Picker không phản hồi.'))});
+  })).catch(e=>{pickerLoader=null;throw e;});
+  return pickerLoader;
+ }
+ async function pickGoogleFolder(){
+  const r=await fetch('/api/qa/drive/picker-config',{credentials:'same-origin',cache:'no-store'});
+  if(!r.ok)throw Error('Google Picker chưa được cấu hình API Key cho QA. Chưa thể chọn thư mục.');
+  const config=await r.json();
+  if(!config.configured||!/^AIza[A-Za-z0-9_-]{25,}$/.test(config.api_key||''))
+   throw Error('Google Picker chưa sẵn sàng.');
+  const clientId=$('drive-blob-test')?.dataset.googleClientId||'';
+  const appId=clientId.split('-')[0];
+  if(!/^\\d{8,20}$/.test(appId)||!browserReady())throw Error('Cần kết nối lại tài khoản Google.');
+  await loadPicker();
+  const G=window.google?.picker;
+  if(!G?.PickerBuilder||!G.DocsView||!G.ViewId?.FOLDERS)
+   throw Error('Google Picker chưa được tải đầy đủ.');
+  return new Promise((resolve,reject)=>{
+   try{
+    const view=new G.DocsView(G.ViewId.FOLDERS)
+     .setIncludeFolders(true).setSelectFolderEnabled(true);
+    const picker=new G.PickerBuilder().setDeveloperKey(config.api_key)
+     .setAppId(appId).setOAuthToken(browserToken).addView(view)
+     .setCallback(data=>{
+      if(data.action===G.Action.PICKED){
+       const docs=data[G.Response.DOCUMENTS]||data.docs||[];
+       const id=docs?.[0]?.[G.Document.ID]||docs?.[0]?.id||'';
+       if(!/^[A-Za-z0-9_-]{10,200}$/.test(id))
+        reject(Error('Thư mục Google được chọn chưa hợp lệ.'));
+       else resolve(id);
+      }else if(data.action===G.Action.CANCEL)resolve(null);
+     }).build();
+    picker.setVisible(true);
+   }catch(e){reject(e);}
+  });
+ }
+ async function chooseSaveDestination(){
+  const dialog=$('document-save-dialog');
+  const root=$('document-save-root'),folder=$('document-save-folder'),
+   cancel=$('document-save-cancel');
+  if(!dialog||!root||!folder||!cancel||!dialog.showModal)
+   throw Error('Trình duyệt chưa hỗ trợ chọn nơi lưu.');
+  return new Promise(resolve=>{
+   let done=false;
+   const finish=value=>{
+    if(done)return;done=true;
+    if(dialog.open)dialog.close();
+    root.onclick=folder.onclick=cancel.onclick=null;
+    dialog.oncancel=null;resolve(value);
+   };
+   root.onclick=()=>finish('root');
+   cancel.onclick=()=>finish(null);
+   dialog.oncancel=e=>{e.preventDefault();finish(null);};
+   folder.onclick=()=>{
+    dialog.close();
+    void pickGoogleFolder().then(async id=>{
+     if(!id){finish(null);return;}
+     const r=await fetch('/api/qa/storage/select',{method:'POST',
+      credentials:'same-origin',cache:'no-store',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify({folder_id:id})});
+     const body=await r.json().catch(()=>({}));
+     if(r.status===401){location.replace('/login');throw Error('Phiên AI Law đã hết hạn.');}
+     if(!r.ok||!uuid.test(body.destination?.id||''))
+      throw Error(body.error||'Thư mục này không cho phép lưu tài liệu. Hãy chọn thư mục có quyền ghi.');
+     finish(body.destination.id);
+    }).catch(e=>{message(e.message||'Không mở được Drive.','error');finish(null);});
+   };
+   try{dialog.showModal();}catch{finish(null);}
+  });
+ }
  form.addEventListener('submit',async e=>{
   e.preventDefault();message('');
   const id=select.value,chosen=file.files?.[0];
@@ -401,10 +484,6 @@
    message('Chỉ chấp nhận tệp PDF hoặc DOCX mẫu.','error');return;
   }
   if(!connected()||uploading||authorizing||uncertainUpload){uploadGate();return;}
-  if(!storageReady()){
-   message('Chọn nhà cung cấp và thư mục đích được cấp quyền trước khi lưu.','error');
-   uploadGate();return;
-  }
   if(!browserReady()){
    // One save button, no separate browser permission button. Only this first
    // Google popup is needed to obtain the user's scoped browser access token.
@@ -413,6 +492,13 @@
   uploading=true;
   const submit=form.querySelector('button[type="submit"]');submit.disabled=true;
   try{
+   const selectedDestination=await chooseSaveDestination();
+   if(!selectedDestination){
+    if(!feedback?.textContent)message('Đã hủy lưu. Không gửi tệp lên Drive.');
+    return;
+   }
+   if(select.value!==id||file.files?.[0]!==chosen||!connected())
+    throw Error('Hồ sơ, tài khoản Drive hoặc tệp đã thay đổi. Không lưu tệp.');
    // R86: browser→Google Drive direct file data plane. Only JSON manifests
    // and receipt proofs reach Cloudflare; never the PDF/DOCX bytes.
    const ext=chosen.name.toLowerCase().endsWith('.pdf')?'pdf':'docx';
@@ -480,7 +566,7 @@
    };
    message('Đang cấp quyền tải lên Google Drive…');
    const manifest={matter_id:id,file_name:chosen.name,mime_type:mime,byte_length:chosen.size,sha256:digest};
-   if(destination)manifest.destination_id=destination.value;
+   manifest.destination_id=selectedDestination;
    const init=await api('/api/qa/documents/upload/start',manifest);
    // Server checked MatterACL and refreshed the tenant Drive grant. The
    // approved parent and single-use upload ticket are the only returned data.
