@@ -50,7 +50,7 @@ export class GoogleDriveAdapter {
     if(!response || response.status!==200)throw new Error("Drive unavailable or denied");
     return response;
   }
-  async metadata(objectId){
+  async metadata(objectId,approvedParent=this.rootId){
     if(!SAFE_FILE.test(objectId||""))throw new Error("Bad Drive object ID");
     const params=new URLSearchParams({
       fields:"id,name,mimeType,size,trashed,parents,appProperties,createdTime",
@@ -61,13 +61,55 @@ export class GoogleDriveAdapter {
       "?"+params);
     const data=await res.json();
     if(!data || data.id!==objectId || data.trashed!==false ||
-       !Array.isArray(data.parents) || !data.parents.includes(this.rootId) ||
+       !Array.isArray(data.parents) || !data.parents.includes(approvedParent) ||
        !data.mimeType || data.mimeType.startsWith("application/vnd.google-apps."))
       throw new Error("Drive file not in approved customer folder");
     return data;
   }
-  async download(objectId){
-    await this.metadata(objectId); // verify approved folder on every read
+  async childFolder(folderId){
+    if(!SAFE_FILE.test(folderId||'')||folderId===this.rootId)
+      throw new Error('Invalid child folder');
+    const response=await this.request('https://www.googleapis.com/drive/v3/files/'+
+      encodeURIComponent(folderId)+'?fields=id,name,mimeType,trashed,parents&supportsAllDrives=true');
+    const info=await response.json();
+    if(info.id!==folderId||info.trashed!==false||
+       info.mimeType!=='application/vnd.google-apps.folder'||
+       !Array.isArray(info.parents)||!info.parents.includes(this.rootId))
+      throw new Error('Folder is not an approved child of the tenant root');
+    return info;
+  }
+  async createChildFolder(name){
+    if(typeof name!=='string'||name.length<3||name.length>80||
+       name!==name.trim()||name!==name.normalize('NFC')||name.includes('..')||
+       !/^[\\p{L}\\p{N} _().-]+$/u.test(name))
+      throw new Error('Invalid folder name');
+    let response;
+    try{
+      response=await this.fetcher('https://www.googleapis.com/drive/v3/files?'+
+        'fields=id,name,mimeType,parents,trashed&supportsAllDrives=true',{
+        method:'POST',redirect:'manual',headers:{
+          Authorization:'Bearer '+this.accessToken,'Content-Type':'application/json'
+        },
+        body:JSON.stringify({name,mimeType:'application/vnd.google-apps.folder',parents:[this.rootId]})
+      });
+    }catch{throw new DriveUploadFailure('transport');}
+    if(!response||![200,201].includes(response.status))
+      throw new DriveUploadFailure('provider',response?.status||0);
+    let result;try{result=await response.json();}catch{throw new DriveUploadFailure('response');}
+    if(!SAFE_FILE.test(result?.id||''))throw new DriveUploadFailure('response');
+    await this.childFolder(result.id);
+    return {id:result.id};
+  }
+  async removeChildFolder(folderId){
+    await this.childFolder(folderId);
+    const response=await this.fetcher('https://www.googleapis.com/drive/v3/files/'+
+      encodeURIComponent(folderId)+'?supportsAllDrives=true',{
+      method:'DELETE',redirect:'manual',headers:{Authorization:'Bearer '+this.accessToken}
+    });
+    if(response?.status!==204)throw Error('Could not clean up child folder');
+  }
+  async download(objectId,approvedParent=this.rootId){
+    await this.metadata(objectId,approvedParent); // verify approved folder on every read
     const res=await this.request(
       "https://www.googleapis.com/drive/v3/files/"+encodeURIComponent(objectId)+
       "?alt=media&supportsAllDrives=true");
@@ -112,8 +154,9 @@ export class GoogleDriveAdapter {
   }
   // R86: bind a new Drive object to the server-created ticket and approved
   // root. The browser cannot set/alter these metadata fields during PUT.
-  async verifyDirectUpload(objectId,{ticketId,name,mimeType,size}){
-    const info=await this.metadata(objectId);
+  async verifyDirectUpload(objectId,{ticketId,name,mimeType,size,approvedParent=this.rootId}){
+    if(approvedParent!==this.rootId)await this.childFolder(approvedParent);
+    const info=await this.metadata(objectId,approvedParent);
     if(info.name!==name||info.mimeType!==mimeType||
        Number(info.size)!==size||
        info.appProperties?.ai_law_upload_ticket!==ticketId)
