@@ -25,7 +25,12 @@ function fixture({user=ADMIN,role='tenant_admin',kind='organization',tenant=T,co
  let childN=0;
  const storageDrive={
   async createChildFolder(name){childN++;return {id:'qaFolder_'+String(childN).padStart(12,'0'),name};},
-  async removeChildFolder(){},created:()=>childN
+  async removeChildFolder(){},
+  async writableFolder(folderId){
+   if(folderId==='denyFolder000000')throw Error('Provider write permission denied');
+   return {id:folderId,name:'Thư mục người dùng chọn',mimeType:'application/vnd.google-apps.folder',
+    capabilities:{canAddChildren:true}};
+  },created:()=>childN
  };
  const key=(d,u,t=tenant)=>[t,d,u].join('|');
  env.DB={
@@ -43,7 +48,8 @@ function fixture({user=ADMIN,role='tenant_admin',kind='organization',tenant=T,co
      }
      if(sql.includes('COUNT(*) AS n FROM qa_storage_destinations'))return {n:folders.size};
      if(sql.includes('SELECT destination_id FROM qa_storage_destinations')){
-      const d=folders.get(args[2]);return d&&d.tenant_id===tenant&&d.owner_kind==='organization'?d:null;
+      const d=sql.includes('folder_id=?')?[...folders.values()].find(x=>x.folder_id===args[2]):folders.get(args[2]);
+      return d&&d.tenant_id===tenant&&(sql.includes('folder_id=?')||d.owner_kind==='organization')?d:null;
      }
      if(sql.includes('SELECT 1 AS ok FROM qa_memberships'))return person.includes(args[2])?{ok:1}:null;
      return null;
@@ -145,4 +151,27 @@ test('R103 sole personal owner can create their own storage folder while organiz
  assert.equal(r.status,201,JSON.stringify(r.json));
  assert.equal(r.json.destination.kind,'personal');
  assert.equal(f.folders.get(r.json.destination.id).tenant_id,O);
+});
+
+
+test('R104 signed-in employee can select an existing Google folder only after provider confirms write',async()=>{
+ const staff=fixture({user:STAFF,role:'lawyer'});
+ const selected=await api(staff,'/api/qa/storage/select',{folder_id:'sharedTeamFolder123456'});
+ assert.equal(selected.status,200,JSON.stringify(selected.json));
+ assert.match(selected.json.destination.id,/^[0-9a-f-]{36}$/);
+ assert.equal(staff.folders.size,1,'do not create or copy a new Drive folder');
+ assert.equal(staff.storageDrive.created(),0);
+ const again=await api(staff,'/api/qa/storage/select',{folder_id:'sharedTeamFolder123456'});
+ assert.equal(again.status,200);
+ assert.equal(again.json.destination.id,selected.json.destination.id,'same chosen folder reuses destination');
+ assert.equal(staff.folders.size,1);
+ assert.equal((await assignedDestination(staff.env,{tenant_id:T,user_id:STAFF},
+  selected.json.destination.id))?.folder_id,'sharedTeamFolder123456');
+ const denied=await api(staff,'/api/qa/storage/select',{folder_id:'denyFolder000000'});
+ assert.equal(denied.status,404,'provider denies write; no registration');
+ assert.equal(staff.folders.size,1);
+ const malformed=await api(staff,'/api/qa/storage/select',{folder_id:'../outside'});
+ assert.equal(malformed.status,400);
+ const outsider=fixture({connected:false});
+ assert.equal((await api(outsider,'/api/qa/storage/select',{folder_id:'sharedTeamFolder123456'})).status,401);
 });
