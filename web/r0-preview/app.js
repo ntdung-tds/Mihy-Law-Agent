@@ -90,6 +90,7 @@
     });
     $('#breadcrumb-current').textContent = viewLabels[view];
     if (view === 'documents') { renderDocuments(); window.dispatchEvent(new Event('ai-law:documents-open')); }
+    if (view === 'assistant') window.dispatchEvent(new Event('ai-law:legal-open'));
     if (updateHash && window.location.hash !== `#${view}`) window.history.replaceState(null, '', `#${view}`);
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
