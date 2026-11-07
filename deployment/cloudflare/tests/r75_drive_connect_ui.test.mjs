@@ -11,12 +11,13 @@ function element(id){
   id,textContent:'',hidden:id==='drive-connect',disabled:false,
   value:'',dataset:{},options:[],listeners:{},
   addEventListener(name,fn){this.listeners[name]=fn;},
+  setAttribute(){},removeAttribute(){},click(){this.clicked=true;},remove(){},
   replaceChildren(){this.options=[];},
-  append(x){this.options.push(x);},
+  append(...x){this.options.push(...x);if(this.id==='document-matter'&&this.options.length===2)this.value=x[0].value;},
   querySelector(){return null;}
  };
 }
-async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false,directStartError=null,directGoogleError=''}={}){
+async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false,directStartError=null,directGoogleError='',downloadCase=null}={}){
  const ids=['document-matter','document-upload-form','document-file','document-file-name','document-feedback',
   'qa-document-list','drive-setup','drive-status','drive-connect','drive-disconnect',
   'document-google-status','drive-blob-test'];
@@ -28,7 +29,12 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
   pending.push(Promise.resolve(els['document-upload-form'].listeners.submit({preventDefault(){}})));
  };
  els['drive-blob-test'].dataset.googleClientId='748514165913-petg8vmsa7cvkmvutothq5g8keocuvga.apps.googleusercontent.com';
- const calls=[],assignments=[],historyUrls=[],confirmations=[];
+ const calls=[],assignments=[],historyUrls=[],confirmations=[],savedFiles=[],savedBlobs=[];
+ const downloadUuid='66666666-6666-4666-8666-666666666666';
+ const matterUuid='44444444-4444-4444-8444-444444444444';
+ const raw=downloadCase?.original||new Uint8Array();
+ const hash=downloadCase?Buffer.from(await webcrypto.subtle.digest('SHA-256',raw)).toString('hex'):'';
+ const record={id:downloadUuid,name:'qa_gpt.pdf',mime_type:'application/pdf',bytes:raw.length,sha256:hash};
  const currentStatus={...status};
  const location={
   href:'https://ai-law-web-qa.iaict-platform.workers.dev/app'+query+'#documents',
@@ -37,6 +43,7 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
   replace(url){assignments.push(url);}
  };
  const document={
+  body:{appendChild(node){savedFiles.push(node);}},
   getElementById(id){return els[id]||null;},
   createElement(tag){if(!['option','p','div','span','a','small'].includes(tag))throw Error('Unexpected HTML node');return element(tag);}
  };
@@ -47,7 +54,14 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
    currentStatus.connected=false;currentStatus.connected_at=null;
    return Response.json({connected:false,disconnected:true,files_preserved:true});
   }
-  if(url==='/api/qa/matters')return Response.json({matters:[]});
+  if(url==='/api/qa/matters')return Response.json({matters:downloadCase?[{id:matterUuid,title:'Synthetic QA'}]:[]});
+  if(downloadCase&&typeof url==='string'&&url.startsWith('/api/qa/documents?'))
+   return Response.json({documents:[record]});
+  if(downloadCase&&typeof url==='string'&&url.endsWith('/download')){
+   if(downloadCase.httpError)return Response.json({error:'denied'},{status:downloadCase.httpError,headers:{'Content-Type':'application/json'}});
+   const bytes=downloadCase.received||raw;
+   return new Response(bytes,{headers:{'Content-Type':downloadCase.mime||'application/pdf','Content-Length':String(bytes.length)}});
+  }
   if(directUpload&&directStartError&&url==='/api/qa/documents/upload/start')
    return Response.json(directStartError,{status:503});
   if(directUpload&&url==='/api/qa/documents/upload/start')
@@ -70,10 +84,14 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
    config.callback({access_token:'synthetic-google-browser-token',expires_in:3600});
   }};}}}},
   confirm(text){confirmations.push(text);return confirmDisconnect;}};
+ class StubURL extends URL{
+  static createObjectURL(blob){savedBlobs.push(blob);return 'blob:synthetic-verified-file';}
+  static revokeObjectURL(){}
+ }
  vm.runInNewContext(code,{document,window,location,history:{replaceState(_a,_b,url){historyUrls.push(url);}},
-  fetch,URL,Response,Blob,console,crypto:webcrypto,Uint8Array,TextDecoder},{filename:'documents.js'});
+  fetch,URL:StubURL,Response,Blob,console,crypto:webcrypto,Uint8Array,TextDecoder,setTimeout(){}},{filename:'documents.js'});
  await new Promise(resolve=>setImmediate(resolve));
- return {els,submit,calls,assignments,historyUrls,confirmations,pending};
+ return {els,submit,calls,assignments,historyUrls,confirmations,pending,savedFiles,savedBlobs,record};
 }
 
 test('unconfigured OAuth shows operator-only setup status without a broken consent button',async()=>{
@@ -324,4 +342,42 @@ test('R96 new Google OAuth client remains allowed when backend credentials are u
   {connectResponse:{authorization_url:url}});
  await t.els['drive-connect'].listeners.click();
  assert.deepEqual(t.assignments,[url],'new valid client is not blocked');
+});
+
+test('R100 downloaded original PDF is verified by byte size and SHA before mobile Blob save',async()=>{
+ const original=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},{downloadCase:{original}});
+ const row=t.els['qa-document-list'].options.find(x=>x.className==='matter-row');
+ assert.ok(row,'authenticated file list rendered');
+ const link=row.options.find(x=>x.textContent==='Tải về');
+ assert.ok(link);
+ link.listeners.click({preventDefault(){}});
+ for(let i=0;i<6;i++)await new Promise(r=>setImmediate(r));
+ assert.equal(t.savedBlobs.length,1);
+ assert.equal(t.savedFiles[0].download,'qa_gpt.pdf');
+ assert.deepEqual(new Uint8Array(await t.savedBlobs[0].arrayBuffer()),original);
+ assert.equal(t.els['document-feedback'].dataset.state,'success');
+ assert.match(t.els['document-feedback'].textContent,/SHA-256/);
+});
+test('R100 inflated download response is rejected before saving a corrupted document',async()=>{
+ const original=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
+ const received=new Uint8Array(1600001);
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},{downloadCase:{original,received}});
+ const row=t.els['qa-document-list'].options.find(x=>x.className==='matter-row');
+ const link=row.options.find(x=>x.textContent==='Tải về');
+ link.listeners.click({preventDefault(){}});
+ for(let i=0;i<5;i++)await new Promise(r=>setImmediate(r));
+ assert.equal(t.savedBlobs.length,0,'never save too large or wrong response as a PDF');
+ assert.equal(t.els['document-feedback'].dataset.state,'error');
+ assert.match(t.els['document-feedback'].textContent,/vượt giới hạn/);
+});
+test('R100 a login or HTML response is not saved under the original PDF filename',async()=>{
+ const original=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},
+  {downloadCase:{original,httpError:503}});
+ const row=t.els['qa-document-list'].options.find(x=>x.className==='matter-row');
+ row.options.find(x=>x.textContent==='Tải về').listeners.click({preventDefault(){}});
+ for(let i=0;i<4;i++)await new Promise(r=>setImmediate(r));
+ assert.equal(t.savedBlobs.length,0);
+ assert.match(t.els['document-feedback'].textContent,/HTTP 503/);
 });
