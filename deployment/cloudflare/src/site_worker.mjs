@@ -29,7 +29,7 @@ import { DRIVE_INLINE_HTML } from './drive_inline_html.mjs';
 import { DRIVE_INLINE_JS } from './drive_inline_js.mjs';
 
 const AUTH_ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
-const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile','/api/qa/profile/avatar','/api/qa/drive/status','/api/qa/drive/connect','/api/qa/drive/disconnect','/api/qa/storage/destinations','/api/qa/storage/members','/api/qa/storage/assignments','/api/qa/storage/select']);
+const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile','/api/qa/profile/avatar','/api/qa/drive/status','/api/qa/drive/connect','/api/qa/storage/destinations','/api/qa/storage/destinations','/api/qa/storage/members','/api/qa/storage/assignments','/api/qa/storage/select']);
 const privateAssets=new Map([
  ['/styles.css',[WORKSPACE_CSS,'text/css; charset=utf-8']],
  ['/app.js',[WORKSPACE_JS,'application/javascript; charset=utf-8']],
