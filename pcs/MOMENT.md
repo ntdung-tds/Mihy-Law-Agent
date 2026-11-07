@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `96` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T08:12:00.000Z`.
+- **PCS revision:** `97` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T08:39:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R100 — One Save action and verified-download byte integrity (2026-11-07)
+
+- **Owner report:** Matter upload and download succeeded, but locally downloaded file was rejected on re-upload as **over 1.5 MB**. Owner objected to a separate browser Google permission button after Drive was connected. Backend tenant refresh token and per-user browser token are different security boundaries; UI now starts any necessary per-user popup from **the Save action**, then resumes the same file, without any extra button.
+- **QA D1 evidence:** Aggregate only, **4 receipts**, maximum recorded size **380236 bytes**, none above **1500000**. The user's local inflated file was not provided, so the precise on-device enlargement is **not proven**. Do not increase size limit or assume Google stored an oversized file.
+- **Source and CI:** [PR #143](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/143) merged 85f97eb3f3ec07baf2a7b47181c62d4bcc381304; [Actions #42355867537](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42355867537) **PASS 9/9**. Protected file download now verifies response HTTP 200, MIME, size, SHA-256 against D1 list before Blob save; wrong HTML/error, >1.5MB and hash mismatch are rejected. Backend sets exact Content-Length; site relay forwards it. Tests cover exact PDF bytes, oversized response, HTTP error, DOCX byte length and Google consent from one Save click. Tenant Drive secret never exposed to browser.
+- **QA deployment:** Backend ai-law-standalone-cf-qa ID 151e78ff-2fa7-4fef-b931-80990170ef4e at 2026-11-07T08:36:14Z; website ai-law-web-qa ID 4466c8b8-5a65-49ab-a523-10301f81b121 at 2026-11-07T08:36:40Z, **100%** each. Source readback verified 8 + 26 modules, preserved QA_AUTH, D1, Client Secret. Anonymous Chromium /app redirected to login **PASS**; separate /drive-blob Browser Rendering request **BLOCKED 429**.
+- **Not accepted yet:** Physical-mobile one-Save UX, exact local download bytes and re-upload success remain **NOT_RUN** after this release. QA only, SRS v1.1.15 unchanged, no production deployment.
 
 ## R99 — Browser Google multipart replaces failing matter resumable PUT (2026-11-07)
 
