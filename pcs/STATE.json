@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 98,
-  "updated_at": "2026-11-07T09:04:00.000Z",
+  "revision": 99,
+  "updated_at": "2026-11-07T09:22:00.000Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2451,8 +2451,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R101 Owner uploaded DOCX SRS_Drive_gpt (2).docx and received misleading backend error 'Chỉ chấp nhận metadata PDF/DOCX QA nhỏ hơn 1,5 MB'. Local file inspected: exactly 42090 bytes, valid DOCX ZIP/EOCD, under 1500000. Root cause backend validName regex rejected parentheses, not size. PR #145 merged b6167c36847912c64dec6304b5ac1aa2ba1f9027; final-head CI #42357625493 PASS 9/9 including deterministic awaited download test. Backend allows only safe ASCII parentheses additionally, keeps filename NFC/no traversals, split invalid name 400, oversized 413, type 400, SHA 400. GoogleDriveAdapter and browser verified-download filename rules synchronized. QA backend deployed version 9e3bfe45-a3bf-4bc4-bad4-bd7d6245fd7d, website 378c40ff-3050-4dc6-849a-4b673faf62ec, both 100%; 8 and 26 modules, OAuth secret, D1 and QA_AUTH preserved. Actual post-fix Owner authenticated upload/download of this DOCX NOT_RUN. Production and baseline SRS v1.1.15 unchanged.",
-      "next_action": "Owner test at canonical https://ai-law-web-qa.iaict-platform.workers.dev/app#documents with synthetic/non-customer DOCX named SRS_Drive_gpt (2).docx (42090 bytes). Confirm one Save click (Google popup only if needed), successful Google provider upload, D1 matter file receipt, verified download and filename/SHA, no automatic retry if ambiguous. Invalid traversal/backslash names and >1500000 bytes remain rejected. Owner final acceptance pending; no production deploy or SRS scope expansion.",
+      "last_completed_step": "R102 Owner showed Google account chooser every time selecting Save, despite organization Drive connection showing success and disconnect. Reviewed QA browser GIS: client.requestAccessToken({prompt:'consent'}) explicitly re-forced Google consent when browser token expired, page reloaded or workspace switched. Organizational server-side Drive OAuth grant and browser-scoped direct-upload access token are distinct; cannot expose tenant refresh token to browser. PR #147 merged c1206d31e5b8904044a9894f655b82589a5f5f3b, final CI #42358969331 PASS 9/9. Browser GIS now requests prompt:'' (Google saved-grant reuse), continues using in-memory token within expiry; regression simulates two successive uploads with one token request and no forced chooser. Cloudflare website QA deployment fbbdc99d-136f-4ad3-92b1-22b9fc8ac1ab 100%, 26 modules, QA_AUTH preserved, backend OAuth/Drive/D1 and production unchanged. Anonymous Browser Rendering /app#documents login gate PASS; Owner signed-in real Google popup suppression E2E NOT_RUN. SRS v1.1.15 unchanged.",
+      "next_action": "Owner test only at https://ai-law-web-qa.iaict-platform.workers.dev/app#documents after reloading website once: select a synthetic PDF/DOCX and save twice to same QA matter, verify Google account chooser not repeatedly forced, confirm two independent receipts in D1 and Drive and ability to download. If Google still prompts despite prompt:'', report whether tab/page was refreshed, whether browser switched workspace, and account chooser details; investigate Google session restrictions or same OAuth client user mismatch. Existing tenant Connect/Disconnect still control backend refresh grant; never export it to users. Preserve file size <=1.5MB, ACL, no production/customer data; Owner acceptance pending.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
