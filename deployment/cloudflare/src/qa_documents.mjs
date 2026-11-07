@@ -134,6 +134,10 @@ async function startDirect(req,env,p,now,opts){
  // The Owner may explicitly choose My Drive root in the Save chooser. Never
  // interpret an omitted destination as root (fail closed on cancellation).
  const explicitRoot=destinationId==='root';
+ // The old OAuth connection is tenant-owned. Do not present the administrator's
+ // My Drive as an ordinary employee's personal My Drive.
+ if(explicitRoot&&p.role_key!=='tenant_admin'&&p.kind!=='personal')
+  return forbidden();
  // No implicit root destination in live QA: clients must choose a location.
  // Prior R72 synthetic fixtures inject fake Google credentials and an internal
  // fetcher; preserve their historical root-only contract without enabling it
