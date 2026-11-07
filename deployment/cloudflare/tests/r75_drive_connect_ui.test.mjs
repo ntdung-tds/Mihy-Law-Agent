@@ -79,6 +79,11 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
   }
   if(directUpload&&directStartError&&url==='/api/qa/documents/upload/start')
    return Response.json(directStartError,{status:503});
+  if(url==='/api/qa/drive/picker-config')return Response.json({
+   configured:true,api_key:'AIza'+'X'.repeat(35)});
+  if(url==='/api/qa/storage/select')return Response.json({
+   destination:{id:'77777777-7777-4777-8777-777777777777',
+    label:'Shared Folder',provider:'google_drive'}});
   if(directUpload&&url==='/api/qa/documents/upload/start')
    return Response.json({ticket:'55555555-5555-4555-8555-555555555555',
     drive_folder_id:'syntheticQAroot_12345'});
@@ -100,6 +105,24 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
    config.callback({access_token:'synthetic-google-browser-token',expires_in:3600});
   }};}}}},
   confirm(text){confirmations.push(text);return confirmDisconnect;}};
+ if(saveChoice==='folder'){
+  class DocsView{
+   constructor(view){this.view=view;}
+   setIncludeFolders(){return this;}
+   setSelectFolderEnabled(){return this;}
+  }
+  class PickerBuilder{
+   setDeveloperKey(){return this;}
+   setAppId(){return this;}
+   setOAuthToken(){return this;}
+   addView(){return this;}
+   setCallback(cb){this.cb=cb;return this;}
+   build(){const cb=this.cb;return {setVisible(){cb({action:'picked',docs:[{id:'sharedTeamFolder123456'}]});}};}
+  }
+  window.google.picker={PickerBuilder,DocsView,
+   ViewId:{FOLDERS:'folders'},Action:{PICKED:'picked',CANCEL:'cancel'},
+   Response:{DOCUMENTS:'docs'},Document:{ID:'id'}};
+ }
  class StubURL extends URL{
   static createObjectURL(blob){savedBlobs.push(blob);return 'blob:synthetic-verified-file';}
   static revokeObjectURL(){}
@@ -461,4 +484,23 @@ test('R104 Save presents one explicit destination choice and never preselects Go
  const start=chosen.calls.find(x=>x.url==='/api/qa/documents/upload/start');
  assert.equal(JSON.parse(start.body).destination_id,'root','explicit My Drive selection, not silent fallback');
  assert.equal(chosen.googleGrants.length,1);
+});
+
+
+test('R104 real Google Picker callback registers folder selected by user before uploading',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},{
+  directUpload:true,saveChoice:'folder'});
+ const bytes=new TextEncoder().encode('%PDF-1.4\\n1 0 obj\\n<< >>\\nendobj\\n%%EOF\\n');
+ t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+ t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
+  async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
+ await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ await Promise.all(t.pending);
+ const selected=t.calls.find(x=>x.url==='/api/qa/storage/select');
+ assert.ok(selected,'provider choice must be checked with application and Google permissions');
+ assert.equal(JSON.parse(selected.body).folder_id,'sharedTeamFolder123456');
+ const start=t.calls.find(x=>x.url==='/api/qa/documents/upload/start');
+ assert.ok(start);
+ assert.equal(JSON.parse(start.body).destination_id,'77777777-7777-4777-8777-777777777777');
+ assert.equal(t.els['document-feedback'].dataset.state,'success');
 });
