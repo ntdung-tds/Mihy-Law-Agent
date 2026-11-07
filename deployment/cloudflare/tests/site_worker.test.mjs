@@ -312,7 +312,7 @@ test('R90 isolated Blob to Drive page is hosted static, without QA auth or Cloud
  assert.match(robots,/Disallow: \/drive-blob/);
 });
 
-test('R95 authenticated QA documents workspace hosts the proven direct Blob uploader without changing MatterACL flow',async()=>{
+test('R97 authenticated QA documents workspace hosts the proven direct Blob uploader without changing MatterACL flow',async()=>{
  logged=false;
  const denied=await get('/app');
  assert.equal(denied.status,302,'anonymous app still redirects to login');
@@ -324,7 +324,7 @@ test('R95 authenticated QA documents workspace hosts the proven direct Blob uplo
  const html=await r.text();
  assert.match(html,/id="qa-direct-drive-panel"/);
  assert.match(html,/id="drive-blob-test"/);
- assert.match(html,/data-google-client-id="748514165913-k1paechitoq2ds8337ondc1q2smk8dut\.apps\.googleusercontent\.com"/);
+ assert.match(html,/data-google-client-id="748514165913-petg8vmsa7cvkmvutothq5g8keocuvga\.apps\.googleusercontent\.com"/);
  assert.match(html,/src="\/drive-inline\.js"/);
  assert.match(html,/không được gắn với hồ sơ AI Law/);
  assert.match(html,/id="document-upload-form"/,'existing ACL-backed upload is retained');
