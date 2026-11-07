@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 88,
-  "updated_at": "2026-11-07T04:14:00.000Z",
+  "revision": 89,
+  "updated_at": "2026-11-07T05:15:00.000Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2431,12 +2431,20 @@
       {
         "path": "deployment/cloudflare/tests/r77_strict_cookie_server.mjs",
         "visibility": "PUBLIC_SAFE_SYNTHETIC_LOCAL_ONLY"
+      },
+      {
+        "path": "web/qa/drive-blob.html",
+        "visibility": "PUBLIC_SAFE_QA_CONFIG_PUBLIC_OAUTH_CLIENT_ID_NO_SECRET"
+      },
+      {
+        "path": "deployment/cloudflare/tests/r90_drive_blob.test.mjs",
+        "visibility": "PUBLIC_SAFE_SYNTHETIC_GOOGLE_OAUTH_REGRESSION"
       }
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R84 architecture correction recorded from Owner: Cloudflare runs site/users/auth/MatterACL and D1 metadata; PDF/DOCX bytes must upload from browser direct to customer's Google Drive, not through Cloudflare Worker file relay. R83 independent Google Drive connector PDF/DOCX PASS but website still FAIL. PR116 PCS r81 merged main after CI 9/9. This is scope correction of existing R72 task, not new product feature. No new upload implementation or QA deployment yet; production untouched.",
-      "next_action": "Within existing AL-R0-DOC-TRANSFER-R72 only: implement and test short-lived tenant-scoped server-started Google Drive resumable upload session; browser directly PUTs file bytes to Google; backend validates user/MatterACL, file/root/size/MIME and confirms provider ID+receipt in D1. FIRST verify actual browser CORS and bearer-capability security, with no OAuth access/refresh token in browser. Run synthetic PDF/DOCX browser test and denied ACL scenarios; deploy QA only after green CI and keep production untouched. If direct Drive resumable session lacks CORS, report that concrete blocker and evaluate another secure direct-to-Drive mechanism before coding.",
+      "last_completed_step": "R93 QA source branch: replaced stale Google OAuth web client in existing /drive-blob HTML with Owner-provided new public Client ID; existing JS reads data-google-client-id and invokes Google GIS initTokenClient. Added synthetic regression; PR #130 OPEN, GitHub CI pending. Not merged/deployed; actual Google consent and upload NOT_RUN.",
+      "next_action": "Wait for PR #130 final-head CI; if green, merge and deploy ONLY isolated /drive-blob QA static HTML without touching upload API/tenant data or production. Owner tests Google consent and synthetic PDF/DOCX direct upload, verifies file in own Drive; record PASS/FAIL and avoid duplicate retry.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
