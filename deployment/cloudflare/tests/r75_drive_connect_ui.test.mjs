@@ -18,10 +18,12 @@ function element(id){
 }
 async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false,directStartError=null}={}){
  const ids=['document-matter','document-upload-form','document-file','document-file-name','document-feedback',
-  'qa-document-list','drive-setup','drive-status','drive-connect','drive-disconnect'];
+  'qa-document-list','drive-setup','drive-status','drive-connect','drive-disconnect',
+  'document-google-authorize','document-google-status','drive-blob-test'];
  const els=Object.fromEntries(ids.map(x=>[x,element(x)]));
  const submit=element('submit');
  els['document-upload-form'].querySelector=()=>submit;
+ els['drive-blob-test'].dataset.googleClientId='748514165913-petg8vmsa7cvkmvutothq5g8keocuvga.apps.googleusercontent.com';
  const calls=[],assignments=[],historyUrls=[],confirmations=[];
  const currentStatus={...status};
  const location={
@@ -46,7 +48,7 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
    return Response.json(directStartError,{status:503});
   if(directUpload&&url==='/api/qa/documents/upload/start')
    return Response.json({ticket:'55555555-5555-4555-8555-555555555555',
-    upload_url:'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=syntheticBrowserToken12345'});
+    drive_folder_id:'syntheticQAroot_12345'});
   if(directUpload&&typeof url==='string'&&url.startsWith('https://www.googleapis.com/upload/drive/v3/files?'))
    return Response.json({id:'syntheticRemoteDriveId1234'});
   if(directUpload&&url==='/api/qa/documents/upload/finish')
@@ -57,6 +59,9 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
   throw Error('Unexpected endpoint '+url);
  };
  const window={addEventListener(){},
+  google:{accounts:{oauth2:{initTokenClient(config){return{requestAccessToken(){
+   config.callback({access_token:'synthetic-google-browser-token',expires_in:3600});
+  }};}}}},
   confirm(text){confirmations.push(text);return confirmDisconnect;}};
  vm.runInNewContext(code,{document,window,location,history:{replaceState(_a,_b,url){historyUrls.push(url);}},
   fetch,URL,Response,console,crypto:webcrypto,Uint8Array,TextDecoder},{filename:'documents.js'});
@@ -92,7 +97,8 @@ test('successful consent is verified by server status; upload enabled only if co
  const t=await mount({connected:true,configuration_ready:true,can_connect:true},
   {query:'?drive=connected'});
  assert.equal(t.els['drive-connect'].hidden,true);
- assert.equal(t.submit.disabled,false);
+ assert.equal(t.submit.disabled,true,'direct upload also requires browser Google consent');
+ assert.equal(t.els['document-google-authorize'].hidden,false);
  assert.equal(t.els['drive-setup'].dataset.state,'connected');
  assert.deepEqual(t.historyUrls,['/app#documents']);
 });
@@ -175,7 +181,7 @@ test('R80 canceled user confirmation does not call disconnect endpoint',async()=
  await t.els['drive-disconnect'].listeners.click();
  assert.equal(t.calls.some(x=>x.url==='/api/qa/drive/disconnect'),false);
  assert.equal(t.els['drive-setup'].dataset.state,'connected');
- assert.equal(t.submit.disabled,false);
+ assert.equal(t.submit.disabled,true,'browser token is not granted yet');
 });
 test('R80 organization non-admin and disconnected workspaces never show disconnect',async()=>{
  for(const state of [{connected:true,configuration_ready:true,can_connect:false},
