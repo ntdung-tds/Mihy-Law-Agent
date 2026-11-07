@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `101` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T14:16:00.000Z`.
+- **PCS revision:** `102` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T14:51:49.176Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R104.1 — Google Picker CSP and Shared Drives QA correction (2026-11-07)
+
+- **Owner UX unchanged:** one existing **Lưu** action; explicit My Drive root or choose a Google folder; no client Google Cloud configuration, folder wizard, implicit root, or duplicate upload.
+- **Fix:** Real /app CSP now permits `https://apis.google.com` (Picker JavaScript) and `https://docs.google.com` (Picker iframe), while /login, landing pages, and isolated Blob POC remain restricted. Picker offers a separate Shared Drives view; browser-to-Google multipart requests carry `supportsAllDrives=true`.
+- **Test:** PR #154 [CI run 42383252102](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42383252102), **9/9 PASS**, including R104 CSP, key gating, shared-drive synthetic tests, existing ACL and mobile regression.
+- **Live QA website:** content-only deploy `c7d3b33d-7f21-4203-b4c4-a6946a9c8682` at 100%; exact source readback PASS, all 26 modules and QA_AUTH binding retained; existing backend `a23dc8d3-e8d6-4a77-95dd-a7102e4eab10` unchanged. Anonymous /health Chromium PASS; authenticated /app browser probe BLOCKED HTTP 429.
+- **Blocking operator setup:** Google Cloud project for AI Law must enable Google Picker API and create a referrer/API-restricted API key for QA + `docs.google.com`; the website QA Worker still **lacks GOOGLE_PICKER_API_KEY**. This is the developer/operator's one-time setup, **not** a customer task. Real signed-in Google Picker, root, folder, shared company Drive, file download and employee account E2E remain **NOT_RUN**; OneDrive NOT_IMPLEMENTED; Owner acceptance pending. Production and private SRS v1.1.15 unchanged.
 
 ## R104 — One Save opens Google Drive destination chooser (2026-11-07)
 
