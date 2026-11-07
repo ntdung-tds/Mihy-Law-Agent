@@ -1,0 +1,149 @@
+/* R109: authenticated, source-limited QA legal operations. Separate from R0 static shell. */
+(() => {
+ 'use strict';
+ const $=q=>document.querySelector(q);
+  // R109: independent text-only QA workflows. No Drive/file access and no
+  // local persistence of customer text or model output.
+  const legalForm=$('#legal-qa-form');
+  if(legalForm) {
+    const byId=id=>$('#'+id);
+    const uc=byId('legal-qa-uc'),matter=byId('legal-qa-matter');
+    const question=byId('legal-qa-question'),secondary=byId('legal-qa-source-b');
+    const status=byId('legal-qa-feedback'),result=byId('legal-qa-result');
+    const output=byId('legal-qa-output'),copy=byId('legal-qa-copy');
+    const setStatus=(msg,bad=false)=>{status.textContent=msg;status.dataset.state=bad?'error':'info';};
+    let isSubmitting=false;
+    function clearResult(){
+      result.hidden=true;output.textContent='';
+      byId('legal-qa-sources').replaceChildren();
+    }
+    function updateTaskFields(){
+      const dual=['UC06','UC08'].includes(uc.value);
+      byId('legal-qa-source-b-label').hidden=!dual;
+      secondary.required=dual;
+      const needingQuestion=['UC09','UC10','UC11'].includes(uc.value);
+      question.required=needingQuestion;
+      byId('legal-qa-language').disabled=uc.value!=='UC03';
+      byId('legal-qa-run').textContent=['UC10','UC11'].includes(uc.value)
+        ?'Tìm trong nguồn mẫu':'Tạo bản nháp QA';
+      clearResult();
+    }
+    uc.addEventListener('change',updateTaskFields);
+    updateTaskFields();
+    async function loadLegalMatters(){
+      try {
+        const r=await fetch('/api/qa/matters',{credentials:'same-origin',cache:'no-store'});
+        if(r.status===401){location.replace('/login');return;}
+        if(!r.ok)throw Error('matter unavailable');
+        const data=await r.json();
+        const previously=matter.value;
+        matter.replaceChildren();
+        const empty=document.createElement('option');
+        empty.value='';empty.textContent='Chọn hồ sơ QA…';
+        matter.append(empty);
+        for(const m of data.matters||[]){
+          if(typeof m.id!=='string'||typeof m.title!=='string')continue;
+          const item=document.createElement('option');
+          item.value=m.id;item.textContent=m.title;
+          matter.append(item);
+        }
+        matter.value=previously&&[...matter.options].some(o=>o.value===previously)?previously:'';
+        setStatus((data.matters||[]).length
+          ?'Chọn hồ sơ có quyền truy cập để thử nghiệp vụ AI với văn bản mẫu.'
+          :'Chưa có hồ sơ QA. Vào Tài liệu → Tạo hồ sơ trước.');
+      } catch {
+        matter.replaceChildren();
+        const opt=document.createElement('option');
+        opt.value='';opt.textContent='Danh mục hồ sơ chưa sẵn sàng';matter.append(opt);
+        setStatus('Không thể tải hồ sơ QA. Hãy thử lại.',true);
+      }
+    }
+    window.addEventListener('ai-law:legal-open',()=>void loadLegalMatters());
+    window.addEventListener('ai-law:workspace-switch',()=>{
+      matter.replaceChildren();clearResult();byId('legal-qa-source').value='';
+      secondary.value='';question.value='';byId('legal-qa-consent').checked=false;
+      void loadLegalMatters();
+    });
+    legalForm.addEventListener('submit',async event=>{
+      event.preventDefault();
+      if(isSubmitting)return;
+      const source=byId('legal-qa-source').value.trim();
+      const extra=secondary.value.trim();
+      if(!matter.value){setStatus('Hãy tạo và chọn hồ sơ QA trước.',true);return;}
+      if(source.length<30||source.length>5000||
+        (secondary.required&&(extra.length<30||extra.length>5000))){
+        setStatus('Nguồn A/B cần tối thiểu 30 và tối đa 5000 ký tự.',true);return;
+      }
+      if(!byId('legal-qa-consent').checked){
+        setStatus('Chỉ sử dụng văn bản giả lập và xác nhận trước khi chạy.',true);return;
+      }
+      isSubmitting=true;byId('legal-qa-run').disabled=true;clearResult();
+      setStatus('Đang xử lý nguồn QA. Không tải dữ liệu lên Drive…');
+      try {
+        const response=await fetch('/api/qa/legal/run',{method:'POST',
+          headers:{'Content-Type':'application/json'},
+          credentials:'same-origin',cache:'no-store',
+          body:JSON.stringify({uc:uc.value,matter_id:matter.value,
+            source_text:source,source_text_2:extra,
+            question:question.value.trim(),
+            language:byId('legal-qa-language').value,synthetic_consent:true})
+        });
+        if(response.status===401){location.replace('/login');return;}
+        const data=await response.json().catch(()=>({}));
+        if(!response.ok){
+          if(response.status===404)void loadLegalMatters();
+          throw Error(data.error||'Tác vụ QA không thể thực hiện.');
+        }
+        if(typeof data.answer!=='string'||!data.answer)throw Error('Kết quả từ máy chủ không hợp lệ.');
+        output.textContent=data.answer;
+        byId('legal-qa-result-title').textContent=data.title+' · '+(data.mode==='local_example_only'?'Tìm trong nguồn mẫu':'Bản nháp AI');
+        byId('legal-qa-review').textContent=data.review_notice||
+          'Chỉ truy xuất từ nguồn giả lập. Chưa xác minh dữ liệu văn bản pháp luật/bản án chính thức.';
+        const sources=byId('legal-qa-sources');
+        sources.replaceChildren();
+        const title=document.createElement('strong');
+        title.textContent='Nguồn đã sử dụng · SHA-256 '+String(data.source_hash||'').slice(0,12)+'…';
+        sources.append(title);
+        for(const ref of data.source_anchors||[]){
+          const line=document.createElement('p');
+          line.textContent='['+ref.id+'] '+ref.preview;
+          sources.append(line);
+        }
+        if(Array.isArray(data.findings)&&data.findings.length){
+          const found=document.createElement('p');
+          found.textContent='Các đoạn phù hợp: '+data.findings.map(x=>x.source_id).join(', ');
+          sources.append(found);
+        }
+        result.hidden=false;
+        setStatus('Hoàn tất bản nháp QA. Hãy đối chiếu nguồn và kiểm duyệt thủ công.');
+        result.scrollIntoView({behavior:'smooth',block:'nearest'});
+      } catch(error){setStatus(error?.message||'Lỗi kết nối đến mô hình QA.',true);}
+      finally{isSubmitting=false;byId('legal-qa-run').disabled=false;}
+    });
+    copy.addEventListener('click',async()=>{
+      if(result.hidden||!output.textContent)return;
+      try{await navigator.clipboard.writeText(output.textContent);
+        setStatus('Đã sao chép bản nháp. Chưa xác minh pháp lý.');
+      }catch{setStatus('Không sao chép tự động được. Bạn có thể chọn và sao chép văn bản.',true);}
+    });
+    void loadLegalMatters();
+  }
+
+ // Intercept only known workflow cards. The old R0 informational modal
+ // remains intact in the static, network-free preview implementation.
+ document.addEventListener('click',event=>{
+  const target=event.target.closest?.('[data-demo-action]');
+  if(!target||!document.querySelector('#legal-qa-form'))return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  const selected=document.querySelector('#legal-qa-uc');
+  selected.value=target.dataset.feature;
+  selected.dispatchEvent(new Event('change'));
+  if(window.location.hash!=='#assistant')window.location.hash='#assistant';
+  else window.dispatchEvent(new Event('ai-law:legal-open'));
+  window.requestAnimationFrame?.(()=>document.querySelector('#legal-qa-heading')?.scrollIntoView({behavior:'smooth',block:'start'}));
+ },true);
+ window.addEventListener('hashchange',()=>{
+  if(location.hash==='#assistant')window.dispatchEvent(new Event('ai-law:legal-open'));
+ });
+})();
