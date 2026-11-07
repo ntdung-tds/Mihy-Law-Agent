@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 100,
-  "updated_at": "2026-11-07T17:24:00.000Z",
+  "revision": 101,
+  "updated_at": "2026-11-07T17:51:19.950Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1856,6 +1856,44 @@
           "Original private SRS v1.1.15 artifact not available for exact mapping; do not infer acceptance of all 11 UC."
         ],
         "owner_acceptance": "PENDING"
+      },
+      {
+        "id": "AL-R0-LEGAL-R109-001",
+        "title": "R109: synthetic text QA workflows for 11 legal UCs with Workers AI, MatterACL and no file storage",
+        "status": "QA_DEPLOYED_SOURCE_CI_PASS_PROVIDER_SMOKE_PASS_OWNER_E2E_NOT_RUN",
+        "priority": "P1",
+        "scope": "Only fictional pasted text, 9 unverified AI drafts and 2 local sample-text searches. No Google Drive/OneDrive, real client data, official law/case corpus or production release.",
+        "acceptance": [
+          "Signed-in user with current MatterACL may submit only explicit fictional sample for one of 11 known UC codes",
+          "POST same-origin/CSRF and denial across tenant, revoked ACL, expired sessions, unsupported roles",
+          "R0 UC03/04/07 and R1 UC01/02/05/06/08/09 return bounded AI draft only, requiring human review",
+          "UC10/11 search ONLY provided local text, never fabricate official case/statute results",
+          "Quota 12 model calls/user/day in D1 with no source/answer persistence",
+          "Provider failure returns honest error, no fake AI/legal citations",
+          "Mobile and desktop source comparison and copy work; real owner account acceptance still required"
+        ],
+        "test_results": {
+          "source_ci_pre_docs": "PASS_9_OF_9_RUN_42397098574",
+          "latest_head_ci": "PENDING_POST_DOCS_AND_SAMPLE",
+          "provider_smoke_synthetic": "PASS_REAL_CLOUDFLARE_AI_TEXT_VIETNAMESE",
+          "cf_ai_binding": "PASS_BACKEND_QA_AI_NAMED_BINDING_PRESERVED_10_OLD_BINDINGS",
+          "qa_d1_migration": "PASS_QUOTA_TABLE_5_COLUMNS_EMPTY_AT_INSTALL_ONE_OLD_MATTER_PRESERVED",
+          "qa_backend": "PASS_100_PERCENT_DEPLOY_8cee0745-05a1-45a1-bf36-1bdd934bc223_10_MODULES",
+          "qa_web": "PASS_100_PERCENT_DEPLOY_132f1e4d-44c7-40a3-ad74-bc0d9d1e51b4_27_MODULES",
+          "qa_source_readback": "PASS_UNRELATED_OAUTH_DRIVE_AND_ACCOUNT_MODULES_PRESERVED",
+          "qa_health": "PASS_REAL_BROWSER_RENDERING",
+          "authenticated_mobile_ai_11_uc": "NOT_RUN",
+          "verified_official_legal_research": "NOT_IMPLEMENTED",
+          "docx_pdf_file_workflow": "NOT_IMPLEMENTED_PAUSED_STORAGE",
+          "production": "UNTOUCHED"
+        },
+        "blockers": [
+          "Owner authenticated real Android and desktop AI QA E2E NOT_RUN because browser-rendering /login and /app probes are HTTP 429; CI is not Owner acceptance.",
+          "No verified official legal statute/judgment corpus or temporal validity; UC10 and UC11 only local sample search.",
+          "Original private SRS v1.1.15 not available for exact clause/test-ID mapping; do not claim all 11 UCs complete.",
+          "No real DOCX Track Changes/Word UI acceptance or PDF/DOCX integrated upload. Google/OneDrive paused by Owner."
+        ],
+        "owner_acceptance": "PENDING"
       }
     ],
     "features": [
@@ -2486,8 +2524,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "2026-11-07 R108 non-storage scope: PR #155 code CI PASS 9/9, isolated QA D1 migration validated (existing 1 synthetic matter intact), Cloudflare QA backend+website content-only deployments readback PASS and existing OAuth/Drive modules unchanged. Real Owner account E2E NOT_RUN; no production.",
-      "next_action": "Proceed with non-storage SRS-aligned UC03/UC04/UC07 vertical-slice work and real IAM/account checks using synthetic data. First Owner validates R108 rename with authenticated QA browser; code inspection and CI are not acceptance. Google/OneDrive frozen by explicit Owner directive. No production/real client case content.",
+      "last_completed_step": "2026-11-08 R109 non-storage: source CI 42397098574 PASS 9/9, 11 text QA UC routes implemented (9 AI drafts, 2 local source searches), Cloudflare Workers AI configured on standalone QA, provider smoke PASS, D1 quota table deployed, guarded backend+web QA deploy/readback PASS; sample-data button added. Real owner signed-in mobile E2E NOT_RUN, verified official law/case corpus and file Word pipeline NOT_IMPLEMENTED. Production untouched.",
+      "next_action": "Use prepared QA_R109_LEGAL_TEXT.md for Owner synthetic desktop/mobile UC tests; capture PASS/FAIL and repair. Keep Google/OneDrive frozen, preserve standalone-first program, continue SRS-mapped legal workflow completion in small increments; do not claim full UC product acceptance.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",

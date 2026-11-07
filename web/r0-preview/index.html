@@ -11,6 +11,7 @@
   <script src="./session.js" defer></script>
   <script src="./matters.js" defer></script>
   <script src="./documents.js" defer></script>
+  <script src="./legal.js" defer></script>
 </head>
 <body>
   <svg aria-hidden="true" class="svg-sprite" xmlns="http://www.w3.org/2000/svg">
@@ -80,29 +81,29 @@
           <section class="catalog-group" data-catalog-group="A" aria-labelledby="catalog-group-a">
             <div class="catalog-group-heading"><span class="catalog-group-index">NHÓM A</span><div><h3 id="catalog-group-a" class="catalog-group-title">Làm việc với văn bản</h3><p>Soạn thảo, rà soát, dịch và chỉnh sửa văn bản</p></div><span class="catalog-group-count">4 nghiệp vụ</span></div>
             <div class="services-grid">
-              <button type="button" class="service-card catalog-card" data-demo-action="Soạn hợp đồng / văn bản" data-feature="UC01" data-stage="r1" aria-label="Soạn hợp đồng / văn bản — Sắp triển khai, chưa khả dụng"><span class="catalog-card-top"><span class="service-icon service-violet"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>Soạn hợp đồng / văn bản</strong><p>Tạo bản nháp từ thông tin chính và mẫu chuẩn.</p><span class="service-bottom">Xem thông tin <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
-              <button type="button" class="service-card catalog-card" data-demo-action="Rà soát hợp đồng" data-feature="UC02" data-stage="r1" aria-label="Rà soát hợp đồng — Sắp triển khai, chưa khả dụng"><span class="catalog-card-top"><span class="service-icon service-blue"><svg class="icon" aria-hidden="true"><use href="#i-clipboard"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>Rà soát hợp đồng</strong><p>Nhận diện điều khoản rủi ro và đề xuất câu chữ.</p><span class="service-bottom">Xem thông tin <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
-              <button type="button" class="service-card catalog-card" data-demo-action="Dịch tài liệu, hợp đồng" data-feature="UC03" data-stage="r0" aria-label="Dịch tài liệu, hợp đồng — Đang triển khai, chưa khả dụng"><span class="catalog-card-top"><span class="service-icon service-mint"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></span><span class="catalog-status catalog-status-building">R0 · Đang triển khai</span></span><strong>Dịch tài liệu, hợp đồng</strong><p>Dịch tài liệu, giữ bố cục và thuật ngữ pháp lý.</p><span class="service-bottom">Xem thông tin <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
-              <button type="button" class="service-card catalog-card" data-demo-action="Sửa lỗi ngữ pháp" data-feature="UC07" data-stage="r0" aria-label="Sửa lỗi ngữ pháp — Đang triển khai, chưa khả dụng"><span class="catalog-card-top"><span class="service-icon service-peach"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="catalog-status catalog-status-building">R0 · Đang triển khai</span></span><strong>Sửa lỗi ngữ pháp</strong><p>Đánh dấu nội dung thay đổi để luật sư xem xét.</p><span class="service-bottom">Xem thông tin <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
+              <button type="button" class="service-card catalog-card" data-demo-action="Soạn hợp đồng / văn bản" data-feature="UC01" data-stage="r1" aria-label="Soạn hợp đồng / văn bản — R1 chưa phát hành, có bản nháp QA văn bản mẫu"><span class="catalog-card-top"><span class="service-icon service-violet"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>Soạn hợp đồng / văn bản</strong><p>Tạo bản nháp từ thông tin chính và mẫu chuẩn.</p><span class="service-bottom">Thử bản nháp QA <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
+              <button type="button" class="service-card catalog-card" data-demo-action="Rà soát hợp đồng" data-feature="UC02" data-stage="r1" aria-label="Rà soát hợp đồng — R1 chưa phát hành, có bản nháp QA văn bản mẫu"><span class="catalog-card-top"><span class="service-icon service-blue"><svg class="icon" aria-hidden="true"><use href="#i-clipboard"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>Rà soát hợp đồng</strong><p>Nhận diện điều khoản rủi ro và đề xuất câu chữ.</p><span class="service-bottom">Thử bản nháp QA <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
+              <button type="button" class="service-card catalog-card" data-demo-action="Dịch tài liệu, hợp đồng" data-feature="UC03" data-stage="r0" aria-label="Dịch tài liệu, hợp đồng — R0 bản nháp QA để thử nghiệm"><span class="catalog-card-top"><span class="service-icon service-mint"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></span><span class="catalog-status catalog-status-building">R0 · Đang triển khai</span></span><strong>Dịch tài liệu, hợp đồng</strong><p>Dịch tài liệu, giữ bố cục và thuật ngữ pháp lý.</p><span class="service-bottom">Thử bản nháp QA <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
+              <button type="button" class="service-card catalog-card" data-demo-action="Sửa lỗi ngữ pháp" data-feature="UC07" data-stage="r0" aria-label="Sửa lỗi ngữ pháp — R0 bản nháp QA để thử nghiệm"><span class="catalog-card-top"><span class="service-icon service-peach"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="catalog-status catalog-status-building">R0 · Đang triển khai</span></span><strong>Sửa lỗi ngữ pháp</strong><p>Đánh dấu nội dung thay đổi để luật sư xem xét.</p><span class="service-bottom">Thử bản nháp QA <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
             </div>
           </section>
 
           <section class="catalog-group" data-catalog-group="B" aria-labelledby="catalog-group-b">
             <div class="catalog-group-heading"><span class="catalog-group-index">NHÓM B</span><div><h3 id="catalog-group-b" class="catalog-group-title">Đọc hiểu hồ sơ</h3><p>Tóm tắt, phân tích một hoặc nhiều tài liệu</p></div><span class="catalog-group-count">3 nghiệp vụ</span></div>
             <div class="services-grid">
-              <button type="button" class="service-card catalog-card" data-demo-action="Tóm tắt văn bản" data-feature="UC04" data-stage="r0" aria-label="Tóm tắt văn bản — Đang triển khai, chưa khả dụng"><span class="catalog-card-top"><span class="service-icon service-peach"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg></span><span class="catalog-status catalog-status-building">R0 · Đang triển khai</span></span><strong>Tóm tắt văn bản</strong><p>Rút ra các ý chính, nghĩa vụ và mốc thời gian.</p><span class="service-bottom">Xem thông tin <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
-              <button type="button" class="service-card catalog-card" data-demo-action="Phân tích văn bản" data-feature="UC05" data-stage="r1" aria-label="Phân tích văn bản — Sắp triển khai, chưa khả dụng"><span class="catalog-card-top"><span class="service-icon service-blue"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>Phân tích văn bản</strong><p>Phân tích theo góc độ yêu cầu và chỉ rõ vị trí.</p><span class="service-bottom">Xem thông tin <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
-              <button type="button" class="service-card catalog-card" data-demo-action="Đọc và phân tích nhiều hồ sơ" data-feature="UC08" data-stage="r1" aria-label="Đọc và phân tích nhiều hồ sơ — Sắp triển khai, chưa khả dụng"><span class="catalog-card-top"><span class="service-icon service-violet"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>Đọc và phân tích nhiều hồ sơ</strong><p>Tổng hợp diễn biến, chứng cứ, mâu thuẫn và vấn đề pháp lý.</p><span class="service-bottom">Xem thông tin <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
+              <button type="button" class="service-card catalog-card" data-demo-action="Tóm tắt văn bản" data-feature="UC04" data-stage="r0" aria-label="Tóm tắt văn bản — R0 bản nháp QA để thử nghiệm"><span class="catalog-card-top"><span class="service-icon service-peach"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg></span><span class="catalog-status catalog-status-building">R0 · Đang triển khai</span></span><strong>Tóm tắt văn bản</strong><p>Rút ra các ý chính, nghĩa vụ và mốc thời gian.</p><span class="service-bottom">Thử bản nháp QA <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
+              <button type="button" class="service-card catalog-card" data-demo-action="Phân tích văn bản" data-feature="UC05" data-stage="r1" aria-label="Phân tích văn bản — R1 chưa phát hành, có bản nháp QA văn bản mẫu"><span class="catalog-card-top"><span class="service-icon service-blue"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>Phân tích văn bản</strong><p>Phân tích theo góc độ yêu cầu và chỉ rõ vị trí.</p><span class="service-bottom">Thử bản nháp QA <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
+              <button type="button" class="service-card catalog-card" data-demo-action="Đọc và phân tích nhiều hồ sơ" data-feature="UC08" data-stage="r1" aria-label="Đọc và phân tích nhiều hồ sơ — R1 chưa phát hành, có bản nháp QA văn bản mẫu"><span class="catalog-card-top"><span class="service-icon service-violet"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>Đọc và phân tích nhiều hồ sơ</strong><p>Tổng hợp diễn biến, chứng cứ, mâu thuẫn và vấn đề pháp lý.</p><span class="service-bottom">Thử bản nháp QA <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
             </div>
           </section>
 
           <section class="catalog-group" data-catalog-group="C" aria-labelledby="catalog-group-c">
             <div class="catalog-group-heading"><span class="catalog-group-index">NHÓM C</span><div><h3 id="catalog-group-c" class="catalog-group-title">Tra cứu pháp lý</h3><p>Tìm căn cứ có nguồn và đối chiếu quy định</p></div><span class="catalog-group-count">4 nghiệp vụ</span></div>
             <div class="services-grid">
-              <button type="button" class="service-card catalog-card" data-demo-action="Trả lời câu hỏi pháp lý" data-feature="UC09" data-stage="r1" aria-label="Trả lời câu hỏi pháp lý — Sắp triển khai, chưa khả dụng"><span class="catalog-card-top"><span class="service-icon service-mint"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>Trả lời câu hỏi pháp lý</strong><p>Nêu quy định liên quan kèm trích dẫn và hiệu lực.</p><span class="service-bottom">Xem thông tin <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
-              <button type="button" class="service-card catalog-card" data-demo-action="Tìm bản án theo chủ đề" data-feature="UC10" data-stage="r1" aria-label="Tìm bản án theo chủ đề — Sắp triển khai, chưa khả dụng"><span class="catalog-card-top"><span class="service-icon service-blue"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>Tìm bản án theo chủ đề</strong><p>Liệt kê bản án liên quan và liên kết bản gốc.</p><span class="service-bottom">Xem thông tin <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
-              <button type="button" class="service-card catalog-card" data-demo-action="Tìm quy định theo chủ đề" data-feature="UC11" data-stage="r1" aria-label="Tìm quy định theo chủ đề — Sắp triển khai, chưa khả dụng"><span class="catalog-card-top"><span class="service-icon service-violet"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>Tìm quy định theo chủ đề</strong><p>Tổng hợp quy định có liên quan và tình trạng hiệu lực.</p><span class="service-bottom">Xem thông tin <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
-              <button type="button" class="service-card catalog-card" data-demo-action="So sánh hai văn bản QPPL" data-feature="UC06" data-stage="r1" aria-label="So sánh hai văn bản QPPL — Sắp triển khai, chưa khả dụng"><span class="catalog-card-top"><span class="service-icon service-peach"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>So sánh hai văn bản QPPL</strong><p>Đối chiếu điểm giữ nguyên, sửa đổi, bổ sung hoặc bãi bỏ.</p><span class="service-bottom">Xem thông tin <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
+              <button type="button" class="service-card catalog-card" data-demo-action="Trả lời câu hỏi pháp lý" data-feature="UC09" data-stage="r1" aria-label="Trả lời câu hỏi pháp lý — R1 chưa phát hành, có bản nháp QA văn bản mẫu"><span class="catalog-card-top"><span class="service-icon service-mint"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>Trả lời câu hỏi pháp lý</strong><p>Nêu quy định liên quan kèm trích dẫn và hiệu lực.</p><span class="service-bottom">Thử bản nháp QA <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
+              <button type="button" class="service-card catalog-card" data-demo-action="Tìm bản án theo chủ đề" data-feature="UC10" data-stage="r1" aria-label="Tìm bản án theo chủ đề — R1 chưa phát hành, có bản nháp QA văn bản mẫu"><span class="catalog-card-top"><span class="service-icon service-blue"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>Tìm bản án theo chủ đề</strong><p>Liệt kê bản án liên quan và liên kết bản gốc.</p><span class="service-bottom">Thử bản nháp QA <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
+              <button type="button" class="service-card catalog-card" data-demo-action="Tìm quy định theo chủ đề" data-feature="UC11" data-stage="r1" aria-label="Tìm quy định theo chủ đề — R1 chưa phát hành, có bản nháp QA văn bản mẫu"><span class="catalog-card-top"><span class="service-icon service-violet"><svg class="icon" aria-hidden="true"><use href="#i-scale"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>Tìm quy định theo chủ đề</strong><p>Tổng hợp quy định có liên quan và tình trạng hiệu lực.</p><span class="service-bottom">Thử bản nháp QA <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
+              <button type="button" class="service-card catalog-card" data-demo-action="So sánh hai văn bản QPPL" data-feature="UC06" data-stage="r1" aria-label="So sánh hai văn bản QPPL — R1 chưa phát hành, có bản nháp QA văn bản mẫu"><span class="catalog-card-top"><span class="service-icon service-peach"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg></span><span class="catalog-status catalog-status-planned">R1 · Sắp triển khai</span></span><strong>So sánh hai văn bản QPPL</strong><p>Đối chiếu điểm giữ nguyên, sửa đổi, bổ sung hoặc bãi bỏ.</p><span class="service-bottom">Thử bản nháp QA <svg class="icon tiny" aria-hidden="true"><use href="#i-arrow-right"/></svg></span></button>
             </div>
           </section>
           </div>
@@ -159,8 +160,66 @@
         </section>
 
         <section id="view-assistant" class="view-panel" data-panel="assistant" hidden>
-          <div class="sub-page-heading"><div><p class="section-kicker">TRỢ LÝ AI</p><h1>Hỏi điều bạn cần<span class="heading-dot">.</span></h1><p class="subtitle">Bản thiết kế giao diện trò chuyện hỗ trợ công việc pháp lý.</p></div><span class="outline-pill">✦ Chế độ minh họa</span></div>
+          <div class="sub-page-heading"><div><p class="section-kicker">TRỢ LÝ AI</p><h1>Hỏi điều bạn cần<span class="heading-dot">.</span></h1><p class="subtitle">Hộp chat dưới đây chỉ minh họa; dùng bảng tác vụ QA để xử lý văn bản mẫu.</p></div><span class="outline-pill">✦ Chế độ minh họa</span></div>
           <div class="chat-shell"><div class="chat-center"><div class="chat-icon"><svg class="icon"><use href="#i-spark"/></svg></div><p class="chat-kicker">MIHY LAW AI AGENT ASSISTANT</p><h2>Hôm nay tôi có thể<br><em>giúp gì cho bạn?</em></h2><p>Chọn một câu hỏi mẫu để trải nghiệm thao tác. Trợ lý chưa kết nối AI hoặc nguồn luật thật.</p><div class="prompt-grid"><button class="prompt-card" data-prompt="Giúp tôi rà soát các điều khoản quan trọng trong hợp đồng dịch vụ."><span>✦</span> Rà soát hợp đồng <svg class="icon tiny"><use href="#i-arrow-right"/></svg></button><button class="prompt-card" data-prompt="Tóm tắt những điểm cần chú ý trong một văn bản pháp lý."><span>✦</span> Tóm tắt văn bản <svg class="icon tiny"><use href="#i-arrow-right"/></svg></button><button class="prompt-card" data-prompt="Tìm quy định pháp luật có liên quan và trích dẫn nguồn."><span>✦</span> Tìm quy định pháp luật <svg class="icon tiny"><use href="#i-arrow-right"/></svg></button></div></div><div id="chat-preview-reply" class="chat-preview-reply" hidden><div class="chat-preview-bubble"><strong>Chế độ xem trước</strong><p>Giao diện đã nhận câu hỏi mẫu. Chức năng AI, kiểm chứng nguồn và xử lý tài liệu sẽ được tích hợp trong các task R0 tiếp theo.</p></div></div><form id="chat-form" class="chat-composer"><label class="sr-only" for="chat-input">Nhập câu hỏi mẫu</label><textarea rows="2" id="chat-input" maxlength="400" placeholder="Nhập câu hỏi để xem trải nghiệm giao diện..."></textarea><div class="chat-compose-bottom"><span><svg class="icon"><use href="#i-shield"/></svg> Không gửi dữ liệu lên máy chủ</span><button type="submit" aria-label="Gửi câu hỏi mẫu"><svg class="icon"><use href="#i-arrow-up"/></svg></button></div></form><p class="chat-footnote">Bản xem trước thiết kế · Không cung cấp tư vấn pháp lý</p></div>
+          <section class="legal-qa-panel" aria-labelledby="legal-qa-heading">
+            <div class="legal-qa-heading">
+              <span class="legal-qa-chip">THỬ NGHIỆM QA · VĂN BẢN MẪU</span>
+              <h2 id="legal-qa-heading">Thực hiện nghiệp vụ với AI</h2>
+              <p>Bản nháp văn bản từ nguồn bạn cung cấp. Chỉ dùng nội dung giả lập, không có hồ sơ khách hàng thật. Kết quả không phải tư vấn pháp lý và chưa xác nhận hiệu lực văn bản.</p>
+            </div>
+            <form id="legal-qa-form" class="legal-qa-form">
+              <div class="legal-qa-grid">
+                <label for="legal-qa-matter">Hồ sơ QA đã tạo
+                  <select id="legal-qa-matter" required><option value="">Đang tải hồ sơ…</option></select>
+                </label>
+                <label for="legal-qa-uc">Nghiệp vụ
+                  <select id="legal-qa-uc" required>
+                    <option value="UC03">UC03 · Dịch tài liệu</option>
+                    <option value="UC04">UC04 · Tóm tắt văn bản</option>
+                    <option value="UC07">UC07 · Chỉnh ngữ pháp</option>
+                    <option value="UC01">UC01 · Soạn bản nháp</option>
+                    <option value="UC02">UC02 · Rà soát hợp đồng</option>
+                    <option value="UC05">UC05 · Phân tích văn bản</option>
+                    <option value="UC06">UC06 · So sánh 2 văn bản</option>
+                    <option value="UC08">UC08 · Phân tích 2 hồ sơ</option>
+                    <option value="UC09">UC09 · Hỏi đáp theo nguồn</option>
+                    <option value="UC10">UC10 · Tìm bản án trong nguồn mẫu</option>
+                    <option value="UC11">UC11 · Tìm quy định trong nguồn mẫu</option>
+                  </select>
+                </label>
+              </div>
+              <label for="legal-qa-source">Nguồn mẫu A (30–5000 ký tự)
+                <textarea id="legal-qa-source" required minlength="30" maxlength="5000" rows="6" placeholder="Dán văn bản giả lập, điều khoản thử nghiệm hoặc dữ liệu minh họa. Không dùng hồ sơ khách hàng." spellcheck="false"></textarea>
+              </label>
+              <label for="legal-qa-source-b" id="legal-qa-source-b-label" hidden>Nguồn mẫu B (dùng cho UC06 và UC08)
+                <textarea id="legal-qa-source-b" maxlength="5000" minlength="30" rows="5" placeholder="Dán văn bản so sánh, chỉ sử dụng nội dung mẫu."></textarea>
+              </label>
+              <div class="legal-qa-grid">
+                <label for="legal-qa-question">Yêu cầu cụ thể / từ khóa
+                  <input id="legal-qa-question" maxlength="600" placeholder="Ví dụ: Các mốc thời gian và nghĩa vụ chính?" />
+                </label>
+                <label for="legal-qa-language">Ngôn ngữ đích (UC03)
+                  <select id="legal-qa-language"><option value="vi">Tiếng Việt</option><option value="en">Tiếng Anh</option></select>
+                </label>
+              </div>
+              <label class="legal-qa-consent"><input id="legal-qa-consent" type="checkbox" required />
+                Tôi xác nhận đây là dữ liệu giả lập và đồng ý gửi phần văn bản đã dán đến mô hình AI trong môi trường QA.
+              </label>
+              <div class="legal-qa-actions">
+                <button id="legal-qa-example" type="button" class="legal-qa-example">Nạp ví dụ QA</button>
+                <button id="legal-qa-run" type="submit" class="btn btn-primary">Tạo bản nháp QA</button>
+                <p id="legal-qa-feedback" role="status" aria-live="polite">Tạo hồ sơ QA trước khi chạy tác vụ. Mỗi tài khoản tối đa 12 yêu cầu mô hình/ngày.</p>
+              </div>
+            </form>
+            <section class="legal-qa-result" id="legal-qa-result" aria-label="Kết quả bản nháp" hidden>
+              <h3 id="legal-qa-result-title">Bản nháp cần kiểm duyệt</h3>
+              <p id="legal-qa-review" class="legal-qa-disclaimer">Chưa kiểm chứng pháp lý. Đối chiếu nguồn gốc trước khi sử dụng.</p>
+              <pre id="legal-qa-output"></pre>
+              <div id="legal-qa-sources"></div>
+              <button type="button" id="legal-qa-copy">Sao chép bản nháp</button>
+            </section>
+          </section>
         </section>
 
         <section id="view-research" class="view-panel" data-panel="research" hidden>
@@ -169,7 +228,7 @@
           <div class="research-principles"><div><svg class="icon"><use href="#i-link"/></svg><h3>Nguồn truy xuất</h3><p>Các kết quả sau này cần dẫn được về văn bản và điều khoản.</p></div><div><svg class="icon"><use href="#i-clock"/></svg><h3>Hiệu lực theo thời gian</h3><p>Phân biệt thời điểm áp dụng của từng quy định.</p></div><div><svg class="icon"><use href="#i-shield"/></svg><h3>Kiểm chứng trước sử dụng</h3><p>Hỗ trợ người dùng tự đối chiếu thông tin quan trọng.</p></div></div>
         </section>
       </main>
-      <footer class="page-footer"><span>© <span id="year">2026</span> Mihy Law AI Agent · R0 Interface Preview</span><span>Hồ sơ QA lưu trên D1 · Tệp Google Drive và nghiệp vụ AI chưa kết nối</span></footer>
+      <footer class="page-footer"><span>© <span id="year">2026</span> Mihy Law AI Agent · R0 Interface Preview</span><span>Hồ sơ QA lưu trên D1 · AI văn bản QA dùng nguồn mẫu, cần kiểm duyệt; Drive chưa nghiệm thu</span></footer>
     </div>
   </div>
 
