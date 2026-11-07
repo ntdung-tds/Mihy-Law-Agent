@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 101,
-  "updated_at": "2026-11-07T17:51:19.950Z",
+  "revision": 102,
+  "updated_at": "2026-11-07T19:48:33.817Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1894,6 +1894,42 @@
           "No real DOCX Track Changes/Word UI acceptance or PDF/DOCX integrated upload. Google/OneDrive paused by Owner."
         ],
         "owner_acceptance": "PENDING"
+      },
+      {
+        "id": "AL-R0-LEGAL-R110-001",
+        "title": "R110 secure source-anchored QA AI drafts and size-bound streaming without duplicate UI",
+        "status": "QA_DEPLOYED_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "priority": "P1",
+        "scope": "Hardening the already deployed R109 11-UC synthetic-text QA API only; no new app, no Drive/OneDrive, no client files and no production.",
+        "acceptance": [
+          "When a model draft cites [A###] or [B###], the cited anchor must exist in the supplied QA source map or the entire output fails closed",
+          "Source JSON stream is byte bounded at 36KB even without Content-Length; excess input cannot reach model or quota",
+          "Cloudflare Workers AI object-shaped {answer} response is accepted only with bounded, valid plain text",
+          "Existing per-Matter read ACL, 12/day/model-user quota and QA session security remain unchanged",
+          "QA content-only deploy preserves all 9 unrelated modules, AI/D1/OAuth bindings, existing matters and quotas",
+          "Owner authenticated browser QA and legal reviewer checks still require human acceptance"
+        ],
+        "test_results": {
+          "ci": "PASS_9_OF_9",
+          "ci_run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42407576294",
+          "source_anchor_qa_node": "PASS_FAKE_AND_GENUINE_REFERENCES",
+          "stream_no_content_length": "PASS_36KB_BOUND",
+          "source_and_quota_regressions": "PASS",
+          "live_backend": "QA_DEPLOYED_301ecbe7-5a2e-47f9-9962-56b44ad2b26f",
+          "unchanged_modules": "PASS_9_OF_9",
+          "bindings_preserved": "PASS",
+          "qa_health": "PASS_BROWSER_RENDERING",
+          "live_d1": "PASS_ONE_MATTER_ONE_AI_QUOTA_ROW_RETAINED",
+          "owner_real_authenticated_ai_e2e": "NOT_RUN",
+          "independent_legal_accuracy": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "blockers": [
+          "Model-supported draft conclusions remain unverified for legal accuracy even when explicit source anchor IDs exist.",
+          "No real Owner signed-in Android/desktop 11-UC E2E; user acceptance remains pending.",
+          "SRS v1.1.15 private baseline requires exact mapping before full release claim."
+        ],
+        "owner_acceptance": "PENDING"
       }
     ],
     "features": [
@@ -2524,8 +2560,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "2026-11-08 R109 non-storage: source CI 42397098574 PASS 9/9, 11 text QA UC routes implemented (9 AI drafts, 2 local source searches), Cloudflare Workers AI configured on standalone QA, provider smoke PASS, D1 quota table deployed, guarded backend+web QA deploy/readback PASS; sample-data button added. Real owner signed-in mobile E2E NOT_RUN, verified official law/case corpus and file Word pipeline NOT_IMPLEMENTED. Production untouched.",
-      "next_action": "Use prepared QA_R109_LEGAL_TEXT.md for Owner synthetic desktop/mobile UC tests; capture PASS/FAIL and repair. Keep Google/OneDrive frozen, preserve standalone-first program, continue SRS-mapped legal workflow completion in small increments; do not claim full UC product acceptance.",
+      "last_completed_step": "R110 source-bound QA legal workflow hardening on PR159; CI 9/9 PASS run 42407576294. Deployed only qa_legal_workflows.mjs content to Cloudflare backend QA deployment 301ecbe7-5a2e-47f9-9962-56b44ad2b26f (100%); other 9 modules and existing AI/D1/OAuth bindings exact-match preserved. Real browser /health online; read-only D1 count 1 matter/1 AI quota record. PR158 duplicate was closed without merge/deploy. Real signed-in model E2E, legal accuracy/Owner acceptance NOT_RUN.",
+      "next_action": "Continue existing 11-UC R109 QA (one canonical /app#assistant surface), verify login and model outputs on real mobile with fictional documents. Prioritize exact source quotes for UC03/04/07, distinct negative tests, role ACL and model failure cases. Do not work on Google Drive/OneDrive or touch production. Keep SRS v1.1.15 private/frozen and report NOT_RUN for unverified gates.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
