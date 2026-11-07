@@ -18,7 +18,7 @@ function element(id){
   showModal(){this.open=true;},close(){this.open=false;}
  };
 }
-async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false,directStartError=null,directGoogleError='',downloadCase=null,storageSelection=false,saveChoice='root'}={}){
+async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false,directStartError=null,directGoogleError='',downloadCase=null,storageSelection=false,saveChoice='root',serverAccess=false}={}){
  const ids=['document-matter','document-upload-form','document-file','document-file-name','document-feedback',
   'qa-document-list','drive-setup','drive-status','drive-connect','drive-disconnect',
   'document-google-status','drive-blob-test','document-save-dialog',
@@ -62,6 +62,10 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
  const fetch=async(url,opts)=>{
   calls.push({url,method:opts?.method||'GET',headers:opts?.headers||{},body:opts?.body});
   if(url==='/api/qa/drive/status')return Response.json(currentStatus);
+  if(url==='/api/qa/drive/browser-access')return serverAccess?
+   Response.json({access_token:'synthetic-existing-qa-owner-grant-12345678',expires_in:3600,
+    scope:'https://www.googleapis.com/auth/drive.file'}):
+   Response.json({error:'not connected as current owner'},{status:403});
   if(storageSelection&&url==='/api/qa/storage/destinations')
    return Response.json({destinations:[{id:'77777777-7777-4777-8777-777777777777',
     label:'Hồ sơ luật sư A',provider:'google_drive',kind:'organization',assigned:true}],can_manage:false,
@@ -549,4 +553,23 @@ test('R104 authenticated app CSP permits Google Picker JS and docs iframe withou
  const ui=readFileSync(new URL('../../../web/r0-preview/documents.js',import.meta.url),'utf8');
  assert.match(ui,/setEnableDrives\(true\)/,'Google Picker includes shared-drive folder tab');
  assert.match(ui,/supportsAllDrives=true/,'selected shared-drive folders need Drive multipart support');
+});
+
+test('R107 already-connected owner Save opens Drive with server token and NO Google sign-in popup',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},
+  {directUpload:true,saveChoice:'folder',serverAccess:true});
+ const raw=new TextEncoder().encode('%PDF-1.4\\n1 0 obj\\n<< >>\\nendobj\\n%%EOF\\n');
+ t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+ t.els['document-file'].files=[{name:'qa_gpt.pdf',size:raw.length,
+  async arrayBuffer(){return raw.buffer.slice(raw.byteOffset,raw.byteOffset+raw.byteLength);}}];
+ assert.equal(t.submit.disabled,false);
+ await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ await settleSave(t);
+ assert.equal(t.googleGrants.length,0,'never open Google sign-in when connected user has a valid server refresh');
+ assert.equal(t.calls.filter(x=>x.url==='/api/qa/drive/browser-access').length,1);
+ assert.equal(t.calls.filter(x=>x.url==='/api/qa/storage/select').length,1);
+ const direct=t.calls.find(x=>String(x.url).includes('uploadType=multipart'));
+ assert.ok(direct,'must upload exactly once after selected location');
+ assert.equal(direct.headers.Authorization,'Bearer synthetic-existing-qa-owner-grant-12345678');
+ assert.equal(t.els['document-feedback'].dataset.state,'success');
 });
