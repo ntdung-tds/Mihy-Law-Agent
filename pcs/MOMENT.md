@@ -1,12 +1,18 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `102` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T14:51:49.176Z`.
+- **PCS revision:** `103` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T15:09:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R104.2 — Google Picker API Key is now configured (2026-11-07)
+
+- Owner set `GOOGLE_PICKER_API_KEY` as Text on `ai-law-web-qa`. Read-only Cloudflare confirmed binding present, Google-shaped value, QA_AUTH retained; deployment `a83efac3-51b1-4168-9731-9dcd3665250a` 100%.
+- QA browser `/health` PASS; authenticated Picker config/browser E2E NOT_RUN because browser-rendering was HTTP 429 on the attempted additional probe. Google Cloud referrer/API restrictions, actual document upload/download, shared-folder and employee OAuth isolation need real testing; **Owner acceptance pending**. Public GitHub contains no API key value.
+- [PR #154 checkpoint](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/154#issuecomment-6709053155); production untouched.
 
 ## R104.1 — Google Picker CSP and Shared Drives QA correction (2026-11-07)
 
