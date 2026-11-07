@@ -133,7 +133,7 @@ async function rename(req,env,identity,now,matterId){
   typeof body.title!=='string'||!Number.isInteger(body.expected_version)||
   body.expected_version<1||body.expected_version>1000000000)return bad();
  const title=body.title.trim().normalize('NFC');
- if(title.length<3||title.length>100||/[\\u0000-\\u001f\\u007f<>]/u.test(title))return bad();
+ if(title.length<3||title.length>100||/[\u0000-\u001f\u007f<>]/u.test(title))return bad();
  const queryArgs=[identity.user_id,now,now,identity.user_id,now,now];
  const old=await env.DB.prepare(MATTER_EDIT_SQL).bind(env.INSTALLATION_ID,
   identity.tenant_id,matterId,...queryArgs).first();
