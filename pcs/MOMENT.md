@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `87` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T02:52:42.873Z`.
+- **PCS revision:** `88` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T04:14:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R92 — SRS Drive upload delta and independent Google Apps Script POC (2026-11-07)
+
+- **Owner requested:** "Cập nhật srs" after separate Google Drive web upload POC `drive_gpt.zip`, due to repeated failures in integrated QA. Not a production migration instruction.
+- **Change control:** Existing `srs_changed.md` **SC-018** documents the precise before/after, test gates and limits. No duplicate PCS requirement ledger added. Private SRS **v1.1.15** is not in repository and remains unmodified.
+- **Candidate standalone POC:** Google Apps Script `HtmlService` → `google.script.run(form)` → server `DriveApp.createFile(blob)` in the deployment owner's My Drive. Restricted `Execute as Me / Only myself`, test limit 10 MiB. Distinct from browser→Drive direct API and not an AI Law tenant/MatterACL integration. Existing integrated QA 1.5 MB limit unchanged.
+- **Deliverable:** `SRS_Drive_gpt.docx`, three-page addendum produced and page-rendered for Owner review, delivered in chat. Actual owner Google Web App consent and successful PDF/DOCX upload are **NOT_RUN**. Production and baseline SRS unchanged; Owner acceptance **PENDING**.
 
 ## R91 — Diagnose correct QA login versus Google upload authorization and browser preflight (2026-11-07)
 
