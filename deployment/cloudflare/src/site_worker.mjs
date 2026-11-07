@@ -20,6 +20,7 @@ import { WORKSPACE_JS } from './workspace_js.mjs';
 import { WORKSPACE_SESSION } from './workspace_session.mjs';
 import { WORKSPACE_MATTERS } from './workspace_matters.mjs';
 import { WORKSPACE_DOCUMENTS } from './workspace_documents.mjs';
+import { WORKSPACE_LEGAL } from './workspace_legal.mjs';
 import { ACCOUNT_HTML } from './account_html.mjs';
 import { ACCOUNT_CSS } from './account_css.mjs';
 import { ACCOUNT_JS } from './account_js.mjs';
@@ -36,6 +37,7 @@ const privateAssets=new Map([
  ['/session.js',[WORKSPACE_SESSION,'application/javascript; charset=utf-8']],
  ['/matters.js',[WORKSPACE_MATTERS,'application/javascript; charset=utf-8']],
  ['/documents.js',[WORKSPACE_DOCUMENTS,'application/javascript; charset=utf-8']],
+ ['/legal.js',[WORKSPACE_LEGAL,'application/javascript; charset=utf-8']],
  ['/account.css',[ACCOUNT_CSS,'text/css; charset=utf-8']],
  ['/account.js',[ACCOUNT_JS,'application/javascript; charset=utf-8']],
  ['/drive-inline.js',[DRIVE_INLINE_JS,'application/javascript; charset=utf-8']]
