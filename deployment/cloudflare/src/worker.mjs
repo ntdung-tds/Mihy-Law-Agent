@@ -113,7 +113,7 @@ export async function handle(request,env,options={}){
     return new Response(MOBILE_JS,{headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"public, max-age=300","X-Content-Type-Options":"nosniff"}});
   if(url.pathname==="/api/qa/profile"||url.pathname==="/api/qa/profile/avatar")
     return accountApi(request,env,options);
-  if(url.pathname==="/api/qa/matters")return matterApi(request,env,options);
+  if(url.pathname==="/api/qa/matters"||/^\/api\/qa\/matters\/[0-9a-f-]{36}$/.test(url.pathname))return matterApi(request,env,options);
   if(["/api/qa/drive/connect","/api/qa/drive/disconnect","/api/qa/drive/status","/api/qa/drive/callback"].includes(url.pathname))
     return oauthDriveApi(request,env,options);
   if(url.pathname==="/api/qa/documents"||
