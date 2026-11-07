@@ -270,3 +270,23 @@ test('R103 live upload cannot bypass selected folder with a legacy manifest',asy
  assert.equal(f.ticket(),null);
  assert.equal(f.receipt(),false);
 });
+
+// R104: Owner explicitly chose to save at My Drive root in a provider chooser.
+// This is distinct from the prohibited implicit default for an empty location.
+test('R104 explicit My Drive root Save succeeds while missing destination still fails closed for live callers',async()=>{
+ const root=fixture();
+ const chosen=await documentsApi(request(start,{...MANIFEST,destination_id:'root'}),
+  root.env,{now,driveFetch:root.driveFetch});
+ assert.equal(chosen.status,200,await chosen.clone().text());
+ const ticket=await chosen.json();
+ assert.equal(ticket.drive_folder_id,ROOT);
+ assert.equal(root.ticket().destination_id,null,'root is an explicit choice, not a per-user folder grant');
+ const done=await documentsApi(request(finish,{ticket:ticket.ticket,file_id:REMOTE}),
+  root.env,{now,driveFetch:root.driveFetch});
+ assert.equal(done.status,201,await done.clone().text());
+ const q=fixture();
+ // The public handler has no driveFetch and still rejects the missing choice before OAuth.
+ const missing=await documentsApi(request(start,MANIFEST),q.env,{now});
+ assert.equal(missing.status,400);
+ assert.match((await missing.json()).error,/chọn thư mục/);
+});
