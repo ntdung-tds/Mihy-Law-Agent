@@ -34,7 +34,7 @@
   if(!uuid.test(id)||!Number.isInteger(bytesExpected)||bytesExpected<22||bytesExpected>1500000||
      !/^[a-f0-9]{64}$/.test(d.sha256||'')||
      !['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(d.mime_type)||
-     !/^[\p{L}\p{N}._ -]{5,120}$/u.test(d.name||'')||
+     !/^[\p{L}\p{N}._ ()-]{5,120}$/u.test(d.name||'')||
      !/\.(pdf|docx)$/i.test(d.name||'')){
    message('Thông tin tệp lưu trong hồ sơ không hợp lệ. Không tải xuống.','error');return;
   }
@@ -86,7 +86,7 @@
     if(driveBox?.dataset.state==='connected'){
      const a=document.createElement('a');a.href='/api/qa/documents/'+d.id+'/download';
      a.textContent='Tải về';a.rel='nofollow';
-     a.addEventListener('click',e=>{e.preventDefault();void downloadVerified(d,a);});
+     a.addEventListener('click',e=>{e.preventDefault();return downloadVerified(d,a);});
      row.append(label,a);
     }else{
      const note=document.createElement('small');note.textContent='Kết nối Drive để tải về';

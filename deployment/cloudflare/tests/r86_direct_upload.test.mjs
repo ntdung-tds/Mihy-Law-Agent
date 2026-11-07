@@ -95,6 +95,34 @@ test('R99 server issues ACL-bound ticket and approved tenant folder, not CORS-bl
  assert.ok(!JSON.stringify(data).includes('synthetic-drive-access-token'));
  assert.equal(f.receipt(),false,'no D1 receipt until Google metadata confirms');
 });
+test('R101 safe numbered DOCX filename is accepted as 42090-byte metadata, without any file bytes sent to Worker',async()=>{
+ const f=fixture();
+ const manifest={...MANIFEST,file_name:'SRS_Drive_gpt (2).docx',
+  mime_type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  byte_length:42090};
+ const res=await documentsApi(request(start,manifest),f.env,{now,driveFetch:f.driveFetch});
+ assert.equal(res.status,200,await res.clone().text());
+ assert.equal(f.ticket().file_name,manifest.file_name);
+ assert.equal(f.ticket().byte_length,42090);
+ assert.equal(f.ticket().mime_type,manifest.mime_type);
+ assert.equal(f.receipt(),false,'no receipt until provider proves upload');
+ assert.equal(f.requests.length,0,'metadata-only initiation never transports DOCX bytes');
+});
+test('R101 name, size, MIME and SHA failures have different safe errors and no ticket',async()=>{
+ for(const [metadata,status,message] of [
+  [{...MANIFEST,file_name:'../qa_gpt.pdf'},400,/Tên tệp/],
+  [{...MANIFEST,file_name:'qa\\malicious.pdf'},400,/Tên tệp/],
+  [{...MANIFEST,file_name:'qa_gpt.pdf',byte_length:1500001},413,/1,5 MB/],
+  [{...MANIFEST,file_name:'qa_gpt.pdf',mime_type:'text/plain'},400,/PDF hoặc DOCX/],
+  [{...MANIFEST,file_name:'qa_gpt.pdf',sha256:'invalid'},400,/SHA-256/],
+ ]){
+  const f=fixture();
+  const res=await documentsApi(request(start,metadata),f.env,{now,driveFetch:f.driveFetch});
+  assert.equal(res.status,status,await res.clone().text());
+  assert.match((await res.json()).error,message);
+  assert.equal(f.ticket(),null,'never create an upload ticket for invalid manifest');
+ }
+});
 test('R86 finalize rechecks authorized file, approved root and app-specific ticket, writes D1 only after proof',async()=>{
  const f=fixture();
  const init=await (await documentsApi(request(start,MANIFEST),f.env,{now,driveFetch:f.driveFetch})).json();
@@ -121,7 +149,7 @@ test('R86 denied write, no session, CSRF or invalid metadata never initiates Dri
   [fixture({allow:false}),request(start,MANIFEST),404],
   [fixture({active:false}),request(start,MANIFEST),401],
   [fixture(),request(start,MANIFEST,{origin:'https://evil.invalid'}),403],
-  [fixture(),request(start,{...MANIFEST,byte_length:9999999}),400],
+  [fixture(),request(start,{...MANIFEST,byte_length:9999999}),413],
   [fixture(),request(start,{...MANIFEST,mime_type:'text/plain'}),400],
  ]){
   const [f,req,status]=x;

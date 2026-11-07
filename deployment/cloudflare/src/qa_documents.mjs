@@ -28,7 +28,7 @@ const storageIssue=(code,detail)=>result(503,{
 const configured=env=>env?.AI_LAW_CF_MODE==='isolated-qa-only'&&env.DB&&UUID.test(env.INSTALLATION_ID||'');
 const csrf=req=>{const u=new URL(req.url);return u.protocol==='https:'&&req.headers.get('Origin')===u.origin&&req.headers.get('Sec-Fetch-Site')!=='cross-site'};
 const validName=name=>typeof name==='string'&&name.length>=5&&name.length<=120&&
- name===name.trim()&&name===name.normalize('NFC')&&!name.includes('..')&&!name.startsWith('.')&&/^[\p{L}\p{N}._ -]+$/u.test(name);
+ name===name.trim()&&name===name.normalize('NFC')&&!name.includes('..')&&!name.startsWith('.')&&/^[\p{L}\p{N}._ ()-]+$/u.test(name);
 const hex=b=>Array.from(b,x=>x.toString(16).padStart(2,'0')).join('');
 const sha256=async bytes=>hex(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)));
 function magic(bytes,extension){
@@ -123,12 +123,19 @@ async function startDirect(req,env,p,now,opts){
  if(!v||Object.keys(v).sort().join(',')!=='byte_length,file_name,matter_id,mime_type,sha256')
   return result(400,{error:'Yêu cầu tệp không hợp lệ.'});
  const matter=v.matter_id,name=v.file_name,mime=v.mime_type,size=v.byte_length,sha=v.sha256;
- if(!UUID.test(matter||'')||!validName(name)||
-    !Number.isInteger(size)||size<22||size>MAX_FILE||
-    !/^[a-f0-9]{64}$/.test(sha||'')||
-    !((name.toLowerCase().endsWith('.pdf')&&mime===PDF)||
+ if(!UUID.test(matter||''))return result(400,{error:'Hồ sơ QA không hợp lệ.'});
+ // A mobile/browser download may append (1) or (2). These are safe filename
+ // characters, unlike path separators and control characters.
+ if(!validName(name))return result(400,{error:'Tên tệp không hợp lệ. Cho phép chữ, số, khoảng trắng, dấu chấm, gạch nối, gạch dưới và ngoặc đơn.'});
+ if(!Number.isInteger(size)||size<22)
+  return result(400,{error:'Kích thước tệp chưa hợp lệ.'});
+ if(size>MAX_FILE)
+  return result(413,{error:'Tệp vượt giới hạn 1,5 MB của QA.'});
+ if(!((name.toLowerCase().endsWith('.pdf')&&mime===PDF)||
       (name.toLowerCase().endsWith('.docx')&&mime===DOCX)))
-  return result(400,{error:'Chỉ chấp nhận metadata PDF/DOCX QA nhỏ hơn 1,5 MB.'});
+  return result(400,{error:'Chỉ chấp nhận PDF hoặc DOCX đúng loại tệp.'});
+ if(!/^[a-f0-9]{64}$/.test(sha||''))
+  return result(400,{error:'Mã kiểm tra SHA-256 không hợp lệ.'});
  if(!await permit(env,p,matter,'write',now))return forbidden();
  const pending=await env.DB.prepare('SELECT COUNT(*) AS n FROM qa_document_upload_tickets WHERE installation_id=? AND tenant_id=? AND user_id=? AND consumed_at IS NULL AND expires_at>?')
   .bind(env.INSTALLATION_ID,p.tenant_id,p.user_id,now).first();
