@@ -22,3 +22,14 @@ CREATE TABLE IF NOT EXISTS qa_matter_title_events (
 );
 CREATE INDEX IF NOT EXISTS idx_qa_matter_title_events_case
  ON qa_matter_title_events(installation_id,tenant_id,matter_id,version DESC);
+-- Audit is in the same SQLite statement/transaction as title mutation.
+-- A failed insert aborts the rename; no audit-gap is possible.
+CREATE TRIGGER IF NOT EXISTS trg_qa_matter_title_audit
+AFTER UPDATE OF title ON qa_matter_catalog
+WHEN NEW.title<>OLD.title
+BEGIN
+ INSERT INTO qa_matter_title_events
+  (installation_id,tenant_id,event_id,matter_id,actor_id,version,occurred_at)
+ VALUES(NEW.installation_id,NEW.tenant_id,lower(hex(randomblob(16))),
+  NEW.matter_id,NEW.updated_by,NEW.version,NEW.updated_at);
+END;
