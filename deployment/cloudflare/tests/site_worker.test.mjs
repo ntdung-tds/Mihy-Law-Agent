@@ -311,3 +311,37 @@ test('R90 isolated Blob to Drive page is hosted static, without QA auth or Cloud
  const robots=await (await get('/robots.txt')).text();
  assert.match(robots,/Disallow: \/drive-blob/);
 });
+
+test('R95 authenticated QA documents workspace hosts the proven direct Blob uploader without changing MatterACL flow',async()=>{
+ logged=false;
+ const denied=await get('/app');
+ assert.equal(denied.status,302,'anonymous app still redirects to login');
+ const closed=await get('/drive-inline.js');
+ assert.equal(closed.status,401,'private lazy loader is never anonymously available');
+ logged=true;
+ const r=await get('/app');
+ assert.equal(r.status,200);
+ const html=await r.text();
+ assert.match(html,/id="qa-direct-drive-panel"/);
+ assert.match(html,/id="drive-blob-test"/);
+ assert.match(html,/data-google-client-id="748514165913-k1paechitoq2ds8337ondc1q2smk8dut\.apps\.googleusercontent\.com"/);
+ assert.match(html,/src="\/drive-inline\.js"/);
+ assert.match(html,/không được gắn với hồ sơ AI Law/);
+ assert.match(html,/id="document-upload-form"/,'existing ACL-backed upload is retained');
+ assert.doesNotMatch(html,/src="https:\/\/accounts\.google\.com\/gsi\/client"/,
+  'external OAuth script loads lazily after explicit user opening');
+ const csp=r.headers.get('Content-Security-Policy')||'';
+ assert.match(csp,/script-src 'self' https:\/\/accounts\.google\.com;/);
+ assert.match(csp,/frame-src https:\/\/accounts\.google\.com;/);
+ assert.doesNotMatch(csp,/script-src[^;]*\*/);
+ assert.equal(r.headers.get('Cross-Origin-Opener-Policy'),'same-origin-allow-popups');
+ const js=await get('/drive-inline.js');
+ assert.equal(js.status,200);
+ const source=await js.text();
+ assert.match(source,/panel\.addEventListener\('toggle'/);
+ assert.match(source,/https:\/\/accounts\.google\.com\/gsi\/client/);
+ assert.match(source,/verified\.src='\/drive-blob\.js'/);
+ assert.doesNotMatch(source,/\/api\/qa\/documents|access_token|refresh_token|localStorage/);
+ const login=await get('/login');
+ assert.doesNotMatch(login.headers.get('Content-Security-Policy')||'',/accounts\.google\.com/);
+});

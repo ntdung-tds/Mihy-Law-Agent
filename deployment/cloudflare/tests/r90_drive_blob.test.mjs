@@ -100,3 +100,27 @@ test('R93 configured QA OAuth Client ID is passed from hosted HTML to the Google
  assert.match(script,/client_id:\s*clientId/,'JS passes it to Google Identity Services');
  assert.match(html,/https:\/\/accounts\.google\.com\/gsi\/client/);
 });
+
+test('R95 widget loader is lazy and reuses only the proven Google direct upload JavaScript',()=>{
+ const src=readFileSync(new URL('../../../web/qa/drive-inline.js',import.meta.url),'utf8');
+ const hooks={};
+ const panel={open:false,addEventListener(event,fn){hooks[event]=fn;}};
+ const status={textContent:'',dataset:{}};
+ const inserted=[];
+ const head={appendChild(el){inserted.push(el);}};
+ const document={
+  getElementById(id){return id==='qa-direct-drive-panel'?panel:id==='blob-status'?status:null;},
+  createElement(tag){assert.equal(tag,'script');return {src:'',onload:null,onerror:null,async:false};},
+  head
+ };
+ vm.runInNewContext(src,{document},{filename:'drive-inline.js'});
+ assert.equal(inserted.length,0,'OAuth is not loaded until QA details opened');
+ panel.open=true; hooks.toggle();
+ assert.equal(inserted.length,1);
+ assert.equal(inserted[0].src,'https://accounts.google.com/gsi/client');
+ inserted[0].onload();
+ assert.equal(inserted.length,2);
+ assert.equal(inserted[1].src,'/drive-blob.js');
+ hooks.toggle();
+ assert.equal(inserted.length,2,'opening again does not duplicate script injection');
+});

@@ -27,6 +27,8 @@ const modules=[
  ['workspace_documents.mjs','web/r0-preview/documents.js','WORKSPACE_DOCUMENTS'],
  ['drive_blob_html.mjs','web/qa/drive-blob.html','DRIVE_BLOB_HTML'],
  ['drive_blob_js.mjs','web/qa/drive-blob.js','DRIVE_BLOB_JS'],
+ ['drive_inline_html.mjs','web/qa/drive-inline.html','DRIVE_INLINE_HTML'],
+ ['drive_inline_js.mjs','web/qa/drive-inline.js','DRIVE_INLINE_JS'],
  ['account_html.mjs','web/account/index.html','ACCOUNT_HTML'],
  ['account_css.mjs','web/account/styles.css','ACCOUNT_CSS'],
  ['account_js.mjs','web/account/app.js','ACCOUNT_JS']
