@@ -80,7 +80,7 @@ export class GoogleDriveAdapter {
   // the file bytes directly to Google. This method NEVER accepts file bytes.
   async beginResumable({name,mimeType,size,ticketId}){
     if(typeof name!=='string'||name.length<5||name.length>120||
-       !/^[\p{L}\p{N}._ -]+$/u.test(name)||name.includes('..')||
+       !/^[\p{L}\p{N}._ ()-]+$/u.test(name)||name.includes('..')||
        !['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(mimeType)||
        !Number.isInteger(size)||size<22||size>1500000||
        !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(ticketId))
@@ -125,7 +125,7 @@ export class GoogleDriveAdapter {
   // The caller must authorize MatterACL and store a D1 receipt before exposing it.
   async upload({name,mimeType,bytes}){
     if(typeof name!=='string'||!name||name.length>120||
-       !/^[\p{L}\p{N}._ -]+$/u.test(name)||name.includes('..')||
+       !/^[\p{L}\p{N}._ ()-]+$/u.test(name)||name.includes('..')||
        !['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(mimeType)||
        !(bytes instanceof Uint8Array)||bytes.length<22||bytes.length>1500000)
       throw Error('Invalid bounded QA document');
