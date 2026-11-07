@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `97` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T08:39:00.000Z`.
+- **PCS revision:** `98` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T09:04:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R101 — Fix false >1.5MB metadata rejection for safe numbered DOCX filenames (2026-11-07)
+
+- **Owner-reported error:** "Chỉ chấp nhận metadata PDF/DOCX QA nhỏ hơn 1,5 MB" after selecting the attached file `SRS_Drive_gpt (2).docx`. File was read locally: **42090 bytes**, Microsoft Word DOCX/ZIP with valid end-of-central-directory marker. Therefore file-size threshold not exceeded. The exact backend validation combined filename, size, MIME and SHA into a single generic message; its filename regex excluded safe `(`/`)`, the direct cause.
+- **Source/CI:** [PR #145](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/145) merged `b6167c36847912c64dec6304b5ac1aa2ba1f9027`; final-head [CI #42357625493](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42357625493) **PASS 9/9**. Backend validName and GoogleDriveAdapter plus browser's validated-download filename regex permit safe numbered `(1)`, `(2)` with unchanged filename length, NFC, path traversal protections. Separate errors for invalid basename, MIME, SHA (400), and genuinely oversized file (413). Filename-based browser-download tests now await completion deterministically rather than flaky event-loop ticks. Synthetic 42090-byte numbered DOCX metadata test passes without routing document content to Worker. No secrets/customer files committed.
+- **QA deploy/readback:** Backend `ai-law-standalone-cf-qa` deployment `9e3bfe45-a3bf-4bc4-bad4-bd7d6245fd7d` at 2026-11-07T09:01:05Z, **8** modules, OAuth Secret + D1 intact. Frontend `ai-law-web-qa` deployment `378c40ff-3050-4dc6-849a-4b673faf62ec` at 2026-11-07T09:01:32Z, **26** modules, `QA_AUTH` intact. Both **100%**. Readback confirms safe name regex and 413 limit; old misleading message absent.
+- **Remaining acceptance:** Owner physical mobile re-upload of named DOCX, provider confirmation, D1 matter receipt, verified download/re-upload and denial cases **NOT_RUN** post-deployment. QA limit remains **1500000 bytes**; baseline SRS v1.1.15 unchanged. Uploaded supplemental Drive SRS is a proposed delta, not automatically a new baseline. Production untouched.
 
 ## R100 — One Save action and verified-download byte integrity (2026-11-07)
 

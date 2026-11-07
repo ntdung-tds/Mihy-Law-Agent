@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 97,
-  "updated_at": "2026-11-07T08:39:00.000Z",
+  "revision": 98,
+  "updated_at": "2026-11-07T09:04:00.000Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2451,8 +2451,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R100 Owner confirmed per-matter Drive upload/download worked, but locally downloaded file subsequently rejected as >1.5 MB, and complained duplicate Google permission button. Live QA D1 aggregate has four receipts, max 380236 stored bytes, zero >1500000. Root cause of on-device inflated file size UNVERIFIED. PR #143 merged 85f97eb3f3ec07baf2a7b47181c62d4bcc381304; CI #42355867537 PASS 9/9. UI now one Save button: Google browser popup only when user-specific access token absent, no extra button; protected download verifies exact byte length, MIME and SHA-256 against D1 before Blob save. Backend sets verified Content-Length and site relay preserves it. QA backend deployment 151e78ff-2fa7-4fef-b931-80990170ef4e and website 4466c8b8-5a65-49ab-a523-10301f81b121 both 100%, D1/secrets/QA_AUTH preserved. Anonymous /app browser login gate PASS; separate /drive-blob browser probe BLOCKED 429. Physical Owner device one-click Save and download/re-upload NOT_RUN. SRS v1.1.15 and production unchanged.",
-      "next_action": "Owner on mobile https://ai-law-web-qa.iaict-platform.workers.dev/app#documents: connect organizational Drive if needed; select existing synthetic matter and PDF/DOCX; click only Lưu tệp QA vào Drive (first time may open Google popup without extra button); download via Tài liệu link; check confirmation of original bytes/SHA-256, local file size <=1500000 and test re-upload after checking duplicates. If local file still bigger, report observed byte size and exact error; investigate without lifting QA size limit. Final Owner signoff and ACL tests pending. No customer files or production.",
+      "last_completed_step": "R101 Owner uploaded DOCX SRS_Drive_gpt (2).docx and received misleading backend error 'Chỉ chấp nhận metadata PDF/DOCX QA nhỏ hơn 1,5 MB'. Local file inspected: exactly 42090 bytes, valid DOCX ZIP/EOCD, under 1500000. Root cause backend validName regex rejected parentheses, not size. PR #145 merged b6167c36847912c64dec6304b5ac1aa2ba1f9027; final-head CI #42357625493 PASS 9/9 including deterministic awaited download test. Backend allows only safe ASCII parentheses additionally, keeps filename NFC/no traversals, split invalid name 400, oversized 413, type 400, SHA 400. GoogleDriveAdapter and browser verified-download filename rules synchronized. QA backend deployed version 9e3bfe45-a3bf-4bc4-bad4-bd7d6245fd7d, website 378c40ff-3050-4dc6-849a-4b673faf62ec, both 100%; 8 and 26 modules, OAuth secret, D1 and QA_AUTH preserved. Actual post-fix Owner authenticated upload/download of this DOCX NOT_RUN. Production and baseline SRS v1.1.15 unchanged.",
+      "next_action": "Owner test at canonical https://ai-law-web-qa.iaict-platform.workers.dev/app#documents with synthetic/non-customer DOCX named SRS_Drive_gpt (2).docx (42090 bytes). Confirm one Save click (Google popup only if needed), successful Google provider upload, D1 matter file receipt, verified download and filename/SHA, no automatic retry if ambiguous. Invalid traversal/backslash names and >1500000 bytes remain rejected. Owner final acceptance pending; no production deploy or SRS scope expansion.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
