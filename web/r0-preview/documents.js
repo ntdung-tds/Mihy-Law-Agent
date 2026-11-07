@@ -443,6 +443,10 @@
    cancel=$('document-save-cancel');
   if(!dialog||!root||!folder||!cancel||!dialog.showModal)
    throw Error('Trình duyệt chưa hỗ trợ chọn nơi lưu.');
+  // A tenant admin's OAuth root is not an employee's own My Drive.
+  // Only admin/personal-owner accounts with a verified tenant grant may use it.
+  root.disabled=connect?.dataset.canConnect!=='true';
+  root.title=root.disabled?'My Drive cá nhân cần kết nối tài khoản Google riêng.':'';
   return new Promise(resolve=>{
    let done=false;
    const finish=value=>{
