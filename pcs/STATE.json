@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 90,
-  "updated_at": "2026-11-07T05:24:00.000Z",
+  "revision": 91,
+  "updated_at": "2026-11-07T05:33:32.797Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2443,8 +2443,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R93 Owner-provided public Google OAuth Web Client ID registered in isolated /drive-blob HTML; PR #130 MERGED main d75921351367843defa4f4108a4d8ee7723fd49d. Final-head GitHub Actions 42342034596 PASS all 9 executed jobs, including cloudflare-contract. Cloudflare ai-law-web-qa QA-only Worker upload after one failed syntax packaging attempt was accepted; source readback 24 modules, only new Client ID, QA_AUTH service binding intact, latest deployment 100%. Cloudflare Browser Rendering live /drive-blob HTML shows new Client ID and heading. REAL OWNER GOOGLE CONSENT + PDF/DOCX UPLOAD NOT_RUN.",
-      "next_action": "Owner opens https://ai-law-web-qa.iaict-platform.workers.dev/drive-blob, chooses configured Google test user, grants drive.file and uploads synthetic PDF and DOCX. Verify file in their My Drive and link. In case of uncertain response, inspect My Drive before retrying; report result to finalize isolated QA only. Do not infer integrated MatterACL/tenant upload success or production readiness.",
+      "last_completed_step": "R94 Owner reported 'Đã ok rồi nhé' after testing isolated /drive-blob Google sign-in and direct upload using newly registered OAuth Client ID. Mark standalone QA page OWNER_REPORTED_PASS; no independent provider receipt captured. R93 deployment and synthetic CI PASS. Integrated tenant document/MatterACL/receipt workflow and production not accepted.",
+      "next_action": "Keep isolated /drive-blob as owner-accepted QA proof. To continue the existing AL-R0-DOC-TRANSFER-R72, independently test the authenticated organization workspace, tenant MatterACL, correct Google parent, D1 receipt and download, without assuming standalone QA upload PASS covers integration. No production deploy.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
