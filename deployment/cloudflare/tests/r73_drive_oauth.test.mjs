@@ -29,7 +29,7 @@ function fixture({role='tenant_admin',active=true,configured=true,tokenDenied=fa
    if(sql.startsWith('SELECT root_id FROM qa_drive_connections'))return connections.get(params[1])||null;
    if(sql.startsWith('SELECT connected_at FROM qa_drive_connections'))return connections.get(params[1])||null;
    if(sql.startsWith('SELECT encrypted_refresh,root_id FROM qa_drive_connections'))return connections.get(params[1])||null;
-   if(sql.startsWith('SELECT encrypted_refresh,connected_by,scope FROM qa_drive_connections'))return connections.get(params[1])||null;
+   if(sql.startsWith('SELECT encrypted_refresh,connected_by,scope FROM qa_drive_connections')){const v=connections.get(params[1]);return v?{...v}:null;}
    if(sql.startsWith('SELECT connected_by,scope FROM qa_drive_connections'))return connections.get(params[1])||null;
    return null;
   },
