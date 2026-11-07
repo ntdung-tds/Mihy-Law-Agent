@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `93` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T06:18:00.000Z`.
+- **PCS revision:** `94` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T07:10:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R97 — Replacement Google OAuth Web Client synchronized on QA (2026-11-07)
+
+- **Owner-provided:** new public OAuth Web Client ID `748514165913-petg8vmsa7cvkmvutothq5g8keocuvga.apps.googleusercontent.com` after deleting the previous R93 browser OAuth client. Verified live QA backend `ai-law-standalone-cf-qa` already has the **new public ID** in `GOOGLE_OAUTH_CLIENT_ID`; `GOOGLE_OAUTH_CLIENT_SECRET` exists as a `secret_text` binding, but its pairing/validity is **unknown and NOT verified**. No secret retrieved or committed.
+- **Source/CI:** [PR #137](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/137) merged `b5ec387b2cc25a7be562a4753c1763995eac2db5`; [CI #42349700713](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42349700713) **PASS 9/9** executed jobs. Both `web/qa/drive-blob.html` and `web/qa/drive-inline.html` now use new Client ID; exact tests updated. No changes to backend, secret, user/tenant ACL, SRS or production.
+- **Cloudflare QA:** browser website deployment `ac0581c2-990c-43d7-b81e-7ee6765032bf` at 2026-11-07T07:08:15Z **100%**; readback **26** modules, new ID exactly **2**, previous browser ID **0**, service binding `QA_AUTH` present. Live Browser Rendering `/drive-blob` **PASS** displays new ID and uploader; secondary authenticated `/app#documents` Browser Rendering **BLOCKED 429**, not a pass/fail.
+- **Acceptance:** Google consent and actual PDF/DOCX upload using replacement client **NOT_RUN**. Backend organization authorization code grant requires valid matching new secret and registered callback URI `/api/qa/drive/callback`; parent, D1 receipt, MatterACL and download E2E remain unaccepted. The independent browser uploader must not be treated as tenant-managed storage.
 
 ## R96 — Google deleted_client root cause confirmed and QA fail-close (2026-11-07)
 
