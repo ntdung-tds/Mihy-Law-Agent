@@ -196,6 +196,35 @@ async function disconnect(req,env,now){
   return unavailable();
  return out(200,{connected:false,disconnected:true,files_preserved:true});
 }
+// Reuse only the connected person's existing authorization for the browser.
+// Tenant-wide Drive access is NOT a delegation to every tenant member.
+// Returns short-lived ACCESS token only (never an encrypted refresh grant).
+async function browserAccess(req,env,now,opts){
+ if(!originOkay(req))return out(403,{error:'CSRF_DENIED'});
+ const p=await mobileSession(req,env,now);
+ if(!p)return out(401,{error:'Phiên AI Law đã hết hạn.'});
+ if(!await canConnect(env,p))return out(403,{error:'Chỉ tài khoản đã kết nối Drive mới được sử dụng quyền này.'});
+ const row=await env.DB.prepare(
+  'SELECT encrypted_refresh,connected_by,scope FROM qa_drive_connections WHERE installation_id=? AND tenant_id=?')
+  .bind(env.INSTALLATION_ID,p.tenant_id).first();
+ if(!row||row.connected_by!==p.user_id||row.scope!==SCOPE)
+  return out(403,{error:'Tài khoản này chưa có kết nối Google riêng.'});
+ let grant;
+ try{
+  const refresh=await decrypt(row.encrypted_refresh,env,'refresh',p.tenant_id);
+  grant=await token({grant_type:'refresh_token',refresh_token:refresh},env,opts);
+ }catch{return out(503,{error:'Không thể gia hạn kết nối Google Drive. Hãy kết nối lại khi cần.'});}
+ // Recheck the owner and the active session after remote refresh. A concurrent
+ // disconnect/account switch must fail closed.
+ const [latest,active]=await Promise.all([
+  env.DB.prepare('SELECT connected_by,scope FROM qa_drive_connections WHERE installation_id=? AND tenant_id=?')
+   .bind(env.INSTALLATION_ID,p.tenant_id).first(),
+  mobileSession(req,env,now)]);
+ if(!latest||latest.connected_by!==p.user_id||latest.scope!==SCOPE||
+    !active||active.user_id!==p.user_id||active.tenant_id!==p.tenant_id)
+  return out(403,{error:'Kết nối Google đã thay đổi.'});
+ return out(200,{access_token:grant.access_token,expires_in:Math.min(3600,Math.max(60,Number(grant.expires_in||3000))),scope:SCOPE});
+}
 async function status(req,env,now){
  // The signed-in user's UI must receive a useful status even before the
  // operator has registered this application's Google OAuth client.
@@ -213,6 +242,10 @@ export async function oauthDriveApi(req,env,opts={}){
  try{
   if(path==='/api/qa/drive/status'&&req.method==='GET')return await status(req,env,now);
   if(path==='/api/qa/drive/disconnect'&&req.method==='POST')return await disconnect(req,env,now);
+  if(path==='/api/qa/drive/browser-access'&&req.method==='POST'){
+   if(!ready(env))return unavailable();
+   return await browserAccess(req,env,now,opts);
+  }
   if(!ready(env))return path==='/api/qa/drive/callback'?failed():unavailable();
   if(path==='/api/qa/drive/connect'&&req.method==='POST')return await begin(req,env,now);
   if(path==='/api/qa/drive/callback'&&req.method==='GET')return await callback(req,env,now,opts);
