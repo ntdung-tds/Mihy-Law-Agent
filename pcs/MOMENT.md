@@ -1,12 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `86` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T02:12:41.272Z`.
+- **PCS revision:** `87` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T02:52:42.873Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R91 — Diagnose correct QA login versus Google upload authorization and browser preflight (2026-11-07)
+
+- **User report:** Google Drive upload fails despite login to the correct QA test account. Distinguish AI Law cookie/membership/MatterACL, tenant OAuth Drive grant, JavaScript OAuth origin, Google resumable session, browser CORS and final receipt.
+- **Actual QA D1 evidence (read-only):** two `qa_document_upload_tickets` created Nov 7 **09:00:29** and **09:00:46** ICT after the R89 Cloudflare native `fetch` fix; same active test user, same tenant and matter with allow-write ACL. Both tickets initiated by **the same QA user who connected the tenant Drive grant**; 1 tenant Drive connection exists. Both tickets now expired and unconsumed; `provider_object_id` absent; 0 linked files and 0 receipts. This demonstrates **backend session-init was completed twice and QA login/ACL were not the rejection point**. It does NOT prove whether Google received PUT data before client/receipt failure.
+- **Reaudited real Chromium R85:** desktop/mobile with actual site CSP, synthetic deliberately invalid `upload_id` PUT produces `TypeError: Failed to fetch`; Chrome console explicitly: **CORS preflight denied — No Access-Control-Allow-Origin header on response**. When test browser strips CSP locally, Google returns **HTTP 404 with CORS response** (expected for intentionally invalid session). Live site CSP itself contains `connect-src ... https://www.googleapis.com` so do not claim exact CSP rule is misconfigured. Crucially **an invalid dummy session cannot determine whether valid authorized sessions pass CORS**.
+- **Separate standalone R90 OAuth failure:** user received `401 invalid_client, no registered origin` from Google Identity Services client-side OAuth. The R90 page reused a server OAuth web client ID but its QA **Authorized JavaScript origin was not registered**. Being logged into AI Law or Google does not bypass Google Cloud registration. The Cloudflare/GitHub/Google Drive connectors here do **not** provide Google Cloud OAuth client administration. No automatic fix or consent can be claimed.
+- **QA regression:** [PR #127](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/127) merged after [Actions #42331067824](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42331067824) **CI PASS 9/9**. It captures CSP header and sanitized real Chrome console for this synthetic probe and prints **`R91_CORS_PREFLIGHT_BLOCKED_NOT_UPLOAD_PASS`**, replacing false-positive R85 interpretation. Test-only change, no production or QA Worker code updated, no secrets/customer data, SRS unchanged.
+- **Remaining gate:** Do **not** equate synthetic browser CORS with actual authorized upload. Need authorized test browser capture of status/network `POST upload/start` → Google `OPTIONS/PUT` → `POST upload/finish`, without exposing session URI, access tokens, file IDs or content; verify Google root presence before retrying to avoid duplicate files. If upload is still blocked, address the evidenced stage only and rerun. User final acceptance pending.
 
 ## R90 — Standalone Blob → Google Drive QA test, no Cloudflare upload (2026-11-07)
 
