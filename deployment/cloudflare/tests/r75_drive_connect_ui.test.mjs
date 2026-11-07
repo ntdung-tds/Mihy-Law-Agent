@@ -111,12 +111,14 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
    constructor(view){this.view=view;}
    setIncludeFolders(){return this;}
    setSelectFolderEnabled(){return this;}
+   setEnableDrives(enabled){this.sharedDrivesOnly=enabled;return this;}
   }
   class PickerBuilder{
+   constructor(){this.views=[];}
    setDeveloperKey(){return this;}
    setAppId(){return this;}
    setOAuthToken(){return this;}
-   addView(){return this;}
+   addView(view){this.views.push(view);return this;}
    setCallback(cb){this.cb=cb;return this;}
    build(){const cb=this.cb;return {setVisible(){cb({action:'picked',docs:[{id:'sharedTeamFolder123456'}]});}};}
   }
@@ -504,4 +506,20 @@ test('R104 real Google Picker callback registers folder selected by user before 
  assert.ok(start);
  assert.equal(JSON.parse(start.body).destination_id,'77777777-7777-4777-8777-777777777777');
  assert.equal(t.els['document-feedback'].dataset.state,'success');
+});
+
+test('R104 authenticated app CSP permits Google Picker JS and docs iframe without weakening public pages',()=>{
+ const source=readFileSync(new URL('../src/site_worker.mjs',import.meta.url),'utf8');
+ const app=source.slice(source.indexOf('const directWorkspaceCsp='),
+   source.indexOf('function directWorkspaceHeaders('));
+ const blob=source.slice(source.indexOf('const driveBlobCsp='),
+   source.indexOf('// Same OAuth popup origin'));
+ const common=source.slice(source.indexOf('const csp='),source.indexOf('const driveBlobCsp='));
+ assert.match(app,/https:\/\/apis\.google\.com/,'picker script must be allowed on /app');
+ assert.match(app,/frame-src https:\/\/accounts\.google\.com https:\/\/docs\.google\.com/);
+ assert.doesNotMatch(blob,/https:\/\/apis\.google\.com/,'isolated upload POC should not gain unrelated picker privileges');
+ assert.doesNotMatch(common,/https:\/\/apis\.google\.com/,'public pages remain restricted');
+ const ui=readFileSync(new URL('../../../web/r0-preview/documents.js',import.meta.url),'utf8');
+ assert.match(ui,/setEnableDrives\(true\)/,'Google Picker includes shared-drive folder tab');
+ assert.match(ui,/supportsAllDrives=true/,'selected shared-drive folders need Drive multipart support');
 });
