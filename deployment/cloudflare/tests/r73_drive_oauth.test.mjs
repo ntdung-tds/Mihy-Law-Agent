@@ -328,3 +328,21 @@ test('R107 rejects cross-origin, missing login, another employee and replaced Go
  assert.equal(x.calls.length,callsBefore,'never refresh the admin token for an unrelated user');
  assert.doesNotMatch(await mismatch.text(),/synthetic-refreshed-token|synthetic-refresh-token/);
 });
+
+test('R107 blocks stale Google token if connected owner switches accounts while refresh is in flight',async()=>{
+ const x=fixture();
+ const started=await oauthDriveApi(req('/api/qa/drive/connect','POST'),x.env,x.opts);
+ const u=new URL((await started.json()).authorization_url);
+ await oauthDriveApi(req('/api/qa/drive/callback?state='+u.searchParams.get('state')+'&code=synthetic-code','GET',{cookie:false}),x.env,x.opts);
+ const original=x.opts.googleFetch;
+ x.opts.googleFetch=async(url,init)=>{
+  const response=await original(url,init);
+  if(url==='https://oauth2.googleapis.com/token'&&String(init.body).includes('grant_type=refresh_token')){
+   x.connections.get(T).encrypted_refresh='synthetic-rotated-encrypted-grant';
+  }
+  return response;
+ };
+ const res=await oauthDriveApi(req('/api/qa/drive/browser-access','POST'),x.env,x.opts);
+ assert.equal(res.status,403,'revocation or reconnect during refresh must not mint a token for stale Google account');
+ assert.doesNotMatch(await res.text(),/synthetic-refreshed-token/);
+});
