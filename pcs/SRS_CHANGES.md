@@ -20,3 +20,16 @@
 - Implement as small provider-and-destination policy tasks; assess Google Picker `drive.file`, Microsoft Graph delegated permissions and available picker APIs; verify folder selection and access with real provider accounts. Do not assume selecting a folder grants app unrestricted access to its children.
 - Acceptance: distinct organization/personal accounts, assigned folder allowed/denied, per-user and cross-tenant isolation, folder change/revocation, OneDrive and Google Drive upload/download, no unintended provider redirect or duplicates; CI then real QA browser, Owner final acceptance.
 - No document data or secret stored in this public file.
+
+
+### CR-20261107-BYOS-01 — Owner confirms implementation direction
+
+```pcs-change
+{"kind":"DECIDE","id":"CR-20261107-BYOS-01","decision":"APPROVED","actor":"owner","ref":"Current project conversation: Owner 'Ok, làm' after BYOS destination and Google Drive/OneDrive folder assignment proposal","at":"2026-11-07T10:41:27.169Z","verified_external_decision":false}
+```
+
+### CR-20261107-BYOS-02 — Owner confirms implementation direction
+
+```pcs-change
+{"kind":"DECIDE","id":"CR-20261107-BYOS-02","decision":"APPROVED","actor":"owner","ref":"Current project conversation: Owner 'Ok, làm' after BYOS destination and Google Drive/OneDrive folder assignment proposal","at":"2026-11-07T10:41:27.169Z","verified_external_decision":false}
+```
