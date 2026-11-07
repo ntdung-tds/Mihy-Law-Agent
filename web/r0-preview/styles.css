@@ -448,3 +448,19 @@ body.drawer-open{overflow:hidden}
 @media(max-width:600px){
  .qa-document-box #drive-disconnect{width:100%;justify-self:stretch;min-height:44px;font-size:13px}
 }
+
+/* R103 explicit BYOS destination selection (QA only). No implicit root fallback in UI. */
+.qa-storage-picker{border:1px solid #dfe5f0;border-radius:12px;padding:14px;margin:16px 0;background:#fbfcff;display:grid;gap:8px;min-width:0}
+.qa-storage-picker legend{font-size:13px;color:#253555;font-weight:800;padding:0 5px}
+.qa-storage-picker label{font-size:12px;font-weight:700;color:#3b4b66}
+.qa-storage-picker select,.qa-storage-picker input{width:100%;min-width:0;min-height:44px;border:1px solid #d6ddea;border-radius:9px;background:#fff;padding:9px 11px;font-size:16px;color:#203451}
+.qa-storage-picker select:disabled{opacity:.65;background:#f1f3f8}
+.qa-storage-admin{border-top:1px solid #e1e6ef;padding-top:12px;margin-top:8px}
+.qa-storage-admin[hidden]{display:none!important}
+.qa-storage-admin p{margin:0 0 10px}
+.qa-storage-actions{display:flex;gap:8px;align-items:center;min-width:0;flex-wrap:wrap;margin:7px 0 12px}
+.qa-storage-actions input{flex:1 1 180px}
+.qa-storage-actions button{border:0;background:#403f89;color:#fff;border-radius:9px;min-height:42px;padding:9px 13px;font-size:12px;font-weight:800}
+.qa-storage-actions .qa-storage-secondary{background:#f2f3f9;color:#344158;border:1px solid #dce2ec}
+.qa-storage-actions button:disabled{opacity:.5}
+@media(max-width:600px){.qa-storage-picker{padding:12px}.qa-storage-actions{display:grid;grid-template-columns:1fr}.qa-storage-actions input,.qa-storage-actions button{width:100%}}

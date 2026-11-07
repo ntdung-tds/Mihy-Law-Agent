@@ -7,6 +7,7 @@ import { accountApi } from "./account_profile.mjs";
 import { matterApi } from "./matter_workspace.mjs";
 import { documentsApi } from "./qa_documents.mjs";
 import { oauthDriveApi } from "./oauth_drive.mjs";
+import { storageDestinationApi } from "./qa_storage_destinations.mjs";
 import { MOBILE_CSS, MOBILE_JS } from "./mobile_assets.mjs";
 
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
@@ -116,6 +117,8 @@ export async function handle(request,env,options={}){
   if(url.pathname==="/api/qa/matters")return matterApi(request,env,options);
   if(["/api/qa/drive/connect","/api/qa/drive/disconnect","/api/qa/drive/status","/api/qa/drive/callback"].includes(url.pathname))
     return oauthDriveApi(request,env,options);
+  if(["/api/qa/storage/destinations","/api/qa/storage/members","/api/qa/storage/assignments"].includes(url.pathname))
+    return storageDestinationApi(request,env,options);
   if(url.pathname==="/api/qa/documents"||
      ["/api/qa/documents/upload/start","/api/qa/documents/upload/finish"].includes(url.pathname)||
      /^\/api\/qa\/documents\/[0-9a-f-]{36}\/download$/.test(url.pathname))

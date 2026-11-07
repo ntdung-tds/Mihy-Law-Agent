@@ -2,12 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {documentsApi,DOCUMENT_ACL_SQL} from '../src/qa_documents.mjs';
 import {GoogleDriveAdapter} from '../src/google_drive.mjs';
+import {ASSIGNED_SQL} from '../src/qa_storage_destinations.mjs';
 const I='11111111-1111-4111-8111-111111111111';
 const U='22222222-2222-4222-8222-222222222222';
 const T='33333333-3333-4333-8333-333333333333';
 const M='44444444-4444-4444-8444-444444444444';
 const S='55555555-5555-4555-8555-555555555555';
 const ROOT='syntheticQAroot_12345',REMOTE='syntheticDriveFile_67890';
+const FOLDER='assignedFolder_1234567',DEST='77777777-7777-4777-8777-777777777777';
 const ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
 const now=1800000000;
 const MANIFEST={matter_id:M,file_name:'qa_gpt.pdf',mime_type:'application/pdf',
@@ -17,8 +19,8 @@ function request(path,body,{cookie=true,origin=ORIGIN}={}){
  if(cookie)headers.Cookie='al_qa_session='+S;
  return new Request(ORIGIN+path,{method:'POST',headers,body:JSON.stringify(body)});
 }
-function fixture({allow=true,grant=true,badProof=false,active=true,sessionMode='ok'}={}){
- let ticket=null,used=false,receipt=false;const requests=[],statements=[];
+function fixture({allow=true,grant=true,badProof=false,active=true,sessionMode='ok',destination=false,badFolder=false}={}){
+ let ticket=null,used=false,receipt=false,storageGrant=true;const requests=[],statements=[];
  const env={AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,
   JWT_ISSUER:'https://issuer.test',
   ...(grant?{GOOGLE_DRIVE_ACCESS_TOKEN:'synthetic-drive-access-token',
@@ -31,19 +33,22 @@ function fixture({allow=true,grant=true,badProof=false,active=true,sessionMode='
       if(sql.includes('FROM qa_sessions s'))return active?
        {user_id:U,tenant_id:T,role_key:'lawyer',subject:'qa',expires_at:now+400}:null;
       if(sql===DOCUMENT_ACL_SQL)return allow?{ok:1}:null;
+      if(sql===ASSIGNED_SQL)return destination&&storageGrant?{
+       destination_id:DEST,folder_id:FOLDER,label:'Hồ sơ luật sư A',
+       provider:'google_drive',owner_kind:'organization'}:null;
       if(sql.includes('COUNT(*)'))return {n:0};
       if(sql.includes('FROM qa_document_upload_tickets WHERE')){
        if(!ticket||used||params[2]!==ticket.ticket_id)return null;
        return {ticket_id:ticket.ticket_id,user_id:U,matter_id:M,
         file_name:ticket.file_name,mime_type:ticket.mime_type,
-        byte_length:ticket.byte_length,sha256:ticket.sha256};
+        byte_length:ticket.byte_length,sha256:ticket.sha256,destination_id:ticket.destination_id};
       }
       return null;
      },
      async run(){
       if(sql.startsWith('INSERT INTO qa_document_upload_tickets')){
        ticket={ticket_id:params[2],file_name:params[5],
-        mime_type:params[6],byte_length:params[7],sha256:params[8]};
+        mime_type:params[6],byte_length:params[7],sha256:params[8],destination_id:params[11]||null};
       }
       return {success:true,meta:{changes:1}};
      }
@@ -71,15 +76,20 @@ function fixture({allow=true,grant=true,badProof=false,active=true,sessionMode='
    return new Response(null,{status:200,headers:{Location:
     'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=syntheticTicket12345'}});
   }
-  if(init.method==='GET')return Response.json({
-   id:REMOTE,name:'qa_gpt.pdf',mimeType:'application/pdf',size:'42',
-   parents:[ROOT],trashed:false,
-   appProperties:{ai_law_upload_ticket:badProof?'other-ticket':ticket?.ticket_id}
-  });
+  if(init.method==='GET'){
+   if(url.includes('/files/'+FOLDER))return Response.json({
+    id:FOLDER,name:'Hồ sơ luật sư A',mimeType:'application/vnd.google-apps.folder',
+    parents:[badFolder?'someOutsideRoot12345':ROOT],trashed:false});
+   return Response.json({
+    id:REMOTE,name:'qa_gpt.pdf',mimeType:'application/pdf',size:'42',
+    parents:[destination?FOLDER:ROOT],trashed:false,
+    appProperties:{ai_law_upload_ticket:badProof?'other-ticket':ticket?.ticket_id}
+   });
+  }
   throw Error('Unexpected Google method');
  }
  return {env,driveFetch,requests,statements,
-  ticket:()=>ticket,receipt:()=>receipt};
+  ticket:()=>ticket,receipt:()=>receipt,revokeDestination:()=>{storageGrant=false;}};
 }
 const start='/api/qa/documents/upload/start',finish='/api/qa/documents/upload/finish';
 test('R99 server issues ACL-bound ticket and approved tenant folder, not CORS-blocked Google upload session',async()=>{
@@ -165,8 +175,8 @@ test('R86 only metadata JSON endpoints are accepted, never arbitrary GET',async(
 });
 
 test('R99 missing organization Drive grant never issues a ticket or exposes file bytes',async()=>{
- const f=fixture({grant:false});
- const res=await documentsApi(request(start,MANIFEST),f.env,{now,driveFetch:f.driveFetch});
+ const f=fixture({grant:false,destination:true});
+ const res=await documentsApi(request(start,{...MANIFEST,destination_id:DEST}),f.env,{now,driveFetch:f.driveFetch});
  assert.equal(res.status,503);
  const data=await res.json();
  assert.equal(data.code,'DRIVE_GRANT_UNAVAILABLE');
@@ -208,4 +218,55 @@ test('R89 Cloudflare fetch brand binding: bare invocation works for session star
  });
  assert.equal(proof.id,remote);
  assert.deepEqual(calls.map(x=>x.method),['POST','GET']);
+});
+
+test('R103 selected and assigned child folder replaces tenant root in ticket and verified file receipt',async()=>{
+ const f=fixture({destination:true});
+ f.env.QA_STORAGE_DESTINATIONS='enforced';
+ const response=await documentsApi(request(start,{...MANIFEST,destination_id:DEST}),
+  f.env,{now,driveFetch:f.driveFetch});
+ assert.equal(response.status,200,await response.clone().text());
+ const init=await response.json();
+ assert.equal(init.drive_folder_id,FOLDER,'no automatic root upload');
+ assert.equal(f.ticket().destination_id,DEST,'destination persists in ticket');
+ const saved=await documentsApi(request(finish,{ticket:init.ticket,file_id:REMOTE}),
+  f.env,{now,driveFetch:f.driveFetch});
+ assert.equal(saved.status,201,await saved.clone().text());
+ assert.equal(f.receipt(),true);
+ assert.equal(f.statements.some(x=>x.sql.includes('storage_destination_id')),true);
+ const check=f.requests.filter(x=>x.init.method==='GET').map(x=>x.url);
+ assert.equal(check.some(x=>x.includes('/files/'+FOLDER)),true,'verify approved folder lives within tenant root');
+ assert.equal(check.some(x=>x.includes('/files/'+REMOTE)),true,'verify actual uploaded file belongs to selected child');
+});
+test('R103 missing folder choice, revoked assignment, or outsider folder fail closed',async()=>{
+ const enforced=fixture();
+ enforced.env.QA_STORAGE_DESTINATIONS='enforced';
+ const missing=await documentsApi(request(start,MANIFEST),enforced.env,{now});
+ assert.equal(missing.status,400);
+ assert.equal(enforced.ticket(),null);
+ const outside=fixture({destination:true,badFolder:true});
+ const bad=await documentsApi(request(start,{...MANIFEST,destination_id:DEST}),
+  outside.env,{now,driveFetch:outside.driveFetch});
+ assert.equal(bad.status,409);
+ assert.equal(outside.ticket(),null);
+ const revoked=fixture({destination:true});
+ const began=await documentsApi(request(start,{...MANIFEST,destination_id:DEST}),
+  revoked.env,{now,driveFetch:revoked.driveFetch});
+ assert.equal(began.status,200);
+ const ticket=(await began.json()).ticket;
+ revoked.revokeDestination();
+ const finishRes=await documentsApi(request(finish,{ticket,file_id:REMOTE}),
+  revoked.env,{now,driveFetch:revoked.driveFetch});
+ assert.equal(finishRes.status,404);
+ assert.equal(revoked.receipt(),false,'revoked staff must never finalize a D1 receipt');
+});
+
+test('R103 live upload cannot bypass selected folder with a legacy manifest',async()=>{
+ const f=fixture();
+ // No internal fake provider injection; public HTTP never passes driveFetch.
+ const res=await documentsApi(request(start,MANIFEST),f.env,{now});
+ assert.equal(res.status,400);
+ assert.match((await res.json()).error,/chọn thư mục/);
+ assert.equal(f.ticket(),null);
+ assert.equal(f.receipt(),false);
 });
