@@ -255,6 +255,7 @@ async function download(env,p,id,now,opts){
  if(!await permit(env,p,r.matter_id,'read',now))return forbidden();
  return new Response(bytes,{headers:{
   'Content-Type':r.mime_type,'Content-Disposition':"attachment; filename*=UTF-8''"+encodeURIComponent(r.file_name),
+  'Content-Length':String(bytes.length),
   'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY'
  }});
 }
