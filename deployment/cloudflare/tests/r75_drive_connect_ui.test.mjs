@@ -232,7 +232,7 @@ test('R99 MatterACL PDF uploads with proven Google multipart POST, then verifies
 test('R99 ambiguous Google network failure never finalizes receipt or silently retries',async()=>{
  const t=await mount({connected:true,configuration_ready:true,can_connect:true},
   {directUpload:true,directGoogleError:'network'});
- const bytes=new TextEncoder().encode('%PDF-1.4\n%%EOF\n');
+ const bytes=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
  t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
  t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
@@ -247,7 +247,7 @@ test('R99 ambiguous Google network failure never finalizes receipt or silently r
 test('R99 browser Google 403 on organization root does not generate receipt',async()=>{
  const t=await mount({connected:true,configuration_ready:true,can_connect:true},
   {directUpload:true,directGoogleError:'403'});
- const bytes=new TextEncoder().encode('%PDF-1.4\n%%EOF\n');
+ const bytes=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
  t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
  t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
