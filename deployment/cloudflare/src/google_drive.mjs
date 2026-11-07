@@ -78,6 +78,29 @@ export class GoogleDriveAdapter {
       throw new Error('Folder is not an approved child of the tenant root');
     return info;
   }
+  // The actual My Drive root is distinct from AI Law's historic private root.
+  // Never fall back to this location unless Save explicitly chose My Drive.
+  async accountRoot(){
+    const response=await this.request('https://www.googleapis.com/drive/v3/files/root?'+
+      'fields=id,mimeType,trashed,capabilities(canAddChildren)&supportsAllDrives=true');
+    const info=await response.json();
+    if(!SAFE_FILE.test(info?.id||'')||info.mimeType!=='application/vnd.google-apps.folder'||
+       info.trashed!==false||info.capabilities?.canAddChildren!==true)
+      throw Error('My Drive root is not writable');
+    return info.id;
+  }
+  // Google Picker explicitly authorizes this folder for the connected OAuth app.
+  // The provider, not a user-supplied folder name, must confirm write access.
+  async writableFolder(id){
+    if(!SAFE_FILE.test(id||''))throw Error('Invalid Drive folder');
+    const response=await this.request('https://www.googleapis.com/drive/v3/files/'+
+      encodeURIComponent(id)+'?fields=id,name,mimeType,trashed,capabilities(canAddChildren)&supportsAllDrives=true');
+    const info=await response.json();
+    if(info?.id!==id||info.mimeType!=='application/vnd.google-apps.folder'||
+      info.trashed!==false||info.capabilities?.canAddChildren!==true)
+      throw Error('Selected Drive folder is not writable');
+    return info;
+  }
   async createChildFolder(name){
     if(typeof name!=='string'||name.length<3||name.length>80||
        name!==name.trim()||name!==name.normalize('NFC')||name.includes('..')||
@@ -155,7 +178,10 @@ export class GoogleDriveAdapter {
   // R86: bind a new Drive object to the server-created ticket and approved
   // root. The browser cannot set/alter these metadata fields during PUT.
   async verifyDirectUpload(objectId,{ticketId,name,mimeType,size,approvedParent=this.rootId}){
-    if(approvedParent!==this.rootId)await this.childFolder(approvedParent);
+    if(approvedParent!==this.rootId){
+      const accountRoot=await this.accountRoot();
+      if(approvedParent!==accountRoot)await this.writableFolder(approvedParent);
+    }
     const info=await this.metadata(objectId,approvedParent);
     if(info.name!==name||info.mimeType!==mimeType||
        Number(info.size)!==size||
