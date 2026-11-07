@@ -1,12 +1,23 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `100` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T17:24:00.000Z`.
+- **PCS revision:** `101` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T17:51:19.950Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R109 — Eleven legal workflows: source-limited QA draft and local retrieval (2026-11-08)
+
+- **Owner directive:** Complete all other AI Law functions, without reopening Google Drive/OneDrive. No production or real client legal documents. Source branch `feat/r109-qa-legal-text-workflows`, stacked on R108, [draft PR #157](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/157). Exact private SRS v1.1.15 clause mapping unavailable; baseline untouched.
+- **Delivered narrow QA slice:** `/api/qa/legal/run` requires signed-in principal, active tenant/read MatterACL with deny-overrides, same-origin POST, explicit fictional-source checkbox, strict input size and allowed UC set. UC01,02,03,04,05,06,07,08,09 produce **AI drafts requiring legal review** from user-pasted sample text only. UC10 and UC11 return **deterministic local search results only inside pasted sample**; **no** official court decision/statute database, verified law citations or legal effect claims. No DOCX/PDF file bytes or document storage in this task.
+- **Safety:** AI request allowance bounded to **12 per user/day** using D1 `qa_legal_ai_quota` table (five numeric/ID columns, no source text or model output). MatterACL is enforced server-side for each request; model output/source anchors are displayed only in memory, no app persistence. Input and output are explicitly labeled QA synthetic/unverified; provider failure returns 503 rather than fabricated text.
+- **Real infrastructure:** Cloudflare Workers AI `AI` binding added to standalone QA, 10 old OAuth/D1/secret bindings preserved. Live model smoke with fictional Vietnamese contract returned a useful summary. QA D1 migration applied once, 0 quota rows at installation, 1 existing synthetic matter intact.
+- **QA deployment:** backend `ai-law-standalone-cf-qa` deployment `8cee0745-05a1-45a1-bf36-1bdd934bc223` (10 modules: 1 new legal engine + 1 patched route), web `ai-law-web-qa` deployment `132f1e4d-44c7-40a3-ad74-bc0d9d1e51b4` (27 modules; protected form, compact responsive CSS and JS). Content/route readback PASS, all unrelated OAuth/Drive and QA_AUTH/Picker bindings unchanged. Public /health browser PASS; authenticated Browser Rendering blocked HTTP 429.
+- **CI:** Source [Actions #42397098574](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42397098574) **9/9 PASS** including Node legal task/ACL, real SQLite quota and existing PG/Chromium regressions. Latest docs/final-head CI must be checked separately.
+- **Owner QA link:** [AI Law — Trợ lý AI](https://ai-law-web-qa.iaict-platform.workers.dev/app#assistant), then **Nạp ví dụ QA**, select matter, check fictional-source consent, run. Full [11-UC synthetic QA checklist](../deployment/cloudflare/QA_R109_LEGAL_TEXT.md).
+- **Acceptance gates:** Real signed-in Owner phone/mobile E2E NOT_RUN, original input DOCX/PDF/Word flow NOT_IMPLEMENTED, official law and judgments search NOT_IMPLEMENTED, legal accuracy/references NOT_VERIFIED. Do NOT claim all 11 UC product requirements complete. Production untouched; Owner accepts last.
 
 ## R108 — Non-storage functions: matter rename with ACL, version and audit (2026-11-07)
 
