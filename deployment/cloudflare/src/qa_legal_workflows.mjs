@@ -120,11 +120,42 @@ function validBody(body){
  if(body.uc==='UC03'&&body.language==='vi'&&body.source_text.trim().length<30)return false;
  return true;
 }
+// Return only model text that can be represented safely as plain text.
+// Some Workers AI model versions return {response:{answer:...}}.
 function modelText(result){
- const value=result?.response??result?.choices?.[0]?.message?.content;
+ const raw=result?.response??result?.choices?.[0]?.message?.content;
+ const value=typeof raw==='string'?raw:raw&&typeof raw.answer==='string'?raw.answer:null;
  if(typeof value!=='string'||!value.trim()||value.length>MAX_OUTPUT||
   /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/u.test(value))return null;
  return value.trim();
+}
+// Model citations of the form [A1] / [B3] must refer to an actual source
+// anchor. This does NOT establish that the model's conclusions are true.
+export function sourceReferencesExist(answer,sourceRows){
+ const valid=new Set(sourceRows.map(x=>x.id));
+ const explicit=answer.matchAll(/\[([AB]\d{1,3})\]/g);
+ for(const match of explicit)if(!valid.has(match[1]))return false;
+ return true;
+}
+// Always enforce byte limits on the stream itself: Content-Length can be
+// absent or forged. Never log or persist these bytes.
+async function readLimitedSource(req,max){
+ const reader=req.body?.getReader();
+ if(!reader)return {invalid:true};
+ let count=0;const chunks=[];
+ try{
+  for(;;){
+   const {value,done}=await reader.read();
+   if(done)break;
+   count+=value.byteLength;
+   if(count>max){await reader.cancel();return {tooBig:true};}
+   chunks.push(value);
+  }
+ }finally{reader.releaseLock();}
+ const bytes=new Uint8Array(count);let at=0;
+ for(const part of chunks){bytes.set(part,at);at+=part.byteLength;}
+ try{return {raw:new TextDecoder('utf-8',{fatal:true}).decode(bytes)};}
+ catch{return {invalid:true};}
 }
 export async function legalApi(req,env,opts={}){
  if(!configured(env))return unavailable();
@@ -138,11 +169,10 @@ export async function legalApi(req,env,opts={}){
  if(!principal||!UUID.test(principal.tenant_id)||!UUID.test(principal.user_id))return err(401,'Phiên AI Law đã hết hạn.');
  if(!['lawyer','tenant_admin'].includes(principal.role_key))return err(403,'Không có quyền sử dụng tác vụ AI.');
  let body;
- try{
-  const raw=await req.text();if(new TextEncoder().encode(raw).length>MAX_BODY_BYTES)
-   return err(413,'Nội dung QA vượt giới hạn.');
-  body=JSON.parse(raw);
- }catch{return invalid();}
+ const bounded=await readLimitedSource(req,MAX_BODY_BYTES);
+ if(bounded.tooBig)return err(413,'Nội dung QA vượt giới hạn.');
+ if(bounded.invalid)return invalid();
+ try{body=JSON.parse(bounded.raw);}catch{return invalid();}
  if(!validBody(body))return invalid();
  let allowed;
  try{
@@ -186,7 +216,7 @@ export async function legalApi(req,env,opts={}){
   });
   output=modelText(response);
  }catch{return unavailable();}
- if(!output)return unavailable();
+ if(!output||!sourceReferencesExist(output,[...primary,...secondary]))return unavailable();
  return json(200,{...common,mode:'ai_draft_not_verified',
   model:MODEL,answer:output,review_notice:'Bản nháp AI từ nội dung mẫu. Chưa kiểm chứng pháp lý, nguồn chính thức hoặc độ chính xác ngôn ngữ.'});
 }
