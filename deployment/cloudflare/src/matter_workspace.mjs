@@ -38,7 +38,18 @@ export const WRITE_ACL_SQL=`
 `;
 export const MATTER_LIST_SQL=`
 SELECT c.matter_id,c.title,c.created_at,c.version,
- CASE WHEN ${WRITE_ACL_SQL} THEN 1 ELSE 0 END AS can_write
+ CASE WHEN 
+ EXISTS(SELECT 1 FROM qa_matter_acl w WHERE
+  w.installation_id=c.installation_id AND w.tenant_id=c.tenant_id
+  AND w.matter_id=c.matter_id AND w.user_id=? AND w.permission='write'
+  AND w.effect='allow' AND w.acl_version=m.acl_version
+  AND w.valid_from<=? AND (w.valid_to IS NULL OR w.valid_to>?))
+ AND NOT EXISTS(SELECT 1 FROM qa_matter_acl d WHERE
+  d.installation_id=c.installation_id AND d.tenant_id=c.tenant_id
+  AND d.matter_id=c.matter_id AND d.user_id=? AND d.permission='write'
+  AND d.effect='deny' AND d.acl_version=m.acl_version
+  AND d.valid_from<=? AND (d.valid_to IS NULL OR d.valid_to>?))
+ THEN 1 ELSE 0 END AS can_write
 FROM qa_matter_catalog c JOIN qa_matters m
  ON m.installation_id=c.installation_id AND m.tenant_id=c.tenant_id AND m.matter_id=c.matter_id
 WHERE c.installation_id=? AND c.tenant_id=?
