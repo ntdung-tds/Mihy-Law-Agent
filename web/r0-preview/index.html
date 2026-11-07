@@ -161,6 +161,63 @@
         <section id="view-assistant" class="view-panel" data-panel="assistant" hidden>
           <div class="sub-page-heading"><div><p class="section-kicker">TRỢ LÝ AI</p><h1>Hỏi điều bạn cần<span class="heading-dot">.</span></h1><p class="subtitle">Bản thiết kế giao diện trò chuyện hỗ trợ công việc pháp lý.</p></div><span class="outline-pill">✦ Chế độ minh họa</span></div>
           <div class="chat-shell"><div class="chat-center"><div class="chat-icon"><svg class="icon"><use href="#i-spark"/></svg></div><p class="chat-kicker">MIHY LAW AI AGENT ASSISTANT</p><h2>Hôm nay tôi có thể<br><em>giúp gì cho bạn?</em></h2><p>Chọn một câu hỏi mẫu để trải nghiệm thao tác. Trợ lý chưa kết nối AI hoặc nguồn luật thật.</p><div class="prompt-grid"><button class="prompt-card" data-prompt="Giúp tôi rà soát các điều khoản quan trọng trong hợp đồng dịch vụ."><span>✦</span> Rà soát hợp đồng <svg class="icon tiny"><use href="#i-arrow-right"/></svg></button><button class="prompt-card" data-prompt="Tóm tắt những điểm cần chú ý trong một văn bản pháp lý."><span>✦</span> Tóm tắt văn bản <svg class="icon tiny"><use href="#i-arrow-right"/></svg></button><button class="prompt-card" data-prompt="Tìm quy định pháp luật có liên quan và trích dẫn nguồn."><span>✦</span> Tìm quy định pháp luật <svg class="icon tiny"><use href="#i-arrow-right"/></svg></button></div></div><div id="chat-preview-reply" class="chat-preview-reply" hidden><div class="chat-preview-bubble"><strong>Chế độ xem trước</strong><p>Giao diện đã nhận câu hỏi mẫu. Chức năng AI, kiểm chứng nguồn và xử lý tài liệu sẽ được tích hợp trong các task R0 tiếp theo.</p></div></div><form id="chat-form" class="chat-composer"><label class="sr-only" for="chat-input">Nhập câu hỏi mẫu</label><textarea rows="2" id="chat-input" maxlength="400" placeholder="Nhập câu hỏi để xem trải nghiệm giao diện..."></textarea><div class="chat-compose-bottom"><span><svg class="icon"><use href="#i-shield"/></svg> Không gửi dữ liệu lên máy chủ</span><button type="submit" aria-label="Gửi câu hỏi mẫu"><svg class="icon"><use href="#i-arrow-up"/></svg></button></div></form><p class="chat-footnote">Bản xem trước thiết kế · Không cung cấp tư vấn pháp lý</p></div>
+          <section class="legal-qa-panel" aria-labelledby="legal-qa-heading">
+            <div class="legal-qa-heading">
+              <span class="legal-qa-chip">THỬ NGHIỆM QA · VĂN BẢN MẪU</span>
+              <h2 id="legal-qa-heading">Thực hiện nghiệp vụ với AI</h2>
+              <p>Bản nháp văn bản từ nguồn bạn cung cấp. Chỉ dùng nội dung giả lập, không có hồ sơ khách hàng thật. Kết quả không phải tư vấn pháp lý và chưa xác nhận hiệu lực văn bản.</p>
+            </div>
+            <form id="legal-qa-form" class="legal-qa-form">
+              <div class="legal-qa-grid">
+                <label for="legal-qa-matter">Hồ sơ QA đã tạo
+                  <select id="legal-qa-matter" required><option value="">Đang tải hồ sơ…</option></select>
+                </label>
+                <label for="legal-qa-uc">Nghiệp vụ
+                  <select id="legal-qa-uc" required>
+                    <option value="UC03">UC03 · Dịch tài liệu</option>
+                    <option value="UC04">UC04 · Tóm tắt văn bản</option>
+                    <option value="UC07">UC07 · Chỉnh ngữ pháp</option>
+                    <option value="UC01">UC01 · Soạn bản nháp</option>
+                    <option value="UC02">UC02 · Rà soát hợp đồng</option>
+                    <option value="UC05">UC05 · Phân tích văn bản</option>
+                    <option value="UC06">UC06 · So sánh 2 văn bản</option>
+                    <option value="UC08">UC08 · Phân tích 2 hồ sơ</option>
+                    <option value="UC09">UC09 · Hỏi đáp theo nguồn</option>
+                    <option value="UC10">UC10 · Tìm bản án trong nguồn mẫu</option>
+                    <option value="UC11">UC11 · Tìm quy định trong nguồn mẫu</option>
+                  </select>
+                </label>
+              </div>
+              <label for="legal-qa-source">Nguồn mẫu A (30–5000 ký tự)
+                <textarea id="legal-qa-source" required minlength="30" maxlength="5000" rows="6" placeholder="Dán văn bản giả lập, điều khoản thử nghiệm hoặc dữ liệu minh họa. Không dùng hồ sơ khách hàng." spellcheck="false"></textarea>
+              </label>
+              <label for="legal-qa-source-b" id="legal-qa-source-b-label" hidden>Nguồn mẫu B (dùng cho UC06 và UC08)
+                <textarea id="legal-qa-source-b" maxlength="5000" minlength="30" rows="5" placeholder="Dán văn bản so sánh, chỉ sử dụng nội dung mẫu."></textarea>
+              </label>
+              <div class="legal-qa-grid">
+                <label for="legal-qa-question">Yêu cầu cụ thể / từ khóa
+                  <input id="legal-qa-question" maxlength="600" placeholder="Ví dụ: Các mốc thời gian và nghĩa vụ chính?" />
+                </label>
+                <label for="legal-qa-language">Ngôn ngữ đích (UC03)
+                  <select id="legal-qa-language"><option value="vi">Tiếng Việt</option><option value="en">Tiếng Anh</option></select>
+                </label>
+              </div>
+              <label class="legal-qa-consent"><input id="legal-qa-consent" type="checkbox" required />
+                Tôi xác nhận đây là dữ liệu giả lập và đồng ý gửi phần văn bản đã dán đến mô hình AI trong môi trường QA.
+              </label>
+              <div class="legal-qa-actions">
+                <button id="legal-qa-run" type="submit" class="btn btn-primary">Tạo bản nháp QA</button>
+                <p id="legal-qa-feedback" role="status" aria-live="polite">Tạo hồ sơ QA trước khi chạy tác vụ. Mỗi tài khoản tối đa 12 yêu cầu mô hình/ngày.</p>
+              </div>
+            </form>
+            <section class="legal-qa-result" id="legal-qa-result" aria-label="Kết quả bản nháp" hidden>
+              <h3 id="legal-qa-result-title">Bản nháp cần kiểm duyệt</h3>
+              <p id="legal-qa-review" class="legal-qa-disclaimer">Chưa kiểm chứng pháp lý. Đối chiếu nguồn gốc trước khi sử dụng.</p>
+              <pre id="legal-qa-output"></pre>
+              <div id="legal-qa-sources"></div>
+              <button type="button" id="legal-qa-copy">Sao chép bản nháp</button>
+            </section>
+          </section>
         </section>
 
         <section id="view-research" class="view-panel" data-panel="research" hidden>
