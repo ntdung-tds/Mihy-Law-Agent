@@ -198,23 +198,25 @@ test('R80 both desktop and mobile styles include safe secondary disconnect and H
  assert.match(css,/@media\(max-width:600px\)[\s\S]*#drive-disconnect/);
 });
 
-test('R86 PDF bytes go only to Google; Cloudflare sees JSON metadata and receipt only',async()=>{
+test('R99 MatterACL PDF uploads with proven Google multipart POST, then verifies D1 receipt',async()=>{
  const t=await mount({connected:true,configuration_ready:true,can_connect:true},{directUpload:true});
  const bytes=new TextEncoder().encode('%PDF-1.4\n1 0 obj\n<< >>\nendobj\n%%EOF\n');
  t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
  t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
+ await t.els['document-google-authorize'].listeners.click();
+ assert.equal(t.submit.disabled,false,'tenant grant + browser Google consent required');
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
  const starts=t.calls.filter(x=>x.url==='/api/qa/documents/upload/start');
  const finishes=t.calls.filter(x=>x.url==='/api/qa/documents/upload/finish');
  const direct=t.calls.filter(x=>String(x.url).startsWith('https://www.googleapis.com/upload/drive/v3/files?'));
  assert.equal(starts.length,1);
  assert.equal(direct.length,1);
+ assert.equal(direct[0].method,'POST');
  assert.equal(finishes.length,1);
  assert.equal(t.calls.some(x=>x.url==='/api/qa/documents'&&x.method==='POST'),false);
- assert.equal(t.els['document-feedback'].dataset.state,'success', t.els['document-feedback'].textContent);
+ assert.equal(t.els['document-feedback'].dataset.state,'success',t.els['document-feedback'].textContent);
 });
-
 test('R88 real QA start failure shows bounded stage, provider HTTP and reason, never secrets',async()=>{
  const t=await mount({connected:true,configuration_ready:true,can_connect:true},{
   directUpload:true,directStartError:{
@@ -227,6 +229,7 @@ test('R88 real QA start failure shows bounded stage, provider HTTP and reason, n
  t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
  t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
+ await t.els['document-google-authorize'].listeners.click();
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
  const msg=t.els['document-feedback'].textContent;
  assert.equal(t.els['document-feedback'].dataset.state,'error');
@@ -247,6 +250,7 @@ test('R88 transport failures show stage without implying a mobile connection def
  t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
  t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
+ await t.els['document-google-authorize'].listeners.click();
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
  assert.match(t.els['document-feedback'].textContent,/stage=transport/);
  assert.doesNotMatch(t.els['document-feedback'].textContent,/đường truyền.*ổn định/i);
