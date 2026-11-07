@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {legalApi,LEGAL_MATTER_ACCESS_SQL,LEGAL_QUOTA_SQL} from '../src/qa_legal_workflows.mjs';
+import {legalApi,LEGAL_MATTER_ACCESS_SQL,LEGAL_QUOTA_SQL,sourceReferencesExist} from '../src/qa_legal_workflows.mjs';
 
 const I='11111111-1111-4111-8111-111111111111';
 const U='22222222-2222-4222-8222-222222222222';
@@ -116,4 +116,43 @@ test('R109 provider outage, quota exhaustion and malicious model response never 
  const res=await legalApi(request(),failed.env,{now:NOW});
  assert.equal(res.status,503);
  assert.doesNotMatch(await res.text(),/secret diagnostic/);
+});
+
+test('R110 never displays a model-cited source ID that does not exist',async()=>{
+ assert.equal(sourceReferencesExist('Theo [A1] và [B1].',[{id:'A1'},{id:'B1'}]),true);
+ assert.equal(sourceReferencesExist('Từ [A99].',[{id:'A1'}]),false);
+ assert.equal(sourceReferencesExist('Từ [A99999].',[{id:'A1'}]),false);
+ const fake=fixture();
+ fake.env.AI.run=async()=>({response:'Theo đoạn [A99], có một nghĩa vụ chưa có trong tài liệu.'});
+ const rejected=await legalApi(request({uc:'UC04'}),fake.env,{now:NOW});
+ assert.equal(rejected.status,503);
+ assert.doesNotMatch(await rejected.text(),/A99|nghĩa vụ/);
+ const valid=fixture();
+ valid.env.AI.run=async()=>({response:'Đoạn [A1] ghi thời hạn giao hàng; luật sư cần rà soát.'});
+ const accepted=await legalApi(request({uc:'UC04'}),valid.env,{now:NOW});
+ assert.equal(accepted.status,200);
+ assert.match((await accepted.json()).answer,/\[A1\]/);
+});
+test('R110 untrusted streaming request without Content-Length has a real 36KB bound',async()=>{
+ const payload=JSON.stringify({
+  uc:'UC04',matter_id:M,source_text:'X'.repeat(40000),source_text_2:'',
+  question:'',language:'vi',synthetic_consent:true
+ });
+ const bytes=new TextEncoder().encode(payload);
+ const body=new ReadableStream({start(controller){
+  controller.enqueue(bytes.slice(0,20000));
+  controller.enqueue(bytes.slice(20000));
+  controller.close();
+ }});
+ const headers={Origin:BASE,'Sec-Fetch-Site':'same-origin',
+  'Content-Type':'application/json',Cookie:'al_qa_session='+SID};
+ const streamed=new Request(BASE+'/api/qa/legal/run',{
+  method:'POST',headers,body,duplex:'half'
+ });
+ assert.equal(streamed.headers.get('Content-Length'),null);
+ const f=fixture();
+ const denied=await legalApi(streamed,f.env,{now:NOW});
+ assert.equal(denied.status,413);
+ assert.equal(f.providerCalls.length,0);
+ assert.equal(f.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false);
 });
