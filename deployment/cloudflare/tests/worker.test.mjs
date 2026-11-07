@@ -176,3 +176,26 @@ test("file download with authorized Drive adapter streams only after DB ACL",asy
   assert.equal(r.headers.get("Content-Disposition"),"attachment");
   assert.equal(fetchCalls.length,2);
 });
+
+test("R98 backend root redirects to one canonical AI Law QA website, without leaking query or session",async()=>{
+  const urls=[
+    "https://ai-law-standalone-cf-qa.iaict-platform.workers.dev/",
+    "https://ai-law-standalone-cf-qa.iaict-platform.workers.dev/?code=synthetic-sensitive-should-not-travel"
+  ];
+  for(const url of urls){
+    const r=await handle(new Request(url,{headers:{"Cookie":"al_qa_session=synthetic-private"}}),{}, {now});
+    assert.equal(r.status,302);
+    assert.equal(r.headers.get("Location"),"https://ai-law-web-qa.iaict-platform.workers.dev/");
+    assert.equal(r.headers.get("Cache-Control"),"no-store");
+    assert.equal(r.headers.get("Referrer-Policy"),"no-referrer");
+    assert.equal(r.headers.get("Set-Cookie"),null);
+    assert.equal(await r.text(),"");
+  }
+  const post=await handle(new Request(urls[0],{method:"POST",body:"qa"}),{},{now});
+  assert.equal(post.status,404,"only GET / redirects, backend API routing unchanged");
+  const health=await handle(new Request(urls[0]+"health"),{...envBase,DB:stubDb()},{now});
+  assert.equal(health.status,200,"backend health still operational");
+  const oauthCallback=await handle(new Request(urls[0]+"api/qa/drive/callback"),{}, {now});
+  assert.notEqual(oauthCallback.headers.get("Location"),"https://ai-law-web-qa.iaict-platform.workers.dev/",
+   "backend OAuth callback must not become the generic homepage redirect");
+});

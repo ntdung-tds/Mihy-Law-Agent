@@ -7,7 +7,7 @@ import { accountApi } from "./account_profile.mjs";
 import { matterApi } from "./matter_workspace.mjs";
 import { documentsApi } from "./qa_documents.mjs";
 import { oauthDriveApi } from "./oauth_drive.mjs";
-import { MOBILE_HTML, MOBILE_CSS, MOBILE_JS } from "./mobile_assets.mjs";
+import { MOBILE_CSS, MOBILE_JS } from "./mobile_assets.mjs";
 
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const result=(status,data)=>new Response(JSON.stringify(data),{status,headers:{
@@ -98,11 +98,13 @@ const params=(env,session,id,now)=>[
 export async function handle(request,env,options={}){
   const url=new URL(request.url);
   if(url.pathname==="/" && request.method==="GET"){
-    return new Response(MOBILE_HTML,{status:200,headers:{
-      "Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store",
-      "Content-Security-Policy":"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; font-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
-      "X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY",
-      "Referrer-Policy":"no-referrer"
+    // R98: Only one customer-facing QA entry point. The Worker still serves
+    // tenant auth, document APIs and the Google OAuth callback on this host.
+    // Never forward query strings, credentials or browser session cookies.
+    return new Response(null,{status:302,headers:{
+      "Location":"https://ai-law-web-qa.iaict-platform.workers.dev/",
+      "Cache-Control":"no-store","Referrer-Policy":"no-referrer",
+      "X-Content-Type-Options":"nosniff"
     }});
   }
   if(url.pathname==="/mobile.css" && request.method==="GET")
