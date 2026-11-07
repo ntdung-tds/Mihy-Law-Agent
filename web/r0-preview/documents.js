@@ -106,7 +106,7 @@
  const browserStatus=$('document-google-status');
  const SCOPE='https://www.googleapis.com/auth/drive.file';
  let browserToken='',expiresAt=0,googleScript=null,uploading=false,authorizing=false,uncertainUpload=false,consentSeq=0;
- let choosingDestination=false,pendingSaveChoice='';
+ let choosingDestination=false,pendingSaveChoice='',grantResumePending=false;
  const browserReady=()=>browserToken.length>10&&Date.now()+60000<expiresAt;
  const storageReady=()=>!destination||
    (storageProvider?.value==='google_drive'&&uuid.test(destination.value));
@@ -253,9 +253,10 @@
      // Continue the same save intent only when the file and authorized matter
      // have not changed while Google's popup was open.
      if(browserReady()&&select.value===matterId&&file.files?.[0]===selectedFile&&(!destination||destination.value===selectedDest)){
-      // Defer until the chooser has resolved; a synchronous GIS callback
-      // must not race with the currently submitting form.
-      Promise.resolve().then(()=>form.requestSubmit());
+      // Google normally replies later. Keep a short pending continuation for
+      // browsers/tests which return the grant before the location dialog closes.
+      if(choosingDestination)grantResumePending=true;
+      else form.requestSubmit();
      }else{
       pendingSaveChoice='';
       message('Hồ sơ hoặc tệp đã thay đổi. Hãy bấm Lưu lại.','error');
@@ -522,7 +523,10 @@
   let selectedDestination;
   try{selectedDestination=await chooseSaveDestination(id,chosen);}
   catch(e){pendingSaveChoice='';message(e.message||'Không mở được Drive.','error');return;}
-  finally{choosingDestination=false;uploadGate();}
+  finally{
+   choosingDestination=false;uploadGate();
+   if(grantResumePending){grantResumePending=false;form.requestSubmit();}
+  }
   if(selectedDestination==='oauth_pending')return; // Google popup on first use, not a canceled upload
   if(!selectedDestination){
    if(!feedback?.textContent)message('Đã hủy lưu. Không gửi tệp lên Drive.');
