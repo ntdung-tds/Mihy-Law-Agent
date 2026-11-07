@@ -129,6 +129,16 @@
    const url=new URL(data.authorization_url);
    if(url.origin!=='https://accounts.google.com'||url.protocol!=='https:')
     throw Error('Liên kết cấp quyền Google không hợp lệ.');
+   // R96: The organization connector still points to the deleted QA OAuth
+   // client. Never redirect users into Google's guaranteed 401 deleted_client.
+   // This public client ID is not a secret; no backend grant is overwritten.
+   const deletedClient='873907439100-vlno9kus5k18ikvfgj6smodoho71djsg.apps.googleusercontent.com';
+   if(url.searchParams.get('client_id')===deletedClient){
+    const panel=$('qa-direct-drive-panel');
+    if(panel)panel.open=true;
+    setDrive('error','Kết nối Drive theo hồ sơ đang dùng OAuth Client đã bị xóa. Quản trị cần cập nhật Client ID và Client Secret mới trên Cloudflare. Để thử tải trực tiếp, mở mục kiểm thử Google Drive bên dưới; tệp thử chưa được gắn vào hồ sơ AI Law.');
+    return;
+   }
    location.assign(url.toString());
   }catch(e){setDrive('error',e.message||'Không thể mở Google.');}
   finally{connect.disabled=false;connect.textContent='Kết nối Google Drive';}
