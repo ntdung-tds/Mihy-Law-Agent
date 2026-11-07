@@ -338,22 +338,53 @@
    const init=await api('/api/qa/documents/upload/start',{
     matter_id:id,file_name:chosen.name,mime_type:mime,byte_length:chosen.size,sha256:digest
    });
-   let u;try{u=new URL(init.upload_url);}catch{throw Error('Google không trả về phiên tải tệp hợp lệ.');}
-   if(u.protocol!=='https:'||u.hostname!=='www.googleapis.com'||
-      u.pathname!=='/upload/drive/v3/files'||u.searchParams.get('uploadType')!=='resumable')
-    throw Error('Phiên tải lên không thuộc Google Drive.');
-   // Never write the sensitive one-file upload URL to history, DOM, storage or logs.
-   message('Đang tải tệp trực tiếp đến Google Drive…');
+   // Server checked MatterACL and refreshed the tenant Drive grant. The
+   // approved parent and single-use upload ticket are the only returned data.
+   if(!uuid.test(init.ticket||'')||
+      !/^[A-Za-z0-9_-]{10,200}$/.test(init.drive_folder_id||''))
+    throw Error('AI Law chưa xác nhận được thư mục Drive của đơn vị. Không gửi tệp.');
+   if(!browserReady())throw Error('Quyền Google trong trình duyệt đã hết hạn. Cấp quyền lại rồi tải lên.');
+   // R99: Google-supported multipart/related (<1.5 MB), same as the Owner-
+   // verified browser Blob upload. No resumable-session PUT or file relay.
+   const boundary='ai_law_matter_'+crypto.randomUUID().replace(/-/g,'');
+   const metadata=JSON.stringify({name:chosen.name,mimeType:mime,
+    parents:[init.drive_folder_id],appProperties:{ai_law_upload_ticket:init.ticket}});
+   const body=new Blob([
+    '--'+boundary+'\r\n',
+    'Content-Type: application/json; charset=UTF-8\r\n\r\n',
+    metadata,'\r\n--'+boundary+'\r\n',
+    'Content-Type: '+mime+'\r\n\r\n',bytes,
+    '\r\n--'+boundary+'--'
+   ],{type:'multipart/related; boundary='+boundary});
+   message('Đang gửi tệp trực tiếp đến thư mục Google Drive của đơn vị…');
+   const url='https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id';
    let google;
-   try{google=await fetch(u.toString(),{method:'PUT',body:chosen,
-    headers:{'Content-Type':mime},credentials:'omit',redirect:'error',mode:'cors'});}
-   catch{throw Error('Trình duyệt chưa gửi được tệp trực tiếp tới Google Drive. Không thử lại ngay để tránh tệp trùng.');}
-   if(!google.ok)throw Error('Google Drive chưa xác nhận tệp (HTTP '+google.status+'). Vui lòng kiểm tra trước khi thử lại.');
+   try{
+    google=await fetch(url,{method:'POST',body,headers:{
+     'Authorization':'Bearer '+browserToken,
+     'Content-Type':'multipart/related; boundary='+boundary
+    },credentials:'omit',redirect:'error',mode:'cors',cache:'no-store'});
+   }catch{
+    uncertainUpload=true;
+    throw Error('Chưa đọc được phản hồi Google. Hãy kiểm tra Drive trước khi thử lại để tránh tệp trùng.');
+   }
+   if(!google.ok){
+    if(google.status>=500)uncertainUpload=true;
+    throw Error(google.status===403?
+     'Google từ chối quyền ghi thư mục (HTTP 403). Hãy chọn đúng tài khoản Google của đơn vị.':
+     'Google Drive từ chối tải tệp (HTTP '+google.status+').');
+   }
    let remote={};try{remote=await google.json();}catch{}
-   if(!/^[A-Za-z0-9_-]{10,200}$/.test(remote?.id||''))
-    throw Error('Google đã phản hồi nhưng thiếu ID tệp. Không tải lại ngay để tránh trùng.');
-   message('Đang xác minh thư mục và ghi nhận hồ sơ…');
-   await api('/api/qa/documents/upload/finish',{ticket:init.ticket,file_id:remote.id});
+   if(!/^[A-Za-z0-9_-]{10,200}$/.test(remote?.id||'')){
+    uncertainUpload=true;
+    throw Error('Google có thể đã nhận tệp nhưng chưa trả ID. Kiểm tra Drive trước khi thử lại.');
+   }
+   message('Đang xác minh thư mục, quyền và ghi nhận hồ sơ…');
+   try{await api('/api/qa/documents/upload/finish',{ticket:init.ticket,file_id:remote.id});}
+   catch(e){
+    uncertainUpload=true;
+    throw Error('Google đã nhận tệp nhưng AI Law chưa ghi nhận vào hồ sơ. Không tải lại để tránh trùng. '+(e.message||''));
+   }
    file.value='';showSelectedFile();
    message('Đã lưu tệp thử nghiệm vào Google Drive. Nội dung chưa được dùng cho AI.','success');
    await refreshFiles();
