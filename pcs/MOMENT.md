@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `100` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T11:07:45.432Z`.
+- **PCS revision:** `101` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T14:16:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R104 — One Save opens Google Drive destination chooser (2026-11-07)
+
+- **Owner-approved UX:** Existing AI Law **Lưu** opens choice of **My Drive root explicitly** or existing writable Google folder through Google Picker. Cancellation creates no upload. No separate “Mở Drive”, no app-created folders, no employee-grant wizard, no silent default, no automatic duplicate uploads. Existing AI Law login and Google browser `drive.file` direct multipart flow retained. My Drive root is the actual Google account root, **not** the former AI Law QA private folder.
+- **Source:** [draft PR #154](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/154) branched from still-unmerged R103 PR #151. Tests: [GitHub Actions #42380376897](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42380376897) **PASS 9/9** on code commit `1dd0324586a1706f2a2ce1a6d4b4c94fc7bcd95e`. Synthetic tests cover explicit root, selected writable folder, provider denial, cancel (no ticket), no implicit root, MatterACL, SHA download path, no Worker file-byte proxy.
+- **QA only:** Cloudflare content-only deployments backend `a23dc8d3-e8d6-4a77-95dd-a7102e4eab10` and website `628ee7e0-af3e-4f92-adec-77b79de2a76c` at 100%. Exact source readback: 9 backend / 26 web modules; D1 and OAuth bindings preserved. Anonymous QA health Chromium PASS; authenticated Chromium retry BLOCKED 429.
+- **Blocker:** The Google Picker API requires Google Cloud Picker API enabled and an API Key restricted to QA website + docs.google.com. Site worker **does not have `GOOGLE_PICKER_API_KEY`**; folder-picker selection is visibly unavailable, not silently simulated. The explicit root branch is deployed but actual signed-in owner Google provider upload/download/re-upload **NOT_RUN**. Existing tenant-wide OAuth is not an employee's personal grant; root selection is prohibited to ordinary organization lawyer to avoid storing into admin My Drive. Real employee personal account and company-shared folder flows need per-user connection/authorization QA.
+- **Gate:** OneDrive #153 remains NOT_IMPLEMENTED; source PR unmerged, no production, no private customer data. SRS v1.1.15 original remains unchanged; approved changes tracked in `pcs/SRS_CHANGES.md`. Owner acceptance pending.
 
 ## R103 — QA selectable Google Drive child folders and explicit employee grants (2026-11-07)
 
