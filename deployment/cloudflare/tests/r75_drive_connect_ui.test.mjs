@@ -16,7 +16,7 @@ function element(id){
   querySelector(){return null;}
  };
 }
-async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false}={}){
+async function mount(status,{query='',connectResponse={authorization_url:GOOGLE},confirmDisconnect=true,directUpload=false,directStartError=null}={}){
  const ids=['document-matter','document-upload-form','document-file','document-file-name','document-feedback',
   'qa-document-list','drive-setup','drive-status','drive-connect','drive-disconnect'];
  const els=Object.fromEntries(ids.map(x=>[x,element(x)]));
@@ -42,6 +42,8 @@ async function mount(status,{query='',connectResponse={authorization_url:GOOGLE}
    return Response.json({connected:false,disconnected:true,files_preserved:true});
   }
   if(url==='/api/qa/matters')return Response.json({matters:[]});
+  if(directUpload&&directStartError&&url==='/api/qa/documents/upload/start')
+   return Response.json(directStartError,{status:503});
   if(directUpload&&url==='/api/qa/documents/upload/start')
    return Response.json({ticket:'55555555-5555-4555-8555-555555555555',
     upload_url:'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=syntheticBrowserToken12345'});
@@ -205,4 +207,41 @@ test('R86 PDF bytes go only to Google; Cloudflare sees JSON metadata and receipt
  assert.equal(finishes.length,1);
  assert.equal(t.calls.some(x=>x.url==='/api/qa/documents'&&x.method==='POST'),false);
  assert.equal(t.els['document-feedback'].dataset.state,'success', t.els['document-feedback'].textContent);
+});
+
+test('R88 real QA start failure shows bounded stage, provider HTTP and reason, never secrets',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},{
+  directUpload:true,directStartError:{
+   code:'DRIVE_UPLOAD_UNAVAILABLE',error:'Google Drive chưa hoàn tất tải tệp.',
+   stage:'provider',provider_status:403,provider_reason:'insufficientFilePermissions',
+   access_token:'MUST_NOT_RENDER',upload_url:'MUST_NOT_RENDER'
+  }
+ });
+ const bytes=new TextEncoder().encode('%PDF-1.4\\n1 0 obj\\n<< >>\\nendobj\\n%%EOF\\n');
+ t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+ t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
+  async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
+ await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ const msg=t.els['document-feedback'].textContent;
+ assert.equal(t.els['document-feedback'].dataset.state,'error');
+ assert.match(msg,/stage=provider/);
+ assert.match(msg,/HTTP 403/);
+ assert.match(msg,/insufficientFilePermissions/);
+ assert.match(msg,/Thiếu quyền ghi/);
+ assert.doesNotMatch(msg,/MUST_NOT_RENDER/);
+ assert.equal(t.calls.filter(x=>x.url==='/api/qa/documents/upload/start').length,1);
+ assert.equal(t.calls.some(x=>String(x.url).includes('upload_id=')),false);
+});
+test('R88 transport failures show stage without implying a mobile connection defect',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},{
+  directUpload:true,directStartError:{code:'DRIVE_UPLOAD_UNAVAILABLE',stage:'transport',
+   error:'Google Drive chưa hoàn tất tải tệp.'}
+ });
+ const bytes=new TextEncoder().encode('%PDF-1.4\\n1 0 obj\\n<< >>\\nendobj\\n%%EOF\\n');
+ t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+ t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
+  async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
+ await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ assert.match(t.els['document-feedback'].textContent,/stage=transport/);
+ assert.doesNotMatch(t.els['document-feedback'].textContent,/đường truyền.*ổn định/i);
 });

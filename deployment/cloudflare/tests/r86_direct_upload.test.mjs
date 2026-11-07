@@ -16,7 +16,7 @@ function request(path,body,{cookie=true,origin=ORIGIN}={}){
  if(cookie)headers.Cookie='al_qa_session='+S;
  return new Request(ORIGIN+path,{method:'POST',headers,body:JSON.stringify(body)});
 }
-function fixture({allow=true,grant=true,badProof=false,active=true}={}){
+function fixture({allow=true,grant=true,badProof=false,active=true,sessionMode='ok'}={}){
  let ticket=null,used=false,receipt=false;const requests=[],statements=[];
  const env={AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,
   JWT_ISSUER:'https://issuer.test',
@@ -58,6 +58,12 @@ function fixture({allow=true,grant=true,badProof=false,active=true}={}){
  async function driveFetch(url,init){
   requests.push({url,init});
   if(init.method==='POST'){
+   if(sessionMode==='transport')throw Error('synthetic Worker fetch failure');
+   if(sessionMode==='provider403')return Response.json({
+    error:{errors:[{reason:'insufficientFilePermissions'}]}
+   },{status:403});
+   if(sessionMode==='badLocation')return new Response(null,{status:200,
+    headers:{Location:'https://evil.invalid/upload/drive/v3/files?uploadType=resumable&upload_id=example12345'}});
    assert.match(url,/uploadType=resumable/);
    assert.equal(typeof init.body,'string','Only JSON manifest is sent from Worker to Google');
    assert.ok(!init.body.includes('%PDF-'));
@@ -130,4 +136,24 @@ test('R86 only metadata JSON endpoints are accepted, never arbitrary GET',async(
  const f=fixture();
  const requestGet=new Request(ORIGIN+start,{headers:{Cookie:'al_qa_session='+S}});
  assert.equal((await documentsApi(requestGet,f.env,{now,driveFetch:f.driveFetch})).status,405);
+});
+
+test('R88 Google initiation failures preserve safe stages and never create upload receipts',async()=>{
+ for(const [sessionMode,stage,providerStatus,reason] of [
+  ['transport','transport',undefined,undefined],
+  ['provider403','provider',403,'insufficientFilePermissions'],
+  ['badLocation','response',undefined,undefined]
+ ]){
+  const f=fixture({sessionMode});
+  const res=await documentsApi(request(start,MANIFEST),f.env,{now,driveFetch:f.driveFetch});
+  assert.equal(res.status,503,sessionMode);
+  const data=await res.json();
+  assert.equal(data.code,'DRIVE_UPLOAD_UNAVAILABLE');
+  assert.equal(data.stage,stage,sessionMode);
+  assert.equal(data.provider_status,providerStatus,sessionMode);
+  assert.equal(data.provider_reason,reason,sessionMode);
+  assert.equal(f.ticket(),null,sessionMode);
+  assert.equal(f.receipt(),false,sessionMode);
+  assert.ok(!JSON.stringify(data).includes('synthetic-drive-access-token'));
+ }
 });
