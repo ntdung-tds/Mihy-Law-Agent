@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `98` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T09:04:00.000Z`.
+- **PCS revision:** `99` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T09:22:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R102 — Stop forcing Google account consent at every document save (2026-11-07)
+
+- **Owner feedback:** Screenshot shows Google account chooser “Chọn tài khoản — Tiếp tục tới iaict-platform.workers.dev” after Google Drive was already connected and owner used Save repeatedly. The organization “Kết nối/Ngắt kết nối Google Drive” manages a **server-side tenant OAuth refresh grant**. The browser's file bytes go directly to Google via its own **short-lived in-memory OAuth access token**, distinct from the backend grant. Previous browser code set `requestAccessToken({prompt:'consent'})`, explicitly forcing repeated chooser whenever a new browser token was requested. Server refresh token must **not** be shared with browser users across MatterACL tenants.
+- **Source / CI:** [PR #147](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/147) merged `c1206d31e5b8904044a9894f655b82589a5f5f3b`; final [CI #42358969331](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42358969331) **PASS 9/9**. Google Identity Services browser token request now uses `prompt:''`, respecting previously approved consent instead of demanding it on each repeat. Existing valid token remains only in runtime memory and is reused across uploads in the same tab. Synthetic regression demonstrates two saves, one Google token request, two multipart Google uploads, two verified server finish operations. No new OAuth scopes, storage of tokens in localStorage, browser transfer of tenant refresh secret, or changed backend connection/disconnect semantics.
+- **QA-only deployment:** `ai-law-web-qa` deployment `fbbdc99d-136f-4ad3-92b1-22b9fc8ac1ab` at 2026-11-07T09:19:59Z, **100%**. Live source readback confirms 26 modules, `prompt:''`, no `prompt:'consent'` in document upload, `QA_AUTH` service preserved, MatterACL start/finish and token-memory guard present. Anonymous Chromium `/app#documents` redirected to correct login (**PASS**); provider Google consent and authenticated document E2E on owner's mobile remain **NOT_RUN**. Google may still display prompts if user has no existing grant, changes Google account or expires/revokes consent.
+- **Boundary:** QA only, same single customer-facing website; no SRS v1.1.15, tenant backend OAuth/secret, D1, file bytes pipeline or production change. Owner final QA sign-off pending.
 
 ## R101 — Fix false >1.5MB metadata rejection for safe numbered DOCX filenames (2026-11-07)
 
