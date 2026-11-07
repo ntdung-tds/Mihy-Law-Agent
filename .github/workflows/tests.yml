@@ -181,8 +181,10 @@ jobs:
           node --check web/r0-preview/documents.js
           node --check web/qa/drive-blob.js
           node --check deployment/cloudflare/src/matter_workspace.mjs
+          node --check deployment/cloudflare/src/legal_text_actions.mjs
           node --check deployment/cloudflare/src/r0_preview_worker.mjs
           node --check web/r0-preview/matters.js
+          node --check web/r0-preview/app.js
           node --check tools/build_cf_r0_preview.mjs
           node --check deployment/cloudflare/src/site_worker.mjs
           node --check tools/build_cf_site.mjs
@@ -213,6 +215,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/preview_worker.test.mjs
       - name: Verify real QA matter list/create role boundary and D1 transaction contract
         run: node --test deployment/cloudflare/tests/matter_workspace.test.mjs
+      - name: R109 bound Workers AI R0 translation, summary and proofreading to verified QA sources
+        run: node --test deployment/cloudflare/tests/r109_legal_text_actions.test.mjs
       - name: R72 Drive document upload/download, MatterACL, integrity and fail-closed QA gates
         run: node --test deployment/cloudflare/tests/r72_documents.test.mjs
       - name: R81 Google Drive multipart wire protocol and safe provider error diagnostics
