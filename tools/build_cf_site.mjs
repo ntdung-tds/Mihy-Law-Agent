@@ -22,6 +22,7 @@ const modules=[
  ['workspace_html.mjs','web/r0-preview/index.html','WORKSPACE_HTML'],
  ['workspace_css.mjs','web/r0-preview/styles.css','WORKSPACE_CSS'],
  ['workspace_js.mjs','web/r0-preview/app.js','WORKSPACE_JS'],
+ ['workspace_legal_text.mjs','web/r0-preview/legal-text.js','WORKSPACE_LEGAL_TEXT'],
  ['workspace_session.mjs','web/r0-preview/session.js','WORKSPACE_SESSION'],
  ['workspace_matters.mjs','web/r0-preview/matters.js','WORKSPACE_MATTERS'],
  ['workspace_documents.mjs','web/r0-preview/documents.js','WORKSPACE_DOCUMENTS'],
