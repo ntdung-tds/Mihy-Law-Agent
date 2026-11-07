@@ -1,12 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `85` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T01:42:33.301Z`.
+- **PCS revision:** `86` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T02:12:41.272Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R90 — Standalone Blob → Google Drive QA test, no Cloudflare upload (2026-11-07)
+
+- **Owner explicit instruction:** Stop using Cloudflare for upload and test as an ordinary file Blob upload to Google Drive. This **isolated diagnostic page** is not a redesign of accepted AI Law SRS, not an integrated document workflow and does not change production or existing /app#documents.
+- **Live link:** `https://ai-law-web-qa.iaict-platform.workers.dev/drive-blob`. Cloudflare serves **only static HTML/JS** at `/drive-blob` and `/drive-blob.js`; it never receives the PDF/DOCX body or a Google access token, creates no upload ticket, and does not invoke `QA_AUTH`, D1 or `/api/qa/` for this flow. Google Identity Services client-side `drive.file` OAuth is held in memory only. Browser builds one `multipart/related` Blob and directly POSTs to `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`; it then GETs file metadata directly from Google and displays a Drive link on verified success. PDF/DOCX test file limited to 1.5MB.
+- **Source:** [PR #125](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/125), merged `ac5fdc6cfe348c9e18d8865632b231ebbfa79cc7`; final-head [CI #42327858735](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42327858735) **PASS all nine executed jobs** including new browser-only Blob synthetic integration tests (direct Google POST+metadata GET, provider 403 error, invalid/oversized preflight).
+- **QA deployment/test:** Site Worker only, 3 modules added/modified (`site_worker.mjs`, `drive_blob_html.mjs`, `drive_blob_js.mjs`), source readback PASS, 21 preexisting unrelated modules byte-preserved and `QA_AUTH` binding unchanged, QA traffic 100% as of `2026-11-07T02:12:41Z`. Live mobile Cloudflare Browser Rendering 390×844 loaded page, Google GIS script, buttons and JS route PASS. **No actual Google user consent/upload was performed by the Agent.** The Google OAuth Web Client may require the QA site's **Authorized JavaScript origin**; not verified through existing connectors.
+- **Data/evidence boundary:** Standalone page does not write D1 by design; after deployment D1 contained 1 original Google grant, 2 unconsumed **pre-existing integrated-flow** tickets and **0** document receipts (the standalone page cannot create them). Do not treat any D1 count as proof of standalone upload.
+- **Next gate:** Owner selects synthetic PDF/DOCX, authorizes Google in browser, clicks direct Blob upload and observes Google metadata confirmation/link. Record PASS/FAIL/BLOCKED. Product integrated file management, download, MatterACL, receipts and Owner final acceptance remain **not satisfied** by this diagnostic.
 
 ## R89 — Root cause of Google Drive `stage=transport` confirmed and fixed in Cloudflare QA (2026-11-07)
 
