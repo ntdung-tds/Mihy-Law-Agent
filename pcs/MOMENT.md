@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `94` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T07:10:00.000Z`.
+- **PCS revision:** `95` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T07:44:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R98 — One canonical user-facing QA entry point (2026-11-07)
+
+- **Owner feedback:** Two visibly different AI Law interfaces when opening `ai-law-standalone-cf-qa.../` and `ai-law-web-qa.../app#documents`. Backend Worker still returned an obsolete stand-alone mobile QA login/dashboard at `GET /`, while website Worker served the official branded AI Law UX. They are different Workers, but the former was never intended as a separate customer-facing product.
+- **Source/CI:** [PR #139](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/139) merged `e2a0ad9a0fa266884bf8343a343badfcddcd3989`; [CI #42352062310](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42352062310) **PASS 9/9** executed jobs. Backend `GET /` now **302** to `https://ai-law-web-qa.iaict-platform.workers.dev/` with no query/cookie forwarding. All auth/Drive/Google OAuth callback APIs, `/health`, MatterACL remain as before.
+- **Cloudflare QA:** backend `ai-law-standalone-cf-qa` content-only PUT, deployment `97db88b5-f7d2-4dfc-bd09-57d20b529c97`, created 2026-11-07T07:40:55Z, **100%**. Readback: **8** modules, canonical root redirect, OAuth callback routing intact; D1, Google OAuth client/secret, protected token key, session bindings preserved. Live Cloudflare Browser Rendering from backend root followed redirect and displayed the branded website hero (**PASS**). Follow-up direct second page probe was **BLOCKED 429**; do not count as PASS.
+- **Boundary:** This is a **routing/UX consistency fix only**, not Google OAuth secret verification, provider consent, integrated Drive upload/tenant receipt or production release. Owner final functional confirmation still pending. SRS v1.1.15 and production unchanged.
 
 ## R97 — Replacement Google OAuth Web Client synchronized on QA (2026-11-07)
 
