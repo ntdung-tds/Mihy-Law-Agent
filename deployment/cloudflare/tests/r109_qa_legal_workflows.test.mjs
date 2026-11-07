@@ -121,6 +121,7 @@ test('R109 provider outage, quota exhaustion and malicious model response never 
 test('R110 never displays a model-cited source ID that does not exist',async()=>{
  assert.equal(sourceReferencesExist('Theo [A1] và [B1].',[{id:'A1'},{id:'B1'}]),true);
  assert.equal(sourceReferencesExist('Từ [A99].',[{id:'A1'}]),false);
+ assert.equal(sourceReferencesExist('Từ [A99999].',[{id:'A1'}]),false);
  const fake=fixture();
  fake.env.AI.run=async()=>({response:'Theo đoạn [A99], có một nghĩa vụ chưa có trong tài liệu.'});
  const rejected=await legalApi(request({uc:'UC04'}),fake.env,{now:NOW});
