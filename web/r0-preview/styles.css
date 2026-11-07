@@ -474,3 +474,5 @@ body.drawer-open{overflow:hidden}
 .qa-save-dialog button{display:block;width:100%;min-height:44px;text-align:center;margin:9px 0;
  background:#322e57;color:white;border:0;border-radius:10px;cursor:pointer;font-weight:600}
 .qa-save-dialog button.qa-save-cancel{background:#f0f1f6;color:#49495e}
+
+.qa-save-dialog button:disabled{opacity:.48;cursor:not-allowed}
