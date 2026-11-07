@@ -132,6 +132,7 @@ async function assign(req,env,p,now){
 // A user-selected existing folder needs no AI Law admin grant wizard.
 // The connected provider verifies the folder's real write capability.
 async function selectExisting(req,env,p,now,opts){
+ if(!['lawyer','tenant_admin'].includes(p.role_key))return denied();
  const v=await readJSON(req);
  if(!v||Object.keys(v).sort().join(',')!=='folder_id'||!ID.test(v.folder_id||''))
   return respond(400,{error:'Vị trí được chọn từ Drive chưa hợp lệ.'});
@@ -149,7 +150,7 @@ async function selectExisting(req,env,p,now,opts){
    .bind(env.INSTALLATION_ID,p.tenant_id).first();
   if(Number(cnt?.n||0)>=50)return respond(429,{error:'Đã đạt giới hạn vị trí lưu trữ QA.'});
   id=crypto.randomUUID();
-  const safeLabel=info.name.normalize('NFC').slice(0,80);
+  const safeLabel=info.name.normalize('NFC').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,80).trim();
   if(safeLabel.length<3) return respond(400,{error:'Tên thư mục Drive chưa được hỗ trợ.'});
   await env.DB.prepare("INSERT INTO qa_storage_destinations (installation_id,tenant_id,destination_id,provider,folder_id,label,owner_kind,status,created_by,created_at) VALUES(?,?,?,'google_drive',?,?,?,'active',?,?) ON CONFLICT(installation_id,tenant_id,folder_id) DO NOTHING")
    .bind(env.INSTALLATION_ID,p.tenant_id,id,v.folder_id,safeLabel,
