@@ -3,6 +3,7 @@
 import {mobileSession} from './mobile_auth.mjs';
 import {GoogleDriveAdapter,DriveUploadFailure} from './google_drive.mjs';
 import {tenantDriveAdapter} from './oauth_drive.mjs';
+import {assignedDestination} from './qa_storage_destinations.mjs';
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const MAX_FILE=1500000,MAX_REQUEST=1800000;
 const PDF='application/pdf',DOCX='application/vnd.openxmlformats-officedocument.wordprocessingml.document';
@@ -59,11 +60,16 @@ export const LIST_SQL=[
  'FROM qa_document_receipts r JOIN qa_file_links f',
  'ON f.installation_id=r.installation_id AND f.tenant_id=r.tenant_id AND f.file_id=r.file_id',
  'WHERE r.installation_id=? AND r.tenant_id=? AND f.matter_id=?',
+ 'AND (f.storage_destination_id IS NULL OR EXISTS (SELECT 1 FROM qa_storage_assignments g',
+ 'JOIN qa_storage_destinations d ON d.installation_id=g.installation_id AND d.tenant_id=g.tenant_id',
+ 'AND d.destination_id=g.destination_id AND d.status=\\'active\\'',
+ 'WHERE g.installation_id=f.installation_id AND g.tenant_id=f.tenant_id',
+ 'AND g.destination_id=f.storage_destination_id AND g.user_id=?))',
  'ORDER BY r.created_at DESC,r.file_id DESC LIMIT 50'
 ].join(' ');
 export const READ_SQL=[
  'SELECT r.file_id,r.file_name,r.mime_type,r.byte_length,r.sha256,r.verification_status,',
- 'f.matter_id,f.provider_object_id,f.provider FROM qa_document_receipts r JOIN qa_file_links f',
+ 'f.matter_id,f.provider_object_id,f.provider,f.storage_destination_id FROM qa_document_receipts r JOIN qa_file_links f',
  'ON f.installation_id=r.installation_id AND f.tenant_id=r.tenant_id AND f.file_id=r.file_id',
  'WHERE r.installation_id=? AND r.tenant_id=? AND r.file_id=? LIMIT 1'
 ].join(' ');
@@ -97,7 +103,7 @@ async function readForm(req){
 async function list(req,env,p,now){
  const matter=new URL(req.url).searchParams.get('matter_id');
  if(!await permit(env,p,matter,'read',now))return forbidden();
- const rows=await env.DB.prepare(LIST_SQL).bind(env.INSTALLATION_ID,p.tenant_id,matter).all();
+ const rows=await env.DB.prepare(LIST_SQL).bind(env.INSTALLATION_ID,p.tenant_id,matter,p.user_id).all();
  return result(200,{documents:(rows.results||[]).map(x=>({
   id:x.file_id,name:x.file_name,mime_type:x.mime_type,bytes:x.byte_length,
   sha256:x.sha256,status:x.verification_status,created_at:x.created_at
@@ -120,9 +126,14 @@ async function startDirect(req,env,p,now,opts){
  if(!csrf(req))return result(403,{error:'CSRF_DENIED'});
  let v;
  try{v=await readManifest(req);}catch{return result(400,{error:'Yêu cầu khởi tạo tệp chưa hợp lệ.'});}
- if(!v||Object.keys(v).sort().join(',')!=='byte_length,file_name,matter_id,mime_type,sha256')
+ if(!v||!['byte_length,file_name,matter_id,mime_type,sha256',
+  'byte_length,destination_id,file_name,matter_id,mime_type,sha256'].includes(Object.keys(v).sort().join(',')))
   return result(400,{error:'Yêu cầu tệp không hợp lệ.'});
  const matter=v.matter_id,name=v.file_name,mime=v.mime_type,size=v.byte_length,sha=v.sha256;
+ const destinationId=v.destination_id||null;
+ if((env.QA_STORAGE_DESTINATIONS==='enforced'&&!destinationId)||
+    (destinationId&&!UUID.test(destinationId)))
+  return result(400,{error:'Hãy chọn thư mục lưu trữ được cấp quyền trước khi lưu tệp.'});
  if(!UUID.test(matter||''))return result(400,{error:'Hồ sơ QA không hợp lệ.'});
  // A mobile/browser download may append (1) or (2). These are safe filename
  // characters, unlike path separators and control characters.
@@ -145,17 +156,30 @@ async function startDirect(req,env,p,now,opts){
  if(Number(counts?.n||0)>=20)return result(429,{error:'Hồ sơ QA đạt giới hạn tệp.'});
  let drive;try{drive=await driveAdapter(env,p,opts);}
  catch{return storageIssue('DRIVE_GRANT_UNAVAILABLE');}
+ let selected=null;
+ if(destinationId){
+  try{selected=await assignedDestination(env,p,destinationId);}
+  catch{return storageIssue('QA_RECEIPT_UNAVAILABLE');}
+  if(!selected)return forbidden();
+  try{await drive.childFolder(selected.folder_id);}
+  catch{return result(409,{error:'Thư mục không còn thuộc kho lưu trữ đã cấp quyền.'});}
+ }
  // R99: direct browser multipart upload. Google resumable-session PUT from
  // mobile browsers failed CORS; do not create a browser-inaccessible session.
  // The existing OAuth-backed tenant adapter proves the approved Drive root;
  // the browser receives only its folder ID and a short-lived ACL-bound ticket.
- const rootId=drive.rootId;
+ const rootId=selected?.folder_id||drive.rootId;
  if(typeof rootId!=='string'||!/^[A-Za-z0-9_-]{10,200}$/.test(rootId))
   return storageIssue('DRIVE_GRANT_UNAVAILABLE');
  const ticket=crypto.randomUUID();
  try{
-  await env.DB.prepare('INSERT INTO qa_document_upload_tickets (installation_id,tenant_id,ticket_id,user_id,matter_id,file_name,mime_type,byte_length,sha256,created_at,expires_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)')
+  if(destinationId){
+   await env.DB.prepare('INSERT INTO qa_document_upload_tickets (installation_id,tenant_id,ticket_id,user_id,matter_id,file_name,mime_type,byte_length,sha256,created_at,expires_at,destination_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(env.INSTALLATION_ID,p.tenant_id,ticket,p.user_id,matter,name,mime,size,sha,now,now+600,destinationId).run();
+  }else{
+   await env.DB.prepare('INSERT INTO qa_document_upload_tickets (installation_id,tenant_id,ticket_id,user_id,matter_id,file_name,mime_type,byte_length,sha256,created_at,expires_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)')
     .bind(env.INSTALLATION_ID,p.tenant_id,ticket,p.user_id,matter,name,mime,size,sha,now,now+600).run();
+  }
  }catch{return storageIssue('QA_RECEIPT_UNAVAILABLE');}
  // No resumable upload capability is created or returned in R99.
  // The short-lived ticket is written to D1 only after permission checks.
@@ -171,13 +195,19 @@ async function finishDirect(req,env,p,now,opts){
     !UUID.test(v.ticket||'')||
     !/^[A-Za-z0-9_-]{10,200}$/.test(v.file_id||''))
   return forbidden();
- const row=await env.DB.prepare('SELECT ticket_id,user_id,matter_id,file_name,mime_type,byte_length,sha256 FROM qa_document_upload_tickets WHERE installation_id=? AND tenant_id=? AND ticket_id=? AND user_id=? AND expires_at>? AND consumed_at IS NULL LIMIT 1')
+ const row=await env.DB.prepare('SELECT ticket_id,user_id,matter_id,file_name,mime_type,byte_length,sha256,destination_id FROM qa_document_upload_tickets WHERE installation_id=? AND tenant_id=? AND ticket_id=? AND user_id=? AND expires_at>? AND consumed_at IS NULL LIMIT 1')
   .bind(env.INSTALLATION_ID,p.tenant_id,v.ticket,p.user_id,now).first();
  if(!row||!await permit(env,p,row.matter_id,'write',now))return forbidden();
  let drive;try{drive=await driveAdapter(env,p,opts);}
  catch{return storageIssue('DRIVE_GRANT_UNAVAILABLE');}
+ let approvedParent=drive.rootId;
+ if(row.destination_id){
+  const selected=await assignedDestination(env,p,row.destination_id);
+  if(!selected)return forbidden(); // assignment revoked since start
+  approvedParent=selected.folder_id;
+ }
  try{await drive.verifyDirectUpload(v.file_id,{
-  ticketId:v.ticket,name:row.file_name,mimeType:row.mime_type,size:row.byte_length
+  ticketId:v.ticket,name:row.file_name,mimeType:row.mime_type,size:row.byte_length,approvedParent
  });}catch{return result(409,{code:'DRIVE_VERIFY_DENIED',
   error:'Google Drive chưa xác minh được tệp đúng thư mục và phiên tải lên.'});}
  if(!await permit(env,p,row.matter_id,'write',now))return forbidden();
@@ -185,7 +215,7 @@ async function finishDirect(req,env,p,now,opts){
   const op=await env.DB.batch([
    env.DB.prepare('UPDATE qa_document_upload_tickets SET consumed_at=?,provider_object_id=? WHERE installation_id=? AND tenant_id=? AND ticket_id=? AND user_id=? AND consumed_at IS NULL AND expires_at>?')
     .bind(now,v.file_id,env.INSTALLATION_ID,p.tenant_id,v.ticket,p.user_id,now),
-   env.DB.prepare("INSERT INTO qa_file_links(installation_id,tenant_id,file_id,matter_id,provider,provider_object_id,mime_type) SELECT installation_id,tenant_id,ticket_id,matter_id,'google_drive',provider_object_id,mime_type FROM qa_document_upload_tickets WHERE installation_id=? AND tenant_id=? AND ticket_id=? AND user_id=? AND consumed_at=? AND provider_object_id=?")
+   env.DB.prepare("INSERT INTO qa_file_links(installation_id,tenant_id,file_id,matter_id,provider,provider_object_id,mime_type,storage_destination_id) SELECT installation_id,tenant_id,ticket_id,matter_id,'google_drive',provider_object_id,mime_type,destination_id FROM qa_document_upload_tickets WHERE installation_id=? AND tenant_id=? AND ticket_id=? AND user_id=? AND consumed_at=? AND provider_object_id=?")
     .bind(env.INSTALLATION_ID,p.tenant_id,v.ticket,p.user_id,now,v.file_id),
    env.DB.prepare("INSERT INTO qa_document_receipts(installation_id,tenant_id,file_id,file_name,mime_type,byte_length,sha256,verification_status,uploaded_by,created_at) SELECT installation_id,tenant_id,ticket_id,file_name,mime_type,byte_length,sha256,'unverified',user_id,? FROM qa_document_upload_tickets WHERE installation_id=? AND tenant_id=? AND ticket_id=? AND user_id=? AND consumed_at=? AND provider_object_id=?")
     .bind(now,env.INSTALLATION_ID,p.tenant_id,v.ticket,p.user_id,now,v.file_id)
@@ -254,7 +284,14 @@ async function download(env,p,id,now,opts){
  if(!UUID.test(id||''))return forbidden();
  const r=await env.DB.prepare(READ_SQL).bind(env.INSTALLATION_ID,p.tenant_id,id).first();
  if(!r||r.provider!=='google_drive'||!await permit(env,p,r.matter_id,'read',now))return forbidden();
- const drive=await driveAdapter(env,p,opts),response=await drive.download(r.provider_object_id);
+ let approvedParent=null;
+ if(r.storage_destination_id){
+  const selected=await assignedDestination(env,p,r.storage_destination_id);
+  if(!selected)return forbidden();
+  approvedParent=selected.folder_id;
+ }
+ const drive=await driveAdapter(env,p,opts);
+ const response=await drive.download(r.provider_object_id,approvedParent||drive.rootId);
  if(Number(response.headers.get('Content-Length')||0)>MAX_FILE)throw Error('Too large');
  const bytes=new Uint8Array(await response.arrayBuffer());
  if(bytes.length!==Number(r.byte_length)||bytes.length>MAX_FILE||await sha256(bytes)!==r.sha256)
