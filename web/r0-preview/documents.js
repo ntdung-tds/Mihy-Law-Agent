@@ -159,8 +159,9 @@
    const data=await res.json();
    connect.dataset.canConnect=data.can_connect===true?'true':'false';
    if(data.connected===true&&data.configuration_ready===true){
-    setDrive('connected','Đã kết nối Google Drive cho không gian làm việc này. Có thể tải tệp QA lên.');
-    if(uploadButton)uploadButton.disabled=false;
+    setDrive('connected','Đã kết nối Google Drive cho không gian làm việc này. Để tải theo hồ sơ cần cấp quyền Google trong trình duyệt.');
+    prepareBrowserConsent();
+    uploadGate();
     if(disconnect)disconnect.hidden=data.can_connect!==true;
     void refreshFiles();
     return;
@@ -186,7 +187,9 @@
      ?'Google đã trả về nhưng kết nối chưa được lưu. Vui lòng thử lại.'
      :'Chưa kết nối. Nhấn nút bên dưới, chọn tài khoản Google và Đồng ý.');
    connect.hidden=false;
+   resetGoogleBrowser();
   }catch{
+   resetGoogleBrowser();
    setDrive('error','Không thể kiểm tra kết nối Google Drive lúc này. Vui lòng thử lại.');
   }
  }
@@ -234,6 +237,7 @@
    let data={};try{data=await r.json();}catch{}
    if(!r.ok||data.disconnected!==true||data.connected!==false)
     throw Error(data.error||'Không thể ngắt kết nối Google Drive. Vui lòng thử lại.');
+   resetGoogleBrowser();
    await driveStatus();
    if(driveBox?.dataset.state!=='disconnected')
     throw Error('Chưa xác minh được trạng thái ngắt kết nối. Vui lòng tải lại trang.');
@@ -258,6 +262,11 @@
   if(!/\.(pdf|docx)$/i.test(chosen.name)){
    message('Chỉ chấp nhận tệp PDF hoặc DOCX mẫu.','error');return;
   }
+  if(!uploaderReady()){
+   message('Hãy bấm “Cấp quyền Google để tải theo hồ sơ” trước và dùng tài khoản có quyền ghi vào Drive của đơn vị.','error');
+   uploadGate();return;
+  }
+  uploading=true;
   const submit=form.querySelector('button[type="submit"]');submit.disabled=true;
   try{
    // R86: browser→Google Drive direct file data plane. Only JSON manifests
@@ -359,7 +368,7 @@
     }
    }
   }
-  finally{submit.disabled=!(driveBox?.dataset.state==='connected');}
+  finally{uploading=false;uploadGate();}
  });
  select.addEventListener('change',()=>{void refreshFiles();});
  window.addEventListener('ai-law:documents-open',()=>{void driveStatus();void refreshMatters();});
@@ -367,6 +376,7 @@
   reset();setDrive('loading','Đang chuyển không gian làm việc…');
   if(connect)connect.hidden=true;
   if(disconnect)disconnect.hidden=true;
+  resetGoogleBrowser();
   if(uploadButton)uploadButton.disabled=true;
  });
  // app.js can dispatch documents-open before this deferred script registers its listener.
