@@ -448,3 +448,20 @@ body.drawer-open{overflow:hidden}
 @media(max-width:600px){
  .qa-document-box #drive-disconnect{width:100%;justify-self:stretch;min-height:44px;font-size:13px}
 }
+
+/* R108: accessible, compact matter rename controls. Only metadata is edited. */
+.matter-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;flex-shrink:0}
+.matter-edit-button,.matter-inline-editor button{font:inherit;font-size:12px;font-weight:700;
+ min-height:36px;padding:7px 11px;border-radius:9px;border:1px solid #aebeda;
+ color:#243e68;background:white;cursor:pointer}
+.matter-inline-editor{display:flex;align-items:center;flex-wrap:wrap;gap:8px;max-width:100%}
+.matter-inline-editor label{font-size:12px;font-weight:700;color:#4c617f}
+.matter-inline-editor input{min-width:140px;max-width:100%;width:clamp(150px,25vw,250px);
+ border-radius:9px;border:1px solid #abbad0;padding:8px 10px;font:inherit;font-size:13px}
+.matter-inline-editor button[type="submit"]{background:#29395f;color:white;border-color:#29395f}
+.matter-inline-editor button:disabled{opacity:.5;cursor:default}
+.matter-edit-button:focus-visible,.matter-inline-editor input:focus-visible,
+.matter-inline-editor button:focus-visible{outline:2px solid #3876bf;outline-offset:2px}
+@media(max-width:620px){.matter-actions{width:100%;justify-content:space-between}
+ .matter-inline-editor{width:100%}.matter-inline-editor label{width:100%}
+ .matter-inline-editor input{width:100%}}

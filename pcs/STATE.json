@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 99,
-  "updated_at": "2026-11-07T09:22:00.000Z",
+  "revision": 100,
+  "updated_at": "2026-11-07T17:24:00.000Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1821,6 +1821,41 @@
           "Google Drive API enablement, refresh grant and signed-in PDF/DOCX E2E not yet independently verified"
         ],
         "owner_acceptance": "PENDING"
+      },
+      {
+        "id": "AL-R0-MATTER-R108-RENAME",
+        "title": "R108 versioned matter title management with deny-overrides MatterACL and append-only audit",
+        "status": "QA_DEPLOYED_SOURCE_CI_PASS_OWNER_REAL_E2E_NOT_RUN",
+        "priority": "P1",
+        "scope": "QA synthetic matter metadata only; no Google/OneDrive/OAuth changes, no legal file content, no production. Private SRS v1.1.15 mapping not available in this run.",
+        "acceptance": [
+          "Authenticated writer may rename only a matter within the current tenant and current ACL version",
+          "Explicit deny and revoked write grants override allow; cross-tenant and anonymous requests fail closed",
+          "Optimistic version conflict produces 409, not stale overwrite",
+          "SQLite title update and immutable audit-event trigger are in the same transaction",
+          "Mobile and desktop inline rename, cancel, validation and conflict-refresh work",
+          "Owner verifies real QA login, rename, reload, denial and audit before final acceptance"
+        ],
+        "test_results": {
+          "ci": "PASS_9_OF_9_EXECUTED",
+          "ci_run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42394048779",
+          "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/155",
+          "source_contract": "PASS",
+          "sqlite_real_migration_acl_audit": "PASS",
+          "standalone_browser_simulated": "PASS",
+          "live_qa_migration": "PASS_ONE_EXISTING_MATTER_PRESERVED",
+          "qa_web_deployment": "fa3c8962-fd7f-4abe-a701-f65a593ec335_100_PERCENT",
+          "qa_backend_deployment": "b806d232-14c4-46df-a38e-b840b1e30a63_100_PERCENT",
+          "qa_bindings_and_unrelated_modules": "PASS_VERIFIED_BY_READBACK",
+          "anonymous_qa_health": "PASS",
+          "authenticated_owner_rename_e2e": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "blockers": [
+          "Real authenticated mobile/desktop rename, UI conflict and role denial have not been exercised by an Owner-signed-in browser.",
+          "Original private SRS v1.1.15 artifact not available for exact mapping; do not infer acceptance of all 11 UC."
+        ],
+        "owner_acceptance": "PENDING"
       }
     ],
     "features": [
@@ -2451,8 +2486,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R102 Owner showed Google account chooser every time selecting Save, despite organization Drive connection showing success and disconnect. Reviewed QA browser GIS: client.requestAccessToken({prompt:'consent'}) explicitly re-forced Google consent when browser token expired, page reloaded or workspace switched. Organizational server-side Drive OAuth grant and browser-scoped direct-upload access token are distinct; cannot expose tenant refresh token to browser. PR #147 merged c1206d31e5b8904044a9894f655b82589a5f5f3b, final CI #42358969331 PASS 9/9. Browser GIS now requests prompt:'' (Google saved-grant reuse), continues using in-memory token within expiry; regression simulates two successive uploads with one token request and no forced chooser. Cloudflare website QA deployment fbbdc99d-136f-4ad3-92b1-22b9fc8ac1ab 100%, 26 modules, QA_AUTH preserved, backend OAuth/Drive/D1 and production unchanged. Anonymous Browser Rendering /app#documents login gate PASS; Owner signed-in real Google popup suppression E2E NOT_RUN. SRS v1.1.15 unchanged.",
-      "next_action": "Owner test only at https://ai-law-web-qa.iaict-platform.workers.dev/app#documents after reloading website once: select a synthetic PDF/DOCX and save twice to same QA matter, verify Google account chooser not repeatedly forced, confirm two independent receipts in D1 and Drive and ability to download. If Google still prompts despite prompt:'', report whether tab/page was refreshed, whether browser switched workspace, and account chooser details; investigate Google session restrictions or same OAuth client user mismatch. Existing tenant Connect/Disconnect still control backend refresh grant; never export it to users. Preserve file size <=1.5MB, ACL, no production/customer data; Owner acceptance pending.",
+      "last_completed_step": "2026-11-07 R108 non-storage scope: PR #155 code CI PASS 9/9, isolated QA D1 migration validated (existing 1 synthetic matter intact), Cloudflare QA backend+website content-only deployments readback PASS and existing OAuth/Drive modules unchanged. Real Owner account E2E NOT_RUN; no production.",
+      "next_action": "Proceed with non-storage SRS-aligned UC03/UC04/UC07 vertical-slice work and real IAM/account checks using synthetic data. First Owner validates R108 rename with authenticated QA browser; code inspection and CI are not acceptance. Google/OneDrive frozen by explicit Owner directive. No production/real client case content.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -2490,7 +2525,8 @@
         "R66 as of 2026-11-06: QA password-change UI/API deployed and source/readback PASS but owner real password rotation NOT_RUN, so exposed credential remains potentially usable for new sessions. Prior 3 sessions revoked; no confirmation old denied/new accepted. Cloudflare Browser Rendering limited follow-up via HTTP429. R65 PR89 still OPEN/unmerged; separate credentials/roles/MatterACL testing BLOCKED.",
         "R68-01: DOCX source helper merged PR93 PASS but still not invoked by Cloudflare Worker; original SRS v1.1.15 ZIP not mounted; backend storage, upload, PDF/OCR and AI E2E separate tasks.",
         "R69+R70: source PDF/DOCX extraction and integrity guards are CI-PASS and merged, but NOT integrated with Cloudflare QA Worker or Google Drive; no real authenticated upload/read, OCR or UC03/04/07 AI E2E. Original private SRS 1.1.15 ZIP inaccessible for exact mapping; do not claim full PDF/Word display parity.",
-        "R72-R80 Google Drive QA has one existing grant and new disconnect UI/API deployed; local disconnect/reconnect real browser NOT_RUN due to Owner-only destructive grant action. Zero uploaded file receipts. Signed-in synthetic file E2E and full cross-tenant ACL still NOT_RUN; production not deployed."
+        "R72-R80 Google Drive QA has one existing grant and new disconnect UI/API deployed; local disconnect/reconnect real browser NOT_RUN due to Owner-only destructive grant action. Zero uploaded file receipts. Signed-in synthetic file E2E and full cross-tenant ACL still NOT_RUN; production not deployed.",
+        "2026-11-07 Owner paused Google Drive/OneDrive and instructed completion of all other functions. Storage work remains OPEN/NOT_ACCEPTED but excluded from active implementation and QA changes; no Drive retry."
       ]
     },
     "policy": {

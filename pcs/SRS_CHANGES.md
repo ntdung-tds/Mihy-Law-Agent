@@ -33,3 +33,11 @@
 ```pcs-change
 {"kind":"DECIDE","id":"CR-20261107-BYOS-02","decision":"APPROVED","actor":"owner","ref":"Current project conversation: Owner 'Ok, làm' after BYOS destination and Google Drive/OneDrive folder assignment proposal","at":"2026-11-07T10:41:27.169Z","verified_external_decision":false}
 ```
+
+
+## R108 — Implementation checkpoint, no SRS revision (2026-11-07)
+
+- **Owner priority:** Pause Google Drive and OneDrive problem solving. Implement the remaining functions in small independent slices, with concrete source and real QA evidence; see [non-storage checklist #156](https://github.com/ntdung-tds/Mihy-Law-Agent/issues/156).
+- **R108 implementation:** Versioned title-edit operation for the existing QA matter metadata register with effective current-tenant write ACL, deny-overrides, CSRF, 409 optimistic conflict, SQLite transactional audit trigger and mobile inline editor. This does not implement legal AI analysis, Word review, file storage or any new user-facing document provider.
+- **SRS mapping:** Private v1.1.15 baseline unchanged. Its original artifact was not available in this conversation for clause-by-clause validation, so R108 is an implementation proposal to the existing QA matter management capability and the exact SRS reference is **NOT_VERIFIED**. Do not silently label it a new SRS feature or an accepted test case.
+- **Evidence:** PR #155; GitHub Actions #42394048779 9/9 PASS; QA D1 migration applied, existing case preserved; QA web/backend surgical deployments verified without unrelated module changes. Real authenticated customer acceptance **NOT_RUN**, production untouched.

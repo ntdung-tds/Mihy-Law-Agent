@@ -1,12 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `99` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T09:22:00.000Z`.
+- **PCS revision:** `100` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T17:24:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R108 — Non-storage functions: matter rename with ACL, version and audit (2026-11-07)
+
+- **Owner direction:** Skip Google Drive/OneDrive and finish remaining AI Law functions. **No further Google/OneDrive debugging, no OAuth/Drive mutation, no production release.** Full non-storage backlog by UC and acceptance gates: [issue #156](https://github.com/ntdung-tds/Mihy-Law-Agent/issues/156).
+- **Delivered QA source:** [PR #155](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/155) (draft, branched independently from `main`). Authenticated QA case title can be edited inline on desktop/mobile. API requires current tenant + active write MatterACL with deny-overrides, optimistic `version`, bounded title/CSRF input; SQL update is atomic with an append-only audit trigger. A conflict triggers refresh, not a silent overwrite. No case file is changed.
+- **Real database:** D1 QA R108 migration applied on existing table, `version/updated_at/updated_by` columns + `qa_matter_title_events` and `trg_qa_matter_title_audit` verified; existing **1** QA case remains intact at version 1. No customer identities/titles exported.
+- **Source CI:** [Actions run #42394048779](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42394048779) **9/9 PASS**, including actual SQLite migrations/audit/deny-overrides, Node API validation and existing login/browser regression.
+- **QA deployment:** backend `ai-law-standalone-cf-qa` deployment `b806d232-14c4-46df-a38e-b840b1e30a63` (9 modules, 2 surgically changed), website `ai-law-web-qa` deployment `fa3c8962-fd7f-4abe-a701-f65a593ec335` (26 modules, 3 surgically changed), both 100%. Readback exactly matched intended case modules and preserved every unrelated module + all prior OAuth/D1/QA_AUTH/Picker binding names/types. Anonymous /health Cloudflare browser PASS; a second /login browser probe was BLOCKED 429 by browser-rendering rate limits.
+- **Remaining verification:** Authenticated Owner phone/browser case rename/reload/denied role **NOT_RUN**. None of 11 legal AI UCs is accepted by this slice. Original private SRS v1.1.15 remains unchanged; exact SRS mapping is NOT_VERIFIED in this chat. Production untouched; Owner acceptance PENDING.
 
 ## R102 — Stop forcing Google account consent at every document save (2026-11-07)
 

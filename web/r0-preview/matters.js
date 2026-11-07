@@ -34,8 +34,57 @@
       const detail=document.createElement('div');
       const name=document.createElement('strong');name.textContent=m.title;
       const info=document.createElement('small');info.textContent='Tạo ngày '+dateOf(m.created_at)+' · Mã '+m.id.slice(0,8);
+      const actions=document.createElement('div');actions.className='matter-actions';
       const status=document.createElement('span');status.className='matter-read-label';
-      status.textContent='Có quyền truy cập';detail.append(name,info);row.append(detail,status);list.append(row);
+      status.textContent='Có quyền truy cập';actions.append(status);
+      detail.append(name,info);
+      if(m.can_write===true&&Number.isInteger(m.version)&&m.version>=1){
+        const editButton=document.createElement('button');
+        editButton.type='button';editButton.className='matter-edit-button';
+        editButton.textContent='Đổi tên';editButton.setAttribute('aria-label','Đổi tên hồ sơ '+m.title);
+        editButton.addEventListener('click',()=>{
+          const editor=document.createElement('form');editor.className='matter-inline-editor';
+          const label=document.createElement('label');
+          label.textContent='Tên hồ sơ mới';
+          const input=document.createElement('input');
+          input.type='text';input.minLength=3;input.maxLength=100;input.required=true;
+          input.value=m.title;input.setAttribute('aria-label','Tên mới cho '+m.title);
+          const save=document.createElement('button');save.type='submit';save.textContent='Lưu tên';
+          const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Hủy';
+          cancel.addEventListener('click',()=>show());
+          editor.addEventListener('submit',async e=>{
+            e.preventDefault();
+            const title=input.value.trim().normalize('NFC');
+            if(title.length<3||title.length>100){note('Tên hồ sơ cần từ 3 đến 100 ký tự.',true);return;}
+            save.disabled=true;cancel.disabled=true;
+            try{
+              const response=await fetch('/api/qa/matters/'+encodeURIComponent(m.id),{
+                method:'PATCH',credentials:'same-origin',cache:'no-store',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({title,expected_version:m.version})
+              });
+              if(response.status===401){sessionExpired();return;}
+              if(!response.ok){
+                const result=await response.json().catch(()=>({}));
+                if(response.status===409||response.status===404){
+                  await load();
+                  note(result.error||'Hồ sơ hoặc quyền ghi đã thay đổi. Danh sách đã làm mới.',true);
+                  return;
+                }
+                throw Error(result.error||'Không thể cập nhật tên hồ sơ.');
+              }
+              await load();note('Đã cập nhật tên hồ sơ và ghi lịch sử thay đổi.');
+            }catch(error){
+              note(error.message||'Không thể đổi tên hồ sơ. Vui lòng thử lại.',true);
+              save.disabled=false;cancel.disabled=false;
+            }
+          });
+          editor.append(label,input,save,cancel);
+          actions.replaceChildren(editor);input.focus();
+        });
+        actions.append(editButton);
+      }
+      row.append(detail,actions);list.append(row);
     });
     $('#matter-empty').hidden=matching.length>0;
     $('#matter-empty').textContent=q?'Không tìm thấy hồ sơ phù hợp.':'Chưa có hồ sơ QA nào được lưu. Tạo hồ sơ thử nghiệm đầu tiên.';
@@ -67,7 +116,7 @@
       if(!res.ok)throw Error('server');
       const payload=await res.json();
       if(!Array.isArray(payload.matters))throw Error('invalid');
-      matters=payload.matters.filter(x=>typeof x.id==='string'&&typeof x.title==='string'&&Number.isInteger(x.created_at));
+      matters=payload.matters.filter(x=>typeof x.id==='string'&&typeof x.title==='string'&&Number.isInteger(x.created_at)).map(x=>({...x,version:Number(x.version||0),can_write:x.can_write===true}));
       show();
       note('Đã đồng bộ '+matters.length+' hồ sơ QA từ máy chủ.');
     }catch{
