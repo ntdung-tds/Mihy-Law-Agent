@@ -1,12 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `104` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T16:01:29.161Z`.
+- **PCS revision:** `105` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T16:30:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R107 — Eliminate duplicate Google browser sign-in for already-connected owner (2026-11-07)
+
+- **Owner repeat failure:** Even after R106 Save-first chooser UX, Android still showed Google Account sign-in splash. Root cause: standalone backend had a connected OAuth refresh grant, while browser demanded a second Google Identity Services token, with no reuse.
+- **Fix:** Authenticated same-origin POST `/api/qa/drive/browser-access` checks the active AI Law login, exact tenant and **connected_by == current user**, authorized connector role, original `drive.file` scope, current encrypted refresh grant, and rechecks session + grant after refresh. Returns only a short-lived access token (never the refresh token). The Documents UI silently retrieves it when the connected owner opens the page; normal **Lưu → My Drive hoặc thư mục** uses that token without triggering another Google login. Other employees cannot borrow the owner's OAuth identity; they still require appropriate separate consent. On disconnect/workspace change the in-memory token is cleared.
+- **CI:** [run 42390901712](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42390901712) **9/9 PASS**, includes cross-origin/anonymous/employee denial, account-switch race, backend relay and no-second-Google-login synthetic Save.
+- **Live QA:** Backend `ai-law-standalone-cf-qa` deployed `e0a70baa-5ab9-4197-ba9d-7fd698e8fa90` (9 modules, 2 changed), website `ai-law-web-qa` `fa7ed99e-955e-498b-ab93-06bb750daf1d` (26 modules, 2 changed). Both 100% traffic, guarded source readback PASS; QA OAuth/D1 bindings and website QA_AUTH + Picker API Key preserved. Anonymous `/health` Chromium PASS.
+- **Read-only QA D1 aggregate:** One active Drive connection and an active login for the same connected principal; no user IDs or Google file IDs saved to this public checkpoint.
+- **Not accepted yet:** Real owner Android Google Picker, My Drive root/shared folder, PDF/DOCX bytes round-trip and mobile E2E remain NOT_RUN. Initial Google consent may still be required if a different user account is signed into AI Law. No original SRS v1.1.15 or production changes; Owner final acceptance pending.
 
 ## R106 — Android Google sign-in appeared before Drive chooser (2026-11-07)
 
