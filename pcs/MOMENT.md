@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `103` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T15:09:00.000Z`.
+- **PCS revision:** `104` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T16:01:29.161Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R106 — Android Google sign-in appeared before Drive chooser (2026-11-07)
+
+- **Owner report:** Android screenshot showed a Google Account sign-in splash rather than the Google Drive folder picker after trying to open/save. QA code inspection confirmed `Lưu` starts a *separate* browser GIS token grant before presenting the destination chooser, even though the tenant Drive connection may already exist.
+- **QA fix:** `Lưu` opens destination selection first, and requests an OAuth browser token only if needed after the user explicitly selects My Drive or a folder; original choice is resumed without duplicate prompts. Cancel invokes no Google auth and creates no upload. A 45-second timeout unlocks the Save button if Google fails to return a result. Existing Drive.file browser→Google file data path and MatterACL remain unchanged; no OAuth secrets moved to frontend.
+- **Evidence:** [CI 42388832874](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42388832874) PASS 9/9, including no-Google-on-cancel and Save-first synthetic Android test. QA website `ai-law-web-qa` deployment `18e3f3be-1a77-43e3-af0f-55d83096e030` 100%; one module replaced, 26 module count preserved, exact source readback and QA_AUTH+GOOGLE_PICKER_API_KEY binding preservation PASS. Public /health browser PASS.
+- **Pending:** Existing tenant-side refresh grant is NOT the same as the user's browser-side OAuth token. On first use or when provider session expires Google **may still ask for sign-in**; real Android user account E2E, shared folder/root actual upload/download, and Owner acceptance NOT_RUN. Do not claim that the screenshot's Google sign-in is completely resolved without Owner device test. Production untouched.
 
 ## R104.2 — Google Picker API Key is now configured (2026-11-07)
 
