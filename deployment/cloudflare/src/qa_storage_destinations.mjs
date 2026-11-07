@@ -86,7 +86,7 @@ async function create(req,env,p,now,opts){
  if(Number(count?.n||0)>=50)return respond(429,{error:'Đã đạt giới hạn 50 vị trí lưu trữ QA.'});
  let drive,folder;
  try{
-  drive=await tenantDriveAdapter(env,p,opts);
+  drive=opts.storageDrive??await tenantDriveAdapter(env,p,opts);
   folder=await drive.createChildFolder(data.name);
  }catch{return respond(503,{error:'Không tạo được thư mục Google Drive. Hãy kiểm tra kết nối và quyền.'});}
  const destinationId=crypto.randomUUID();
