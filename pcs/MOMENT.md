@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `89` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T05:15:00.000Z`.
+- **PCS revision:** `90` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T05:24:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -12,7 +12,8 @@
 
 - **Owner supplied:** new public OAuth **Client ID** only (not a Client Secret) after reconfiguring Google Auth Platform and `drive.file` scope. QA JavaScript origin must be `https://ai-law-web-qa.iaict-platform.workers.dev`; redirected callback path `/drive-return` is not used by isolated popup token client.
 - **Scoped change:** [PR #130](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/130) replaces the old QA `data-google-client-id` in `web/qa/drive-blob.html`, keeping `web/qa/drive-blob.js` unchanged because it already reads the value and passes it to Google Identity Services. Regression checks that HTML and JS are wired to the new ID. Only public client identifier is committed; never a secret, access token, file ID, or real customer data.
-- **At checkpoint:** PR open, final-head CI **PENDING**, QA deployment **NOT_RUN**, Google owner consent and real PDF/DOCX upload **NOT_RUN**. No claim that this fixes Google origin registration or upload until owner-browser proof. Production, baseline SRS, organization document/MatterACL flow unchanged.
+- **Source/CI:** [PR #130](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/130) merged into main as `d75921351367843defa4f4108a4d8ee7723fd49d`; final-head [GitHub Actions #42342034596](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42342034596) **PASS 9/9 executed jobs**, including isolated Blob OAuth wiring test.
+- **QA deployment:** Cloudflare Worker `ai-law-web-qa` source-content PUT accepted after one corrected multipart packaging retry; latest deployment routes **100%** traffic to new version (2026-11-07T05:22:41Z). Readback: 24/24 modules present, Client ID new **1** / old **0**, `QA_AUTH` service binding intact, no production changes. Live Cloudflare Browser Rendering `/drive-blob` HTML PASS: correct Client ID and page heading. Real Google owner consent + PDF/DOCX upload **NOT_RUN**; AI Law integrated organization documents/MatterACL flow remains separate and unproven.
 
 ## R92 — SRS Drive upload delta and independent Google Apps Script POC (2026-11-07)
 
