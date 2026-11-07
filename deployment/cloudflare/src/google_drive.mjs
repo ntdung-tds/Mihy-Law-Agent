@@ -31,7 +31,11 @@ export class GoogleDriveAdapter {
     if(typeof accessToken!=="string"||accessToken.length<10||
        !SAFE_FILE.test(rootId||"")||typeof fetcher!=="function")
       throw new Error("Unconfigured organization-specific Drive grant");
-    this.accessToken=accessToken;this.rootId=rootId;this.fetcher=fetcher;
+    this.accessToken=accessToken;this.rootId=rootId;
+    // Cloudflare Workers fetch() requires its global receiver. Storing it as
+    // this.fetcher and invoking the property directly throws 'Illegal invocation'.
+    // Call the captured function as a bare function through an arrow wrapper.
+    this.fetcher=(url,init)=>fetcher(url,init);
   }
   async request(url){
     const parsed=new URL(url);

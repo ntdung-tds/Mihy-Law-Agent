@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {documentsApi,DOCUMENT_ACL_SQL} from '../src/qa_documents.mjs';
+import {GoogleDriveAdapter} from '../src/google_drive.mjs';
 const I='11111111-1111-4111-8111-111111111111';
 const U='22222222-2222-4222-8222-222222222222';
 const T='33333333-3333-4333-8333-333333333333';
@@ -156,4 +157,39 @@ test('R88 Google initiation failures preserve safe stages and never create uploa
   assert.equal(f.receipt(),false,sessionMode);
   assert.ok(!JSON.stringify(data).includes('synthetic-drive-access-token'));
  }
+});
+
+test('R89 Cloudflare fetch brand binding: bare invocation works for session start and metadata GET',async()=>{
+ const root='syntheticQAroot_12345',remote='syntheticDriveFile_67890';
+ const ticket='55555555-5555-4555-8555-555555555555';
+ const calls=[];
+ // Cloudflare global fetch throws TypeError when assigned as an object method
+ // and then called with an incorrect this. Reproduce without real credentials.
+ function cloudflareBrandSensitiveFetch(url,init){
+  assert.equal(this,undefined,'Worker fetch must not receive GoogleDriveAdapter as receiver');
+  calls.push({url,method:init.method});
+  if(init.method==='POST')
+   return Promise.resolve(new Response(null,{status:200,headers:{
+    Location:'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&upload_id=syntheticSession12345'
+   }}));
+  if(init.method==='GET')
+   return Promise.resolve(Response.json({id:remote,name:'qa_gpt.pdf',
+    mimeType:'application/pdf',size:'42',parents:[root],trashed:false,
+    appProperties:{ai_law_upload_ticket:ticket}}));
+  throw Error('unexpected request');
+ }
+ const adapter=new GoogleDriveAdapter({
+  accessToken:'synthetic-drive-access-token',
+  rootId:root,
+  fetcher:cloudflareBrandSensitiveFetch
+ });
+ const session=await adapter.beginResumable({
+  name:'qa_gpt.pdf',mimeType:'application/pdf',size:42,ticketId:ticket
+ });
+ assert.match(session,/upload_id=syntheticSession12345/);
+ const proof=await adapter.verifyDirectUpload(remote,{
+  ticketId:ticket,name:'qa_gpt.pdf',mimeType:'application/pdf',size:42
+ });
+ assert.equal(proof.id,remote);
+ assert.deepEqual(calls.map(x=>x.method),['POST','GET']);
 });
