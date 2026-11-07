@@ -58,6 +58,82 @@
  const driveBox=$('drive-setup'),driveMessage=$('drive-status'),connect=$('drive-connect'),
   disconnect=$('drive-disconnect');
  const uploadButton=form.querySelector('button[type="submit"]');
+ const browserAuth=$('document-google-authorize'),browserStatus=$('document-google-status');
+ const SCOPE='https://www.googleapis.com/auth/drive.file';
+ let browserToken='',expiresAt=0,googleScript=null,uploading=false,uncertainUpload=false;
+ const browserReady=()=>browserToken.length>10&&Date.now()+60000<expiresAt;
+ const uploaderReady=()=>driveBox?.dataset.state==='connected'&&browserReady();
+ function uploadGate(){
+  if(uploadButton)uploadButton.disabled=uploading||uncertainUpload||!uploaderReady();
+ }
+ function resetGoogleBrowser(){
+  browserToken='';expiresAt=0;
+  if(browserAuth)browserAuth.hidden=true;
+  if(browserStatus)browserStatus.textContent='Đăng nhập Google bằng tài khoản có quyền ghi vào thư mục Drive của đơn vị trước khi tải tệp theo hồ sơ.';
+  uploadGate();
+ }
+ function loadGoogleBrowser(){
+  if(window.google?.accounts?.oauth2?.initTokenClient)return Promise.resolve();
+  if(googleScript)return googleScript;
+  googleScript=new Promise((resolve,reject)=>{
+   const node=document.createElement('script');
+   node.src='https://accounts.google.com/gsi/client';node.async=true;
+   node.onload=()=>resolve();
+   node.onerror=()=>reject(Error('Google Identity Services không tải được.'));
+   document.head.appendChild(node);
+  }).catch(e=>{googleScript=null;throw e;});
+  return googleScript;
+ }
+ function prepareBrowserConsent(){
+  if(!browserAuth||!browserStatus)return;
+  browserAuth.hidden=false;
+  browserAuth.disabled=true;
+  browserStatus.textContent='Đang nạp chức năng cấp quyền Google cho tệp theo hồ sơ…';
+  void loadGoogleBrowser().then(()=>{
+   if(driveBox?.dataset.state==='connected'){
+    browserAuth.disabled=false;
+    browserStatus.textContent=browserReady()
+     ?'Đã cấp quyền Google trong trình duyệt. Tệp sẽ lưu vào thư mục Drive của đơn vị.'
+     :'Chọn cùng tài khoản Google có quyền ghi vào thư mục Drive của đơn vị.';
+   }
+  }).catch(()=>{if(driveBox?.dataset.state==='connected'){
+   browserAuth.disabled=false;
+   browserStatus.textContent='Chưa nạp được Google. Hãy kiểm tra mạng và nhấn cấp quyền để thử lại.';
+  }});
+ }
+ if(browserAuth)browserAuth.addEventListener('click',()=>{
+  if(driveBox?.dataset.state!=='connected')return;
+  const clientId=$('drive-blob-test')?.dataset.googleClientId||'';
+  if(!/^[A-Za-z0-9_.-]+\.apps\.googleusercontent\.com$/.test(clientId)){
+   message('OAuth Client ID chưa hợp lệ trên trang QA.','error');return;
+  }
+  if(!window.google?.accounts?.oauth2?.initTokenClient){
+   browserStatus.textContent='Google chưa tải xong. Hãy thử lại sau khi thư viện đăng nhập sẵn sàng.';
+   void loadGoogleBrowser().then(()=>{browserAuth.disabled=false;}).catch(()=>{browserAuth.disabled=false;});
+   return;
+  }
+  try{
+   const client=window.google.accounts.oauth2.initTokenClient({
+    client_id:clientId,scope:SCOPE,include_granted_scopes:false,
+    callback:answer=>{
+     if(driveBox?.dataset.state!=='connected')return;
+     if(answer?.error||typeof answer?.access_token!=='string'||answer.access_token.length<11){
+      browserStatus.textContent='Google chưa cấp quyền tải tệp theo hồ sơ. Hãy kiểm tra tài khoản được chọn.';
+      uploadGate();return;
+     }
+     browserToken=answer.access_token;
+     expiresAt=Date.now()+Math.max(0,Number(answer.expires_in||0))*1000;
+     browserStatus.textContent='Đã cấp quyền trong trình duyệt. Có thể lưu tệp vào hồ sơ QA.';
+     uploadGate();
+    },
+    error_callback:()=>{
+     browserStatus.textContent='Không mở được Google. Hãy kiểm tra popup và cấu hình JavaScript origin.';
+    }
+   });
+   browserStatus.textContent='Đang mở Google để cấp quyền tải tệp vào thư mục của đơn vị…';
+   client.requestAccessToken({prompt:'consent'});
+  }catch{browserStatus.textContent='Không thể mở Google để cấp quyền. Vui lòng thử lại.';}
+ });
  const link=new URL(location.href);
  const returned=link.searchParams.get('drive');
  const issue=link.searchParams.get('issue');
