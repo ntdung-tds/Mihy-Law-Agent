@@ -495,7 +495,7 @@ test('R104 real Google Picker callback registers folder selected by user before 
  t.els['document-file'].files=[{name:'qa_gpt.pdf',size:bytes.length,
   async arrayBuffer(){return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}}];
  await t.els['document-upload-form'].listeners.submit({preventDefault(){}});
- await Promise.all(t.pending);
+ await Promise.race([Promise.all(t.pending),new Promise((_,reject)=>setTimeout(()=>reject(Error('Picker flow did not finish: '+JSON.stringify({calls:t.calls.map(x=>x.url),feedback:t.els['document-feedback'].textContent,dialog:t.els['document-save-dialog'].open}))),2000))]);
  const selected=t.calls.find(x=>x.url==='/api/qa/storage/select');
  assert.ok(selected,'provider choice must be checked with application and Google permissions');
  assert.equal(JSON.parse(selected.body).folder_id,'sharedTeamFolder123456');
