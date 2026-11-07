@@ -463,6 +463,24 @@ test('R101 verified browser download keeps a safe (2) filename instead of reject
  assert.match(t.els['document-feedback'].textContent,/SHA-256/);
 });
 
+test('R106 mobile Save opens destination chooser before triggering a Google sign-in screen',async()=>{
+ const t=await mount({connected:true,configuration_ready:true,can_connect:true},
+  {directUpload:true,saveChoice:'hold'});
+ const raw=new TextEncoder().encode('%PDF-1.4\\n1 0 obj\\n<< >>\\nendobj\\n%%EOF\\n');
+ t.els['document-matter'].value='44444444-4444-4444-8444-444444444444';
+ t.els['document-file'].files=[{name:'qa_gpt.pdf',size:raw.length,
+  async arrayBuffer(){return raw.buffer.slice(raw.byteOffset,raw.byteOffset+raw.byteLength);}}];
+ const pending=t.els['document-upload-form'].listeners.submit({preventDefault(){}});
+ await Promise.resolve();
+ assert.equal(t.els['document-save-dialog'].open,true,'destination selection opens on Save');
+ assert.equal(t.googleGrants.length,0,'do not send the user to Google before choosing where to save');
+ assert.equal(t.calls.filter(x=>x.url==='/api/qa/documents/upload/start').length,0,'no upload before location');
+ t.els['document-save-cancel'].onclick();
+ await pending;
+ assert.equal(t.googleGrants.length,0,'cancel must never launch Google sign-in');
+ assert.equal(t.calls.filter(x=>x.url==='/api/qa/documents/upload/start').length,0);
+});
+
 test('R104 Save presents one explicit destination choice and never preselects Google root',async()=>{
  const html=readFileSync(new URL('../../../web/r0-preview/index.html',import.meta.url),'utf8');
  const css=readFileSync(new URL('../../../web/r0-preview/styles.css',import.meta.url),'utf8');
