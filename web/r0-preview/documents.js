@@ -175,7 +175,11 @@
      message('Không thể mở cửa sổ Google. Hãy kiểm tra popup và thử Lưu tệp lại.','error');
     }
    });
-   client.requestAccessToken({prompt:'consent'});
+   // Google retains user consent per OAuth Client ID and requested scope.
+   // A forced "consent" prompt makes returning users select their Google
+   // account again. Empty prompt asks only when authorization is truly needed.
+   // Never persist bearer tokens or expose the tenant's backend refresh grant.
+   client.requestAccessToken({prompt:''});
   }catch{
    if(seq===consentSeq){authorizing=false;uploadGate();}
    message('Không mở được Google. Vui lòng thử Lưu tệp lại.','error');
