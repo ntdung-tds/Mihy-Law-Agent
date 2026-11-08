@@ -171,3 +171,26 @@ test('R111 aborted or errored request body fails closed without invoking AI or q
  assert.equal(f.providerCalls.length,0);
  assert.equal(f.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false);
 });
+
+test('R112 malformed UTF-8 JSON bytes fail closed before MatterACL, quota or AI',async()=>{
+ const valid=JSON.stringify({uc:'UC04',matter_id:M,source_text:SOURCE,
+  source_text_2:'',question:'',language:'vi',synthetic_consent:true});
+ const bytes=new TextEncoder().encode(valid);
+ const marker=new TextEncoder().encode(SOURCE);
+ const pos=bytes.findIndex((_,i)=>i+marker.length<=bytes.length&&
+  marker.every((b,j)=>bytes[i+j]===b));
+ assert.ok(pos>=0,'fixture must contain source text');
+ bytes[pos]=0xff; // Invalid UTF-8 lead byte within a JSON string
+ const headers={Origin:BASE,'Sec-Fetch-Site':'same-origin',
+  'Content-Type':'application/json',Cookie:'al_qa_session='+SID};
+ const req=new Request(BASE+'/api/qa/legal/run',{
+  method:'POST',headers,body:bytes
+ });
+ const f=fixture();
+ const response=await legalApi(req,f.env,{now:NOW});
+ assert.equal(response.status,400);
+ assert.equal(f.providerCalls.length,0);
+ assert.equal(f.calls.some(c=>c.sql===LEGAL_MATTER_ACCESS_SQL),false);
+ assert.equal(f.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false);
+ assert.doesNotMatch(await response.text(),/\\ufffd|source_text/);
+});
