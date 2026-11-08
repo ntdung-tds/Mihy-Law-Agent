@@ -538,12 +538,17 @@ def scenario(browser,name,viewport,origin):
     page.locator("#legal-qa-matter").select_option(F)
     page.locator("#legal-qa-run").click()
     coverage.wait_for(state="visible",timeout=15000)
+    review=page.locator("#legal-qa-uc03-04-compare")
+    if not review.evaluate("(e)=>e.open"):
+        review.locator(":scope > summary").click()
+    page.locator("#legal-qa-uc03-04-reviewed").check()
+    assert page.locator("#legal-qa-uc03-04-copy-reviewed").is_enabled()
     page.evaluate("""() => {
       document.getElementById('legal-qa-question').value =
         'Yêu cầu đổi bằng lập trình nhưng không gửi sự kiện input';
     }""")
-    page.locator("#legal-qa-copy").click()
-    assert page.locator("#legal-qa-result").is_hidden(), "Silent edit must block UC03 copy"
+    page.locator("#legal-qa-uc03-04-copy-reviewed").click()
+    assert page.locator("#legal-qa-result").is_hidden(), "Silent edit must block UC03 reviewed copy"
     assert not page.locator("#legal-qa-output").inner_text()
     # Simulate a pending provider reply which arrives after the user edits input.
     page.locator("#legal-qa-matter").select_option(F)
