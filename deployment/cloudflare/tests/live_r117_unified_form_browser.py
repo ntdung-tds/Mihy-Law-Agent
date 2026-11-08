@@ -673,7 +673,10 @@ def scenario(browser,name,viewport,origin):
     assert page.locator("#legal-qa-result").is_hidden()
     assert not ack.is_checked()
     assert not gated_copy.is_enabled()
-    # Rerun a valid UC04 summary to test ordinary input-change invalidation.
+    # Mobile UC04 auto-collapses the source form after success. Open it again
+    # before the next explicit submit; do not click a hidden form button.
+    if not inputs.evaluate("(e)=>e.open"):
+        inputs.locator(":scope > summary").click()
     page.locator("#legal-qa-run").click()
     check.wait_for(state="visible",timeout=15000)
     review.wait_for(state="visible",timeout=15000)
