@@ -58,7 +58,7 @@ def main():
                     assert page.locator(".qa-document-box").get_attribute("hidden") is not None
                     if name=="mobile":
                         # R118 list-first: the upload form must be absent until Tạo mới.
-                        page.locator("#matter-list").wait_for(state="visible",timeout=10000)
+                        page.locator(".qa-case-saved-list").wait_for(state="visible",timeout=10000)
                         assert not page.locator("#matter-form").is_visible()
                         assert not page.locator("#case-r2-file").is_visible()
                         page.locator("#upload-btn").click()
