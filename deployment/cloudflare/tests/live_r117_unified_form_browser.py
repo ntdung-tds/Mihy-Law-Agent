@@ -582,7 +582,8 @@ def scenario(browser,name,viewport,origin):
     edited_copy.click()
     page.wait_for_function("() => typeof window.__uc07Copied === 'string'")
     assert page.evaluate("window.__uc07Copied")=="Bên B có thể thanh toán 3.000.000 đồng vào ngày 16/09/2026."
-    assert "không lưu vào hồ sơ" in page.locator("#legal-qa-uc07-copy-status").inner_text()
+    page.wait_for_function("""() => document.querySelector('#legal-qa-uc07-copy-status')
+       ?.textContent.includes('chưa được phê duyệt pháp lý')""",timeout=15000)
     page.locator("#legal-qa-uc07-reviewed").uncheck()
     assert edited_copy.is_disabled(),"Unchecking must revoke clipboard gate"
     page.locator("#legal-qa-uc07-reviewed").check()
