@@ -141,7 +141,7 @@
     resumeUc = null;
     $('#workflow-resume-panel').hidden = true;
   });
-  $('[data-view]').forEach(n => n.addEventListener('click', () => goto(n.dataset.view)));
+  $$('[data-view]').forEach(n => n.addEventListener('click', () => goto(n.dataset.view)));
   $$('[data-go]').forEach(n => n.addEventListener('click', () => goto(n.dataset.go)));
 
   const drawer = $('#function-drawer'), backdrop = $('#drawer-backdrop'), trigger = $('#rail-features');
