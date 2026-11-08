@@ -18,6 +18,39 @@
     function clearResult(){
       result.hidden=true;output.textContent='';
       byId('legal-qa-sources').replaceChildren();
+      const check=byId('legal-qa-translation-check');
+      check.hidden=true;check.replaceChildren();delete check.dataset.state;
+    }
+    function showTranslationCheck(check){
+      // Server-side deterministic QA flag only, not legal/linguistic validation.
+      const root=byId('legal-qa-translation-check');
+      root.replaceChildren();root.hidden=true;
+      if(!check||typeof check!=='object')return;
+      const needsReview=check.status==='review_required';
+      if(!needsReview&&check.status!=='no_obvious_numeric_omission')return;
+      root.dataset.state=needsReview?'warning':'info';
+      const title=document.createElement('strong');
+      title.textContent=needsReview
+        ?'Cần đối chiếu lại số liệu hoặc số điều trong bản dịch'
+        :'Chưa thấy thiếu chữ số hoặc số điều qua phép đối chiếu đơn giản';
+      root.append(title);
+      if(needsReview){
+        const numbers=Array.isArray(check.missing_numbers)?check.missing_numbers.slice(0,12):[];
+        const articles=Array.isArray(check.missing_article_numbers)?check.missing_article_numbers.slice(0,12):[];
+        if(numbers.length){
+          const line=document.createElement('p');
+          line.textContent='Số cần kiểm tra: '+numbers.map(String).join(', ');
+          root.append(line);
+        }
+        if(articles.length){
+          const line=document.createElement('p');
+          line.textContent='Số điều cần kiểm tra: '+articles.map(String).join(', ');
+          root.append(line);
+        }
+      }
+      const note=document.createElement('p');
+      note.textContent='Đây chỉ là đối chiếu chữ số tự động, không xác nhận bản dịch đầy đủ hoặc tương đương pháp lý. Kiểm tra với văn bản nguồn trước khi sử dụng.';
+      root.append(note);root.hidden=false;
     }
     function updateTaskFields(){
       const dual=['UC06','UC08'].includes(uc.value);
@@ -154,6 +187,7 @@
         }
         if(typeof data.answer!=='string'||!data.answer)throw Error('Kết quả từ máy chủ không hợp lệ.');
         output.textContent=data.answer;
+        if(currentTask==='UC03')showTranslationCheck(data.translation_check);
         byId('legal-qa-result-title').textContent=data.title+' · '+(data.mode==='local_example_only'?'Tìm trong nguồn mẫu':'Bản nháp AI');
         byId('legal-qa-review').textContent=data.review_notice||
           'Chỉ truy xuất từ nguồn giả lập. Chưa xác minh dữ liệu văn bản pháp luật/bản án chính thức.';

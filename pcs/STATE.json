@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 106,
-  "updated_at": "2026-11-08T02:00:22.219Z",
+  "revision": 107,
+  "updated_at": "2026-11-08T02:13:48.810Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2066,6 +2066,61 @@
           "production": "UNTOUCHED"
         },
         "owner_acceptance": "PENDING_R114"
+      },
+      {
+        "id": "AL-R0-UC03-R115-001",
+        "title": "R115 UC03 QA translation – cảnh báo thiếu số liệu, số điều trong bản dịch (không đánh giá độ đúng pháp lý)",
+        "priority": "P0",
+        "status": "QA_WEB_AND_API_DEPLOYED_CI_PASS_OWNER_AUTH_MOBILE_E2E_NOT_RUN",
+        "scope": "Existing R0 UC03 fictional source text translation QA only; numeric/Article numbering review signals, no new data ingestion/provider/storage/API endpoint; no production.",
+        "implementation": "Server-side deterministic translationIntegrityCheck(source,answer) compares numeral multiset and Điều/Article/Section numbering; ignores source [A1] citations; normalizes grouping separators; returns advisory warning without blocking/editing AI draft. UC03 UI presents an accessible warning with explicit no semantic/legal equivalence verification; state cleared on switch.",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/164",
+        "api_deployment": {
+          "worker": "ai-law-standalone-cf-qa",
+          "deployment_id": "3c857fcb-d8e7-4230-93bd-13fd8a39c092",
+          "version_id": "8d541a3e-2972-49bd-95e4-f4953f58b08c",
+          "traffic": "100%",
+          "changed_module": "qa_legal_workflows.mjs",
+          "preserved_module_count": 9,
+          "bindings": "11 EXISTING INCLUDING 3 SECRET_TEXT AND AI/D1 PRESERVED_BY_CODE_ONLY_CONTENT_ENDPOINT",
+          "readback": "PASS_10_OF_10"
+        },
+        "web_deployment": {
+          "worker": "ai-law-web-qa",
+          "deployment_id": "12aacc4c-ec55-4ed8-b43b-37f93de39b85",
+          "version_id": "d54ff95a-9ec0-41cc-9396-ef6022ef4dac",
+          "traffic": "100%",
+          "changed_modules": [
+            "workspace_html.mjs",
+            "workspace_css.mjs",
+            "workspace_legal.mjs"
+          ],
+          "preserved_module_count": 24,
+          "bindings": "QA_AUTH_AND_GOOGLE_PICKER_API_KEY_PRESERVED",
+          "readback": "PASS_27_OF_27",
+          "prior_R113_and_R114_UI": "PRESERVED",
+          "BYOS": "PRESERVED"
+        },
+        "tests": {
+          "ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42437367246",
+          "ci_result": "PASS_9_EXECUTED_21_BRANCH_SKIPPED",
+          "numerals_dates_articles": "PASS_R115_DETERMINISTIC_FIXTURES",
+          "duplicate_number": "PASS_R115",
+          "fabricated_A1_citation_exclusion": "PASS_R115",
+          "authorized_UC03_API_QA_stub": "PASS_R115",
+          "revoked_matter_acl": "PASS_R115_DENY_404",
+          "non_UC03_unchanged": "PASS_R115",
+          "source_not_persisted": "PASS_R115_DB_PARAMETERS",
+          "live_qa_module_readback": "PASS_BOTH_WORKERS",
+          "authenticated_owner_mobile": "NOT_RUN",
+          "authenticated_owner_desktop": "NOT_RUN",
+          "real_live_provider_text_translation": "NOT_RUN",
+          "translation_semantic_accuracy": "NOT_VERIFIED",
+          "private_SRS_clause_mapping": "NOT_VERIFIED",
+          "production": "UNTOUCHED"
+        },
+        "caveat": "Numeric presence check is not proof of correct translation, payment terms, legal effect, names, dates in words or completeness; false positives possible for localized/spelled-out numbers. Source and result remain QA-only with manual review.",
+        "owner_acceptance": "PENDING_R115"
       }
     ],
     "features": [

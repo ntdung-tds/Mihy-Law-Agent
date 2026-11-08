@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `106` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T02:00:43.829Z`.
+- **PCS revision:** `107` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T02:14:08.094Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R115 — P0 UC03 translation numeral/article check (2026-11-08)
+
+- **Scope:** In existing text-only QA UC03, add a **deterministic, advisory** review for numeral occurrence counts and Điều/Article/Section numbering. Translate exactly as before with authorized `/api/qa/legal/run`; preserve raw AI draft unchanged. Source citation identifiers like `[A1]` are not counted as translated numbers; grouped thousands separators normalize. Review warnings are nonblocking, not a claim of linguistic accuracy, completeness or legal equivalence; localized dates/spelled-out numbers can produce false positives. Never persist QA source/output.
+- **Source:** [Draft PR #164](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/164) stacked on #162; deterministic helper `translationIntegrityCheck()` in `deployment/cloudflare/src/qa_legal_workflows.mjs`; UC03-only `translation_check` response; accessible result panel rendered with `textContent` and cleared between tasks. Other UCs unchanged. SRS v1.1.15 unchanged, Drive/OneDrive/OAuth and production untouched.
+- **CI:** [Actions #42437367246](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42437367246) **PASS 9/9 executed jobs**, 21 conditional skipped; R115 tests cover source 2.000.000 vs target 2,000,000, 15/09/2026, Điều/Article cross-language, missing/duplicated numerals, missing article number, citation exclusion, full authorized API mock, 404 MatterACL deny, unchanged UC04 and no stored input/output. First CI found R114 test fixture missing the new DOM element; fixed and reran to green.
+- **Live QA:** Backend `ai-law-standalone-cf-qa`, deployment `3c857fcb-d8e7-4230-93bd-13fd8a39c092`, version `8d541a3e-2972-49bd-95e4-f4953f58b08c`, 100%; only `qa_legal_workflows.mjs` changed, remaining **9 modules byte-for-byte preserved**, **11 existing bindings** including AI, D1 and 3 secrets remain. Site `ai-law-web-qa`, deployment `12aacc4c-ec55-4ed8-b43b-37f93de39b85`, version `d54ff95a-9ec0-41cc-9396-ef6022ef4dac`, 100%; 3 UI modules updated, remaining **24 modules preserved**, BYOS and QA_AUTH unchanged. Both used script **content-only** upload, not binding-resetting Worker upload; full 10/10 and 27/27 source readback PASS.
+- **Not yet verified:** Real Owner signed-in Android/desktop UC03 source→provider→result E2E **NOT_RUN**, real model translation accuracy **NOT_VERIFIED**, source SRS exact mapping **NOT_VERIFIED**. Owner R115 acceptance **PENDING**, production unchanged.
 
 ## R114 — P0 existing QA Matter setup and resume original UC (2026-11-08)
 

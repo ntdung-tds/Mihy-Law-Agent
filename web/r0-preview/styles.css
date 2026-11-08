@@ -565,3 +565,10 @@ body.drawer-open{overflow:hidden}
  .workflow-resume{display:block}
  .workflow-resume p{margin-top:8px}
 }
+
+/* R115 UC03 numeric/article review; nonblocking, explicitly not legal validation. */
+.legal-qa-translation-check{padding:14px 16px;margin:13px 0 17px;border:1px solid #b9cde2;border-radius:12px;background:#f3f8ff;color:#234b72;line-height:1.6}
+.legal-qa-translation-check[hidden]{display:none!important}
+.legal-qa-translation-check[data-state="warning"]{background:#fff9ed;border-color:#eccd84;color:#715016}
+.legal-qa-translation-check strong{display:block;font-size:13px}
+.legal-qa-translation-check p{margin:5px 0 0;font-size:12px;overflow-wrap:anywhere}

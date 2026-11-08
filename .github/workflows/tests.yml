@@ -226,6 +226,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r112_uc_screens.test.mjs
       - name: R114 Matter quick-create/resume and stale workspace response safety
         run: node --test deployment/cloudflare/tests/r114_workflow_matter.test.mjs
+      - name: R115 UC03 translation numeral and article omissions, no false legal certification
+        run: node --test deployment/cloudflare/tests/r115_uc03_translation.test.mjs
       - name: R72 Drive document upload/download, MatterACL, integrity and fail-closed QA gates
         run: node --test deployment/cloudflare/tests/r72_documents.test.mjs
       - name: R81 Google Drive multipart wire protocol and safe provider error diagnostics
