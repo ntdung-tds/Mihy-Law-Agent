@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `109` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T04:09:06.335Z`.
+- **PCS revision:** `110` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T04:48:54.238Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R118 — Mobile list-first case screen, case details on demand (2026-11-08)
+
+- **Owner correction:** On a phone, opening Hồ sơ must show **only saved case list, search, legal area filter and Tạo mới**; the create form must remain hidden until tapped. Tapping a saved case should open **read-only detail**, with explicit *Chỉnh sửa* and *← Danh sách hồ sơ* back. Apply this same mobile list/detail/create principle to **future already-approved list-based functions** when implemented. Desktop unchanged. Recorded as **SC-021**, SRS v1.1.15 unmodified.
+- **Change:** UI-only R118 [draft PR #167](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/167), above R117 #166. `#matter-workspace[data-mobile-mode]` with four states list/create/detail/edit and <=720px style. New route event `ai-law:case-create` from top CTA or UC quick-create. Default navigation to Documents resets to list, avoids targeting a hidden form. Existing saved-case title becomes an accessible tap button. Viewing detail on mobile is read-only until the user explicitly edits, preserving server permissions.
+- **Real QA deployment:** `ai-law-web-qa` version `ddeeb6c7-1f77-4c1b-aab5-5cd1ab2a07d5`, deployment `0f2ed334-7fe2-4576-a9d4-e549a6ae40cb`, 100% traffic. Exactly four of 27 modules changed, 23 others byte-identical after full readback; both `QA_AUTH` and Google Picker bindings unchanged, five top-level routed views remain valid. Backend `ai-law-standalone-cf-qa`, D1 and private R2 bucket **unchanged**, production untouched.
+- **Verification:** [GitHub Actions #42447984685](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42447984685) **PASS 9/9 executed CI jobs** (21 conditional skipped). Node R118 UI tests PASS; real local Chromium **desktop 1280px and mobile 390px PASS** on list/create/detail/edit/back and synthetic PDF mock. R77 Strict cookie return+list-first/new-case chooser PASS. This does not imply signed-in live Cloudflare user browser E2E.
+- **Not done / final gate:** Owner-authenticated Android/desktop click-through and actual private R2 upload/download on live QA remain **NOT_RUN**, owner acceptance **PENDING**. No production deploy, no real client case files used in testing.
 
 ## R117 — One complete case editor, attachments and classified list (2026-11-08)
 
