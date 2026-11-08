@@ -201,3 +201,9 @@
 - **Nhiều tệp:** Cho phép gom các tệp PDF/DOCX từ một hoặc nhiều lượt chọn thành một hàng đợi trước khi bấm Lưu; bỏ riêng tệp chưa lưu. Giữ giới hạn 20 tệp/lần, 10 MiB/tệp, 50 bản ghi tệp/hồ sơ (bao gồm các bản ghi đã ẩn).
 - **Xóa riêng tệp = soft-hide:** D1 migration `0019_r122_case_file_soft_hide.sql`; tombstone immutable, có người/giờ thao tác. API PATCH yêu cầu write MatterACL, tenant/matter/file, CSRF; danh sách và download mặc định loại trừ tệp ẩn, nhưng R2 object và file receipt vẫn được giữ. Không tự mở API xóa vật lý; chỉ system_admin theo cổng quy trình riêng khi được phép.
 - **Evidence:** PR #171; CI [#42455594464](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42455594464) 9/9 PASS, synthetic Chromium desktop/mobile. Additive QA D1 migration applied. Backend QA deployment `aa48d887-bdab-4a3f-b0f8-73d43aaeaca6`, website QA deployment `edb6e99b-9d65-427a-bda9-e6971fdefa04`, both 100% and source/binding readback PASS. Actual Owner Android and original file restoration NOT_RUN; production untouched. SRS v1.1.15 baseline unchanged.
+
+## SC-026 — 2026-11-08 — Icon phân biệt PDF/Word trong danh sách tệp QA mobile (presentation only)
+
+- Hiển thị icon SVG file-shaped theo loại định dạng: PDF đỏ, Word DOC/DOCX xanh và fallback xám (không thay đổi danh sách file được backend chấp nhận: PDF/DOCX). Áp dụng cho cả danh sách tệp đã lưu và tệp đang chọn chờ lưu.
+- Layout tệp gọn, tên tối đa 2 dòng, dung lượng/ngày tải, giữ nút tải độc lập trong chế độ xem. Không thay đổi API/D1/R2/ACL/kiểm toán; yêu cầu lịch sử thay đổi chi tiết riêng vẫn pending.
+- Test [CI #42463186412](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42463186412) PASS 9/9; site QA 100% version `83381d39-a115-4285-a55d-c43fe7218aac`, deployment `83f2e212-c0f8-439c-be03-bdd896b39942`, 25/27 modules và 2 bindings bảo toàn, đọc lại mã PASS. Owner Android acceptance NOT_RUN, production untouched; frozen SRS v1.1.15 unchanged.
