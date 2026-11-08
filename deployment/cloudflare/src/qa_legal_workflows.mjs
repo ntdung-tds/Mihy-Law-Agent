@@ -436,6 +436,117 @@ async function readLimitedSource(req,max){
  * Never persist the original bytes, converted text or any legal conclusion.
  * No storage provider or OAuth path is involved. Do not auto-run legal AI.
  */
+
+/** R140 conservative Word/OOXML preflight for source completeness.
+ * Parse ZIP central directory, and inspect only bounded Word XML parts.
+ * Never unpack to disk or treat a mere PK signature as a DOCX document.
+ */
+async function docxSourcePreflight(bytes){
+ const fail=reason=>({ok:false,reason});
+ const u16=i=>bytes[i]|(bytes[i+1]<<8);
+ const u32=i=>(bytes[i]|(bytes[i+1]<<8)|(bytes[i+2]<<16)|(bytes[i+3]<<24))>>>0;
+ const sig=(i,value)=>i>=0&&i+4<=bytes.length&&u32(i)===value;
+ const decode=new TextDecoder('utf-8',{fatal:true});
+ const crc32=data=>{
+  let crc=0xffffffff;
+  for(const v of data){crc^=v;for(let i=0;i<8;i++)crc=(crc>>>1)^((crc&1)?0xedb88320:0);}
+  return(crc^0xffffffff)>>>0;
+ };
+ try{
+  if(bytes.length<22||!sig(0,0x04034b50))return fail('invalid');
+  let eocd=-1;
+  for(let i=bytes.length-22;i>=Math.max(0,bytes.length-65557);i--){
+   if(sig(i,0x06054b50)&&i+22+u16(i+20)===bytes.length){eocd=i;break;}
+  }
+  if(eocd<0||u16(eocd+4)!==0||u16(eocd+6)!==0||
+   u16(eocd+8)!==u16(eocd+10))return fail('invalid');
+  const count=u16(eocd+10),cdSize=u32(eocd+12),cdOffset=u32(eocd+16);
+  if(!count||count>128||cdOffset+cdSize!==eocd)return fail('invalid');
+  const entries=new Map();
+  let totalUncompressed=0,pos=cdOffset;
+  for(let i=0;i<count;i++){
+   if(pos+46>eocd||!sig(pos,0x02014b50))return fail('invalid');
+   const flags=u16(pos+8),method=u16(pos+10);
+   const crc=u32(pos+16),packed=u32(pos+20),size=u32(pos+24);
+   const nameLen=u16(pos+28),extra=u16(pos+30),comment=u16(pos+32);
+   const offset=u32(pos+42),end=pos+46+nameLen+extra+comment;
+   if(end>eocd||!nameLen||nameLen>220||(flags&0x2041)!==0||
+      ![0,8].includes(method)||size>8000000||
+      (packed===0&&size!==0)||
+      (packed>0&&size>packed*250))return fail('invalid');
+   const name=decode.decode(bytes.slice(pos+46,pos+46+nameLen));
+   if(name.startsWith('/')||name.startsWith('\\')||name.includes('\\')||
+      name.split('/').some(part=>part==='..'||part==='.')||
+      /[\u0000-\u001f]/u.test(name))return fail('invalid');
+   const key=name.toLowerCase();
+   if(entries.has(key))return fail('invalid');
+   totalUncompressed+=size;
+   if(totalUncompressed>24000000||offset+30>cdOffset||!sig(offset,0x04034b50))
+    return fail('invalid');
+   const lFlags=u16(offset+6),lMethod=u16(offset+8);
+   const localNameLen=u16(offset+26),localExtraLen=u16(offset+28);
+   const dataStart=offset+30+localNameLen+localExtraLen;
+   if((lFlags&0x2041)!==0||lMethod!==method||
+      localNameLen!==nameLen||dataStart+packed>cdOffset)return fail('invalid');
+   for(let j=0;j<nameLen;j++)
+    if(bytes[offset+30+j]!==bytes[pos+46+j])return fail('invalid');
+   entries.set(key,{name,method,packed,size,crc,dataStart});
+   pos=end;
+  }
+  if(pos!==eocd||!entries.has('[content_types].xml')||
+     !entries.has('_rels/.rels')||!entries.has('word/document.xml'))
+    return fail('invalid');
+  // Comments, redline revisions, notes and embedded chunks may hold legal
+  // obligations not preserved by a single plain-text conversion; deny rather
+  // than misrepresent the resulting preview as a complete document.
+  for(const key of entries.keys()){
+   if(/^word\/(?:comments(?:extended)?\.xml|footnotes\.xml|endnotes\.xml|vbaproject\.bin|embeddings\/)/u.test(key))
+    return fail('review_sensitive');
+  }
+  const readXml=async(name,max=4000000)=>{
+   const e=entries.get(name);
+   if(!e)return null;
+   if(e.size>max)throw Error('XML part exceeds bound');
+   const packed=bytes.slice(e.dataStart,e.dataStart+e.packed);
+   let result;
+   if(e.method===0)result=packed;
+   else{
+    const reader=new Blob([packed]).stream()
+      .pipeThrough(new DecompressionStream('deflate-raw')).getReader();
+    const parts=[];let length=0;
+    try{
+     for(;;){
+      const {done,value}=await reader.read();
+      if(done)break;
+      length+=value.byteLength;
+      if(length>max){await reader.cancel();throw Error('XML inflated beyond bound');}
+      parts.push(value);
+     }
+    }finally{reader.releaseLock();}
+    result=new Uint8Array(length);let offset=0;
+    for(const part of parts){result.set(part,offset);offset+=part.length;}
+   }
+   if(result.length!==e.size||crc32(result)!==e.crc)
+    throw Error('XML size/CRC did not match ZIP directory');
+   return decode.decode(result);
+  };
+  const typeXml=await readXml('[content_types].xml',400000);
+  if(!typeXml?.includes('application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml')||
+     !typeXml.includes('/word/document.xml'))return fail('invalid');
+  const docXml=await readXml('word/document.xml');
+  if(!docXml||!/<w:document(?:\s|>)/u.test(docXml)||
+     !/<w:body(?:\s|>)/u.test(docXml))return fail('invalid');
+  const settings=await readXml('word/settings.xml',400000);
+  const revision=/<w:(?:ins|del|delText|moveFrom|moveTo|moveFromRangeStart|moveToRangeStart|commentReference|commentRangeStart|altChunk)(?:\s|\/|>)/u;
+  const hidden=/<w:(?:vanish|webHidden|specVanish)(?:\s|\/|>)/u;
+  if(revision.test(docXml)||hidden.test(docXml)||
+     (settings&&(/<w:trackRevisions(?:\s|\/|>)/u.test(settings)||hidden.test(settings))))
+   return fail('review_sensitive');
+  const warnings=/<w:tbl(?:\s|>)/u.test(docXml)?['tables_present_review_layout']:[];
+  return {ok:true,warnings};
+ }catch{return fail('invalid');}
+}
+
 const MAX_QA_FILE_BYTES=1500000;
 const MAX_QA_MULTIPART_BYTES=MAX_QA_FILE_BYTES+16384;
 async function boundedBinary(req,max){
@@ -517,6 +628,13 @@ export async function documentExtractApi(req,env,opts={}){
    env.INSTALLATION_ID,principal.tenant_id,principal.user_id,Math.floor(now/86400)).run();
   if(usage?.meta?.changes!==1)return err(429,'Đã đạt giới hạn 12 lượt AI QA mỗi ngày.');
  }catch{return unavailable();}
+ let fidelity={ok:true,warnings:[]};
+ if(ext==='docx'){
+  fidelity=await docxSourcePreflight(bytes);
+  if(!fidelity.ok)return err(422,fidelity.reason==='review_sensitive'?
+    'DOCX có nội dung ẩn, sửa đổi theo dõi, chú thích hoặc phần chưa thể đối chiếu an toàn. Hãy kiểm tra và chốt nội dung trong Word rồi thử lại bằng tệp QA.':
+    'DOCX không phải gói Word hợp lệ hoặc có cấu trúc nén không an toàn. Không đọc tệp này.');
+ }
  let converted;
  try{
   converted=await (opts.convertDocument??((doc,options)=>env.AI.toMarkdown(doc,options)))({
@@ -544,6 +662,7 @@ export async function documentExtractApi(req,env,opts={}){
  return json(200,{
   uc:data.get('uc'),file_name:fileName,file_type:ext,file_size:file.size,
   source_sha256:sha,source_text:extracted,
+  document_warnings:fidelity.warnings,
   mode:'qa_file_text_preview_not_verified',review_required:true,storage:'none',
   note:'Văn bản chuyển đổi tự động có thể thiếu trang quét, bảng, bố cục, chữ xoay/ẩn hoặc chỉnh sửa theo dõi. Phải mở tệp gốc và đối chiếu toàn bộ đoạn trước khi đưa vào nguồn A. Không lưu tệp và chưa gửi nội dung tới mô hình soạn/dịch AI.'
  });
