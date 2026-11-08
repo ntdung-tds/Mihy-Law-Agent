@@ -141,7 +141,7 @@
         ['duplicate_source_ids','Nhãn xuất hiện lặp']
        ]){
         const values=Array.isArray(coverage[field])?
-         coverage[field].filter(id=>/^A[1-9]\\d*$/.test(id)).slice(0,30):[];
+         coverage[field].filter(id=>/^A[1-9]\d*$/.test(id)).slice(0,30):[];
         if(values.length){
          const detail=document.createElement('p');
          detail.textContent=label+': '+values.join(', ');
