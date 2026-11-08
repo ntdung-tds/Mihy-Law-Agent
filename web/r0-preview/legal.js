@@ -18,7 +18,7 @@
     function clearResult(){
       result.hidden=true;output.textContent='';
       byId('legal-qa-sources').replaceChildren();
-      for(const id of ['legal-qa-translation-check','legal-qa-source-coverage']){
+      for(const id of ['legal-qa-translation-check','legal-qa-source-coverage','legal-qa-summary-review']){
        const check=byId(id);
        check.hidden=true;check.replaceChildren();delete check.dataset.state;
       }
@@ -81,6 +81,44 @@
       const note=document.createElement('p');
       note.textContent='Có nhãn [A#] không chứng minh nội dung đã dịch đúng, đủ hoặc tương đương pháp lý. Bắt buộc luật sư đối chiếu từng đoạn nguồn.';
       root.append(note);root.hidden=false;
+    }
+    function showSummaryReview(check){
+      const panel=byId('legal-qa-summary-review');
+      panel.hidden=true;panel.replaceChildren();delete panel.dataset.state;
+      if(!check||typeof check!=='object')return;
+      const status=check.status;
+      if(!['review_required','no_obvious_omission_not_verified'].includes(status))return;
+      const important=Number(check.critical_source_count);
+      const marked=Number(check.marked_critical_count);
+      const missing=Number(check.missing_critical_source_count);
+      const missingNumbers=Number(check.missing_number_count);
+      const missingDates=Number(check.missing_date_count);
+      if(![important,marked,missing,missingNumbers,missingDates].every(
+        n=>Number.isInteger(n)&&n>=0))return;
+      panel.dataset.state=status==='review_required'?'warning':'info';
+      const title=document.createElement('strong');
+      title.textContent=status==='review_required'
+       ?'Cần đối chiếu lại các thông tin có nguy cơ bị bỏ sót'
+       :'Chưa thấy dấu hiệu thiếu qua kiểm tra tự động';
+      panel.append(title);
+      const count=document.createElement('p');
+      count.textContent='Đoạn nghĩa vụ có dẫn nguồn: '+marked+'/'+important+
+       ' · Số cần rà: '+missingNumbers+' · Mốc ngày cần rà: '+missingDates;
+      panel.append(count);
+      const add=(label,values,max)=>{
+       if(!Array.isArray(values)||!values.length)return;
+       const p=document.createElement('p');
+       p.textContent=label+': '+values.slice(0,12).map(String).join(', ')+
+        (max>12?' (và các giá trị khác)':'');
+       panel.append(p);
+      };
+      add('Đoạn nguồn cần đối chiếu',check.missing_critical_source_ids,missing);
+      add('Chữ số cần đối chiếu',check.missing_numbers,missingNumbers);
+      add('Mốc ngày cần đối chiếu',check.missing_dates,missingDates);
+      const disclaimer=document.createElement('p');
+      disclaimer.textContent='Đây chỉ là cảnh báo hình thức. Tóm tắt có thể diễn đạt hoặc lược bỏ chi tiết hợp lệ. Không xác nhận đã đầy đủ ý, đúng nghĩa hay có giá trị pháp lý; luật sư phải đối chiếu nguồn.';
+      panel.append(disclaimer);
+      panel.hidden=false;
     }
     function updateTaskFields(){
       const dual=['UC06','UC08'].includes(uc.value);
@@ -221,6 +259,7 @@
          showTranslationCheck(data.translation_check);
          showSourceCoverage(data.source_coverage);
         }
+        if(currentTask==='UC04')showSummaryReview(data.summary_review);
         byId('legal-qa-result-title').textContent=data.title+' · '+(data.mode==='local_example_only'?'Tìm trong nguồn mẫu':'Bản nháp AI');
         byId('legal-qa-review').textContent=data.review_notice||
           'Chỉ truy xuất từ nguồn giả lập. Chưa xác minh dữ liệu văn bản pháp luật/bản án chính thức.';

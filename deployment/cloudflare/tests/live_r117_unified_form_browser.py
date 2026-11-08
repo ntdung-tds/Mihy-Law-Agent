@@ -43,6 +43,28 @@ def scenario(browser,name,viewport,origin):
             return reply(route,payload={"display_name":"Lawyer QA","plan_code":"demo"})
         if u=="/api/qa/legal/run" and method=="POST":
             data=json.loads(req.post_data)
+            if data["uc"]=="UC04":
+                assert data["matter_id"]==F
+                assert data["synthetic_consent"] is True
+                return reply(route,payload={
+                    "uc":"UC04","title":"Tóm tắt văn bản",
+                    "mode":"ai_draft_not_verified",
+                    "source_hash":"a"*64,"source_anchors":[
+                        {"id":"A1","preview":"Điều 1. Bên A thanh toán"},
+                        {"id":"A2","preview":"Điều 2. Bên B bàn giao"}],
+                    "answer":"[A1] Bên A thanh toán 2,000,000 đồng ngày 15/09/2026.",
+                    "review_notice":"Chỉ là bản tóm tắt QA cần kiểm duyệt.",
+                    "summary_review":{
+                        "status":"review_required",
+                        "critical_source_count":2,"marked_critical_count":1,
+                        "missing_critical_source_count":1,
+                        "missing_critical_source_ids":["A2"],
+                        "source_number_count":3,
+                        "missing_number_count":1,"missing_numbers":["10"],
+                        "source_date_count":2,"missing_date_count":1,
+                        "missing_dates":["20/9/2026"],
+                        "review_required":True}
+                })
             assert data["uc"]=="UC03"
             assert data["matter_id"]==F
             assert data["synthetic_consent"] is True
@@ -408,6 +430,26 @@ def scenario(browser,name,viewport,origin):
     page.goto(origin+"/#uc-UC04",wait_until="domcontentloaded")
     page.wait_for_function("""() => document.querySelector('#legal-qa-source-coverage')?.hidden === true
        && document.querySelector('#legal-qa-output')?.textContent === ''""",timeout=15000)
+    assert not page.locator("#legal-qa-result").is_visible()
+    # R128: synthetic UC04 summary warning is a bounded, human-review-only UI
+    # with original draft retained and no UC03 warning bleed-through.
+    page.locator("#legal-qa-example").click()
+    page.locator("#legal-qa-matter").select_option(F)
+    page.locator("#legal-qa-consent").check()
+    page.locator("#legal-qa-run").click()
+    check=page.locator("#legal-qa-summary-review")
+    check.wait_for(state="visible",timeout=15000)
+    assert check.get_attribute("data-state")=="warning"
+    assert "1/2" in check.inner_text()
+    assert "A2" in check.inner_text()
+    assert "10" in check.inner_text()
+    assert "20/9/2026" in check.inner_text()
+    assert "không" in check.inner_text().lower()
+    assert not page.locator("#legal-qa-source-coverage").is_visible()
+    assert page.locator("#legal-qa-output").inner_text().startswith("[A1] Bên A")
+    page.goto(origin+"/#uc-UC07",wait_until="domcontentloaded")
+    page.wait_for_function("""() => document.querySelector('#legal-qa-summary-review')?.hidden === true
+      && document.querySelector('#legal-qa-output')?.textContent === ''""",timeout=15000)
     assert not page.locator("#legal-qa-result").is_visible()
     assert not errors,(name,errors)
     print(f"PASS {name}: one create/save, D1 details, PDF upload, two-category filter, edit/reload, no overflow")

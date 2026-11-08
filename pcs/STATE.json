@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 119,
-  "updated_at": "2026-11-08T13:25:28.471Z",
+  "revision": 120,
+  "updated_at": "2026-11-08T15:08:02.341Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2809,6 +2809,54 @@
         "remaining": "Signed-in Owner Android and human legal translator acceptance NOT_RUN; actual DOCX/PDF intake pipeline and per-segment legal translation remain unintegrated. No approval to deploy production.",
         "owner_acceptance": "PENDING_R127",
         "srs_change": "SC-030; frozen private SRS v1.1.15 unchanged"
+      },
+      {
+        "id": "AL-R0-UC04-R128-001",
+        "title": "R128 UC04 — cảnh báo nguy cơ bỏ sót nghĩa vụ, số liệu và mốc ngày trong tóm tắt nháp QA",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_OWNER_SIGNED_IN_E2E_PENDING",
+        "branch": "feat/r128-uc04-summary-review-guards",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/178",
+        "scope": "Existing UC04 pasted synthetic QA text; human review aid only, no claims of completeness or legal accuracy. SRS v1.1.15 unchanged.",
+        "implementation": {
+          "backend": "summaryReviewCheck: obligation-related source anchor count/uncited A# IDs; canonical numeric thousands separator and Vietnamese written/explicit numeric date comparison; risk status nonblocking, original model output preserved, bounded 12-item warning arrays.",
+          "ui": "UC04 result compact warning panel in existing responsive layout, count and possible missing source IDs, numerals, dates; textContent only; reset when switching UCs; UC03 review unaffected.",
+          "gates": "QA legal session/tenant/deny ACL, source citations, Workers AI quota and no input/output persistence retained; non-authoritative false-positive caveat explicitly displayed.",
+          "compatibility": "UC04-only summary_review field; UC03/07 and others unchanged; no D1/R2 migrations; production untouched."
+        },
+        "evidence": {
+          "ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42492712381",
+          "ci_executed": "PASS_9_OF_9",
+          "ci_commit": "dc7bfeb129991504cb4fd872cecfaa17da956d90",
+          "unit": "PASS_REAL_API_AND_CANONICAL_NUMERIC_DATE_AND_OBLIGATION_RISK_CASES",
+          "chromium_mobile_desktop": "PASS_SYNTHETIC_UC04_WARNINGS_AND_UC07_CROSS_TASK_RESET",
+          "qa_backend": {
+            "script": "ai-law-standalone-cf-qa",
+            "version": "0f7e0c24-e216-4f4c-b45b-b7d754846a4a",
+            "deployment": "481f5403-e209-4b1f-b539-a9ab9be76f7d",
+            "traffic_percent": 100,
+            "modules": 11,
+            "preserved_modules": 10,
+            "bindings": 12
+          },
+          "qa_site": {
+            "script": "ai-law-web-qa",
+            "version": "08e37ab6-5606-4714-b20c-579a12349008",
+            "deployment": "a5a2f521-fa96-4313-8361-4d6444f02fcd",
+            "traffic_percent": 100,
+            "modules": 27,
+            "preserved_modules": 25,
+            "bindings": 2
+          },
+          "live_source_readback": "PASS_BOTH_QA_WORKERS",
+          "live_owner_android": "NOT_RUN",
+          "real_docx_pdf_summary": "NOT_RUN",
+          "professional_legal_accuracy_review": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "remaining": "User signed-in mobile and actual document-text ingestion still pending; heuristic only flags risks, not guarantees. No customer real data used.",
+        "owner_acceptance": "PENDING_R128",
+        "srs_change": "SC-031"
       }
     ],
     "features": [

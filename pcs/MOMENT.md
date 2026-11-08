@@ -1,12 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `119` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T13:25:28.471Z`.
+- **PCS revision:** `120` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T15:08:02.341Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R128 — UC04 kiểm tra dấu hiệu bỏ sót trong bản tóm tắt (2026-11-08)
+
+- **Owner:** “Ok, bước tiếp theo”, tiếp tục đúng ưu tiên UC04 sau R127. Chỉ áp dụng văn bản **giả lập/QA dán vào**, không mở rộng sang tệp thật hoặc kết luận pháp lý.
+- **Backend:** `summaryReviewCheck(primary,output)` của UC04 kiểm tra đoạn có dấu hiệu nghĩa vụ (`[A#]`) chưa có mã đối chiếu, số liệu và ngày (chuẩn hóa 2.000.000/2,000,000 và ngày 15 tháng 9 năm 2026/15-09-2026). Trả số lượng và tối đa 12 gợi ý mỗi loại, không sửa văn bản mô hình; `review_required=true` kể cả khi kiểm tra không thấy thiếu, không tuyên bố đủ ý hoặc đúng nghĩa. Prompt UC04 yêu cầu dẫn đoạn cho nghĩa vụ/mốc thời gian.
+- **UI:** Cảnh báo gọn, có số lượng nguồn, số liệu và mốc ngày cần rà; dữ liệu chỉ qua textContent, reset khi chuyển sang UC khác. R127 UC03 và R126 lịch sử vẫn giữ.
+- **CI:** [#42492712381](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42492712381) hoàn tất PASS **9/9 nhóm**, Node API/ACL/không lưu nguồn, test định dạng số/ngày, Chromium desktop+mobile tạo cảnh báo và reset UC07. Các regression test UC03 cũ đã được chỉnh lại để chấp nhận panel UC04 mới.
+- **QA deploy/source readback PASS:** Backend `ai-law-standalone-cf-qa` version `0f7e0c24-e216-4f4c-b45b-b7d754846a4a`, deployment `481f5403-e209-4b1f-b539-a9ab9be76f7d`, 100%, 11 modules/12 bindings, chỉ đổi 1 module. Website `ai-law-web-qa` version `08e37ab6-5606-4714-b20c-579a12349008`, deployment `a5a2f521-fa96-4313-8361-4d6444f02fcd`, 100%, 27 modules/2 bindings, chỉ đổi 2 module. Mã QA readback đầy đủ; production/D1/R2 không bị thay đổi.
+- **Chờ:** Owner signed-in Android UC04, tóm tắt PDF/DOCX thật, chuyên gia pháp lý thẩm định độ đủ/đúng `NOT_RUN`. `SC-031`; SRS v1.1.15 giữ nguyên.
 
 ## R127 — UC03 cảnh báo đoạn nguồn chưa đối chiếu (2026-11-08)
 
