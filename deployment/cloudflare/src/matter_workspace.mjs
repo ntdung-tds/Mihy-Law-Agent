@@ -59,6 +59,9 @@ FROM qa_matter_catalog c JOIN qa_matters m
  LEFT JOIN qa_case_details cd ON cd.installation_id=c.installation_id
   AND cd.tenant_id=c.tenant_id AND cd.matter_id=c.matter_id
 WHERE c.installation_id=? AND c.tenant_id=?
+ AND NOT EXISTS(SELECT 1 FROM qa_matter_hides h WHERE
+  h.installation_id=c.installation_id AND h.tenant_id=c.tenant_id
+  AND h.matter_id=c.matter_id)
  AND EXISTS(
   SELECT 1 FROM qa_matter_acl a
   WHERE a.installation_id=c.installation_id AND a.tenant_id=c.tenant_id
@@ -144,6 +147,8 @@ SELECT c.title,c.version FROM qa_matter_catalog c
 JOIN qa_matters m ON m.installation_id=c.installation_id
  AND m.tenant_id=c.tenant_id AND m.matter_id=c.matter_id
 WHERE c.installation_id=? AND c.tenant_id=? AND c.matter_id=?
+ AND NOT EXISTS(SELECT 1 FROM qa_matter_hides h WHERE
+  h.installation_id=c.installation_id AND h.tenant_id=c.tenant_id AND h.matter_id=c.matter_id)
  AND ${WRITE_ACL_SQL} LIMIT 1
 `;
 export const MATTER_RENAME_SQL=`
@@ -151,6 +156,8 @@ UPDATE qa_matter_catalog AS c
 SET title=?,version=version+1,updated_by=?,updated_at=?
 WHERE c.installation_id=? AND c.tenant_id=? AND c.matter_id=?
  AND c.version=?
+ AND NOT EXISTS(SELECT 1 FROM qa_matter_hides h WHERE
+  h.installation_id=c.installation_id AND h.tenant_id=c.tenant_id AND h.matter_id=c.matter_id)
  AND EXISTS(
   SELECT 1 FROM qa_matters m WHERE m.installation_id=c.installation_id
    AND m.tenant_id=c.tenant_id AND m.matter_id=c.matter_id
