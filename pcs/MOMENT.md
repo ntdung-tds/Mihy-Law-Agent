@@ -1,12 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `117` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T10:48:06.204Z`.
+- **PCS revision:** `118` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T11:18:20.251Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R126 — Xem thêm lịch sử theo trang, cuộn riêng mobile (2026-11-08)
+
+- **Lý do:** R125 giữ nhật ký bất biến ở D1 nhưng API chỉ trả tối đa 100 sự kiện, không thể đọc các thay đổi xa hơn. Owner yêu cầu tiếp tục bước kế tiếp. R125 signed-in Android E2E vẫn chờ, không tự coi là nghiệm thu.
+- **API:** GET `/api/qa/cases/:id/events`, mỗi trang 30, keyset theo `occurred_at DESC,event_id DESC`, trả `next_cursor:{at,id}`. Các trang tiếp theo dùng `before_at` và `before_id`, lọc SQL bằng bind variables. Chặn cursor thiếu/thừa/lặp/trái định dạng; tất cả các trang đều xác nhận lại tenant và deny-overrides MatterACL read, đồng thời mask cặp before/after khi không có write.
+- **UI:** Nút `Xem thêm lịch sử` bên dưới vùng cuộn độc lập; append sự kiện không xóa kết quả đã tải, giữ vị trí cuộn; mở/thu gọn từng sự kiện; cơ chế epoch bỏ phản hồi bất đồng bộ cũ khi chuyển/refresh hồ sơ.
+- **CI:** [#42474761235](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42474761235) PASS 9/9 nhóm. Test 67 sự kiện có timestamp trùng, không lặp/bỏ sót khi phân trang, cursor lỗi từ chối, permission checks trên mỗi trang; Chromium mobile+desktop kiểm tra append và scroll, lịch sử cũ.
+- **QA deployed and source readback PASS:** Backend `ai-law-standalone-cf-qa` version `217f45e7-1b25-4a79-9974-a8df2fe01335`, deploy `c3a85db9-4c30-473e-8970-172d7ff24c8a`, 11 modules/12 bindings, chỉ sửa 1 module. Site `ai-law-web-qa` version `57d22f4a-c661-4031-adef-b249c1343b37`, deploy `8bba7423-22af-4309-8378-d099c63ba903`, 27 modules/2 bindings, chỉ sửa 3 modules. Mỗi Worker 100% QA traffic, production không đụng tới. Không migration D1.
+- **Chờ:** Owner authenticated mobile R125/R126 acceptance và live role permission `NOT_RUN`; tiếp tục ưu tiên UC03/04/07 theo issue #156 sau khi xử lý QA chức năng hiện tại. `SC-029`, SRS v1.1.15 giữ nguyên.
 
 ## R125 — Lịch sử chi tiết, bất biến D1 và mobile timeline (2026-11-08)
 
