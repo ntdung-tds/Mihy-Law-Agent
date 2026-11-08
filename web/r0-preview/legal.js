@@ -386,7 +386,15 @@
         fileUse.disabled=true;fileText.textContent='';
         setFileStatus(error?.message||'Không thể đọc tệp QA.',true);
       }finally{
-        if(fileStillSame(current)){fileRead.disabled=false;fileController=null;}
+        if(fileEpoch===current.epoch){
+          if(!fileStillSame(current)){
+            // Silent source/file mutation must not strand a disabled button.
+            resetFileImport();
+            setFileStatus('Tệp, hồ sơ hoặc nguồn A đã thay đổi. Hãy đọc lại tệp QA.',true);
+          }else{
+            fileRead.disabled=false;fileController=null;
+          }
+        }
       }
     });
     fileReviewed.addEventListener('change',()=>{
