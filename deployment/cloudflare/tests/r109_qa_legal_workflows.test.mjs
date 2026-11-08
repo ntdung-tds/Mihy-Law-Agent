@@ -192,5 +192,5 @@ test('R112 malformed UTF-8 JSON bytes fail closed before MatterACL, quota or AI'
  assert.equal(f.providerCalls.length,0);
  assert.equal(f.calls.some(c=>c.sql===LEGAL_MATTER_ACCESS_SQL),false);
  assert.equal(f.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false);
- assert.doesNotMatch(await response.text(),/\\ufffd|source_text/);
+ assert.doesNotMatch(await response.text(),/\uFFFD|source_text/);
 });
