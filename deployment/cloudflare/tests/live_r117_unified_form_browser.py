@@ -334,7 +334,15 @@ def scenario(browser,name,viewport,origin):
         edit=page.locator("#case-mobile-edit")
         assert back.inner_text()=="← Danh sách",back.inner_text()
         assert edit.inner_text()=="Sửa",edit.inner_text()
-        back_box,edit_box=back.bounding_box(),edit.bounding_box()
+        # Snapshot both boxes in one browser task. Two serial Playwright
+        # bounding_box() calls can see different frames during smooth scrolling,
+        # spuriously reporting a 6px offset for truly aligned sibling buttons.
+        back_box,edit_box=page.evaluate("""() => {
+            return ['case-close', 'case-mobile-edit'].map(id => {
+                const r=document.getElementById(id).getBoundingClientRect();
+                return {x:r.x, y:r.y, width:r.width, height:r.height};
+            });
+        }""")
         assert back_box and edit_box
         assert 31<=back_box["height"]<=40 and 31<=edit_box["height"]<=40,(back_box,edit_box)
         assert back_box["width"]<=125 and edit_box["width"]<=90,(back_box,edit_box)
