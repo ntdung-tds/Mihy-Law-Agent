@@ -669,3 +669,11 @@ Continue functional R0 slices on separate task branches while retaining the save
 ## Publication boundary
 
 Synthetic preview source and public-safe PCS notes only. No internal SRS, genuine legal/client data, secrets, screenshots or private Drive identifiers.
+
+
+### R112 — 2026-11-08 · Invalid UTF-8 source regression (branch-only checkpoint)
+- **PASS:** Read `pcs/STATE.json` and `pcs/MOMENT.md` (base revision 99), checked PR #157 OPEN, #158 CLOSED (never reimplement), #159 OPEN, #160 OPEN and #163 OPEN. Reviewed PR #163's fail-closed streaming patch and existing `TextDecoder('utf-8',{fatal:true})` in the QA legal API.
+- **PASS (change authored):** Draft PR #175 adds a synthetic malformed-UTF-8 request test asserting HTTP 400, no MatterACL query, no quota consumption, no Workers AI invocation, and no leaked source content. Only a test file changed; no production code or UI change.
+- **NOT_RUN:** New PR #175 head `aa0888ef893859b938be72bdacb18254d4b31648` has no associated PR workflow runs at initial check; the test is not yet proven executed. Existing CI green on other PRs does not prove this test passed. QA real API/browser E2E NOT_RUN.
+- **BLOCKED:** QA deployment gated on dedicated Node test actually running and passing, reviewed integration order for #159/#160/#163, and real API/browser proof.
+- **Next:** Ensure `.github/workflows/tests.yml` from PR #160 explicitly runs `deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs`; run red/green Node test and CI on integration branch, then only consider QA deploy. SRS v1.1.15 frozen; no Drive/OneDrive/OAuth, real customer data or production changes. Owner final acceptance remains pending.
