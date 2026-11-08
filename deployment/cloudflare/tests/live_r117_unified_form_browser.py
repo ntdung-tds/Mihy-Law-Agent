@@ -570,6 +570,7 @@ def scenario(browser,name,viewport,origin):
     page.wait_for_function("""() =>
        document.getElementById('legal-qa-file-status').dataset.state==='error'""")
     assert "SHA-256" in file_status.inner_text()
+    assert page.locator("#legal-qa-file-extract").is_enabled()
     assert page.locator("#legal-qa-file-preview").is_hidden()
     assert not file_use.is_enabled()
     assert source.input_value()==source_before
@@ -592,6 +593,7 @@ def scenario(browser,name,viewport,origin):
     assert page.locator("#legal-qa-file-preview").is_hidden()
     assert not file_use.is_enabled()
     assert "nguồn A" in file_status.inner_text()
+    assert page.locator("#legal-qa-file-extract").is_enabled()
     assert len([c for c in calls if c==("POST","/api/qa/legal/run")])==run_before
     # Backend blocks oversize multipart and browser must refuse before fetch.
     file_input.set_input_files({"name":"huge_qa.pdf","mimeType":"application/pdf",
