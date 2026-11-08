@@ -161,7 +161,7 @@
 /* R116: real isolated QA case details + private R2 files. No customer data in QA. */
 (() => {
  'use strict';
- const $=id=>document.getElementById(id);
+ const $=id=>typeof document.getElementById==='function'?document.getElementById(id):null;
  const root=$('qa-case-detail'),form=$('case-detail-form'),upload=$('case-r2-upload-form');
  if(!root||!form||!upload)return;
  const uuid=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
