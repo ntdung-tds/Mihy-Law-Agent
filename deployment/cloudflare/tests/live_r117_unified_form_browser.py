@@ -172,7 +172,11 @@ def scenario(browser,name,viewport,origin):
     page.get_by_text("Đã ẩn hồ sơ khỏi danh sách. Dữ liệu và tài liệu vẫn được giữ nguyên.").wait_for(timeout=15000)
     assert cases[0]["hidden"] is True
     assert len(cases)==2 and len(files[I])==1
-    assert page.locator("#matter-list .matter-row").count()==0
+    # Once the hidden practice area disappears, the filter resets to All.
+    # Other live cases remain visible; the hidden case does not.
+    assert page.locator("#matter-list .matter-row").count()==1
+    assert "Hồ sơ QA mẫu B" in page.locator("#matter-list").inner_text()
+    assert "Hồ sơ QA mẫu A" not in page.locator("#matter-list").inner_text()
     assert sum(1 for method,path in calls if method=="DELETE" and "/api/qa/matters/" in path)==0
     width=page.evaluate("document.documentElement.scrollWidth")
     assert width<=viewport["width"]+4,(name,width,viewport)
