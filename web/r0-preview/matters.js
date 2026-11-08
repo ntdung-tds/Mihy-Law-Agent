@@ -27,9 +27,16 @@
   if(screen?.dataset)screen.dataset.mobileMode=mode;
   const onMobile=media.matches;
   const close=$('#case-close');
-  if(close)close.textContent=onMobile?'← Danh sách hồ sơ':'+ Hồ sơ mới';
+  if(close){
+   close.textContent=onMobile?'← Danh sách':'+ Hồ sơ mới';
+   close.setAttribute('aria-label',onMobile?'Quay về danh sách hồ sơ':'Tạo hồ sơ mới');
+  }
   const edit=$('#case-mobile-edit');
-  if(edit)edit.hidden=!(onMobile&&mode==='detail'&&canWrite);
+  if(edit){
+   edit.hidden=!(onMobile&&mode==='detail'&&canWrite);
+   edit.textContent=onMobile?'Sửa':'Chỉnh sửa hồ sơ';
+   edit.setAttribute('aria-label','Chỉnh sửa hồ sơ');
+  }
   const heading=$('#matter-title-heading');
   if(heading)heading.textContent=onMobile?({
    create:'Tạo hồ sơ mới',detail:'Chi tiết hồ sơ',

@@ -798,3 +798,22 @@ body.drawer-open{overflow:hidden}
   min-height:38px;padding:7px 10px;border-radius:9px;font-size:11.5px;
  }
 }
+
+/* R121: mobile detail navigation must NOT stretch to two giant half-width buttons. */
+@media(max-width:720px){
+ #matter-workspace .case-editor-navigation{
+  display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-start;
+  width:100%;gap:7px;min-width:0
+ }
+ #matter-workspace .case-editor-navigation #case-close,
+ #matter-workspace .case-editor-navigation #case-mobile-edit{
+  flex:0 0 auto;width:auto;max-width:100%;min-width:0;
+  min-height:34px;padding:6px 11px;margin:0;
+  border-radius:8px;font-size:12px;font-weight:700;line-height:1.15;
+  text-align:center;white-space:nowrap;overflow-wrap:normal;
+  box-shadow:none
+ }
+ #matter-workspace .case-unified-heading{flex-direction:column;align-items:flex-start;gap:10px}
+ #matter-workspace .case-editor-navigation{order:-1}
+ #matter-workspace .case-unified-heading>div:first-child{min-width:0;width:100%}
+}

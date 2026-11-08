@@ -1,12 +1,23 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `112` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T05:29:22.237Z`.
+- **PCS revision:** `113` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T05:56:26.916Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R121 — Fix false R2 404, missing stored PDF, oversized mobile detail buttons (2026-11-08)
+
+- **Owner QA evidence:** Mobile screenshot shows giant 50%-width `← Danh sách hồ sơ` and `Chỉnh sửa hồ sơ` buttons with forced line wrap. On saving a case with `ai_law_qa_gpt.pdf`, UI reported D1 success, R2 **0/1**, false 404: “Không tìm thấy hồ sơ hoặc không có quyền truy cập”.
+- **Real QA findings:** There is **one D1 file receipt** for that exact QA filename at 2026-11-08 05:35:39 UTC, with the original creator's active read/write grants, no explicit deny, not hidden. **The R2 object for that receipt was missing** when checked through Cloudflare R2 API (404). D1 receipt alone is not proof of a file in storage.
+- **Verified root cause:** R116 code did `INSERT qa_case_files_r2`, triggering `AFTER INSERT` append-only audit in `qa_case_events`. The Worker checked `receipt.meta?.changes!==1`, but Cloudflare D1 **correctly returns changes=2** for file receipt + audit row; it therefore erroneously deleted the R2 object and returned a 404 *after committing the receipt*. Reproduced on the real QA D1 using a synthetic temporary table+trigger: `source_rows=1`, `trigger_rows=1`, `meta.changes=2`; temporary probe schema cleaned.
+- **Backend fix:** Check exact committed D1 file receipt using a separate SELECT, and verify R2 object bytes / SHA-256, never gate on total row-change count. Re-uploading the **same name AND SHA-256** reuses the original file receipt, heals its missing object in the private bucket using supplied file bytes, verifies SHA and returns **200**; no duplicate D1 receipt. Unknown write state never deletes the possibly only R2 copy. Keep existing ACL, tenant, file validators, soft-hide, audit and 10MB cap. Original `ai_law_qa_gpt.pdf` bytes cannot be reconstructed from D1; Owner must select the exact original file in Sửa and save once **after R121 QA fix**.
+- **Mobile fix:** `← Danh sách` and `Sửa` short visible labels with full accessible names; compact 34px navigation pills aligned left and flex 0, no forced wrap. Desktop unchanged.
+- **Test evidence:** [CI #42452269479](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42452269479) **PASS 9/9 executed jobs**, 21 conditional skips; tests include R2 insert with `meta.changes=2`, idempotent duplicate retry, restore missing R2 object and verified download using synthetic fixtures, Chromium mobile 390px physical button geometry and desktop regressions. Additional controlled R2 API synthetic PUT/GET exact bytes/DELETE PASS; no real customer file used.
+- **Live QA deployment:** Backend `ai-law-standalone-cf-qa`: version `fadf2cd1-44c9-427d-b8e7-41e758825c4b`, deployment `36ae8541-fce7-4a2f-9b68-09668b7581d6`, 1/11 module changed, 10 preserved, all 12 bindings unchanged and full source readback PASS. Site `ai-law-web-qa`: version `5de0ff60-63de-4160-869e-9e260571304b`, deployment `809eb329-1301-4d0d-bef0-ad008fbfeadc`, 2/27 modules changed, 25 preserved, both bindings unchanged, source readback PASS. Cloudflare production untouched; no schema migration.
+- **Owner acceptance:** Physical Android visual confirmation and **real signed-in QA repair and download of the Owner's original PDF** remain **NOT_RUN**. The prior file is not yet recovered until the exact local PDF is supplied once through the corrected existing-case upload workflow. PCS revision **113**, SC-024 logged; private frozen SRS v1.1.15 unchanged.
 
 ## R120 — Compact mobile case buttons and refresh (2026-11-08)
 

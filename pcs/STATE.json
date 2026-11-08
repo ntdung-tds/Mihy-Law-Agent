@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 112,
-  "updated_at": "2026-11-08T05:29:01.458Z",
+  "revision": 113,
+  "updated_at": "2026-11-08T05:55:55.898Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2485,6 +2485,82 @@
         },
         "srs_change": "SC-023 presentational only; frozen v1.1.15 unaffected",
         "owner_acceptance": "PENDING_R120"
+      },
+      {
+        "id": "AL-R0-CASE-R2-R121-001",
+        "title": "R121 fix oversized mobile back/edit controls and real D1 audit-trigger false R2 failure",
+        "priority": "P0",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_REAL_D1_TRIGGER_PROBE_PASS_R2_STORAGE_SYNTHETIC_PASS_OWNER_FILE_REPAIR_PENDING",
+        "branch": "fix/r121-mobile-nav-r2-receipt",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/170",
+        "srs": "SC-024 bug fix; frozen v1.1.15 unchanged",
+        "diagnosis": {
+          "error": "D1 saved case but R2 upload returned 0/1 with false 404 and deleted stored object",
+          "real_qa_case_file": "ai_law_qa_gpt.pdf",
+          "d1_file_receipt": "PRESENT_ONE",
+          "r2_object_at_diagnosis": "NOT_FOUND_404",
+          "creator_active_write": "PASS",
+          "hidden_or_explicit_deny": "NONE",
+          "cause": "D1 AFTER INSERT file audit trigger increments meta.changes from 1 to 2. Old code required ===1, removed R2 object and returned false 404 after real receipt insert",
+          "real_d1_trigger_probe": {
+            "source_rows": 1,
+            "audit_rows": 1,
+            "meta_changes": 2,
+            "temporary_schema_cleaned": true
+          }
+        },
+        "changes": {
+          "mobile": "34px compact nonstretch back/edit controls, visible texts ← Danh sách and Sửa; full accessible names",
+          "r2": "Verify durable D1 receipt and private R2 bytes/SHA256, no meta.changes===1 assumption; identical retry reuses receipt, restores missing R2 object, no duplicate metadata",
+          "unresolved_prior_object": "Owner must choose exact original local PDF to restore missing content; not auto-reconstructed",
+          "d1_schema": "UNCHANGED",
+          "auth": "UNCHANGED",
+          "acl": "UNCHANGED",
+          "r119_soft_hide": "UNCHANGED",
+          "desktop": "UNCHANGED",
+          "production": "UNTOUCHED"
+        },
+        "qa_backend": {
+          "worker": "ai-law-standalone-cf-qa",
+          "deployment": "36ae8541-fce7-4a2f-9b68-09668b7581d6",
+          "version": "fadf2cd1-44c9-427d-b8e7-41e758825c4b",
+          "modules": 11,
+          "modified": [
+            "qa_case_r2.mjs"
+          ],
+          "preserved": 10,
+          "bindings_preserved": 12,
+          "source_readback": "PASS"
+        },
+        "qa_site": {
+          "worker": "ai-law-web-qa",
+          "deployment": "809eb329-1301-4d0d-bef0-ad008fbfeadc",
+          "version": "5de0ff60-63de-4160-869e-9e260571304b",
+          "modules": 27,
+          "modified": [
+            "workspace_css.mjs",
+            "workspace_matters.mjs"
+          ],
+          "preserved": 25,
+          "bindings_preserved": 2,
+          "source_readback": "PASS"
+        },
+        "tests": {
+          "ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42452269479",
+          "executed": "PASS_9_OF_9",
+          "conditional_skipped": 21,
+          "r116_audit_trigger_meta_changes2": "PASS_SYNTHETIC",
+          "r121_existing_receipt_repair": "PASS_SYNTHETIC",
+          "r121_idempotent_replay": "PASS_SYNTHETIC",
+          "chromium_mobile_nav_pills": "PASS",
+          "chromium_desktop": "PASS",
+          "real_qa_d1_trigger_probe": "PASS",
+          "qa_r2_bucket_synthetic_put_get_cleanup": "PASS",
+          "owner_authenticated_exact_file_repair": "NOT_RUN",
+          "owner_r2_verified_download": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "owner_acceptance": "PENDING_R121"
       }
     ],
     "features": [
