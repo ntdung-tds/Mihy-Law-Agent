@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `115` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T08:34:55.543Z`.
+- **PCS revision:** `116` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T10:00:30.715Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R124 — Scroll + thu gọn trên mobile (2026-11-08)
+
+- **Owner:** “Nhớ làm scroll và thu gọn nhé” sau góp ý icon PDF/Word và màn tệp mobile. Implement UI-only trên R123; `#case-r2-details` là native `details/summary` có nút mở/thu gọn và số tệp trong tiêu đề. Giữ `#case-r2-upload-form` cho tương thích cũ.
+- **Cuộn độc lập:** `#case-r2-list` giới hạn 340px desktop / `min(37dvh,320px)` mobile; `#case-history-list` giới hạn 300px desktop / `min(36dvh,300px)` mobile. Cả hai cuộn dọc bên trong khi có nhiều mục, hỗ trợ cảm ứng và bàn phím, tránh card dài gây tràn màn hình; lịch sử có thể thu gọn (giữ `details` cũ).
+- **QA test:** [CI #42469244931](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42469244931) PASS 9/9 nhóm thực thi, Chromium desktop/mobile với danh sách tổng hợp dài, đóng/mở, cuộn, đếm tệp, tải xuống còn hoạt động và không tràn ngang.
+- **Deploy QA:** `ai-law-web-qa` version `139028a3-5776-42b7-aba5-36e20a391c9a`, deployment `9b580c7e-0386-46e9-b73c-4cc3bc5897d8`, 100% traffic; đọc lại mã PASS, bảo toàn 24/27 modules và 2 bindings. Backend D1/R2 + production không thay đổi.
+- **Chờ:** Owner nghiệm thu mobile thực `NOT_RUN`; yêu cầu lịch sử lưu vết **chi tiết theo trường** vẫn còn pending từ trước (R124 chỉ xử lý UI cuộn/thu gọn). `SC-027` ghi nhận UI; SRS v1.1.15 giữ nguyên.
 
 ## R123 — Nhận diện file theo icon PDF/Word, mobile gọn (2026-11-08)
 

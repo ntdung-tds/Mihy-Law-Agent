@@ -924,3 +924,64 @@ body.drawer-open{overflow:hidden}
  }
  #matter-workspace #case-r2-list .case-file-actions{grid-column:2;justify-self:end}
 }
+
+/* R124 — bounded independent scrolling and accessible collapse for dense case files/history. */
+#matter-workspace #case-r2-details{
+ display:block;min-width:0;box-sizing:border-box;
+}
+#matter-workspace #case-r2-details>summary{
+ display:flex;align-items:center;justify-content:space-between;
+ flex-wrap:wrap;gap:8px;min-height:38px;padding:2px 0 10px;
+ cursor:pointer;list-style:none;user-select:none;
+}
+#matter-workspace #case-r2-details>summary::-webkit-details-marker{display:none}
+#matter-workspace #case-r2-details>summary::marker{content:''}
+#matter-workspace #case-r2-details>summary h3{
+ margin:0;font-size:15px;line-height:1.35;
+}
+#matter-workspace #case-r2-details>summary small{
+ display:inline-flex;align-items:center;gap:6px;margin:0;
+ color:#526781;font-size:11px;font-weight:650;line-height:1.2;
+}
+#matter-workspace .case-r2-chevron{
+ display:inline-block;flex:none;width:8px;height:8px;margin-left:3px;
+ border-right:2px solid currentColor;border-bottom:2px solid currentColor;
+ transform:rotate(45deg);transition:transform .14s ease;
+}
+#matter-workspace #case-r2-details:not([open]) .case-r2-chevron{transform:rotate(-45deg)}
+#matter-workspace #case-r2-details:not([open])>summary{padding-bottom:2px}
+#matter-workspace #case-r2-details>summary:focus-visible,
+#matter-workspace #case-history-details>summary:focus-visible,
+#matter-workspace #case-r2-list:focus-visible{
+ outline:2px solid #397bb7;outline-offset:2px;border-radius:5px;
+}
+#matter-workspace #case-r2-list{
+ max-height:340px;overflow-y:auto;overflow-x:hidden;
+ overscroll-behavior-y:contain;scrollbar-width:thin;
+ padding-right:3px;-webkit-overflow-scrolling:touch;
+}
+#matter-workspace #case-history-list{
+ max-height:300px;overflow-y:auto;overflow-x:hidden;
+ overscroll-behavior-y:contain;scrollbar-width:thin;
+ padding-right:3px;-webkit-overflow-scrolling:touch;
+}
+#matter-workspace #case-history-details>summary{
+ cursor:pointer;min-height:38px;padding:8px 0;
+}
+@media(max-width:720px){
+ #matter-workspace #case-r2-details{padding:9px 11px}
+ #matter-workspace #case-r2-details>summary{
+  gap:6px;min-height:34px;padding-bottom:6px;
+ }
+ #matter-workspace #case-r2-details>summary h3{font-size:14px}
+ #matter-workspace #case-r2-details>summary small{font-size:10.5px}
+ #matter-workspace #case-r2-list{
+  max-height:min(37dvh,320px);overflow-y:auto;
+  scrollbar-width:thin;padding-right:2px;
+ }
+ #matter-workspace #case-history-list{max-height:min(36dvh,300px)}
+ #matter-workspace #case-history-details>summary{font-size:12.5px}
+}
+@media(prefers-reduced-motion:reduce){
+ #matter-workspace .case-r2-chevron{transition:none}
+}

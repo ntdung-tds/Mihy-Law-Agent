@@ -8,6 +8,7 @@
  const categoryFilter=$('#matter-category-filter'),filePicker=$('#case-r2-file');
  const title=$('#matter-title'),save=$('#matter-create'),saveState=$('#case-save-state');
  const pendingList=$('#case-selected-files'),fileCount=$('#case-r2-count');
+ const fileDetails=$('#case-r2-details'),fileSummaryCount=$('#case-r2-summary-count');
  const uuid=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
  const mimes={pdf:'application/pdf',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'};
  const fields=['reference','category','status','priority','assignee_user_id',
@@ -111,6 +112,8 @@
   workspaceGeneration++;
   currentId='';caseVersion=0;titleVersion=0;originalTitle='';originalDetails=null;canWrite=true;
   form.reset();title.value='';filePicker.value='';pendingFiles=[];renderPending();
+  if(fileDetails)fileDetails.open=true;
+  if(fileSummaryCount)fileSummaryCount.textContent='0 tệp';
   const assignee=field('assignee_user_id');
   assignee.replaceChildren(makeOption('Tôi phụ trách (mặc định)',''));
   for(const control of form.querySelectorAll('input,textarea,select'))control.disabled=false;
@@ -321,6 +324,7 @@
    if(scope!==workspaceGeneration||id!==currentId)return;
    container.replaceChildren();
    const files=Array.isArray(data.files)?data.files:[];
+   if(fileSummaryCount)fileSummaryCount.textContent=files.length+' tệp';
    if(fileCount)fileCount.textContent=files.length+' tệp đang hiển thị · giới hạn 50 bản ghi tệp/hồ sơ (kể cả tệp đã ẩn)';
    if(!files.length){const p=document.createElement('p');p.textContent='Chưa có tệp đã lưu.';container.append(p);}
    for(const file of files){

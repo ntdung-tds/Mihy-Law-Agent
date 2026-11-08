@@ -136,6 +136,17 @@ def scenario(browser,name,viewport,origin):
     assert pdf_icon.first.locator("svg text").text_content()=="PDF"
     first_row=page.locator("#case-r2-list .case-file-row").first.bounding_box()
     assert first_row and first_row["height"]<=108,(name,first_row)
+    details=page.locator("#case-r2-details")
+    assert details.get_attribute("open") is not None, "attached documents start expanded"
+    assert page.locator("#case-r2-summary-count").inner_text()=="1 tệp"
+    assert page.locator("#case-r2-list").is_visible()
+    details.locator("summary").click()
+    assert details.get_attribute("open") is None, "collapse should work"
+    assert not page.locator("#case-r2-list").is_visible()
+    assert page.locator("#case-r2-summary-count").is_visible(), "count must remain visible while collapsed"
+    details.locator("summary").click()
+    assert details.get_attribute("open") is not None
+    assert page.locator("#case-r2-list").is_visible()
     assert page.locator("#case-r2-list .case-file-download").is_enabled(), "download must remain usable after saving on mobile"
     with page.expect_download(timeout=15000) as dl:
         page.locator("#case-r2-list .case-file-download").click()
@@ -277,6 +288,33 @@ def scenario(browser,name,viewport,origin):
     word_row=page.locator("#case-r2-list .case-file-row").first.bounding_box()
     assert word_row and word_row["height"]<=108,(name,word_row)
     assert page.locator("#case-r2-list .case-file-download").is_enabled()
+    # R124: long file lists scroll INSIDE their viewport, while the summary and
+    # action controls remain compact. Use cloned synthetic rows (no network).
+    scroll_state=page.locator("#case-r2-list").evaluate("""el => {
+      const template=el.querySelector('.case-file-row');
+      for(let i=0;i<16;i++)el.append(template.cloneNode(true));
+      const overflow=getComputedStyle(el).overflowY;
+      const capped=el.scrollHeight>el.clientHeight;
+      el.scrollTop=el.scrollHeight;
+      return {overflow,capped,scrollTop:el.scrollTop,height:el.clientHeight};
+    }""")
+    assert scroll_state["overflow"]=="auto" and scroll_state["capped"],(name,scroll_state)
+    assert scroll_state["scrollTop"]>0 and scroll_state["height"]<=342,(name,scroll_state)
+    history=page.locator("#case-history-details")
+    assert history.is_visible()
+    assert history.get_attribute("open") is None
+    history.locator("summary").click()
+    assert history.get_attribute("open") is not None
+    history_scroll=page.locator("#case-history-list").evaluate("""el => {
+      for(let i=0;i<16;i++){
+        const p=document.createElement('p');p.textContent='Sự kiện QA '+i;el.append(p);
+      }
+      el.scrollTop=el.scrollHeight;
+      return {overflow:getComputedStyle(el).overflowY,capped:el.scrollHeight>el.clientHeight,scrollTop:el.scrollTop};
+    }""")
+    assert history_scroll["overflow"]=="auto" and history_scroll["capped"] and history_scroll["scrollTop"]>0,(name,history_scroll)
+    history.locator("summary").click()
+    assert history.get_attribute("open") is None
     width=page.evaluate("document.documentElement.scrollWidth")
     assert width<=viewport["width"]+4,(name,width,viewport)
     assert not errors,(name,errors)

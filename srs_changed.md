@@ -207,3 +207,9 @@
 - Hiển thị icon SVG file-shaped theo loại định dạng: PDF đỏ, Word DOC/DOCX xanh và fallback xám (không thay đổi danh sách file được backend chấp nhận: PDF/DOCX). Áp dụng cho cả danh sách tệp đã lưu và tệp đang chọn chờ lưu.
 - Layout tệp gọn, tên tối đa 2 dòng, dung lượng/ngày tải, giữ nút tải độc lập trong chế độ xem. Không thay đổi API/D1/R2/ACL/kiểm toán; yêu cầu lịch sử thay đổi chi tiết riêng vẫn pending.
 - Test [CI #42463186412](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42463186412) PASS 9/9; site QA 100% version `83381d39-a115-4285-a55d-c43fe7218aac`, deployment `83f2e212-c0f8-439c-be03-bdd896b39942`, 25/27 modules và 2 bindings bảo toàn, đọc lại mã PASS. Owner Android acceptance NOT_RUN, production untouched; frozen SRS v1.1.15 unchanged.
+
+## SC-027 — 2026-11-08 — Scroll và thu gọn danh sách tệp/lịch sử mobile (QA UI-only)
+
+- Tệp: thêm `details/summary` đóng/mở được, tiêu đề hiển thị số tệp ngay khi thu gọn; giữ ID container cũ và icon PDF/Word R123. Danh sách nhiều tệp cuộn trong chiều cao giới hạn, không làm kéo dài toàn bộ màn hình.
+- Lịch sử: giữ vùng `details` đóng/mở sẵn có, thêm vùng cuộn có giới hạn chiều cao và keyboard-accessible khi có nhiều sự kiện; **không** tuyên bố đã thực hiện lưu vết chi tiết theo trường, phần backend này còn chờ.
+- Test CI [#42469244931](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42469244931) 9/9 PASS, Chromium desktop/mobile. QA deployed at 100% version `139028a3-5776-42b7-aba5-36e20a391c9a`, deployment `9b580c7e-0386-46e9-b73c-4cc3bc5897d8`; live readback pass. Owner signed-in Android visual check NOT_RUN. Backend, D1/R2, production untouched; SRS v1.1.15 baseline unchanged.
