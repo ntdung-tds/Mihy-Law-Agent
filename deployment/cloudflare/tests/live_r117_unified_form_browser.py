@@ -3,6 +3,7 @@ Synthetic HTTP API only. No account, live Cloudflare, provider or real documents
 """
 import json
 import hashlib
+import uuid
 import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -67,16 +68,29 @@ def scenario(browser,name,viewport,origin):
                 c["details"]={k:v for k,v in data.items() if k!="expected_version"}
                 return reply(route,payload={"id":c["id"],"version":c["version"],"saved":True})
             if u==path+"/files" and method=="GET":
-                return reply(route,payload={"files":files[c["id"]]})
+                return reply(route,payload={"files":[f for f in files[c["id"]] if not f.get("hidden")]})
             if u==path+"/files" and method=="POST":
                 body=req.post_data_buffer
                 assert body.startswith(b"%PDF-")
                 assert body[-5:].endswith(b"%%EOF")
                 digest=hashlib.sha256(body).hexdigest()
-                file=dict(id=F,name="QA evidence.pdf",mime_type="application/pdf",bytes=len(body),
+                file=dict(id=str(uuid.uuid5(uuid.NAMESPACE_DNS,c["id"]+":"+str(len(files[c["id"]])))),
+                    name=req.headers.get("x-file-name","QA%20evidence.pdf").replace("%20"," "),
+                    mime_type="application/pdf",bytes=len(body),
                     sha256=digest,created_at=1800000000)
                 files[c["id"]].append(file)
                 return reply(route,201,file)
+            for f in files[c["id"]]:
+                if u==path+"/files/"+f["id"]+"/download" and method=="GET":
+                    if f.get("hidden"):return reply(route,404,{"error":"hidden"})
+                    data=b"%PDF-1.4\\nSynthetic QA document only\\n%%EOF"
+                    return route.fulfill(status=200,content_type="application/pdf",body=data,
+                        headers={"Content-Length":str(len(data))})
+                if u==path+"/files/"+f["id"] and method=="PATCH":
+                    assert json.loads(req.post_data)=={"action":"hide"}
+                    if f.get("hidden"):return reply(route,404,{"error":"hidden"})
+                    f["hidden"]=True
+                    return reply(route,payload={"id":f["id"],"hidden":True,"physical_deleted":False})
             if u==path+"/events":
                 return reply(route,payload={"events":[{"action":"details_saved","created_at":1800000000}]})
             if u=="/api/qa/matters/"+c["id"] and method=="PATCH":
@@ -88,7 +102,7 @@ def scenario(browser,name,viewport,origin):
                 c["title_version"]+=1;c["title"]=v["title"]
                 return reply(route,payload={"id":c["id"],"title":c["title"],"version":c["title_version"]})
         return reply(route,404,{"error":"synthetic unavailable"})
-    context=browser.new_context(viewport=viewport)
+    context=browser.new_context(viewport=viewport,accept_downloads=True)
     page=context.new_page()
     errors=[]
     page.on("pageerror",lambda e:errors.append(str(e)))
@@ -113,11 +127,42 @@ def scenario(browser,name,viewport,origin):
     page.locator("#matter-create").click()
     page.get_by_text("Đã lưu hồ sơ và 1 tệp vào R2 thành công.").wait_for(timeout=15000)
     assert len(cases)==1 and len(files[I])==1,(cases,files)
+    assert page.locator("#case-r2-list .case-file-download").is_enabled(), "download must remain usable after saving on mobile"
+    with page.expect_download(timeout=15000) as dl:
+        page.locator("#case-r2-list .case-file-download").click()
+    assert dl.value.suggested_filename=="QA evidence.pdf",dl.value.suggested_filename
+    page.get_by_text("Tải tệp thành công, đã đối chiếu SHA-256.").wait_for(timeout=15000)
+    # R122: user can choose 2 files together, then add another one before one Save.
+    if name=="mobile":page.locator("#case-mobile-edit").click()
+    docs=[
+        {"name":"QA evidence B.pdf","mimeType":"application/pdf",
+         "buffer":b"%PDF-1.4\\nSynthetic QA document only\\n%%EOF"},
+        {"name":"QA evidence C.pdf","mimeType":"application/pdf",
+         "buffer":b"%PDF-1.4\\nSynthetic QA document only\\n%%EOF"}
+    ]
+    page.locator("#case-r2-file").set_input_files(docs)
+    assert page.locator("#case-selected-files .case-pending-row").count()==2
+    page.locator("#case-r2-file").set_input_files({
+      "name":"QA evidence D.pdf","mimeType":"application/pdf",
+      "buffer":b"%PDF-1.4\\nSynthetic QA document only\\n%%EOF"})
+    assert page.locator("#case-selected-files .case-pending-row").count()==3
+    page.locator("#matter-create").click()
+    page.get_by_text("Đã lưu hồ sơ và 3 tệp vào R2 thành công.").wait_for(timeout=15000)
+    assert len(files[I])==4,(name,files[I])
+    assert page.locator("#case-r2-list .case-file-download").count()==4
+    assert page.locator("#case-r2-list .case-file-download").first.is_enabled()
+    if name=="mobile":page.locator("#case-mobile-edit").click()
+    page.locator("#case-r2-list .case-file-hide").first.click()
+    page.locator("#case-r2-list .case-file-confirm-yes").click()
+    page.get_by_text("Đã ẩn tệp khỏi danh sách; dữ liệu gốc vẫn còn trên R2.").wait_for(timeout=15000)
+    assert len(files[I])==4 and sum(bool(f.get("hidden")) for f in files[I])==1
+    assert page.locator("#case-r2-list .case-file-download").count()==3
+    if name=="mobile":page.locator("#case-close").click()
     assert cases[0]["details"]["reference"]=="QA-LD-001"
     assert page.locator("#matter-list .matter-row").count()==1
-    assert page.locator("#case-r2-list .matter-row").count()==1
+    assert page.locator("#case-r2-list .matter-row").count()==3
     assert sum(1 for method,path in calls if method=="POST" and path=="/api/qa/matters")==1
-    assert sum(1 for method,path in calls if method=="POST" and path.endswith("/files"))==1
+    assert sum(1 for method,path in calls if method=="POST" and path.endswith("/files"))==4
     if name=="mobile":
         assert page.locator("#matter-workspace").get_attribute("data-mobile-mode")=="detail"
         assert page.locator("#case-mobile-edit").is_visible()
@@ -182,7 +227,7 @@ def scenario(browser,name,viewport,origin):
     page.get_by_text("Đã lưu hồ sơ thành công.").wait_for(timeout=15000)
     assert ("PATCH","/api/qa/cases/"+I) in calls,calls
     assert cases[0]["details"]["summary"]=="Nội dung QA đã cập nhật"
-    assert page.locator("#case-r2-list .matter-row").count()==1
+    assert page.locator("#case-r2-list .matter-row").count()==3
     if name=="mobile":
         page.locator("#case-close").click()
         assert page.locator("#matter-list").is_visible()
@@ -198,7 +243,7 @@ def scenario(browser,name,viewport,origin):
     page.locator("#matter-list .case-hide-approve").click()
     page.get_by_text("Đã ẩn hồ sơ khỏi danh sách. Dữ liệu và tài liệu vẫn được giữ nguyên.").wait_for(timeout=15000)
     assert cases[0]["hidden"] is True
-    assert len(cases)==2 and len(files[I])==1
+    assert len(cases)==2 and len(files[I])==4
     # Once the hidden practice area disappears, the filter resets to All.
     # Other live cases remain visible; the hidden case does not.
     assert page.locator("#matter-list .matter-row").count()==1
