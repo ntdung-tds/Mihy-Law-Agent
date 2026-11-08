@@ -13,7 +13,7 @@ const NOW=1800000000;
 const PDF=new TextEncoder().encode('%PDF-1.4\nQA synthetic, no client data.\n%%EOF');
 const sha=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
 function fixture({role='lawyer',session=true,allowed=true,write=true,r2=true}={}){
- let receipt=null;
+ let receipt=null,hidden=false;
  const events=[],objects=new Map(),calls=[];
  const db={prepare(sql){return {bind(...params){
   calls.push({sql,params});
@@ -22,19 +22,24 @@ function fixture({role='lawyer',session=true,allowed=true,write=true,r2=true}={}
     if(sql.includes('FROM qa_sessions s'))return session?{user_id:U,tenant_id:T,role_key:role}:null;
     if(sql===CASE_ACL_SQL)return allowed&&((params[4]!=='write')||write)?{allowed:1}:null;
     if(sql.includes('SELECT COUNT(*) AS n FROM qa_case_files_r2'))return {n:receipt?1:0};
-    if(sql.includes('SELECT file_id,file_name,mime_type,byte_length,sha256,object_key'))return receipt;
+    if(sql.includes('SELECT f.file_id'))return hidden?null:receipt;
+    if(sql.includes('SELECT hidden_by FROM qa_case_file_hides'))return hidden?{hidden_by:U}:null;
     if(sql.includes('SELECT version FROM qa_case_details'))return null;
     if(sql.includes("SELECT 1 AS ok FROM qa_memberships"))return {ok:1};
     if(sql.includes('FROM qa_matter_catalog c LEFT JOIN qa_case_details'))return {title:'Hồ sơ QA mẫu',created_at:NOW,version:null};
     return null;
    },
    async all(){
-    if(sql.includes('FROM qa_case_files_r2 WHERE'))return {results:receipt?[receipt]:[]};
+    if(sql.includes('FROM qa_case_files_r2 f WHERE'))return {results:receipt&&!hidden?[receipt]:[]};
     if(sql.includes('FROM qa_case_events WHERE'))return {results:events};
     if(sql.includes('FROM qa_memberships m LEFT JOIN'))return {results:[{user_id:U,label:'QA Lawyer'}]};
     return {results:[]};
    },
    async run(){
+    if(sql.includes('INSERT INTO qa_case_file_hides')){
+     if(!allowed||!write||!receipt||hidden)return {meta:{changes:0}};
+     hidden=true;return {meta:{changes:1}};
+    }
     if(sql.includes('INSERT INTO qa_case_files_r2')){
      if(!allowed||!write)return {meta:{changes:0}};
      receipt={file_id:params[3],file_name:params[4],mime_type:params[5],
@@ -132,6 +137,40 @@ test('R121: D1 audit-trigger changes=2 is success; repeat/repair reuses receipt 
  const downloaded=await caseR2Api(req(path+'/'+firstInfo.id+'/download'),f.env,{now:NOW});
  assert.equal(downloaded.status,200,await downloaded.clone().text());
  assert.deepEqual(new Uint8Array(await downloaded.arrayBuffer()),PDF);
+});
+test('R122: soft-hide attachment is ACL-scoped, immutable metadata only; R2 bytes preserved',async()=>{
+ const f=fixture();const path=root+'/files';
+ const created=await caseR2Api(req(path,'POST',PDF,{
+  'Content-Type':'application/pdf','X-File-Name':'QA%20sample.pdf'}),f.env,{now:NOW});
+ assert.equal(created.status,201);
+ const id=(await created.json()).id;
+ assert.equal((await caseR2Api(req(path+'/'+id,'PATCH',JSON.stringify({action:'delete'}),
+  {'Content-Type':'application/json'}),f.env,{now:NOW})).status,400);
+ assert.equal((await caseR2Api(req(path+'/'+id,'PATCH',JSON.stringify({action:'hide'}),
+  {'Content-Type':'application/json',Origin:'https://evil.invalid'}),f.env,{now:NOW})).status,403);
+ assert.equal((await caseR2Api(req(path+'/'+id,'PATCH',JSON.stringify({action:'hide'}),
+  {'Content-Type':'application/json'}),fixture({allowed:false}).env,{now:NOW})).status,404);
+ const res=await caseR2Api(req(path+'/'+id,'PATCH',JSON.stringify({action:'hide'}),
+  {'Content-Type':'application/json'}),f.env,{now:NOW});
+ assert.equal(res.status,200,await res.clone().text());
+ assert.deepEqual(await res.json(),{id,hidden:true,physical_deleted:false});
+ assert.equal((await (await caseR2Api(req(path),f.env,{now:NOW})).json()).files.length,0);
+ assert.equal((await caseR2Api(req(path+'/'+id+'/download'),f.env,{now:NOW})).status,404);
+ assert.equal((await caseR2Api(req(path+'/'+id,'PATCH',JSON.stringify({action:'hide'}),
+  {'Content-Type':'application/json'}),f.env,{now:NOW})).status,404);
+ assert.equal(f.objects.size,1);
+ assert.ok(f.calls.some(x=>x.sql.includes('INSERT INTO qa_case_file_hides')&&x.sql.includes("effect='deny'")));
+});
+test('R122: exact private D1 migration uses immutable tombstones without DELETE physical',()=>{
+ const migration=readFileSync('deployment/cloudflare/migrations/0019_r122_case_file_soft_hide.sql','utf8');
+ const html=readFileSync('web/r0-preview/index.html','utf8');
+ const js=readFileSync('web/r0-preview/matters.js','utf8');
+ assert.match(migration,/qa_case_file_hides_no_update/);
+ assert.match(migration,/qa_case_file_hides_no_delete/);
+ assert.match(html,/id="case-r2-file" name="case_files" type="file" multiple/);
+ assert.match(html,/id="case-selected-files"/);
+ assert.match(js,/form\.querySelectorAll\('input,textarea,select'\)/);
+ assert.doesNotMatch(js,/form\.querySelectorAll\('input,textarea,select,button'\)/);
 });
 test('R116: deny-overrides, session, CSRF, unsupported types and filenames fail closed',async()=>{
  assert.equal((await caseR2Api(req(root),fixture({session:false}).env,{now:NOW})).status,401);
