@@ -30,6 +30,34 @@ test('R112: the QA form belongs to exactly one isolated workflow screen with a d
  assert.match(html,/id="workflow-back"/);
  assert.match(css,/view-workflow/);
 });
+test('R113 P0 regression: all routed panels are true siblings, never nested inside a hidden assistant',()=>{
+ const sectionStack=[];
+ const opened=new Set();
+ const closed=new Set();
+ const tags=html.matchAll(/<\/?section\b[^>]*>/g);
+ for(const match of tags){
+  const tag=match[0];
+  if(tag.startsWith('</')){
+   assert.ok(sectionStack.length>0,'Orphan closing section');
+   const id=sectionStack.pop();
+   if(id)closed.add(id);
+  }else{
+   const id=tag.match(/\bid="(view-[^"]+)"/)?.[1]||null;
+   if(id){
+     assert.ok(!sectionStack.some(x=>x?.startsWith('view-')),
+       id+' must not be nested in an invisible parent view panel');
+     opened.add(id);
+   }
+   sectionStack.push(id);
+  }
+ }
+ assert.equal(sectionStack.length,0,'All routed section tags must close correctly');
+ assert.deepEqual([...opened].sort(),
+  ['view-overview','view-documents','view-assistant','view-workflow','view-research'].sort());
+ assert.deepEqual([...closed].sort(),[...opened].sort());
+ assert.match(html,/<button[^>]*id="workflow-back"[^>]*data-go="assistant"/);
+});
+
 test('R112: deep links, safe switching, and task-specific fields do not reuse prior results or input',()=>{
  assert.match(app,/uc-\(UC/);
  assert.match(legal,/ai-law:workflow-open/);
