@@ -114,9 +114,12 @@ def scenario(browser,name,viewport,origin):
     page.locator("#matter-category-filter").select_option("Lao động")
     assert page.locator("#matter-list .matter-row").count()==1
     page.locator("#matter-list .matter-row button").click()
+    page.get_by_text("Đã mở hồ sơ. Chỉnh sửa hoặc chọn thêm tệp rồi bấm “Lưu thay đổi”.").wait_for(timeout=15000)
+    assert page.locator("#matter-create").inner_text()=="Lưu thay đổi"
     page.locator('[name="summary"]').fill("Nội dung QA đã cập nhật")
     page.locator("#matter-create").click()
     page.get_by_text("Đã lưu hồ sơ thành công.").wait_for(timeout=15000)
+    assert ("PATCH","/api/qa/cases/"+I) in calls,calls
     assert cases[0]["details"]["summary"]=="Nội dung QA đã cập nhật"
     assert page.locator("#case-r2-list .matter-row").count()==1
     width=page.evaluate("document.documentElement.scrollWidth")
