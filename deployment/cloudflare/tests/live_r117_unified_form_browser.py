@@ -89,6 +89,14 @@ def scenario(browser,name,viewport,origin):
     page.on("pageerror",lambda e:errors.append(str(e)))
     page.route("**/api/qa/**",intercepted)
     page.goto(origin+"/#documents",wait_until="domcontentloaded")
+    if name=="mobile":
+        # User requirement: no create form before tapping "Tạo mới".
+        page.locator("#matter-list").wait_for(state="visible",timeout=15000)
+        assert not page.locator("#matter-form").is_visible(),"mobile starts list-first"
+        assert page.locator("#upload-btn").is_visible()
+        page.locator("#upload-btn").click()
+        page.locator("#matter-form").wait_for(state="visible")
+        assert not page.locator("#matter-list").is_visible()
     page.locator("#matter-title").fill("Hồ sơ QA mẫu A")
     page.locator('[name="reference"]').fill("QA-LD-001")
     page.locator('[name="category"]').fill("Lao động")
@@ -105,16 +113,33 @@ def scenario(browser,name,viewport,origin):
     assert page.locator("#case-r2-list .matter-row").count()==1
     assert sum(1 for method,path in calls if method=="POST" and path=="/api/qa/matters")==1
     assert sum(1 for method,path in calls if method=="POST" and path.endswith("/files"))==1
+    if name=="mobile":
+        assert page.locator("#matter-workspace").get_attribute("data-mobile-mode")=="detail"
+        assert page.locator("#case-mobile-edit").is_visible()
+        assert not page.locator("#matter-list").is_visible()
     page.locator("#case-close").click()
+    if name=="mobile":
+        page.locator("#matter-list").wait_for(state="visible")
+        assert not page.locator("#matter-form").is_visible()
+        page.locator("#upload-btn").click()
     page.locator("#matter-title").fill("Hồ sơ QA mẫu B")
     page.locator('[name="category"]').fill("Dân sự")
     page.locator("#matter-create").click()
     page.get_by_text("Đã lưu hồ sơ thành công.").wait_for(timeout=15000)
     assert len(cases)==2
+    if name=="mobile":
+        page.locator("#case-close").click()
+        page.locator("#matter-list").wait_for(state="visible")
     page.locator("#matter-category-filter").select_option("Lao động")
     assert page.locator("#matter-list .matter-row").count()==1
     page.locator("#matter-list .matter-row button").click()
     page.get_by_text("Đã mở hồ sơ. Chỉnh sửa hoặc chọn thêm tệp rồi bấm “Lưu thay đổi”.").wait_for(timeout=15000)
+    if name=="mobile":
+        assert page.locator("#matter-workspace").get_attribute("data-mobile-mode")=="detail"
+        assert not page.locator('[name="summary"]').is_enabled()
+        assert not page.locator("#matter-list").is_visible()
+        page.locator("#case-mobile-edit").click()
+        assert page.locator("#matter-workspace").get_attribute("data-mobile-mode")=="edit"
     assert page.locator("#matter-create").inner_text()=="Lưu thay đổi"
     page.locator('[name="summary"]').fill("Nội dung QA đã cập nhật")
     page.locator("#matter-create").click()
@@ -122,7 +147,11 @@ def scenario(browser,name,viewport,origin):
     assert ("PATCH","/api/qa/cases/"+I) in calls,calls
     assert cases[0]["details"]["summary"]=="Nội dung QA đã cập nhật"
     assert page.locator("#case-r2-list .matter-row").count()==1
-    width=page.evaluate("document.documentElement.scrollWidth")
+    if name=="mobile":
+        page.locator("#case-close").click()
+        assert page.locator("#matter-list").is_visible()
+        assert not page.locator("#matter-form").is_visible()
+        width=page.evaluate("document.documentElement.scrollWidth")
     assert width<=viewport["width"]+4,(name,width,viewport)
     assert not errors,(name,errors)
     print(f"PASS {name}: one create/save, D1 details, PDF upload, two-category filter, edit/reload, no overflow")
