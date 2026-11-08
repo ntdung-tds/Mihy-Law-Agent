@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 129,
-  "updated_at": "2026-11-08T18:21:42.577Z",
+  "revision": 130,
+  "updated_at": "2026-11-08T19:14:43.191Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -3176,6 +3176,51 @@
           "Real PDF/DOCX ingestion into deployed Worker remains NOT_IMPLEMENTED; Python helper only, subject to separate safe architectural task",
           "Keep PR draft, no main merge or production without Owner signoff"
         ]
+      },
+      {
+        "id": "AL-R0-UC03-UC04-R137-001",
+        "title": "R137 UC03/UC04 — xác nhận đã đối chiếu nguồn/bản nháp trong phiên trước khi sao chép",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CI_CODE_PASS_9_OF_9_FINAL_HEAD_CI_PENDING_OWNER_ANDROID_NOT_RUN",
+        "branch": "feat/r137-uc03-uc04-review-before-copy",
+        "pr": 186,
+        "scope": "UC03/UC04 text-only QA review gate before clipboard; frozen SRS v1.1.15, storage/OAuth excluded",
+        "implementation": [
+          "Collapsible source-vs-draft comparison, desktop two-column and narrow-screen single-column scroll areas.",
+          "Legacy UC03/04 unreviewed copy hidden and disabled; new review copy disabled until in-session acknowledgement.",
+          "Clipboard handler rechecks UC/Matter/source/question/language/consent snapshot, even after silent DOM mutations, before copying the exact original AI draft.",
+          "Invalidate review checkbox and draft on source/Matter/UC change, new requests or workspace switch; no legal approval, audit or data persistence."
+        ],
+        "tests": {
+          "unit_api": "PASS_EXISTING_LEGAL_UNIT_API_ACL",
+          "chromium": "PASS_DESKTOP_MOBILE_R137_REVIEW_AND_STALE_COPY",
+          "github_code_ci": "PASS_9_OF_9_RUN_42513662500_COMMIT_576d157d99291016d664870359668a8fca6bc764",
+          "github_final_head_ci": "PENDING_DOCUMENT_CHECKPOINT_COMMIT",
+          "actual_owner_signed_in_android": "NOT_RUN",
+          "legal_semantic_comparison": "NOT_RUN",
+          "real_pdf_docx_e2e": "NOT_RUN",
+          "test_fixes": "R114_FAKE_DOM_ADDED_R137_NODES_R134_LEGACY_COPY_TEST_UPDATED_R129_UC04_COLLAPSED_FORM_OPENED_BEFORE_RERUN"
+        },
+        "qa": {
+          "website": "ai-law-web-qa",
+          "version": "7ac0ccc2-0660-421f-8e2b-c34d7389be43",
+          "deployment": "efbbb590-20c2-4692-a65c-c50b2ed786a5",
+          "percentage": 100,
+          "readback": "PASS_THREE_PATCHED_MODULES_EXACT_24_UNRELATED_MODULES_EXACT_2_BINDINGS_EXACT",
+          "html_css_preexisting_drift": "PREEXISTING_R1_CARDS_AND_BYOS_CSS_PRESERVED_NOT_IDENTICAL_TO_GITHUB",
+          "backend": "UNCHANGED_R136",
+          "d1_r2": "UNCHANGED",
+          "production": "NOT_DEPLOYED"
+        },
+        "srs_change": "SC-039_BASELINE_UNCHANGED",
+        "owner_acceptance": "PENDING",
+        "remaining": [
+          "Verify PR #186 last documentation commit GitHub CI 9/9",
+          "Owner sign-in on Android UC03/UC04: compare with fictional sources, check copy disabled/enabled and reset on edit; final acceptance pending",
+          "Reconcile preexisting QA-vs-GitHub HTML/CSS R1/BYOS drift separately before any main merge/full redeploy",
+          "PDF/DOCX actual intake through Cloudflare still not implemented; Python-only R68–R70 helpers cannot be claimed integrated",
+          "Do not touch production or merge stacked draft PRs without Owner final approval"
+        ]
       }
     ],
     "features": [
@@ -3806,8 +3851,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R136 UC03 empty/reversed translation-label safeguard PR #185: code CI #42509181486 PASS 9/9; backend QA deployment bc9ff15c-1485-4edb-835a-8ccd60209d8c and website QA 1b6a0a70-4dc2-41c4-84d6-659e95ad81d2 100%, source readback PASS (10+26 sibling modules, 12+2 bindings preserved). Owner Android and legal translation E2E NOT_RUN.",
-      "next_action": "Finish R136 final-head CI; Owner signed-in Android acceptance of UC03 blank/reversed marker warnings. For the next substantive R0 step, assess authorized in-browser/on-premises DOCX/PDF ingestion route with actual document fidelity and no storage OAuth changes; do not assume local Python helpers run on Cloudflare. Preserve SRS v1.1.15 and Owner final release gate.",
+      "last_completed_step": "R137 UC03/04 local comparison+copy gate PR #186: code CI #42513662500 PASS 9/9; website QA deployment efbbb590-20c2-4692-a65c-c50b2ed786a5 100%, exact 3 changed modules, all 24 siblings and 2 bindings preserved. Preexisting QA HTML/CSS drift preserved. Backend R136 unchanged; Android/legal E2E NOT_RUN.",
+      "next_action": "Close R137 final-head CI and Owner authenticated Android UC03/UC04 review/copy gate acceptance; then progress to the next SRS-scoped R0 actual document ingestion prerequisite with explicit input fidelity, ACL, and separate security design. Do not reopen storage OAuth or claim local Python parser is deployed. Owner final release signoff.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
