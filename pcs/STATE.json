@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 103,
-  "updated_at": "2026-11-08T00:41:22.619Z",
+  "revision": 105,
+  "updated_at": "2026-11-08T01:20:15.852Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1968,6 +1968,63 @@
           "Private SRS v1.1.15 exact clause mapping unavailable in this session."
         ],
         "owner_acceptance": "PENDING"
+      },
+      {
+        "id": "AL-R0-UI-R112-001",
+        "title": "R112 P0: mỗi nghiệp vụ trong menu mở một màn hình riêng trên mobile/desktop",
+        "priority": "P0",
+        "status": "QA_DEPLOYED_SOURCE_CI_PASS_ANON_BROWSER_PASS_OWNER_SIGNED_IN_E2E_NOT_RUN",
+        "scope": "UI routing only: 11 distinct UC hash screens on canonical AI Law app, no new legal business scope. Google/OneDrive/OAuth/storage and production untouched.",
+        "acceptance": [
+          "Every menu UC01–UC11 navigates directly to a distinct #uc-UCxx address and isolated workflow screen, not overview scroll/one shared selector",
+          "Task-specific heading, purpose, stage and relevant fields display on mobile/desktop; direct links, menu and Back work",
+          "Switching/leaving UC clears prior source/consent/output, aborts pending previous response; real API session/MatterACL unchanged",
+          "Anonymous deep link cannot access private workflow, redirects to AI Law login",
+          "Real authenticated Owner Android and desktop UI, API, positive/negative cross-UC cases required before acceptance"
+        ],
+        "test_results": {
+          "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/161",
+          "final_code_ci": "PASS_9_OF_9_EXECUTED_21_CONDITIONAL_SKIPPED_RUN_42432080171",
+          "r112_menu_routing_unit": "PASS_ALL_11_UCS_DESKTOP_MOBILE_HASH_BACK_AND_INVALID_ROUTE_MOCK",
+          "qa_site_deployment": "2a71a0c0-fdcf-4796-aede-37e7a48fcb83_100_PERCENT",
+          "qa_source_readback": "PASS_27_MODULES_23_UNCHANGED_4_UI_MODULES_CHANGED",
+          "qa_bindings": "PASS_QA_AUTH_AND_GOOGLE_PICKER_API_KEY_PRESERVED",
+          "qa_storage_untouched": "PASS_R103_BYOS_LIVE_HTML_CSS_PRESERVED",
+          "qa_anonymous_chromium_deep_link": "PASS_REDIRECT_TO_LOGIN_WORKFLOW_NOT_PUBLIC",
+          "qa_authenticated_owner_android": "NOT_RUN",
+          "qa_authenticated_owner_desktop": "NOT_RUN",
+          "qa_legal_accuracy": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "blockers": [
+          "Owner authenticated Android/desktop real UC and matter/role E2E not run. Do not claim final acceptance.",
+          "Live QA HTML/CSS contained previous BYOS UI not present on GitHub parent branch. Surgical deploy preserved that live content, so do not overwrite whole live modules with bare PR files without reconciling.",
+          "Private SRS v1.1.15 exact clause mapping unavailable; baseline remains unchanged."
+        ],
+        "owner_acceptance": "PENDING"
+      },
+      {
+        "id": "AL-R0-UI-R113-001",
+        "title": "P0 hotfix: blank UC screen due to workflow panel nested in hidden assistant; restore back button",
+        "priority": "P0",
+        "status": "QA_DEPLOYED_STRUCTURE_TEST_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "scope": "Close missing </section> for assistant; workflow and 4 other view panels must be top-level siblings. No API/ACL/drive/product expansion.",
+        "root_cause": "R112 moved legal form into a new <section id=view-workflow> but omitted the closing </section> of view-assistant. CSS hides assistant and therefore nested workflow and its Back button.",
+        "code": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/161",
+        "qa_deployment_id": "4cd494c3-059a-4082-9e12-7e29ad9a34a0",
+        "qa_active_version": "c5994600-9e8c-4946-b63e-2645327bfade",
+        "test_results": {
+          "source_html_section_nesting": "PASS_ALL_FIVE_TOP_LEVEL_SIBLING_VIEWS_STATIC_ON_LIVE_CLOUDFLARE",
+          "qa_deploy_readback": "PASS_SINGLE_WORKSPACE_HTML_MODULE_ONLY; 26 OTHER MODULES UNCHANGED",
+          "bindings": "PASS_QA_AUTH_AND_GOOGLE_PICKER_API_KEY",
+          "test_r113_html_nesting": "PASS_IN_CI_R112_STEP_RUN_42433594946",
+          "ci_full": "IN_PROGRESS_RUN_42433594946",
+          "live_authenticated_mobile": "NOT_RUN",
+          "live_authenticated_desktop": "NOT_RUN",
+          "live_browser_rendering_simulation": "INCONCLUSIVE_RATE_LIMITED_NO_RESULT",
+          "owner_final_acceptance": "PENDING"
+        },
+        "note": "QA browser Rendering anonymous-only cannot test signed-in view, synthetic browser HTML simulation had no usable result and service returned 429. Do not report live authenticated E2E PASS. Production and OAuth/Drive unchanged."
       }
     ],
     "features": [

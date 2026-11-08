@@ -519,3 +519,32 @@ body.drawer-open{overflow:hidden}
  padding:9px 14px;background:#fff;color:#2e536f;border:1px solid #abc0d6;
  border-radius:10px;cursor:pointer}
 .legal-qa-example:focus-visible{outline:2px solid #4779b2;outline-offset:2px}
+
+/* R112: one routed, focused screen per legal use case. */
+#view-workflow{width:100%;max-width:1150px;margin:0 auto;min-width:0}
+.workflow-page-heading{max-width:1100px;margin:0 auto}
+.workflow-back{display:inline-flex;align-items:center;justify-content:center;min-height:42px;
+ padding:9px 14px;margin:0 0 20px;border-radius:11px;border:1px solid #c9d7e9;
+ background:#fff;color:#29456c;font-size:13px;font-weight:750}
+.workflow-back:hover,.workflow-back:focus-visible{border-color:#8071c5;outline-offset:2px}
+.workflow-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.workflow-title-row>div{min-width:0;flex:1}
+.workflow-title-row h1{font-size:clamp(26px,3.3vw,39px);line-height:1.2;
+ margin:9px 0 10px;color:#152b4e;overflow-wrap:anywhere}
+.workflow-title-row .subtitle{max-width:760px;font-size:14px;line-height:1.6;margin:0;color:#596c86}
+.workflow-stage{display:inline-flex;flex-shrink:0;padding:8px 12px;border:1px solid #ccdaf0;
+ background:#edf3ff;color:#35578c;border-radius:999px;font-size:12px;font-weight:750}
+.workflow-form-note{border:1px solid #dfe8f4;background:#f7faff;border-radius:11px;
+ display:flex;align-items:center;min-height:50px;padding:11px 14px;font-size:12px;
+ line-height:1.5;color:#566c89}
+#view-workflow .legal-qa-panel{max-width:none;margin-top:22px}
+.legal-qa-form input[type="hidden"]{display:none!important}
+@media(max-width:620px){
+ .workflow-page-heading{padding:0 2px}
+ .workflow-back{width:100%;margin-bottom:17px}
+ .workflow-title-row{display:block}
+ .workflow-title-row h1{font-size:clamp(24px,7vw,31px)}
+ .workflow-stage{margin:13px 0 0}
+ #view-workflow .legal-qa-panel{margin-top:16px}
+ .workflow-form-note{min-height:0}
+}

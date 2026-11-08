@@ -1,12 +1,27 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `103` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T00:41:33.788Z`.
+- **PCS revision:** `105` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T01:20:34.134Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R113 — P0 repair hidden UC screen and missing Back (2026-11-08)
+
+- **Owner-reported real failure:** UC menu changed the route but screen appeared empty, no Back. Confirmed source bug: R112 inserted `<section id="view-workflow">` **without closing** `<section id="view-assistant">`, nesting the new UC view inside the hidden assistant. Router intentionally hides assistant when opening workflow, so the inner UC form and Back were also hidden. R112 mock DOM tests did not check HTML hierarchy.
+- **Fix:** One missing `</section>` inserted before workflow in `web/r0-preview/index.html` on draft [PR #161](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/161). Added R113 Node regression parsing all `<section>` opening/closing tags and verifying 5 top-level route sections are siblings; missing or nested views fail CI.
+- **Evidence:** Cloudflare QA Worker `ai-law-web-qa`, active deployment `4cd494c3-059a-4082-9e12-7e29ad9a34a0`, 100% version `c5994600-9e8c-4946-b63e-2645327bfade`; correct structural source validated after upload, **only workspace_html.mjs changed, 26/27 modules preserved**, `QA_AUTH` and Google Picker bindings preserved. One safety check incorrectly compared module arrays by order after upload, triggering a rollback; verified upload source and candidate version bindings, then activated the verified candidate by version deployment. No production or provider/storage changes.
+- **Tests:** R113 actual HTML hierarchy regression **PASS** in cloudflare-contract job on [GitHub Actions #42433594946](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42433594946); final job completion still pending at first check. Cloudflare Browser Rendering attempted source HTML simulation but did not produce a usable DOM assertion and then hit HTTP 429; **NO live signed-in browser PASS claim**. Owner Android/Desktop signed-in UC/Back test **NOT_RUN**, Owner acceptance **PENDING**.
+
+## R112 — P0: one dedicated screen per legal function (2026-11-08)
+
+- **Owner decision:** Clicking any of the 11 UC function menu items must open its **own screen**, not an overview card or a shared UC selector. No expansion beyond SRS v1.1.15; Google/OneDrive/OAuth paused, no production.
+- **Source:** [draft PR #161](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/161) stacked on #160. Unique deep links `/app#uc-UC01` through `/app#uc-UC11`; per-UC title, stage, purpose, conditional inputs, back navigation, desktop menu and existing mobile drawer. Shared /api/qa/legal/run, real session and MatterACL remain unchanged. Switching/leaving clears previous source, consent, result and cancels pending requests.
+- **CI:** [Actions #42432080171](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42432080171) **9/9 executed jobs PASS**; 21 conditional jobs skipped. R112 tests verify all 11 routes/headings, Back, invalid route and unique workflow form in synthetic DOM. Source code CI does not substitute for Owner authenticated E2E.
+- **QA deployment:** Cloudflare **ai-law-web-qa** deployment `2a71a0c0-fdcf-4796-aede-37e7a48fcb83`, 100% traffic, readback **27/27 modules**; only `workspace_html.mjs`, `workspace_css.mjs`, `workspace_js.mjs`, `workspace_legal.mjs` changed, other **23** modules preserved exactly. `QA_AUTH` and `GOOGLE_PICKER_API_KEY` bindings preserved. The live QA HTML/CSS had separate older BYOS content absent from current GitHub stack; a surgical patch preserved its storage UI/CSS. Do **not** overwrite full live HTML/CSS with branch-only copies without a three-way reconciliation. One initial upload lacked bindings and was rolled back to the old version before the successful explicit-binding upload; current 100%-traffic deployment has bindings checked.
+- **Real browser QA:** anonymous Chromium requesting `/app#uc-UC03` showed the QA login, not private UC form (**PASS authentication gate**). Real signed-in Owner Android+desktop, role denial and all 11 UC positive/negative cases **NOT_RUN**. Full legal accuracy/Word/docx E2E remain unaccepted. Owner final acceptance **PENDING**.
 
 ## R111 — Restore real CI test coverage and reject fabricated grouped source citations (2026-11-08)
 

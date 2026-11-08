@@ -55,3 +55,15 @@
 ## R110 — QA security correction only; no SRS v1.1.15 baseline revision (2026-11-08)
 
 The existing eleven-UC R109 synthetic-text QA surface is unchanged. R110 adds a bounded streaming request reader and rejects explicit nonexistent AI source-anchor identifiers, including long ones; existing MatterACL, tenant login, quota, provider selection and source/output non-persistence are preserved. Real legal correctness, full PDF/DOCX workflow, official Vietnamese law retrieval and acceptance remain unverified. This is a technical correction to existing QA implementation, **not a new SRS requirement**. PR #159, CI #42407576294 PASS 9/9, QA-only backend deploy `301ecbe7-5a2e-47f9-9962-56b44ad2b26f`; production untouched. PR #158 duplicate was closed unmerged.
+
+## CR-20261108-NAV-01 — P0 each function has its own navigation screen
+
+Implementation-only UI decision for existing UC01–UC11; SRS v1.1.15 original unchanged. No provider/storage/OAuth or production permissions.
+
+```pcs-change
+{"kind":"PROPOSE","id":"CR-20261108-NAV-01","task_id":"AL-R0-UI-R112-001","item_key":"CR-20261108-NAV-01","srs_ref":"UNMAPPED","mapping":"ACTIVE_CONTEXT","ambiguous_features":false,"based_on":"OWNER_UI_IMPLEMENTATION_DECISION","before":"The QA UI menu jumped to an overview card or changed a selector within one shared assistant screen for the 11 UCs.","after":"Every one of the existing 11 UC menu items opens a distinct dedicated route/screen with its own title and contextual form, preserving the same authorized API and existing SRS scope.","reason":"Owner P0 instruction: mỗi 1 chức năng khi nhấn vào menu là 1 màn riêng","at":"2026-11-08T01:04:44.566Z","verified_external_decision":false}
+```
+
+```pcs-change
+{"kind":"DECIDE","id":"CR-20261108-NAV-01","decision":"APPROVED","actor":"owner","ref":"Active AI Law project conversation, 2026-11-08 Owner P0 instruction","at":"2026-11-08T01:04:44.566Z","verified_external_decision":false}
+```

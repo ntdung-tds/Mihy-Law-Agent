@@ -3,6 +3,19 @@
   'use strict';
   const documents = Object.freeze([]); // No fabricated file records in the live QA workspace.
   const viewLabels = { overview: 'Tổng quan', documents: 'Tài liệu', assistant: 'Trợ lý AI', research: 'Tra cứu pháp lý' };
+  const workflows = Object.freeze({
+    UC01: {title: "Soạn hợp đồng / văn bản", stage: "R1 · Bản nháp QA", summary: "Tạo bản nháp từ dữ kiện giả lập; chỗ thiếu căn cứ phải được xác minh."},
+    UC02: {title: "Rà soát hợp đồng", stage: "R1 · Bản nháp QA", summary: "Đọc điều khoản mẫu, xác định nội dung cần xem xét; luật sư phải rà soát."},
+    UC03: {title: "Dịch tài liệu, hợp đồng", stage: "R0 · Ưu tiên QA", summary: "Dịch văn bản mẫu, kiểm tra thuật ngữ và số liệu; chưa bảo đảm bố cục Word."},
+    UC04: {title: "Tóm tắt văn bản", stage: "R0 · Ưu tiên QA", summary: "Tóm tắt các ý chính, nghĩa vụ, mốc thời gian dựa trên nguồn giả lập."},
+    UC05: {title: "Phân tích văn bản", stage: "R1 · Bản nháp QA", summary: "Phân tích cấu trúc và rủi ro từ văn bản mẫu, không tự tạo căn cứ luật."},
+    UC06: {title: "So sánh hai văn bản QPPL", stage: "R1 · Bản nháp QA", summary: "Đối chiếu hai văn bản mẫu; chưa xác minh hiệu lực pháp luật thực tế."},
+    UC07: {title: "Sửa lỗi ngữ pháp", stage: "R0 · Ưu tiên QA", summary: "Gợi ý sửa từ ngữ, giữ nguyên ý nghĩa; chưa tích hợp Word Track Changes."},
+    UC08: {title: "Đọc và phân tích nhiều hồ sơ", stage: "R1 · Bản nháp QA", summary: "Đối chiếu hai nguồn giả lập, nêu điểm thống nhất và mâu thuẫn."},
+    UC09: {title: "Trả lời câu hỏi pháp lý", stage: "R1 · Bản nháp QA", summary: "Trả lời trong phạm vi nguồn mẫu, không tra cứu cơ sở pháp luật chính thức."},
+    UC10: {title: "Tìm bản án theo chủ đề", stage: "R1 · Tìm trong nguồn mẫu", summary: "Chỉ tìm trong văn bản mẫu đã dán, chưa có kho bản án chính thức."},
+    UC11: {title: "Tìm quy định theo chủ đề", stage: "R1 · Tìm trong nguồn mẫu", summary: "Chỉ tìm trong văn bản mẫu đã dán, chưa có cơ sở dữ liệu luật chính thức."}
+  });
   let filter = 'all';
   let currentView = 'overview';
   let lastFocus = null;
@@ -79,44 +92,68 @@
     });
     $('#empty-docs').hidden = items.length !== 0;
   }
-  function goto(view, { updateHash = true } = {}) {
-    if (!(view in viewLabels)) view = 'overview';
+  function goto(route, { updateHash = true } = {}) {
+    const task = /^uc-(UC(?:0[1-9]|1[01]))$/.exec(route || '');
+    const uc = task && Object.hasOwn(workflows, task[1]) ? task[1] : null;
+    const view = uc ? 'workflow' : Object.hasOwn(viewLabels, route) ? route : 'overview';
+    const nextHash = uc ? 'uc-' + uc : view;
+    // Native hash navigation permits deep links and Back/Forward on mobile.
+    if (updateHash && window.location.hash !== '#' + nextHash) {
+      window.location.hash = '#' + nextHash;
+      return;
+    }
+    if (currentView === 'workflow' && !uc)
+      window.dispatchEvent(new Event('ai-law:workflow-close'));
     currentView = view;
     $$('[data-panel]').forEach(panel => { panel.hidden = panel.dataset.panel !== view; });
     $$('[data-view]').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.view === view);
-      if (btn.dataset.view === view) btn.setAttribute('aria-current', 'page');
+      const selected = btn.dataset.view === view || (uc && btn.dataset.view === 'assistant');
+      btn.classList.toggle('active', !!selected);
+      if (selected) btn.setAttribute('aria-current', 'page');
       else btn.removeAttribute('aria-current');
     });
-    $('#breadcrumb-current').textContent = viewLabels[view];
+    $('#breadcrumb-current').textContent = uc ? workflows[uc].title : viewLabels[view];
     if (view === 'documents') { renderDocuments(); window.dispatchEvent(new Event('ai-law:documents-open')); }
-    if (updateHash && window.location.hash !== `#${view}`) window.history.replaceState(null, '', `#${view}`);
+    if (uc) {
+      $('#workflow-code').textContent = uc;
+      $('#workflow-title').textContent = workflows[uc].title;
+      $('#workflow-stage').textContent = workflows[uc].stage;
+      $('#workflow-summary').textContent = workflows[uc].summary;
+      window.dispatchEvent(new CustomEvent('ai-law:workflow-open', { detail: { uc } }));
+    }
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
   $$('[data-view]').forEach(n => n.addEventListener('click', () => goto(n.dataset.view)));
   $$('[data-go]').forEach(n => n.addEventListener('click', () => goto(n.dataset.go)));
 
   const drawer = $('#function-drawer'), backdrop = $('#drawer-backdrop'), trigger = $('#rail-features');
+  const desktopTrigger=$('#desktop-features');
+  let lastDrawerTrigger=trigger;
   function closeFunctionDrawer(restoreFocus = true) {
     drawer.hidden = true; backdrop.hidden = true; drawer.setAttribute('aria-hidden', 'true');
-    trigger.setAttribute('aria-expanded', 'false'); document.body.classList.remove('drawer-open');
-    if (restoreFocus) trigger.focus();
+    trigger.setAttribute('aria-expanded', 'false');
+    desktopTrigger.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('drawer-open');
+    if (restoreFocus) lastDrawerTrigger.focus();
   }
-  function openFunctionDrawer() {
+  function openFunctionDrawer(event) {
+    lastDrawerTrigger=event?.currentTarget||trigger;
     drawer.hidden = false; backdrop.hidden = false; drawer.setAttribute('aria-hidden', 'false');
-    trigger.setAttribute('aria-expanded', 'true'); document.body.classList.add('drawer-open');
+    trigger.setAttribute('aria-expanded', 'true');
+    desktopTrigger.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('drawer-open');
     $('#drawer-close').focus();
   }
   trigger.addEventListener('click', openFunctionDrawer);
+  desktopTrigger.addEventListener('click', openFunctionDrawer);
   $('#drawer-close').addEventListener('click', () => closeFunctionDrawer());
   backdrop.addEventListener('click', () => closeFunctionDrawer());
   $$('[data-drawer-view]').forEach(n => n.addEventListener('click', () => {
     goto(n.dataset.drawerView); closeFunctionDrawer(false);
   }));
   $$('[data-feature-jump]').forEach(n => n.addEventListener('click', () => {
-    const target = $('[data-feature="' + n.dataset.featureJump + '"]');
-    goto('overview'); closeFunctionDrawer(false);
-    if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); target.focus({ preventScroll: true }); }
+    closeFunctionDrawer(false);
+    goto('uc-' + n.dataset.featureJump);
   }));
   drawer.addEventListener('keydown', event => {
     if (event.key !== 'Tab') return;
