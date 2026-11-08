@@ -5,6 +5,7 @@ import { GoogleDriveAdapter } from "./google_drive.mjs";
 import { mobileApi } from "./mobile_auth.mjs";
 import { accountApi } from "./account_profile.mjs";
 import { matterApi } from "./matter_workspace.mjs";
+import { caseR2Api } from "./qa_case_r2.mjs";
 import { legalApi } from "./qa_legal_workflows.mjs";
 import { documentsApi } from "./qa_documents.mjs";
 import { oauthDriveApi } from "./oauth_drive.mjs";
@@ -115,6 +116,7 @@ export async function handle(request,env,options={}){
   if(url.pathname==="/api/qa/profile"||url.pathname==="/api/qa/profile/avatar")
     return accountApi(request,env,options);
   if(url.pathname==="/api/qa/legal/run")return legalApi(request,env,options);
+  if(url.pathname.startsWith("/api/qa/cases/"))return caseR2Api(request,env,options);
   if(url.pathname==="/api/qa/matters"||/^\/api\/qa\/matters\/[0-9a-f-]{36}$/.test(url.pathname))return matterApi(request,env,options);
   if(["/api/qa/drive/connect","/api/qa/drive/disconnect","/api/qa/drive/status","/api/qa/drive/callback"].includes(url.pathname))
     return oauthDriveApi(request,env,options);

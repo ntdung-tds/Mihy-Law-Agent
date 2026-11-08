@@ -1,12 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `107` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T02:14:08.094Z`.
+- **PCS revision:** `108` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T03:40:24.365Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R116 — Real QA case dossier with private temporary R2 (2026-11-08)
+
+- **Owner request:** “Hoàn thiện; bao gồm cả bản lưu thật nữa chứ, lưu tạm trên r2.” Draft [PR #165](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/165), staged above PR #164, source of truth includes code, D1 migration and site Worker snapshots. Changed storage decision documented as **SC-019** in `srs_changed.md`; private SRS v1.1.15 baseline itself not edited or verified clause-by-clause.
+- **Real case UI:** Existing Matter title/rename plus case reference, category, status, priority, assignee among active tenant members, client/counterparty QA labels, due date and summary. Only visible with active MatterACL; read-only for nonwriters. Version-conflict detection, D1 persistence, append-only details/file receipt events via DB triggers. Existing Google Drive chooser hidden, not deleted; legacy OAuth/secret unchanged.
+- **Real QA resources:** D1 `ai-law-standalone-cf-qa` migration `0017_r116_case_details_r2.sql` **APPLIED**; 3 tables and 5 expected audit triggers verified. New private APAC R2 bucket **`ai-law-qa-case-files`**, r2.dev **OFF**, no custom domain. Cloudflare Worker binding `CASE_FILES_R2`, 11 existing bindings preserved and one added. Max PDF/DOCX 10MiB, magic validation, stream bound, SHA-256 integrity and download authorization checks; no automatic TTL/deletion.
+- **QA deploy:** Backend `ai-law-standalone-cf-qa` 100% version `f465622c-a75b-48bb-897f-9eaf47eb8d0a`, deployment `ad483808-e95f-4ed3-b524-1bb707a1f9f2` (11 modules: new case module and patched Worker, nine existing modules unchanged). Site `ai-law-web-qa` 100% version `aa3e4bf5-be8e-4f75-956a-c37cb4363ca2`, deployment `9b4698f3-42e7-4e5a-987d-e3cc07c95c9b` (27 modules; four updated, 23 intact; protected 5-panel layout, old BYOS code/CSS retained). Both workers full module and binding readback **PASS**.
+- **CI:** [GitHub Actions #42443309606](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42443309606) **PASS all 9 executed jobs**, 21 branch-conditional skipped. R116 tests cover authorized case details, validation, optimistic version, failed active ACL, private synthetic PDF upload/byte-equal download/hash/mismatch failure, filename/MIME/size restrictions. Old mobile/desktop Chromium check was updated for private R2 chooser and passed. R2 admin-plane synthetic object **PUT/LIST/GET/DELETE PASS**, returned content bytes were not exposed by admin tool; no object remains.
+- **Gates:** Actual Owner-authenticated browser E2E create/save/reload/upload/list/download SHA-256/cross-tenant negative tests **NOT_RUN**; code/CI and R2 admin smoke do not prove full live website flow. Real client data **must not be uploaded to QA** without permission. R2→tenant BYOS migration, backup/restore, retention and exact original SRS mapping pending. **Owner R116 acceptance PENDING; production untouched.**
 
 ## R115 — P0 UC03 translation numeral/article check (2026-11-08)
 
