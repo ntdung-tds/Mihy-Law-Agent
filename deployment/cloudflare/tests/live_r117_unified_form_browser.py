@@ -119,13 +119,14 @@ def scenario(browser,name,viewport,origin):
                 "source_hash":"a"*64,"source_anchors":[
                     {"id":"A1","preview":"Điều 1. Bên A bàn giao tài liệu"},
                     {"id":"A2","preview":"Điều 2. Thời hạn thanh toán"}],
-                "answer":"[A1] Article 1. Party A shall deliver the documents.",
+                "answer":"[A1] Article 1. Party A shall deliver the documents.\\nNote: the untranslated source [A2] mentions payment.",
                 "review_notice":"Bản nháp QA, luật sư phải kiểm duyệt.",
                 "translation_check":{"status":"review_required",
                   "missing_numbers":["10"],"missing_article_numbers":["2"]},
                 "source_coverage":{"status":"review_required",
                   "source_segment_count":2,"marked_segment_count":1,
                   "missing_source_count":1,"missing_source_ids":["A2"],
+                  "misplaced_source_ids":["A2"],"duplicate_source_ids":[],
                   "review_required":True}
             })
         if u=="/api/qa/drive/status":
@@ -474,6 +475,7 @@ def scenario(browser,name,viewport,origin):
     coverage.wait_for(state="visible",timeout=15000)
     assert "1/2" in coverage.inner_text()
     assert "A2" in coverage.inner_text()
+    assert "Nhãn chưa đứng đầu dòng dịch: A2" in coverage.inner_text()
     assert "không chứng minh" in coverage.inner_text()
     assert page.locator("#legal-qa-translation-check").is_visible()
     assert page.locator("#legal-qa-output").inner_text().startswith("[A1] Article 1")
