@@ -817,3 +817,35 @@ body.drawer-open{overflow:hidden}
  #matter-workspace .case-editor-navigation{order:-1}
  #matter-workspace .case-unified-heading>div:first-child{min-width:0;width:100%}
 }
+
+
+/* R122: compact independent attachment actions; download stays interactive in read-only mode. */
+#matter-workspace .case-file-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+ justify-content:space-between;min-width:0}
+#matter-workspace .case-file-row>span{flex:1 1 160px;overflow-wrap:anywhere;min-width:0}
+#matter-workspace .case-file-actions{display:flex;align-items:center;gap:7px;flex-shrink:0}
+#matter-workspace .case-file-actions button,.case-pending-row button{
+ width:auto;min-height:35px;padding:6px 11px;border:1px solid #d6e2f1;
+ border-radius:8px;background:#f5f9ff;color:#244466;font-size:12px;font-weight:700;cursor:pointer}
+#matter-workspace .case-file-actions .case-file-hide{color:#a33b48;border-color:#f1d1d5;background:#fff5f5}
+#matter-workspace .case-file-actions button:disabled{opacity:.55;cursor:wait}
+#matter-workspace .case-file-actions button:focus-visible,.case-pending-row button:focus-visible{
+ outline:2px solid #3a76ad;outline-offset:2px}
+#matter-workspace .case-r2-count,.case-selected-files small{font-size:11.5px;color:#53677d}
+#matter-workspace .case-selected-files{display:grid;gap:6px;margin:8px 0}
+#matter-workspace .case-pending-row{display:flex;gap:9px;align-items:center;justify-content:space-between;
+ min-width:0;font-size:12px;padding:7px 9px;background:#f5f8fd;border:1px solid #e1e7f0;border-radius:9px}
+#matter-workspace .case-pending-row span{min-width:0;overflow-wrap:anywhere}
+#matter-workspace .case-file-confirm{width:100%;padding:9px 12px;border:1px solid #edccd3;
+ border-radius:10px;background:#fff7f8;font-size:12px}
+#matter-workspace .case-file-confirm p{margin:0 0 8px}
+#matter-workspace .case-file-confirm-actions{display:flex;gap:8px;justify-content:flex-end}
+#matter-workspace .case-file-confirm-actions button{width:auto;min-height:34px;
+ border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer}
+#matter-workspace .case-file-confirm-yes{background:#a53847;color:#fff;border:1px solid #a53847}
+@media(max-width:720px){
+ #matter-workspace[data-mobile-mode="detail"] #case-selected-files,
+ #matter-workspace[data-mobile-mode="detail"] .case-file-hide{display:none!important}
+ #matter-workspace .case-file-actions{flex-wrap:nowrap}
+ #matter-workspace .case-file-actions button{min-height:34px;padding:5px 9px}
+}
