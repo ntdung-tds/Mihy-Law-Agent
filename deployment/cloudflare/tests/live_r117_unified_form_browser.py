@@ -23,6 +23,10 @@ def scenario(browser,name,viewport,origin):
     cases=[]
     files={}
     calls=[]
+    qa_import_pdf=b"%PDF-1.4\\nSynthetic QA only Article 1 Party A delivers 10 documents.\\n%%EOF"
+    qa_import_docx=b"PK\\x03\\x04Synthetic QA DOCX sample bytes (converter mocked by test)"
+    qa_import_files={"qa_r138.pdf":qa_import_pdf,"qa_r138.docx":qa_import_docx}
+    qa_import_text="Điều 1. Bên A giao 10 tài liệu vào ngày 15/09/2026. Bên B thanh toán 2.000.000 đồng."
     def as_row(c):
         return dict(id=c["id"],title=c["title"],created_at=1800000000,
             version=c.get("title_version",1),can_write=True,
@@ -41,6 +45,23 @@ def scenario(browser,name,viewport,origin):
             return reply(route,payload={"workspaces":[]})
         if u=="/api/qa/profile":
             return reply(route,payload={"display_name":"Lawyer QA","plan_code":"demo"})
+        # R138: synthetic real multipart upload bytes, never a real converter
+        # or customer file. Separate backend test verifies ACL and toMarkdown.
+        if u=="/api/qa/legal/extract" and method=="POST":
+            body=req.post_data_buffer
+            file_name=next((n for n in qa_import_files if n.encode() in body),None)
+            assert file_name is not None
+            assert b"synthetic_consent" in body and b"true" in body
+            assert F.encode() in body and b"UC03" in body
+            assert qa_import_files[file_name] in body
+            return reply(route,payload={
+                "uc":"UC03","file_name":file_name,
+                "file_size":len(qa_import_files[file_name]),
+                "file_type":"pdf" if file_name.endswith(".pdf") else "docx",
+                "source_sha256":"c"*64,"source_text":qa_import_text,
+                "mode":"qa_file_text_preview_not_verified",
+                "review_required":True,"storage":"none",
+                "note":"Synthetic text conversion for review; no storage."})
         if u=="/api/qa/legal/run" and method=="POST":
             data=json.loads(req.post_data)
             if data["uc"]=="UC04":
@@ -494,6 +515,54 @@ def scenario(browser,name,viewport,origin):
     # Missing source A2 must remain a visible non-authoritative warning.
     page.goto(origin+"/#uc-UC03",wait_until="domcontentloaded")
     page.locator("#legal-qa-form").wait_for(state="visible",timeout=15000)
+    # R138: in-memory PDF/DOCX import is deliberately separate from UC03 AI.
+    # Both inputs are real multipart browser file bytes, response is synthetic.
+    source=page.locator("#legal-qa-source")
+    file_details=page.locator("#legal-qa-file-details")
+    file_input=page.locator("#legal-qa-file-input")
+    file_status=page.locator("#legal-qa-file-status")
+    file_review=page.locator("#legal-qa-file-reviewed")
+    file_use=page.locator("#legal-qa-file-use")
+    assert file_details.is_visible()
+    assert not file_details.evaluate("(e)=>e.open"),"File chooser must start collapsed"
+    file_details.locator(":scope > summary").click()
+    page.locator("#legal-qa-matter").select_option(F)
+    for filename,mime,blob in [
+       ("qa_r138.pdf","application/pdf",qa_import_pdf),
+       ("qa_r138.docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document",qa_import_docx)
+    ]:
+        file_input.set_input_files({"name":filename,"mimeType":mime,"buffer":blob})
+        assert not page.locator("#legal-qa-file-consent").is_checked()
+        if filename.endswith(".pdf"):
+            before=len([c for c in calls if c==("POST","/api/qa/legal/extract")])
+            page.locator("#legal-qa-file-extract").click()
+            assert "Chọn tệp" in file_status.inner_text()
+            assert len([c for c in calls if c==("POST","/api/qa/legal/extract")])==before
+        page.locator("#legal-qa-file-consent").check()
+        run_before=len([c for c in calls if c==("POST","/api/qa/legal/run")])
+        page.locator("#legal-qa-file-extract").click()
+        page.locator("#legal-qa-file-preview").wait_for(state="visible",timeout=15000)
+        assert qa_import_text in page.locator("#legal-qa-file-text").inner_text()
+        assert not file_use.is_enabled()
+        assert "chưa" not in file_status.inner_text().lower() or "lưu" not in file_status.inner_text().lower()
+        assert len([c for c in calls if c==("POST","/api/qa/legal/run")])==run_before
+        assert source.input_value()!=qa_import_text,"Preview must NOT auto-overwrite source"
+        file_review.check()
+        assert file_use.is_enabled()
+        file_use.click()
+        assert source.input_value()==qa_import_text
+        assert not page.locator("#legal-qa-consent").is_checked()
+        assert page.locator("#legal-qa-file-preview").is_hidden()
+        assert file_input.input_value()==""
+    # Backend blocks oversize multipart and browser must refuse before fetch.
+    file_input.set_input_files({"name":"huge_qa.pdf","mimeType":"application/pdf",
+        "buffer":b"%PDF-"+b"z"*1500000})
+    page.locator("#legal-qa-file-consent").check()
+    previous=len([c for c in calls if c==("POST","/api/qa/legal/extract")])
+    page.locator("#legal-qa-file-extract").click()
+    assert "1,5 MB" in file_status.inner_text()
+    assert len([c for c in calls if c==("POST","/api/qa/legal/extract")])==previous
+    # Returning to text-only workflow should require fresh consent as before.
     page.locator("#legal-qa-example").click()
     page.locator("#legal-qa-matter").select_option(F)
     page.locator("#legal-qa-consent").check()
