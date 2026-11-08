@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `129` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T18:21:42.577Z`.
+- **PCS revision:** `130` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T19:14:43.191Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R137 — UC03/UC04 xác nhận đã đối chiếu trước khi sao chép (2026-11-09)
+
+- **Lý do:** R0 UC03/UC04 đã hiển thị cảnh báo kiểm tra nhãn, chữ số và thông tin nguồn, nhưng bản dịch/tóm tắt vẫn có nút sao chép ngay mà không yêu cầu người xem chủ động đối chiếu. Chủ dự án nghiệm thu cuối; checkbox chỉ là xác nhận thao tác cục bộ, **không** phải duyệt tính pháp lý.
+- **Triển khai:** PR [#186](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/186) draft trên PR #185, chỉ UI nguồn/bản nháp text-only của UC03/UC04. Khung xem nguồn/bản nháp hai cột desktop, một cột mobile, có scroll và thu gọn. Nút sao chép bản nháp cũ của UC03/UC04 bị ẩn/khóa; nút sao chép mới mặc định khóa đến khi người dùng đánh dấu đã tự đối chiếu nguồn. Mỗi lần đổi văn bản, Matter, câu hỏi, ngôn ngữ, consent, UC hoặc gửi lại tác vụ thì xóa xác nhận; trước clipboard còn so snapshot kể cả trường bị thay đổi lập trình không phát sự kiện. Không tạo bản ghi phê duyệt, không lưu văn bản trong D1/R2 và không làm thay UC07.
+- **CI và sửa fixture:** Chromium desktop/mobile cover disabled→acknowledged→enabled, side-by-side, mobile collapsed form, silent-input copy blocked, stale invalidation. [#42513003491](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42513003491) FAIL vì fake DOM của R114 thiếu nút mới; [#42513125130](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42513125130) FAIL vì test cũ thử click nút sao chép UC03 đã bị ẩn; [#42513409438](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42513409438) FAIL vì test cần mở lại form UC04 thu gọn trên mobile. Đã sửa bộ kiểm thử **không bỏ cổng an toàn**. [CI #42513662500](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42513662500) **PASS 9/9** tại code commit `576d157d99291016d664870359668a8fca6bc764`. CI HEAD cuối sau checkpoint tài liệu còn chờ.
+- **Website QA deployed và readback PASS:** `ai-law-web-qa`, version `7ac0ccc2-0660-421f-8e2b-c34d7389be43`, deployment `efbbb590-20c2-4692-a65c-c50b2ed786a5`, **100%**. Cập nhật content-only đúng `workspace_html.mjs`, `workspace_css.mjs`, `workspace_legal.mjs`, **24/24 module còn lại nguyên** và **2/2 binding không đổi**. HTML/CSS QA trước đó có chênh lệch R1/BYOS từ GitHub; bản vá R137 chỉ áp phần thay đổi đích lên mã đang chạy, giữ nguyên phần chênh lệch. **Không tuyên bố toàn bộ HTML/CSS QA giống hệt GitHub**, phải đối soát riêng trước khi cập nhật toàn bộ/production. Backend QA R136 nguyên, production không đổi.
+- **Còn chờ:** Owner đăng nhập Android thật và nghiệm thu UC03/04 review/copy, luật sư đối chiếu nội dung, PDF/DOCX nhập tệp E2E **NOT_RUN**. R68–R70 chỉ là công cụ Python cục bộ, không phải module Worker; không tự tích hợp vì cần cổng bảo mật và xác minh fidelity riêng. SRS v1.1.15 giữ nguyên, SC-039, PCS revision 130.
 
 ## R136 — UC03 cảnh báo đoạn dịch không có nội dung hoặc đảo thứ tự nhãn nguồn (2026-11-09)
 
