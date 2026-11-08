@@ -3,6 +3,8 @@ Synthetic HTTP API only. No account, live Cloudflare, provider or real documents
 """
 import json
 import hashlib
+import io
+import zipfile
 import uuid
 import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -24,7 +26,16 @@ def scenario(browser,name,viewport,origin):
     files={}
     calls=[]
     qa_import_pdf=b"%PDF-1.4\\nSynthetic QA only Article 1 Party A delivers 10 documents.\\n%%EOF"
-    qa_import_docx=b"PK\\x03\\x04Synthetic QA DOCX sample bytes (converter mocked by test)"
+    # R140: produce a valid deflated OOXML DOCX rather than a PK-only stub.
+    # A table is intentional: conversion must surface a layout-review warning.
+    docx_buf=io.BytesIO()
+    with zipfile.ZipFile(docx_buf,"w",zipfile.ZIP_DEFLATED) as z:
+        z.writestr("[Content_Types].xml",
+            '<Types><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>')
+        z.writestr("_rels/.rels",'<Relationships><Relationship Target="word/document.xml"/></Relationships>')
+        z.writestr("word/document.xml",
+            '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:tbl><w:tr><w:tc><w:p><w:r><w:t>Legal QA document with a table and 10 files.</w:t></w:r></w:p></w:tc></w:tr></w:tbl></w:body></w:document>')
+    qa_import_docx=docx_buf.getvalue()
     qa_import_files={"qa_r138.pdf":qa_import_pdf,"qa_r138.docx":qa_import_docx,
                      "qa_r139_badsha.pdf":qa_import_pdf}
     qa_import_text="Điều 1. Bên A giao 10 tài liệu vào ngày 15/09/2026. Bên B thanh toán 2.000.000 đồng."
@@ -62,6 +73,8 @@ def scenario(browser,name,viewport,origin):
                 "source_sha256":("0"*64 if file_name=="qa_r139_badsha.pdf" else
                                  hashlib.sha256(qa_import_files[file_name]).hexdigest()),
                 "source_text":qa_import_text,
+                "document_warnings":(["tables_present_review_layout"]
+                                      if file_name.endswith(".docx") else []),
                 "mode":"qa_file_text_preview_not_verified",
                 "review_required":True,"storage":"none",
                 "note":"Synthetic text conversion for review; no storage."})
@@ -547,6 +560,9 @@ def scenario(browser,name,viewport,origin):
         page.locator("#legal-qa-file-extract").click()
         page.locator("#legal-qa-file-preview").wait_for(state="visible",timeout=15000)
         assert qa_import_text in page.locator("#legal-qa-file-text").inner_text()
+        if filename.endswith(".docx"):
+            assert "có bảng" in file_status.inner_text().lower()
+            assert "từng ô" in page.locator("#legal-qa-file-meta").inner_text()
         assert not file_use.is_enabled()
         assert "chưa" not in file_status.inner_text().lower() or "lưu" not in file_status.inner_text().lower()
         assert len([c for c in calls if c==("POST","/api/qa/legal/run")])==run_before
