@@ -122,6 +122,18 @@ def scenario(browser,name,viewport,origin):
         assert page.locator("#matter-workspace").get_attribute("data-mobile-mode")=="detail"
         assert page.locator("#case-mobile-edit").is_visible()
         assert not page.locator("#matter-list").is_visible()
+        # R121: back/edit are compact pills, not stretched 50%-width cards.
+        back=page.locator("#case-close")
+        edit=page.locator("#case-mobile-edit")
+        assert back.inner_text()=="← Danh sách",back.inner_text()
+        assert edit.inner_text()=="Sửa",edit.inner_text()
+        back_box,edit_box=back.bounding_box(),edit.bounding_box()
+        assert back_box and edit_box
+        assert 31<=back_box["height"]<=40 and 31<=edit_box["height"]<=40,(back_box,edit_box)
+        assert back_box["width"]<=125 and edit_box["width"]<=90,(back_box,edit_box)
+        assert abs(back_box["y"]-edit_box["y"])<=4,(back_box,edit_box)
+        assert back.evaluate("(e)=>getComputedStyle(e).whiteSpace")=="nowrap"
+        assert back.evaluate("(e)=>getComputedStyle(e).flexGrow")=="0"
     page.locator("#case-close").click()
     if name=="mobile":
         page.locator("#matter-list").wait_for(state="visible")
