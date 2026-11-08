@@ -40,7 +40,8 @@ function fixture({role='lawyer',session=true,allowed=true,write=true,r2=true}={}
      receipt={file_id:params[3],file_name:params[4],mime_type:params[5],
       byte_length:params[6],sha256:params[7],object_key:params[8],uploaded_at:params[10]};
      events.push({action:'r2_file_uploaded',file_id:receipt.file_id,actor_id:U,occurred_at:NOW});
-     return {meta:{changes:1}};
+     // Real D1: the R116 AFTER INSERT audit trigger writes a second row.
+     return {meta:{changes:2}};
     }
     if(sql.includes('INSERT INTO qa_case_details')||sql.includes('UPDATE qa_case_details')){
      events.push({action:'details_saved',file_id:null,actor_id:U,occurred_at:NOW});
@@ -99,6 +100,38 @@ test('R116: uploads synthetic PDF to private R2, stores SHA-256 and verifies byt
  // Tampered R2 bytes can never be downloaded as a successful file.
  f.objects.set([...f.objects.keys()][0],new TextEncoder().encode('corrupt test'));
  assert.equal((await caseR2Api(req(root+'/files/'+data.id+'/download'),f.env,{now:NOW})).status,503);
+});
+test('R121: D1 audit-trigger changes=2 is success; repeat/repair reuses receipt without duplicate',async()=>{
+ const f=fixture();const path=root+'/files';
+ const upload=()=>caseR2Api(req(path,'POST',PDF,{
+  'Content-Type':'application/pdf','X-File-Name':encodeURIComponent('QA sample.pdf')}),f.env,{now:NOW});
+ const first=await upload();
+ assert.equal(first.status,201,await first.clone().text());
+ const firstInfo=await first.json();
+ assert.equal(f.objects.size,1);
+ const key=[...f.objects.keys()][0];
+ const repeat=await upload();
+ assert.equal(repeat.status,200,await repeat.clone().text());
+ const repeatInfo=await repeat.json();
+ assert.equal(repeatInfo.id,firstInfo.id);
+ assert.equal(repeatInfo.already_saved,true);
+ assert.equal(repeatInfo.repaired,false);
+ assert.equal(f.objects.size,1);
+ assert.equal(f.calls.filter(x=>x.sql.includes('INSERT INTO qa_case_files_r2')).length,1);
+ // Reproduce the production QA error: receipt persisted but R2 object got
+ // incorrectly deleted after checking D1 meta.changes against the number 1.
+ f.objects.delete(key);
+ assert.equal(f.objects.size,0);
+ const repaired=await upload();
+ assert.equal(repaired.status,200,await repaired.clone().text());
+ const repairedInfo=await repaired.json();
+ assert.equal(repairedInfo.id,firstInfo.id);
+ assert.equal(repairedInfo.repaired,true);
+ assert.equal(f.objects.size,1);
+ assert.equal(f.calls.filter(x=>x.sql.includes('INSERT INTO qa_case_files_r2')).length,1);
+ const downloaded=await caseR2Api(req(path+'/'+firstInfo.id+'/download'),f.env,{now:NOW});
+ assert.equal(downloaded.status,200,await downloaded.clone().text());
+ assert.deepEqual(new Uint8Array(await downloaded.arrayBuffer()),PDF);
 });
 test('R116: deny-overrides, session, CSRF, unsupported types and filenames fail closed',async()=>{
  assert.equal((await caseR2Api(req(root),fixture({session:false}).env,{now:NOW})).status,401);
