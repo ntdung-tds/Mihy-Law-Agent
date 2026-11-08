@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 118,
-  "updated_at": "2026-11-08T11:18:20.251Z",
+  "revision": 119,
+  "updated_at": "2026-11-08T13:25:28.471Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2760,6 +2760,55 @@
         "remaining": "R125 owner Android E2E not yet accepted; R126 owner signed-in Android and live permission tests NOT_RUN. No migration or production deploy. SRS v1.1.15 private unchanged.",
         "owner_acceptance": "PENDING_R126",
         "srs_change": "SC-029"
+      },
+      {
+        "id": "AL-R0-UC03-R127-001",
+        "title": "R127 UC03 QA đối chiếu mã đoạn nguồn trong bản dịch nháp, tăng bảo vệ trích dẫn",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_OWNER_LIVE_E2E_PENDING",
+        "branch": "feat/r127-uc03-source-coverage",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/177",
+        "scope": "Synthetic/pasted QA text only. Does not integrate PDF/DOCX bytes with the real customer translation workflow or guarantee semantic fidelity.",
+        "implementation": {
+          "backend": "UC03 prompt requests [A#] per source segment; deterministic translationSourceCoverage counts exact present/missing source markers, bound missing ID list; review_required always true. Existing number/article warnings preserved.",
+          "frontend": "Compact separate coverage warning shows count and missing A-IDs; resets on task switch, no HTML injection or persistent customer text.",
+          "security": "QA sourceReferencesExist upgraded to strict repo guard after proving this was the ONLY source difference with deployed R126 legal module. Source ID reference ACL and D1 quota intact.",
+          "compatibility": "UC04/UC07/other UCs have no source_coverage field; unchanged. QA-only no new D1 migration, no R2/file changes, no production deploy."
+        },
+        "tests": {
+          "ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42484211865",
+          "ci_executed": "PASS_9_OF_9",
+          "uc03_server": "PASS_DETERMINISTIC_SOURCE_COVERAGE_NEGATIVE/BOUND",
+          "browser": "PASS_CHROMIUM_MOBILE_DESKTOP_UC03_WARNING_AND_UC04_RESET_SYNTHETIC",
+          "real_owner_android": "NOT_RUN",
+          "real_document_pdf_docx_translation": "NOT_RUN",
+          "human_translation_review": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "qa": {
+          "backend": {
+            "script": "ai-law-standalone-cf-qa",
+            "version": "d35b58db-38d4-43ee-b5de-ae365b2b7862",
+            "deployment": "5083472e-f92b-45dc-8346-599b7ba339de",
+            "traffic_percent": 100,
+            "modules": 11,
+            "preserved_modules": 10,
+            "bindings": 12
+          },
+          "frontend": {
+            "script": "ai-law-web-qa",
+            "version": "3a39d312-f0ce-4556-b1f9-310b001728cd",
+            "deployment": "f3ce8f06-a120-4eee-ae97-671e4e946ca3",
+            "traffic_percent": 100,
+            "modules": 27,
+            "preserved_modules": 25,
+            "bindings": 2
+          },
+          "readback": "PASS"
+        },
+        "remaining": "Signed-in Owner Android and human legal translator acceptance NOT_RUN; actual DOCX/PDF intake pipeline and per-segment legal translation remain unintegrated. No approval to deploy production.",
+        "owner_acceptance": "PENDING_R127",
+        "srs_change": "SC-030; frozen private SRS v1.1.15 unchanged"
       }
     ],
     "features": [
