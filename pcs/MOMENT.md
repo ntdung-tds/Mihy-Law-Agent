@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `102` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T19:48:33.817Z`.
+- **PCS revision:** `103` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T00:40:47.221Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R111 — Restore real CI test coverage and reject fabricated grouped source citations (2026-11-08)
+
+- **Finding:** The old 9-job CI reported success while `.github/workflows/tests.yml` did not execute R108 matter title, R109/R110 legal-workflow Node tests or R109 real SQLite AI quota tests. This was a **test-coverage hole**, not a claim that these features failed production. R111 PR [#160](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/160) fixes CI coverage and strengthens the *existing* canonical `/app#assistant` source citation guard; no new application.
+- **Reproduction:** An early CI run [#42430256045](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42430256045) was green on a deliberately failing source-citation test because it did not run that file. After wiring the dedicated tests, [#42430559379](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42430559379) reproduced **FAIL** in `R109-R111 legal text ACL` (7 PASS, 1 FAIL) on malformed/grouped citation handling.
+- **Fix + test:** Recognize every one-letter+numeric bracketed source-like identifier (including grouped/ranged, lowercase, non-A/B and long bracket variants). Only accept those present in the supplied A/B source map; valid grouped references remain allowed. This is ID verification **only**, not factual/legal accuracy certification. Node pure helper smoke 9/9 PASS. The `cloudflare-contract` job in [#42430607926](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42430607926) now runs R108 Node + R109/R110/R111 Node + real SQLite quota tests, all **PASS**. Remaining workflow jobs were still in progress when written.
+- **Gates:** PR #160 remains draft and stacked above #159 → #157 → #155; do not merge out of sequence. No Cloudflare QA deploy of R111 yet, no Owner signed-in Android/desktop 11-UC E2E and no legal review. Drive/OneDrive paused, SRS v1.1.15 unchanged, production untouched. Owner acceptance pending.
 
 ## R110 — Reject invented source anchors and oversized streaming AI inputs (2026-11-08)
 
