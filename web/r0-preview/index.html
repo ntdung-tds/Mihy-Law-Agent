@@ -272,6 +272,29 @@
               <label for="legal-qa-source">Nguồn mẫu A (30–5000 ký tự)
                 <textarea id="legal-qa-source" required minlength="30" maxlength="5000" rows="6" placeholder="Dán văn bản giả lập, điều khoản thử nghiệm hoặc dữ liệu minh họa. Không dùng hồ sơ khách hàng." spellcheck="false"></textarea>
               </label>
+              <details id="legal-qa-file-details" class="legal-qa-file-details">
+                <summary>Đưa nội dung từ PDF/DOCX giả lập vào nguồn A</summary>
+                <div class="legal-qa-file-fields">
+                  <p>Chỉ sử dụng tệp QA không có dữ liệu khách hàng. Tệp tối đa 1,5 MB được gửi đến Cloudflare Workers AI để chuyển thành văn bản trong bộ nhớ; không lưu trên Drive/R2 và không tự chạy tác vụ AI pháp lý.</p>
+                  <label for="legal-qa-file-input">Chọn một PDF hoặc DOCX
+                    <input id="legal-qa-file-input" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                  </label>
+                  <label class="legal-qa-consent" for="legal-qa-file-consent"><input id="legal-qa-file-consent" type="checkbox" />
+                    Tôi xác nhận tệp là dữ liệu giả lập và đồng ý gửi tệp đến bộ chuyển đổi tài liệu Cloudflare QA.
+                  </label>
+                  <button type="button" id="legal-qa-file-extract" class="legal-qa-example">Đọc nội dung tệp QA</button>
+                  <p id="legal-qa-file-status" role="status" aria-live="polite">Chọn tệp và xác nhận trước khi trích nội dung.</p>
+                  <div id="legal-qa-file-preview" hidden>
+                    <p id="legal-qa-file-meta"></p>
+                    <pre id="legal-qa-file-text" tabindex="0"></pre>
+                    <p><strong>Phải đối chiếu tệp gốc:</strong> công cụ có thể bỏ sót chữ trong ảnh, trang quét, chữ xoay/ẩn, bảng và thay đổi theo dõi. Không tự cho rằng nội dung trích xuất đã đầy đủ.</p>
+                    <label class="legal-qa-consent" for="legal-qa-file-reviewed"><input id="legal-qa-file-reviewed" type="checkbox" />
+                      Tôi đã mở tệp gốc và tự đối chiếu đoạn trích ở trên trước khi đưa vào nguồn A.
+                    </label>
+                    <button type="button" id="legal-qa-file-use" disabled>Đưa đoạn đã đối chiếu vào nguồn A</button>
+                  </div>
+                </div>
+              </details>
               <label for="legal-qa-source-b" id="legal-qa-source-b-label" hidden>Nguồn mẫu B (dùng cho UC06 và UC08)
                 <textarea id="legal-qa-source-b" maxlength="5000" minlength="30" rows="5" placeholder="Dán văn bản so sánh, chỉ sử dụng nội dung mẫu."></textarea>
               </label>

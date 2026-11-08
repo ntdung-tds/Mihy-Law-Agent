@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `130` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T19:14:43.191Z`.
+- **PCS revision:** `131` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T20:34:31.974Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R138 — Đọc PDF/DOCX giả lập trong RAM trước khi đưa vào nguồn A (2026-11-09)
+
+- **Vấn đề:** R68–R70 PDF/DOCX parser Python cục bộ không chạy trong Worker, nên chức năng nạp nguồn tệp UC03/UC04/UC07 chưa có trên QA. R138 giải quyết đúng một vertical slice **không lưu trữ**: truyền một tệp giả lập PDF hoặc DOCX đến Cloudflare Workers AI `toMarkdown` để lấy bản văn bản tạm thời. Trong QA đã trực tiếp gửi một PDF và một DOCX chuẩn tự tạo tới Cloudflare conversion API, **PASS text format cả hai**; vẫn chưa kiểm tra được tính đầy đủ của tài liệu phức tạp.
+- **Phạm vi code:** Draft PR [#187](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/187) xếp trên PR #186 R137. `/api/qa/legal/extract` yêu cầu session, vai trò, MatterACL và deny override, same-origin POST, consent riêng, giới hạn 1,5 MB/5000 ký tự, nhận dạng PDF/DOCX tối thiểu qua MIME/signature, áp hạn mức 12 thao tác/ngày, đối chiếu lại ACL sau kết nối chậm; không lưu byte/text, không tự gọi model dịch/tóm tắt/sửa lỗi. UI mobile có details thu gọn, file picker một tệp, preview cuộn, xác nhận đã đối chiếu và nút **Đưa vào nguồn A**; checkbox đồng ý gọi model QA luôn phải đánh dấu lại, không tự chuyển tệp sang Drive/R2/OAuth.
+- **CI:** Node R138 real multipart + Mock Cloudflare conversion, test ACL/role/quota/revocation, sai file/MIME/size, không cắt thầm hoặc lưu dữ liệu, relay same-origin and method. Chromium desktop/mobile sử dụng file binary synthetic và mocked conversion response, kiểm tra preview không auto ghi đè, checkboxes, từ chối 1,5MB và các nghiệp vụ R137. Các CI thử ban đầu FAIL bài browser do fixture tệp thứ hai so sánh với hằng nguồn thay vì `source_before`; sửa thử đúng thuộc tính. [CI code #42520226883](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42520226883) **PASS 9/9** tại `fe6a960fddcf53183cf8702c202b5043eb96eb1f`, bao gồm một bước CI mới chạy trực tiếp `r138_doc_intake.test.mjs`.
+- **QA thực tế đã triển khai — readback PASS:** Backend `ai-law-standalone-cf-qa` version `90f71495-6215-49f6-acb1-a338340cbd16`, deployment `48586f30-4ae2-436f-a66b-8f82e75b6787` **100%**; chỉ thay `worker.mjs`, `qa_legal_workflows.mjs`, giữ nguyên 9 module khác và 12 binding. Website `ai-law-web-qa` version `5102dfb0-aa47-482f-b2ee-85448f174b5e`, deployment `71886c86-7f6e-4bc2-aaf0-b0ea08191501` **100%**; chỉ thay `site_worker.mjs`, `workspace_html.mjs`, `workspace_css.mjs`, `workspace_legal.mjs`, giữ nguyên 23 module khác và 2 binding. Các phần Worker và HTML/CSS đang chạy vốn có chênh lệch với nguồn GitHub (BYOS/R1); bản vá chỉ thay các đoạn cần thiết, **không ghi đè drift**. Không deploy production.
+- **Giới hạn và nghiệm thu:** Chỉ hỗ trợ **một tệp và nguồn A** trong task này, không tự trộn văn bản từ nhiều tệp, không xác nhận tệp scan, chữ xoay/ẩn, bảng, tracked changes và OCR đủ fidelity; chỉ báo rõ cảnh báo bắt buộc so sánh với bản gốc. Chưa chạy end-to-end có tài khoản thực Owner Android nên **NOT_RUN**. Chưa có tư vấn pháp lý tự động, xác thực tệp gốc chuyên sâu hoặc production readiness. SRS v1.1.15 giữ nguyên, SC-040, PCS revision 131, PR draft, Owner nghiệm thu cuối.
 
 ## R137 — UC03/UC04 xác nhận đã đối chiếu trước khi sao chép (2026-11-09)
 

@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 130,
-  "updated_at": "2026-11-08T19:14:43.191Z",
+  "revision": 131,
+  "updated_at": "2026-11-08T20:34:31.974Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -3221,6 +3221,64 @@
           "PDF/DOCX actual intake through Cloudflare still not implemented; Python-only R68–R70 helpers cannot be claimed integrated",
           "Do not touch production or merge stacked draft PRs without Owner final approval"
         ]
+      },
+      {
+        "id": "AL-R0-DOC-SOURCE-R138-001",
+        "title": "R138 PDF/DOCX QA: trích nội dung trong RAM, người dùng rà soát rồi đưa vào nguồn A UC03/UC04/UC07",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CODE_CI_PASS_9_OF_9_FINAL_DOC_CI_PENDING_OWNER_AUTHENTICATED_FILE_E2E_NOT_RUN",
+        "branch": "feat/r138-r0-inmemory-pdf-docx-source",
+        "pr": 187,
+        "scope": "Non-storage R0 synthetic-document intake through existing Cloudflare AI toMarkdown; fixed SRS v1.1.15 unchanged",
+        "implementation": [
+          "One POST /api/qa/legal/extract through existing same-origin QA_AUTH service. Session and role lawyer/tenant_admin plus Matter read ACL/deny overrides. Read size bound 1.5 MB, PDF/DOCX file type and signature, explicit synthetic consent, quota shared with AI QA, check ACL again after awaited provider conversion.",
+          "Cloudflare Workers AI toMarkdown text mode, no conversion output over 5000 chars, no silent truncation, returns SHA256 and text in no-store response. No source bytes/model output persisted to D1/R2/Drive; no legal model inference until separate user submit.",
+          "Mobile compact collapsible file picker; file-specific consent, preview with original-source fidelity warning, human comparison checkbox, explicit inject to source A only; original legal QA model consent reset. Abort/clear old file preview on UC/Matter/source/file/workspace change.",
+          "Live Cloudflare patch is targeted. Do not overwrite pre-existing HTML/CSS/site_worker and backend worker drift from GitHub."
+        ],
+        "tests": {
+          "direct_cloudflare_conversion_pdf": "PASS_SYNTHETIC_VALID_PDF_REST_TO_MARKDOWN_TEXT",
+          "direct_cloudflare_conversion_docx": "PASS_SYNTHETIC_VALID_DOCX_REST_TO_MARKDOWN_TEXT",
+          "direct_supported_formats": "PASS_PDF_DOCX_LISTED_BY_ACCOUNT_API",
+          "node_api": "PASS_MULTIPART_AUTH_ACL_ROLE_QUOTA_OVERSIZE_MAGIC_INVALID_TEXT_REVOKE_AFTER_CONVERSION_NO_PERSISTENCE",
+          "site_relay": "PASS_SAME_ORIGIN_ONLY_POST_WITH_COOKIE",
+          "browser": "PASS_CHROMIUM_DESKTOP_MOBILE_SYNTHETIC_REAL_BROWSER_FILE_MULTIPART_AND_MOCK_CONVERTER_IMPORT_GATES",
+          "github_code_ci": "PASS_9_OF_9_RUN_42520226883_SHA_fe6a960fddcf53183cf8702c202b5043eb96eb1f",
+          "github_final_head_ci": "PENDING_DOCUMENTATION_COMMIT",
+          "owner_real_signed_in_mobile": "NOT_RUN",
+          "owner_real_file_end_to_end": "NOT_RUN",
+          "legal_fidelity_scanned_pdf_tracked_docx": "NOT_RUN",
+          "on_premise_adapter": "NOT_RUN"
+        },
+        "qa": {
+          "backend": {
+            "worker": "ai-law-standalone-cf-qa",
+            "version": "90f71495-6215-49f6-acb1-a338340cbd16",
+            "deployment": "48586f30-4ae2-436f-a66b-8f82e75b6787",
+            "traffic_percent": 100,
+            "readback": "PASS_TWO_UPDATED_MODULES_EXACT_9_OTHER_MODULES_BYTE_EXACT_12_BINDING_OBJECTS_UNCHANGED",
+            "preexisting_module_drift": "LIVE_WORKER_MJS_BYOS_WIRING_PRESERVED"
+          },
+          "website": {
+            "worker": "ai-law-web-qa",
+            "version": "5102dfb0-aa47-482f-b2ee-85448f174b5e",
+            "deployment": "71886c86-7f6e-4bc2-aaf0-b0ea08191501",
+            "traffic_percent": 100,
+            "readback": "PASS_FOUR_PATCHED_MODULES_EXACT_23_OTHER_MODULES_BYTE_EXACT_2_BINDING_OBJECTS_UNCHANGED",
+            "preexisting_module_drift": "SITE_WORKER_HTML_CSS_QA_DIVERGENCE_PRESERVED"
+          },
+          "storage": "NOT_TOUCHED",
+          "production": "NOT_DEPLOYED"
+        },
+        "srs_change": "SC-040_BASELINE_V1_1_15_UNCHANGED",
+        "owner_acceptance": "PENDING",
+        "remaining": [
+          "Verify final-head CI 9/9 after documentation updates",
+          "Owner Android signed-in PDF/DOCX synthetic source preview, compare, import and legal-model consent E2E NOT_RUN",
+          "Security/legal verification of table/hidden/rotated/OCR/tracked-change fidelity is not covered by text conversion; fail closed if >5000 chars; manual review required",
+          "Reconcile pre-existing QA Worker HTML/CSS/site Worker/source-of-truth code drift before any full deployment or main merge",
+          "Do not ship production, activate real customer documents or merge stacked draft PR without Owner release acceptance"
+        ]
       }
     ],
     "features": [
@@ -3851,8 +3909,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R137 UC03/04 local comparison+copy gate PR #186: code CI #42513662500 PASS 9/9; website QA deployment efbbb590-20c2-4692-a65c-c50b2ed786a5 100%, exact 3 changed modules, all 24 siblings and 2 bindings preserved. Preexisting QA HTML/CSS drift preserved. Backend R136 unchanged; Android/legal E2E NOT_RUN.",
-      "next_action": "Close R137 final-head CI and Owner authenticated Android UC03/UC04 review/copy gate acceptance; then progress to the next SRS-scoped R0 actual document ingestion prerequisite with explicit input fidelity, ACL, and separate security design. Do not reopen storage OAuth or claim local Python parser is deployed. Owner final release signoff.",
+      "last_completed_step": "R138 PDF/DOCX QA-only in-memory source preview PR #187: Cloudflare direct synthetic PDF and DOCX conversion PASS; code CI #42520226883 PASS 9/9 including Chromium mobile/desktop and MatterACL. Backend QA version 90f71495-6215-49f6-acb1-a338340cbd16 and site QA 5102dfb0-aa47-482f-b2ee-85448f174b5e 100%, readback 2+4 exact modules, preserved other 9+23 modules and 12+2 binding objects. Owner signed-in file E2E NOT_RUN; SC-040.",
+      "next_action": "Confirm R138 final-head CI; Owner Android signed-in synthetic PDF/DOCX conversion/preview and user-consent E2E with source/manual fidelity check; then SRS R0 document-fidelity edges (rotated/hidden/OCR/tables/tracked Word) as separate small tasks and reconcile QA-vs-GitHub drift. No storage OAuth or production; Owner final acceptance.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",

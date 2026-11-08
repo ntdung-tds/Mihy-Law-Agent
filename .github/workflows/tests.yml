@@ -222,6 +222,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r108_matter_rename.test.mjs
       - name: R109-R111 legal text ACL, quotas and source citation security
         run: node --test deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs
+      - name: R138 PDF/DOCX QA extraction in-memory auth, ACL, format, size, fidelity-review gates
+        run: node --test deployment/cloudflare/tests/r138_doc_intake.test.mjs
       - name: R109 actual SQLite daily AI quota constraints
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r109_ai_quota_sql.py' -v
       - name: R112 separate 11 legal workflow screens, deep links and mobile menu
