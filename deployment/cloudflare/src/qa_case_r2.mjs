@@ -150,19 +150,26 @@ async function details(req,env,p,matter,now){
  return json(200,{id:matter,version:version+1,saved:true});
 }
 const FILE_LIST_SQL=[
- 'SELECT file_id,file_name,mime_type,byte_length,sha256,uploaded_at',
- 'FROM qa_case_files_r2 WHERE installation_id=? AND tenant_id=? AND matter_id=?',
- 'ORDER BY uploaded_at DESC,file_id DESC LIMIT 50'
+ 'SELECT f.file_id,f.file_name,f.mime_type,f.byte_length,f.sha256,f.uploaded_at',
+ 'FROM qa_case_files_r2 f WHERE f.installation_id=? AND f.tenant_id=? AND f.matter_id=?',
+ 'AND NOT EXISTS(SELECT 1 FROM qa_case_file_hides h WHERE h.installation_id=f.installation_id',
+ 'AND h.tenant_id=f.tenant_id AND h.matter_id=f.matter_id AND h.file_id=f.file_id)',
+ 'ORDER BY f.uploaded_at DESC,f.file_id DESC LIMIT 50'
 ].join(' ');
 const FILE_GET_SQL=[
- 'SELECT file_id,file_name,mime_type,byte_length,sha256,object_key',
- 'FROM qa_case_files_r2 WHERE installation_id=? AND tenant_id=? AND matter_id=? AND file_id=? LIMIT 1'
+ 'SELECT f.file_id,f.file_name,f.mime_type,f.byte_length,f.sha256,f.object_key',
+ 'FROM qa_case_files_r2 f WHERE f.installation_id=? AND f.tenant_id=? AND f.matter_id=? AND f.file_id=?',
+ 'AND NOT EXISTS(SELECT 1 FROM qa_case_file_hides h WHERE h.installation_id=f.installation_id',
+ 'AND h.tenant_id=f.tenant_id AND h.matter_id=f.matter_id AND h.file_id=f.file_id) LIMIT 1'
 ].join(' ');
 // R121: same-content retry must reuse/repair the original receipt, not duplicate it.
 const FILE_MATCH_SQL=[
- 'SELECT file_id,file_name,mime_type,byte_length,sha256,object_key,uploaded_at',
- 'FROM qa_case_files_r2 WHERE installation_id=? AND tenant_id=? AND matter_id=?',
- 'AND file_name=? AND sha256=? ORDER BY uploaded_at DESC,file_id DESC LIMIT 1'
+ 'SELECT f.file_id,f.file_name,f.mime_type,f.byte_length,f.sha256,f.object_key,f.uploaded_at',
+ 'FROM qa_case_files_r2 f WHERE f.installation_id=? AND f.tenant_id=? AND f.matter_id=?',
+ 'AND f.file_name=? AND f.sha256=?',
+ 'AND NOT EXISTS(SELECT 1 FROM qa_case_file_hides h WHERE h.installation_id=f.installation_id',
+ 'AND h.tenant_id=f.tenant_id AND h.matter_id=f.matter_id AND h.file_id=f.file_id)',
+ 'ORDER BY f.uploaded_at DESC,f.file_id DESC LIMIT 1'
 ].join(' ');
 const FILE_INSERT_SQL=[
  'INSERT INTO qa_case_files_r2(installation_id,tenant_id,matter_id,file_id,file_name,mime_type,',
@@ -296,6 +303,43 @@ async function files(req,env,p,matter,now,id){
  return json(201,{id:idNew,name:fileName,mime_type:contentType,
   bytes:bytes.byteLength,sha256:sha,created_at:now});
 }
+// R122: a file-level "Xóa" creates an immutable D1 tombstone. No R2 object or
+// receipt is deleted; only an authorized system-admin future workflow may purge.
+const FILE_HIDE_SQL=[
+ 'INSERT INTO qa_case_file_hides(installation_id,tenant_id,matter_id,file_id,hidden_by,hidden_at)',
+ 'SELECT f.installation_id,f.tenant_id,f.matter_id,f.file_id,?,?',
+ 'FROM qa_case_files_r2 f JOIN qa_matters m ON m.installation_id=f.installation_id',
+ 'AND m.tenant_id=f.tenant_id AND m.matter_id=f.matter_id',
+ 'WHERE f.installation_id=? AND f.tenant_id=? AND f.matter_id=? AND f.file_id=?',
+ 'AND NOT EXISTS(SELECT 1 FROM qa_matter_hides mh WHERE mh.installation_id=m.installation_id',
+ 'AND mh.tenant_id=m.tenant_id AND mh.matter_id=m.matter_id)',
+ 'AND NOT EXISTS(SELECT 1 FROM qa_case_file_hides h WHERE h.installation_id=f.installation_id',
+ 'AND h.tenant_id=f.tenant_id AND h.matter_id=f.matter_id AND h.file_id=f.file_id)',
+ 'AND',ACL_FRAGMENT
+].join(' ');
+async function hideFile(req,env,p,matter,now,fileId){
+ if(!await permitted(env,p,matter,'write',now))return forbidden();
+ if(!origin(req)||!req.headers.get('Content-Type')?.startsWith('application/json'))
+  return error(403,'Yêu cầu không hợp lệ.');
+ let data;
+ try{const raw=await req.text();if(raw.length>100)return error(413,'Yêu cầu quá dài.');data=JSON.parse(raw);}
+ catch{return error(400,'Dữ liệu không hợp lệ.');}
+ if(!data||typeof data!=='object'||Array.isArray(data)||
+    Object.keys(data).length!==1||data.action!=='hide')
+  return error(400,'Chỉ hỗ trợ ẩn tệp, không xóa vật lý.');
+ const original=await env.DB.prepare(FILE_GET_SQL)
+  .bind(env.INSTALLATION_ID,p.tenant_id,matter,fileId).first();
+ if(!original)return forbidden();
+ try{
+  await env.DB.prepare(FILE_HIDE_SQL)
+   .bind(p.user_id,now,env.INSTALLATION_ID,p.tenant_id,matter,fileId,...aclParams(p,now)).run();
+ }catch{return unavailable();}
+ const hidden=await env.DB.prepare(
+  'SELECT hidden_by FROM qa_case_file_hides WHERE installation_id=? AND tenant_id=? AND matter_id=? AND file_id=? LIMIT 1'
+ ).bind(env.INSTALLATION_ID,p.tenant_id,matter,fileId).first();
+ if(!hidden||hidden.hidden_by!==p.user_id)return forbidden();
+ return json(200,{id:fileId,hidden:true,physical_deleted:false});
+}
 async function events(env,p,matter,now){
  if(!await permitted(env,p,matter,'read',now))return forbidden();
  const rows=await env.DB.prepare(
@@ -306,19 +350,24 @@ async function events(env,p,matter,now){
 export async function caseR2Api(req,env,opts={}){
  if(!configured(env))return unavailable();
  const route=new URL(req.url).pathname;
- const m=/^\/api\/qa\/cases\/([0-9a-f-]{36})(?:\/(files|events)(?:\/([0-9a-f-]{36})\/download)?)?$/.exec(route);
+ const m=/^\/api\/qa\/cases\/([0-9a-f-]{36})(?:\/(files|events)(?:\/([0-9a-f-]{36})(\/download)?)?)?$/.exec(route);
  if(!m||!UUID.test(m[1])||(m[3]&&!UUID.test(m[3])))return error(404,'Không tìm thấy.');
  if(m[2]==='events'&&(m[3]||req.method!=='GET'))return error(405,'Phương thức không được hỗ trợ.');
- if(m[2]==='files'&&!['GET','POST'].includes(req.method))return error(405,'Phương thức không được hỗ trợ.');
+ if(m[2]==='files'&&m[3]){
+  if(m[4]==='/download'?req.method!=='GET':req.method!=='PATCH')
+   return error(405,'Phương thức không được hỗ trợ.');
+ }else if(m[2]==='files'&&!['GET','POST'].includes(req.method))
+  return error(405,'Phương thức không được hỗ trợ.');
  if(!m[2]&&!['GET','PATCH'].includes(req.method))return error(405,'Phương thức không được hỗ trợ.');
- if(m[3]&&req.method!=='GET')return error(405,'Phương thức không được hỗ trợ.');
  try{
   const now=opts.now??Math.floor(Date.now()/1000);
   const principal=await mobileSession(req,env,now);
   if(!principal||!UUID.test(principal.user_id)||!UUID.test(principal.tenant_id))
    return error(401,'Phiên đăng nhập không còn hiệu lực.');
   if(!['lawyer','tenant_admin'].includes(principal.role_key))return error(403,'Không có quyền.');
-  if(m[2]==='files')return files(req,env,principal,m[1],now,m[3]);
+  if(m[2]==='files')return m[3]&&!m[4]
+   ?hideFile(req,env,principal,m[1],now,m[3])
+   :files(req,env,principal,m[1],now,m[3]);
   if(m[2]==='events')return events(env,principal,m[1],now);
   return details(req,env,principal,m[1],now);
  }catch{return unavailable();}
