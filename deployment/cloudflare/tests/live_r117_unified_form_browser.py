@@ -132,7 +132,7 @@ def scenario(browser,name,viewport,origin):
         page.locator("#matter-list").wait_for(state="visible")
     page.locator("#matter-category-filter").select_option("Lao động")
     assert page.locator("#matter-list .matter-row").count()==1
-    page.locator("#matter-list .matter-row button").click()
+    page.locator("#matter-list .matter-row .case-row-open").click()
     page.get_by_text("Đã mở hồ sơ. Chỉnh sửa hoặc chọn thêm tệp rồi bấm “Lưu thay đổi”.").wait_for(timeout=15000)
     if name=="mobile":
         assert page.locator("#matter-workspace").get_attribute("data-mobile-mode")=="detail"
