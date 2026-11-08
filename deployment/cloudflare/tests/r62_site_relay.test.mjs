@@ -68,4 +68,25 @@ test('R62: wrong route methods fail closed before reaching auth worker',async()=
   }
   assert.equal(observed.length,before);
 });
+test('R138: file preview POST passes through same-origin QA service but denies other origins/methods',async()=>{
+ const form=new FormData();
+ form.append('uc','UC03');
+ form.append('file',new Blob(['%PDF-1.4'],'application/pdf'),'synthetic.pdf');
+ const request=new Request(ORIGIN+'/api/qa/legal/extract',{method:'POST',
+  headers:{Origin:ORIGIN,'Sec-Fetch-Site':'same-origin',Cookie:'al_qa_session='+ORIGINAL},
+  body:form});
+ const result=await handleSite(request,env);
+ assert.equal(result.status,401,'Relay does not invent authorization');
+ assert.equal(observed.at(-1).path,'/api/qa/legal/extract');
+ assert.equal(observed.at(-1).origin,authOrigin);
+ assert.equal(observed.at(-1).cookie,'al_qa_session='+ORIGINAL);
+ assert.equal(observed.at(-1).method,'POST');
+ const n=observed.length;
+ const forbidden=new Request(ORIGIN+'/api/qa/legal/extract',{method:'POST',
+  headers:{Origin:'https://malicious.example.invalid','Sec-Fetch-Site':'cross-site'},
+  body:new FormData()});
+ assert.equal((await handleSite(forbidden,env)).status,403);
+ assert.equal((await handleSite(req('/api/qa/legal/extract'),env)).status,404);
+ assert.equal(observed.length,n);
+});
 rmSync(dir,{recursive:true,force:true});
