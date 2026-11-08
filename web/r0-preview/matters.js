@@ -37,7 +37,7 @@
   for(const id of ['#matter-total','#nav-matter-count','#dashboard-matter-count']){
    const node=$(id);if(node)node.textContent='0';
   }
-  if(categoryFilter)categoryFilter.replaceChildren(new Option('Tất cả lĩnh vực',''));
+  if(categoryFilter)categoryFilter.replaceChildren(makeOption('Tất cả lĩnh vực',''));
  }
  function expired(){
   workspaceGeneration++;loadGeneration++;
@@ -50,7 +50,7 @@
   currentId='';caseVersion=0;titleVersion=0;originalTitle='';originalDetails=null;canWrite=true;
   form.reset();title.value='';filePicker.value='';
   const assignee=field('assignee_user_id');
-  assignee.replaceChildren(new Option('Tôi phụ trách (mặc định)',''));
+  assignee.replaceChildren(makeOption('Tôi phụ trách (mặc định)',''));
   for(const control of form.querySelectorAll('input,textarea,select,button'))control.disabled=false;
   $('#case-r2-list').replaceChildren();
   $('#case-history-list').replaceChildren();
