@@ -151,7 +151,7 @@ def scenario(browser,name,viewport,origin):
         page.locator("#case-close").click()
         assert page.locator("#matter-list").is_visible()
         assert not page.locator("#matter-form").is_visible()
-        width=page.evaluate("document.documentElement.scrollWidth")
+    width=page.evaluate("document.documentElement.scrollWidth")
     assert width<=viewport["width"]+4,(name,width,viewport)
     assert not errors,(name,errors)
     print(f"PASS {name}: one create/save, D1 details, PDF upload, two-category filter, edit/reload, no overflow")
