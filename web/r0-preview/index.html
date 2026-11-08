@@ -113,8 +113,8 @@
         </section>
 
         <section id="view-documents" class="view-panel" data-panel="documents" hidden>
-          <div class="sub-page-heading"><div><p class="section-kicker">DANH MỤC HỒ SƠ · DỮ LIỆU QA</p><h1>Hồ sơ vụ việc<span class="heading-dot">.</span></h1><p class="subtitle">Tạo và quản lý danh mục hồ sơ lưu bền vững trên D1, có phân quyền theo từng hồ sơ.</p></div>
-            <button class="btn btn-primary" type="button" id="upload-btn"><svg class="icon"><use href="#i-plus"/></svg> Tạo hồ sơ QA</button><input type="file" id="local-file" accept=".docx,.pdf" hidden /></div>
+          <div class="sub-page-heading"><div><p class="section-kicker">DANH MỤC HỒ SƠ · DỮ LIỆU QA</p><h1>Hồ sơ vụ việc<span class="heading-dot">.</span></h1><p class="subtitle">Một biểu mẫu để tạo và cập nhật hồ sơ, đính kèm tài liệu R2; danh sách hồ sơ đã lưu và lọc lĩnh vực nằm bên dưới.</p></div>
+            <button class="btn btn-primary" type="button" id="upload-btn"><svg class="icon"><use href="#i-plus"/></svg> + Hồ sơ mới</button><input type="file" id="local-file" accept=".docx,.pdf" hidden /></div>
           <div class="demo-disclaimer"><svg class="icon"><use href="#i-shield"/></svg><div><strong>Hồ sơ QA được lưu trên D1 · Tệp lưu tạm R2 private</strong>
             <span>Quản lý chi tiết vụ việc, quyền truy cập, lịch sử và tệp PDF/DOCX trên môi trường thử nghiệm. Không nhập thông tin khách hàng thật. Google Drive/OneDrive tạm dừng.</span></div></div>
           <div class="workflow-resume" id="workflow-resume-panel" hidden>
@@ -122,56 +122,83 @@
             <p>Danh mục hồ sơ QA đã tạo sẽ được làm mới khi bạn quay lại.</p>
           </div>
           <section id="matter-workspace" class="matter-workspace" aria-labelledby="matter-title-heading">
-            <div class="matter-card">
-              <h2 id="matter-title-heading">Tạo hồ sơ mới</h2>
-              <p>Chỉ tạo hồ sơ thử nghiệm không chứa thông tin cá nhân hoặc hồ sơ khách hàng.</p>
-              <form id="matter-form"><label for="matter-title">Tên hồ sơ QA (3–100 ký tự)</label>
-                <div class="matter-form-row"><input id="matter-title" name="title" required minlength="3" maxlength="100" placeholder="Ví dụ: Hồ sơ QA - kiểm thử phân quyền" autocomplete="off"/>
-                  <button type="submit" id="matter-create">Lưu hồ sơ</button></div></form>
-              <p id="matter-feedback" role="status" aria-live="polite"></p>
-            </div>
-            <div class="matter-card">
-              <div class="matter-list-heading"><h2>Danh mục đã lưu <span id="matter-total">0</span></h2>
-                <button type="button" id="matter-refresh">Làm mới</button></div>
-              <label class="sr-only" for="matter-search">Tìm hồ sơ QA</label>
-              <input id="matter-search" placeholder="Tìm theo tên hồ sơ…" type="search" aria-label="Tìm hồ sơ QA" />
-              <p id="matter-empty">Chưa có hồ sơ nào. Tạo hồ sơ thử nghiệm đầu tiên để kiểm tra dữ liệu thật.</p>
-              <div id="matter-list" class="matter-list" role="list"></div>
-            </div>
-          </section>
-          <section id="qa-case-detail" class="matter-card qa-case-detail" hidden aria-labelledby="case-detail-heading">
-            <div class="case-detail-head"><div><p class="section-kicker">HỒ SƠ VỤ VIỆC · DỮ LIỆU LƯU THẬT TRÊN QA</p>
-              <h2 id="case-detail-heading">Chi tiết hồ sơ</h2><p id="case-title-caption"></p></div>
-              <button type="button" id="case-close" class="workflow-matter-link">Đóng chi tiết</button></div>
-            <p class="legal-qa-disclaimer">Chỉ sử dụng hồ sơ/tệp giả lập khi kiểm thử QA. D1 lưu thông tin; R2 private lưu tệp PDF/DOCX tạm thời. Không nhập dữ liệu khách hàng thật.</p>
-            <form id="case-detail-form" class="case-detail-form">
-              <div class="case-form-grid">
-                <label>Mã hồ sơ<input name="reference" maxlength="60" placeholder="VD: HS-QA-001" /></label>
-                <label>Loại vụ việc<input name="category" maxlength="80" placeholder="VD: Hợp đồng, tranh chấp..." /></label>
-                <label>Trạng thái<select name="status"><option value="open">Mới mở</option><option value="in_progress">Đang xử lý</option><option value="on_hold">Tạm dừng</option><option value="closed">Đã đóng</option></select></label>
-                <label>Mức ưu tiên<select name="priority"><option value="low">Thấp</option><option value="normal">Bình thường</option><option value="high">Cao</option></select></label>
-                <label>Người phụ trách<select name="assignee_user_id" required></select></label>
-                <label>Thời hạn dự kiến<input type="date" name="deadline" /></label>
-                <label>Khách hàng / bên yêu cầu<input name="client_label" maxlength="160" placeholder="Chỉ dữ liệu giả lập ở QA" /></label>
-                <label>Bên liên quan / đối tác<input name="counterparty_label" maxlength="160" placeholder="Chỉ dữ liệu giả lập ở QA" /></label>
+            <div class="matter-card qa-case-unified">
+              <div class="case-unified-heading">
+                <div><p class="section-kicker">TẠO · CHỈNH SỬA · LƯU THẬT</p>
+                  <h2 id="matter-title-heading">Thông tin hồ sơ vụ việc</h2>
+                  <p id="case-title-caption">Điền thông tin và đính kèm tệp, sau đó bấm một lần “Lưu hồ sơ”.</p>
+                </div>
+                <button id="case-close" type="button" class="workflow-matter-link">+ Hồ sơ mới</button>
               </div>
-              <label class="case-summary-label">Tóm tắt vụ việc<textarea name="summary" rows="4" maxlength="1600" placeholder="Nội dung mô tả vụ việc, chỉ nhập thông tin giả lập trong QA"></textarea></label>
-              <button type="submit" id="case-save" class="btn btn-primary">Lưu thông tin hồ sơ</button>
-              <p id="case-save-feedback" role="status" aria-live="polite"></p>
-            </form>
-            <div class="case-r2-panel">
-              <h3>Tài liệu của hồ sơ · R2 tạm thời</h3>
-              <p>PDF hoặc DOCX tối đa 10 MB/tệp; tải về được kiểm tra SHA-256. Tệp không công khai và chỉ người có quyền hồ sơ mới truy cập được.</p>
-              <form id="case-r2-upload-form" class="case-r2-upload-form">
-                <label for="case-r2-file">Chọn tài liệu PDF/DOCX mẫu</label>
-                <input type="file" id="case-r2-file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required />
-                <button type="submit" id="case-r2-upload" class="btn btn-primary">Lưu tệp vào R2</button>
+              <form id="matter-form" class="case-unified-form" autocomplete="off">
+                <label class="case-main-title" for="matter-title">Tên hồ sơ <span aria-hidden="true">*</span>
+                  <input id="matter-title" name="title" required minlength="3" maxlength="100" placeholder="Ví dụ: Hồ sơ QA - hợp đồng mẫu" />
+                </label>
+                <div id="qa-case-detail" class="qa-case-detail" aria-label="Thông tin chi tiết hồ sơ">
+                  <div id="case-detail-form" class="case-form-grid">
+                    <label>Mã hồ sơ<input name="reference" maxlength="60" placeholder="VD: HS-QA-001" /></label>
+                    <label>Lĩnh vực pháp lý
+                      <input name="category" list="case-category-options" maxlength="80" placeholder="Chọn hoặc nhập lĩnh vực..." />
+                      <datalist id="case-category-options">
+                        <option value="Dân sự"></option><option value="Hình sự"></option>
+                        <option value="Hành chính"></option><option value="Kinh doanh - thương mại"></option>
+                        <option value="Lao động"></option><option value="Đất đai"></option>
+                        <option value="Hôn nhân và gia đình"></option><option value="Sở hữu trí tuệ"></option>
+                        <option value="Thuế"></option><option value="Khác"></option>
+                      </datalist>
+                    </label>
+                    <label>Trạng thái<select name="status">
+                      <option value="open">Mới mở</option><option value="in_progress">Đang xử lý</option>
+                      <option value="on_hold">Tạm dừng</option><option value="closed">Đã đóng</option>
+                    </select></label>
+                    <label>Mức ưu tiên<select name="priority">
+                      <option value="low">Thấp</option><option value="normal" selected>Bình thường</option><option value="high">Cao</option>
+                    </select></label>
+                    <label>Người phụ trách<select name="assignee_user_id" id="case-assignee">
+                      <option value="">Tôi phụ trách (mặc định)</option>
+                    </select></label>
+                    <label>Thời hạn dự kiến<input name="deadline" type="date" /></label>
+                    <label>Khách hàng / bên yêu cầu<input name="client_label" maxlength="160" placeholder="Chỉ dùng dữ liệu giả lập ở QA" /></label>
+                    <label>Bên liên quan / đối tác<input name="counterparty_label" maxlength="160" placeholder="Chỉ dùng dữ liệu giả lập ở QA" /></label>
+                  </div>
+                  <label class="case-summary-label">Tóm tắt vụ việc
+                    <textarea name="summary" rows="4" maxlength="1600" placeholder="Mô tả nội dung và công việc liên quan; chỉ dữ liệu mẫu khi QA."></textarea>
+                  </label>
+                </div>
+                <div id="case-r2-upload-form" class="case-r2-panel">
+                  <div class="case-r2-heading"><h3>Tài liệu đính kèm</h3><small>Cloudflare R2 private · PDF/DOCX · tối đa 10 MB/tệp</small></div>
+                  <label for="case-r2-file">Chọn tệp hồ sơ (có thể chọn nhiều tệp)</label>
+                  <input id="case-r2-file" name="case_files" type="file" multiple
+                    accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                  <small>Tệp được lưu vào R2 khi bấm “Lưu hồ sơ”. Nếu tải tệp lỗi, thông tin D1 vẫn được giữ và hệ thống sẽ báo rõ tệp chưa lưu.</small>
+                  <p id="case-r2-feedback" role="status" aria-live="polite"></p>
+                  <div id="case-r2-list" class="matter-list" aria-label="Tệp đã lưu thuộc hồ sơ đang mở"></div>
+                </div>
+                <div class="case-unified-actions">
+                  <button type="submit" id="matter-create" class="btn btn-primary">Lưu hồ sơ</button>
+                  <span id="case-save-state" aria-live="polite">Hồ sơ mới · Chưa lưu</span>
+                </div>
+                <p id="matter-feedback" role="status" aria-live="polite"></p>
+                <p id="case-save-feedback" role="status" aria-live="polite"></p>
               </form>
-              <p id="case-r2-feedback" role="status" aria-live="polite"></p>
-              <div id="case-r2-list" class="matter-list" aria-live="polite"></div>
+              <details id="case-history-details" class="case-events" hidden>
+                <summary>Lịch sử thay đổi hồ sơ</summary>
+                <div id="case-history-list" aria-live="polite"></div>
+              </details>
             </div>
-            <div class="case-events"><h3>Lịch sử thao tác hồ sơ</h3>
-              <div id="case-history-list" aria-live="polite"></div>
+            <div class="matter-card qa-case-saved-list">
+              <div class="matter-list-heading"><h2>Danh sách hồ sơ đã lưu <span id="matter-total">0</span></h2>
+                <button id="matter-refresh" type="button">Làm mới</button></div>
+              <div class="case-saved-filters">
+                <label for="matter-search">Tìm hồ sơ
+                  <input id="matter-search" type="search" placeholder="Tên hoặc mã hồ sơ..." />
+                </label>
+                <label for="matter-category-filter">Lĩnh vực pháp lý
+                  <select id="matter-category-filter"><option value="">Tất cả lĩnh vực</option></select>
+                </label>
+              </div>
+              <p id="matter-empty">Chưa có hồ sơ đã lưu.</p>
+              <div id="matter-list" class="matter-list" role="list"></div>
             </div>
           </section>
           <section class="matter-card qa-document-box" hidden aria-label="Lưu trữ Google Drive tạm dừng">
