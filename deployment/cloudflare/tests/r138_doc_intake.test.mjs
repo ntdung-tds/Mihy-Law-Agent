@@ -11,14 +11,19 @@ const M='44444444-4444-4444-8444-444444444444';
 const SID='55555555-5555-4555-8555-555555555555';
 const NOW=1800000000;
 const GOOD='Điều 1. Bên A giao 10 bộ hồ sơ vào ngày 15/09/2026. Bên B thanh toán 2.000.000 đồng.';
-function fixture({session=true,acl=true,quota=true,role='lawyer',convert=true,converted=GOOD}={}){
+function fixture({session=true,acl=true,quota=true,role='lawyer',
+ convert=true,converted=GOOD,revokeAfterConvert=false}={}){
  const calls=[],conversions=[],runs=[];
+ let aclReads=0;
  const env={AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,
   DB:{prepare(sql){return {bind(...args){
     calls.push({sql,args});
     return {async first(){
       if(sql.includes('FROM qa_sessions s'))return session?{user_id:U,tenant_id:T,role_key:role}:null;
-      if(sql===LEGAL_MATTER_ACCESS_SQL)return acl?{'1':1}:null;
+      if(sql===LEGAL_MATTER_ACCESS_SQL){
+     aclReads++;
+     return acl&&!(revokeAfterConvert&&aclReads>1)?{'1':1}:null;
+    }
       return null;
      },async run(){return {meta:{changes:quota?1:0}};}};
   }};}},
@@ -119,4 +124,14 @@ test('R138 conversion rejects oversize, mislabeled files, invalid PDF/ZIP signat
  const r=await documentExtractApi(req(),f.env,{now:NOW});
  assert.equal(r.status,503);
  assert.equal(f.conversions.length,1);
+});
+test('R138: revoke or deny Matter during conversion blocks text returned to former member',async()=>{
+ const f=fixture({revokeAfterConvert:true});
+ const response=await documentExtractApi(req(),f.env,{now:NOW});
+ assert.equal(response.status,404);
+ const body=await response.text();
+ assert.ok(!body.includes(GOOD));
+ assert.equal(f.conversions.length,1);
+ assert.equal(f.calls.filter(x=>x.sql===LEGAL_MATTER_ACCESS_SQL).length,2);
+ assert.equal(f.runs.length,0);
 });
