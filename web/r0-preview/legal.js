@@ -23,7 +23,22 @@
     let isSubmitting=false;
     let activeUc=null, requestGeneration=0, activeController=null;
     let uc07Review=null; // In-memory only; never a persisted legal sign-off.
-    const uc07StillSame=()=>!!uc07Review&&activeUc==='UC07'&&
+    // R134: keep the exact source/Matter/question snapshot belonging to a
+    // displayed result. An old response must not appear or be copied after
+    // edits, even when an input was changed programmatically (no DOM event).
+    let currentResultContext=null;
+    const captureInputs=()=>({
+      uc:activeUc,source:byId('legal-qa-source').value.trim(),
+      extra:secondary.value.trim(),matter:matter.value,
+      question:question.value.trim(),language:byId('legal-qa-language').value,
+      consent:byId('legal-qa-consent').checked
+    });
+    const unchangedInputs=old=>{
+      if(!old)return false;
+      const now=captureInputs();
+      return Object.keys(now).every(key=>now[key]===old[key]);
+    };
+    const uc07StillSame=()=>!!uc07Review&&unchangedInputs(currentResultContext)&&activeUc==='UC07'&&
       byId('legal-qa-source').value.trim()===uc07Review.source&&
       matter.value===uc07Review.matter&&
       question.value.trim()===uc07Review.question&&
@@ -56,6 +71,7 @@
     }
     let matterLoadGeneration=0; // Abort effect of late responses from old workspace or UC.
     function clearResult(){
+      currentResultContext=null;
       clearUc07Review();
       result.hidden=true;output.textContent='';
       byId('legal-qa-sources').replaceChildren();
@@ -272,7 +288,7 @@
     window.addEventListener('ai-law:workflow-open',event=>activateWorkflow(event.detail?.uc));
     window.addEventListener('ai-law:workflow-close',clearWorkflow);
     byId('legal-qa-example').addEventListener('click',()=>{
-      if(activeUc==='UC07'&&isSubmitting){
+      if(isSubmitting){
         requestGeneration++;activeController?.abort();activeController=null;
         isSubmitting=false;byId('legal-qa-run').disabled=false;
       }
@@ -312,6 +328,7 @@
           matter.append(item);
         }
         matter.value=previously&&[...matter.options].some(o=>o.value===previously)?previously:'';
+        if(previously!==matter.value)invalidateResultOnInput();
         setStatus(data.matters.length
           ?'Chọn hồ sơ có quyền truy cập để thử nghiệp vụ AI với văn bản mẫu.'
           :'Chưa có hồ sơ QA. Chọn “Tạo hồ sơ QA mới” để tiếp tục.');
@@ -344,6 +361,7 @@
         setStatus('Chỉ sử dụng văn bản giả lập và xác nhận trước khi chạy.',true);return;
       }
       isSubmitting=true;byId('legal-qa-run').disabled=true;clearResult();
+      const submittedContext=captureInputs();
       const generation=requestGeneration;
       const currentTask=uc.value;
       const controller=new AbortController();
@@ -361,11 +379,17 @@
         if(response.status===401){location.replace('/login');return;}
         const data=await response.json().catch(()=>({}));
         if(generation!==requestGeneration||activeUc!==currentTask)return;
+        if(!unchangedInputs(submittedContext)){
+          clearResult();
+          setStatus('Đầu vào đã thay đổi. Hãy tạo lại bản nháp với nội dung hiện tại.',true);
+          return;
+        }
         if(!response.ok){
           if(response.status===404)void loadLegalMatters();
           throw Error(data.error||'Tác vụ QA không thể thực hiện.');
         }
         if(typeof data.answer!=='string'||!data.answer)throw Error('Kết quả từ máy chủ không hợp lệ.');
+        currentResultContext=submittedContext;
         output.textContent=data.answer;
         if(currentTask==='UC03'){
          showTranslationCheck(data.translation_check);
@@ -421,6 +445,11 @@
     copy.addEventListener('click',async()=>{
       if(activeUc==='UC07')return; // R131: no raw model-output clipboard bypass.
       if(result.hidden||!output.textContent)return;
+      if(['UC03','UC04'].includes(activeUc)&&!unchangedInputs(currentResultContext)){
+        clearResult();
+        setStatus('Đầu vào đã thay đổi. Hãy tạo lại bản nháp trước khi sao chép.',true);
+        return;
+      }
       try{await navigator.clipboard.writeText(output.textContent);
         setStatus('Đã sao chép bản nháp. Chưa xác minh pháp lý.');
       }catch{setStatus('Không sao chép tự động được. Bạn có thể chọn và sao chép văn bản.',true);}
@@ -442,20 +471,21 @@
         uc07CopyStatus.textContent='Không sao chép tự động được; vui lòng chọn và sao chép trực tiếp bản sửa đề xuất.';
       }
     });
-    function invalidateUc07OnInput(){
-      if(activeUc!=='UC07'||(result.hidden&&!isSubmitting))return;
+    function invalidateResultOnInput(){
+      if(!['UC03','UC04','UC07'].includes(activeUc)||
+         (result.hidden&&!isSubmitting))return;
       requestGeneration++;activeController?.abort();
       activeController=null;isSubmitting=false;
       byId('legal-qa-run').disabled=false;
       clearResult();
-      setStatus('Đầu vào đã thay đổi. Hãy chạy lại UC07 và đối chiếu bản sửa mới.',true);
+      setStatus('Đầu vào đã thay đổi. Hãy tạo lại bản nháp và đối chiếu nguồn.',true);
     }
     for(const [node,type] of [
       [byId('legal-qa-source'),'input'],[secondary,'input'],
       [question,'input'],[matter,'change'],
       [byId('legal-qa-language'),'change'],
       [byId('legal-qa-consent'),'change']
-    ])node.addEventListener(type,invalidateUc07OnInput);
+    ])node.addEventListener(type,invalidateResultOnInput);
     // app.js initializes the route before this deferred module.
     const direct=/^#uc-(UC(?:0[1-9]|1[01]))$/.exec(location.hash);
     if(direct)activateWorkflow(direct[1]);
