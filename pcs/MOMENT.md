@@ -677,3 +677,10 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - **NOT_RUN:** New PR #175 head `aa0888ef893859b938be72bdacb18254d4b31648` has no associated PR workflow runs at initial check; the test is not yet proven executed. Existing CI green on other PRs does not prove this test passed. QA real API/browser E2E NOT_RUN.
 - **BLOCKED:** QA deployment gated on dedicated Node test actually running and passing, reviewed integration order for #159/#160/#163, and real API/browser proof.
 - **Next:** Ensure `.github/workflows/tests.yml` from PR #160 explicitly runs `deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs`; run red/green Node test and CI on integration branch, then only consider QA deploy. SRS v1.1.15 frozen; no Drive/OneDrive/OAuth, real customer data or production changes. Owner final acceptance remains pending.
+
+
+### R112 follow-up — 2026-11-08 (test assertion correction)
+- **PASS (committed):** PR #175 branch `test/r112-qa-invalid-utf8-failclosed` commit `422833fbe4de9bea796343226913ddcd4da1f0dd` corrects the response-leak assertion from a literal backslash sequence to regex `/\uFFFD|source_text/`, detecting the actual U+FFFD replacement character. Only synthetic test changed; no UI, server logic, Drive/OAuth or production change.
+- **PASS (previous CI only):** Original PR #175 commit `6bc161a992695fc34d057fe06669e684aaa152f5` has completed successful workflow run `42473712712`; this does not prove the corrected assertion executed.
+- **NOT_RUN:** No GitHub PR workflow run yet associated with corrected commit at first check; dedicated R112 test execution and live API/browser E2E unverified.
+- **BLOCKED:** QA deployment pending CI with dedicated test, MatterACL checks and QA reachability. Keep PR draft and no merge until evidence.
