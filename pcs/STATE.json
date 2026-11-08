@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 124,
-  "updated_at": "2026-11-08T17:04:22.242Z",
+  "revision": 125,
+  "updated_at": "2026-11-08T17:10:15.796Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -3001,7 +3001,7 @@
         "id": "AL-R0-UC07-R133-001",
         "title": "R133 UC07 — từ chối nhãn phân cách bản sửa AI lặp nội dòng hoặc lời giải thích",
         "priority": "P1",
-        "status": "CI_PASS_9_OF_9_QA_DEPLOY_NOT_RUN_OWNER_ANDROID_NOT_RUN",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_OWNER_AUTHENTICATED_ANDROID_E2E_PENDING",
         "branch": "fix/r133-uc07-duplicate-marker-failclosed",
         "pr": 182,
         "scope": "Chỉ sửa bộ trích bản sửa UC07 text-only QA R131, giữ SRS v1.1.15 và các chức năng ngoài phạm vi.",
@@ -3016,15 +3016,23 @@
           "docx_pdf_e2e": "NOT_RUN"
         },
         "qa": {
-          "deployment": "NOT_RUN",
-          "reason": "Do not claim R133 live QA until backend source readback and exact binding/module preservation"
+          "deployment": "PASS_QA_ONLY_100_PERCENT",
+          "worker": "ai-law-standalone-cf-qa",
+          "version": "512fb19d-0ab9-44fd-8497-0155871d20af",
+          "deployment_id": "7f097434-71b5-45c1-a722-a1aeec19b8be",
+          "deployed_at": "2026-11-08T17:08:53.695299Z",
+          "source_readback": "PASS_1_UPDATED_EXACT_10_OTHER_MODULES_EXACT",
+          "bindings": "PASS_12_OF_12_OBJECTS_IDENTICAL",
+          "site": "UNCHANGED_R131",
+          "signed_in_e2e": "NOT_RUN",
+          "production": "NOT_DEPLOYED"
         },
         "srs_change": "SC-035_PROPOSAL_BASELINE_UNCHANGED",
         "owner_acceptance": "PENDING",
         "remaining": [
-          "Preserve existing 11 QA Worker modules and all 12 settings/bindings during any content-only deployment",
-          "Read back actual R133 Worker source after deployment and run signed-in Android QA",
-          "Do not merge draft PR or deploy production without Owner final acceptance"
+          "Authenticated Owner Android/real-browser UC07: valid markers, inline duplicate/requoted marker, deny/ACL, copy-lock and reviewer gate",
+          "Professional legal-semantic equivalence review and real DOCX/PDF tracked-change E2E NOT_RUN",
+          "PR #182 remains draft; no main merge/production release without Owner final acceptance"
         ]
       }
     ],
@@ -3656,8 +3664,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R133 UC07 fail-close duplicated inline/quoted markers: PR #182 draft, app commit a5adf0a98afec5905a0f0909c98ec31187b71882, GitHub CI #42502639161 PASS 9/9; Cloudflare R133 QA deploy and owner Android not run.",
-      "next_action": "R133: controlled backend QA content-only deployment and readback if all modules/bindings can be preserved, then signed-in owner Android UC07 regression and review. Keep separate PRs draft; no production/Drive/OneDrive; baseline SRS v1.1.15 unchanged.",
+      "last_completed_step": "R133 PR #182 draft; CI #42502639161 PASS 9/9, content-only Cloudflare QA deployment 7f097434-71b5-45c1-a722-a1aeec19b8be 100%; source one updated module exact, 10 others exact, 12 bindings exact. Owner signed-in mobile and legal E2E NOT_RUN.",
+      "next_action": "Owner authenticated mobile QA of UC07 R133 and R131 comparison/copy gate; run valid/inline-duplicate cases, then mark PASS/FAIL and fix if needed. Avoid storage/OAuth, do not auto-merge or touch production. SRS v1.1.15 unchanged.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
