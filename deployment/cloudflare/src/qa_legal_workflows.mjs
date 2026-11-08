@@ -145,6 +145,60 @@ export function sourceReferencesExist(answer,sourceRows){
  return true;
 }
 
+/**
+ * R115 UC03: a deterministic, read-only aid for the HUMAN legal translator.
+ * This is NOT semantic accuracy, translation completeness or legal equivalence.
+ * Only explicit numeral occurrences and Điều/Article/Section numbers can be
+ * compared. Spelled-out numbers, localized dates or reformatting can trigger
+ * false positives; never silently rewrite or reject the original AI draft.
+ * No input/output is logged, cached or persisted.
+ */
+export function translationIntegrityCheck(source,translation){
+ const deCitation=text=>text.replace(/\[(?:A|B)\d+\]/gu,'');
+ const canonical=raw=>{
+  // 2.000.000, 2,000,000 and 2000000 refer to the same explicit integer.
+  if(/^\d{1,3}(?:[.,]\d{3})+$/u.test(raw))return raw.replace(/[.,]/gu,'');
+  // A single decimal separator may change with the target language.
+  if(/^\d+[.,]\d+$/u.test(raw))return raw.replace(',','.');
+  return raw;
+ };
+ const count=(arr)=>{
+  const map=new Map();
+  for(const token of arr)map.set(token,(map.get(token)||0)+1);
+  return map;
+ };
+ const numbers=text=>{
+  const matches=deCitation(text).matchAll(/(?<![\p{L}\p{N}])\d+(?:[.,]\d+)*(?![\p{L}\p{N}])/gu);
+  return [...matches].map(x=>canonical(x[0]));
+ };
+ const articles=text=>{
+  const matches=deCitation(text).matchAll(/(?<!\p{L})(?:Điều|Article|Section)\s+(\d+(?:\.\d+)*)(?!\d)/giu);
+  return [...matches].map(x=>x[1]);
+ };
+ const missing=(sourceTokens,resultTokens,max)=>{
+  const remaining=count(resultTokens),missing=[];
+  for(const token of sourceTokens){
+   const n=remaining.get(token)||0;
+   if(n>0){remaining.set(token,n-1);continue;}
+   if(missing.length<max)missing.push(token);
+  }
+  return missing;
+ };
+ const originalNumbers=numbers(source),translatedNumbers=numbers(translation);
+ const originalArticles=articles(source),translatedArticles=articles(translation);
+ const missingNumbers=missing(originalNumbers,translatedNumbers,12);
+ const missingArticles=missing(originalArticles,translatedArticles,12);
+ return {
+  status:missingNumbers.length||missingArticles.length?'review_required':'no_obvious_numeric_omission',
+  missing_numbers:missingNumbers,
+  missing_article_numbers:missingArticles,
+  source_number_count:originalNumbers.length,
+  source_article_count:originalArticles.length,
+  review_required:true,
+  note:'Chỉ kiểm tra sự hiện diện của số và số điều ở dạng chữ số. KHÔNG xác minh độ đúng bản dịch, nghĩa pháp lý, tên riêng hoặc thuật ngữ. Cần người có chuyên môn đối chiếu toàn văn.'
+ };
+}
+
 // Always enforce byte limits on the stream itself: Content-Length can be
 // absent or forged. Never log or persist these bytes.
 async function readLimitedSource(req,max){
@@ -226,5 +280,7 @@ export async function legalApi(req,env,opts={}){
  }catch{return unavailable();}
  if(!output||!sourceReferencesExist(output,[...primary,...secondary]))return unavailable();
  return json(200,{...common,mode:'ai_draft_not_verified',
-  model:MODEL,answer:output,review_notice:'Bản nháp AI từ nội dung mẫu. Chưa kiểm chứng pháp lý, nguồn chính thức hoặc độ chính xác ngôn ngữ.'});
+  model:MODEL,answer:output,
+  ...(body.uc==='UC03'?{translation_check:translationIntegrityCheck(body.source_text,output)}:{}),
+  review_notice:'Bản nháp AI từ nội dung mẫu. Chưa kiểm chứng pháp lý, nguồn chính thức hoặc độ chính xác ngôn ngữ.'});
 }
