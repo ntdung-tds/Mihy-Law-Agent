@@ -540,13 +540,14 @@ def scenario(browser,name,viewport,origin):
             assert len([c for c in calls if c==("POST","/api/qa/legal/extract")])==before
         page.locator("#legal-qa-file-consent").check()
         run_before=len([c for c in calls if c==("POST","/api/qa/legal/run")])
+        source_before=source.input_value()
         page.locator("#legal-qa-file-extract").click()
         page.locator("#legal-qa-file-preview").wait_for(state="visible",timeout=15000)
         assert qa_import_text in page.locator("#legal-qa-file-text").inner_text()
         assert not file_use.is_enabled()
         assert "chưa" not in file_status.inner_text().lower() or "lưu" not in file_status.inner_text().lower()
         assert len([c for c in calls if c==("POST","/api/qa/legal/run")])==run_before
-        assert source.input_value()!=qa_import_text,"Preview must NOT auto-overwrite source"
+        assert source.input_value()==source_before,"Preview must NOT auto-overwrite source"
         file_review.check()
         assert file_use.is_enabled()
         file_use.click()
