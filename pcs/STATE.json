@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 114,
-  "updated_at": "2026-11-08T06:45:00.000Z",
+  "revision": 115,
+  "updated_at": "2026-11-08T08:34:55.543Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2607,6 +2607,34 @@
           }
         },
         "owner_acceptance": "PENDING_R122"
+      },
+      {
+        "id": "AL-R0-CASE-FILE-ICONS-R123-001",
+        "title": "R123: nhận diện định dạng PDF và Word bằng icon tài liệu trên mobile",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_OWNER_ANDROID_VISUAL_ACCEPTANCE_PENDING",
+        "branch": "style/r123-case-filetype-icons",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/172",
+        "scope": "UI only: SVG file-type icons PDF red, Word DOCX blue, generic fallback; compact attachment rows, two-line filenames, small actions; same icons for pending files.",
+        "evidence": {
+          "ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42463186412",
+          "ci_result": "PASS_9_OF_9",
+          "chromium_mobile_desktop": "PASS_SYNTHETIC_PDF_WORD_AND_ROW_GEOMETRY",
+          "qa_site_worker": "ai-law-web-qa",
+          "qa_version": "83381d39-a115-4285-a55d-c43fe7218aac",
+          "qa_deployment": "83f2e212-c0f8-439c-be03-bdd896b39942",
+          "qa_traffic_percent": 100,
+          "qa_modules": 27,
+          "preserved_modules": 25,
+          "bindings": 2,
+          "readback": "PASS",
+          "owner_android_visual": "NOT_RUN",
+          "original_pdf_restore": "NOT_RUN",
+          "backend_d1_r2": "UNCHANGED",
+          "production": "UNTOUCHED"
+        },
+        "srs_change": "SC-026 UI-only; frozen private v1.1.15 unchanged",
+        "owner_acceptance": "PENDING_R123"
       }
     ],
     "features": [
