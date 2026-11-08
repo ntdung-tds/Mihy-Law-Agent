@@ -177,3 +177,10 @@
 - **Physical deletion:** Current QA membership roles are only `lawyer` and `tenant_admin`; **neither is a system administrator**. No physical-delete or restore API is exposed by R119. A separately defined and audited `system_admin` governance/privilege flow is a **future gate** before any hard purge capability; never grant it implicitly to tenant administrators. No production purge.
 - **Compatibility:** No changes to frozen SRS v1.1.15; no new business modules. Existing one-form D1/R2 workflow and mobile list-first UX from R117/R118 remain. Google Drive/OneDrive BYOS and AI legacy live-only modules preserved with minimal authorization guards.
 - **QA verification:** [CI #42449716851](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42449716851) PASS 9/9 executed jobs (21 conditional skips), synthetic real Chromium desktop and mobile hide/cancel/confirm/data-retention. D1 `0018_r119_matter_soft_hide.sql` applied in QA; tombstone triggers verified, live SQL `EXPLAIN INSERT` PASS without mutation. Both Worker deployments and module/binding readback verified. Real signed-in Owner Android soft-hide/reload is **NOT_RUN**, and final acceptance remains with Owner. No actual customer data should be used in QA.
+
+## SC-023 — 2026-11-08 — Compact mobile case buttons
+
+- Owner refinement: “Button ở mobile nhỏ gọn thôi, button làm mới cũng thế”.
+- Presentation only within the existing R118/R119 Hồ sơ mobile screen (width ≤720px): compact **Xem/Sửa/Xóa** visually about 37px high with 13px icons, right-aligned instead of full-width columns; **Làm mới** about 36px and **Tạo mới** about 38px; smaller in-row confirm buttons. Desktop and underlying workflow unchanged.
+- No SRS functional expansion. Soft-hide stays strictly non-destructive; ACL, D1, private R2, Google/AI and production unchanged.
+- CI [#42450700225](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42450700225) PASS 9/9 jobs incl. real Chromium mobile synthetic backend geometry tests. QA site CSS-only deployment `3eecb4a1-3f61-450a-b58c-2052db4d4685` with 26/27 modules preserved and readback PASS. Owner physical-device QA acceptance remains pending.

@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `111` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T05:18:40.074Z`.
+- **PCS revision:** `112` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T05:29:22.237Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R120 — Compact mobile case buttons and refresh (2026-11-08)
+
+- Owner refinement: “Button ở mobile nhỏ gọn thôi, button làm mới cũng thế”. [Draft PR #169](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/169) on top of R119 #168. **CSS-only mobile ≤720px:** Xem/Sửa/Xóa shrink from ~45px full-width grid to compact, right-aligned ~37px icon-label pills; Làm mới ~36px; Tạo mới ~38px; confirmation buttons ~38px. Desktop unchanged; no soft-hide, D1, R2, AI, Google, auth or production changes.
+- **Real testing:** [CI #42450700225](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42450700225) **PASS 9/9 executed jobs**, 21 conditional skips. Local real Chromium mobile 390px verifies rendered heights and widths for case actions, refresh and create, with synthetic HTTP backend; existing desktop create/edit/hide tests pass.
+- **QA site deployed:** `ai-law-web-qa` version `64458196-5873-4570-8d27-c945691db69b`, deployment `3eecb4a1-3f61-450a-b58c-2052db4d4685` at 100%. Exactly 1 of 27 modules (`workspace_css.mjs`) changed; 26 modules byte-identical and both prior bindings preserved; full source readback PASS.
+- **PCS revision 112;** SC-023 records Owner mobile visual adjustment without changing frozen private SRS v1.1.15. Owner live physical-phone visual acceptance **NOT_RUN**, pending final signoff.
 
 ## R119 — Polished case action buttons and real soft hide, not physical deletion (2026-11-08)
 

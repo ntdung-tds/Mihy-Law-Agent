@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 111,
-  "updated_at": "2026-11-08T05:18:11.509Z",
+  "revision": 112,
+  "updated_at": "2026-11-08T05:29:01.458Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2440,6 +2440,51 @@
           "production": "UNTOUCHED"
         },
         "owner_acceptance": "PENDING_R119"
+      },
+      {
+        "id": "AL-R0-CASE-MOBILE-R120-001",
+        "title": "R120 compact Xem/Sửa/Xóa, Làm mới and Tạo mới buttons on mobile",
+        "priority": "P0",
+        "status": "QA_SITE_DEPLOYED_CI_PASS_9_OF_9_CHROMIUM_DESKTOP_MOBILE_PASS_OWNER_PHONE_NOT_RUN",
+        "owner_request": "Mobile case buttons and refresh should be smaller and tidy",
+        "branch": "feat/r120-compact-mobile-case-buttons",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/169",
+        "changes": {
+          "scope": "CSS only at max-width 720px",
+          "case_actions": "~37px visual height, ~13px icon, right-aligned compact pills",
+          "refresh": "~36px",
+          "create": "~38px",
+          "confirm": "~38px",
+          "desktop": "UNCHANGED",
+          "matter_soft_hide": "UNCHANGED",
+          "authorization": "UNCHANGED",
+          "api": "UNCHANGED",
+          "d1": "UNCHANGED",
+          "r2": "UNCHANGED",
+          "production": "UNTOUCHED"
+        },
+        "qa": {
+          "worker": "ai-law-web-qa",
+          "deployment": "3eecb4a1-3f61-450a-b58c-2052db4d4685",
+          "version": "64458196-5873-4570-8d27-c945691db69b",
+          "traffic": "100%",
+          "modified": [
+            "workspace_css.mjs"
+          ],
+          "modules_preserved": 26,
+          "bindings_preserved": 2,
+          "readback": "PASS"
+        },
+        "tests": {
+          "ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42450700225",
+          "executed_jobs": "PASS_9_OF_9",
+          "conditional_skipped": 21,
+          "chromium_mobile_390px": "PASS_SYNTHETIC_BACKEND_VISUAL_GEOMETRY",
+          "chromium_desktop": "PASS_SYNTHETIC_BACKEND",
+          "real_owner_mobile_visual": "NOT_RUN"
+        },
+        "srs_change": "SC-023 presentational only; frozen v1.1.15 unaffected",
+        "owner_acceptance": "PENDING_R120"
       }
     ],
     "features": [

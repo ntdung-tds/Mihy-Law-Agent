@@ -141,6 +141,21 @@ def scenario(browser,name,viewport,origin):
     assert page.locator("#matter-list .case-action--view").is_visible()
     assert page.locator("#matter-list .case-action--edit").is_visible()
     assert page.locator("#matter-list .case-action--hide").is_visible()
+    if name=="mobile":
+        # R120: compact visual footprint; three separate actions remain readable.
+        heights=[page.locator("#matter-list .case-action--"+kind).bounding_box()["height"]
+                 for kind in ("view","edit","hide")]
+        widths=[page.locator("#matter-list .case-action--"+kind).bounding_box()["width"]
+                for kind in ("view","edit","hide")]
+        refresh=page.locator("#matter-refresh").bounding_box()
+        create=page.locator("#upload-btn").bounding_box()
+        assert all(34 <= h <= 40 for h in heights),(heights,widths)
+        assert all(42 <= w <= 84 for w in widths),(heights,widths)
+        assert refresh and 33 <= refresh["height"] <= 40,refresh
+        assert refresh["width"] <= 95,refresh
+        assert create and create["height"] <= 42,create
+        assert page.locator("#matter-list .case-row-actions").evaluate(
+            "(node) => node.scrollWidth <= node.clientWidth+1")
     page.locator("#matter-list .case-action--view").click()
     page.get_by_text("Đã mở hồ sơ. Chỉnh sửa hoặc chọn thêm tệp rồi bấm “Lưu thay đổi”.").wait_for(timeout=15000)
     if name=="mobile":
