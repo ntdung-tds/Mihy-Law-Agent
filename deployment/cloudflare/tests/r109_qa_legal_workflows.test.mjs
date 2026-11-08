@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {legalApi,LEGAL_MATTER_ACCESS_SQL,LEGAL_QUOTA_SQL,sourceReferencesExist,summaryReviewCheck,grammarIntegrityCheck} from '../src/qa_legal_workflows.mjs';
+import {legalApi,LEGAL_MATTER_ACCESS_SQL,LEGAL_QUOTA_SQL,sourceReferencesExist,summaryReviewCheck,grammarIntegrityCheck,grammarEditedText} from '../src/qa_legal_workflows.mjs';
 
 const I='11111111-1111-4111-8111-111111111111';
 const U='22222222-2222-4222-8222-222222222222';
@@ -38,6 +38,58 @@ function request({
  return new Request(BASE+'/api/qa/legal/run',{method,headers,
   body:method==='POST'?JSON.stringify(body):undefined});
 }
+test('R131 UC07: authoritative text extraction never includes model commentary and fails closed',()=>{
+ const edited='Bên B có thể thanh toán 3.000.000 đồng ngày 16/09/2026.';
+ const raw='Lưu ý: [A1] thuộc nguồn mẫu.\n[BẮT ĐẦU BẢN SỬA]\n'+edited+
+  '\n[KẾT THÚC BẢN SỬA]\nGiải thích: Tôi đã sửa 2.000.000 thành 3.000.000.';
+ assert.equal(grammarEditedText(raw),edited);
+ assert.ok(!grammarEditedText(raw).includes('Giải thích'));
+ for(const broken of [
+  'Bên B có thể thanh toán 3 triệu.', // No boundary
+  '[KẾT THÚC BẢN SỬA]\nA\n[BẮT ĐẦU BẢN SỬA]',
+  '[BẮT ĐẦU BẢN SỬA]\nA\n[KẾT THÚC BẢN SỬA]\n[BẮT ĐẦU BẢN SỬA]\nB',
+  '[BẮT ĐẦU BẢN SỬA]\n \n[KẾT THÚC BẢN SỬA]'
+ ])assert.equal(grammarEditedText(broken),null,broken);
+ const risk=grammarIntegrityCheck('Bên A phải thanh toán 2.000.000 đồng ngày 15/09/2026.',raw);
+ assert.equal(risk.isolated_proposal,true);
+ assert.equal(risk.status,'review_required');
+});
+test('R131 UC07: real API exposes isolated edit only, blocks on malformed structure, no other UC leaks',async()=>{
+ const source='Bên A phải thanh toán 2.000.000 đồng trước 15/09/2026 cho Công ty Minh Anh.';
+ const text='Bên B có thể thanh toán 3.000.000 đồng trước 16/09/2026 cho Công ty Minh Anh.';
+ const raw='[BẮT ĐẦU BẢN SỬA]\n'+text+'\n[KẾT THÚC BẢN SỬA]\nChú thích: bản gốc 2.000.000 đồng.';
+ const f=fixture();
+ f.env.AI.run=async()=>({response:raw});
+ const ok=await legalApi(request({uc:'UC07',source}),f.env,{now:NOW});
+ assert.equal(ok.status,200);
+ const data=await ok.json();
+ assert.equal(data.answer,raw);
+ assert.equal(data.grammar_edited_text,text);
+ assert.equal(data.grammar_review.isolated_proposal,true);
+ assert.equal(data.grammar_review.review_required,true);
+ assert.equal(ok.headers.get('Cache-Control'),'no-store');
+ assert.ok(f.calls.every(x=>x.params.every(v=>v!==source&&v!==text&&v!==raw)),
+  'Source, edited text and AI commentary must not persist in D1');
+ const bad=fixture();
+ bad.env.AI.run=async()=>({response:'Bên A không được thanh toán 3.000.000 đồng.'});
+ const fail=await legalApi(request({uc:'UC07',source}),bad.env,{now:NOW});
+ assert.equal(fail.status,200,'Manual-review warning is a result, not false provider success');
+ const fallback=await fail.json();
+ assert.equal(fallback.grammar_edited_text,null);
+ assert.equal(fallback.grammar_review.isolated_proposal,false);
+ assert.equal(fallback.grammar_review.status,'manual_review_no_proposed_version');
+ for(const uc of ['UC03','UC04']){
+  const other=fixture();
+  const response=await legalApi(request({uc}),other.env,{now:NOW});
+  assert.equal(response.status,200);
+  assert.equal(Object.hasOwn(await response.json(),'grammar_edited_text'),false);
+ }
+ const denied=fixture({acl:false});
+ const unauth=await legalApi(request({uc:'UC07',source}),denied.env,{now:NOW});
+ assert.equal(unauth.status,404);
+ assert.equal(denied.providerCalls.length,0);
+});
+
 test('R130 UC07: proposed version only, with number/date/modal/party-name changes flagged',()=>{
  const source='Bên A phải thanh toán 2.000.000 đồng trước ngày 15 tháng 9 năm 2026 cho Công ty Minh Anh.';
  const edited='Bên B có thể thanh toán 3.000.000 đồng trước ngày 16/09/2026 cho Công ty Minh Bách.';

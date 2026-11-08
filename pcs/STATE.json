@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 122,
-  "updated_at": "2026-11-08T16:18:33.003Z",
+  "revision": 123,
+  "updated_at": "2026-11-08T16:38:31.590Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2945,6 +2945,57 @@
         "owner_acceptance": "PENDING_R130",
         "srs_change": "SC-033",
         "remaining": "Owner authenticated Android and professional review needed; no production readiness claim."
+      },
+      {
+        "id": "AL-R0-UC07-R131-001",
+        "title": "R131 UC07 — đối chiếu bản gốc/bản sửa và xác nhận thủ công trước khi sao chép",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_OWNER_AUTHENTICATED_ANDROID_E2E_PENDING",
+        "branch": "feat/r131-uc07-review-before-copy",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/181",
+        "scope": "UC07 non-storage, synthetic pasted text QA only; no Word Tracked Changes, real PDF/DOCX edits or authoritative legal approval.",
+        "implementation": {
+          "backend": "Single grammarEditedText(answer) extractor reused by grammarIntegrityCheck; UC07-only grammar_edited_text property string or null, no fallback to AI explanation and no persistence.",
+          "ui": "Accessible UC07 before/after comparison with independent bounded scroll, desktop side-by-side/mobile stacked. Checkbox acknowledgement within comparison is required to enable copy of edited_text ONLY. Raw model reply copy is hidden/guarded for UC07; missing proposal blocks copy.",
+          "invalidation": "Input text, question, matter, consent or language change aborts in-flight work, invalidates result/acknowledgment and copy; example reload while in flight aborts. UC change resets all source/proposal state.",
+          "semantics": "In-memory review acknowledgement is NOT a legal approval, audit event or persisted reviewer signoff. Human must still verify text; older UC03/04 and audit flows preserved."
+        },
+        "tests": {
+          "ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42500369224",
+          "ci_application_head": "2f4945b7f486ded49742eb46c4abe650c3e46456",
+          "executed": "PASS_9_OF_9",
+          "server": "PASS_parser_unique_boundaries_and_bad_structure_null_API_acl_no_persistence_and_uc_isolation",
+          "browser": "PASS_CHROMIUM_MOBILE_DESKTOP_CHECKBOX_COPY_GATE_EXACT_EDITED_TEXT_INPUT_INVALIDATION_MALFORMED_PROPOSAL_NO_OVERFLOW",
+          "qa_source_readback": "PASS_BOTH_WORKERS_100_PERCENT",
+          "owner_authenticated_android": "NOT_RUN",
+          "real_word_accept_reject": "NOT_RUN",
+          "human_legal_review": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "qa": {
+          "backend": {
+            "script": "ai-law-standalone-cf-qa",
+            "version": "ebb86625-a899-4b96-be14-4d2b2284d81c",
+            "deployment": "454398e3-b506-4855-b308-2239ebf15d03",
+            "traffic_percent": 100,
+            "modules": 11,
+            "bindings": 12,
+            "preserved_modules": 10
+          },
+          "website": {
+            "script": "ai-law-web-qa",
+            "version": "7f39492c-771f-410b-85e6-5ef9b53492f1",
+            "deployment": "53f25268-f6d1-434e-aa85-e572ef7b38c1",
+            "traffic_percent": 100,
+            "modules": 27,
+            "bindings": 2,
+            "preserved_modules": 24
+          },
+          "readback": "PASS_ALL_TARGETED_AND_PRIOR_R126_R127_R129_CHECKS"
+        },
+        "owner_acceptance": "PENDING_R131",
+        "srs_change": "SC-034; SRS v1.1.15 unchanged",
+        "remaining": "Owner signed-in Android E2E and actual DOCX tracked-change approval remain untested; QA compare/copy is local, not legal acceptance or file editing."
       }
     ],
     "features": [

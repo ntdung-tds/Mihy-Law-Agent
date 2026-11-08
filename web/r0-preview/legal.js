@@ -13,11 +13,50 @@
     const output=byId('legal-qa-output'),copy=byId('legal-qa-copy');
     const inputDetails=byId('legal-qa-input-details');
     const workflowPanel=$('#view-workflow');
+    const uc07Compare=byId('legal-qa-uc07-compare');
+    const uc07Original=byId('legal-qa-uc07-original');
+    const uc07Edited=byId('legal-qa-uc07-edited');
+    const uc07Acknowledged=byId('legal-qa-uc07-reviewed');
+    const uc07Copy=byId('legal-qa-uc07-copy-edited');
+    const uc07CopyStatus=byId('legal-qa-uc07-copy-status');
     const setStatus=(msg,bad=false)=>{status.textContent=msg;status.dataset.state=bad?'error':'info';};
     let isSubmitting=false;
     let activeUc=null, requestGeneration=0, activeController=null;
+    let uc07Review=null; // In-memory only; never a persisted legal sign-off.
+    const uc07StillSame=()=>!!uc07Review&&activeUc==='UC07'&&
+      byId('legal-qa-source').value.trim()===uc07Review.source&&
+      matter.value===uc07Review.matter&&
+      question.value.trim()===uc07Review.question&&
+      byId('legal-qa-language').value===uc07Review.language&&
+      byId('legal-qa-consent').checked;
+    function clearUc07Review(){
+      uc07Review=null;
+      uc07Compare.hidden=true;uc07Compare.open=false;
+      uc07Original.textContent='';uc07Edited.textContent='';
+      uc07Acknowledged.checked=false;uc07Copy.disabled=true;
+      uc07CopyStatus.textContent='Xác nhận chỉ áp dụng cho lần xem này; không phải phê duyệt pháp lý và không lưu vào hồ sơ.';
+      copy.hidden=false;copy.disabled=false;copy.textContent='Sao chép bản nháp';
+    }
+    function showUc07Review(data,source,selectedMatter){
+      // This is the edited version extracted BY THE SERVER, never scraped
+      // from untrusted model commentary or accepted as legally equivalent.
+      copy.hidden=true;copy.disabled=true;
+      const revised=data?.grammar_edited_text;
+      if(data?.grammar_review?.isolated_proposal!==true||
+         typeof revised!=='string'||!revised.trim()||revised.length>8500)return;
+      uc07Review={source,edited:revised,matter:selectedMatter,
+        question:question.value.trim(),language:byId('legal-qa-language').value};
+      uc07Original.textContent=source;
+      uc07Edited.textContent=revised;
+      uc07Compare.hidden=false;
+      // Keep the comparison visible on desktop; on narrow mobile screens the
+      // reviewer must deliberately expand it to reach the confirmation box.
+      uc07Compare.open=!(window.matchMedia?.('(max-width: 620px)')?.matches);
+      uc07Acknowledged.checked=false;uc07Copy.disabled=true;
+    }
     let matterLoadGeneration=0; // Abort effect of late responses from old workspace or UC.
     function clearResult(){
+      clearUc07Review();
       result.hidden=true;output.textContent='';
       byId('legal-qa-sources').replaceChildren();
       for(const id of ['legal-qa-translation-check','legal-qa-source-coverage','legal-qa-summary-review','legal-qa-grammar-review']){
@@ -233,6 +272,10 @@
     window.addEventListener('ai-law:workflow-open',event=>activateWorkflow(event.detail?.uc));
     window.addEventListener('ai-law:workflow-close',clearWorkflow);
     byId('legal-qa-example').addEventListener('click',()=>{
+      if(activeUc==='UC07'&&isSubmitting){
+        requestGeneration++;activeController?.abort();activeController=null;
+        isSubmitting=false;byId('legal-qa-run').disabled=false;
+      }
       byId('legal-qa-source').value=
         'Điều 1. Bên A bàn giao 10 bộ tài liệu vào ngày 15 tháng 9 năm 2026. Bên B thanh toán 2.000.000 đồng sau khi nghiệm thu đủ 10 bộ tài liệu.\n\nĐiều 2. Nếu giao thiếu tài liệu, hai bên lập biên bản ghi nhận số lượng đã giao và hẹn ngày hoàn tất.';
       secondary.value=
@@ -330,6 +373,7 @@
         }
         if(currentTask==='UC04')showSummaryReview(data.summary_review);
         if(currentTask==='UC07')showGrammarReview(data.grammar_review);
+        if(currentTask==='UC07')showUc07Review(data,source,matter.value);
         byId('legal-qa-result-title').textContent=data.title+' · '+(data.mode==='local_example_only'?'Tìm trong nguồn mẫu':'Bản nháp AI');
         byId('legal-qa-review').textContent=data.review_notice||
           'Chỉ truy xuất từ nguồn giả lập. Chưa xác minh dữ liệu văn bản pháp luật/bản án chính thức.';
@@ -363,7 +407,7 @@
         const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
         result.scrollIntoView({
           behavior:reduceMotion?'auto':'smooth',
-          block:currentTask==='UC04'?'start':'nearest'
+          block:['UC04','UC07'].includes(currentTask)?'start':'nearest'
         });
       } catch(error){
         if(generation===requestGeneration&&error?.name!=='AbortError')
@@ -375,11 +419,43 @@
       }
     });
     copy.addEventListener('click',async()=>{
+      if(activeUc==='UC07')return; // R131: no raw model-output clipboard bypass.
       if(result.hidden||!output.textContent)return;
       try{await navigator.clipboard.writeText(output.textContent);
         setStatus('Đã sao chép bản nháp. Chưa xác minh pháp lý.');
       }catch{setStatus('Không sao chép tự động được. Bạn có thể chọn và sao chép văn bản.',true);}
     });
+    // Acknowledgement is a LOCAL user action, not a legal approval, audit
+    // event or authorization escalation. It is invalidated by any input change.
+    uc07Acknowledged.addEventListener('change',()=>{
+      const allowed=uc07StillSame()&&!uc07Compare.hidden;
+      if(!allowed)uc07Acknowledged.checked=false;
+      uc07Copy.disabled=!allowed||!uc07Acknowledged.checked;
+    });
+    uc07Copy.addEventListener('click',async()=>{
+      if(result.hidden||uc07Compare.hidden||!uc07Acknowledged.checked||
+         uc07Copy.disabled||!uc07StillSame())return;
+      try{
+        await navigator.clipboard.writeText(uc07Review.edited);
+        uc07CopyStatus.textContent='Đã sao chép riêng bản sửa đã đối chiếu. Kết quả chưa được phê duyệt pháp lý hoặc lưu vào hồ sơ.';
+      }catch{
+        uc07CopyStatus.textContent='Không sao chép tự động được; vui lòng chọn và sao chép trực tiếp bản sửa đề xuất.';
+      }
+    });
+    function invalidateUc07OnInput(){
+      if(activeUc!=='UC07'||(result.hidden&&!isSubmitting))return;
+      requestGeneration++;activeController?.abort();
+      activeController=null;isSubmitting=false;
+      byId('legal-qa-run').disabled=false;
+      clearResult();
+      setStatus('Đầu vào đã thay đổi. Hãy chạy lại UC07 và đối chiếu bản sửa mới.',true);
+    }
+    for(const [node,type] of [
+      [byId('legal-qa-source'),'input'],[secondary,'input'],
+      [question,'input'],[matter,'change'],
+      [byId('legal-qa-language'),'change'],
+      [byId('legal-qa-consent'),'change']
+    ])node.addEventListener(type,invalidateUc07OnInput);
     // app.js initializes the route before this deferred module.
     const direct=/^#uc-(UC(?:0[1-9]|1[01]))$/.exec(location.hash);
     if(direct)activateWorkflow(direct[1]);

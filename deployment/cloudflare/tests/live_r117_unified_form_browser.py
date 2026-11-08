@@ -68,11 +68,28 @@ def scenario(browser,name,viewport,origin):
             if data["uc"]=="UC07":
                 assert data["matter_id"]==F
                 assert data["synthetic_consent"] is True
+                if "CẤU TRÚC KHÔNG HỢP LỆ" in data["source_text"]:
+                    return reply(route,payload={
+                        "uc":"UC07","title":"Sửa lỗi ngữ pháp",
+                        "mode":"ai_draft_not_verified","source_hash":"a"*64,
+                        "source_anchors":[{"id":"A1","preview":"Nguồn QA lỗi định dạng"}],
+                        "answer":"Bên B được thanh toán 3 triệu nhưng không có bản sửa tách riêng.",
+                        "grammar_edited_text":None,
+                        "review_notice":"Bản nháp cần kiểm tra thủ công.",
+                        "grammar_review":{"status":"manual_review_no_proposed_version",
+                            "isolated_proposal":False,
+                            "number_changed_count":0,"date_changed_count":0,
+                            "duty_changed_count":0,"party_changed_count":0,
+                            "number_changes":[],"date_changes":[],
+                            "duty_changes":[],"party_changes":[],
+                            "review_required":True}
+                    })
                 return reply(route,payload={
                     "uc":"UC07","title":"Sửa lỗi ngữ pháp",
                     "mode":"ai_draft_not_verified","source_hash":"a"*64,
                     "source_anchors":[{"id":"A1","preview":"Bên A phải thanh toán"}],
                     "answer":"[BẮT ĐẦU BẢN SỬA]\\nBên B có thể thanh toán 3.000.000 đồng vào ngày 16/09/2026.\\n[KẾT THÚC BẢN SỬA]\\nDanh sách chỉnh sửa cần rà soát.",
+                    "grammar_edited_text":"Bên B có thể thanh toán 3.000.000 đồng vào ngày 16/09/2026.",
                     "review_notice":"Bản sửa chỉ là đề xuất QA.",
                     "grammar_review":{
                         "status":"review_required","isolated_proposal":True,
@@ -317,7 +334,15 @@ def scenario(browser,name,viewport,origin):
         edit=page.locator("#case-mobile-edit")
         assert back.inner_text()=="← Danh sách",back.inner_text()
         assert edit.inner_text()=="Sửa",edit.inner_text()
-        back_box,edit_box=back.bounding_box(),edit.bounding_box()
+        # Snapshot both boxes in one browser task. Two serial Playwright
+        # bounding_box() calls can see different frames during smooth scrolling,
+        # spuriously reporting a 6px offset for truly aligned sibling buttons.
+        back_box,edit_box=page.evaluate("""() => {
+            return ['case-close', 'case-mobile-edit'].map(id => {
+                const r=document.getElementById(id).getBoundingClientRect();
+                return {x:r.x, y:r.y, width:r.width, height:r.height};
+            });
+        }""")
         assert back_box and edit_box
         assert 31<=back_box["height"]<=40 and 31<=edit_box["height"]<=40,(back_box,edit_box)
         assert back_box["width"]<=125 and edit_box["width"]<=90,(back_box,edit_box)
@@ -537,8 +562,55 @@ def scenario(browser,name,viewport,origin):
     grammar.locator(":scope > summary").click()
     assert grammar.evaluate("(e)=>e.open")
     assert page.evaluate("document.documentElement.scrollWidth")<=viewport["width"]+4
+    # R131: UC07 shows independently scrollable source/proposal, never exposes
+    # the raw model reply via clipboard. Reviewer acknowledgment is session-only.
+    compare=page.locator("#legal-qa-uc07-compare")
+    compare.wait_for(state="visible",timeout=15000)
+    assert compare.evaluate("(el)=>el.tagName")=="DETAILS"
+    assert compare.evaluate("(el)=>el.open")==(name!="mobile")
+    assert page.locator("#legal-qa-copy").is_hidden()
+    edited_copy=page.locator("#legal-qa-uc07-copy-edited")
+    assert edited_copy.is_disabled()
+    assert not page.locator("#legal-qa-uc07-reviewed").is_checked()
+    if not compare.evaluate("(el)=>el.open"):
+        compare.locator(":scope > summary").click()
+    assert page.locator("#legal-qa-uc07-original").inner_text()==page.locator("#legal-qa-source").input_value().strip()
+    assert page.locator("#legal-qa-uc07-edited").inner_text().startswith("Bên B có thể thanh toán")
+    assert "Danh sách chỉnh sửa" not in page.locator("#legal-qa-uc07-edited").inner_text()
+    assert edited_copy.is_disabled()
+    page.evaluate("""() => {
+        window.__uc07Copied = null;
+        Object.defineProperty(navigator,'clipboard',{
+          configurable:true,
+          value:{writeText:(value)=>{window.__uc07Copied=value;return Promise.resolve();}}
+        });
+    }""")
+    page.locator("#legal-qa-uc07-reviewed").check()
+    assert edited_copy.is_enabled()
+    edited_copy.click()
+    page.wait_for_function("() => typeof window.__uc07Copied === 'string'")
+    assert page.evaluate("window.__uc07Copied")=="Bên B có thể thanh toán 3.000.000 đồng vào ngày 16/09/2026."
+    page.wait_for_function("""() => document.querySelector('#legal-qa-uc07-copy-status')
+       ?.textContent.includes('chưa được phê duyệt pháp lý')""",timeout=15000)
+    page.locator("#legal-qa-uc07-reviewed").uncheck()
+    assert edited_copy.is_disabled(),"Unchecking must revoke clipboard gate"
+    page.locator("#legal-qa-uc07-reviewed").check()
+    assert edited_copy.is_enabled()
+    page.locator("#legal-qa-source").fill("Bên A CẤU TRÚC KHÔNG HỢP LỆ. Nội dung này chỉ kiểm thử hành vi AI thiếu nhãn bản sửa.")
+    assert page.locator("#legal-qa-result").is_hidden(),"Source change invalidates previously reviewed result"
+    assert compare.is_hidden()
+    assert edited_copy.is_disabled()
+    # Invalid AI response must NOT unlock copy even with consent.
+    page.locator("#legal-qa-run").click()
+    grammar=page.locator("#legal-qa-grammar-review")
+    grammar.wait_for(state="visible",timeout=15000)
+    assert "Không tách được" in grammar.locator(":scope > summary").inner_text()
+    assert compare.is_hidden(),"Malformed proposal must not be presented as a reviewable edit"
+    assert edited_copy.is_disabled()
+    assert page.locator("#legal-qa-copy").is_hidden()
     page.goto(origin+"/#uc-UC04",wait_until="domcontentloaded")
     page.wait_for_function("""() => document.querySelector('#legal-qa-grammar-review')?.hidden === true
+      && document.querySelector('#legal-qa-uc07-compare')?.hidden === true
       && document.querySelector('#legal-qa-output')?.textContent === ''""",timeout=15000)
     assert not page.locator("#legal-qa-result").is_visible()
     assert not errors,(name,errors)

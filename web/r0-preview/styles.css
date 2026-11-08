@@ -1201,3 +1201,65 @@ body.drawer-open{overflow:hidden}
   min-height:40px;font-size:12px;
  }
 }
+
+/* R131 UC07 reviewer comparison: in-memory only; scoped to the legal flow. */
+#view-workflow .legal-qa-uc07-compare{
+ min-width:0;margin:12px 0;border:1px solid #bdd1e8;border-radius:11px;
+ padding:10px 12px;background:#f8fbff;overflow-wrap:anywhere;
+}
+#view-workflow .legal-qa-uc07-compare[hidden]{display:none!important}
+#view-workflow .legal-qa-uc07-compare>summary{
+ min-height:42px;display:flex;align-items:center;cursor:pointer;
+ font-size:13px;font-weight:760;color:#214b78;
+}
+#view-workflow .legal-qa-uc07-compare>summary:focus-visible{
+ outline:2px solid #497dba;outline-offset:2px;border-radius:7px;
+}
+#view-workflow .legal-qa-uc07-compare-grid{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+ margin:9px 0;
+}
+#view-workflow .legal-qa-uc07-compare-grid section{min-width:0}
+#view-workflow .legal-qa-uc07-compare-grid h4{
+ font-size:12px;margin:0 0 5px;font-weight:720;
+}
+#view-workflow .legal-qa-uc07-compare-grid pre{
+ min-width:0;max-height:250px;overflow:auto;white-space:pre-wrap;
+ overflow-wrap:anywhere;padding:10px;margin:0;border:1px solid #dee8f4;
+ border-radius:9px;background:#fff;font-size:12px;line-height:1.55;
+}
+#view-workflow .legal-qa-uc07-reviewed{
+ display:flex;align-items:flex-start;gap:9px;padding:10px;
+ background:#f1f5fb;border-radius:9px;font-size:12px;line-height:1.5;
+}
+#view-workflow .legal-qa-uc07-reviewed input{
+ flex:0 0 auto;min-width:17px;min-height:17px;margin:2px 0 0;
+ accent-color:#215b91;
+}
+#view-workflow #legal-qa-uc07-copy-edited{
+ display:inline-flex;align-items:center;justify-content:center;
+ min-height:42px;max-width:100%;margin:10px 0 0;padding:8px 12px;
+ border:1px solid #235e96;border-radius:9px;background:#235e96;
+ color:#fff;font-size:12px;font-weight:740;cursor:pointer;
+}
+#view-workflow #legal-qa-uc07-copy-edited:disabled{
+ color:#627b94;background:#e4eaf2;border-color:#ccd9e6;cursor:not-allowed;
+}
+#view-workflow #legal-qa-uc07-copy-status{
+ margin:7px 0 2px;font-size:11px;line-height:1.5;color:#4a6078;
+}
+#view-workflow[data-active-uc="UC07"] #legal-qa-copy{display:none!important}
+@media(max-width:620px){
+ #view-workflow[data-active-uc="UC07"] .legal-qa-uc07-compare{
+  padding:9px;margin:9px 0;border-radius:10px;
+ }
+ #view-workflow[data-active-uc="UC07"] .legal-qa-uc07-compare-grid{
+  grid-template-columns:minmax(0,1fr);gap:8px;
+ }
+ #view-workflow[data-active-uc="UC07"] .legal-qa-uc07-compare-grid pre{
+  max-height:175px;font-size:12px;overscroll-behavior:contain;
+ }
+ #view-workflow[data-active-uc="UC07"] #legal-qa-uc07-copy-edited{
+  width:100%;min-height:43px;
+ }
+}

@@ -1,12 +1,22 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `122` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T16:18:33.003Z`.
+- **PCS revision:** `123` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T16:38:31.590Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R131 — UC07 đối chiếu bản gốc/bản sửa và xác nhận trước khi sao chép (2026-11-08)
+
+- **Mục tiêu:** Tiếp tục R0 UC07 theo issue #156 sau R130; còn thiếu cổng đối chiếu người dùng. Không can thiệp tệp khách hàng hay các dịch vụ lưu trữ bị tạm dừng.
+- **Backend:** `grammarEditedText` duy nhất tách chính xác bản sửa giữa `[BẮT ĐẦU BẢN SỬA]`/`[KẾT THÚC BẢN SỬA]`; đồng nhất với kiểm tra rủi ro R130. UC07 trả thêm `grammar_edited_text` là văn bản tách được hoặc `null` khi bất hợp lệ; không dùng phần giải thích của AI làm bản sửa, không lưu source/answer.
+- **UI mobile/desktop:** So sánh bản nguồn với bản sửa (desktop hai cột, mobile xếp dọc/scroll riêng), khu vực thu gọn. Người dùng phải tích xác nhận đã tự đối chiếu trong phiên hiện tại trước khi bật nút sao chép **chỉ bản sửa**. Nút copy bản nháp thô bị chặn trên UC07. Khi đổi nguồn/hồ sơ/câu hỏi/consent hoặc UC, xác nhận cũ bị hủy; phản hồi bất đồng bộ cũ không được phép hiển thị. Đây **không phải** audit phê duyệt hay pháp lý.
+- **CI:** [#42500369224](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42500369224) PASS **9/9** nhóm (app commit `2f4945b7f486ded49742eb46c4abe650c3e46456`). Node kiểm thử API/ACL/không lưu nguồn/nhãn lỗi; Chromium desktop và mobile kiểm tra copy gate, nội dung clipboard chính xác không có giải thích, thay dữ liệu và lỗi mô hình fail closed, không tràn ngang. Một bài browser test được sửa vì kỳ vọng sai cách diễn đạt/thời điểm thông báo; không nới chức năng.
+- **QA deployed/source readback PASS 100%:** Backend `ai-law-standalone-cf-qa` version `ebb86625-a899-4b96-be14-4d2b2284d81c`, deployment `454398e3-b506-4855-b308-2239ebf15d03`, 11 modules/12 bindings, chỉ sửa 1. Website `ai-law-web-qa` version `7f39492c-771f-410b-85e6-5ef9b53492f1`, deployment `53f25268-f6d1-434e-aa85-e572ef7b38c1`, 27 modules/2 bindings, chỉ sửa HTML/JS/CSS. R126 audit, R127 UC03 và R129 mobile UC04 readback giữ nguyên. Không migration D1/R2, production untouched.
+- **Chờ:** Owner đăng nhập Android nghiệm thu, sửa tệp DOCX có Tracked Changes hoặc xác nhận reviewer thật `NOT_RUN`; SRS v1.1.15 chốt, delta `SC-034`.
+- **QA:** https://ai-law-web-qa.iaict-platform.workers.dev/app#uc-UC07
 
 ## R130 — UC07 kiểm tra bản sửa ngữ pháp với dữ kiện pháp lý (2026-11-08)
 
