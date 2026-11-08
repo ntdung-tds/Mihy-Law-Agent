@@ -129,8 +129,8 @@
   $('#workflow-create-matter').addEventListener('click', () => {
     resumeUc = $('#workflow-code').textContent;
     if (!/^UC(?:0[1-9]|1[01])$/.test(resumeUc)) { resumeUc = null; return; }
+    window.dispatchEvent(new Event('ai-law:case-create'));
     goto('documents');
-    $('#matter-title').focus();
   });
   $('#workflow-resume').addEventListener('click', () => {
     const previous = resumeUc;
@@ -212,7 +212,7 @@
   $('#modal-close').addEventListener('click', closeModal);
   $('#modal-ack').addEventListener('click', closeModal);
   $('#modal-backdrop').addEventListener('click', (event) => { if (event.target.id === 'modal-backdrop') closeModal(); });
-  $('#upload-btn').addEventListener('click', () => { goto('documents'); $('#matter-title').focus(); });
+  $('#upload-btn').addEventListener('click', () => { window.dispatchEvent(new Event('ai-law:case-create')); goto('documents'); });
   $('#local-file').addEventListener('change', event => {
     const file = event.target.files?.[0];
     if (file) openModal('Đã chọn tệp trên thiết bị', 'Ứng dụng chỉ đọc tên tệp để minh họa thao tác chọn tài liệu. Tệp không được tải lên, đọc nội dung hay lưu trữ trên máy chủ.', `Tên tệp: ${file.name} · ${Math.round(file.size / 1024)} KB`);
