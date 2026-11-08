@@ -8,7 +8,7 @@ const matters=readFileSync('web/r0-preview/matters.js','utf8');
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 function node(){
   return {textContent:'',value:'',hidden:false,disabled:false,offsetParent:{},
-    style:{},children:[],events:{},
+    style:{},classList:{add(){},remove(){}},children:[],events:{},
     addEventListener(name,cb){this.events[name]=cb;},
     setAttribute(){},focus(){},scrollIntoView(){},reset(){},
     querySelectorAll(){return [];},
@@ -70,7 +70,7 @@ function mountMatters(){
     }]})};
   };
   runInNewContext(matters,{
-    document:{querySelector:dom.get,createElement:()=>node()},
+    document:{querySelector:dom.get,querySelectorAll:()=>[],createElement:()=>node(),createElementNS:()=>node()},
     window:{addEventListener:(event,cb)=>{events[event]=cb;}},
     location:{replace:path=>navigations.push(path),hash:''},
     fetch
