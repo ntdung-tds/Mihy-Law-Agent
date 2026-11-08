@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 121,
-  "updated_at": "2026-11-08T15:58:46.847Z",
+  "revision": 122,
+  "updated_at": "2026-11-08T16:18:33.003Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2898,6 +2898,53 @@
         "remaining": "Owner authenticated Android UI acceptance NOT_RUN. Do not mark Owner acceptance or production ready without user verification.",
         "owner_acceptance": "PENDING_R129",
         "srs_change": "SC-032; private SRS v1.1.15 unchanged"
+      },
+      {
+        "id": "AL-R0-UC07-R130-001",
+        "title": "R130 UC07: rà soát thay đổi số, hạn, nghĩa vụ, chủ thể khi AI sửa ngữ pháp",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_OWNER_ANDROID_E2E_PENDING",
+        "branch": "feat/r130-uc07-grammar-integrity-qa",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/180",
+        "scope": "Existing UC07 synthetic text-only QA within SRS v1.1.15, no real file OCR/DOCX/PDF or automatic legal edits.",
+        "implementation": {
+          "backend": "Prompt isolates unique edited version with [BẮT ĐẦU BẢN SỬA] / [KẾT THÚC BẢN SỬA]. Server compares edited portion ONLY (never commentary) to source: normalized numbers, explicit numeric/Vietnamese dates, common modal/negation obligation phrases, Bên A/Bên B, title-prefixed proper names. If isolation fails, warn manual review (fail closed).",
+          "ui": "Accessible collapsible, non-authoritative UC07 risk warning panel. Mobile defaults collapsed, desktop expanded; textContent only; clear on UC change; no alteration to model reply or source content.",
+          "limits": "Capped at 12 changed entries per type, counts reflect totals; not a semantic/legal correctness validator. Source and results not logged or persisted.",
+          "compatibility": "Existing UC03 R127, UC04 R128/R129 mobile, audit R125/R126, source citation ACL and quotas preserved. No backend migration."
+        },
+        "evidence": {
+          "ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42498703716",
+          "ci_head": "868ffe861cff51808f4019285724b842ece9bef6",
+          "ci_executed": "PASS_9_OF_9",
+          "tests": "PASS_direct_helper_structured_draft+fallback+numbers+dates+obligation+party; PASS_API_acl_no_persistence; PASS_Chromium_mobile_desktop_warning_expand_reset_no_overflow",
+          "qa_backend": {
+            "script": "ai-law-standalone-cf-qa",
+            "version": "d8beb0de-6d20-41c4-9b91-02565b348ba3",
+            "deployment": "b646db26-d441-4cd3-b4be-8f84fdbfa944",
+            "traffic_percent": 100,
+            "modules": 11,
+            "bindings": 12,
+            "preserved_modules": 10
+          },
+          "qa_site": {
+            "script": "ai-law-web-qa",
+            "version": "1ed19757-3dc3-4282-a764-e97e7612351c",
+            "deployment": "7d341446-24f2-4444-8247-250b37a469ce",
+            "traffic_percent": 100,
+            "modules": 27,
+            "bindings": 2,
+            "preserved_modules": 24
+          },
+          "qa_live_source_readback": "PASS_BOTH_WORKERS",
+          "owner_signed_in_android": "NOT_RUN",
+          "human_legal_equivalence_review": "NOT_RUN",
+          "real_DOCX_PDF_UC07": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "owner_acceptance": "PENDING_R130",
+        "srs_change": "SC-033",
+        "remaining": "Owner authenticated Android and professional review needed; no production readiness claim."
       }
     ],
     "features": [
