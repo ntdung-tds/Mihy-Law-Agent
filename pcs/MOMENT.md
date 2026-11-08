@@ -707,3 +707,11 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - **PASS status read:** main PCS revision 99; PR #157/#159/#160/#163/#175 OPEN draft; PR #158 CLOSED and not redeployed. UI stays at `/app#assistant` with 11 UC.
 - **BLOCKED QA:** fresh HEAD requests to `ai-law-web-qa.iaict-platform.workers.dev/app#assistant` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev/` fail DNS resolution (curl error 6, HTTP 000). Authenticated API, browser E2E, live MatterACL and source verification remain NOT_RUN. No QA deployment attempted because live verification cannot complete.
 - **Next:** Review dependency/order of PR #157 → #159/#160/#163 → #175, then independently add a missing synthetic tenant/MatterACL denial regression test first. Do not merge/deploy until safe and live QA reachable. No production, OAuth, Drive/OneDrive or customer data touched.
+
+
+## R112 follow-up — latest head CI and QA connectivity (2026-11-09)
+
+- **Baseline:** main PCS revision 99; branch MOMENT identifies revision 102. PR #157/#159/#160/#163/#175 OPEN; duplicate PR #158 CLOSED and not redeployed. SRS v1.1.15 unchanged.
+- **PASS (CI):** PR #175 head `2b8da7bc9c1a4b37d613b7712061bb7864b7b149`, [Actions run #42502504092](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42502504092): 9/9 executed jobs success, 21 conditional/live jobs skipped. `cloudflare-contract` job 128798095212 includes successful step `R112 legal AI synthetic source, tenant ACL and malformed UTF-8 regression`. This is synthetic CI evidence only, not live tenant E2E or legal validation.
+- **BLOCKED (QA):** `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` both fail DNS resolution from this execution environment (`curl: (6) Could not resolve host`); no authenticated live API/browser proof. Do not deploy QA or production on this evidence.
+- **NOT_RUN:** live MatterACL negative-path and source provider E2E; all 11 workflows full acceptance, owner signoff. No new product code or merge in this follow-up. Next independent task: review tenant/MatterACL negative tests and branch integration order (#157 → #159; #160/#163 siblings; #175 based on #163), test-first.
