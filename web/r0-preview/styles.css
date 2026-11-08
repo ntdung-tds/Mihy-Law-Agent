@@ -671,3 +671,9 @@ body.drawer-open{overflow:hidden}
  #matter-workspace[data-mobile-mode="list"] .qa-case-saved-list .matter-row button{min-height:43px}
  #view-documents .sub-page-heading{align-items:flex-start}
 }
+
+/* Accessible full-width saved-case title tap target; row action remains separate. */
+.case-row-open{display:block;flex:1;min-width:0;background:transparent;border:0;
+ text-align:left;padding:8px 4px;border-radius:7px;color:inherit;font:inherit;cursor:pointer}
+.case-row-open:focus-visible{outline:2px solid #4e77af;outline-offset:3px}
+@media(max-width:720px){.case-row-open{min-height:44px}}
