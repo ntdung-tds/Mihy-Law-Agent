@@ -693,3 +693,10 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - **FIX (test-first):** Added an explicit `cloudflare-contract` step running `node --test deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs` on PR #175 head, commit `2bc7df85e191224b336779f7827b2ef86027b032`. Existing R112 test remains unchanged.
 - **NOT_RUN:** CI result for the new commit pending; no claim of R112 PASS until job logs confirm the exact test and successful result. **BLOCKED:** real remote QA API/browser and full E2E not verified. No deploy, no production, no storage/OAuth changes. Only synthetic fixtures.
 - Next: inspect new Actions job output, fix any failures on this draft branch, then check MatterACL/source tests and QA reachability before safe promotion. SRS v1.1.15 unchanged; Owner final acceptance required.
+
+
+### R113 CI verification — 2026-11-08
+- **PASS:** Actions run [42487816242](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42487816242), `cloudflare-contract` job `128753434091`, step 16 **R112 legal AI synthetic source, tenant ACL and malformed UTF-8 regression** completed `success`. Nine executed jobs passed; 21 deployment/conditional jobs skipped. This resolves prior R112 CI coverage gap on PR #175 branch, but is not proof of deployed QA behavior or legal acceptance.
+- **PASS:** Re-read `main` PCS revision 99 and MOMENT; PR #157/#159/#160/#163/#175 OPEN, PR #158 CLOSED, not merged. PR #175 remains draft; no UI/production/storage change.
+- **NOT_RUN:** Remote QA authenticated API, browser E2E, complete 11 UC acceptance and legal review. **BLOCKED:** QA reachability/authenticated proof not established in this run. Do not deploy or merge on CI alone.
+- **Next:** Review integration dependency order #159/#160/#163/#175 and test tenant/MatterACL/source failures with synthetic fixtures on an isolated branch; only promote QA after safe code/deploy review and live verification. Owner final sign-off remains required.
