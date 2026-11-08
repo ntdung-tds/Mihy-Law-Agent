@@ -356,6 +356,7 @@ async function hideFile(req,env,p,matter,now,fileId){
 }
 async function events(env,p,matter,now){
  if(!await permitted(env,p,matter,'read',now))return forbidden();
+ const mayViewHistoryValues=await permitted(env,p,matter,'write',now);
  const rows=await env.DB.prepare([
   'SELECT e.event_id,e.action,e.file_id,e.actor_id,e.occurred_at,e.changes_json,',
   "COALESCE(NULLIF(p.display_name,''),substr(e.actor_id,1,8)) AS actor_name",
@@ -369,6 +370,13 @@ async function events(env,p,matter,now){
   try{const parsed=JSON.parse(x.changes_json||'{}');
    if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))changes=parsed;
   }catch{}
+  if(!mayViewHistoryValues){
+   for(const [name,value] of Object.entries(changes)){
+    if(value&&typeof value==='object'&&!Array.isArray(value)&&
+       Object.hasOwn(value,'to'))
+     changes[name]={from:'[cần quyền sửa]',to:'[cần quyền sửa]'};
+   }
+  }
   return{id:x.event_id,action:x.action,file_id:x.file_id,actor_id:x.actor_id,
    actor_name:x.actor_name,created_at:x.occurred_at,changes};
  })});
