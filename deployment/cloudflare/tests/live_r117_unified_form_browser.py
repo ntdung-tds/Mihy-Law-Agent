@@ -41,6 +41,27 @@ def scenario(browser,name,viewport,origin):
             return reply(route,payload={"workspaces":[]})
         if u=="/api/qa/profile":
             return reply(route,payload={"display_name":"Lawyer QA","plan_code":"demo"})
+        if u=="/api/qa/legal/run" and method=="POST":
+            data=json.loads(req.post_data)
+            assert data["uc"]=="UC03"
+            assert data["matter_id"]==F
+            assert data["synthetic_consent"] is True
+            assert len(data["source_text"])>=30
+            return reply(route,payload={
+                "uc":"UC03","title":"Dịch tài liệu, hợp đồng",
+                "mode":"ai_draft_not_verified",
+                "source_hash":"a"*64,"source_anchors":[
+                    {"id":"A1","preview":"Điều 1. Bên A bàn giao tài liệu"},
+                    {"id":"A2","preview":"Điều 2. Thời hạn thanh toán"}],
+                "answer":"[A1] Article 1. Party A shall deliver the documents.",
+                "review_notice":"Bản nháp QA, luật sư phải kiểm duyệt.",
+                "translation_check":{"status":"review_required",
+                  "missing_numbers":["10"],"missing_article_numbers":["2"]},
+                "source_coverage":{"status":"review_required",
+                  "source_segment_count":2,"marked_segment_count":1,
+                  "missing_source_count":1,"missing_source_ids":["A2"],
+                  "review_required":True}
+            })
         if u=="/api/qa/drive/status":
             return reply(route,503,{"error":"paused"})
         if u=="/api/qa/matters" and method=="GET":
@@ -367,6 +388,27 @@ def scenario(browser,name,viewport,origin):
     assert history.get_attribute("open") is None
     width=page.evaluate("document.documentElement.scrollWidth")
     assert width<=viewport["width"]+4,(name,width,viewport)
+    # R127 UC03: real Chromium DOM, synthetic authorized QA AI response only.
+    # Missing source A2 must remain a visible non-authoritative warning.
+    page.goto(origin+"/#uc-UC03",wait_until="domcontentloaded")
+    page.locator("#legal-qa-form").wait_for(state="visible",timeout=15000)
+    page.locator("#legal-qa-example").click()
+    page.locator("#legal-qa-matter").select_option(F)
+    page.locator("#legal-qa-consent").check()
+    page.locator("#legal-qa-run").click()
+    coverage=page.locator("#legal-qa-source-coverage")
+    coverage.wait_for(state="visible",timeout=15000)
+    assert "1/2" in coverage.inner_text()
+    assert "A2" in coverage.inner_text()
+    assert "không chứng minh" in coverage.inner_text()
+    assert page.locator("#legal-qa-translation-check").is_visible()
+    assert page.locator("#legal-qa-output").inner_text().startswith("[A1] Article 1")
+    assert page.locator("#legal-qa-result").is_visible()
+    # Switching UCs must clear all previous answer, source evidence and flags.
+    page.goto(origin+"/#uc-UC04",wait_until="domcontentloaded")
+    page.wait_for_function("""() => document.querySelector('#legal-qa-source-coverage')?.hidden === true
+       && document.querySelector('#legal-qa-output')?.textContent === ''""",timeout=15000)
+    assert not page.locator("#legal-qa-result").is_visible()
     assert not errors,(name,errors)
     print(f"PASS {name}: one create/save, D1 details, PDF upload, two-category filter, edit/reload, no overflow")
     context.close()
