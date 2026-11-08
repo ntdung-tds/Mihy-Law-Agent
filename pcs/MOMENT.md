@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `123` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T16:38:31.590Z`.
+- **PCS revision:** `124` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T17:04:22.242Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R133 — UC07 chống nhãn AI trùng trong nội dòng (2026-11-08)
+
+- **Bối cảnh:** R131 đã có cổng tự đối chiếu trước khi sao chép, nhưng bộ trích bản sửa chỉ đếm nhãn đứng riêng trên dòng. Trường hợp AI lặp nhãn trong câu hoặc phần bình luận có thể tạo bản sửa mơ hồ. Phải xử lý theo **fail closed**, không suy đoán ý AI.
+- **Giải pháp và kiểm thử:** PR [#182](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/182) draft trên nhánh R131. Hàm `grammarEditedText` chỉ chấp nhận **mỗi nhãn đúng một lần trong toàn phản hồi**, sau đó kiểm tra nhãn đứng độc lập, đúng thứ tự, nội dung không rỗng. Nhãn lặp → không có bản sửa để xác nhận/sao chép, vẫn cảnh báo kiểm duyệt thủ công. Test-first Node/APIs cho nội dòng/lời giải thích, không lưu nội dung hồ sơ; giữ các bài kiểm thử valid/ACL/UC03/04.
+- **CI ứng dụng:** commit `a5adf0a98afec5905a0f0909c98ec31187b71882`, [#42502639161](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42502639161) **PASS 9/9 nhóm thực thi**, gồm Chromium mobile/desktop. R132 test measurement regression trên nhánh mẹ PR #181 cũng PASS 9/9 [#42501789057](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42501789057).
+- **Chưa hoàn thành:** Code mới **chưa được cập nhật lên Cloudflare QA**; cần giữ nguyên đủ modules/bindings và đọc lại Worker thực trước khi báo QA deployed. Đăng nhập Android Owner, thẩm định pháp lý, DOCX/PDF thực tế đều **NOT_RUN**. PR vẫn draft, không merge hoặc deploy production. SRS v1.1.15 giữ nguyên; delta `SC-035`, PCS revision 124.
 
 ## R131 — UC07 đối chiếu bản gốc/bản sửa và xác nhận trước khi sao chép (2026-11-08)
 
