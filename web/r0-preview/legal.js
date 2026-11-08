@@ -316,6 +316,7 @@
     const fileStillSame=context=>!!context&&
       context.epoch===fileEpoch&&activeUc===context.uc&&
       matter.value===context.matter&&
+      byId('legal-qa-source').value===context.sourceA&&
       fileInput.files?.[0]===context.file&&fileConsent.checked;
     const setFileStatus=(message,bad=false)=>{
       fileStatus.textContent=message;fileStatus.dataset.state=bad?'error':'info';
@@ -338,7 +339,8 @@
         setFileStatus('Chỉ đọc PDF/DOCX QA hợp lệ, tối đa 1,5 MB.',true);return;
       }
       resetFileImport(); // Reset any previous preview and abort stale requests.
-      const current={epoch:fileEpoch,uc:task,matter:matter.value,file:selected};
+      const current={epoch:fileEpoch,uc:task,matter:matter.value,
+        sourceA:byId('legal-qa-source').value,file:selected};
       const controller=new AbortController();fileController=controller;
       fileRead.disabled=true;
       setFileStatus('Đang trích văn bản trong bộ nhớ Cloudflare QA. Không lưu tệp…');
@@ -358,10 +360,20 @@
         if(typeof extracted!=='string'||extracted.length<30||extracted.length>5000||
            data.storage!=='none'||data.review_required!==true||
            data.file_name!==selected.name||data.file_size!==selected.size||
+           data.file_type!==(selected.name.toLowerCase().endsWith('.pdf')?'pdf':'docx')||
            data.uc!==task||!/^[a-f0-9]{64}$/.test(data.source_sha256||'')){
           throw Error('Kết quả trích xuất không đủ điều kiện đối chiếu.');
         }
-        importedFile={...current,text:extracted};
+        // R139: the server hash is only useful if independently verified.
+        // Use original selected File bytes (bounded to 1.5 MB) and WebCrypto;
+        // do not accept a well-formed but forged or stale digest.
+        const digest=await crypto.subtle.digest('SHA-256',await selected.arrayBuffer());
+        if(!fileStillSame(current))return; // May have changed during hashing.
+        const localSha=[...new Uint8Array(digest)]
+          .map(n=>n.toString(16).padStart(2,'0')).join('');
+        if(localSha!==data.source_sha256)
+          throw Error('SHA-256 của tệp không khớp kết quả chuyển đổi. Không cho phép dùng bản trích; hãy chọn lại tệp QA.');
+        importedFile={...current,text:extracted,sha256:localSha};
         fileText.textContent=extracted;
         fileMeta.textContent=selected.name+' · '+selected.size+' byte · SHA-256 '+
           data.source_sha256.slice(0,16)+'…';
@@ -374,7 +386,15 @@
         fileUse.disabled=true;fileText.textContent='';
         setFileStatus(error?.message||'Không thể đọc tệp QA.',true);
       }finally{
-        if(fileStillSame(current)){fileRead.disabled=false;fileController=null;}
+        if(fileEpoch===current.epoch){
+          if(!fileStillSame(current)){
+            // Silent source/file mutation must not strand a disabled button.
+            resetFileImport();
+            setFileStatus('Tệp, hồ sơ hoặc nguồn A đã thay đổi. Hãy đọc lại tệp QA.',true);
+          }else{
+            fileRead.disabled=false;fileController=null;
+          }
+        }
       }
     });
     fileReviewed.addEventListener('change',()=>{
@@ -386,7 +406,7 @@
     fileUse.addEventListener('click',()=>{
       if(!fileStillSame(importedFile)){
         resetFileImport();
-        setFileStatus('Tệp hoặc hồ sơ đã thay đổi. Hãy đọc lại tệp QA.',true);
+        setFileStatus('Tệp, hồ sơ hoặc nguồn A đã thay đổi. Hãy đọc lại tệp QA.',true);
         return;
       }
       if(!fileReviewed.checked||fileUse.disabled||filePreview.hidden)return;
