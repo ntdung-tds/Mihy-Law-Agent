@@ -388,6 +388,7 @@
   file_uploaded:'Thêm tệp',file_hidden:'Ẩn tệp',
   file_downloaded:'Cấp tệp tải xuống',case_hidden:'Ẩn hồ sơ',
   legacy_case_created:'Tạo hồ sơ (nhật ký cũ)',
+  legacy_title_changed:'Đổi tên hồ sơ (nhật ký cũ)',
   legacy_details_saved:'Lưu hồ sơ (nhật ký cũ)',
   legacy_file_uploaded:'Thêm tệp (nhật ký cũ)',
   legacy_file_hidden:'Ẩn tệp (nhật ký cũ)',
