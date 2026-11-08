@@ -177,6 +177,8 @@ jobs:
           node --check deployment/cloudflare/src/google_drive.mjs
           node --check deployment/cloudflare/src/qa_documents.mjs
           node --check deployment/cloudflare/src/qa_legal_workflows.mjs
+          node --check web/r0-preview/app.js
+          node --check web/r0-preview/legal.js
           node --check deployment/cloudflare/tests/r86_direct_upload.test.mjs
           node --check deployment/cloudflare/src/oauth_drive.mjs
           node --check web/r0-preview/documents.js
@@ -220,6 +222,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs
       - name: R109 actual SQLite daily AI quota constraints
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r109_ai_quota_sql.py' -v
+      - name: R112 separate 11 legal workflow screens, deep links and mobile menu
+        run: node --test deployment/cloudflare/tests/r112_uc_screens.test.mjs
       - name: R72 Drive document upload/download, MatterACL, integrity and fail-closed QA gates
         run: node --test deployment/cloudflare/tests/r72_documents.test.mjs
       - name: R81 Google Drive multipart wire protocol and safe provider error diagnostics
