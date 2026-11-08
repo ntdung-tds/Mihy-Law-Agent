@@ -3,8 +3,9 @@
  * No real client files, legal text, OAuth, AI or production IAM.
  */
 import {mobileSession} from './mobile_auth.mjs';
+import {CASE_DETAIL_FIELDS,validateInitialCaseDetails} from './qa_case_r2.mjs';
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
-const MAX_BODY=1024;
+const MAX_BODY=6000;
 const json=(status,data)=>new Response(JSON.stringify(data),{status,headers:{
   'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
   'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY',
@@ -38,6 +39,9 @@ export const WRITE_ACL_SQL=`
 `;
 export const MATTER_LIST_SQL=`
 SELECT c.matter_id,c.title,c.created_at,c.version,
+ COALESCE(cd.category,'') AS category,
+ COALESCE(cd.status,'open') AS case_status,
+ COALESCE(cd.reference,'') AS case_reference,
  CASE WHEN 
  EXISTS(SELECT 1 FROM qa_matter_acl w WHERE
   w.installation_id=c.installation_id AND w.tenant_id=c.tenant_id
@@ -52,6 +56,8 @@ SELECT c.matter_id,c.title,c.created_at,c.version,
  THEN 1 ELSE 0 END AS can_write
 FROM qa_matter_catalog c JOIN qa_matters m
  ON m.installation_id=c.installation_id AND m.tenant_id=c.tenant_id AND m.matter_id=c.matter_id
+ LEFT JOIN qa_case_details cd ON cd.installation_id=c.installation_id
+  AND cd.tenant_id=c.tenant_id AND cd.matter_id=c.matter_id
 WHERE c.installation_id=? AND c.tenant_id=?
  AND EXISTS(
   SELECT 1 FROM qa_matter_acl a
@@ -74,7 +80,8 @@ async function list(env,identity,now){
    identity.user_id,now,now,identity.user_id,now,now).all();
  return json(200,{matters:(r.results||[]).map(x=>({
    id:x.matter_id,title:x.title,created_at:x.created_at,
-   version:Number(x.version),can_write:x.can_write===1
+   version:Number(x.version),can_write:x.can_write===1,
+   category:x.category||'',case_status:x.case_status||'open',case_reference:x.case_reference||''
  }))});
 }
 async function create(req,env,identity,now){
@@ -84,7 +91,15 @@ async function create(req,env,identity,now){
  try{
   const raw=await req.text();if(raw.length>MAX_BODY)return bad();data=JSON.parse(raw);
  }catch{return bad();}
- if(!data||typeof data.title!=='string')return bad();
+ if(!data||typeof data.title!=='string'||Object.keys(data).some(k=>!['title','details'].includes(k)))return bad();
+ const details=Object.hasOwn(data,'details')?validateInitialCaseDetails(data.details,identity.user_id):null;
+ if(Object.hasOwn(data,'details')&&!details)return bad();
+ if(details?.assignee_user_id!==identity.user_id){
+  const assignee=await env.DB.prepare(
+   "SELECT 1 AS ok FROM qa_memberships WHERE installation_id=? AND tenant_id=? AND user_id=? AND status='active' LIMIT 1"
+  ).bind(env.INSTALLATION_ID,identity.tenant_id,details.assignee_user_id).first();
+  if(!assignee)return bad();
+ }
  const title=data.title.trim().normalize('NFC');
  if(title.length<3||title.length>100||/[\u0000-\u001f\u007f<>]/u.test(title))return bad();
  // No bulk importing or real case content in this QA-only module.
@@ -108,8 +123,19 @@ async function create(req,env,identity,now){
    installation_id,tenant_id,event_id,matter_id,actor_id,action,created_at)
    VALUES(?,?,?,?,?,?,?)`).bind(env.INSTALLATION_ID,identity.tenant_id,eid,id,identity.user_id,'created',now)
  ];
+ // D1 batch executes as one transaction: either title, ACL and all details
+ // are created, or none of the case exists. File upload is the next phase.
+ if(details)sql.push(env.DB.prepare(`
+  INSERT INTO qa_case_details(
+   installation_id,tenant_id,matter_id,
+   reference,category,status,priority,assignee_user_id,
+   client_label,counterparty_label,summary,deadline,
+   version,updated_by,updated_at)
+  VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,?,?)`)
+  .bind(env.INSTALLATION_ID,identity.tenant_id,id,
+   ...CASE_DETAIL_FIELDS.map(k=>details[k]),identity.user_id,now));
  await env.DB.batch(sql);
- return json(201,{id,title,created_at:now});
+ return json(201,{id,title,created_at:now,details_saved:!!details,details_version:details?1:0});
 }
 // PATCH only updates QA matter metadata, not underlying legal documents.
 // An audit trigger attached to this same UPDATE guarantees no silent rename.
