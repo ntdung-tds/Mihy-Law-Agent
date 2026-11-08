@@ -136,6 +136,9 @@ test('R110 never displays a model-cited source ID that does not exist',async()=>
 test('R111 fails closed on noncanonical or grouped source IDs instead of silently accepting fabricated anchors',()=>{
   const anchors=[{id:'A1'},{id:'B1'}];
   assert.equal(sourceReferencesExist('Theo [A1] và [B1].',anchors),true);
+  assert.equal(sourceReferencesExist('Theo [A1, B1].',anchors),true);
+  assert.equal(sourceReferencesExist('Theo [C1].',anchors),false);
+  assert.equal(sourceReferencesExist('Theo [A99'+('x'.repeat(280))+'].',anchors),false);
   assert.equal(sourceReferencesExist('Theo [A1-A99].',anchors),false);
   assert.equal(sourceReferencesExist('Theo [a99].',anchors),false);
   assert.equal(sourceReferencesExist('Theo [A1, B99].',anchors),false);
