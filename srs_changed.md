@@ -220,3 +220,9 @@
 - API GET /api/qa/cases/:id/events giữ MatterACL read/tenant isolation; mask giá trị lịch sử cho tài khoản không có write. UI mobile timeline mở/thu gọn với scroll R124; dữ liệu hiển thị textContent, không chèn HTML. Chưa thu thập IP/device.
 - Nhật ký cũ chỉ backfill actor/time/action, đánh dấu legacy và không tái tạo giả before/after. Phần biệt tệp khôi phục thiếu object R2 không có event chuyên biệt trong lần này.
 - Kiểm thử [CI #42472426132](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42472426132): PASS 9/9, real SQLite + browser synthetic mobile/desktop. QA D1 17/17 migration statements, 8 legacy records. Backend QA 100% `43b89f10-3094-4dfc-9281-66d2e4db6f22`, site QA 100% `81415417-9a4a-45f1-b8b7-f6e6136c8210`; nguồn/bindings đọc lại PASS. Actual owner Android E2E NOT_RUN. Production không đổi; SRS v1.1.15 vẫn giữ nguyên.
+
+## SC-029 — 2026-11-08 — Phân trang lịch sử hồ sơ theo keyset, mobile QA
+
+- R125 append-only audit tiếp tục giữ nguyên. Bổ sung GET /api/qa/cases/:id/events: trang tối đa 30 sự kiện, mốc next_cursor (timestamp,event_id), xem tiếp theo thời gian/tie-breaker để không còn giới hạn thực tế 100 sự kiện; query bind, kiểm tra tham số chặt chẽ và MatterACL theo từng trang.
+- UI mobile giữ vùng cuộn R124, nút Xem thêm lịch sử nhỏ, append không đặt lại scroll, bỏ qua phản hồi cũ khi chuyển hồ sơ. Không nới quyền xem giá trị trước/sau; read-only vẫn mask.
+- CI [#42474761235](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42474761235) PASS 9/9; unit 67 sự kiện có timestamp trùng + invalid cursor, Chromium desktop/mobile. QA backend 100% `217f45e7-1b25-4a79-9974-a8df2fe01335`, site 100% `57d22f4a-c661-4031-adef-b249c1343b37`, live source/binding readback PASS. Không migration D1, không đụng production; owner authenticated Android E2E NOT_RUN. SRS v1.1.15 vẫn giữ nguyên.

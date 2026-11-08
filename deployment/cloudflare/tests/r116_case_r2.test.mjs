@@ -34,11 +34,17 @@ function fixture({role='lawyer',session=true,allowed=true,write=true,r2=true}={}
    async all(){
     if(sql.includes('FROM qa_case_files_r2 f WHERE'))return {results:receipt&&!hidden?[receipt]:[]};
     if(sql.includes('FROM qa_case_audit_v2 e LEFT JOIN qa_account_profiles')){
-     return {results:events.map((e,i)=>({
-      event_id:'event-'+i,action:e.action,file_id:e.file_id,
-      actor_id:U,actor_name:'QA Lawyer',occurred_at:NOW,
+     let records=events.map((e,i)=>({
+      event_id:e.event_id||'event-'+i,action:e.action,file_id:e.file_id,
+      actor_id:U,actor_name:'QA Lawyer',occurred_at:e.occurred_at||NOW,
       changes_json:JSON.stringify(e.changes||{})
-     }))};
+     }));
+     if(sql.includes('e.occurred_at < ?')){
+      const at=params[3],id=params[5];
+      records=records.filter(e=>e.occurred_at<at||
+       (e.occurred_at===at&&e.event_id<id));
+     }
+     return {results:records.slice(0,31)};
     }
     if(sql.includes('FROM qa_case_events WHERE'))return {results:events};
     if(sql.includes('FROM qa_memberships m LEFT JOIN'))return {results:[{user_id:U,label:'QA Lawyer'}]};
@@ -113,6 +119,54 @@ test('R125: read-only users see actor/time, never historical before-after values
  assert.deepEqual(audit.changes.summary,{from:'[cần quyền sửa]',to:'[cần quyền sửa]'});
  assert.ok(!JSON.stringify(audit).includes('Tài liệu QA cũ'));
  assert.ok(!JSON.stringify(audit).includes('Tài liệu QA mới'));
+});
+test('R126 audit keyset pagination never truncates history, repeats or bypasses ACL',async()=>{
+ const f=fixture({write:false});
+ for(let i=0;i<67;i++)f.events.push({
+  event_id:'audit-'+String(100-i).padStart(3,'0'),
+  action:'details_updated',occurred_at:NOW-Math.floor(i/2),
+  changes:{summary:{from:'old sensitive '+i,to:'new sensitive '+i}}
+ });
+ // Timestamp ties are sorted by descending event ID as in actual SQL.
+ f.events.sort((a,b)=>b.occurred_at-a.occurred_at||
+  b.event_id.localeCompare(a.event_id));
+ const first=await caseR2Api(req(root+'/events'),f.env,{now:NOW});
+ assert.equal(first.status,200,await first.clone().text());
+ let data=await first.json();
+ assert.equal(data.events.length,30);
+ assert.ok(data.next_cursor);
+ const seen=new Set(data.events.map(e=>e.id));
+ for(const e of data.events){
+  assert.deepEqual(e.changes.summary,{from:'[cần quyền sửa]',to:'[cần quyền sửa]'});
+ }
+ let pages=1;
+ while(data.next_cursor){
+  const cursor=data.next_cursor;
+  const path=root+'/events?before_at='+cursor.at+'&before_id='+cursor.id;
+  const response=await caseR2Api(req(path),f.env,{now:NOW});
+  assert.equal(response.status,200);
+  data=await response.json();
+  for(const e of data.events){
+   assert.equal(seen.has(e.id),false,'duplicate audit event across pages');
+   seen.add(e.id);
+   assert.deepEqual(e.changes.summary,{from:'[cần quyền sửa]',to:'[cần quyền sửa]'});
+  }
+  assert.ok(++pages<=4);
+ }
+ assert.equal(seen.size,67);
+ assert.equal(pages,3);
+ assert.ok(f.calls.filter(x=>x.sql===CASE_ACL_SQL).length>=pages*2,
+  'every page repeats active read and write access checks');
+ for(const suffix of [
+  '?before_at=1','?before_id=audit-001',
+  '?before_at=0&before_id=audit-001',
+  '?before_at='+NOW+'&before_id=x%27%3B',
+  '?before_at='+NOW+'&before_id=audit-001&before_id=audit-002',
+  '?before_at='+NOW+'&before_id=audit-001&tenant_id=elsewhere'
+ ]){
+  const bad=await caseR2Api(req(root+'/events'+suffix),f.env,{now:NOW});
+  assert.equal(bad.status,400,suffix);
+ }
 });
 test('R116: uploads synthetic PDF to private R2, stores SHA-256 and verifies byte-identical download',async()=>{
  const f=fixture();

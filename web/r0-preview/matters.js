@@ -412,20 +412,11 @@
   }
   return String(v);
  }
- async function refreshEvents(scope=workspaceGeneration,id=currentId){
-  if(!id||scope!==workspaceGeneration)return;
-  const container=$('#case-history-list');
-  try{
-   const r=await req('/api/qa/cases/'+encodeURIComponent(id)+'/events');
-   if(scope!==workspaceGeneration||id!==currentId)return;
-   if(r.status===401){expired();return;}
-   if(!r.ok)throw Error('history');
-   const data=await r.json();
-   if(scope!==workspaceGeneration||id!==currentId)return;
-   container.replaceChildren();
-   const items=Array.isArray(data.events)?data.events.slice(0,100):[];
-   if(!items.length){const p=document.createElement('p');p.textContent='Chưa có lịch sử thay đổi.';container.append(p);}
-   for(const item of items){
+ // R126: keyset history paging; asynchronous pages cannot update another case.
+ const auditMore=$('#case-history-more');
+ let auditCursor=null,auditLoading=false,auditEpoch=0;
+ function renderAuditEntries(container,items){
+  for(const item of items){
     if(!Object.hasOwn(auditNames,item.action))continue;
     const entry=document.createElement('details');entry.className='case-history-entry';
     const header=document.createElement('summary');header.className='case-history-head';
@@ -462,13 +453,65 @@
     }
     entry.append(body);container.append(entry);
    }
+ }
+ async function loadAuditPage(scope,id,append=false){
+  if(!id||scope!==workspaceGeneration||id!==currentId)return;
+  if(!append){
+   auditEpoch++;auditCursor=null;auditLoading=false;
+   if(auditMore){auditMore.hidden=true;auditMore.disabled=false;}
+  }else if(auditLoading||!auditCursor)return;
+  const requestEpoch=auditEpoch;
+  const cursor=append?auditCursor:null;
+  const container=$('#case-history-list');
+  auditLoading=true;
+  if(auditMore){auditMore.disabled=true;auditMore.textContent='Đang tải…';}
+  try{
+   const query=cursor?'?before_at='+encodeURIComponent(cursor.at)+
+    '&before_id='+encodeURIComponent(cursor.id):'';
+   const r=await req('/api/qa/cases/'+encodeURIComponent(id)+'/events'+query);
+   if(scope!==workspaceGeneration||id!==currentId||requestEpoch!==auditEpoch)return;
+   if(r.status===401){expired();return;}
+   if(!r.ok)throw Error('history');
+   const data=await r.json();
+   if(scope!==workspaceGeneration||id!==currentId||requestEpoch!==auditEpoch)return;
+   const items=Array.isArray(data.events)?data.events.slice(0,30):[];
+   if(!append)container.replaceChildren();
+   if(!append&&!items.length){
+    const p=document.createElement('p');p.textContent='Chưa có lịch sử thay đổi.';
+    container.append(p);
+   }
+   renderAuditEntries(container,items);
+   const next=data.next_cursor;
+   const at=Number(next?.at),idText=String(next?.id||'');
+   auditCursor=next&&Number.isSafeInteger(at)&&at>0&&/^[a-z0-9-]{1,128}$/.test(idText)
+    ?{at,id:idText}:null;
+   if(auditMore)auditMore.hidden=!auditCursor;
   }catch{
-   if(scope===workspaceGeneration&&id===currentId){
-    container.replaceChildren();const p=document.createElement('p');
-    p.textContent='Chưa tải được lịch sử. Hãy mở lại hồ sơ.';container.append(p);
+   if(scope===workspaceGeneration&&id===currentId&&requestEpoch===auditEpoch){
+    if(!append){
+     container.replaceChildren();
+     const p=document.createElement('p');
+     p.textContent='Chưa tải được lịch sử. Hãy mở lại hồ sơ.';container.append(p);
+    }else if(auditMore){auditMore.hidden=false;auditMore.textContent='Thử tải lại lịch sử';}
+   }
+  }finally{
+   if(requestEpoch===auditEpoch){
+    auditLoading=false;
+    if(auditMore){
+     auditMore.disabled=false;
+     if(auditMore.textContent!=='Thử tải lại lịch sử')
+      auditMore.textContent='Xem thêm lịch sử';
+    }
    }
   }
  }
+ async function refreshEvents(scope=workspaceGeneration,id=currentId){
+  return loadAuditPage(scope,id,false);
+ }
+ auditMore?.addEventListener('click',()=>{
+  if(!auditLoading&&auditCursor&&currentId)
+   void loadAuditPage(workspaceGeneration,currentId,true);
+ });
  async function openCase(id,{edit=false}={}){
   if(!uuid.test(id)||saving)return;
   resetEditor(true);

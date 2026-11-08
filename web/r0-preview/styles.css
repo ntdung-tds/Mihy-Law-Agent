@@ -1022,3 +1022,20 @@ body.drawer-open{overflow:hidden}
  #matter-workspace .case-history-head strong{font-size:12px}
  #matter-workspace .case-history-meta{font-size:10.5px}
 }
+
+/* R126: an independent, compact pager below the scrollable history region. */
+#matter-workspace #case-history-more{
+ display:inline-flex;align-items:center;justify-content:center;
+ margin:10px 0 2px;padding:7px 13px;min-height:36px;
+ max-width:100%;border:1px solid #b9cce3;border-radius:9px;
+ background:#f5f8fc;color:#24517b;font-size:12px;font-weight:650;
+ cursor:pointer;touch-action:manipulation;
+}
+#matter-workspace #case-history-more[hidden]{display:none!important}
+#matter-workspace #case-history-more:disabled{cursor:progress;opacity:.6}
+#matter-workspace #case-history-more:focus-visible{
+ outline:2px solid #2466a4;outline-offset:2px;
+}
+@media(max-width:720px){
+ #matter-workspace #case-history-more{width:100%;min-height:38px;font-size:12px}
+}
