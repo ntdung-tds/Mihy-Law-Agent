@@ -286,15 +286,21 @@ export function summaryReviewCheck(rows,answer){
  * Both parser ambiguity and absent template FAIL CLOSED as review_required.
  * This is not legal/semantic equivalence checking.
  */
-export function grammarIntegrityCheck(source,answer){
- const original=String(source||''),raw=String(answer||'');
- const start='[BẮT ĐẦU BẢN SỬA]',end='[KẾT THÚC BẢN SỬA]';
+// R131: one authoritative extraction shared by the UC07 integrity check
+// and the separately offered text for human comparison/copying. Never use
+// model commentary as the edited version, even if it quotes the source.
+export function grammarEditedText(answer){
+ const raw=String(answer||'');
  const startLine=/^\s*\[BẮT ĐẦU BẢN SỬA\]\s*$/gmu;
  const endLine=/^\s*\[KẾT THÚC BẢN SỬA\]\s*$/gmu;
  const starts=[...raw.matchAll(startLine)],ends=[...raw.matchAll(endLine)];
- const isolated=starts.length===1&&ends.length===1&&
-  starts[0].index<ends[0].index;
- const proposed=isolated?raw.slice(starts[0].index+starts[0][0].length,ends[0].index).trim():'';
+ if(starts.length!==1||ends.length!==1||starts[0].index>=ends[0].index)return null;
+ const text=raw.slice(starts[0].index+starts[0][0].length,ends[0].index).trim();
+ return text||null;
+}
+export function grammarIntegrityCheck(source,answer){
+ const original=String(source||'');
+ const proposed=grammarEditedText(answer);
  if(!proposed)return{
   status:'manual_review_no_proposed_version',isolated_proposal:false,
   number_changed_count:0,number_changes:[],date_changed_count:0,date_changes:[],
@@ -450,6 +456,9 @@ export async function legalApi(req,env,opts={}){
    source_coverage:translationSourceCoverage(primary,output)
   }:{}),
   ...(body.uc==='UC04'?{summary_review:summaryReviewCheck(primary,output)}:{}),
-  ...(body.uc==='UC07'?{grammar_review:grammarIntegrityCheck(body.source_text,output)}:{}),
+  ...(body.uc==='UC07'?{
+   grammar_review:grammarIntegrityCheck(body.source_text,output),
+   grammar_edited_text:grammarEditedText(output)
+  }:{}),
   review_notice:'Bản nháp AI từ nội dung mẫu. Chưa kiểm chứng pháp lý, nguồn chính thức hoặc độ chính xác ngôn ngữ.'});
 }
