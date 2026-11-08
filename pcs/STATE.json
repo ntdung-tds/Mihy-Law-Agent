@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 117,
-  "updated_at": "2026-11-08T10:48:06.204Z",
+  "revision": 118,
+  "updated_at": "2026-11-08T11:18:20.251Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2713,6 +2713,53 @@
         "remaining": "No historical before/after for legacy events because it was never recorded. Device/IP not inferred. R2 file repairs not separately classified; future scoped work if approved. No system-admin physical deletion in R125.",
         "owner_acceptance": "PENDING_R125",
         "srs_change": "SC-028; SRS v1.1.15 private unchanged"
+      },
+      {
+        "id": "AL-R0-CASE-AUDIT-R126-001",
+        "title": "R126: xem toàn bộ lịch sử hồ sơ theo phân trang có bảo vệ MatterACL, scroll mobile",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_OWNER_SIGNED_IN_E2E_PENDING",
+        "branch": "feat/r126-audit-history-pagination",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/176",
+        "implementation": {
+          "pagination": "Keyset D1 occurred_at DESC,event_id DESC, PAGE_SIZE=30, next_cursor(at,id), no hard 100-event truncation",
+          "security": "Every page rechecks tenant + current deny-overrides read MatterACL; before-after masked for no-write; malformed or repeated cursor arguments rejected",
+          "ui": "Compact Xem thêm lịch sử button below separately scrollable history; stale response ignored on case switch/refresh; expands each event; no reload jump",
+          "migrations": "NONE; qa_case_audit_v2 remains append-only under R125"
+        },
+        "tests": {
+          "ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42474761235",
+          "executed": "PASS_9_OF_9",
+          "unit": "PASS_67_EVENTS_WITH_TIMESTAMP_TIES_AND_CURSOR_NEGATIVES",
+          "browser": "PASS_DESKTOP_MOBILE_SYNTHETIC_PAGINATION_SCROLL_LEGACY",
+          "live_signed_in_android": "NOT_RUN",
+          "cross_role_real_users": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "qa": {
+          "backend": {
+            "script": "ai-law-standalone-cf-qa",
+            "version": "217f45e7-1b25-4a79-9974-a8df2fe01335",
+            "deployment": "c3a85db9-4c30-473e-8970-172d7ff24c8a",
+            "traffic_percent": 100,
+            "modules": 11,
+            "bindings": 12,
+            "preserved_modules": 10
+          },
+          "site": {
+            "script": "ai-law-web-qa",
+            "version": "57d22f4a-c661-4031-adef-b249c1343b37",
+            "deployment": "8bba7423-22af-4309-8378-d099c63ba903",
+            "traffic_percent": 100,
+            "modules": 27,
+            "bindings": 2,
+            "preserved_modules": 24
+          },
+          "readback": "PASS_BOTH_DEPLOYED_WORKERS"
+        },
+        "remaining": "R125 owner Android E2E not yet accepted; R126 owner signed-in Android and live permission tests NOT_RUN. No migration or production deploy. SRS v1.1.15 private unchanged.",
+        "owner_acceptance": "PENDING_R126",
+        "srs_change": "SC-029"
       }
     ],
     "features": [
