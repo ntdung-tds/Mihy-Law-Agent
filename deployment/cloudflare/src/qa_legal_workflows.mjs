@@ -133,14 +133,13 @@ function modelText(result){
 // anchor. This does NOT establish that the model's conclusions are true.
 export function sourceReferencesExist(answer,sourceRows){
  const valid=new Set(sourceRows.map(x=>x.id));
- // Reject grouped or noncanonical source-like citations. An exact one-ID
- // reference such as [A1] is valid only when present in the supplied map.
- for(const bracket of answer.matchAll(/\[([^\]\r\n]{0,256})\]/g)){
-  const token=bracket[1].trim();
-  if(/^[AB]\d+$/.test(token)){
-   if(!valid.has(token))return false;
-  }else if(/(?:^|[^\p{L}\p{N}])[ABab]\d+/u.test(token)){
-   return false;
+ // Bracketed citations can be comma-delimited or ranges. Check EVERY
+ // source-looking identifier; never let a fake [A99], [C1], [a99],
+ // grouped citation or unusually long bracket silently bypass validation.
+ // This verifies source ID existence, not the legal truth of the claim.
+ for(const bracket of answer.matchAll(/\[([^\]\r\n]*)\]/g)){
+  for(const ref of bracket[1].matchAll(/(?:^|[^\p{L}\p{N}])([A-Za-z]\d+[A-Za-z]*)/gu)){
+   if(!valid.has(ref[1]))return false;
   }
  }
  return true;
