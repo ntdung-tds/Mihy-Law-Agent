@@ -279,6 +279,36 @@
    if(seq===loadGeneration&&scope===workspaceGeneration)note('Không thể tải danh sách hồ sơ. Hãy thử lại.',true);
   }finally{if(seq===loadGeneration)$('#matter-refresh').disabled=false;}
  }
+ // R123: identify PDF/Word by a real file-shaped SVG, not a plain type pill.
+ // The server still validates MIME, extension and file signature on upload.
+ function fileKind(name,mime=''){
+  const ext=String(name||'').toLowerCase().split('.').pop();
+  if(ext==='pdf'&&(!mime||mime===mimes.pdf))return {kind:'pdf',mark:'PDF',label:'Tệp PDF'};
+  if((ext==='docx'||ext==='doc')&&(!mime||mime===mimes.docx))
+   return {kind:'word',mark:'W',label:'Tài liệu Word'};
+  return {kind:'other',mark:'•',label:'Tệp đính kèm'};
+ }
+ function fileIcon(name,mime=''){
+  const type=fileKind(name,mime);
+  const root=document.createElement('span');
+  root.className='case-file-type-icon case-file-type-icon--'+type.kind;
+  root.setAttribute('role','img');root.setAttribute('aria-label',type.label);
+  root.dataset.fileType=type.kind;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 40 48');svg.setAttribute('aria-hidden','true');
+  svg.setAttribute('focusable','false');
+  const outline=document.createElementNS('http://www.w3.org/2000/svg','path');
+  outline.setAttribute('d','M7 2h17l9 9v31a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4z');
+  outline.setAttribute('class','case-file-icon-page');
+  const corner=document.createElementNS('http://www.w3.org/2000/svg','path');
+  corner.setAttribute('d','M24 2v9h9');corner.setAttribute('class','case-file-icon-corner');
+  const mark=document.createElementNS('http://www.w3.org/2000/svg','text');
+  mark.setAttribute('x','20');mark.setAttribute('y','33');
+  mark.setAttribute('text-anchor','middle');mark.setAttribute('class','case-file-icon-letter');
+  mark.textContent=type.mark;
+  svg.append(outline,corner,mark);root.append(svg);
+  return root;
+ }
  async function refreshFiles(scope=workspaceGeneration,id=currentId){
   if(!id||scope!==workspaceGeneration)return;
   const container=$('#case-r2-list');
@@ -295,10 +325,16 @@
    if(!files.length){const p=document.createElement('p');p.textContent='Chưa có tệp đã lưu.';container.append(p);}
    for(const file of files){
     if(!uuid.test(file.id||''))continue;
-    const line=document.createElement('div');line.className='matter-row';
-    const info=document.createElement('span');info.textContent=String(file.name||'Tệp')+' · '+
-      Math.ceil(Number(file.bytes)/1024)+' KB';
-    line.classList.add('case-file-row');
+    const line=document.createElement('div');line.className='matter-row case-file-row';
+    const icon=fileIcon(file.name,file.mime_type);
+    const info=document.createElement('div');info.className='case-file-details';
+    const name=document.createElement('strong');name.className='case-file-name';
+    name.textContent=String(file.name||'Tệp');name.title=name.textContent;
+    const meta=document.createElement('small');meta.className='case-file-meta';
+    const uploadDate=Number(file.created_at);
+    meta.textContent=Math.ceil(Number(file.bytes)/1024)+' KB'+
+     (Number.isFinite(uploadDate)&&uploadDate>0?' · '+dateOf(uploadDate):'');
+    info.append(name,meta);
     const actions=document.createElement('div');actions.className='case-file-actions';
     const download=document.createElement('button');download.type='button';
     download.className='matter-edit-button case-file-download';download.textContent='Tải xuống';
@@ -310,7 +346,7 @@
      hide.addEventListener('click',()=>askHideFile(line,id,file,scope));
      actions.append(hide);
     }
-    line.append(info,actions);container.append(line);
+    line.append(icon,info,actions);container.append(line);
    }
   }catch{if(scope===workspaceGeneration&&id===currentId)fileNote('Không tải được danh sách tệp trên R2.',true);}
  }
@@ -439,7 +475,12 @@
   pendingList.append(header);
   for(const [index,file] of pendingFiles.entries()){
    const line=document.createElement('div');line.className='case-pending-row';
-   const label=document.createElement('span');label.textContent=file.name+' · '+Math.ceil(file.size/1024)+' KB';
+   const label=document.createElement('span');label.className='case-pending-info';
+   const icon=fileIcon(file.name,file.type);
+   const title=document.createElement('span');title.className='case-pending-name';
+   title.textContent=file.name;
+   const size=document.createElement('small');size.textContent=Math.ceil(file.size/1024)+' KB';
+   label.append(icon,title,size);
    const remove=document.createElement('button');remove.type='button';remove.textContent='Bỏ';
    remove.setAttribute('aria-label','Bỏ tệp đã chọn '+file.name);remove.disabled=saving;
    remove.addEventListener('click',()=>{if(saving)return;pendingFiles.splice(index,1);renderPending();});

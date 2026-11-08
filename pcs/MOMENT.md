@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `114` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T06:45:00.000Z`.
+- **PCS revision:** `115` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T08:34:55.543Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R123 — Nhận diện file theo icon PDF/Word, mobile gọn (2026-11-08)
+
+- **Owner direction:** “Nhận diện kiểu icon file”, tiếp nối góp ý danh sách tệp mobile đang quá cao. Thay kiểu trình bày tệp bằng **biểu tượng SVG dạng trang tài liệu có góc gấp**: PDF màu đỏ/chữ PDF, Word DOC/DOCX xanh/chữ W, fallback trung tính. Icon có aria-label, không dùng icon ảnh bên ngoài; chỉ hiện loại đã hỗ trợ khi tên tệp và MIME tương thích.
+- **Giao diện:** Các file đã lưu và đang chờ lưu đều có icon đúng loại, tên tối đa 2 dòng, dung lượng và ngày tải, nút Tải/Xóa riêng. CSS giảm chiều cao hàng, override đúng quy tắc mobile cũ từng kéo giãn card, không thay đổi các chức năng bảo mật hoặc lưu trữ.
+- **Regression:** [CI #42463186412](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42463186412) **PASS 9/9 executed jobs**, bao gồm Chromium desktop/390px mobile kiểm tra icon PDF/Word và chiều cao hàng không quá 108px, vẫn tải được tệp và soft-hide hoạt động; synthetic fixtures, không phải E2E Android của Owner.
+- **QA deployed/readback:** Site `ai-law-web-qa` version `83381d39-a115-4285-a55d-c43fe7218aac`, deployment `83f2e212-c0f8-439c-be03-bdd896b39942` 100%, 2/27 module thay đổi (`workspace_matters.mjs`, `workspace_css.mjs`); giữ nguyên 25 module còn lại, 2 bindings, backend/D1/R2 không đổi. Production không thay đổi.
+- **Pending:** Owner kiểm tra giao diện trên Android có đăng nhập; yêu cầu “lịch sử lưu vết chi tiết” từ trước **chưa được triển khai trong R123**, không coi là đã hoàn tất. PCS revision 115; SC-026. SRS v1.1.15 giữ nguyên.
 
 ## R122 — Sửa download bị khóa, chọn nhiều tệp, ẩn riêng tệp QA (2026-11-08)
 

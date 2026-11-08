@@ -127,6 +127,15 @@ def scenario(browser,name,viewport,origin):
     page.locator("#matter-create").click()
     page.get_by_text("Đã lưu hồ sơ và 1 tệp vào R2 thành công.").wait_for(timeout=15000)
     assert len(cases)==1 and len(files[I])==1,(cases,files)
+    # R123: a PDF is recognized by its red document-shaped icon, not text alone.
+    pdf_icon=page.locator("#case-r2-list .case-file-type-icon--pdf")
+    assert pdf_icon.count()==1
+    assert pdf_icon.first.get_attribute("role")=="img"
+    assert pdf_icon.first.get_attribute("aria-label")=="Tệp PDF"
+    assert pdf_icon.first.locator("svg path").count()==2
+    assert pdf_icon.first.locator("svg text").text_content()=="PDF"
+    first_row=page.locator("#case-r2-list .case-file-row").first.bounding_box()
+    assert first_row and first_row["height"]<=108,(name,first_row)
     assert page.locator("#case-r2-list .case-file-download").is_enabled(), "download must remain usable after saving on mobile"
     with page.expect_download(timeout=15000) as dl:
         page.locator("#case-r2-list .case-file-download").click()
@@ -255,6 +264,19 @@ def scenario(browser,name,viewport,origin):
     assert "Hồ sơ QA mẫu B" in page.locator("#matter-list").inner_text()
     assert "Hồ sơ QA mẫu A" not in page.locator("#matter-list").inner_text()
     assert sum(1 for method,path in calls if method=="DELETE" and "/api/qa/matters/" in path)==0
+    # Word recognition from stored file metadata; no actual DOCX bytes sent.
+    files[F].append(dict(id=str(uuid.uuid4()),name="QA example Word.docx",
+        mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        bytes=2311,sha256="a"*64,created_at=1800000000))
+    page.locator("#matter-list .case-action--view").click()
+    word=page.locator("#case-r2-list .case-file-type-icon--word")
+    word.wait_for(state="visible",timeout=15000)
+    assert word.get_attribute("aria-label")=="Tài liệu Word"
+    assert word.locator("svg text").text_content()=="W"
+    assert page.locator("#case-r2-list .case-file-name").inner_text()=="QA example Word.docx"
+    word_row=page.locator("#case-r2-list .case-file-row").first.bounding_box()
+    assert word_row and word_row["height"]<=108,(name,word_row)
+    assert page.locator("#case-r2-list .case-file-download").is_enabled()
     width=page.evaluate("document.documentElement.scrollWidth")
     assert width<=viewport["width"]+4,(name,width,viewport)
     assert not errors,(name,errors)
