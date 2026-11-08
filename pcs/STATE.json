@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 108,
-  "updated_at": "2026-11-08T03:40:01.528Z",
+  "revision": 109,
+  "updated_at": "2026-11-08T04:08:42.185Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2218,6 +2218,74 @@
           "Exact private SRS v1.1.15 clauses and acceptance mapping unavailable in this session."
         ],
         "owner_acceptance": "PENDING_R116"
+      },
+      {
+        "id": "AL-R0-CASE-R117-001",
+        "title": "R117 one-form complete legal case create/edit + R2 attachments; saved case list with legal practice area filter",
+        "priority": "P0",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_CHROMIUM_DESKTOP_MOBILE_PASS_OWNER_LIVE_SIGNED_IN_E2E_NOT_RUN",
+        "scope": "Owner 2026-11-08 form redesign within R116 D1 private R2 case scope. No new provider, no new migrations, no production.",
+        "source": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/166",
+        "design": "One complete form contains title, reference, legal area category (user-editable suggestions), case status, priority, active assignee, deadline, simulated client and counterparty labels, summary and multiple PDF/DOCX attachments. One Save action; below is only saved-case list with text search, category filter and open/edit using the same form.",
+        "persistence": "D1 batch atomically persists new Matter+read/write ACL+title+all case details; existing title-only API remains backwards compatible. Files uploaded sequentially after D1 success using existing private R2 API. Per-file confirmed/failed counts, no automatic retry, explicit partial-save warning, file list refresh. Existing title and details optimistic version gate for edit.",
+        "qa_api": {
+          "worker": "ai-law-standalone-cf-qa",
+          "deployment": "d0136a23-125c-4236-a631-de9e760b177d",
+          "version": "93b2985a-95a9-4e00-818e-edc9340ca09c",
+          "traffic": "100%",
+          "modules": 11,
+          "updated": [
+            "matter_workspace.mjs",
+            "qa_case_r2.mjs"
+          ],
+          "preserved": 9,
+          "bindings_preserved": 12,
+          "d1_explain_detail_insert": "PASS",
+          "readback": "PASS"
+        },
+        "qa_site": {
+          "worker": "ai-law-web-qa",
+          "deployment": "2c4085e3-1793-4843-9c1a-b7a97908cc1e",
+          "version": "6043e852-2e02-460a-8481-96010d9d9d05",
+          "traffic": "100%",
+          "modules": 27,
+          "updated": [
+            "workspace_html.mjs",
+            "workspace_css.mjs",
+            "workspace_matters.mjs"
+          ],
+          "preserved": 24,
+          "bindings_preserved": [
+            "QA_AUTH",
+            "GOOGLE_PICKER_API_KEY"
+          ],
+          "views_siblings": "PASS",
+          "single_form": "PASS",
+          "category_filter": "PASS",
+          "drive_panel": "HIDDEN_PRESERVED",
+          "readback": "PASS"
+        },
+        "tests": {
+          "github_actions": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42445275866",
+          "executed": "PASS_9_OF_9",
+          "conditional_skipped": 21,
+          "case_atomic_create": "PASS_MOCK",
+          "legacy_title_only": "PASS",
+          "area_filter_and_acl": "PASS",
+          "invalid_case_and_forbidden_role": "PASS",
+          "chromium_desktop_complete_save_and_edit": "PASS_SYNTHETIC_BACKEND",
+          "chromium_mobile_complete_save_and_edit": "PASS_SYNTHETIC_BACKEND",
+          "d1_qa_explain_real_schema": "PASS",
+          "qa_website_source_readback": "PASS",
+          "qa_backend_source_readback": "PASS",
+          "owner_android_signed_in_case_save": "NOT_RUN",
+          "owner_desktop_signed_in_case_save": "NOT_RUN",
+          "real_pdf_or_docx_r2_browser": "NOT_RUN",
+          "negative_live_multi_tenant": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "owner_acceptance": "PENDING_R117",
+        "srs_change": "SC-020 UX-only; frozen private v1.1.15 unchanged"
       }
     ],
     "features": [
