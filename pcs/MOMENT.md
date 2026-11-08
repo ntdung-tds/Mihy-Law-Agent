@@ -1,12 +1,24 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `110` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T04:48:54.238Z`.
+- **PCS revision:** `111` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T05:18:40.074Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R119 — Polished case action buttons and real soft hide, not physical deletion (2026-11-08)
+
+- **Owner correction:** “thiết kế các Button đẹp chút, nhất là trên mobile; Xem/Sửa/Xoá (xoá ở đây không phải là xoá vật lý, hiden; xoá vật lý chỉ admin hệ thống xoá được)”. Source [draft PR #168](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/168), stacked on R118 #167, SC-022; SRS v1.1.15 frozen baseline unchanged.
+- **UI:** Individual compact accessible **Xem** blue, **Sửa** purple, **Xóa** soft red, SVG icons and minimum 45px touch targets in three-column mobile row. Read-only case users see *Xem* only. Clicking Xóa opens a deliberate inline confirm with *Hủy* / *Ẩn hồ sơ*, stating D1 and R2 remain intact. Desktop uses same visual actions without changing list-first mobile structure.
+- **Business meaning:** Ordinary **Xóa** means **SOFT_HIDE** only. D1 `qa_matter_hides` stores immutable `installation_id/tenant_id/matter_id/hidden_by/hidden_at`, no SQL record delete and no R2 object delete. `PATCH /api/qa/matters/:id` accepts strict `{action:"hide",expected_version:N}` with session, same-origin, tenant, write MatterACL allow-minus-deny, expected case version and no existing hide. Hidden cases disappear from normal list and are rejected for rename, details, R2 files, legacy Drive documents and AI legal workflow authorization. Original case and private files remain.
+- **Physical delete policy:** QA membership supports only `lawyer` and `tenant_admin`, **neither is a system administrator**. No hard-purge endpoint/UI. Separate verified `system_admin` privilege, audit and explicit approval are prerequisites for any future physical deletion/restore capability. Tenant-admin privileges are NOT elevated implicitly.
+- **D1 QA:** additive `0018_r119_matter_soft_hide.sql` applied to `ai-law-standalone-cf-qa`; readback 1 tombstone table + 2 immutable triggers **PASS**; 0 preexisting hides. Actual D1 `EXPLAIN INSERT` for hide SQL **PASS** with 12 bound parameters, does not alter records.
+- **QA backend:** `ai-law-standalone-cf-qa` 100%-traffic version `bc63ede0-781a-4983-b4a3-2f98f02930dd`, deployment `855f158f-a123-4757-beb2-224b7307b6f2`: 4/11 modules targeted, seven unchanged, 12 D1/R2/OAuth/AI bindings preserved. Google BYOS and live AI-specific code differ from tracked sources, so the two live modules were patched surgically (only additional hidden authorization checks), avoiding overwrite. Exact full module readback **PASS**.
+- **QA site:** `ai-law-web-qa` 100%-traffic version `16c74ff2-f556-4948-90a0-40dbf04c62f5`, deployment `b6728373-9417-4c99-8878-0aa7e90b7426`: 3/27 modules updated, 24 byte-identical, two old bindings unchanged, readback PASS. No production changes.
+- **Evidence:** [GitHub Actions #42449716851](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42449716851) **PASS 9/9 executed CI jobs**, 21 branch-conditional skips. Contract fixtures test write ACL, stale version, malformed/CSRF, no physical method, hidden case denial and preserved R2; isolated real Chromium desktop/mobile checks View/Edit/Hide, cancel/confirm, saved list filtering and no overflow. Real QA D1 schema and SQL preparation PASS.
+- **Owner gate:** Actual Owner-authenticated Android click-hide/reload and live R2 upload/download negative checks **NOT_RUN**; owner R119 acceptance pending. Do not test on confidential/real client files in QA.
 
 ## R118 — Mobile list-first case screen, case details on demand (2026-11-08)
 
