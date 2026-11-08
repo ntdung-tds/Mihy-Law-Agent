@@ -49,7 +49,7 @@ function fixture({role='lawyer',hasSession=true,canWrite=true,canRead=true,
     return {meta:{changes:0}};
    }
   };
- }};}};
+ }}}}};
  return {env,state,queries};
 }
 const req=(method='PATCH',body={action:'hide',expected_version:1},origin=BASE,path='/api/qa/matters/'+CASE)=>{
