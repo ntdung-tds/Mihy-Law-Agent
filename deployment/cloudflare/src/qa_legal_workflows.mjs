@@ -291,6 +291,11 @@ export function summaryReviewCheck(rows,answer){
 // model commentary as the edited version, even if it quotes the source.
 export function grammarEditedText(answer){
  const raw=String(answer||'');
+ // R133: a marker embedded in model commentary or inside the proposal must
+ // invalidate the entire extraction, even when not on its own line.
+ // Otherwise the R131 review/copy gate could receive an ambiguous edit.
+ const start='[BẮT ĐẦU BẢN SỬA]',end='[KẾT THÚC BẢN SỬA]';
+ if(raw.split(start).length!==2||raw.split(end).length!==2)return null;
  const startLine=/^\s*\[BẮT ĐẦU BẢN SỬA\]\s*$/gmu;
  const endLine=/^\s*\[KẾT THÚC BẢN SỬA\]\s*$/gmu;
  const starts=[...raw.matchAll(startLine)],ends=[...raw.matchAll(endLine)];
