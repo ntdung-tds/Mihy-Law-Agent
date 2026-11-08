@@ -224,6 +224,8 @@ jobs:
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r109_ai_quota_sql.py' -v
       - name: R112 separate 11 legal workflow screens, deep links and mobile menu
         run: node --test deployment/cloudflare/tests/r112_uc_screens.test.mjs
+      - name: R114 Matter quick-create/resume and stale workspace response safety
+        run: node --test deployment/cloudflare/tests/r114_workflow_matter.test.mjs
       - name: R72 Drive document upload/download, MatterACL, integrity and fail-closed QA gates
         run: node --test deployment/cloudflare/tests/r72_documents.test.mjs
       - name: R81 Google Drive multipart wire protocol and safe provider error diagnostics
