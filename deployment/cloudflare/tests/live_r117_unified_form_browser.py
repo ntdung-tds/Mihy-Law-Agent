@@ -328,7 +328,7 @@ def scenario(browser,name,viewport,origin):
     history=page.locator("#case-history-details")
     assert history.is_visible()
     assert history.get_attribute("open") is None
-    history.locator("summary").click()
+    history.locator(":scope > summary").click()
     assert history.get_attribute("open") is not None
     history_scroll=page.locator("#case-history-list").evaluate("""el => {
       for(let i=0;i<16;i++){
@@ -338,7 +338,7 @@ def scenario(browser,name,viewport,origin):
       return {overflow:getComputedStyle(el).overflowY,capped:el.scrollHeight>el.clientHeight,scrollTop:el.scrollTop};
     }""")
     assert history_scroll["overflow"]=="auto" and history_scroll["capped"] and history_scroll["scrollTop"]>0,(name,history_scroll)
-    history.locator("summary").click()
+    history.locator(":scope > summary").click()
     assert history.get_attribute("open") is None
     width=page.evaluate("document.documentElement.scrollWidth")
     assert width<=viewport["width"]+4,(name,width,viewport)
