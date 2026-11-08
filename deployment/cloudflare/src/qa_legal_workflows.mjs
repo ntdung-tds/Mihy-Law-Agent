@@ -151,6 +151,10 @@ async function readLimitedSource(req,max){
    if(count>max){await reader.cancel();return {tooBig:true};}
    chunks.push(value);
   }
+ }catch{
+  // Network aborts and malformed streams must not escape as unhandled errors.
+  // No model or quota call occurs when the request body cannot be read.
+  return {invalid:true};
  }finally{reader.releaseLock();}
  const bytes=new Uint8Array(count);let at=0;
  for(const part of chunks){bytes.set(part,at);at+=part.byteLength;}
