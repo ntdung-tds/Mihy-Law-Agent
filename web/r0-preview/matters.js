@@ -14,7 +14,7 @@
  const defaults={reference:'',category:'',status:'open',priority:'normal',assignee_user_id:'',
   client_label:'',counterparty_label:'',summary:'',deadline:''};
  let matters=[],currentId='',caseVersion=0,titleVersion=0,originalTitle='',originalDetails=null;
- let canWrite=true,saving=false,workspaceGeneration=0,loadGeneration=0;
+ let canWrite=true,saving=false,hiding=false,workspaceGeneration=0,loadGeneration=0;
 
  // Mobile navigation contract: list first; create, detail and edit are explicit.
  // Desktop keeps the R117 full editor + list side-by-side.
@@ -126,6 +126,77 @@
   for(const category of categories)categoryFilter.append(makeOption(category,category));
   categoryFilter.value=categories.includes(selected)?selected:'';
  }
+ function iconFor(action){
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 24 24');
+  svg.setAttribute('width','17');svg.setAttribute('height','17');
+  svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');
+  svg.setAttribute('stroke-width','1.9');svg.setAttribute('stroke-linecap','round');
+  svg.setAttribute('stroke-linejoin','round');svg.setAttribute('aria-hidden','true');
+  const shapes={
+   view:['M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12',
+    'M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0'],
+   edit:['M12 20h9','M16.5 3.5a2.1 2.1 0 0 1 3 3L9 17l-4 1 1-4L16.5 3.5z'],
+   hide:['M3 6h18','M8 6V4h8v2','M6 6l1 14h10l1-14','M10 10v7','M14 10v7']
+  };
+  for(const path of shapes[action]||[]){
+   const node=document.createElementNS('http://www.w3.org/2000/svg','path');
+   node.setAttribute('d',path);svg.append(node);
+  }
+  return svg;
+ }
+ function makeAction(label,kind,handler){
+  const button=document.createElement('button');button.type='button';
+  button.className='case-action case-action--'+kind;button.setAttribute('aria-label',label);
+  button.append(iconFor(kind));
+  const text=document.createElement('span');text.textContent=label;button.append(text);
+  button.addEventListener('click',handler);
+  return button;
+ }
+ function listNote(message,bad=false){
+  const n=$('#matter-list-feedback');
+  if(!n)return;
+  n.hidden=!message;n.textContent=message;n.dataset.state=bad?'error':'success';
+ }
+ function askHide(row,m){
+  if(saving||hiding)return;
+  for(const p of document.querySelectorAll('.case-hide-confirm'))p.remove();
+  const panel=document.createElement('div');panel.className='case-hide-confirm';
+  panel.setAttribute('role','group');panel.setAttribute('aria-label','Xác nhận ẩn hồ sơ');
+  const text=document.createElement('p');text.textContent='Ẩn hồ sơ “'+m.title+'”? Hồ sơ và tệp R2 vẫn được giữ nguyên, không xóa vật lý.';
+  const controls=document.createElement('div');controls.className='case-hide-confirm-actions';
+  const cancel=document.createElement('button');cancel.type='button';
+  cancel.className='case-hide-cancel';cancel.textContent='Hủy';
+  cancel.addEventListener('click',()=>panel.remove());
+  const confirm=document.createElement('button');confirm.type='button';
+  confirm.className='case-hide-approve';confirm.textContent='Ẩn hồ sơ';
+  confirm.addEventListener('click',()=>void hideCase(m,confirm));
+  controls.append(cancel,confirm);panel.append(text,controls);row.append(panel);
+  cancel.focus?.();
+ }
+ async function hideCase(m,button){
+  if(hiding||saving||!m.can_write)return;
+  hiding=true;button.disabled=true;button.textContent='Đang ẩn…';
+  listNote('');
+  try{
+   const r=await req('/api/qa/matters/'+encodeURIComponent(m.id),{
+    method:'PATCH',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'hide',expected_version:m.version})
+   });
+   if(r.status===401){expired();return;}
+   const result=await r.json().catch(()=>({}));
+   if(!r.ok)throw Error(result.error||'Không thể ẩn hồ sơ.');
+   if(result.hidden!==true||result.physical_deleted!==false)
+    throw Error('Chưa xác nhận được hồ sơ đã ẩn.');
+   if(currentId===m.id){resetEditor(true);mobileView('list');}
+   await load({silent:true});
+   listNote('Đã ẩn hồ sơ khỏi danh sách. Dữ liệu và tài liệu vẫn được giữ nguyên.');
+  }catch(e){
+   listNote(e?.message||'Ẩn hồ sơ không thành công.',true);
+  }finally{
+   hiding=false;button.disabled=false;button.textContent='Ẩn hồ sơ';
+  }
+ }
  function show(){
   const query=search.value.trim().toLocaleLowerCase('vi-VN');
   const cat=categoryFilter?.value||'';
@@ -144,12 +215,14 @@
    sub.textContent=[m.category||'Chưa phân loại',m.case_reference||('Mã '+m.id.slice(0,8)),
     statusLabels[m.case_status]||'Mới mở',dateOf(m.created_at)].join(' · ');
    detail.append(name,sub);
-   const actions=document.createElement('div');actions.className='matter-actions';
-   const button=document.createElement('button');button.type='button';button.className='matter-edit-button';
-   button.textContent=m.can_write?'Mở / Sửa':'Xem hồ sơ';
-   button.setAttribute('aria-label','Mở hồ sơ '+m.title);
-   button.addEventListener('click',()=>void openCase(m.id));
-   actions.append(button);row.append(detail,actions);list.append(row);
+   row.classList.add('case-list-item');
+   const actions=document.createElement('div');actions.className='case-row-actions';
+   actions.append(makeAction('Xem','view',()=>void openCase(m.id)));
+   if(m.can_write){
+    actions.append(makeAction('Sửa','edit',()=>void openCase(m.id,{edit:true})));
+    actions.append(makeAction('Xóa','hide',()=>askHide(row,m)));
+   }
+   row.append(detail,actions);list.append(row);
   }
   const empty=$('#matter-empty');empty.hidden=filtered.length>0;
   empty.textContent=matters.length===0?'Chưa có hồ sơ nào được lưu.'
@@ -238,7 +311,7 @@
    }
   }catch{/* history is not a blocker for saving; no sensitive error logs */}
  }
- async function openCase(id){
+ async function openCase(id,{edit=false}={}){
   if(!uuid.test(id)||saving)return;
   resetEditor(true);
   const scope=workspaceGeneration;currentId=id;
@@ -275,8 +348,10 @@
    $('#case-history-details').hidden=false;
    note(canWrite?'Đã mở hồ sơ. Chỉnh sửa hoặc chọn thêm tệp rồi bấm “Lưu thay đổi”.':'Bạn chỉ có quyền xem hồ sơ.');
    fileNote('');
-   if(media.matches){lockMobileDetail();mobileView('detail');}
-   else mobileView('edit');
+   if(media.matches){
+    lockMobileDetail();mobileView('detail');
+    if(edit&&canWrite)startEdit();
+   }else mobileView('edit');
    void Promise.all([refreshFiles(scope,id),refreshEvents(scope,id)]);
    $('#matter-title-heading').scrollIntoView({behavior:'smooth',block:'start'});
   }catch(e){
