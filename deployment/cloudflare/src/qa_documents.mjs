@@ -45,6 +45,8 @@ export const DOCUMENT_ACL_SQL=[
  'SELECT 1 AS ok FROM qa_matters m JOIN qa_matter_catalog c',
  'ON c.installation_id=m.installation_id AND c.tenant_id=m.tenant_id AND c.matter_id=m.matter_id',
  'WHERE m.installation_id=? AND m.tenant_id=? AND m.matter_id=?',
+ 'AND NOT EXISTS(SELECT 1 FROM qa_matter_hides h WHERE h.installation_id=m.installation_id',
+ 'AND h.tenant_id=m.tenant_id AND h.matter_id=m.matter_id)',
  'AND EXISTS(SELECT 1 FROM qa_matter_acl a WHERE a.installation_id=m.installation_id',
  'AND a.tenant_id=m.tenant_id AND a.matter_id=m.matter_id AND a.user_id=?',
  "AND a.permission=? AND a.effect='allow' AND a.acl_version=m.acl_version",
