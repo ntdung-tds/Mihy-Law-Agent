@@ -247,6 +247,61 @@ test('R135 UC03: real QA API retains raw translation but warns on commentary-onl
  assert.equal(Object.hasOwn(await otherResult.json(),'source_coverage'),false);
 });
 
+test('R136 UC03: unique positioned source labels must have text and maintain source order',()=>{
+ const rows=[
+  {id:'A1',text:'Điều 1. Bên A giao tài liệu.'},
+  {id:'A2',text:'Điều 2. Bên B trả tiền.'},
+  {id:'A3',text:'Điều 3. Hai bên ký.'}
+ ];
+ const reversed=translationSourceCoverage(rows,
+  '[A2] Article 2. Party B pays.\n[A1] Article 1. Party A delivers.\n[A3] Article 3. Sign.');
+ assert.equal(reversed.status,'review_required');
+ assert.equal(reversed.marked_segment_count,3,'Do not conflate order warning with marker position');
+ assert.equal(reversed.missing_source_count,0);
+ assert.deepEqual(reversed.out_of_order_source_ids,['A2','A1','A3']);
+ assert.deepEqual(reversed.empty_source_ids,[]);
+ const noText=translationSourceCoverage(rows,
+  '[A1]   \n[A2] Article 2. Party B pays.\n[A3] Article 3. Sign.');
+ assert.equal(noText.status,'review_required');
+ assert.equal(noText.marked_segment_count,2);
+ assert.equal(noText.missing_source_count,1);
+ assert.deepEqual(noText.missing_source_ids,['A1']);
+ assert.deepEqual(noText.empty_source_ids,['A1']);
+ assert.deepEqual(noText.out_of_order_source_ids,[]);
+ const markersOnly=translationSourceCoverage(rows,
+  '[A1] [A2]\n[A2] Actual article 2 text.\n[A3] Article 3 text.');
+ assert.ok(markersOnly.missing_source_ids.includes('A1'),'Other marker is not translated text');
+ const canonical=translationSourceCoverage(rows,
+  '  [A1] Article 1. Party A delivers.\n- [A2] Article 2. Party B pays.\n[A3] Article 3. Sign.');
+ assert.equal(canonical.status,'markers_present_not_verified');
+ assert.equal(canonical.marked_segment_count,3);
+ assert.deepEqual(canonical.out_of_order_source_ids,[]);
+ assert.deepEqual(canonical.empty_source_ids,[]);
+ assert.equal(canonical.review_required,true);
+});
+test('R136 UC03: real API flags reversed labels and empty translation, retains raw answer and ACL',async()=>{
+ const source='Điều 1. Bên A bàn giao 10 tài liệu.\n\nĐiều 2. Bên B thanh toán 2.000.000 đồng.';
+ for(const [answer,expected] of [
+  ['[A2] Article 2. Party B pays.\n[A1] Article 1. Party A delivers.','order'],
+  ['[A1] \n[A2] Article 2. Party B pays.','empty']
+ ]){
+  const f=fixture();
+  f.env.AI.run=async()=>({response:answer});
+  const r=await legalApi(request({uc:'UC03',source,language:'en'}),f.env,{now:NOW});
+  assert.equal(r.status,200);
+  const data=await r.json();
+  assert.equal(data.answer,answer,'No automatic replacement of model translation');
+  assert.equal(data.source_coverage.status,'review_required');
+  if(expected==='order')assert.deepEqual(data.source_coverage.out_of_order_source_ids,['A2','A1']);
+  else assert.deepEqual(data.source_coverage.empty_source_ids,['A1']);
+  assert.ok(f.calls.every(c=>c.params.every(v=>v!==source&&v!==answer)), 'Do not persist source or draft');
+ }
+ const denied=fixture({acl:false});
+ const rejected=await legalApi(request({uc:'UC03',source}),denied.env,{now:NOW});
+ assert.equal(rejected.status,404);
+ assert.equal(denied.providerCalls.length,0);
+});
+
 test('R128 UC04: omission signals for missing obligation anchors, key amounts and dates',()=>{
  const rows=[{id:'A1',text:'Điều 1. Bên A phải thanh toán 2.000.000 đồng vào ngày 15 tháng 9 năm 2026.'},
   {id:'A2',text:'Điều 2. Bên B bàn giao 10 tài liệu trước ngày 20/09/2026.'}];

@@ -169,31 +169,54 @@ export function translationSourceCoverage(sourceRows,answer){
  const expected=sources.filter(x=>/^A[1-9]\d*$/.test(x?.id||'')).map(x=>x.id);
  const valid=new Set(expected),all=new Map(),atStart=new Map();
  const raw=String(answer||'');
- // R135: An anchor quoted inside the AI explanation is NOT a translated
- // paragraph. Only a sole [A#] preceding text on its own output line
- // qualifies as positioned; repeated references remain ambiguous.
+ // R135: quoted or duplicated source labels are not translated paragraphs.
  for(const match of raw.matchAll(/\[(A[1-9]\d*)\]/gu)){
   const id=match[1];
   if(valid.has(id))all.set(id,(all.get(id)||0)+1);
  }
+ const positioned=[];
  for(const match of raw.matchAll(/^[ \t]*(?:[-*][ \t]+)?\[(A[1-9]\d*)\](?=[ \t]|$)/gmu)){
   const id=match[1];
-  if(valid.has(id))atStart.set(id,(atStart.get(id)||0)+1);
+  if(!valid.has(id))continue;
+  atStart.set(id,(atStart.get(id)||0)+1);
+  positioned.push({id,start:match.index,end:match.index+match[0].length});
  }
- const marked=expected.filter(id=>all.get(id)===1&&atStart.get(id)===1);
- const missing=expected.filter(id=>all.get(id)!==1||atStart.get(id)!==1);
+ // R136: An empty labeled paragraph is NOT coverage. Strip citation tokens
+ // before checking visible letters/numbers; do not accept another [A#] as
+ // translated content. This remains a structural heuristic, not language QA.
+ const empty=[];
+ for(let i=0;i<positioned.length;i++){
+  const p=positioned[i];
+  if(all.get(p.id)!==1||atStart.get(p.id)!==1)continue;
+  const content=raw.slice(p.end,positioned[i+1]?.start??raw.length)
+   .replace(/\[(?:A|B)[1-9]\d*\]/gu,' ');
+  if(!/[\p{L}\p{N}]/u.test(content))empty.push(p.id);
+ }
+ const emptySet=new Set(empty);
+ const marked=expected.filter(id=>all.get(id)===1&&atStart.get(id)===1&&!emptySet.has(id));
+ const missing=expected.filter(id=>!marked.includes(id));
  const misplaced=expected.filter(id=>(all.get(id)||0)>0&&!atStart.has(id));
  const duplicated=expected.filter(id=>(all.get(id)||0)>1);
+ // The UC03 prompt demands paragraphs retain source order; unique correctly
+ // positioned labels can still be transposed. Surface the observed sequence
+ // for human review without silently rearranging model text.
+ const sourceRank=new Map(expected.map((id,i)=>[id,i]));
+ const sequence=positioned.filter(p=>all.get(p.id)===1&&atStart.get(p.id)===1)
+  .map(p=>p.id);
+ const reversed=sequence.some((id,i)=>i>0&&sourceRank.get(id)<sourceRank.get(sequence[i-1]));
+ const outOfOrder=reversed?sequence.slice(0,30):[];
  return {
-  status:missing.length?'review_required':'markers_present_not_verified',
+  status:missing.length||outOfOrder.length?'review_required':'markers_present_not_verified',
   source_segment_count:expected.length,
   marked_segment_count:marked.length,
   missing_source_ids:missing.slice(0,30),
   missing_source_count:missing.length,
   misplaced_source_ids:misplaced.slice(0,30),
   duplicate_source_ids:duplicated.slice(0,30),
+  empty_source_ids:empty.slice(0,30),
+  out_of_order_source_ids:outOfOrder,
   review_required:true,
-  note:'Chỉ công nhận một mã [A#] duy nhất đứng đầu dòng dịch; mã được nhắc trong lời giải thích hoặc bị lặp đều phải rà soát. Đây là kiểm tra vị trí nhãn, KHÔNG chứng minh dịch đủ, đúng nghĩa hoặc có giá trị pháp lý. Luật sư phải đối chiếu từng đoạn nguồn.'
+  note:'Chỉ kiểm tra nhãn [A#] duy nhất đứng đầu dòng, không rỗng và theo đúng thứ tự nguồn. Nhãn sai thứ tự, không có văn bản hoặc bị lặp phải được luật sư kiểm tra. Đây là dấu hiệu hình thức, KHÔNG chứng minh đoạn đã dịch đúng, đủ nghĩa hoặc tương đương pháp lý.'
  };
 }
 

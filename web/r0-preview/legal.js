@@ -130,15 +130,19 @@
       if(warning){
        const ids=Array.isArray(coverage.missing_source_ids)?
         coverage.missing_source_ids.filter(id=>/^A[1-9]\d*$/.test(id)).slice(0,30):[];
-       const p=document.createElement('p');
-       p.textContent='Đoạn cần kiểm tra: '+ids.join(', ')+
-        (missing>ids.length?' và '+(missing-ids.length)+' đoạn khác':'');
-       root.append(p);
+       if(missing>0){
+        const p=document.createElement('p');
+        p.textContent='Đoạn cần kiểm tra: '+ids.join(', ')+
+         (missing>ids.length?' và '+(missing-ids.length)+' đoạn khác':'');
+        root.append(p);
+       }
        // R135: tell the reviewer why a visible marker is untrusted.
        // Render as text only; the model response must never become HTML.
        for(const [field,label] of [
         ['misplaced_source_ids','Nhãn chưa đứng đầu dòng dịch'],
-        ['duplicate_source_ids','Nhãn xuất hiện lặp']
+        ['duplicate_source_ids','Nhãn xuất hiện lặp'],
+        ['empty_source_ids','Nhãn không có nội dung dịch'],
+        ['out_of_order_source_ids','Thứ tự nhãn khác thứ tự nguồn (theo bản nháp)']
        ]){
         const values=Array.isArray(coverage[field])?
          coverage[field].filter(id=>/^A[1-9]\d*$/.test(id)).slice(0,30):[];
@@ -150,7 +154,7 @@
        }
       }
       const note=document.createElement('p');
-      note.textContent='Chỉ vị trí nhãn được kiểm tra tự động; có nhãn [A#] không chứng minh nội dung đã dịch đúng, đủ hoặc tương đương pháp lý. Bắt buộc luật sư đối chiếu từng đoạn nguồn.';
+      note.textContent='Đây chỉ là kiểm tra nhãn, đoạn trống và thứ tự nguồn; không chứng minh nội dung đã dịch đúng, đủ hoặc tương đương pháp lý. Bắt buộc luật sư đối chiếu từng đoạn nguồn.';
       root.append(note);root.hidden=false;
     }
     function showSummaryReview(check){

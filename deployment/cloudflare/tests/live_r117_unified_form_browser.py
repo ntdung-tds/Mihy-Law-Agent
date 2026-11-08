@@ -113,6 +113,33 @@ def scenario(browser,name,viewport,origin):
             assert data["matter_id"]==F
             assert data["synthetic_consent"] is True
             assert len(data["source_text"])>=30
+            # R136: synthetic provider response to exercise user-facing
+            # warnings; no live model or customer document is used.
+            if "R136-REVERSE" in data["source_text"] or "R136-EMPTY" in data["source_text"]:
+                reverse="R136-REVERSE" in data["source_text"]
+                return reply(route,payload={
+                    "uc":"UC03","title":"Dịch tài liệu, hợp đồng",
+                    "mode":"ai_draft_not_verified",
+                    "source_hash":"a"*64,"source_anchors":[
+                        {"id":"A1","preview":"Nguồn hư cấu thứ nhất"},
+                        {"id":"A2","preview":"Nguồn hư cấu thứ hai"}],
+                    "answer":("[A2] Article 2. Payment.\\n[A1] Article 1. Delivery."
+                              if reverse else "[A1] \\n[A2] Article 2. Payment."),
+                    "review_notice":"Văn bản mẫu, cần đối chiếu.",
+                    "translation_check":{"status":"review_required",
+                      "missing_numbers":["10"],"missing_article_numbers":[]},
+                    "source_coverage":{
+                        "status":"review_required",
+                        "source_segment_count":2,
+                        "marked_segment_count":2 if reverse else 1,
+                        "missing_source_count":0 if reverse else 1,
+                        "missing_source_ids":[] if reverse else ["A1"],
+                        "misplaced_source_ids":[],
+                        "duplicate_source_ids":[],
+                        "empty_source_ids":[] if reverse else ["A1"],
+                        "out_of_order_source_ids":["A2","A1"] if reverse else [],
+                        "review_required":True}
+                })
             return reply(route,payload={
                 "uc":"UC03","title":"Dịch tài liệu, hợp đồng",
                 "mode":"ai_draft_not_verified",
@@ -528,6 +555,24 @@ def scenario(browser,name,viewport,origin):
     page.wait_for_timeout(250)
     assert page.locator("#legal-qa-result").is_hidden(), "Late UC03 answer must be discarded"
     assert not page.locator("#legal-qa-output").inner_text()
+    # R136: A full set of [A#] markers out of source order must still warn,
+    # and an empty translated paragraph must not be counted as completed.
+    for marker,expectedLabel,expectedCount in [
+        ("R136-REVERSE","Thứ tự nhãn khác thứ tự nguồn (theo bản nháp): A2, A1","2/2"),
+        ("R136-EMPTY","Nhãn không có nội dung dịch: A1","1/2")
+    ]:
+        page.locator("#legal-qa-source").fill(
+            marker+" Điều 1. Bên A giao 10 tài liệu. Điều 2. Bên B thanh toán sau nghiệm thu.")
+        page.locator("#legal-qa-run").click()
+        coverage.wait_for(state="visible",timeout=15000)
+        assert coverage.get_attribute("data-state")=="warning"
+        assert expectedLabel in coverage.inner_text(),(name,marker,coverage.inner_text())
+        assert expectedCount in coverage.inner_text()
+        assert page.locator("#legal-qa-output").inner_text().startswith("[A")
+        if marker=="R136-REVERSE":
+            assert "Đoạn cần kiểm tra:" not in coverage.inner_text()
+        page.locator("#legal-qa-source").fill("Nguồn hư cấu mới đã đổi để hủy bản nháp AI đang hiển thị.")
+        assert coverage.is_hidden(),"Source change must clear marker warnings"
     # Switching UCs must clear all previous answer, source evidence and flags.
     page.goto(origin+"/#uc-UC04",wait_until="domcontentloaded")
     page.wait_for_function("""() => document.querySelector('#legal-qa-source-coverage')?.hidden === true

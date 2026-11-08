@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 128,
-  "updated_at": "2026-11-08T17:55:32.795Z",
+  "revision": 129,
+  "updated_at": "2026-11-08T18:21:42.577Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -3125,6 +3125,57 @@
           "Professional source-vs-translation check plus real PDF/DOCX ingestion and legal reliability remains NOT_RUN",
           "Do not merge stacked draft PRs or deploy production without Owner signoff"
         ]
+      },
+      {
+        "id": "AL-R0-UC03-R136-001",
+        "title": "R136 UC03 — bắt cảnh báo nhãn đoạn dịch rỗng hoặc đảo thứ tự nguồn",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CODE_CI_PASS_9_OF_9_FINAL_HEAD_CI_PENDING_OWNER_ANDROID_NOT_RUN",
+        "branch": "fix/r136-uc03-empty-and-out-of-order-segments",
+        "pr": 185,
+        "scope": "R0 UC03 deterministic source-label QA warning only; frozen SRS v1.1.15 unchanged",
+        "implementation": [
+          "Check that each uniquely positioned [A#] marker precedes substantive letters/numbers rather than only another citation or whitespace.",
+          "Mark empty_source_ids as missing coverage; surface non-monotonic out_of_order_source_ids while leaving marker coverage counts and raw model draft intact.",
+          "Use plain-text warning output for both cases and avoid blank missing-label summary when only ordering is wrong."
+        ],
+        "tests": {
+          "unit": "PASS_EMPTY_ORDER_AND_VALID_R136",
+          "synthetic_api": "PASS_NO_SOURCE_OUTPUT_PERSISTENCE_DENY_ACL",
+          "chromium": "PASS_MOBILE_AND_DESKTOP_WARNING_AND_CROSS_UC_REGRESSION",
+          "previous_ci": "FAIL_42509105935_R127_EMPTY_FIXTURE_EXPECTATION",
+          "code_ci": "PASS_9_OF_9_42509181486_SHA_fd6460167e161ee36a43b005ce0785e79f374980",
+          "final_head_ci": "PENDING_AFTER_PCS_AND_SRS_DOCS",
+          "signed_in_owner_android": "NOT_RUN",
+          "semantic_translation": "NOT_RUN",
+          "real_pdf_docx_e2e": "NOT_RUN"
+        },
+        "qa": {
+          "backend": {
+            "worker": "ai-law-standalone-cf-qa",
+            "version": "aae636de-4b3b-4905-83bc-575529492e01",
+            "deployment": "bc9ff15c-1485-4edb-835a-8ccd60209d8c",
+            "traffic_percent": 100,
+            "readback": "PASS_UPDATED_MODULE_EXACT_10_OTHER_MODULES_IDENTICAL_12_BINDINGS_IDENTICAL"
+          },
+          "website": {
+            "worker": "ai-law-web-qa",
+            "version": "1216538b-cc86-46e7-b740-97469a5fbb63",
+            "deployment": "1b6a0a70-4dc2-41c4-84d6-659e95ad81d2",
+            "traffic_percent": 100,
+            "readback": "PASS_UPDATED_MODULE_EXACT_26_OTHER_MODULES_IDENTICAL_2_BINDINGS_IDENTICAL"
+          },
+          "production": "NOT_DEPLOYED",
+          "d1_r2": "UNCHANGED"
+        },
+        "srs_change": "SC-038_PROPOSAL_BASELINE_UNCHANGED",
+        "owner_acceptance": "PENDING",
+        "remaining": [
+          "Verify last PR head CI after documentation commit before reporting final-head 9/9",
+          "Owner signed-in Android UC03 acceptance with fictional sources, human translation comparison",
+          "Real PDF/DOCX ingestion into deployed Worker remains NOT_IMPLEMENTED; Python helper only, subject to separate safe architectural task",
+          "Keep PR draft, no main merge or production without Owner signoff"
+        ]
       }
     ],
     "features": [
@@ -3755,8 +3806,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R135 UC03 marker-placement QA repair PR #184; app CI #42506988150 PASS 9/9 at 348843c14f2442ac2474722d04a0fb09223b0480; backend QA deployment bd73f0b0-719f-4f34-a378-e1fb5162baf1, site QA b7f18024-362e-483c-8dbe-5b2ea24cf3ea both 100%, exact source readback and all other modules/bindings preserved. Owner Android legal E2E NOT_RUN.",
-      "next_action": "Run final-head CI for R135; Owner Android signed-in UC03 translation labels review and source comparison; continue SRS-scoped R0 missing DOCX/PDF integration or acceptance gates only with genuine E2E and no storage-provider scope expansion. No production/main merge.",
+      "last_completed_step": "R136 UC03 empty/reversed translation-label safeguard PR #185: code CI #42509181486 PASS 9/9; backend QA deployment bc9ff15c-1485-4edb-835a-8ccd60209d8c and website QA 1b6a0a70-4dc2-41c4-84d6-659e95ad81d2 100%, source readback PASS (10+26 sibling modules, 12+2 bindings preserved). Owner Android and legal translation E2E NOT_RUN.",
+      "next_action": "Finish R136 final-head CI; Owner signed-in Android acceptance of UC03 blank/reversed marker warnings. For the next substantive R0 step, assess authorized in-browser/on-premises DOCX/PDF ingestion route with actual document fidelity and no storage OAuth changes; do not assume local Python helpers run on Cloudflare. Preserve SRS v1.1.15 and Owner final release gate.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
