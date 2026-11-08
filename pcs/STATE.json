@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 123,
-  "updated_at": "2026-11-08T16:38:31.590Z",
+  "revision": 124,
+  "updated_at": "2026-11-08T17:04:22.242Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2996,6 +2996,36 @@
         "owner_acceptance": "PENDING_R131",
         "srs_change": "SC-034; SRS v1.1.15 unchanged",
         "remaining": "Owner signed-in Android E2E and actual DOCX tracked-change approval remain untested; QA compare/copy is local, not legal acceptance or file editing."
+      },
+      {
+        "id": "AL-R0-UC07-R133-001",
+        "title": "R133 UC07 — từ chối nhãn phân cách bản sửa AI lặp nội dòng hoặc lời giải thích",
+        "priority": "P1",
+        "status": "CI_PASS_9_OF_9_QA_DEPLOY_NOT_RUN_OWNER_ANDROID_NOT_RUN",
+        "branch": "fix/r133-uc07-duplicate-marker-failclosed",
+        "pr": 182,
+        "scope": "Chỉ sửa bộ trích bản sửa UC07 text-only QA R131, giữ SRS v1.1.15 và các chức năng ngoài phạm vi.",
+        "implementation": "Đếm chính xác một nhãn bắt đầu/kết thúc trên toàn bộ phản hồi AI trước khi tách bản sửa; nhãn lặp không nằm riêng trên dòng cũng khóa cổng sao chép và cảnh báo cần rà soát thủ công.",
+        "tests": {
+          "unit_api": "PASS_R133_INLINE_AND_QUOTED_DUPLICATES_DENIED",
+          "valid_grammar_edit": "PASS_R131_REGRESSION",
+          "browser": "PASS_CHROMIUM_MOBILE_DESKTOP_CI",
+          "github_ci": "PASS_9_OF_9_RUN_42502639161_CODE_SHA_a5adf0a98afec5905a0f0909c98ec31187b71882",
+          "authenticated_owner_android": "NOT_RUN",
+          "legal_semantics": "NOT_RUN",
+          "docx_pdf_e2e": "NOT_RUN"
+        },
+        "qa": {
+          "deployment": "NOT_RUN",
+          "reason": "Do not claim R133 live QA until backend source readback and exact binding/module preservation"
+        },
+        "srs_change": "SC-035_PROPOSAL_BASELINE_UNCHANGED",
+        "owner_acceptance": "PENDING",
+        "remaining": [
+          "Preserve existing 11 QA Worker modules and all 12 settings/bindings during any content-only deployment",
+          "Read back actual R133 Worker source after deployment and run signed-in Android QA",
+          "Do not merge draft PR or deploy production without Owner final acceptance"
+        ]
       }
     ],
     "features": [
@@ -3626,8 +3656,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R110 source-bound QA legal workflow hardening on PR159; CI 9/9 PASS run 42407576294. Deployed only qa_legal_workflows.mjs content to Cloudflare backend QA deployment 301ecbe7-5a2e-47f9-9962-56b44ad2b26f (100%); other 9 modules and existing AI/D1/OAuth bindings exact-match preserved. Real browser /health online; read-only D1 count 1 matter/1 AI quota record. PR158 duplicate was closed without merge/deploy. Real signed-in model E2E, legal accuracy/Owner acceptance NOT_RUN.",
-      "next_action": "Continue existing 11-UC R109 QA (one canonical /app#assistant surface), verify login and model outputs on real mobile with fictional documents. Prioritize exact source quotes for UC03/04/07, distinct negative tests, role ACL and model failure cases. Do not work on Google Drive/OneDrive or touch production. Keep SRS v1.1.15 private/frozen and report NOT_RUN for unverified gates.",
+      "last_completed_step": "R133 UC07 fail-close duplicated inline/quoted markers: PR #182 draft, app commit a5adf0a98afec5905a0f0909c98ec31187b71882, GitHub CI #42502639161 PASS 9/9; Cloudflare R133 QA deploy and owner Android not run.",
+      "next_action": "R133: controlled backend QA content-only deployment and readback if all modules/bindings can be preserved, then signed-in owner Android UC07 regression and review. Keep separate PRs draft; no production/Drive/OneDrive; baseline SRS v1.1.15 unchanged.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
