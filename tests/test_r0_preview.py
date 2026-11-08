@@ -219,7 +219,10 @@ class R0PreviewTests(unittest.TestCase):
         self.assertIn('src="./matters.js"', self.html)
         self.assertIn("const documents = Object.freeze([])", self.js)
         self.assertIn('Hồ sơ vụ việc', self.html)
-        self.assertIn('Google Drive, tải tệp và xử lý AI chưa kích hoạt', self.html)
+        self.assertIn('Hồ sơ QA được lưu trên D1 · Tệp lưu tạm R2 private', self.html)
+        self.assertIn('id="qa-case-detail"', self.html)
+        self.assertIn('id="case-r2-upload-form"', self.html)
+        self.assertIn('qa-document-box" hidden', self.html)
 
     def test_r45_right_menu_multi_selector_and_11_srs_shortcuts(self):
         """Regression for the real Chromium error: querySelector is not a NodeList."""
