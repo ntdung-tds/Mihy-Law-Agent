@@ -375,14 +375,46 @@
     if(!response.ok||result.hidden!==true||result.physical_deleted!==false)
      throw Error(result.error||'Chưa xác nhận được tệp đã ẩn.');
     await refreshFiles(scope,id);
+    void refreshEvents(scope,id);
     fileNote('Đã ẩn tệp khỏi danh sách; dữ liệu gốc vẫn còn trên R2.');
    }catch(e){if(scope===workspaceGeneration)fileNote(e?.message||'Không thể ẩn tệp.',true);}
    finally{hiding=false;accept.disabled=false;}
   });
   controls.append(cancel,accept);panel.append(text,controls);row.append(panel);
  }
+ const auditNames=Object.freeze({
+  case_created:'Tạo hồ sơ',details_created:'Lưu thông tin hồ sơ',
+  details_updated:'Cập nhật thông tin',title_changed:'Đổi tên hồ sơ',
+  file_uploaded:'Thêm tệp',file_hidden:'Ẩn tệp',
+  file_downloaded:'Cấp tệp tải xuống',case_hidden:'Ẩn hồ sơ',
+  legacy_case_created:'Tạo hồ sơ (nhật ký cũ)',
+  legacy_title_changed:'Đổi tên hồ sơ (nhật ký cũ)',
+  legacy_details_saved:'Lưu hồ sơ (nhật ký cũ)',
+  legacy_file_uploaded:'Thêm tệp (nhật ký cũ)',
+  legacy_file_hidden:'Ẩn tệp (nhật ký cũ)',
+  legacy_case_hidden:'Ẩn hồ sơ (nhật ký cũ)'
+ });
+ const auditFields=Object.freeze({
+  title:'Tên hồ sơ',reference:'Mã hồ sơ',category:'Lĩnh vực',
+  status:'Trạng thái',priority:'Mức ưu tiên',assignee_user_id:'Người phụ trách',
+  client_label:'Khách hàng/bên yêu cầu',counterparty_label:'Bên liên quan',
+  summary:'Tóm tắt',deadline:'Thời hạn'
+ });
+ function auditValue(key,v){
+  if(v===null||v===undefined||v==='')return 'Chưa có';
+  const status={open:'Mới mở',in_progress:'Đang xử lý',on_hold:'Tạm dừng',closed:'Đã đóng'};
+  const priority={low:'Thấp',normal:'Bình thường',high:'Cao'};
+  if(key==='status')return status[v]||String(v);
+  if(key==='priority')return priority[v]||String(v);
+  if(key==='assignee_user_id'){
+   const list=Array.from(field('assignee_user_id')?.options||[]);
+   return list.find(x=>x.value===v)?.textContent||String(v).slice(0,8);
+  }
+  return String(v);
+ }
  async function refreshEvents(scope=workspaceGeneration,id=currentId){
   if(!id||scope!==workspaceGeneration)return;
+  const container=$('#case-history-list');
   try{
    const r=await req('/api/qa/cases/'+encodeURIComponent(id)+'/events');
    if(scope!==workspaceGeneration||id!==currentId)return;
@@ -390,14 +422,52 @@
    if(!r.ok)throw Error('history');
    const data=await r.json();
    if(scope!==workspaceGeneration||id!==currentId)return;
-   const container=$('#case-history-list');container.replaceChildren();
-   for(const item of (data.events||[]).slice(0,50)){
-    const row=document.createElement('p');
-    row.textContent=(item.action==='r2_file_uploaded'?'Đã lưu tài liệu R2':'Đã cập nhật hồ sơ')+
-      ' · '+new Date(Number(item.created_at)*1000).toLocaleString('vi-VN');
-    container.append(row);
+   container.replaceChildren();
+   const items=Array.isArray(data.events)?data.events.slice(0,100):[];
+   if(!items.length){const p=document.createElement('p');p.textContent='Chưa có lịch sử thay đổi.';container.append(p);}
+   for(const item of items){
+    if(!Object.hasOwn(auditNames,item.action))continue;
+    const entry=document.createElement('details');entry.className='case-history-entry';
+    const header=document.createElement('summary');header.className='case-history-head';
+    const action=document.createElement('strong');action.textContent=auditNames[item.action];
+    const by=document.createElement('small');by.className='case-history-meta';
+    const time=Number(item.created_at);
+    const when=Number.isFinite(time)&&time>0?new Date(time*1000).toLocaleString('vi-VN'):'Không rõ thời gian';
+    by.textContent=String(item.actor_name||'Tài khoản').slice(0,100)+' · '+when;
+    header.append(action,by);entry.append(header);
+    const body=document.createElement('div');body.className='case-history-diff';
+    const changes=item.changes&&typeof item.changes==='object'&&!Array.isArray(item.changes)?item.changes:{};
+    for(const [key,label] of Object.entries(auditFields)){
+     const ch=changes[key];
+     if(!ch||typeof ch!=='object'||Array.isArray(ch)||!Object.hasOwn(ch,'to'))continue;
+     const p=document.createElement('p');p.className='case-history-change';
+     const title=document.createElement('b');title.textContent=label+': ';
+     const diff=document.createElement('span');
+     diff.textContent=auditValue(key,ch.from)+' → '+auditValue(key,ch.to);
+     p.append(title,diff);body.append(p);
+    }
+    if(typeof changes.name==='string'){
+     const p=document.createElement('p');p.className='case-history-change';
+     const bytes=Number(changes.bytes);
+     p.textContent='Tệp: '+changes.name+(Number.isFinite(bytes)&&bytes>=0?' · '+Math.ceil(bytes/1024)+' KB':'');
+     body.append(p);
+    }
+    if(item.action.startsWith('legacy_')){
+     const p=document.createElement('p');p.className='case-history-legacy';
+     p.textContent='Nhật ký cũ không chứa giá trị trước/sau; không thể tái tạo chính xác.';
+     body.append(p);
+    }else if(!body.childElementCount){
+     const p=document.createElement('p');p.textContent='Sự kiện đã ghi nhận, không có trường thay đổi.';
+     body.append(p);
+    }
+    entry.append(body);container.append(entry);
    }
-  }catch{/* history is not a blocker for saving; no sensitive error logs */}
+  }catch{
+   if(scope===workspaceGeneration&&id===currentId){
+    container.replaceChildren();const p=document.createElement('p');
+    p.textContent='Chưa tải được lịch sử. Hãy mở lại hồ sơ.';container.append(p);
+   }
+  }
  }
  async function openCase(id,{edit=false}={}){
   if(!uuid.test(id)||saving)return;
@@ -465,6 +535,7 @@
     document.body.append(a);a.click();a.remove();
    }finally{setTimeout(()=>URL.revokeObjectURL(address),30000);}
    fileNote('Tải tệp thành công, đã đối chiếu SHA-256.');
+   void refreshEvents(scope,id);
   }catch(e){if(scope===workspaceGeneration)fileNote(e?.message||'Không tải được tệp.',true);}
   finally{button.disabled=false;button.textContent='Tải xuống';}
  }

@@ -26,6 +26,8 @@ function fixture({role='lawyer',hasSession=true,canWrite=true,canRead=true,
    async first(){
     if(sql.includes('FROM qa_sessions s'))return hasSession?{user_id:USER,tenant_id:TENANT,role_key:role}:null;
     if(sql===MATTER_EDIT_SQL)return state.hidden||!canWrite?null:{title:'Synthetic dossier',version:state.version};
+    if(sql.includes('SELECT hidden_by,hidden_at FROM qa_matter_hides'))
+     return state.hidden?{hidden_by:USER,hidden_at:NOW}:null;
     if(sql===CASE_ACL_SQL)return state.hidden||!canRead?null:{allowed:1};
     if(sql.includes('SELECT COUNT(*) AS n'))return {n:1};
     return null;

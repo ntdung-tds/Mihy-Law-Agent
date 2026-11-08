@@ -92,7 +92,17 @@ def scenario(browser,name,viewport,origin):
                     f["hidden"]=True
                     return reply(route,payload={"id":f["id"],"hidden":True,"physical_deleted":False})
             if u==path+"/events":
-                return reply(route,payload={"events":[{"action":"details_saved","created_at":1800000000}]})
+                return reply(route,payload={"events":[
+                    {"id":"qa-1","action":"details_updated","actor_name":"Luật sư QA",
+                     "created_at":1800000000,
+                     "changes":{"summary":{"from":"Bản cũ","to":"Bản mới"},
+                                "priority":{"from":"normal","to":"high"}}},
+                    {"id":"qa-2","action":"file_uploaded","actor_name":"Luật sư QA",
+                     "created_at":1800000000,
+                     "changes":{"name":"QA evidence.pdf","bytes":43}},
+                    {"id":"qa-3","action":"legacy_details_saved","actor_name":"QA trước đây",
+                     "created_at":1799999000,"changes":{"legacy":1}}
+                ]})
             if u=="/api/qa/matters/"+c["id"] and method=="PATCH":
                 v=json.loads(req.post_data)
                 if v.get("action")=="hide":
@@ -127,6 +137,21 @@ def scenario(browser,name,viewport,origin):
     page.locator("#matter-create").click()
     page.get_by_text("Đã lưu hồ sơ và 1 tệp vào R2 thành công.").wait_for(timeout=15000)
     assert len(cases)==1 and len(files[I])==1,(cases,files)
+    # R125: accessible, expandable per-field history with actor/time; legacy
+    # entries must be explicit about missing before/after metadata.
+    page.locator("#case-history-details").evaluate("(e)=>e.open=true")
+    page.locator("#case-history-list .case-history-entry").first.wait_for(state="visible",timeout=15000)
+    assert page.locator("#case-history-list .case-history-entry").count()==3
+    first_audit=page.locator("#case-history-list .case-history-entry").first
+    assert "Cập nhật thông tin" in first_audit.locator("summary").inner_text()
+    assert "Luật sư QA" in first_audit.locator("summary").inner_text()
+    first_audit.locator("summary").click()
+    assert "Tóm tắt: Bản cũ → Bản mới" in first_audit.inner_text()
+    assert "Mức ưu tiên: Bình thường → Cao" in first_audit.inner_text()
+    page.locator("#case-history-list .case-history-entry").last.locator("summary").click()
+    assert "không thể tái tạo chính xác" in page.locator("#case-history-list").inner_text()
+    page.locator("#case-history-details").evaluate("(e)=>e.open=false")
+
     # R123: a PDF is recognized by its red document-shaped icon, not text alone.
     pdf_icon=page.locator("#case-r2-list .case-file-type-icon--pdf")
     assert pdf_icon.count()==1
@@ -303,7 +328,7 @@ def scenario(browser,name,viewport,origin):
     history=page.locator("#case-history-details")
     assert history.is_visible()
     assert history.get_attribute("open") is None
-    history.locator("summary").click()
+    history.locator(":scope > summary").click()
     assert history.get_attribute("open") is not None
     history_scroll=page.locator("#case-history-list").evaluate("""el => {
       for(let i=0;i<16;i++){
@@ -313,7 +338,7 @@ def scenario(browser,name,viewport,origin):
       return {overflow:getComputedStyle(el).overflowY,capped:el.scrollHeight>el.clientHeight,scrollTop:el.scrollTop};
     }""")
     assert history_scroll["overflow"]=="auto" and history_scroll["capped"] and history_scroll["scrollTop"]>0,(name,history_scroll)
-    history.locator("summary").click()
+    history.locator(":scope > summary").click()
     assert history.get_attribute("open") is None
     width=page.evaluate("document.documentElement.scrollWidth")
     assert width<=viewport["width"]+4,(name,width,viewport)

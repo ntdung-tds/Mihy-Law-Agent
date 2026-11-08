@@ -145,8 +145,14 @@ async function details(req,env,p,matter,now){
  else command=env.DB.prepare(UPDATE_SQL).bind(
   ...inputs,p.user_id,now,env.INSTALLATION_ID,p.tenant_id,matter,version,...aclParams(p,now)
  );
- const result=await command.run();
- if(result.meta?.changes!==1)return error(409,'Quyền hoặc phiên bản hồ sơ đã thay đổi.');
+ try{await command.run();}catch{return unavailable();}
+ // Audit triggers increase meta.changes; confirm the actual optimistic row.
+ const confirmed=await env.DB.prepare(
+  'SELECT version,updated_by,updated_at FROM qa_case_details WHERE installation_id=? AND tenant_id=? AND matter_id=? LIMIT 1'
+ ).bind(env.INSTALLATION_ID,p.tenant_id,matter).first();
+ if(Number(confirmed?.version)!==version+1||
+    confirmed?.updated_by!==p.user_id||Number(confirmed?.updated_at)!==now)
+  return error(409,'Quyền hoặc phiên bản hồ sơ đã thay đổi.');
  return json(200,{id:matter,version:version+1,saved:true});
 }
 const FILE_LIST_SQL=[
@@ -237,6 +243,14 @@ async function files(req,env,p,matter,now,id){
   if(!object)return unavailable();
   const bytes=new Uint8Array(await object.arrayBuffer());
   if(bytes.length!==file.byte_length||await digest(bytes)!==file.sha256)return unavailable();
+  // Record private R2 delivery only after SHA-256 verification. Fail closed
+  // rather than sending a file without an auditable access event.
+  try{
+   await env.DB.prepare(
+    'INSERT INTO qa_case_audit_v2(installation_id,tenant_id,matter_id,event_id,actor_id,action,file_id,occurred_at,changes_json) '+
+    "VALUES(?,?,?,?,?,'file_downloaded',?,?,json_object('name',?,'bytes',?))"
+   ).bind(env.INSTALLATION_ID,p.tenant_id,matter,crypto.randomUUID(),p.user_id,id,now,file.file_name,bytes.length).run();
+  }catch{return unavailable();}
   const quoted=encodeURIComponent(file.file_name).replace(/[()']/g,c=>'%'+c.charCodeAt(0).toString(16));
   return new Response(bytes,{status:200,headers:{
    'Content-Type':file.mime_type,'Content-Length':String(bytes.length),
@@ -342,10 +356,30 @@ async function hideFile(req,env,p,matter,now,fileId){
 }
 async function events(env,p,matter,now){
  if(!await permitted(env,p,matter,'read',now))return forbidden();
- const rows=await env.DB.prepare(
-  'SELECT action,file_id,actor_id,occurred_at FROM qa_case_events WHERE installation_id=? AND tenant_id=? AND matter_id=? ORDER BY occurred_at DESC,event_id DESC LIMIT 50'
- ).bind(env.INSTALLATION_ID,p.tenant_id,matter).all();
- return json(200,{events:(rows.results||[]).map(x=>({action:x.action,file_id:x.file_id,actor_id:x.actor_id,created_at:x.occurred_at}))});
+ const mayViewHistoryValues=await permitted(env,p,matter,'write',now);
+ const rows=await env.DB.prepare([
+  'SELECT e.event_id,e.action,e.file_id,e.actor_id,e.occurred_at,e.changes_json,',
+  "COALESCE(NULLIF(p.display_name,''),substr(e.actor_id,1,8)) AS actor_name",
+  'FROM qa_case_audit_v2 e LEFT JOIN qa_account_profiles p',
+  'ON p.installation_id=e.installation_id AND p.user_id=e.actor_id',
+  'WHERE e.installation_id=? AND e.tenant_id=? AND e.matter_id=?',
+  'ORDER BY e.occurred_at DESC,e.event_id DESC LIMIT 100'
+ ].join(' ')).bind(env.INSTALLATION_ID,p.tenant_id,matter).all();
+ return json(200,{events:(rows.results||[]).map(x=>{
+  let changes={};
+  try{const parsed=JSON.parse(x.changes_json||'{}');
+   if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))changes=parsed;
+  }catch{}
+  if(!mayViewHistoryValues){
+   for(const [name,value] of Object.entries(changes)){
+    if(value&&typeof value==='object'&&!Array.isArray(value)&&
+       Object.hasOwn(value,'to'))
+     changes[name]={from:'[cần quyền sửa]',to:'[cần quyền sửa]'};
+   }
+  }
+  return{id:x.event_id,action:x.action,file_id:x.file_id,actor_id:x.actor_id,
+   actor_name:x.actor_name,created_at:x.occurred_at,changes};
+ })});
 }
 export async function caseR2Api(req,env,opts={}){
  if(!configured(env))return unavailable();

@@ -9,15 +9,19 @@ const BASE='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
 const NOW=1800000000;
 const PATH='/api/qa/matters/'+M;
 function fixture({active=true,editable=true,version=1,writeSucceeded=true,role='lawyer'}={}){
+ let updated=false;
  const queries=[];
  const env={AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,
   DB:{prepare(sql){return{bind(...params){queries.push({sql,params});return{
     async first(){
      if(sql.includes('FROM qa_sessions s'))return active?{user_id:U,tenant_id:T,role_key:role}:null;
      if(sql===MATTER_EDIT_SQL)return editable?{title:'Synthetic old title',version}:null;
+      if(sql.includes('SELECT title,version,updated_by,updated_at FROM qa_matter_catalog'))
+       return updated?{title:'Synthetic new title',version:version+1,updated_by:U,updated_at:NOW}:null;
      return null;
     },
-    async run(){return {meta:{changes:sql===MATTER_RENAME_SQL&&writeSucceeded?1:0}};},
+    async run(){if(sql===MATTER_RENAME_SQL&&writeSucceeded)updated=true;
+      return {meta:{changes:updated?2:0}};},
     async all(){return {results:[]};}
    };}};}}};
  return {env,queries};

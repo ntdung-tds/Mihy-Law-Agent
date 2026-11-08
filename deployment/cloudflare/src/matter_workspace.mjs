@@ -185,10 +185,18 @@ async function rename(req,env,identity,now,matterId){
  if(Number(old.version)!==body.expected_version)
   return json(409,{error:'Hồ sơ đã được sửa ở phiên khác. Hãy làm mới trước khi thử lại.'});
  if(old.title===title)return json(200,{id:matterId,title,version:body.expected_version,unchanged:true});
- const update=await env.DB.prepare(MATTER_RENAME_SQL).bind(
+ try{await env.DB.prepare(MATTER_RENAME_SQL).bind(
   title,identity.user_id,now,env.INSTALLATION_ID,identity.tenant_id,matterId,
-  body.expected_version,...queryArgs).run();
- if(update.meta?.changes!==1)
+  body.expected_version,...queryArgs).run();}
+ catch{return unavailable();}
+ // R125: D1 AFTER UPDATE audit triggers increase meta.changes; use exact
+ // tenant-scoped version readback instead of treating "2" as a failed write.
+ const saved=await env.DB.prepare(
+  'SELECT title,version,updated_by,updated_at FROM qa_matter_catalog '+
+  'WHERE installation_id=? AND tenant_id=? AND matter_id=? LIMIT 1'
+ ).bind(env.INSTALLATION_ID,identity.tenant_id,matterId).first();
+ if(saved?.title!==title||Number(saved?.version)!==body.expected_version+1||
+    saved?.updated_by!==identity.user_id||Number(saved?.updated_at)!==now)
   return json(409,{error:'Quyền ghi hoặc phiên bản hồ sơ đã thay đổi. Hãy làm mới.'});
  return json(200,{id:matterId,title,version:body.expected_version+1});
 }
@@ -219,10 +227,15 @@ async function hideMatter(req,env,identity,now,matterId){
  if(!old)return json(404,{error:'Hồ sơ không tồn tại hoặc không có quyền ẩn.'});
  if(Number(old.version)!==body.expected_version)
   return json(409,{error:'Hồ sơ đã thay đổi. Vui lòng làm mới danh sách.'});
- const result=await env.DB.prepare(MATTER_SOFT_HIDE_SQL).bind(
+ try{await env.DB.prepare(MATTER_SOFT_HIDE_SQL).bind(
   identity.user_id,now,env.INSTALLATION_ID,identity.tenant_id,matterId,
-  body.expected_version,identity.user_id,now,now,identity.user_id,now,now).run();
- if(result.meta?.changes!==1)
+  body.expected_version,identity.user_id,now,now,identity.user_id,now,now).run();}
+ catch{return unavailable();}
+ const receipt=await env.DB.prepare(
+  'SELECT hidden_by,hidden_at FROM qa_matter_hides '+
+  'WHERE installation_id=? AND tenant_id=? AND matter_id=? LIMIT 1'
+ ).bind(env.INSTALLATION_ID,identity.tenant_id,matterId).first();
+ if(receipt?.hidden_by!==identity.user_id||Number(receipt?.hidden_at)!==now)
   return json(409,{error:'Không thể ẩn hồ sơ vì quyền hoặc dữ liệu đã thay đổi.'});
  return json(200,{id:matterId,hidden:true,physical_deleted:false});
 }
