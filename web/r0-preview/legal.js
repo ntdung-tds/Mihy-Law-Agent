@@ -176,7 +176,13 @@
         setStatus('Đã sao chép bản nháp. Chưa xác minh pháp lý.');
       }catch{setStatus('Không sao chép tự động được. Bạn có thể chọn và sao chép văn bản.',true);}
     });
-    // app.js runs before this def // Overview cards open their own workflow screen; never reuse #assistant.
+    // app.js initializes the route before this deferred module.
+    const direct=/^#uc-(UC(?:0[1-9]|1[01]))$/.exec(location.hash);
+    if(direct)activateWorkflow(direct[1]);
+    else void loadLegalMatters();
+  }
+
+ // Overview cards open their own workflow screen; never reuse #assistant.
  document.addEventListener('click',event=>{
   const target=event.target.closest?.('[data-demo-action]');
   if(!target||!document.querySelector('#legal-qa-form'))return;
