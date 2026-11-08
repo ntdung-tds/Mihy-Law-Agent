@@ -72,7 +72,7 @@
       root.append(heading);
       if(warning){
        const ids=Array.isArray(coverage.missing_source_ids)?
-        coverage.missing_source_ids.filter(id=>/^A[1-9]\\d*$/.test(id)).slice(0,30):[];
+        coverage.missing_source_ids.filter(id=>/^A[1-9]\d*$/.test(id)).slice(0,30):[];
        const p=document.createElement('p');
        p.textContent='Đoạn cần kiểm tra: '+ids.join(', ')+
         (missing>ids.length?' và '+(missing-ids.length)+' đoạn khác':'');
