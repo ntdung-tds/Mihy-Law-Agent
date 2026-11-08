@@ -700,3 +700,10 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - **PASS:** Re-read `main` PCS revision 99 and MOMENT; PR #157/#159/#160/#163/#175 OPEN, PR #158 CLOSED, not merged. PR #175 remains draft; no UI/production/storage change.
 - **NOT_RUN:** Remote QA authenticated API, browser E2E, complete 11 UC acceptance and legal review. **BLOCKED:** QA reachability/authenticated proof not established in this run. Do not deploy or merge on CI alone.
 - **Next:** Review integration dependency order #159/#160/#163/#175 and test tenant/MatterACL/source failures with synthetic fixtures on an isolated branch; only promote QA after safe code/deploy review and live verification. Owner final sign-off remains required.
+
+## R112 — 2026-11-08 23:56 ICT: verified latest CI and QA reachability
+
+- **PASS CI:** PR #175 HEAD `41d18aab5d59dc788619d7e3e097079419b85354`, GitHub Actions run [#42492702659](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42492702659) completed success; 9 executed jobs successful. `cloudflare-contract` step 16 explicitly executed `R112 legal AI synthetic source, tenant ACL and malformed UTF-8 regression` and succeeded. This is synthetic contract evidence only, not deployed E2E or legal validation.
+- **PASS status read:** main PCS revision 99; PR #157/#159/#160/#163/#175 OPEN draft; PR #158 CLOSED and not redeployed. UI stays at `/app#assistant` with 11 UC.
+- **BLOCKED QA:** fresh HEAD requests to `ai-law-web-qa.iaict-platform.workers.dev/app#assistant` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev/` fail DNS resolution (curl error 6, HTTP 000). Authenticated API, browser E2E, live MatterACL and source verification remain NOT_RUN. No QA deployment attempted because live verification cannot complete.
+- **Next:** Review dependency/order of PR #157 → #159/#160/#163 → #175, then independently add a missing synthetic tenant/MatterACL denial regression test first. Do not merge/deploy until safe and live QA reachable. No production, OAuth, Drive/OneDrive or customer data touched.
