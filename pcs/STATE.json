@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 104,
-  "updated_at": "2026-11-08T01:04:04.630Z",
+  "revision": 105,
+  "updated_at": "2026-11-08T01:20:15.852Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2002,6 +2002,29 @@
           "Private SRS v1.1.15 exact clause mapping unavailable; baseline remains unchanged."
         ],
         "owner_acceptance": "PENDING"
+      },
+      {
+        "id": "AL-R0-UI-R113-001",
+        "title": "P0 hotfix: blank UC screen due to workflow panel nested in hidden assistant; restore back button",
+        "priority": "P0",
+        "status": "QA_DEPLOYED_STRUCTURE_TEST_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "scope": "Close missing </section> for assistant; workflow and 4 other view panels must be top-level siblings. No API/ACL/drive/product expansion.",
+        "root_cause": "R112 moved legal form into a new <section id=view-workflow> but omitted the closing </section> of view-assistant. CSS hides assistant and therefore nested workflow and its Back button.",
+        "code": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/161",
+        "qa_deployment_id": "4cd494c3-059a-4082-9e12-7e29ad9a34a0",
+        "qa_active_version": "c5994600-9e8c-4946-b63e-2645327bfade",
+        "test_results": {
+          "source_html_section_nesting": "PASS_ALL_FIVE_TOP_LEVEL_SIBLING_VIEWS_STATIC_ON_LIVE_CLOUDFLARE",
+          "qa_deploy_readback": "PASS_SINGLE_WORKSPACE_HTML_MODULE_ONLY; 26 OTHER MODULES UNCHANGED",
+          "bindings": "PASS_QA_AUTH_AND_GOOGLE_PICKER_API_KEY",
+          "test_r113_html_nesting": "PASS_IN_CI_R112_STEP_RUN_42433594946",
+          "ci_full": "IN_PROGRESS_RUN_42433594946",
+          "live_authenticated_mobile": "NOT_RUN",
+          "live_authenticated_desktop": "NOT_RUN",
+          "live_browser_rendering_simulation": "INCONCLUSIVE_RATE_LIMITED_NO_RESULT",
+          "owner_final_acceptance": "PENDING"
+        },
+        "note": "QA browser Rendering anonymous-only cannot test signed-in view, synthetic browser HTML simulation had no usable result and service returned 429. Do not report live authenticated E2E PASS. Production and OAuth/Drive unchanged."
       }
     ],
     "features": [
