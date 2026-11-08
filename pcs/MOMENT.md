@@ -1,12 +1,22 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `116` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T10:00:30.715Z`.
+- **PCS revision:** `117` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T10:48:06.204Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R125 — Lịch sử chi tiết, bất biến D1 và mobile timeline (2026-11-08)
+
+- **Owner:** “Đã ok” là nghiệm thu UX của R124; đề nghị bước tiếp theo là hoàn thiện lịch sử thay đổi chi tiết. R124 được ghi nhận Owner accepted; R125 đang chờ nghiệm thu chức năng thực.
+- **Mới:** SQL `0020_r125_detailed_case_audit.sql` tạo bảng audit immutable, index và 9 triggers, ghi nguyên tử với create/detail/title/file upload/hide/matter hide. API ghi `file_downloaded` sau khi xác minh R2 SHA-256 và trước khi cấp bytes. Thông tin gồm actor, thời gian, tên tệp/size và cặp `from/to` cho từng trường thay đổi. UI hiển thị timeline có thể mở rộng từng sự kiện, vẫn cuộn riêng trên mobile.
+- **Rủi ro đã xử lý:** D1 trigger tăng số lần thay đổi nên các API details/rename/matter-hide dùng scoped post-write readback thay vì `meta.changes===1`, tránh sai 409/503. Lịch sử có MatterACL read; các giá trị before/after bị che khi không có write.
+- **Migrated QA D1:** 17/17 statements SUCCESS; 8 legacy events backfilled, đóng nhãn `legacy` vì không thể suy ra before/after từ nhật ký cũ; giữ nguyên hồ sơ cũ và bytes R2; migration không chạy production.
+- **CI:** [#42472426132](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42472426132) PASS 9/9 nhóm; real SQLite triggers, immutability, idempotent backfill, mobile/desktop Chromium timeline + permissions.
+- **Live QA readback:** backend `ai-law-standalone-cf-qa` version `43b89f10-3094-4dfc-9281-66d2e4db6f22` deployment `7a9ff370-09bb-461f-a73e-9a1aa443afc8` 100%, 11 modules/12 bindings; website `ai-law-web-qa` version `81415417-9a4a-45f1-b8b7-f6e6136c8210` deployment `dd24cabf-0b11-4b4b-8ebb-51fead6f05f9` 100%, 27 modules/2 bindings. Both source readback PASS, unrelated modules retained.
+- **Pending:** Signed-in Android owner E2E for each audit action, cross-role live visibility and actual file download `NOT_RUN`; legacy field history cannot be reconstructed; no device/IP inference; physical R2 deletion forbidden. Production untouched, private SRS v1.1.15 unchanged, `SC-028` noted.
 
 ## R124 — Scroll + thu gọn trên mobile (2026-11-08)
 
