@@ -407,7 +407,7 @@
         const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
         result.scrollIntoView({
           behavior:reduceMotion?'auto':'smooth',
-          block:currentTask==='UC04'?'start':'nearest'
+          block:['UC04','UC07'].includes(currentTask)?'start':'nearest'
         });
       } catch(error){
         if(generation===requestGeneration&&error?.name!=='AbortError')
