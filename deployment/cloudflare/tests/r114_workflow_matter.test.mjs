@@ -40,7 +40,9 @@ test('R114: late Matter response from previous workspace never leaks or redirect
  'legal-qa-result-title','legal-qa-review','legal-qa-translation-check',
  'legal-qa-source-coverage','legal-qa-summary-review','legal-qa-grammar-review',
  'legal-qa-uc07-compare','legal-qa-uc07-original','legal-qa-uc07-edited',
- 'legal-qa-uc07-reviewed','legal-qa-uc07-copy-edited','legal-qa-uc07-copy-status'];
+ 'legal-qa-uc07-reviewed','legal-qa-uc07-copy-edited','legal-qa-uc07-copy-status',
+ 'legal-qa-uc03-04-compare','legal-qa-uc03-04-original','legal-qa-uc03-04-draft',
+ 'legal-qa-uc03-04-reviewed','legal-qa-uc03-04-copy-reviewed','legal-qa-uc03-04-copy-status'];
  for(const id of ids)make(id);
  const document={
   querySelector(q){return nodes.get(q.slice(1))||null;},
