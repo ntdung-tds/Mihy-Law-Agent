@@ -20,7 +20,7 @@
     function clearResult(){
       result.hidden=true;output.textContent='';
       byId('legal-qa-sources').replaceChildren();
-      for(const id of ['legal-qa-translation-check','legal-qa-source-coverage','legal-qa-summary-review']){
+      for(const id of ['legal-qa-translation-check','legal-qa-source-coverage','legal-qa-summary-review','legal-qa-grammar-review']){
        const check=byId(id);
        check.hidden=true;check.replaceChildren();delete check.dataset.state;
       }
@@ -124,6 +124,64 @@
       const disclaimer=document.createElement('p');
       disclaimer.textContent='Đây chỉ là cảnh báo hình thức. Tóm tắt có thể diễn đạt hoặc lược bỏ chi tiết hợp lệ. Không xác nhận đã đầy đủ ý, đúng nghĩa hay có giá trị pháp lý; luật sư phải đối chiếu nguồn.';
       content.append(disclaimer);
+      panel.open=!(window.matchMedia?.('(max-width: 620px)')?.matches);
+      panel.hidden=false;
+    }
+    function showGrammarReview(review){
+      const panel=byId('legal-qa-grammar-review');
+      panel.hidden=true;panel.open=false;panel.replaceChildren();delete panel.dataset.state;
+      if(!review||typeof review!=='object')return;
+      if(!['review_required','no_obvious_change_not_verified',
+           'manual_review_no_proposed_version'].includes(review.status))return;
+      const isolated=review.isolated_proposal===true;
+      const kinds=[
+       ['number','Số liệu'],['date','Mốc ngày'],
+       ['duty','Quyền, nghĩa vụ/phủ định'],['party','Chủ thể, tên riêng']
+      ];
+      let changed=0;
+      for(const [key] of kinds){
+       const n=Number(review[key+'_changed_count']);
+       if(!Number.isInteger(n)||n<0)return;
+       changed+=n;
+      }
+      const risky=!isolated||review.status==='review_required';
+      panel.dataset.state=risky?'warning':'info';
+      const title=document.createElement('summary');
+      title.className='legal-qa-grammar-toggle';
+      title.textContent=!isolated
+       ?'Không tách được bản sửa · Cần rà soát thủ công'
+       :risky?'Cần đối chiếu '+changed+' nhóm giá trị thay đổi'
+        :'Chưa thấy thay đổi qua kiểm tra hình thức · Vẫn cần duyệt';
+      const details=document.createElement('div');details.className='legal-qa-grammar-content';
+      panel.append(title,details);
+      const intro=document.createElement('p');
+      intro.textContent=!isolated
+       ?'AI không trả đủ cặp nhãn đầu/kết thúc bản sửa. Không sử dụng phần giải thích để thay cho văn bản đề xuất.'
+       :'Hệ thống chỉ so sánh bản sửa đã tách với nguồn ban đầu; thay đổi ngữ nghĩa ngoài nhóm chỉ báo có thể bị bỏ sót.';
+      details.append(intro);
+      for(const [key,label] of kinds){
+       const total=Number(review[key+'_changed_count']);
+       if(!total)continue;
+       const row=document.createElement('p');
+       row.className='legal-qa-grammar-diff';
+       const bold=document.createElement('strong');
+       bold.textContent=label+' ('+total+'): ';
+       row.append(bold);
+       const parts=Array.isArray(review[key+'_changes'])?
+        review[key+'_changes'].slice(0,12).filter(v=>v&&typeof v==='object'):[];
+       const names=parts.map(v=>{
+        const old=Number(v.from_count),next=Number(v.to_count);
+        const safe=String(v.value||'').slice(0,80);
+        return safe+' ('+(Number.isInteger(old)?old:'?')+' → '+(Number.isInteger(next)?next:'?')+')';
+       });
+       const span=document.createElement('span');
+       span.textContent=names.join('; ')+(total>parts.length?' …':'');
+       row.append(span);details.append(row);
+      }
+      const note=document.createElement('p');
+      note.className='legal-qa-review-note';
+      note.textContent='Đây là cảnh báo hình thức, KHÔNG xác minh bản sửa giữ nguyên nghĩa pháp lý. Luật sư phải so sánh toàn văn, đặc biệt quyền/nghĩa vụ, ngày, số liệu và chủ thể.';
+      details.append(note);
       panel.open=!(window.matchMedia?.('(max-width: 620px)')?.matches);
       panel.hidden=false;
     }
@@ -271,6 +329,7 @@
          showSourceCoverage(data.source_coverage);
         }
         if(currentTask==='UC04')showSummaryReview(data.summary_review);
+        if(currentTask==='UC07')showGrammarReview(data.grammar_review);
         byId('legal-qa-result-title').textContent=data.title+' · '+(data.mode==='local_example_only'?'Tìm trong nguồn mẫu':'Bản nháp AI');
         byId('legal-qa-review').textContent=data.review_notice||
           'Chỉ truy xuất từ nguồn giả lập. Chưa xác minh dữ liệu văn bản pháp luật/bản án chính thức.';
