@@ -1,12 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `108` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T03:40:24.365Z`.
+- **PCS revision:** `109` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T04:09:06.335Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R117 — One complete case editor, attachments and classified list (2026-11-08)
+
+- **Owner directive:** one complete form to create/save all case metadata and files, then only the already-saved case list below with optional legal-area grouping/filtering. Implemented on [draft PR #166](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/166), stacked above #165. **SC-020** records the Owner's UX and save coordination direction without changing SRS v1.1.15.
+- **UI/flow:** One `#matter-form` includes title, reference, customizable legal area field with suggestions, status, priority, owner/active assignee, due date, synthetic client/counterparty, summary and multi-file PDF/DOCX chooser. Exactly one *Lưu hồ sơ* action. Previously saved cases remain below; search title/reference and filter by category. Open/edit puts data back into the same form, with current private R2 file list and collapsible case history inside it. Prior hidden Google Drive code unchanged.
+- **Persistence:** New case `POST /api/qa/matters` supports optional complete `details`: D1 atomic batch creates Matter, read/write ACL, catalog, created event and details (which trigger audit). Previous title-only create API remains compatible. R2 upload runs sequentially after D1 success; it never silently claims success for failed/uncertain files and does not auto-retry. Existing title/details optimistic editing and server-side MatterACL remain.
+- **CI evidence:** [Actions #42445275866](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42445275866) **PASS 9/9 executed jobs**, 21 conditional skips. R117 contract tests cover atomic case creation, malformed fields, legacy title-only behavior, authorization, field classification and form structure. Chromium **desktop 1280 px and mobile 390 px PASS** synthetic browser routing: single create D1+PDF upload, two practice areas and filter, reopen/edit/reload, no overflow. R116 R2 download integrity and existing session regressions remain green. Direct D1 QA `EXPLAIN INSERT` schema check PASS.
+- **QA deployed:** Backend `ai-law-standalone-cf-qa` deployment `d0136a23-125c-4236-a631-de9e760b177d`, version `93b2985a-95a9-4e00-818e-edc9340ca09c` (2 of 11 modules changed, 9 preserved, all 12 bindings including D1/R2/secret unchanged). Website `ai-law-web-qa` deployment `2c4085e3-1793-4843-9c1a-b7a97908cc1e`, version `6043e852-2e02-460a-8481-96010d9d9d05` (3/27 modules changed, 24 preserved, QA_AUTH and Picker binding unchanged). Source readback PASS; all five main routed sections siblings, exactly one form.
+- **Pending:** Authenticated live Owner QA browser create→D1→private R2→reload/download and negative ACL E2E **NOT_RUN**; mock Chromium/CI and direct D1 schema verification do not substitute for real signed-in acceptance. Owner R117 final acceptance **PENDING**. No real client documents in QA. No production deployment.
 
 ## R116 — Real QA case dossier with private temporary R2 (2026-11-08)
 
