@@ -113,7 +113,7 @@
         </section>
 
         <section id="view-documents" class="view-panel" data-panel="documents" hidden>
-          <div class="sub-page-heading"><div><p class="section-kicker">DANH MỤC HỒ SƠ · DỮ LIỆU QA</p><h1>Hồ sơ vụ việc<span class="heading-dot">.</span></h1><p class="subtitle">Một biểu mẫu để tạo và cập nhật hồ sơ, đính kèm tài liệu R2; danh sách hồ sơ đã lưu và lọc lĩnh vực nằm bên dưới.</p></div>
+          <div class="sub-page-heading"><div><p class="section-kicker">DANH MỤC HỒ SƠ · DỮ LIỆU QA</p><h1>Hồ sơ vụ việc<span class="heading-dot">.</span></h1><p class="subtitle">Xem hồ sơ đã lưu theo lĩnh vực. Chọn “Tạo mới” để lập hồ sơ hoặc chạm vào một hồ sơ để xem chi tiết.</p></div>
             <button class="btn btn-primary" type="button" id="upload-btn"><svg class="icon"><use href="#i-plus"/></svg> + Hồ sơ mới</button><input type="file" id="local-file" accept=".docx,.pdf" hidden /></div>
           <div class="demo-disclaimer"><svg class="icon"><use href="#i-shield"/></svg><div><strong>Hồ sơ QA được lưu trên D1 · Tệp lưu tạm R2 private</strong>
             <span>Quản lý chi tiết vụ việc, quyền truy cập, lịch sử và tệp PDF/DOCX trên môi trường thử nghiệm. Không nhập thông tin khách hàng thật. Google Drive/OneDrive tạm dừng.</span></div></div>
@@ -121,14 +121,17 @@
             <button id="workflow-resume" type="button" class="workflow-matter-link">← Quay lại nghiệp vụ đang thực hiện</button>
             <p>Danh mục hồ sơ QA đã tạo sẽ được làm mới khi bạn quay lại.</p>
           </div>
-          <section id="matter-workspace" class="matter-workspace" aria-labelledby="matter-title-heading">
+          <section id="matter-workspace" class="matter-workspace" data-mobile-mode="list" aria-labelledby="matter-title-heading">
             <div class="matter-card qa-case-unified">
               <div class="case-unified-heading">
                 <div><p class="section-kicker">TẠO · CHỈNH SỬA · LƯU THẬT</p>
                   <h2 id="matter-title-heading">Thông tin hồ sơ vụ việc</h2>
                   <p id="case-title-caption">Điền thông tin và đính kèm tệp, sau đó bấm một lần “Lưu hồ sơ”.</p>
                 </div>
-                <button id="case-close" type="button" class="workflow-matter-link">+ Hồ sơ mới</button>
+                <div class="case-editor-navigation">
+                  <button id="case-close" type="button" class="workflow-matter-link">+ Hồ sơ mới</button>
+                  <button id="case-mobile-edit" type="button" class="workflow-matter-link" hidden>Chỉnh sửa hồ sơ</button>
+                </div>
               </div>
               <form id="matter-form" class="case-unified-form" autocomplete="off">
                 <label class="case-main-title" for="matter-title">Tên hồ sơ <span aria-hidden="true">*</span>
