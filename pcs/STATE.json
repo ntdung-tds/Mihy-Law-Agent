@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 126,
-  "updated_at": "2026-11-08T17:28:49.103Z",
+  "revision": 127,
+  "updated_at": "2026-11-08T17:36:27.155Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -3039,7 +3039,7 @@
         "id": "AL-R0-R134-001",
         "title": "R134 — UC03/04 không giữ và sao chép kết quả AI cũ khi thay đổi nguồn/hồ sơ",
         "priority": "P1",
-        "status": "QA_DEPLOYED_CI_APPLICATION_PASS_9_OF_9_FINAL_HEAD_CI_PENDING_OWNER_ANDROID_NOT_RUN",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_OWNER_AUTHENTICATED_ANDROID_E2E_PENDING",
         "branch": "fix/r134-r0-stale-result-guard",
         "pr": 183,
         "scope": "Non-storage QA R0 correctness fix limited to existing UC03/UC04 and shared UC07 invalidation safeguards; private SRS v1.1.15 unchanged",
@@ -3051,11 +3051,12 @@
         ],
         "tests": {
           "github_ci_application": "PASS_9_OF_9_RUN_42504812956_HEAD_27e8191d605b70d68a02751bc85983227d6c8ce2",
-          "github_ci_final_head": "PENDING_DOCS_AND_ADDITIONAL_REGRESSION",
+          "github_ci_final_head": "PASS_9_OF_9_RUN_42505512889_COMMIT_edc0b1acfd6c50b66ba758eed9490c1c57d85f1f",
           "synthetic_browser_mobile_desktop": "PASS_RUN_42504812956",
-          "silence_change_clipboard_negative": "NEW_TEST_AWAITING_FINAL_HEAD_CI",
+          "silence_change_clipboard_negative": "PASS_CHROMIUM_DESKTOP_MOBILE_RUN_42505512889",
           "actual_owner_android": "NOT_RUN",
-          "legal_fidelity": "NOT_RUN"
+          "legal_fidelity": "NOT_RUN",
+          "mobile_button_geometry": "PASS_ATOMIC_SNAPSHOT_NO_RELAXED_THRESHOLD_RUN_42505512889"
         },
         "qa": {
           "website": "ai-law-web-qa",
@@ -3069,9 +3070,9 @@
         "srs_change": "SC-036",
         "owner_acceptance": "PENDING",
         "remaining": [
-          "Check final-head 9/9 CI with added silent-field-mutation clipboard negative",
-          "Owner signed-in Android mobile UC03/UC04 workflow acceptance and legal semantic review",
-          "Do not merge draft PR or deploy production"
+          "Owner Android authenticated UC03/UC04 source/Matter edit and stale-response UX acceptance NOT_RUN",
+          "Legal semantic review and actual DOCX/PDF ingestion and application E2E NOT_RUN",
+          "PR #183 remains draft; do not merge to main or deploy production without final Owner signoff"
         ]
       }
     ],
@@ -3703,8 +3704,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R134 UI source/result snapshot and invalidation applied, application CI #42504812956 PASS 9/9, site QA deployment 3960fb46-6eb4-4f1c-82b8-042c94041886 100%; only 1 of 27 modules changed; 2 bindings exact. Final-head CI and Owner Android E2E pending.",
-      "next_action": "Finish R134 final-head CI and address failures; then Owner mobile testing UC03/UC04 changed-input and pending-response copy gate. Keep draft, no main merge, no production, SRS v1.1.15 unchanged.",
+      "last_completed_step": "R134 frontend stale-result safety guard PR #183; final code CI #42505512889 PASS 9/9 at edc0b1acfd6c50b66ba758eed9490c1c57d85f1f incl Chromium mobile/desktop + silent edit copy denial. QA website deployment 3960fb46-6eb4-4f1c-82b8-042c94041886 100%, one module exact, 26 other modules and two bindings unchanged. Owner Android NOT_RUN.",
+      "next_action": "Owner authenticated Android UC03/UC04 QA acceptance: generate draft from fictional source, edit question/source/Matter and check old result/copy are cleared, check UC07 reviewer unaffected. Then proceed to other R0 SRS backlog only after confirming blockers. Do not merge draft to main, touch storage/OAuth or production.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
