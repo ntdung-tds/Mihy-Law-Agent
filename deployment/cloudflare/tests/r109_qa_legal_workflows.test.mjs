@@ -194,3 +194,18 @@ test('R112 malformed UTF-8 JSON bytes fail closed before MatterACL, quota or AI'
  assert.equal(f.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false);
  assert.doesNotMatch(await response.text(),/\uFFFD|source_text/);
 });
+
+test('R113 tenant/MatterACL and role denials never charge quota or invoke model',async()=>{
+ for(const scenario of [
+  {name:'missing session',request:{session:false},fixture:{session:false},status:401},
+  {name:'revoked or foreign matter',request:{},fixture:{acl:false},status:404},
+  {name:'read-only role',request:{},fixture:{role:'viewer'},status:403}
+ ]){
+  const f=fixture(scenario.fixture);
+  const res=await legalApi(request(scenario.request),f.env,{now:NOW});
+  assert.equal(res.status,scenario.status,scenario.name);
+  assert.equal(f.providerCalls.length,0,scenario.name+' must not call AI');
+  assert.equal(f.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false,
+   scenario.name+' must not consume quota');
+ }
+});
