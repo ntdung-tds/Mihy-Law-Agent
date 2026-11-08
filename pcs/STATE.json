@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 125,
-  "updated_at": "2026-11-08T17:10:15.796Z",
+  "revision": 126,
+  "updated_at": "2026-11-08T17:28:49.103Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -3034,6 +3034,45 @@
           "Professional legal-semantic equivalence review and real DOCX/PDF tracked-change E2E NOT_RUN",
           "PR #182 remains draft; no main merge/production release without Owner final acceptance"
         ]
+      },
+      {
+        "id": "AL-R0-R134-001",
+        "title": "R134 — UC03/04 không giữ và sao chép kết quả AI cũ khi thay đổi nguồn/hồ sơ",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CI_APPLICATION_PASS_9_OF_9_FINAL_HEAD_CI_PENDING_OWNER_ANDROID_NOT_RUN",
+        "branch": "fix/r134-r0-stale-result-guard",
+        "pr": 183,
+        "scope": "Non-storage QA R0 correctness fix limited to existing UC03/UC04 and shared UC07 invalidation safeguards; private SRS v1.1.15 unchanged",
+        "implementation": [
+          "Cache in-memory snapshot of UC, source A/B, matter, question, target language and consent for every request.",
+          "Cancel pending AI request and clear stale output, source evidence, and warnings when any relevant input changes.",
+          "Reject late responses and block UC03/UC04 clipboard copy if snapshot has changed even without a DOM input/change event.",
+          "Nạp ví dụ invalidates any pending R0 QA request; UC07 reviewer unchanged."
+        ],
+        "tests": {
+          "github_ci_application": "PASS_9_OF_9_RUN_42504812956_HEAD_27e8191d605b70d68a02751bc85983227d6c8ce2",
+          "github_ci_final_head": "PENDING_DOCS_AND_ADDITIONAL_REGRESSION",
+          "synthetic_browser_mobile_desktop": "PASS_RUN_42504812956",
+          "silence_change_clipboard_negative": "NEW_TEST_AWAITING_FINAL_HEAD_CI",
+          "actual_owner_android": "NOT_RUN",
+          "legal_fidelity": "NOT_RUN"
+        },
+        "qa": {
+          "website": "ai-law-web-qa",
+          "deployment": "3960fb46-6eb4-4f1c-82b8-042c94041886",
+          "version": "d90158e1-1b74-40ec-864c-db1b846cea85",
+          "percentage": 100,
+          "readback": "PASS_WORKSPACE_LEGAL_EXACT_26_UNRELATED_MODULES_UNCHANGED_2_BINDINGS_EXACT",
+          "backend": "UNCHANGED_R133",
+          "production": "NOT_DEPLOYED"
+        },
+        "srs_change": "SC-036",
+        "owner_acceptance": "PENDING",
+        "remaining": [
+          "Check final-head 9/9 CI with added silent-field-mutation clipboard negative",
+          "Owner signed-in Android mobile UC03/UC04 workflow acceptance and legal semantic review",
+          "Do not merge draft PR or deploy production"
+        ]
       }
     ],
     "features": [
@@ -3664,8 +3703,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R133 PR #182 draft; CI #42502639161 PASS 9/9, content-only Cloudflare QA deployment 7f097434-71b5-45c1-a722-a1aeec19b8be 100%; source one updated module exact, 10 others exact, 12 bindings exact. Owner signed-in mobile and legal E2E NOT_RUN.",
-      "next_action": "Owner authenticated mobile QA of UC07 R133 and R131 comparison/copy gate; run valid/inline-duplicate cases, then mark PASS/FAIL and fix if needed. Avoid storage/OAuth, do not auto-merge or touch production. SRS v1.1.15 unchanged.",
+      "last_completed_step": "R134 UI source/result snapshot and invalidation applied, application CI #42504812956 PASS 9/9, site QA deployment 3960fb46-6eb4-4f1c-82b8-042c94041886 100%; only 1 of 27 modules changed; 2 bindings exact. Final-head CI and Owner Android E2E pending.",
+      "next_action": "Finish R134 final-head CI and address failures; then Owner mobile testing UC03/UC04 changed-input and pending-response copy gate. Keep draft, no main merge, no production, SRS v1.1.15 unchanged.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
