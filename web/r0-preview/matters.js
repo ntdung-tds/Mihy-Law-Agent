@@ -7,6 +7,7 @@
  if(!form||!list||!search)return;
  const categoryFilter=$('#matter-category-filter'),filePicker=$('#case-r2-file');
  const title=$('#matter-title'),save=$('#matter-create'),saveState=$('#case-save-state');
+ const pendingList=$('#case-selected-files'),fileCount=$('#case-r2-count');
  const uuid=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
  const mimes={pdf:'application/pdf',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'};
  const fields=['reference','category','status','priority','assignee_user_id',
@@ -15,6 +16,7 @@
   client_label:'',counterparty_label:'',summary:'',deadline:''};
  let matters=[],currentId='',caseVersion=0,titleVersion=0,originalTitle='',originalDetails=null;
  let canWrite=true,saving=false,hiding=false,workspaceGeneration=0,loadGeneration=0;
+ let pendingFiles=[];
 
  // Mobile navigation contract: list first; create, detail and edit are explicit.
  // Desktop keeps the R117 full editor + list side-by-side.
@@ -53,7 +55,7 @@
  }
  function lockMobileDetail(){
   if(!media.matches)return;
-  for(const control of form.querySelectorAll('input,textarea,select,button'))control.disabled=true;
+  for(const control of form.querySelectorAll('input,textarea,select'))control.disabled=true;
   save.disabled=true;
   filePicker.disabled=true;
  }
@@ -69,7 +71,7 @@
  }
  function startEdit(){
   if(saving||!currentId||!canWrite||!media.matches)return;
-  for(const control of form.querySelectorAll('input,textarea,select,button'))control.disabled=false;
+  for(const control of form.querySelectorAll('input,textarea,select'))control.disabled=false;
   filePicker.disabled=false;
   save.disabled=false;
   mobileView('edit',true);
@@ -108,10 +110,10 @@
  function resetEditor(silent=false){
   workspaceGeneration++;
   currentId='';caseVersion=0;titleVersion=0;originalTitle='';originalDetails=null;canWrite=true;
-  form.reset();title.value='';filePicker.value='';
+  form.reset();title.value='';filePicker.value='';pendingFiles=[];renderPending();
   const assignee=field('assignee_user_id');
   assignee.replaceChildren(makeOption('Tôi phụ trách (mặc định)',''));
-  for(const control of form.querySelectorAll('input,textarea,select,button'))control.disabled=false;
+  for(const control of form.querySelectorAll('input,textarea,select'))control.disabled=false;
   $('#case-r2-list').replaceChildren();
   $('#case-history-list').replaceChildren();
   $('#case-history-details').hidden=true;
@@ -287,18 +289,55 @@
    if(scope!==workspaceGeneration||id!==currentId)return;
    container.replaceChildren();
    const files=Array.isArray(data.files)?data.files:[];
+   if(fileCount)fileCount.textContent=files.length+' tệp đang hiển thị · giới hạn 50 bản ghi tệp/hồ sơ (kể cả tệp đã ẩn)';
    if(!files.length){const p=document.createElement('p');p.textContent='Chưa có tệp đã lưu.';container.append(p);}
    for(const file of files){
     if(!uuid.test(file.id||''))continue;
     const line=document.createElement('div');line.className='matter-row';
     const info=document.createElement('span');info.textContent=String(file.name||'Tệp')+' · '+
       Math.ceil(Number(file.bytes)/1024)+' KB';
+    line.classList.add('case-file-row');
+    const actions=document.createElement('div');actions.className='case-file-actions';
     const download=document.createElement('button');download.type='button';
-    download.className='matter-edit-button';download.textContent='Tải xuống';
+    download.className='matter-edit-button case-file-download';download.textContent='Tải xuống';
     download.addEventListener('click',()=>void downloadFile(id,file,download));
-    line.append(info,download);container.append(line);
+    actions.append(download);
+    if(canWrite){
+     const hide=document.createElement('button');hide.type='button';
+     hide.className='case-file-hide';hide.textContent='Xóa';hide.setAttribute('aria-label','Ẩn tệp '+file.name);
+     hide.addEventListener('click',()=>askHideFile(line,id,file,scope));
+     actions.append(hide);
+    }
+    line.append(info,actions);container.append(line);
    }
   }catch{if(scope===workspaceGeneration&&id===currentId)fileNote('Không tải được danh sách tệp trên R2.',true);}
+ }
+ function askHideFile(row,id,file,scope){
+  if(saving||hiding||id!==currentId||scope!==workspaceGeneration)return;
+  row.querySelector('.case-file-confirm')?.remove();
+  const panel=document.createElement('div');panel.className='case-file-confirm';
+  const text=document.createElement('p');text.textContent='Ẩn tệp “'+file.name+'” khỏi danh sách? Nội dung R2 và nhật ký vẫn giữ nguyên, không xóa vật lý.';
+  const controls=document.createElement('div');controls.className='case-file-confirm-actions';
+  const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Hủy';
+  cancel.addEventListener('click',()=>panel.remove());
+  const accept=document.createElement('button');accept.type='button';accept.textContent='Ẩn tệp';accept.className='case-file-confirm-yes';
+  accept.addEventListener('click',async()=>{
+   if(hiding)return;
+   hiding=true;accept.disabled=true;
+   try{
+    const response=await req('/api/qa/cases/'+encodeURIComponent(id)+'/files/'+encodeURIComponent(file.id),{
+     method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'hide'})
+    });
+    if(response.status===401){expired();return;}
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok||result.hidden!==true||result.physical_deleted!==false)
+     throw Error(result.error||'Chưa xác nhận được tệp đã ẩn.');
+    await refreshFiles(scope,id);
+    fileNote('Đã ẩn tệp khỏi danh sách; dữ liệu gốc vẫn còn trên R2.');
+   }catch(e){if(scope===workspaceGeneration)fileNote(e?.message||'Không thể ẩn tệp.',true);}
+   finally{hiding=false;accept.disabled=false;}
+  });
+  controls.append(cancel,accept);panel.append(text,controls);row.append(panel);
  }
  async function refreshEvents(scope=workspaceGeneration,id=currentId){
   if(!id||scope!==workspaceGeneration)return;
@@ -372,7 +411,7 @@
    const r=await req('/api/qa/cases/'+encodeURIComponent(id)+'/files/'+file.id+'/download',{redirect:'error'});
    if(scope!==workspaceGeneration||currentId!==id)return;
    if(r.status===401){expired();return;}
-   if(!r.ok)throw Error('Không thể tải tệp.');
+   if(!r.ok)throw Error(r.status===503?'Tệp chưa sẵn sàng trên R2. Với tệp cũ bị lỗi, hãy vào Sửa, chọn lại đúng tệp gốc và Lưu thay đổi.':'Không thể tải tệp (HTTP '+r.status+').');
    if((r.headers.get('Content-Type')||'').split(';')[0]!==file.mime_type)throw Error('Sai định dạng tệp tải về.');
    const bytes=new Uint8Array(await r.arrayBuffer());
    if(bytes.byteLength!==Number(file.bytes)||bytes.length>10*1024*1024)throw Error('Dung lượng không khớp.');
@@ -387,8 +426,37 @@
   }catch(e){if(scope===workspaceGeneration)fileNote(e?.message||'Không tải được tệp.',true);}
   finally{button.disabled=false;button.textContent='Tải xuống';}
  }
+ function renderPending(){
+  if(!pendingList)return;
+  pendingList.replaceChildren();
+  if(!pendingFiles.length){
+   const hint=document.createElement('small');hint.textContent='Chưa có tệp chờ lưu. Có thể chọn 2–3 tệp một lần hoặc bổ sung từng lượt.';
+   pendingList.append(hint);return;
+  }
+  const header=document.createElement('small');header.textContent='Đã chọn '+pendingFiles.length+'/20 tệp:';
+  pendingList.append(header);
+  for(const [index,file] of pendingFiles.entries()){
+   const line=document.createElement('div');line.className='case-pending-row';
+   const label=document.createElement('span');label.textContent=file.name+' · '+Math.ceil(file.size/1024)+' KB';
+   const remove=document.createElement('button');remove.type='button';remove.textContent='Bỏ';
+   remove.setAttribute('aria-label','Bỏ tệp đã chọn '+file.name);remove.disabled=saving;
+   remove.addEventListener('click',()=>{if(saving)return;pendingFiles.splice(index,1);renderPending();});
+   line.append(label,remove);pendingList.append(line);
+  }
+ }
+ filePicker.addEventListener('change',()=>{
+  if(saving)return;
+  const proposed=[...pendingFiles];
+  for(const file of Array.from(filePicker.files||[])){
+   if(!proposed.some(x=>x.name===file.name&&x.size===file.size&&x.lastModified===file.lastModified))
+    proposed.push(file);
+  }
+  if(proposed.length>20)fileNote('Một lượt chỉ chọn tối đa 20 tệp.',true);
+  else{pendingFiles=proposed;fileNote(pendingFiles.length+' tệp đã chọn. Nhấn Lưu để tải lên R2.');}
+  filePicker.value='';renderPending();
+ });
  function selectedFiles(){
-  const files=Array.from(filePicker.files||[]);
+  const files=[...pendingFiles];
   if(files.length>20)throw Error('Một lượt chỉ chọn tối đa 20 tệp.');
   for(const file of files){
    const extension=file.name.split('.').pop().toLowerCase();
@@ -418,7 +486,7 @@
    }catch{uncertain=true;failed.push(f.name+' (không chắc đã ghi, kiểm tra danh sách trước khi thử lại)');}
   }
   if(scope===workspaceGeneration&&id===currentId){
-   filePicker.value='';
+   filePicker.value='';pendingFiles=[];renderPending();
    await refreshFiles(scope,id);
    void refreshEvents(scope,id);
   }
