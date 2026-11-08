@@ -50,3 +50,21 @@ CREATE TRIGGER IF NOT EXISTS qa_case_events_no_update
 BEFORE UPDATE ON qa_case_events BEGIN SELECT RAISE(ABORT,'audit immutable'); END;
 CREATE TRIGGER IF NOT EXISTS qa_case_events_no_delete
 BEFORE DELETE ON qa_case_events BEGIN SELECT RAISE(ABORT,'audit immutable'); END;
+
+-- Transactional append-only audit: the same D1 statement that saves metadata
+-- or a file receipt atomically creates a history entry.
+CREATE TRIGGER IF NOT EXISTS qa_case_details_insert_audit
+AFTER INSERT ON qa_case_details BEGIN
+ INSERT INTO qa_case_events(installation_id,tenant_id,matter_id,event_id,actor_id,action,file_id,occurred_at)
+ VALUES(new.installation_id,new.tenant_id,new.matter_id,lower(hex(randomblob(16))),new.updated_by,'details_saved',NULL,new.updated_at);
+END;
+CREATE TRIGGER IF NOT EXISTS qa_case_details_update_audit
+AFTER UPDATE ON qa_case_details BEGIN
+ INSERT INTO qa_case_events(installation_id,tenant_id,matter_id,event_id,actor_id,action,file_id,occurred_at)
+ VALUES(new.installation_id,new.tenant_id,new.matter_id,lower(hex(randomblob(16))),new.updated_by,'details_saved',NULL,new.updated_at);
+END;
+CREATE TRIGGER IF NOT EXISTS qa_case_file_insert_audit
+AFTER INSERT ON qa_case_files_r2 BEGIN
+ INSERT INTO qa_case_events(installation_id,tenant_id,matter_id,event_id,actor_id,action,file_id,occurred_at)
+ VALUES(new.installation_id,new.tenant_id,new.matter_id,lower(hex(randomblob(16))),new.uploaded_by,'r2_file_uploaded',new.file_id,new.uploaded_at);
+END;
