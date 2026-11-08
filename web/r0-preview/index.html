@@ -256,7 +256,9 @@
               <h2 id="legal-qa-heading">Xử lý văn bản mẫu</h2>
               <p>Bản nháp văn bản từ nguồn bạn cung cấp. Chỉ dùng nội dung giả lập, không có hồ sơ khách hàng thật. Kết quả không phải tư vấn pháp lý và chưa xác nhận hiệu lực văn bản.</p>
             </div>
-            <form id="legal-qa-form" class="legal-qa-form">
+            <details id="legal-qa-input-details" class="legal-qa-input-details" open>
+              <summary class="legal-qa-input-summary">Thông tin đầu vào <span>Chạm để mở / thu gọn</span></summary>
+              <form id="legal-qa-form" class="legal-qa-form">
               <div class="legal-qa-grid">
                 <div class="workflow-matter-control">
                   <label for="legal-qa-matter">Hồ sơ QA đã tạo
@@ -290,12 +292,13 @@
                 <p id="legal-qa-feedback" role="status" aria-live="polite">Tạo hồ sơ QA trước khi chạy tác vụ. Mỗi tài khoản tối đa 12 yêu cầu mô hình/ngày.</p>
               </div>
             </form>
+            </details>
             <section class="legal-qa-result" id="legal-qa-result" aria-label="Kết quả bản nháp" hidden>
               <h3 id="legal-qa-result-title">Bản nháp cần kiểm duyệt</h3>
               <p id="legal-qa-review" class="legal-qa-disclaimer">Chưa kiểm chứng pháp lý. Đối chiếu nguồn gốc trước khi sử dụng.</p>
               <div id="legal-qa-translation-check" class="legal-qa-translation-check" role="status" aria-live="polite" hidden></div>
               <div id="legal-qa-source-coverage" class="legal-qa-translation-check" role="status" aria-live="polite" hidden></div>
-              <div id="legal-qa-summary-review" class="legal-qa-translation-check" role="status" aria-live="polite" hidden></div>
+              <details id="legal-qa-summary-review" class="legal-qa-translation-check" role="status" aria-live="polite" hidden></details>
               <pre id="legal-qa-output"></pre>
               <div id="legal-qa-sources"></div>
               <button type="button" id="legal-qa-copy">Sao chép bản nháp</button>

@@ -440,13 +440,45 @@ def scenario(browser,name,viewport,origin):
     check=page.locator("#legal-qa-summary-review")
     check.wait_for(state="visible",timeout=15000)
     assert check.get_attribute("data-state")=="warning"
+    assert check.evaluate("(e)=>e.tagName")=="DETAILS"
+    assert "Cần đối chiếu" in check.locator(":scope > summary").inner_text()
+    inputs=page.locator("#legal-qa-input-details")
+    assert inputs.evaluate("(e)=>e.tagName")=="DETAILS"
+    if name=="mobile":
+        assert not inputs.evaluate("(e)=>e.open"),"UC04 inputs should auto-collapse on successful small-screen summary"
+        assert not check.evaluate("(e)=>e.open"),"Mobile warnings should default collapsed with visible summary"
+        page.wait_for_function("""() => {
+          const r=document.querySelector('#legal-qa-result').getBoundingClientRect();
+          return r.top >= -10 && r.top < window.innerHeight*0.6;
+        }""",timeout=10000)
+        assert page.locator("#legal-qa-example").is_hidden(),"Collapsed form must stay out of the viewport"
+        inputs.locator(":scope > summary").click()
+        assert inputs.evaluate("(e)=>e.open"),"Users must be able to reopen inputs"
+        assert page.locator("#legal-qa-example").is_visible()
+        input_row=page.locator("#legal-qa-example").bounding_box()
+        run_row=page.locator("#legal-qa-run").bounding_box()
+        assert input_row and run_row and abs(input_row["y"]-run_row["y"])<=4,"UC04 buttons should share a compact row"
+        assert input_row["height"]>=40 and run_row["height"]>=40
+        inputs.locator(":scope > summary").click()
+        assert not inputs.evaluate("(e)=>e.open")
+    else:
+        assert inputs.evaluate("(e)=>e.open"),"Desktop keeps the existing visible form"
+        assert check.evaluate("(e)=>e.open"),"Desktop initially expands the warning"
+    if not check.evaluate("(e)=>e.open"):
+        check.locator(":scope > summary").click()
     assert "1/2" in check.inner_text()
     assert "A2" in check.inner_text()
     assert "10" in check.inner_text()
     assert "20/9/2026" in check.inner_text()
     assert "không" in check.inner_text().lower()
+    check.locator(":scope > summary").click()
+    assert not check.evaluate("(e)=>e.open"),"Warning must support collapse"
+    check.locator(":scope > summary").click()
+    assert check.evaluate("(e)=>e.open"),"Warning must support reopen"
     assert not page.locator("#legal-qa-source-coverage").is_visible()
     assert page.locator("#legal-qa-output").inner_text().startswith("[A1] Bên A")
+    mobile_width=page.evaluate("document.documentElement.scrollWidth")
+    assert mobile_width<=viewport["width"]+4,(name,mobile_width,viewport)
     page.goto(origin+"/#uc-UC07",wait_until="domcontentloaded")
     page.wait_for_function("""() => document.querySelector('#legal-qa-summary-review')?.hidden === true
       && document.querySelector('#legal-qa-output')?.textContent === ''""",timeout=15000)

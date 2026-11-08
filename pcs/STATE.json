@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 120,
-  "updated_at": "2026-11-08T15:08:02.341Z",
+  "revision": 121,
+  "updated_at": "2026-11-08T15:58:46.847Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2857,6 +2857,47 @@
         "remaining": "User signed-in mobile and actual document-text ingestion still pending; heuristic only flags risks, not guarantees. No customer real data used.",
         "owner_acceptance": "PENDING_R128",
         "srs_change": "SC-031"
+      },
+      {
+        "id": "AL-R0-UC04-UX-R129-001",
+        "title": "R129 UC04 — mobile gọn, form/cảnh báo thu gọn, tự cuộn đến kết quả",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_OWNER_MOBILE_ACCEPTANCE_PENDING",
+        "branch": "style/r129-uc04-compact-mobile-flow",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/179",
+        "owner_request": "Owner reported no visible mobile UI change after R128; approved compact mobile layout, smaller buttons, post-submit result scroll, warning collapse.",
+        "scope": "UI-only QA: UC04 under <=620px; preserve desktop and other 10 UCs, unchanged backend/data/SRS.",
+        "changes": {
+          "html": "Accessible details wrapper for UC04 input form, details-based UC04 summary review; form defaults open and is reopened across task resets.",
+          "js": "Only after successful UC04 submit on mobile collapse the input form (source remains in memory), scroll to result; warning defaults closed mobile and open desktop; user may expand either; avoid stale UC state leaks.",
+          "css": "Scoped #view-workflow[data-active-uc=UC04] <=620px spacing/headings/textarea/button row, >=40px targets, bounded result; reduced-motion support.",
+          "security": "No changes to MatterACL, session, AI prompt, answer, source review model, D1/R2, Cloudflare backend or production."
+        },
+        "tests": {
+          "ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42497055426",
+          "ci_head": "42b27c22a1b35c9150e6c0f3e7cbf7d00d1865d9",
+          "ci_executed": "PASS_9_OF_9",
+          "chromium": "PASS_MOBILE_DESKTOP_FORM_COLLAPSE_REOPEN_WARNING_TOGGLE_2_BUTTON_40PX_ROW_SCROLL_TO_RESULT_NO_OVERFLOW",
+          "other_uc_isolation": "PASS_UC03_UC07",
+          "qa_live_readback": "PASS",
+          "owner_android_signed_in": "NOT_RUN",
+          "real_document_input_output": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "qa": {
+          "script": "ai-law-web-qa",
+          "version": "c1857c65-a8e7-4037-95d2-dab4ff62b070",
+          "deployment": "9fde2f43-91d6-45ee-b0c5-ae3fe9378a34",
+          "traffic_percent": 100,
+          "modules": 27,
+          "preserved_modules": 24,
+          "bindings": 2,
+          "backend_unchanged": "ai-law-standalone-cf-qa @ 0f7e0c24-e216-4f4c-b45b-b7d754846a4a",
+          "readback": "PASS_HTML_JS_CSS_AND_PRIOR_UC03_AUDIT"
+        },
+        "remaining": "Owner authenticated Android UI acceptance NOT_RUN. Do not mark Owner acceptance or production ready without user verification.",
+        "owner_acceptance": "PENDING_R129",
+        "srs_change": "SC-032; private SRS v1.1.15 unchanged"
       }
     ],
     "features": [

@@ -1,12 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `120` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T15:08:02.341Z`.
+- **PCS revision:** `121` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T15:58:46.847Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R129 — UC04 mobile gọn, thu gọn form/cảnh báo, cuộn đến kết quả (2026-11-08)
+
+- **Owner:** Sau khi xem ảnh UC04, Owner phản hồi không thấy mobile thay đổi; đã đồng ý thực hiện chỉnh UI mobile thực chất. Chỉ chỉnh UX, không mở rộng backend hay dữ liệu.
+- **Code:** HTML thêm `details` cho phần nhập liệu và cảnh báo UC04. JS mở form khi vào nghiệp vụ, chỉ thu gọn sau khi nhận kết quả UC04 thành công trên <=620px, tự cuộn đến kết quả; có thể mở form lại mà không mất văn bản trong bộ nhớ hay tự gửi lại. Cảnh báo luôn có tiêu đề rõ ràng, mặc định đóng mobile / mở desktop, có thể toggle. Khi đổi UC, xóa trạng thái cũ. CSS UC04 mobile giảm khoảng cách/nút và đặt hai nút cùng hàng, mục tiêu chạm >=40px, không tràn ngang và tôn trọng reduced motion.
+- **CI:** [#42497055426](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42497055426) 9/9 nhóm PASS trên code commit `42b27c22a1b35c9150e6c0f3e7cbf7d00d1865d9`. Chromium mobile/desktop kiểm tra nút 2 cột, form tự thu gọn/mở lại, cảnh báo mở-đóng, cuộn đến kết quả, không tràn, UC03/UC07 độc lập.
+- **QA website 100% và source readback PASS:** `ai-law-web-qa` version `c1857c65-a8e7-4037-95d2-dab4ff62b070`, deployment `9fde2f43-91d6-45ee-b0c5-ae3fe9378a34`, 27 modules/2 bindings, chỉ sửa 3 module HTML/JS/CSS, bảo toàn 24 module khác. Backend QA vẫn `0f7e0c24-e216-4f4c-b45b-b7d754846a4a` (11 modules/12 bindings), D1/R2 và production không đổi. R126/R127/R128 readback vẫn PASS.
+- **Chờ nghiệm thu:** Owner đăng nhập Android và kiểm tra thực tế `NOT_RUN`; không suy diễn đã nghiệm thu UI thật, bản dịch/tóm tắt tệp thật vẫn chưa có. SRS v1.1.15 giữ nguyên, `SC-032`.
+- **Link QA:** https://ai-law-web-qa.iaict-platform.workers.dev/app#uc-UC04
 
 ## R128 — UC04 kiểm tra dấu hiệu bỏ sót trong bản tóm tắt (2026-11-08)
 

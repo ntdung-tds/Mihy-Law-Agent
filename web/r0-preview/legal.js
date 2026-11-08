@@ -11,6 +11,8 @@
     const question=byId('legal-qa-question'),secondary=byId('legal-qa-source-b');
     const status=byId('legal-qa-feedback'),result=byId('legal-qa-result');
     const output=byId('legal-qa-output'),copy=byId('legal-qa-copy');
+    const inputDetails=byId('legal-qa-input-details');
+    const workflowPanel=$('#view-workflow');
     const setStatus=(msg,bad=false)=>{status.textContent=msg;status.dataset.state=bad?'error':'info';};
     let isSubmitting=false;
     let activeUc=null, requestGeneration=0, activeController=null;
@@ -85,6 +87,7 @@
     function showSummaryReview(check){
       const panel=byId('legal-qa-summary-review');
       panel.hidden=true;panel.replaceChildren();delete panel.dataset.state;
+      panel.open=false;
       if(!check||typeof check!=='object')return;
       const status=check.status;
       if(!['review_required','no_obvious_omission_not_verified'].includes(status))return;
@@ -96,28 +99,32 @@
       if(![important,marked,missing,missingNumbers,missingDates].every(
         n=>Number.isInteger(n)&&n>=0))return;
       panel.dataset.state=status==='review_required'?'warning':'info';
-      const title=document.createElement('strong');
+      const title=document.createElement('summary');
+      title.className='legal-qa-summary-toggle';
       title.textContent=status==='review_required'
-       ?'Cần đối chiếu lại các thông tin có nguy cơ bị bỏ sót'
-       :'Chưa thấy dấu hiệu thiếu qua kiểm tra tự động';
-      panel.append(title);
+       ?'Cần đối chiếu thông tin · '+(missing+missingNumbers+missingDates)+' mục cần rà'
+       :'Đối chiếu nguồn · Chưa phát hiện dấu hiệu thiếu';
+      const content=document.createElement('div');
+      content.className='legal-qa-summary-content';
+      panel.append(title,content);
       const count=document.createElement('p');
       count.textContent='Đoạn nghĩa vụ có dẫn nguồn: '+marked+'/'+important+
        ' · Số cần rà: '+missingNumbers+' · Mốc ngày cần rà: '+missingDates;
-      panel.append(count);
+      content.append(count);
       const add=(label,values,max)=>{
        if(!Array.isArray(values)||!values.length)return;
        const p=document.createElement('p');
        p.textContent=label+': '+values.slice(0,12).map(String).join(', ')+
         (max>12?' (và các giá trị khác)':'');
-       panel.append(p);
+       content.append(p);
       };
       add('Đoạn nguồn cần đối chiếu',check.missing_critical_source_ids,missing);
       add('Chữ số cần đối chiếu',check.missing_numbers,missingNumbers);
       add('Mốc ngày cần đối chiếu',check.missing_dates,missingDates);
       const disclaimer=document.createElement('p');
       disclaimer.textContent='Đây chỉ là cảnh báo hình thức. Tóm tắt có thể diễn đạt hoặc lược bỏ chi tiết hợp lệ. Không xác nhận đã đầy đủ ý, đúng nghĩa hay có giá trị pháp lý; luật sư phải đối chiếu nguồn.';
-      panel.append(disclaimer);
+      content.append(disclaimer);
+      panel.open=!(window.matchMedia?.('(max-width: 620px)')?.matches);
       panel.hidden=false;
     }
     function updateTaskFields(){
@@ -135,6 +142,7 @@
         :'Ví dụ: Các mốc thời gian và nghĩa vụ chính?';
       byId('legal-qa-run').textContent=['UC10','UC11'].includes(uc.value)
         ?'Tìm trong nguồn mẫu':'Tạo bản nháp QA';
+      if(inputDetails)inputDetails.open=true;
       clearResult();
     }
     uc.addEventListener('change',updateTaskFields);
@@ -145,6 +153,8 @@
       matterLoadGeneration++;
       activeController?.abort();
       activeController=null;isSubmitting=false;activeUc=null;
+      if(workflowPanel)delete workflowPanel.dataset.activeUc;
+      if(inputDetails)inputDetails.open=true;
       byId('legal-qa-run').disabled=false;
       byId('legal-qa-source').value='';
       secondary.value='';question.value='';
@@ -157,6 +167,7 @@
       if(!/^UC(?:0[1-9]|1[01])$/.test(ucCode))return;
       if(activeUc!==ucCode)clearWorkflow();
       activeUc=ucCode;
+      if(workflowPanel)workflowPanel.dataset.activeUc=ucCode;
       uc.value=ucCode;
       updateTaskFields();
       void loadLegalMatters();
@@ -285,7 +296,16 @@
         }
         result.hidden=false;
         setStatus('Hoàn tất bản nháp QA. Hãy đối chiếu nguồn và kiểm duyệt thủ công.');
-        result.scrollIntoView({behavior:'smooth',block:'nearest'});
+        // R129: On small screens, close only the UC04 source form AFTER a
+        // verified response. Keep source in the in-memory form for reopening;
+        // never submit or persist it again without a deliberate user action.
+        const smallScreen=window.matchMedia?.('(max-width: 620px)')?.matches===true;
+        if(currentTask==='UC04'&&smallScreen&&inputDetails)inputDetails.open=false;
+        const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+        result.scrollIntoView({
+          behavior:reduceMotion?'auto':'smooth',
+          block:currentTask==='UC04'?'start':'nearest'
+        });
       } catch(error){
         if(generation===requestGeneration&&error?.name!=='AbortError')
           setStatus(error?.message||'Lỗi kết nối đến mô hình QA.',true);
