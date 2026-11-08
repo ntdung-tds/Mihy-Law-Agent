@@ -113,6 +113,8 @@ jobs:
         run: R38_ENABLE=1 R39_ENABLE=1 bash deployment/standalone/smoke_api.sh
       - name: R77 real Chromium desktop+mobile Google return with Strict session cookie
         run: python deployment/cloudflare/tests/live_r77_strict_cookie_browser.py
+      - name: R117 real Chromium desktop+mobile unified case create, file attachment and category filter
+        run: python deployment/cloudflare/tests/live_r117_unified_form_browser.py
       - name: R85 observe real Chromium cross-origin Google Drive resumable upload CORS
         run: python deployment/cloudflare/tests/live_r85_direct_drive_cors_probe.py
 
@@ -230,6 +232,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r115_uc03_translation.test.mjs
       - name: R116 case details, private R2 upload, cross-tenant denial and verified download
         run: node --test deployment/cloudflare/tests/r116_case_r2.test.mjs
+      - name: R117 unified full-case D1 transaction, legal classification and one-form upload semantics
+        run: node --test deployment/cloudflare/tests/r117_unified_case.test.mjs
       - name: R72 Drive document upload/download, MatterACL, integrity and fail-closed QA gates
         run: node --test deployment/cloudflare/tests/r72_documents.test.mjs
       - name: R81 Google Drive multipart wire protocol and safe provider error diagnostics

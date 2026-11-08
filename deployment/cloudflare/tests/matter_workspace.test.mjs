@@ -52,7 +52,8 @@ test('real D1 list query is scoped to tenant and explicit allow-minus-deny ACL',
  const f=fixture({rows:[row]});
  const r=await matterApi(request('/api/qa/matters'),f.env,{now});
  assert.equal(r.status,200);
- assert.deepEqual((await r.json()).matters,[{id:row.matter_id,title:row.title,created_at:now,version:1,can_write:true}]);
+ assert.deepEqual((await r.json()).matters,[{id:row.matter_id,title:row.title,created_at:now,
+  version:1,can_write:true,category:'',case_status:'open',case_reference:''}]);
  const q=f.statements.find(x=>x.sql===MATTER_LIST_SQL);
  assert.deepEqual(q.params,[USER,now,now,USER,now,now,INSTALL,TENANT,USER,now,now,USER,now,now]);
 });

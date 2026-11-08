@@ -599,3 +599,43 @@ body.drawer-open{overflow:hidden}
  .case-r2-upload-form{align-items:stretch;flex-direction:column}
  .case-r2-upload-form button,.case-detail-form button{width:100%}
 }
+
+/* R117 one comprehensive dossier form, with the saved categorized list below. */
+.qa-case-unified{padding:clamp(17px,2.6vw,28px)}
+.case-unified-heading{display:flex;align-items:start;justify-content:space-between;gap:18px;margin-bottom:22px}
+.case-unified-heading h2{font-size:clamp(19px,2vw,25px);margin:6px 0}
+.case-unified-heading p{margin:5px 0;font-size:13px;color:#5a6980}
+.case-unified-form{display:flex;flex-direction:column;gap:17px}
+.case-main-title{display:flex;flex-direction:column;gap:7px;font-size:14px;font-weight:750}
+.case-main-title>input{min-height:46px;padding:11px 13px;border:1px solid #b9c9dc;border-radius:9px;font:inherit;font-weight:400;width:100%;box-sizing:border-box}
+.qa-case-unified .qa-case-detail{margin:0;padding:0;border:0}
+.qa-case-unified .case-form-grid{margin:0;gap:15px 18px}
+.qa-case-unified .case-summary-label{display:flex;flex-direction:column;gap:7px;margin-top:16px}
+.qa-case-unified .case-r2-panel{margin:0;padding:16px;border:1px solid #d2dfee;background:#f7faff;border-radius:13px}
+.case-r2-heading{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.case-r2-heading h3{font-size:16px;margin:0}
+.case-r2-heading small,.qa-case-unified .case-r2-panel>small{color:#556984;font-size:12px;line-height:1.5}
+.qa-case-unified #case-r2-file{display:block;max-width:100%;font-size:13px;margin:9px 0}
+.qa-case-unified #case-r2-list{margin-top:10px}
+.qa-case-unified #case-r2-list .matter-row{background:#fff}
+.case-unified-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.case-unified-actions #matter-create{min-height:46px;padding:12px 22px}
+#case-save-state{font-size:12px;color:#526981}
+.qa-case-unified .case-events{margin-top:15px;padding-top:12px}
+.qa-case-unified .case-events summary{cursor:pointer;font-size:13px;font-weight:700}
+.qa-case-saved-list{margin-top:19px}
+.case-saved-filters{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:13px;margin:15px 0 17px}
+.case-saved-filters label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#415a74}
+.case-saved-filters input,.case-saved-filters select{width:100%;min-height:42px;border:1px solid #c3d2e4;border-radius:9px;background:#fff;color:#243d56;padding:10px;box-sizing:border-box;font:inherit;font-size:13px;font-weight:400}
+.case-saved-summary{min-width:0;overflow-wrap:anywhere}
+.case-saved-summary strong{display:block}
+.case-saved-summary small{display:block;margin-top:6px;color:#61768d;font-size:12px}
+@media(max-width:720px){
+ .case-unified-heading{display:block}
+ .case-unified-heading button{margin-top:12px;width:100%}
+ .case-saved-filters{grid-template-columns:minmax(0,1fr)}
+ .case-unified-actions{display:block}
+ .case-unified-actions #matter-create{width:100%}
+ #case-save-state{display:block;margin-top:11px}
+ .qa-case-unified .case-r2-panel{padding:12px}
+}

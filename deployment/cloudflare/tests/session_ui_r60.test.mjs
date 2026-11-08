@@ -10,7 +10,8 @@ function node(){
   return {textContent:'',value:'',hidden:false,disabled:false,offsetParent:{},
     style:{},children:[],events:{},
     addEventListener(name,cb){this.events[name]=cb;},
-    setAttribute(){},focus(){},
+    setAttribute(){},focus(){},scrollIntoView(){},reset(){},
+    querySelectorAll(){return [];},
     append(...items){this.children.push(...items);},
     replaceChildren(...items){this.children=items;}
   };
@@ -54,6 +55,10 @@ test('R60: expired session redirects to public login, without showing authorized
 });
 function mountMatters(){
   const dom=elements(),events={},navigations=[],requests=[];
+  // R117: emulate the HTMLFormElement and file input that are present in
+  // Chromium, preserving R60 session-revocation tests with one unified form.
+  dom.get('#matter-form').elements={namedItem:name=>dom.get('[name="'+name+'"]')};
+  dom.get('#case-r2-file').files=[];
   let authenticated=true;
   const fetch=async(path,options={})=>{
     requests.push({path,method:options.method||'GET'});

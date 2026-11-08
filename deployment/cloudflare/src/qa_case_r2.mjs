@@ -50,11 +50,18 @@ const ACL_FRAGMENT=[
  'AND d.valid_from<=? AND (d.valid_to IS NULL OR d.valid_to>?))'
 ].join(' ');
 const aclParams=(p,now)=>[p.user_id,now,now,p.user_id,now,now];
-const fields=['reference','category','status','priority','assignee_user_id','client_label','counterparty_label','summary','deadline'];
+export const CASE_DETAIL_FIELDS=Object.freeze(['reference','category','status','priority','assignee_user_id','client_label','counterparty_label','summary','deadline']);
+const fields=CASE_DETAIL_FIELDS;
 const statuses=new Set(['open','in_progress','on_hold','closed']);
 const priorities=new Set(['low','normal','high']);
 const EMPTY=Object.freeze({reference:'',category:'',status:'open',priority:'normal',
  client_label:'',counterparty_label:'',summary:'',deadline:'',version:0});
+export function validateInitialCaseDetails(value,ownerId){
+ if(!value||typeof value!=='object'||Array.isArray(value))return null;
+ const normalized={...value,assignee_user_id:value.assignee_user_id||ownerId};
+ if(!allowedBody({...normalized,expected_version:0}))return null;
+ return normalized;
+}
 const allowedBody=(v)=>{
  if(!v||typeof v!=='object'||Array.isArray(v))return false;
  if(Object.keys(v).sort().join(',')!==[...fields,'expected_version'].sort().join(','))return false;

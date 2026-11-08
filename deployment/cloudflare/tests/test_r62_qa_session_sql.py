@@ -51,6 +51,7 @@ class RealSQLiteSessionAuthTest(unittest.TestCase):
             "0002_cf_qa_mobile_login.sql",
             "0003_cf_qa_matter_catalog.sql",
             "r108_qa_matter_rename.sql",
+            "0017_r116_case_details_r2.sql",
         ):
             self.db.executescript(
                 (ROOT / "deployment/cloudflare/migrations" / migration)
