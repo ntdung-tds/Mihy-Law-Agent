@@ -158,6 +158,12 @@ const FILE_GET_SQL=[
  'SELECT file_id,file_name,mime_type,byte_length,sha256,object_key',
  'FROM qa_case_files_r2 WHERE installation_id=? AND tenant_id=? AND matter_id=? AND file_id=? LIMIT 1'
 ].join(' ');
+// R121: same-content retry must reuse/repair the original receipt, not duplicate it.
+const FILE_MATCH_SQL=[
+ 'SELECT file_id,file_name,mime_type,byte_length,sha256,object_key,uploaded_at',
+ 'FROM qa_case_files_r2 WHERE installation_id=? AND tenant_id=? AND matter_id=?',
+ 'AND file_name=? AND sha256=? ORDER BY uploaded_at DESC,file_id DESC LIMIT 1'
+].join(' ');
 const FILE_INSERT_SQL=[
  'INSERT INTO qa_case_files_r2(installation_id,tenant_id,matter_id,file_id,file_name,mime_type,',
  'byte_length,sha256,object_key,uploaded_by,uploaded_at)',
@@ -189,6 +195,25 @@ async function bounded(req,max){
  const out=new Uint8Array(n);let at=0;
  for(const v of pieces){out.set(v,at);at+=v.byteLength;}
  return out;
+}
+// R121: a trigger writes an additional audit row, so D1 meta.changes is 2
+// even when the file-receipt INSERT succeeded. Verify the receipt itself and
+// PRIVATE R2 bytes, rather than guessing success by changed-row count.
+async function objectHealthy(env,key,length,sha){
+ try{
+  const object=await env.CASE_FILES_R2.get(key);
+  if(!object)return false;
+  const bytes=new Uint8Array(await object.arrayBuffer());
+  return bytes.byteLength===length && await digest(bytes)===sha;
+ }catch{return null;} // unknown: never erase the only uploaded copy
+}
+async function ensurePrivateObject(env,key,bytes,sha,mime){
+ const check=await objectHealthy(env,key,bytes.byteLength,sha);
+ if(check===null)return null;
+ if(check===true)return 'existing';
+ try{await env.CASE_FILES_R2.put(key,bytes,{httpMetadata:{contentType:mime}});}
+ catch{return null;}
+ return (await objectHealthy(env,key,bytes.byteLength,sha))===true?'restored':null;
 }
 async function files(req,env,p,matter,now,id){
  const isPost=req.method==='POST',permission=isPost?'write':'read';
@@ -222,30 +247,54 @@ async function files(req,env,p,matter,now,id){
  const extension=fileName.split('.').pop().toLowerCase();
  if(MIMES[extension]!==contentType)return error(415,'Định dạng tệp không khớp tên tệp.');
  if(Number(req.headers.get('Content-Length')||0)>MAX_FILE)return error(413,'Tệp vượt 10 MB.');
+ let bytes;try{bytes=await bounded(req,MAX_FILE);}catch{return error(413,'Tệp vượt 10 MB hoặc kết nối bị gián đoạn.');}
+ if(bytes.length<22||!validMagic(bytes,extension))return error(400,'Tệp không có cấu trúc PDF/DOCX hợp lệ.');
+ const sha=await digest(bytes);
+ // A previous attempt could have committed its D1 receipt and audit event,
+ // then deleted its R2 bytes due to the old "meta.changes===1" false alarm.
+ // Same filename+SHA-256 heals that receipt IN PLACE, with no duplicate row.
+ const old=await env.DB.prepare(FILE_MATCH_SQL)
+  .bind(env.INSTALLATION_ID,p.tenant_id,matter,fileName,sha).first();
+ if(old){
+  if(old.byte_length!==bytes.byteLength||old.mime_type!==contentType)return unavailable();
+  const state=await ensurePrivateObject(env,old.object_key,bytes,sha,contentType);
+  if(!state)return unavailable();
+  return json(200,{id:old.file_id,name:fileName,mime_type:contentType,
+   bytes:bytes.byteLength,sha256:sha,created_at:old.uploaded_at,
+   already_saved:true,repaired:state==='restored'});
+ }
  const count=await env.DB.prepare('SELECT COUNT(*) AS n FROM qa_case_files_r2 WHERE installation_id=? AND tenant_id=? AND matter_id=?')
   .bind(env.INSTALLATION_ID,p.tenant_id,matter).first();
  if(Number(count?.n||0)>=50)return error(429,'Hồ sơ đã đạt giới hạn 50 tệp.');
- let bytes;try{bytes=await bounded(req,MAX_FILE);}catch{return error(413,'Tệp vượt 10 MB hoặc kết nối bị gián đoạn.');}
- if(bytes.length<22||!validMagic(bytes,extension))return error(400,'Tệp không có cấu trúc PDF/DOCX hợp lệ.');
- const idNew=crypto.randomUUID(),sha=await digest(bytes),key=
+ const idNew=crypto.randomUUID(),key=
   ['qa-cases',env.INSTALLATION_ID,p.tenant_id,matter,idNew].join('/');
- // No public R2 domain; this bucket can be accessed only by this Worker binding.
+ // Private R2 put first. Never rely on D1 meta.changes because the audit
+ // trigger increments it to two. Confirm committed receipt and exact bytes.
  try{await env.CASE_FILES_R2.put(key,bytes,{httpMetadata:{contentType:contentType}});}
  catch{return unavailable();}
+ let insertFailed=false;
  try{
-  const receipt=await env.DB.prepare(FILE_INSERT_SQL).bind(
+  await env.DB.prepare(FILE_INSERT_SQL).bind(
    env.INSTALLATION_ID,p.tenant_id,matter,idNew,fileName,contentType,bytes.length,
    sha,key,p.user_id,now,env.INSTALLATION_ID,p.tenant_id,matter,...aclParams(p,now)
   ).run();
-  if(receipt.meta?.changes!==1){
-   await env.CASE_FILES_R2.delete(key).catch(()=>{});
-   return forbidden();
-  }
- }catch{
+ }catch{insertFailed=true;}
+ let stored;
+ try{stored=await env.DB.prepare(FILE_GET_SQL)
+  .bind(env.INSTALLATION_ID,p.tenant_id,matter,idNew).first();}
+ catch{return unavailable();} // uncertain commit: never delete the R2 object
+ if(!stored){
+  // Confirmed no D1 receipt: the new private object is unreferenced.
   await env.CASE_FILES_R2.delete(key).catch(()=>{});
-  return unavailable();
+  return insertFailed?unavailable():forbidden();
  }
- return json(201,{id:idNew,name:fileName,mime_type:contentType,bytes:bytes.length,sha256:sha,created_at:now});
+ if(stored.file_name!==fileName||stored.mime_type!==contentType||
+    stored.byte_length!==bytes.byteLength||stored.sha256!==sha||stored.object_key!==key)
+  return unavailable();
+ const health=await ensurePrivateObject(env,key,bytes,sha,contentType);
+ if(!health)return unavailable();
+ return json(201,{id:idNew,name:fileName,mime_type:contentType,
+  bytes:bytes.byteLength,sha256:sha,created_at:now});
 }
 async function events(env,p,matter,now){
  if(!await permitted(env,p,matter,'read',now))return forbidden();
