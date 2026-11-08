@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS qa_case_audit_v2(
  action TEXT NOT NULL CHECK(action IN (
   'case_created','details_created','details_updated','title_changed',
   'file_uploaded','file_hidden','file_downloaded','case_hidden',
-  'legacy_case_created','legacy_details_saved','legacy_file_uploaded','legacy_file_hidden','legacy_case_hidden'
+  'legacy_case_created','legacy_title_changed','legacy_details_saved','legacy_file_uploaded','legacy_file_hidden','legacy_case_hidden'
  )),
  file_id TEXT,
  occurred_at INTEGER NOT NULL CHECK(occurred_at>0),
@@ -41,6 +41,11 @@ INSERT OR IGNORE INTO qa_case_audit_v2(
  SELECT installation_id,tenant_id,matter_id,'legacy-matter-'||event_id,actor_id,
  'legacy_case_created',NULL,created_at,json_object('legacy',1)
  FROM qa_matter_events;
+INSERT OR IGNORE INTO qa_case_audit_v2(
+ installation_id,tenant_id,matter_id,event_id,actor_id,action,file_id,occurred_at,changes_json)
+ SELECT installation_id,tenant_id,matter_id,'legacy-title-'||event_id,actor_id,
+ 'legacy_title_changed',NULL,occurred_at,json_object('legacy',1)
+ FROM qa_matter_title_events;
 INSERT OR IGNORE INTO qa_case_audit_v2(
  installation_id,tenant_id,matter_id,event_id,actor_id,action,file_id,occurred_at,changes_json)
  SELECT h.installation_id,h.tenant_id,h.matter_id,'legacy-file-hide-'||h.file_id,h.hidden_by,
