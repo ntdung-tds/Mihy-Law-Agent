@@ -677,3 +677,94 @@ body.drawer-open{overflow:hidden}
  text-align:left;padding:8px 4px;border-radius:7px;color:inherit;font:inherit;cursor:pointer}
 .case-row-open:focus-visible{outline:2px solid #4e77af;outline-offset:3px}
 @media(max-width:720px){.case-row-open{min-height:44px}}
+
+/* R119: case actions are distinct, touch-friendly and permission-scoped.
+   "Xóa" performs only a confirmable soft-hide; never a physical purge. */
+#matter-list .case-list-item{
+ background:linear-gradient(135deg,#fff 0%,#f8faff 100%);
+ border:1px solid #d9e3f3;border-radius:15px;padding:14px 15px;
+ box-shadow:0 2px 9px rgba(34,56,95,.045);
+ transition:border-color .16s ease,box-shadow .16s ease;
+ min-width:0
+}
+#matter-list .case-list-item:hover{
+ border-color:#a9bbd9;box-shadow:0 4px 15px rgba(31,62,109,.08)
+}
+#matter-list .case-row-open{flex:1;min-height:46px;padding:5px 4px;line-height:1.38}
+#matter-list .case-row-open strong{font-size:14px;color:#1b3257;letter-spacing:-.1px}
+#matter-list .case-row-open small{font-size:11.7px;line-height:1.55;color:#687d96}
+#matter-list .case-row-actions{
+ display:flex;align-items:center;flex-wrap:nowrap;justify-content:flex-end;
+ gap:7px;flex-shrink:0
+}
+#matter-list .case-action{
+ display:inline-flex;align-items:center;justify-content:center;gap:6px;
+ min-height:43px;min-width:69px;padding:10px 12px;
+ font-family:inherit;font-weight:750;font-size:12.5px;line-height:1.2;
+ border-radius:11px;border:1px solid transparent;cursor:pointer;
+ transition:background-color .16s,color .16s,border-color .16s,transform .15s;
+ white-space:nowrap
+}
+#matter-list .case-action svg{flex:none}
+#matter-list .case-action--view{color:#225c95;background:#eaf3ff;border-color:#d2e4fb}
+#matter-list .case-action--view:hover{background:#dbeafb;border-color:#a7c9ef}
+#matter-list .case-action--edit{color:#6349a6;background:#f2efff;border-color:#ded4fa}
+#matter-list .case-action--edit:hover{background:#e8e0ff;border-color:#c7b2f4}
+#matter-list .case-action--hide{color:#a63842;background:#fff3f3;border-color:#f6dadd}
+#matter-list .case-action--hide:hover{background:#ffe6e7;border-color:#eebac0}
+#matter-list .case-action:focus-visible,#matter-list .case-hide-confirm button:focus-visible{
+ outline:3px solid #346fac;outline-offset:3px
+}
+#matter-list .case-action:active{transform:scale(.97)}
+#matter-list .case-action:disabled{opacity:.5;cursor:not-allowed}
+#matter-list .case-hide-confirm{
+ box-sizing:border-box;width:100%;flex-basis:100%;background:#fff9f7;
+ border:1px solid #f4d0cd;border-radius:11px;padding:12px 14px;
+ margin-top:5px
+}
+#matter-list .case-hide-confirm p{
+ margin:0 0 10px;font-size:12.5px;line-height:1.65;color:#773945;
+ overflow-wrap:anywhere
+}
+#matter-list .case-hide-confirm-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap}
+#matter-list .case-hide-confirm button{
+ min-height:43px;border-radius:10px;font:inherit;font-size:12px;font-weight:750;
+ padding:9px 14px;border:1px solid #d0d7e4;cursor:pointer
+}
+#matter-list .case-hide-cancel{color:#3e526b;background:#fff}
+#matter-list .case-hide-approve{
+ color:#fff;background:#a43741;border-color:#a43741!important
+}
+#matter-list .case-hide-approve:hover{background:#8c2634}
+#matter-list-feedback{
+ font-size:12.5px;line-height:1.6;padding:10px 12px;border-radius:9px;margin:8px 0;
+ border:1px solid #c4e3d0;color:#206847;background:#f0faf4
+}
+#matter-list-feedback[hidden]{display:none!important}
+#matter-list-feedback[data-state="error"]{color:#a22c36;border-color:#efc4c8;background:#fff1f2}
+#view-documents .sub-page-heading #upload-btn{
+ border-radius:12px;min-height:46px;box-shadow:0 3px 11px rgba(54,79,149,.14);
+ font-weight:750
+}
+@media(max-width:720px){
+ #matter-list .case-list-item{
+  display:flex;flex-direction:column;align-items:stretch;gap:10px;
+  padding:12px 13px;border-radius:14px
+ }
+ #matter-list .case-row-open{width:100%;text-align:left;padding:2px 1px;min-height:44px}
+ #matter-list .case-row-actions{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;width:100%;justify-content:stretch
+ }
+ #matter-list .case-row-actions:has(.case-action:only-child){grid-template-columns:minmax(0,1fr)}
+ #matter-list .case-action{min-width:0;min-height:45px;padding:10px 5px;font-size:12px;gap:5px}
+ #matter-list .case-action svg{width:16px;height:16px}
+ #matter-list .case-hide-confirm{margin:1px 0 0}
+ #matter-list .case-hide-confirm-actions{display:grid;grid-template-columns:1fr 1fr}
+ #matter-list .case-hide-confirm button{width:100%}
+ #view-documents .sub-page-heading #upload-btn{width:auto;min-width:123px}
+ #matter-workspace .case-editor-navigation button{border-radius:11px}
+}
+@media(prefers-reduced-motion:reduce){
+ #matter-list .case-action,#matter-list .case-list-item{transition:none}
+}
