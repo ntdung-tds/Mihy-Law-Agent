@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {legalApi,LEGAL_MATTER_ACCESS_SQL,LEGAL_QUOTA_SQL,sourceReferencesExist} from '../src/qa_legal_workflows.mjs';
+import {legalApi,LEGAL_MATTER_ACCESS_SQL,LEGAL_QUOTA_SQL,sourceReferencesExist,summaryReviewCheck} from '../src/qa_legal_workflows.mjs';
 
 const I='11111111-1111-4111-8111-111111111111';
 const U='22222222-2222-4222-8222-222222222222';
@@ -38,6 +38,68 @@ function request({
  return new Request(BASE+'/api/qa/legal/run',{method,headers,
   body:method==='POST'?JSON.stringify(body):undefined});
 }
+test('R128 UC04: omission signals for missing obligation anchors, key amounts and dates',()=>{
+ const rows=[{id:'A1',text:'Điều 1. Bên A phải thanh toán 2.000.000 đồng vào ngày 15 tháng 9 năm 2026.'},
+  {id:'A2',text:'Điều 2. Bên B bàn giao 10 tài liệu trước ngày 20/09/2026.'}];
+ const risk=summaryReviewCheck(rows,'[A1] Bên A thanh toán 2,000,000 đồng ngày 15/09/2026.');
+ assert.equal(risk.status,'review_required');
+ assert.equal(risk.critical_source_count,2);
+ assert.equal(risk.marked_critical_count,1);
+ assert.equal(risk.missing_critical_source_count,1);
+ assert.deepEqual(risk.missing_critical_source_ids,['A2']);
+ assert.ok(risk.missing_numbers.includes('10'));
+ assert.ok(!risk.missing_numbers.includes('2000000'),'Vietnamese/English thousands separators should normalize');
+ assert.deepEqual(risk.missing_dates,['20/9/2026']);
+ assert.equal(risk.missing_date_count,1);
+ assert.equal(risk.review_required,true);
+ assert.match(risk.note,/KHÔNG xác nhận/);
+ const all=summaryReviewCheck(rows,
+  '[A1] Điều 1. Bên A thanh toán 2,000,000 đồng ngày 15/09/2026.\n[A2] Điều 2. Bên B bàn giao 10 tài liệu ngày 20 tháng 9 năm 2026.');
+ assert.equal(all.status,'no_obvious_omission_not_verified');
+ assert.equal(all.missing_number_count,0);
+ assert.equal(all.missing_date_count,0);
+ assert.equal(all.missing_critical_source_count,0);
+ assert.equal(all.review_required,true,'No heuristic can certify summary fidelity');
+ const bogus=summaryReviewCheck(rows,'[A1] [A9] 2,000,000 đồng ngày 15/9/2026.');
+ assert.deepEqual(bogus.missing_critical_source_ids,['A2']);
+ const many=summaryReviewCheck(Array.from({length:33},(_,i)=>({
+  id:'A'+(i+1),text:'Bên A phải thanh toán '+(5000+i)+' đồng trước ngày 31/12/2026.'
+ })),'[A1] Chỉ có khoản 5000 đồng, hạn 31/12/2026.');
+ assert.ok(many.missing_critical_source_count>=30);
+ assert.equal(many.missing_critical_source_ids.length,12);
+ assert.equal(many.missing_numbers.length,12);
+});
+test('R128 UC04: actual API returns review signals without persisting source or changing UC03/07',async()=>{
+ const source='Điều 1. Bên A phải thanh toán 2.000.000 đồng vào ngày 15 tháng 9 năm 2026.\n\nĐiều 2. Bên B bàn giao 10 tài liệu trước ngày 20/09/2026.';
+ const responseText='[A1] Bên A thanh toán 2,000,000 đồng vào 15/09/2026.';
+ const f=fixture();
+ f.env.AI.run=async(model,args)=>{f.providerCalls.push({model,args});return {response:responseText};};
+ const r=await legalApi(request({uc:'UC04',source}),f.env,{now:NOW});
+ assert.equal(r.status,200,await r.clone().text());
+ const d=await r.json();
+ assert.equal(d.answer,responseText,'Never mutate model draft to fix a detected omission');
+ assert.equal(d.summary_review.status,'review_required');
+ assert.deepEqual(d.summary_review.missing_critical_source_ids,['A2']);
+ assert.ok(d.summary_review.missing_numbers.includes('10'));
+ assert.equal(d.summary_review.review_required,true);
+ assert.equal(d.review_required,true);
+ assert.equal(r.headers.get('Cache-Control'),'no-store');
+ assert.ok(f.calls.every(x=>x.params.every(p=>p!==source&&p!==responseText)),
+   'Source and model output may not be stored in D1');
+ assert.match(f.providerCalls[0].args.messages[1].content,/NHIỆM VỤ UC04/);
+ assert.match(f.providerCalls[0].args.messages[1].content,/dẫn mã \[A#\]/);
+ for(const uc of ['UC03','UC07']){
+  const other=fixture();
+  const o=await legalApi(request({uc}),other.env,{now:NOW});
+  assert.equal(o.status,200);
+  assert.equal(Object.hasOwn(await o.json(),'summary_review'),false);
+ }
+ const denied=fixture({acl:false});
+ const no=await legalApi(request({uc:'UC04',source}),denied.env,{now:NOW});
+ assert.equal(no.status,404);
+ assert.equal(denied.providerCalls.length,0);
+});
+
 test('R109 creates a real, bounded AI review draft for UC03/04/07 and no input stored in D1',async()=>{
  for(const uc of ['UC03','UC04','UC07']){
   const f=fixture();const res=await legalApi(request({uc}),f.env,{now:NOW});
