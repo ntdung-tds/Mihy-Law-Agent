@@ -849,3 +849,78 @@ body.drawer-open{overflow:hidden}
  #matter-workspace .case-file-actions{flex-wrap:nowrap}
  #matter-workspace .case-file-actions button{min-height:34px;padding:5px 9px}
 }
+
+/* R123: file-type pictograms and genuinely compact attachment rows. */
+#matter-workspace .case-file-type-icon{
+ display:flex;align-items:center;justify-content:center;flex:0 0 42px;
+ width:42px;height:49px;border-radius:10px;
+ background:#f1f4f8;color:#657389;
+}
+#matter-workspace .case-file-type-icon svg{width:29px;height:37px;display:block;overflow:visible}
+#matter-workspace .case-file-type-icon--pdf{background:#fff0f0;color:#c82f3f}
+#matter-workspace .case-file-type-icon--word{background:#eaf2ff;color:#2462b4}
+#matter-workspace .case-file-icon-page{fill:#fff;stroke:currentColor;stroke-width:2}
+#matter-workspace .case-file-icon-corner{fill:none;stroke:currentColor;stroke-width:2}
+#matter-workspace .case-file-icon-letter{
+ fill:currentColor;font-family:Arial,sans-serif;font-size:12px;font-weight:900;
+ dominant-baseline:middle
+}
+#matter-workspace #case-r2-list .matter-row.case-file-row{
+ display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;
+ flex-direction:row;justify-content:normal;gap:10px;
+ padding:10px 12px;min-height:68px;height:auto;max-height:none;
+ margin:0;border-radius:11px;box-sizing:border-box;
+}
+#matter-workspace #case-r2-list .case-file-details{
+ min-width:0;max-width:100%;flex:none;
+}
+#matter-workspace #case-r2-list .case-file-name{
+ display:-webkit-box;max-width:100%;overflow:hidden;
+ -webkit-box-orient:vertical;-webkit-line-clamp:2;
+ overflow-wrap:anywhere;word-break:break-word;line-height:1.35;
+ font-size:12.5px;font-weight:700;color:#24374d;
+}
+#matter-workspace #case-r2-list .case-file-meta{
+ display:block;margin-top:3px;line-height:1.3;
+ font-size:11px;color:#748399;
+}
+#matter-workspace #case-r2-list .case-file-actions{justify-self:end;align-self:center;gap:5px}
+#matter-workspace #case-r2-list .case-file-actions button{
+ min-height:32px;width:auto;max-width:100%;padding:5px 9px;
+ font-size:11.5px;white-space:nowrap;
+}
+#matter-workspace .case-selected-files .case-pending-row{
+ display:flex;align-items:center;gap:9px;min-height:55px;padding:7px 9px;
+}
+#matter-workspace .case-pending-info{
+ flex:1;min-width:0;display:flex;align-items:center;gap:9px;
+}
+#matter-workspace .case-pending-info .case-file-type-icon{
+ flex-basis:33px;width:33px;height:39px;border-radius:7px;
+}
+#matter-workspace .case-pending-info .case-file-type-icon svg{width:24px;height:29px}
+#matter-workspace .case-pending-name{
+ min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;
+ white-space:nowrap;font-size:12px
+}
+#matter-workspace .case-pending-info small{flex:0 0 auto;white-space:nowrap;font-size:10.5px}
+@media(max-width:620px){
+ #matter-workspace #case-r2-list .matter-row.case-file-row{
+  display:grid;grid-template-columns:38px minmax(0,1fr) auto;
+  gap:7px;align-items:center;flex-direction:row;
+  padding:9px;min-height:61px;
+ }
+ #matter-workspace #case-r2-list .case-file-type-icon{
+  width:38px;height:44px;flex-basis:38px;border-radius:8px
+ }
+ #matter-workspace #case-r2-list .case-file-type-icon svg{width:26px;height:33px}
+ #matter-workspace #case-r2-list .case-file-name{font-size:12px}
+ #matter-workspace #case-r2-list .case-file-actions button{min-height:32px;padding:5px 7px;font-size:11px}
+ #matter-workspace .case-pending-info small{display:none}
+}
+@media(max-width:360px){
+ #matter-workspace #case-r2-list .matter-row.case-file-row{
+  grid-template-columns:38px minmax(0,1fr);row-gap:3px;
+ }
+ #matter-workspace #case-r2-list .case-file-actions{grid-column:2;justify-self:end}
+}
