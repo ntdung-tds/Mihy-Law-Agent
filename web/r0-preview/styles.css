@@ -572,3 +572,30 @@ body.drawer-open{overflow:hidden}
 .legal-qa-translation-check[data-state="warning"]{background:#fff9ed;border-color:#eccd84;color:#715016}
 .legal-qa-translation-check strong{display:block;font-size:13px}
 .legal-qa-translation-check p{margin:5px 0 0;font-size:12px;overflow-wrap:anywhere}
+
+/* R116 real QA case details + private temporary R2 PDF/DOCX. */
+.qa-case-detail{margin-top:20px;padding:24px}
+.qa-case-detail[hidden],.qa-document-box[hidden]{display:none!important}
+.case-detail-head{display:flex;justify-content:space-between;gap:16px;align-items:start}
+.case-detail-head h2{font-size:clamp(20px,2vw,28px);margin:6px 0}
+#case-title-caption{font-size:13px;color:#536a83}
+.case-detail-form{display:flex;flex-direction:column;gap:16px;margin-top:20px}
+.case-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px 20px}
+.case-form-grid label,.case-summary-label{display:flex;flex-direction:column;gap:7px;min-width:0;font-size:13px;font-weight:700;color:#425a74}
+.case-form-grid input,.case-form-grid select,.case-summary-label textarea{width:100%;min-width:0;box-sizing:border-box;min-height:42px;padding:10px 12px;border:1px solid #c5d2e3;border-radius:9px;background:#fff;color:#253b54;font:inherit;font-weight:400}
+.case-summary-label textarea{resize:vertical;min-height:112px}
+.case-r2-panel,.case-events{margin-top:22px;padding-top:19px;border-top:1px solid #d6e1ed}
+.case-r2-panel h3,.case-events h3{margin:0 0 9px;font-size:17px}
+.case-r2-panel>p,.case-events p{font-size:13px;color:#506681;line-height:1.6}
+.case-r2-upload-form{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:14px 0}
+.case-r2-upload-form label{font-size:13px;font-weight:700}
+.case-r2-upload-form input{max-width:100%;font-size:13px}
+.case-r2-upload-form button,.case-detail-form button{min-height:43px}
+#case-save-feedback,#case-r2-feedback{font-size:13px;min-height:18px;overflow-wrap:anywhere}
+#case-save-feedback[data-state="error"],#case-r2-feedback[data-state="error"]{color:#a42a35}
+#case-history-list p{border-bottom:1px solid #edf1f5;padding:7px 0;margin:0}
+@media(max-width:680px){.qa-case-detail{padding:16px}.case-detail-head{display:block}
+ .case-detail-head button{margin-top:12px}.case-form-grid{grid-template-columns:minmax(0,1fr)}
+ .case-r2-upload-form{align-items:stretch;flex-direction:column}
+ .case-r2-upload-form button,.case-detail-form button{width:100%}
+}
