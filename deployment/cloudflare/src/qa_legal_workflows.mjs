@@ -133,10 +133,18 @@ function modelText(result){
 // anchor. This does NOT establish that the model's conclusions are true.
 export function sourceReferencesExist(answer,sourceRows){
  const valid=new Set(sourceRows.map(x=>x.id));
- const explicit=answer.matchAll(/\[([AB]\d+)\]/g);
- for(const match of explicit)if(!valid.has(match[1]))return false;
+ // Bracketed citations can be comma-delimited or ranges. Check EVERY
+ // source-looking identifier; never let a fake [A99], [C1], [a99],
+ // grouped citation or unusually long bracket silently bypass validation.
+ // This verifies source ID existence, not the legal truth of the claim.
+ for(const bracket of answer.matchAll(/\[([^\]\r\n]*)\]/g)){
+  for(const ref of bracket[1].matchAll(/(?:^|[^\p{L}\p{N}])([A-Za-z]\d+[A-Za-z]*)/gu)){
+   if(!valid.has(ref[1]))return false;
+  }
+ }
  return true;
 }
+
 // Always enforce byte limits on the stream itself: Content-Length can be
 // absent or forged. Never log or persist these bytes.
 async function readLimitedSource(req,max){

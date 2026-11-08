@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 102,
-  "updated_at": "2026-11-07T19:48:33.817Z",
+  "revision": 103,
+  "updated_at": "2026-11-08T00:41:22.619Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1849,7 +1849,9 @@
           "qa_bindings_and_unrelated_modules": "PASS_VERIFIED_BY_READBACK",
           "anonymous_qa_health": "PASS",
           "authenticated_owner_rename_e2e": "NOT_RUN",
-          "production": "UNTOUCHED"
+          "production": "UNTOUCHED",
+          "r111_dedicated_ci_gate": "PASS_9_OF_9_FINAL_CODE_RUN_42430607926",
+          "original_suite_exclusion": "PREVIOUS_9_JOB_CI_DID_NOT_EXECUTE_R108_R109_DEDICATED_TEST_FILES"
         },
         "blockers": [
           "Real authenticated mobile/desktop rename, UI conflict and role denial have not been exercised by an Owner-signed-in browser.",
@@ -1885,7 +1887,9 @@
           "authenticated_mobile_ai_11_uc": "NOT_RUN",
           "verified_official_legal_research": "NOT_IMPLEMENTED",
           "docx_pdf_file_workflow": "NOT_IMPLEMENTED_PAUSED_STORAGE",
-          "production": "UNTOUCHED"
+          "production": "UNTOUCHED",
+          "r111_dedicated_ci_gate": "PASS_9_OF_9_FINAL_CODE_RUN_42430607926",
+          "original_suite_exclusion": "PREVIOUS_9_JOB_CI_DID_NOT_EXECUTE_R108_R109_DEDICATED_TEST_FILES"
         },
         "blockers": [
           "Owner authenticated real Android and desktop AI QA E2E NOT_RUN because browser-rendering /login and /app probes are HTTP 429; CI is not Owner acceptance.",
@@ -1922,12 +1926,46 @@
           "live_d1": "PASS_ONE_MATTER_ONE_AI_QUOTA_ROW_RETAINED",
           "owner_real_authenticated_ai_e2e": "NOT_RUN",
           "independent_legal_accuracy": "NOT_RUN",
-          "production": "UNTOUCHED"
+          "production": "UNTOUCHED",
+          "r111_dedicated_ci_gate": "PASS_9_OF_9_FINAL_CODE_RUN_42430607926",
+          "original_suite_exclusion": "PREVIOUS_9_JOB_CI_DID_NOT_EXECUTE_R108_R109_DEDICATED_TEST_FILES"
         },
         "blockers": [
           "Model-supported draft conclusions remain unverified for legal accuracy even when explicit source anchor IDs exist.",
           "No real Owner signed-in Android/desktop 11-UC E2E; user acceptance remains pending.",
           "SRS v1.1.15 private baseline requires exact mapping before full release claim."
+        ],
+        "owner_acceptance": "PENDING"
+      },
+      {
+        "id": "AL-R0-LEGAL-R111-001",
+        "title": "R111 verified CI coverage and source ID guard for existing 11-UC QA",
+        "status": "CODE_CI_PASS_9_OF_9_OWNER_E2E_NOT_RUN_QA_DEPLOY_NOT_RUN",
+        "priority": "P1",
+        "scope": "Only synthetic-text source-citation guard and CI verification for already built R108-R110. No new UI, Google/OneDrive/OAuth, files, customer data or production.",
+        "acceptance": [
+          "Previously omitted R108 matter-rename and R109/R110 AI legal test files execute in the actual PR workflow",
+          "Red-green test proves fabricated grouped, long, lowercase or unsupported source IDs fail closed",
+          "All known valid source references including a valid grouped citation remain readable",
+          "Real SQLite per-user AI quota test executes in CI",
+          "QA deploy only after full CI PASS, guarded module-only change preserving old bindings and data",
+          "Owner authenticated Android/desktop end-to-end and legal reviewer tests are still separately required"
+        ],
+        "test_results": {
+          "unprotected_ci": "GREEN_FALSE_COVERAGE_RUN_42430256045_NEW_TEST_NOT_EXECUTED",
+          "red_ci": "FAIL_REPRODUCED_7_PASS_1_FAIL_RUN_42430559379",
+          "node_guard_local": "PASS_9_OF_9_PURE_HELPER_CASES",
+          "cloudflare_ci": "PASS_R108_NODE_R109_R111_NODE_REAL_SQLITE_RUN_42430607926",
+          "full_workflow": "PASS_9_OF_9_EXECUTED_21_CONDITIONAL_SKIPPED_RUN_42430607926",
+          "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/160",
+          "qa_live_deploy": "NOT_RUN",
+          "owner_android_desktop": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "blockers": [
+          "Final workflow completion and code review pending.",
+          "Real authenticated mobile/desktop Owner QA and legal accuracy not accepted.",
+          "Private SRS v1.1.15 exact clause mapping unavailable in this session."
         ],
         "owner_acceptance": "PENDING"
       }
