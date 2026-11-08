@@ -555,8 +555,14 @@ def scenario(browser,name,viewport,origin):
         inputs.locator(":scope > summary").click()
         assert inputs.evaluate("(e)=>e.open"),"Users must be able to reopen inputs"
         assert page.locator("#legal-qa-example").is_visible()
-        input_row=page.locator("#legal-qa-example").bounding_box()
-        run_row=page.locator("#legal-qa-run").bounding_box()
+        # Snapshot both aligned buttons atomically during any smooth scroll:
+        # serial bounding_box() reads can sample different animation frames.
+        input_row,run_row=page.evaluate("""() => {
+          return ['legal-qa-example', 'legal-qa-run'].map(id => {
+            const r=document.getElementById(id).getBoundingClientRect();
+            return {x:r.x,y:r.y,width:r.width,height:r.height};
+          });
+        }""")
         assert input_row and run_row and abs(input_row["y"]-run_row["y"])<=4,"UC04 buttons should share a compact row"
         assert input_row["height"]>=40 and run_row["height"]>=40
         inputs.locator(":scope > summary").click()
