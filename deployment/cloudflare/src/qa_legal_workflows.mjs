@@ -133,10 +133,19 @@ function modelText(result){
 // anchor. This does NOT establish that the model's conclusions are true.
 export function sourceReferencesExist(answer,sourceRows){
  const valid=new Set(sourceRows.map(x=>x.id));
- const explicit=answer.matchAll(/\[([AB]\d+)\]/g);
- for(const match of explicit)if(!valid.has(match[1]))return false;
+ // Reject grouped or noncanonical source-like citations. An exact one-ID
+ // reference such as [A1] is valid only when present in the supplied map.
+ for(const bracket of answer.matchAll(/\[([^\]\r\n]{0,256})\]/g)){
+  const token=bracket[1].trim();
+  if(/^[AB]\d+$/.test(token)){
+   if(!valid.has(token))return false;
+  }else if(/(?:^|[^\p{L}\p{N}])[ABab]\d+/u.test(token)){
+   return false;
+  }
+ }
  return true;
 }
+
 // Always enforce byte limits on the stream itself: Content-Length can be
 // absent or forged. Never log or persist these bytes.
 async function readLimitedSource(req,max){
