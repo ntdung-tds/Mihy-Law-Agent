@@ -8,6 +8,11 @@
 
 
 
+## R113 — CI evidence verified (2026-11-09)
+
+- **PASS (synthetic CI only):** [Actions #42517667492](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42517667492), `cloudflare-contract` job `128844137967`, explicitly executes `node --test deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs`. TAP reports `ok 10 - R113 tenant/MatterACL and role denials never charge quota or invoke model`, **10/10 pass, 0 fail**. This confirms test execution on that workflow, not live tenant acceptance.
+- **BLOCKED:** Authenticated QA API/browser evidence not reproduced in this run; previously reported DNS resolution failure remains unverified today. **NOT_RUN:** 11-UC real QA E2E, Owner legal acceptance. No merge/deploy/production changes; #158 remains closed. PCS `STATE.json` revision 102 unchanged, no release gate promoted.
+
 ## R113 — Tenant/MatterACL deny must not spend AI quota (2026-11-09)
 
 - **Scope:** Regression-only extension of existing draft PR #175, synthetic data, no product/source change. Three denial paths: missing session (401), revoked/foreign MatterACL (404), viewer role (403). Every denial must make zero AI provider calls and zero quota SQL calls.
