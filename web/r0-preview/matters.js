@@ -114,6 +114,8 @@
   const assignee=field('assignee_user_id');
   assignee.replaceChildren(makeOption('Tôi phụ trách (mặc định)',''));
   for(const control of form.querySelectorAll('input,textarea,select'))control.disabled=false;
+  // Reset must re-enable Save: mobile read-only detail explicitly disabled it.
+  save.disabled=false;
   $('#case-r2-list').replaceChildren();
   $('#case-history-list').replaceChildren();
   $('#case-history-details').hidden=true;
