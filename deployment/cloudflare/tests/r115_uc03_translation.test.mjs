@@ -31,7 +31,7 @@ test('R127 UC03: source markers are deterministic, missing passages flagged with
  assert.deepEqual(fake.missing_source_ids,['A1','A2','A3']);
  assert.equal(fake.marked_segment_count,0,'duplicates, unknown and grouped references cannot raise coverage');
  const many=translationSourceCoverage(
-  Array.from({length:35},(_,i)=>({id:'A'+(i+1),text:'Synthetic'})),'[A1]');
+  Array.from({length:35},(_,i)=>({id:'A'+(i+1),text:'Synthetic'})),'[A1] Translated sample paragraph.');
  assert.equal(many.missing_source_count,34);
  assert.equal(many.missing_source_ids.length,30,'bound the response size');
 });
