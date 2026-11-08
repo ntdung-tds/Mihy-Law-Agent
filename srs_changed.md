@@ -213,3 +213,10 @@
 - Tệp: thêm `details/summary` đóng/mở được, tiêu đề hiển thị số tệp ngay khi thu gọn; giữ ID container cũ và icon PDF/Word R123. Danh sách nhiều tệp cuộn trong chiều cao giới hạn, không làm kéo dài toàn bộ màn hình.
 - Lịch sử: giữ vùng `details` đóng/mở sẵn có, thêm vùng cuộn có giới hạn chiều cao và keyboard-accessible khi có nhiều sự kiện; **không** tuyên bố đã thực hiện lưu vết chi tiết theo trường, phần backend này còn chờ.
 - Test CI [#42469244931](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42469244931) 9/9 PASS, Chromium desktop/mobile. QA deployed at 100% version `139028a3-5776-42b7-aba5-36e20a391c9a`, deployment `9b580c7e-0386-46e9-b73c-4cc3bc5897d8`; live readback pass. Owner signed-in Android visual check NOT_RUN. Backend, D1/R2, production untouched; SRS v1.1.15 baseline unchanged.
+
+## SC-028 — 2026-11-08 — Chi tiết lịch sử hồ sơ/tệp, QA standalone
+
+- Bổ sung bảng audit D1 bất biến, trigger nguyên tử thu thập create, đổi tên, chỉnh sửa trường, thêm/ẩn tệp, ẩn hồ sơ; ghi sự kiện cấp tệp tải xuống sau xác minh SHA-256, không đánh đồng với tải thành công trên điện thoại. Mỗi sự kiện có người, thời gian, cặp giá trị trước/sau nơi có sẵn.
+- API GET /api/qa/cases/:id/events giữ MatterACL read/tenant isolation; mask giá trị lịch sử cho tài khoản không có write. UI mobile timeline mở/thu gọn với scroll R124; dữ liệu hiển thị textContent, không chèn HTML. Chưa thu thập IP/device.
+- Nhật ký cũ chỉ backfill actor/time/action, đánh dấu legacy và không tái tạo giả before/after. Phần biệt tệp khôi phục thiếu object R2 không có event chuyên biệt trong lần này.
+- Kiểm thử [CI #42472426132](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42472426132): PASS 9/9, real SQLite + browser synthetic mobile/desktop. QA D1 17/17 migration statements, 8 legacy records. Backend QA 100% `43b89f10-3094-4dfc-9281-66d2e4db6f22`, site QA 100% `81415417-9a4a-45f1-b8b7-f6e6136c8210`; nguồn/bindings đọc lại PASS. Actual owner Android E2E NOT_RUN. Production không đổi; SRS v1.1.15 vẫn giữ nguyên.
