@@ -283,7 +283,7 @@
   event.preventDefault();if(!current||!canWrite||uploading)return;
   const file=$('case-r2-file').files?.[0];if(!file)return;
   const ext=file.name.split('.').pop().toLowerCase(),mime=MIMES[ext];
-  if(!mime||file.size<22||file.size>FILE_MAX||!^[A-Za-z0-9]$/.test('A')){
+  if(!mime||file.size<22||file.size>FILE_MAX){
    msg('case-r2-feedback','Chỉ nhận PDF/DOCX mẫu tối đa 10 MB.',true);return;
   }
   if(!/^[\p{L}\p{N}._ ()-]{5,120}$/u.test(file.name)||file.name.includes('..')){
