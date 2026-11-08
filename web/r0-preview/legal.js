@@ -49,6 +49,7 @@
       secondary.value='';question.value='';
       byId('legal-qa-consent').checked=false;
       matter.value='';
+      matter.replaceChildren();
       clearResult();
     }
     function activateWorkflow(ucCode){
