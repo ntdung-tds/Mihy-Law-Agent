@@ -431,6 +431,115 @@ async function readLimitedSource(req,max){
  try{return {raw:new TextDecoder('utf-8',{fatal:true}).decode(bytes)};}
  catch{return {invalid:true};}
 }
+
+/** R138: Extract a synthetic PDF/DOCX directly into a review-only preview.
+ * Never persist the original bytes, converted text or any legal conclusion.
+ * No storage provider or OAuth path is involved. Do not auto-run legal AI.
+ */
+const MAX_QA_FILE_BYTES=1500000;
+const MAX_QA_MULTIPART_BYTES=MAX_QA_FILE_BYTES+16384;
+async function boundedBinary(req,max){
+ const reader=req.body?.getReader();
+ if(!reader)return {invalid:true};
+ let size=0;const chunks=[];
+ try{
+  for(;;){
+   const {value,done}=await reader.read();
+   if(done)break;
+   size+=value.byteLength;
+   if(size>max){await reader.cancel();return {tooBig:true};}
+   chunks.push(value);
+  }
+ }catch{return {invalid:true};}
+ finally{reader.releaseLock();}
+ const data=new Uint8Array(size);let i=0;
+ for(const chunk of chunks){data.set(chunk,i);i+=chunk.byteLength;}
+ return {bytes:data};
+}
+export async function documentExtractApi(req,env,opts={}){
+ if(!configured(env))return unavailable();
+ if(new URL(req.url).pathname!=='/api/qa/legal/extract'||req.method!=='POST')
+  return err(405,'Phương thức không được hỗ trợ.');
+ if(!originOkay(req)||!/^multipart\/form-data;\s*boundary=/i.test(req.headers.get('Content-Type')||''))
+  return invalid();
+ const length=Number(req.headers.get('Content-Length')||0);
+ if(!Number.isFinite(length)||length<0||length>MAX_QA_MULTIPART_BYTES)
+  return err(413,'Tệp QA vượt giới hạn 1,5 MB.');
+ const now=opts.now??Math.floor(Date.now()/1000);
+ let principal;
+ try{principal=await mobileSession(req,env,now);}catch{return unavailable();}
+ if(!principal||!UUID.test(principal.tenant_id)||!UUID.test(principal.user_id))
+  return err(401,'Phiên AI Law đã hết hạn.');
+ if(!['lawyer','tenant_admin'].includes(principal.role_key))
+  return err(403,'Không có quyền xử lý nguồn QA.');
+ const bounded=await boundedBinary(req,MAX_QA_MULTIPART_BYTES);
+ if(bounded.tooBig)return err(413,'Tệp QA vượt giới hạn 1,5 MB.');
+ if(bounded.invalid)return invalid();
+ let data;
+ try{
+  data=await new Response(bounded.bytes,{headers:{
+   'Content-Type':req.headers.get('Content-Type')
+  }}).formData();
+ }catch{return invalid();}
+ if([...data.keys()].length!==4||
+  [...data.keys()].some(x=>!['file','uc','matter_id','synthetic_consent'].includes(x))||
+  !['UC03','UC04','UC07'].includes(data.get('uc'))||
+  !UUID.test(data.get('matter_id')||'')||data.get('synthetic_consent')!=='true')
+  return invalid();
+ const file=data.get('file'),fileName=file?.name;
+ if(typeof fileName!=='string'||fileName.length<5||fileName.length>120||
+  /[\/\\\u0000-\u001f\u007f]/u.test(fileName)||
+  typeof file.arrayBuffer!=='function'||file.size<5||file.size>MAX_QA_FILE_BYTES)
+  return file?.size>MAX_QA_FILE_BYTES?
+   err(413,'Tệp QA vượt giới hạn 1,5 MB.'):invalid();
+ const ext=/\.([A-Za-z0-9]+)$/u.exec(fileName)?.[1]?.toLowerCase();
+ const mime=ext==='pdf'?'application/pdf':
+  ext==='docx'?'application/vnd.openxmlformats-officedocument.wordprocessingml.document':null;
+ if(!mime||!['',mime,'application/octet-stream'].includes(file.type))return invalid();
+ const bytes=new Uint8Array(await file.arrayBuffer());
+ if(bytes.length!==file.size)return invalid();
+ const isPdf=bytes[0]===0x25&&bytes[1]===0x50&&bytes[2]===0x44&&
+  bytes[3]===0x46&&bytes[4]===0x2d;
+ const isDocx=bytes[0]===0x50&&bytes[1]===0x4b&&bytes[2]===0x03&&bytes[3]===0x04;
+ if(ext==='pdf'?!isPdf:!isDocx)return invalid();
+ let allowed;
+ try{
+  allowed=await env.DB.prepare(LEGAL_MATTER_ACCESS_SQL).bind(
+   env.INSTALLATION_ID,principal.tenant_id,data.get('matter_id'),
+   principal.user_id,now,now,principal.user_id,now,now).first();
+ }catch{return unavailable();}
+ if(!allowed)return err(404,'Không tìm thấy hồ sơ có quyền truy cập.');
+ if(typeof env.AI?.toMarkdown!=='function')return unavailable();
+ // Conversion consumes the same per-user daily QA allowance as model calls,
+ // preventing unbounded third-party conversion costs or extraction loops.
+ try{
+  const usage=await env.DB.prepare(LEGAL_QUOTA_SQL).bind(
+   env.INSTALLATION_ID,principal.tenant_id,principal.user_id,Math.floor(now/86400)).run();
+  if(usage?.meta?.changes!==1)return err(429,'Đã đạt giới hạn 12 lượt AI QA mỗi ngày.');
+ }catch{return unavailable();}
+ let converted;
+ try{
+  converted=await (opts.convertDocument??((doc,options)=>env.AI.toMarkdown(doc,options)))({
+   name:fileName,blob:new Blob([bytes],{type:mime})
+  },{conversionOptions:{output:{format:'text'},...(ext==='pdf'?{pdf:{metadata:false}}:{})}});
+ }catch{return unavailable();}
+ const result=Array.isArray(converted)?converted[0]:
+  Array.isArray(converted?.results)?converted.results[0]:converted;
+ if(result?.format!=='text'||typeof result.data!=='string')
+  return err(422,'Không trích được văn bản tin cậy từ tệp QA.');
+ const extracted=result.data.trim();
+ if(!safeText(extracted,30,MAX_SOURCE))
+  return err(422,'Nội dung trích xuất rỗng, không hợp lệ hoặc vượt 5000 ký tự. Hãy dùng một đoạn tệp QA nhỏ hơn.');
+ const digest=await crypto.subtle.digest('SHA-256',bytes);
+ const sha=[...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');
+ return json(200,{
+  uc:data.get('uc'),file_name:fileName,file_type:ext,file_size:file.size,
+  source_sha256:sha,source_text:extracted,
+  mode:'qa_file_text_preview_not_verified',review_required:true,storage:'none',
+  note:'Văn bản chuyển đổi tự động có thể thiếu trang quét, bảng, bố cục, chữ xoay/ẩn hoặc chỉnh sửa theo dõi. Phải mở tệp gốc và đối chiếu toàn bộ đoạn trước khi đưa vào nguồn A. Không lưu tệp và chưa gửi nội dung tới mô hình soạn/dịch AI.'
+ });
+}
+
 export async function legalApi(req,env,opts={}){
  if(!configured(env))return unavailable();
  const path=new URL(req.url).pathname;
