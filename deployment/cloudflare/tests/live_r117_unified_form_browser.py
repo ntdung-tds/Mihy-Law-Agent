@@ -92,17 +92,32 @@ def scenario(browser,name,viewport,origin):
                     f["hidden"]=True
                     return reply(route,payload={"id":f["id"],"hidden":True,"physical_deleted":False})
             if u==path+"/events":
-                return reply(route,payload={"events":[
-                    {"id":"qa-1","action":"details_updated","actor_name":"Luật sư QA",
+                if "before_at=" in req.url:
+                    assert "before_id=qa-030" in req.url
+                    return reply(route,payload={"events":[
+                        {"id":"qa-old-1","action":"legacy_details_saved",
+                         "actor_name":"QA trước đây","created_at":1799999000,
+                         "changes":{"legacy":1}},
+                        {"id":"qa-old-2","action":"file_hidden",
+                         "actor_name":"Luật sư QA","created_at":1799998999,
+                         "changes":{"name":"QA evidence.pdf"}}
+                    ],"next_cursor":None})
+                events=[
+                    {"id":"qa-001","action":"details_updated","actor_name":"Luật sư QA",
                      "created_at":1800000000,
                      "changes":{"summary":{"from":"Bản cũ","to":"Bản mới"},
                                 "priority":{"from":"normal","to":"high"}}},
-                    {"id":"qa-2","action":"file_uploaded","actor_name":"Luật sư QA",
-                     "created_at":1800000000,
-                     "changes":{"name":"QA evidence.pdf","bytes":43}},
-                    {"id":"qa-3","action":"legacy_details_saved","actor_name":"QA trước đây",
-                     "created_at":1799999000,"changes":{"legacy":1}}
-                ]})
+                    {"id":"qa-002","action":"file_uploaded","actor_name":"Luật sư QA",
+                     "created_at":1799999999,
+                     "changes":{"name":"QA evidence.pdf","bytes":43}}
+                ]
+                events.extend({
+                    "id":f"qa-{i:03d}","action":"file_downloaded",
+                    "actor_name":"Luật sư QA","created_at":1799999900-i,
+                    "changes":{"name":"QA evidence.pdf","bytes":43}
+                } for i in range(3,31))
+                return reply(route,payload={"events":events,
+                    "next_cursor":{"at":1799999050,"id":"qa-030"}})
             if u=="/api/qa/matters/"+c["id"] and method=="PATCH":
                 v=json.loads(req.post_data)
                 if v.get("action")=="hide":
@@ -141,14 +156,24 @@ def scenario(browser,name,viewport,origin):
     # entries must be explicit about missing before/after metadata.
     page.locator("#case-history-details").evaluate("(e)=>e.open=true")
     page.locator("#case-history-list .case-history-entry").first.wait_for(state="visible",timeout=15000)
-    assert page.locator("#case-history-list .case-history-entry").count()==3
+    assert page.locator("#case-history-list .case-history-entry").count()==30
+    more=page.locator("#case-history-more")
+    assert more.is_visible() and more.is_enabled()
+    assert more.inner_text()=="Xem thêm lịch sử"
     first_audit=page.locator("#case-history-list .case-history-entry").first
     assert "Cập nhật thông tin" in first_audit.locator("summary").inner_text()
     assert "Luật sư QA" in first_audit.locator("summary").inner_text()
     first_audit.locator("summary").click()
     assert "Tóm tắt: Bản cũ → Bản mới" in first_audit.inner_text()
     assert "Mức ưu tiên: Bình thường → Cao" in first_audit.inner_text()
-    page.locator("#case-history-list .case-history-entry").last.locator("summary").click()
+    history_list=page.locator("#case-history-list")
+    history_list.evaluate("(el)=>el.scrollTop=90")
+    more.click()
+    page.locator("#case-history-list .case-history-entry").nth(31).wait_for(state="attached",timeout=15000)
+    assert page.locator("#case-history-list .case-history-entry").count()==32
+    assert not more.is_visible(), "last page should have no load-more action"
+    assert history_list.evaluate("(el)=>el.scrollTop")>0, "append retains independent scroll"
+    page.locator("#case-history-list .case-history-entry").nth(30).locator("summary").click()
     assert "không thể tái tạo chính xác" in page.locator("#case-history-list").inner_text()
     page.locator("#case-history-details").evaluate("(e)=>e.open=false")
 
