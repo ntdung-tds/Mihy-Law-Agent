@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `128` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T17:55:32.795Z`.
+- **PCS revision:** `129` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T18:21:42.577Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R136 — UC03 cảnh báo đoạn dịch không có nội dung hoặc đảo thứ tự nhãn nguồn (2026-11-09)
+
+- **Bối cảnh:** R135 kiểm tra nhãn [A#] duy nhất ở đầu dòng nhưng chưa phát hiện đoạn rỗng chỉ có nhãn hoặc bản dịch có nhãn đúng nhưng thứ tự ngược nguồn. Hai trường hợp không thể hiện đầy đủ sự hiện diện của bản dịch theo cấu trúc đã yêu cầu.
+- **Giới hạn và sửa:** PR [#185](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/185) draft, xếp trên PR #184. R136 giữ nguyên văn bản AI và phân quyền, chỉ tăng cảnh báo kiểm tra hình thức: `empty_source_ids` không tính như đoạn có bản dịch, `out_of_order_source_ids` ghi lại thứ tự nhãn đã nhìn thấy khi trái thứ tự nguồn. UI an toàn `textContent`, không tự dịch, sửa, di chuyển hoặc kết luận tương đương pháp lý.
+- **Kiểm thử:** Node/API thử nhãn rỗng, đảo thứ tự, đầu dòng hợp lệ và sai nhãn; không lưu nội dung vào D1, ACL chặn. Chromium desktop/mobile kiểm tra cảnh báo mới và các UC khác. [CI #42509105935](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42509105935) FAIL do fixture R127 kỳ vọng nhãn không có nội dung được tính; fixture được sửa để có đoạn dịch mẫu thật. [CI #42509181486](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42509181486) **PASS 9/9** tại mã commit `fd6460167e161ee36a43b005ce0785e79f374980`. CI HEAD sau cập nhật PCS/tài liệu còn chờ.
+- **Cloudflare QA đã cập nhật, đọc lại PASS:** Backend `ai-law-standalone-cf-qa` version `aae636de-4b3b-4905-83bc-575529492e01`, deployment `bc9ff15c-1485-4edb-835a-8ccd60209d8c`, **100%**; đúng module mới, 10 module khác và 12 bindings nguyên. Website `ai-law-web-qa` version `1216538b-cc86-46e7-b740-97469a5fbb63`, deployment `1b6a0a70-4dc2-41c4-84d6-659e95ad81d2`, **100%**; đúng module mới, 26 module khác và 2 bindings nguyên. Không đổi DB/R2, Google/OneDrive, production.
+- **Chưa nghiệm thu:** Android đăng nhập thật, chuyên gia so sánh bản dịch và DOCX/PDF E2E đều **NOT_RUN**. Bộ trích PDF/DOCX R68–R70 là Python local-only, chưa nối Worker; không khẳng định đã nhập tệp được. SRS v1.1.15 đóng băng, `SC-038`, PCS revision 129, Owner nghiệm thu cuối.
 
 ## R135 — UC03 phân biệt nhãn đầu đoạn dịch với trích dẫn nội dòng (2026-11-09)
 
