@@ -236,6 +236,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r117_unified_case.test.mjs
       - name: R118 mobile list-first case navigation, detail, edit and return
         run: node --test deployment/cloudflare/tests/r118_mobile_list_first.test.mjs
+      - name: R119 beautiful View/Edit/Hide actions, immutable soft-delete, ACL and R2 retention
+        run: node --test deployment/cloudflare/tests/r119_soft_hide.test.mjs
       - name: R72 Drive document upload/download, MatterACL, integrity and fail-closed QA gates
         run: node --test deployment/cloudflare/tests/r72_documents.test.mjs
       - name: R81 Google Drive multipart wire protocol and safe provider error diagnostics
