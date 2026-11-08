@@ -18,6 +18,7 @@
   });
   let filter = 'all';
   let currentView = 'overview';
+  let resumeUc = null; // Page-local route only; never persist legal text or Matter metadata.
   let lastFocus = null;
   let toastTimeout = null;
   const $ = (selector) => document.querySelector(selector);
@@ -104,7 +105,9 @@
     }
     if (currentView === 'workflow' && !uc)
       window.dispatchEvent(new Event('ai-law:workflow-close'));
+    if (view !== 'documents') resumeUc = null;
     currentView = view;
+    $('#workflow-resume-panel').hidden = view !== 'documents' || !resumeUc;
     $$('[data-panel]').forEach(panel => { panel.hidden = panel.dataset.panel !== view; });
     $$('[data-view]').forEach(btn => {
       const selected = btn.dataset.view === view || (uc && btn.dataset.view === 'assistant');
@@ -123,7 +126,22 @@
     }
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
-  $$('[data-view]').forEach(n => n.addEventListener('click', () => goto(n.dataset.view)));
+  $('#workflow-create-matter').addEventListener('click', () => {
+    resumeUc = $('#workflow-code').textContent;
+    if (!/^UC(?:0[1-9]|1[01])$/.test(resumeUc)) { resumeUc = null; return; }
+    goto('documents');
+    $('#matter-title').focus();
+  });
+  $('#workflow-resume').addEventListener('click', () => {
+    const previous = resumeUc;
+    resumeUc = null;
+    if (previous) goto('uc-' + previous);
+  });
+  window.addEventListener('ai-law:workspace-switch', () => {
+    resumeUc = null;
+    $('#workflow-resume-panel').hidden = true;
+  });
+  $('[data-view]').forEach(n => n.addEventListener('click', () => goto(n.dataset.view)));
   $$('[data-go]').forEach(n => n.addEventListener('click', () => goto(n.dataset.go)));
 
   const drawer = $('#function-drawer'), backdrop = $('#drawer-backdrop'), trigger = $('#rail-features');
