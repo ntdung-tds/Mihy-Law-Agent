@@ -156,3 +156,18 @@ test('R110 untrusted streaming request without Content-Length has a real 36KB bo
  assert.equal(f.providerCalls.length,0);
  assert.equal(f.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false);
 });
+
+test('R111 aborted or errored request body fails closed without invoking AI or quota',async()=>{
+ const headers={Origin:BASE,'Sec-Fetch-Site':'same-origin',
+  'Content-Type':'application/json',Cookie:'al_qa_session='+SID};
+ const body=new ReadableStream({start(controller){
+  controller.error(new Error('sensitive upstream transport detail'));
+ }});
+ const req=new Request(BASE+'/api/qa/legal/run',{method:'POST',headers,body,duplex:'half'});
+ const f=fixture();
+ const response=await legalApi(req,f.env,{now:NOW});
+ assert.equal(response.status,400);
+ assert.doesNotMatch(await response.text(),/sensitive upstream transport detail/);
+ assert.equal(f.providerCalls.length,0);
+ assert.equal(f.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false);
+});
