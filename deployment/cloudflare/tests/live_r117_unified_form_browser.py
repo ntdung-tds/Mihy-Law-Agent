@@ -489,6 +489,18 @@ def scenario(browser,name,viewport,origin):
     page.locator("#legal-qa-matter").select_option("")
     assert page.locator("#legal-qa-result").is_hidden(), "Matter switch must invalidate answer"
     assert not page.locator("#legal-qa-output").inner_text()
+    # R134 fail-closed clipboard fallback: a script can modify a field without
+    # dispatching input/change. Copy must still compare the original snapshot.
+    page.locator("#legal-qa-matter").select_option(F)
+    page.locator("#legal-qa-run").click()
+    coverage.wait_for(state="visible",timeout=15000)
+    page.evaluate("""() => {
+      document.getElementById('legal-qa-question').value =
+        'Yêu cầu đổi bằng lập trình nhưng không gửi sự kiện input';
+    }""")
+    page.locator("#legal-qa-copy").click()
+    assert page.locator("#legal-qa-result").is_hidden(), "Silent edit must block UC03 copy"
+    assert not page.locator("#legal-qa-output").inner_text()
     # Simulate a pending provider reply which arrives after the user edits input.
     page.locator("#legal-qa-matter").select_option(F)
     page.evaluate("""() => {
