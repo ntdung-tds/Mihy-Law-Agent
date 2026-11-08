@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {legalApi,LEGAL_MATTER_ACCESS_SQL,LEGAL_QUOTA_SQL,sourceReferencesExist,summaryReviewCheck,grammarIntegrityCheck,grammarEditedText} from '../src/qa_legal_workflows.mjs';
+import {legalApi,LEGAL_MATTER_ACCESS_SQL,LEGAL_QUOTA_SQL,sourceReferencesExist,translationSourceCoverage,summaryReviewCheck,grammarIntegrityCheck,grammarEditedText} from '../src/qa_legal_workflows.mjs';
 
 const I='11111111-1111-4111-8111-111111111111';
 const U='22222222-2222-4222-8222-222222222222';
@@ -195,6 +195,56 @@ test('R130 UC07: API returns scoped grammar risk without changing model output, 
  const no=await legalApi(request({uc:'UC07',source}),denied.env,{now:NOW});
  assert.equal(no.status,404);
  assert.equal(denied.providerCalls.length,0);
+});
+
+test('R135 UC03: markers in AI commentary do not count as translated paragraphs',()=>{
+ const rows=[
+  {id:'A1',text:'Điều 1. Bên A bàn giao 10 tài liệu ngày 15/09/2026.'},
+  {id:'A2',text:'Điều 2. Bên B thanh toán 2.000.000 đồng.'}
+ ];
+ const onlyComment=translationSourceCoverage(rows,
+  '[A1] Article 1. Party A delivers the documents.\nLưu ý: đoạn [A2] trong nguồn có thông tin thanh toán.');
+ assert.equal(onlyComment.status,'review_required');
+ assert.equal(onlyComment.marked_segment_count,1);
+ assert.deepEqual(onlyComment.missing_source_ids,['A2']);
+ assert.deepEqual(onlyComment.misplaced_source_ids,['A2']);
+ assert.deepEqual(onlyComment.duplicate_source_ids,[]);
+ const duplicate=translationSourceCoverage(rows,
+  '[A1] Article 1. Party A delivers documents.\n' +
+  'Chú thích: [A1] cũng nói tới lịch giao.\n[A2] Article 2. Party B pays.');
+ assert.equal(duplicate.status,'review_required');
+ assert.equal(duplicate.marked_segment_count,1);
+ assert.deepEqual(duplicate.missing_source_ids,['A1']);
+ assert.deepEqual(duplicate.duplicate_source_ids,['A1']);
+ const valid=translationSourceCoverage(rows,
+  '[A1] Article 1. Party A delivers ten documents.\n- [A2] Article 2. Party B pays.');
+ assert.equal(valid.status,'markers_present_not_verified');
+ assert.equal(valid.marked_segment_count,2);
+ assert.deepEqual(valid.missing_source_ids,[]);
+ assert.deepEqual(valid.duplicate_source_ids,[]);
+ assert.deepEqual(valid.misplaced_source_ids,[]);
+ assert.equal(valid.review_required,true,'Labels cannot prove semantic fidelity');
+});
+test('R135 UC03: real QA API retains raw translation but warns on commentary-only marker',async()=>{
+ const source='Điều 1. Bên A bàn giao 10 tài liệu ngày 15/09/2026.\n\nĐiều 2. Bên B thanh toán 2.000.000 đồng.';
+ const answer='[A1] Article 1. Party A delivers documents.\nNote: [A2] source references payment, not translated here.';
+ const f=fixture();
+ f.env.AI.run=async()=>({response:answer});
+ const res=await legalApi(request({uc:'UC03',source,language:'en'}),f.env,{now:NOW});
+ assert.equal(res.status,200,await res.clone().text());
+ const data=await res.json();
+ assert.equal(data.answer,answer,'Do not rewrite the AI draft');
+ assert.equal(data.source_coverage.status,'review_required');
+ assert.equal(data.source_coverage.marked_segment_count,1);
+ assert.deepEqual(data.source_coverage.missing_source_ids,['A2']);
+ assert.deepEqual(data.source_coverage.misplaced_source_ids,['A2']);
+ assert.equal(data.review_required,true);
+ assert.ok(f.calls.every(c=>c.params.every(v=>v!==source&&v!==answer)),
+   'Neither input nor AI draft can be stored in D1');
+ const other=fixture();
+ const otherResult=await legalApi(request({uc:'UC04',source}),other.env,{now:NOW});
+ assert.equal(otherResult.status,200);
+ assert.equal(Object.hasOwn(await otherResult.json(),'source_coverage'),false);
 });
 
 test('R128 UC04: omission signals for missing obligation anchors, key amounts and dates',()=>{
