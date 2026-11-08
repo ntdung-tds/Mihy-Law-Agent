@@ -26,6 +26,8 @@ export const CASE_ACL_SQL=[
  'SELECT 1 AS allowed FROM qa_matters m JOIN qa_matter_catalog c',
  'ON c.installation_id=m.installation_id AND c.tenant_id=m.tenant_id AND c.matter_id=m.matter_id',
  'WHERE m.installation_id=? AND m.tenant_id=? AND m.matter_id=?',
+ 'AND NOT EXISTS(SELECT 1 FROM qa_matter_hides h WHERE h.installation_id=m.installation_id',
+ 'AND h.tenant_id=m.tenant_id AND h.matter_id=m.matter_id)',
  'AND EXISTS(SELECT 1 FROM qa_matter_acl a WHERE a.installation_id=m.installation_id AND a.tenant_id=m.tenant_id',
  "AND a.matter_id=m.matter_id AND a.user_id=? AND a.permission=? AND a.effect='allow'",
  'AND a.acl_version=m.acl_version AND a.valid_from<=? AND (a.valid_to IS NULL OR a.valid_to>?))',
@@ -94,6 +96,8 @@ const INSERT_SQL=[
  'assignee_user_id,client_label,counterparty_label,summary,deadline,version,updated_by,updated_at)',
  'SELECT ?,?,?,?,?,?,?,?,?,?,?,?,1,?,? FROM qa_matters m',
  'WHERE m.installation_id=? AND m.tenant_id=? AND m.matter_id=?',
+ 'AND NOT EXISTS(SELECT 1 FROM qa_matter_hides h WHERE h.installation_id=m.installation_id',
+ 'AND h.tenant_id=m.tenant_id AND h.matter_id=m.matter_id)',
  'AND NOT EXISTS(SELECT 1 FROM qa_case_details d WHERE d.installation_id=m.installation_id',
  'AND d.tenant_id=m.tenant_id AND d.matter_id=m.matter_id)',
  'AND',ACL_FRAGMENT
@@ -104,6 +108,8 @@ const UPDATE_SQL=[
  'WHERE installation_id=? AND tenant_id=? AND matter_id=? AND version=?',
  'AND EXISTS(SELECT 1 FROM qa_matters m WHERE m.installation_id=qa_case_details.installation_id',
  'AND m.tenant_id=qa_case_details.tenant_id AND m.matter_id=qa_case_details.matter_id',
+ 'AND NOT EXISTS(SELECT 1 FROM qa_matter_hides h WHERE h.installation_id=m.installation_id',
+ 'AND h.tenant_id=m.tenant_id AND h.matter_id=m.matter_id)',
  'AND',ACL_FRAGMENT,')'
 ].join(' ');
 async function details(req,env,p,matter,now){
@@ -157,6 +163,8 @@ const FILE_INSERT_SQL=[
  'byte_length,sha256,object_key,uploaded_by,uploaded_at)',
  'SELECT ?,?,?,?,?,?,?,?,?,?,? FROM qa_matters m',
  'WHERE m.installation_id=? AND m.tenant_id=? AND m.matter_id=?',
+ 'AND NOT EXISTS(SELECT 1 FROM qa_matter_hides h WHERE h.installation_id=m.installation_id',
+ 'AND h.tenant_id=m.tenant_id AND h.matter_id=m.matter_id)',
  'AND',ACL_FRAGMENT
 ].join(' ');
 function validMagic(bytes,extension){
