@@ -19,6 +19,16 @@
     const uc07Acknowledged=byId('legal-qa-uc07-reviewed');
     const uc07Copy=byId('legal-qa-uc07-copy-edited');
     const uc07CopyStatus=byId('legal-qa-uc07-copy-status');
+    const fileDetails=byId('legal-qa-file-details');
+    const fileInput=byId('legal-qa-file-input');
+    const fileConsent=byId('legal-qa-file-consent');
+    const fileRead=byId('legal-qa-file-extract');
+    const fileStatus=byId('legal-qa-file-status');
+    const filePreview=byId('legal-qa-file-preview');
+    const fileMeta=byId('legal-qa-file-meta');
+    const fileText=byId('legal-qa-file-text');
+    const fileReviewed=byId('legal-qa-file-reviewed');
+    const fileUse=byId('legal-qa-file-use');
     const uc0304Compare=byId('legal-qa-uc03-04-compare');
     const uc0304Original=byId('legal-qa-uc03-04-original');
     const uc0304Draft=byId('legal-qa-uc03-04-draft');
@@ -30,6 +40,7 @@
     let activeUc=null, requestGeneration=0, activeController=null;
     let uc07Review=null; // In-memory only; never a persisted legal sign-off.
     let uc0304Review=null; // R137: source/draft review in RAM, not approval.
+    let fileEpoch=0,fileController=null,importedFile=null; // R138: in-memory only.
     // R134: keep the exact source/Matter/question snapshot belonging to a
     // displayed result. An old response must not appear or be copied after
     // edits, even when an input was changed programmatically (no DOM event).
@@ -291,7 +302,108 @@
       panel.open=!(window.matchMedia?.('(max-width: 620px)')?.matches);
       panel.hidden=false;
     }
+    // R138: All file bytes are discarded once the provider has returned a
+    // bounded preview. Neither original bytes nor preview is stored locally.
+    function resetFileImport(clearSelection=false){
+      fileEpoch++;fileController?.abort();fileController=null;
+      importedFile=null;filePreview.hidden=true;fileText.textContent='';
+      fileMeta.textContent='';fileReviewed.checked=false;fileUse.disabled=true;
+      fileRead.disabled=false;
+      if(clearSelection){fileInput.value='';fileConsent.checked=false;}
+      fileStatus.textContent='Chọn tệp và xác nhận trước khi trích nội dung.';
+      delete fileStatus.dataset.state;
+    }
+    const fileStillSame=context=>!!context&&
+      context.epoch===fileEpoch&&activeUc===context.uc&&
+      matter.value===context.matter&&
+      fileInput.files?.[0]===context.file&&fileConsent.checked;
+    const setFileStatus=(message,bad=false)=>{
+      fileStatus.textContent=message;fileStatus.dataset.state=bad?'error':'info';
+    };
+    fileInput.addEventListener('change',()=>{
+      resetFileImport();fileConsent.checked=false;
+    });
+    fileConsent.addEventListener('change',()=>{
+      if(!fileConsent.checked)resetFileImport();
+    });
+    fileRead.addEventListener('click',async()=>{
+      const selected=fileInput.files?.[0],task=activeUc;
+      if(!selected||!['UC03','UC04','UC07'].includes(task)||!matter.value||
+         !fileConsent.checked){
+        setFileStatus('Chọn tệp PDF/DOCX giả lập, hồ sơ QA và xác nhận chuyển đổi.',true);
+        return;
+      }
+      if(selected.size<5||selected.size>1500000||
+         !/\.(?:pdf|docx)$/iu.test(selected.name)){
+        setFileStatus('Chỉ đọc PDF/DOCX QA hợp lệ, tối đa 1,5 MB.',true);return;
+      }
+      resetFileImport(); // Reset any previous preview and abort stale requests.
+      const current={epoch:fileEpoch,uc:task,matter:matter.value,file:selected};
+      const controller=new AbortController();fileController=controller;
+      fileRead.disabled=true;
+      setFileStatus('Đang trích văn bản trong bộ nhớ Cloudflare QA. Không lưu tệp…');
+      try{
+        const form=new FormData();
+        form.append('uc',task);form.append('matter_id',matter.value);
+        form.append('synthetic_consent','true');form.append('file',selected,selected.name);
+        const response=await fetch('/api/qa/legal/extract',{
+          method:'POST',body:form,credentials:'same-origin',cache:'no-store',
+          signal:controller.signal
+        });
+        if(response.status===401&&fileStillSame(current)){location.replace('/login');return;}
+        const data=await response.json().catch(()=>({}));
+        if(!fileStillSame(current))return;
+        if(!response.ok)throw Error(data.error||'Không thể trích văn bản từ tệp QA.');
+        const extracted=data.source_text;
+        if(typeof extracted!=='string'||extracted.length<30||extracted.length>5000||
+           data.storage!=='none'||data.review_required!==true||
+           data.file_name!==selected.name||data.file_size!==selected.size||
+           data.uc!==task||!/^[a-f0-9]{64}$/.test(data.source_sha256||'')){
+          throw Error('Kết quả trích xuất không đủ điều kiện đối chiếu.');
+        }
+        importedFile={...current,text:extracted};
+        fileText.textContent=extracted;
+        fileMeta.textContent=selected.name+' · '+selected.size+' byte · SHA-256 '+
+          data.source_sha256.slice(0,16)+'…';
+        fileReviewed.checked=false;fileUse.disabled=true;
+        filePreview.hidden=false;
+        setFileStatus('Đã đọc văn bản QA; mở tệp gốc để đối chiếu trước khi đưa vào nguồn A.');
+      }catch(error){
+        if(!fileStillSame(current)||error?.name==='AbortError')return;
+        importedFile=null;filePreview.hidden=true;fileReviewed.checked=false;
+        fileUse.disabled=true;fileText.textContent='';
+        setFileStatus(error?.message||'Không thể đọc tệp QA.',true);
+      }finally{
+        if(fileStillSame(current)){fileRead.disabled=false;fileController=null;}
+      }
+    });
+    fileReviewed.addEventListener('change',()=>{
+      if(!fileStillSame(importedFile)||filePreview.hidden){
+        fileReviewed.checked=false;
+      }
+      fileUse.disabled=!fileReviewed.checked;
+    });
+    fileUse.addEventListener('click',()=>{
+      if(!fileStillSame(importedFile)){
+        resetFileImport();
+        setFileStatus('Tệp hoặc hồ sơ đã thay đổi. Hãy đọc lại tệp QA.',true);
+        return;
+      }
+      if(!fileReviewed.checked||fileUse.disabled||filePreview.hidden)return;
+      const text=importedFile.text;
+      // No implicit legal AI request. A fresh synthetic-consent checkbox is
+      // required for the existing UC03/04/07 submit path.
+      byId('legal-qa-source').value=text;
+      byId('legal-qa-source').dispatchEvent(new Event('input',{bubbles:true}));
+      byId('legal-qa-consent').checked=false;
+      resetFileImport(true);
+      setStatus('Đã đưa đoạn văn bản đã đối chiếu vào nguồn A. Kiểm tra lại nội dung, sau đó xác nhận gửi AI nếu muốn.');
+    });
+    byId('legal-qa-source').addEventListener('input',()=>resetFileImport());
+    matter.addEventListener('change',()=>resetFileImport());
     function updateTaskFields(){
+      resetFileImport(true);fileDetails.open=false;
+      fileDetails.hidden=!['UC03','UC04','UC07'].includes(uc.value);
       const dual=['UC06','UC08'].includes(uc.value);
       byId('legal-qa-source-b-label').hidden=!dual;
       secondary.required=dual;
@@ -320,6 +432,7 @@
       if(workflowPanel)delete workflowPanel.dataset.activeUc;
       if(inputDetails)inputDetails.open=true;
       byId('legal-qa-run').disabled=false;
+      resetFileImport(true);fileDetails.open=false;
       byId('legal-qa-source').value='';
       secondary.value='';question.value='';
       byId('legal-qa-consent').checked=false;
@@ -339,6 +452,7 @@
     window.addEventListener('ai-law:workflow-open',event=>activateWorkflow(event.detail?.uc));
     window.addEventListener('ai-law:workflow-close',clearWorkflow);
     byId('legal-qa-example').addEventListener('click',()=>{
+      resetFileImport(true);
       if(isSubmitting){
         requestGeneration++;activeController?.abort();activeController=null;
         isSubmitting=false;byId('legal-qa-run').disabled=false;
@@ -379,7 +493,9 @@
           matter.append(item);
         }
         matter.value=previously&&[...matter.options].some(o=>o.value===previously)?previously:'';
-        if(previously!==matter.value)invalidateResultOnInput();
+        if(previously!==matter.value){
+          invalidateResultOnInput();resetFileImport();
+        }
         setStatus(data.matters.length
           ?'Chọn hồ sơ có quyền truy cập để thử nghiệp vụ AI với văn bản mẫu.'
           :'Chưa có hồ sơ QA. Chọn “Tạo hồ sơ QA mới” để tiếp tục.');
