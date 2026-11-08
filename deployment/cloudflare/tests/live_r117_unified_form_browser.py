@@ -25,7 +25,8 @@ def scenario(browser,name,viewport,origin):
     calls=[]
     qa_import_pdf=b"%PDF-1.4\\nSynthetic QA only Article 1 Party A delivers 10 documents.\\n%%EOF"
     qa_import_docx=b"PK\\x03\\x04Synthetic QA DOCX sample bytes (converter mocked by test)"
-    qa_import_files={"qa_r138.pdf":qa_import_pdf,"qa_r138.docx":qa_import_docx}
+    qa_import_files={"qa_r138.pdf":qa_import_pdf,"qa_r138.docx":qa_import_docx,
+                     "qa_r139_badsha.pdf":qa_import_pdf}
     qa_import_text="Điều 1. Bên A giao 10 tài liệu vào ngày 15/09/2026. Bên B thanh toán 2.000.000 đồng."
     def as_row(c):
         return dict(id=c["id"],title=c["title"],created_at=1800000000,
@@ -58,7 +59,9 @@ def scenario(browser,name,viewport,origin):
                 "uc":"UC03","file_name":file_name,
                 "file_size":len(qa_import_files[file_name]),
                 "file_type":"pdf" if file_name.endswith(".pdf") else "docx",
-                "source_sha256":"c"*64,"source_text":qa_import_text,
+                "source_sha256":("0"*64 if file_name=="qa_r139_badsha.pdf" else
+                                 hashlib.sha256(qa_import_files[file_name]).hexdigest()),
+                "source_text":qa_import_text,
                 "mode":"qa_file_text_preview_not_verified",
                 "review_required":True,"storage":"none",
                 "note":"Synthetic text conversion for review; no storage."})
@@ -555,6 +558,41 @@ def scenario(browser,name,viewport,origin):
         assert not page.locator("#legal-qa-consent").is_checked()
         assert page.locator("#legal-qa-file-preview").is_hidden()
         assert file_input.input_value()==""
+    # R139: UI must independently calculate SHA-256 from the selected File,
+    # not trust server-side checksum formatting or display alone. A forged but
+    # correctly shaped digest cannot permit a preview/import or model call.
+    run_before=len([c for c in calls if c==("POST","/api/qa/legal/run")])
+    source_before=source.input_value()
+    file_input.set_input_files({"name":"qa_r139_badsha.pdf",
+        "mimeType":"application/pdf","buffer":qa_import_pdf})
+    page.locator("#legal-qa-file-consent").check()
+    page.locator("#legal-qa-file-extract").click()
+    page.wait_for_function("""() =>
+       document.getElementById('legal-qa-file-status').dataset.state==='error'""")
+    assert "SHA-256" in file_status.inner_text()
+    assert page.locator("#legal-qa-file-preview").is_hidden()
+    assert not file_use.is_enabled()
+    assert source.input_value()==source_before
+    assert len([c for c in calls if c==("POST","/api/qa/legal/run")])==run_before
+    # R139: DOM values may change without an input event. Existing source A
+    # must never be silently replaced by an already-reviewed file.
+    file_input.set_input_files({"name":"qa_r138.pdf",
+        "mimeType":"application/pdf","buffer":qa_import_pdf})
+    page.locator("#legal-qa-file-consent").check()
+    page.locator("#legal-qa-file-extract").click()
+    page.locator("#legal-qa-file-preview").wait_for(state="visible",timeout=15000)
+    file_review.check()
+    assert file_use.is_enabled()
+    injected_source="Nguồn A vừa được người khác sửa trong DOM mà không có input event."
+    page.evaluate("""sourceValue => {
+      document.getElementById('legal-qa-source').value=sourceValue;
+    }""",injected_source)
+    file_use.click()
+    assert source.input_value()==injected_source
+    assert page.locator("#legal-qa-file-preview").is_hidden()
+    assert not file_use.is_enabled()
+    assert "nguồn A" in file_status.inner_text()
+    assert len([c for c in calls if c==("POST","/api/qa/legal/run")])==run_before
     # Backend blocks oversize multipart and browser must refuse before fetch.
     file_input.set_input_files({"name":"huge_qa.pdf","mimeType":"application/pdf",
         "buffer":b"%PDF-"+b"z"*1500000})
