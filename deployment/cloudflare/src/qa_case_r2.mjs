@@ -354,18 +354,46 @@ async function hideFile(req,env,p,matter,now,fileId){
  if(!hidden||hidden.hidden_by!==p.user_id)return forbidden();
  return json(200,{id:fileId,hidden:true,physical_deleted:false});
 }
-async function events(env,p,matter,now){
+const AUDIT_PAGE_SIZE=30;
+async function events(req,env,p,matter,now){
+ // R126 keyset pagination: each page rechecks live ACL and tenant scope.
+ // The cursor is untrusted input and controls position ONLY, never access.
+ const url=new URL(req.url);
+ const params=url.searchParams;
+ if([...params.keys()].some(k=>k!=='before_at'&&k!=='before_id')||
+    params.getAll('before_at').length>1||params.getAll('before_id').length>1)
+  return error(400,'Bộ lọc lịch sử không hợp lệ.');
+ const t=params.get('before_at'),eventId=params.get('before_id');
+ if((t===null)!==(eventId===null))return error(400,'Thiếu thông tin trang lịch sử.');
+ let beforeAt=null;
+ if(t!==null){
+  if(!/^[1-9]\d{0,11}$/.test(t)||!Number.isSafeInteger(Number(t))||
+     !/^[a-z0-9-]{1,128}$/.test(eventId||''))
+   return error(400,'Mốc lịch sử không hợp lệ.');
+  beforeAt=Number(t);
+ }
  if(!await permitted(env,p,matter,'read',now))return forbidden();
  const mayViewHistoryValues=await permitted(env,p,matter,'write',now);
- const rows=await env.DB.prepare([
+ const sql=[
   'SELECT e.event_id,e.action,e.file_id,e.actor_id,e.occurred_at,e.changes_json,',
   "COALESCE(NULLIF(p.display_name,''),substr(e.actor_id,1,8)) AS actor_name",
   'FROM qa_case_audit_v2 e LEFT JOIN qa_account_profiles p',
   'ON p.installation_id=e.installation_id AND p.user_id=e.actor_id',
   'WHERE e.installation_id=? AND e.tenant_id=? AND e.matter_id=?',
-  'ORDER BY e.occurred_at DESC,e.event_id DESC LIMIT 100'
- ].join(' ')).bind(env.INSTALLATION_ID,p.tenant_id,matter).all();
- return json(200,{events:(rows.results||[]).map(x=>{
+  ...(beforeAt===null?[]:[
+   'AND (e.occurred_at < ? OR (e.occurred_at = ? AND e.event_id < ?))'
+  ]),
+  'ORDER BY e.occurred_at DESC,e.event_id DESC LIMIT '+(AUDIT_PAGE_SIZE+1)
+ ].join(' ');
+ const bind=[env.INSTALLATION_ID,p.tenant_id,matter];
+ if(beforeAt!==null)bind.push(beforeAt,beforeAt,eventId);
+ const rows=await env.DB.prepare(sql).bind(...bind).all();
+ const entries=rows.results||[];
+ const page=entries.slice(0,AUDIT_PAGE_SIZE);
+ const last=page[page.length-1];
+ const next=entries.length>AUDIT_PAGE_SIZE&&last
+  ?{at:Number(last.occurred_at),id:last.event_id}:null;
+ return json(200,{events:page.map(x=>{
   let changes={};
   try{const parsed=JSON.parse(x.changes_json||'{}');
    if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))changes=parsed;
@@ -379,7 +407,7 @@ async function events(env,p,matter,now){
   }
   return{id:x.event_id,action:x.action,file_id:x.file_id,actor_id:x.actor_id,
    actor_name:x.actor_name,created_at:x.occurred_at,changes};
- })});
+ }),next_cursor:next});
 }
 export async function caseR2Api(req,env,opts={}){
  if(!configured(env))return unavailable();
@@ -402,7 +430,7 @@ export async function caseR2Api(req,env,opts={}){
   if(m[2]==='files')return m[3]&&!m[4]
    ?hideFile(req,env,principal,m[1],now,m[3])
    :files(req,env,principal,m[1],now,m[3]);
-  if(m[2]==='events')return events(env,principal,m[1],now);
+  if(m[2]==='events')return events(req,env,principal,m[1],now);
   return details(req,env,principal,m[1],now);
  }catch{return unavailable();}
 }
