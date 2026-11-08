@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 109,
-  "updated_at": "2026-11-08T04:08:42.185Z",
+  "revision": 110,
+  "updated_at": "2026-11-08T04:48:34.749Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2286,6 +2286,65 @@
         },
         "owner_acceptance": "PENDING_R117",
         "srs_change": "SC-020 UX-only; frozen private v1.1.15 unchanged"
+      },
+      {
+        "id": "AL-R0-CASE-MOBILE-R118-001",
+        "title": "R118 mobile case management: list first, create on demand, tap read-only details, explicit edit/back",
+        "priority": "P0",
+        "status": "QA_SITE_DEPLOYED_CI_PASS_9_OF_9_MOCK_CHROMIUM_MOBILE_DESKTOP_PASS_OWNER_REAL_ANDROID_E2E_NOT_RUN",
+        "srs": "SRS v1.1.15 unchanged; Owner mobile UX requirement SC-021, design rule for future approved list/detail/create screens only",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/167",
+        "implementation": {
+          "mobile_default": "SAVED_CASE_LIST_ONLY",
+          "mobile_states": [
+            "list",
+            "create",
+            "detail_readonly",
+            "edit"
+          ],
+          "mobile_new_case": "ONLY_AFTER_EXPLICIT_TAO_MOI_OR_UC_QUICK_CREATE",
+          "mobile_case_open": "TAP_CASE_TITLE_TO_READ_ONLY_DETAIL",
+          "mobile_edit": "EXPLICIT_CHINH_SUA_AND_WRITE_PERMISSION",
+          "mobile_back": "EXPLICIT_LEFT_ARROW_DANH_SACH",
+          "desktop": "R117_UNIFIED_FORM_PLUS_SAVED_LIST_UNCHANGED",
+          "backend": "NO_CHANGE",
+          "database": "NO_CHANGE",
+          "r2": "NO_CHANGE",
+          "production": "UNTOUCHED"
+        },
+        "qa_site": {
+          "worker": "ai-law-web-qa",
+          "deployment": "0f2ed334-7fe2-4576-a9d4-e549a6ae40cb",
+          "version": "ddeeb6c7-1f77-4c1b-aab5-5cd1ab2a07d5",
+          "traffic": "100%",
+          "modules_total": 27,
+          "updated": [
+            "workspace_html.mjs",
+            "workspace_css.mjs",
+            "workspace_matters.mjs",
+            "workspace_js.mjs"
+          ],
+          "preserved": 23,
+          "bindings_preserved": [
+            "QA_AUTH",
+            "GOOGLE_PICKER_API_KEY"
+          ],
+          "source_readback": "PASS",
+          "five_main_routes": "PASS"
+        },
+        "ci": {
+          "run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42447984685",
+          "executed_jobs": "PASS_9_OF_9",
+          "skipped_jobs": "21_CONDITIONAL",
+          "r118_ui_contract": "PASS",
+          "r77_cookie_mobile_list_and_click_new": "PASS_CHROMIUM_LOCAL_FIXTURE",
+          "r117_desktop_new_save_r2_mock_edit": "PASS_CHROMIUM_LOCAL_FIXTURE",
+          "r117_mobile_list_new_detail_edit_back": "PASS_CHROMIUM_LOCAL_FIXTURE",
+          "user_signed_in_android_web": "NOT_RUN",
+          "real_authenticated_r2_e2e": "NOT_RUN",
+          "live_cross_tenant_acl": "NOT_RUN"
+        },
+        "owner_acceptance": "PENDING_R118"
       }
     ],
     "features": [

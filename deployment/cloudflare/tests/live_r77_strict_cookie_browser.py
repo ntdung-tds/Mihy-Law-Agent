@@ -56,7 +56,13 @@ def main():
                     # R116: previous Google Drive chooser is paused. The new
                     # private R2 file control must stay readable on both widths.
                     assert page.locator(".qa-document-box").get_attribute("hidden") is not None
-                    page.evaluate("document.getElementById('qa-case-detail').hidden=false")
+                    if name=="mobile":
+                        # R118 list-first: the upload form must be absent until Tạo mới.
+                        page.locator(".qa-case-saved-list").wait_for(state="visible",timeout=10000)
+                        assert not page.locator("#matter-form").is_visible()
+                        assert not page.locator("#case-r2-file").is_visible()
+                        page.locator("#upload-btn").click()
+                        page.locator("#matter-form").wait_for(state="visible",timeout=10000)
                     picker=page.locator("#case-r2-file")
                     picker.wait_for(state="visible",timeout=10000)
                     box=picker.bounding_box()

@@ -15,6 +15,59 @@
   client_label:'',counterparty_label:'',summary:'',deadline:''};
  let matters=[],currentId='',caseVersion=0,titleVersion=0,originalTitle='',originalDetails=null;
  let canWrite=true,saving=false,workspaceGeneration=0,loadGeneration=0;
+
+ // Mobile navigation contract: list first; create, detail and edit are explicit.
+ // Desktop keeps the R117 full editor + list side-by-side.
+ const media=typeof window.matchMedia==='function'
+   ?window.matchMedia('(max-width: 720px)'):{matches:false};
+ const screen=$('#matter-workspace');
+ let pendingCreate=false,mobileMode='list';
+ function mobileView(mode,focus=false){
+  mobileMode=mode;
+  if(screen?.dataset)screen.dataset.mobileMode=mode;
+  const onMobile=media.matches;
+  const close=$('#case-close');
+  if(close)close.textContent=onMobile?'← Danh sách hồ sơ':'+ Hồ sơ mới';
+  const edit=$('#case-mobile-edit');
+  if(edit)edit.hidden=!(onMobile&&mode==='detail'&&canWrite);
+  const heading=$('#matter-title-heading');
+  if(heading)heading.textContent=onMobile?({
+   create:'Tạo hồ sơ mới',detail:'Chi tiết hồ sơ',
+   edit:'Chỉnh sửa hồ sơ',list:'Thông tin hồ sơ vụ việc'
+  }[mode]||'Thông tin hồ sơ vụ việc'):'Thông tin hồ sơ vụ việc';
+  if(onMobile){
+   if(mode!=='list')screen?.scrollIntoView?.({behavior:'instant',block:'start'});
+   if(focus){
+    if(mode==='create')title.focus?.();
+    else if(mode==='list')$('#matter-search')?.focus?.();
+    else close?.focus?.();
+   }
+  }
+ }
+ function lockMobileDetail(){
+  if(!media.matches)return;
+  for(const control of form.querySelectorAll('input,textarea,select,button'))control.disabled=true;
+  save.disabled=true;
+  filePicker.disabled=true;
+ }
+ function startNew(){
+  if(saving)return;
+  resetEditor();
+  mobileView('create',true);
+ }
+ function backToList(){
+  if(saving)return;
+  resetEditor();
+  mobileView('list',true);
+ }
+ function startEdit(){
+  if(saving||!currentId||!canWrite||!media.matches)return;
+  for(const control of form.querySelectorAll('input,textarea,select,button'))control.disabled=false;
+  filePicker.disabled=false;
+  save.disabled=false;
+  mobileView('edit',true);
+ }
+
  const base=()=>'/api/qa/cases/'+encodeURIComponent(currentId);
  const note=(message,bad=false)=>{
   const n=$('#matter-feedback');n.textContent=message;n.style.color=bad?'#a52c35':'#267653';
@@ -82,7 +135,10 @@
   const statusLabels={open:'Mới mở',in_progress:'Đang xử lý',on_hold:'Tạm dừng',closed:'Đã đóng'};
   for(const m of filtered){
    const row=document.createElement('div');row.className='matter-row';row.setAttribute('role','listitem');
-   const detail=document.createElement('div');detail.className='case-saved-summary';
+   const detail=document.createElement('button');detail.type='button';
+   detail.className='case-saved-summary case-row-open';
+   detail.setAttribute('aria-label','Xem chi tiết '+m.title);
+   detail.addEventListener('click',()=>void openCase(m.id));
    const name=document.createElement('strong');name.textContent=m.title;
    const sub=document.createElement('small');
    sub.textContent=[m.category||'Chưa phân loại',m.case_reference||('Mã '+m.id.slice(0,8)),
@@ -186,6 +242,8 @@
   if(!uuid.test(id)||saving)return;
   resetEditor(true);
   const scope=workspaceGeneration;currentId=id;
+  mobileView('detail',true);
+  lockMobileDetail();
   saveState.textContent='Đang tải hồ sơ…';save.disabled=true;
   try{
    const r=await req('/api/qa/cases/'+encodeURIComponent(id));
@@ -217,11 +275,13 @@
    $('#case-history-details').hidden=false;
    note(canWrite?'Đã mở hồ sơ. Chỉnh sửa hoặc chọn thêm tệp rồi bấm “Lưu thay đổi”.':'Bạn chỉ có quyền xem hồ sơ.');
    fileNote('');
+   if(media.matches){lockMobileDetail();mobileView('detail');}
+   else mobileView('edit');
    void Promise.all([refreshFiles(scope,id),refreshEvents(scope,id)]);
    $('#matter-title-heading').scrollIntoView({behavior:'smooth',block:'start'});
   }catch(e){
    if(scope===workspaceGeneration){saveState.textContent='Không mở được hồ sơ';note(e?.message||'Không thể tải hồ sơ.',true);}
-  }finally{if(scope===workspaceGeneration)save.disabled=!canWrite;}
+  }finally{if(scope===workspaceGeneration)save.disabled=media.matches||!canWrite;}
  }
  async function downloadFile(id,file,button){
   if(!uuid.test(file.id||'')||!/^[a-f0-9]{64}$/.test(file.sha256||''))return;
@@ -343,6 +403,10 @@
     note(files.length?'Đã lưu hồ sơ và '+files.length+' tệp vào R2 thành công.':'Đã lưu hồ sơ thành công.');
    }
    await load({silent:true});
+   if(scope===workspaceGeneration&&media.matches){
+    lockMobileDetail();
+    mobileView('detail');
+   }
    void refreshEvents(scope,id);
   }catch(e){
    if(scope===workspaceGeneration)
@@ -351,22 +415,42 @@
    if(currentId)void load({silent:true});
   }finally{
    saving=false;$('#case-close').disabled=false;
-   if(scope===workspaceGeneration)save.disabled=!canWrite;
+   if(scope===workspaceGeneration)save.disabled=!canWrite||(media.matches&&mobileMode==='detail');
   }
  });
- $('#case-close').addEventListener('click',()=>{if(!saving){resetEditor();title.focus();}});
- $('#upload-btn')?.addEventListener('click',()=>{if(!saving)resetEditor();});
+ $('#case-close').addEventListener('click',()=>{if(media.matches)backToList();else startNew();});
+ $('#case-mobile-edit')?.addEventListener('click',startEdit);
  search.addEventListener('input',show);
  categoryFilter?.addEventListener('change',show);
  $('#matter-refresh').addEventListener('click',()=>void load());
  window.addEventListener('ai-law:case-open',e=>void openCase(e.detail?.id));
- window.addEventListener('ai-law:documents-open',()=>void load({silent:true}));
+ // The navigation controller sends create intent BEFORE changing URL hash.
+ // Consuming it on documents-open avoids the browser hashchange race.
+ window.addEventListener('ai-law:case-create',()=>{
+  pendingCreate=true;
+  if(!$('#view-documents')?.hidden)startNew();
+ });
+ window.addEventListener('ai-law:documents-open',()=>{
+  if(media.matches){
+   if(pendingCreate)startNew();
+   else if(!saving)backToList();
+  }else if(pendingCreate)startNew();
+  pendingCreate=false;
+  void load({silent:true});
+ });
  window.addEventListener('ai-law:workspace-switch',()=>{
+  pendingCreate=false;
   workspaceGeneration++;loadGeneration++;
   clearList();resetEditor(true);
+  mobileView('list');
   note('Đã chuyển không gian. Đang tải danh sách hồ sơ mới…');
   void load({silent:true});
  });
+ if(typeof media.addEventListener==='function')media.addEventListener('change',()=>{
+  if(media.matches&&!saving)backToList();
+  else if(!media.matches)mobileView(currentId?'edit':'create');
+ });
  resetEditor(true);
+ mobileView(media.matches?'list':'create');
  void load({silent:true});
 })();
