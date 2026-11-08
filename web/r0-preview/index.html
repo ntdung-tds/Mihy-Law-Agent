@@ -117,6 +117,10 @@
             <button class="btn btn-primary" type="button" id="upload-btn"><svg class="icon"><use href="#i-plus"/></svg> Tạo hồ sơ QA</button><input type="file" id="local-file" accept=".docx,.pdf" hidden /></div>
           <div class="demo-disclaimer"><svg class="icon"><use href="#i-shield"/></svg><div><strong>Đã kết nối dữ liệu hồ sơ QA thật — chưa lưu tài liệu</strong>
             <span>Danh mục và phân quyền được lưu trong D1. Không nhập tên khách hàng hoặc dữ liệu vụ việc thật. Google Drive, tải tệp và xử lý AI chưa kích hoạt.</span></div></div>
+          <div class="workflow-resume" id="workflow-resume-panel" hidden>
+            <button id="workflow-resume" type="button" class="workflow-matter-link">← Quay lại nghiệp vụ đang thực hiện</button>
+            <p>Danh mục hồ sơ QA đã tạo sẽ được làm mới khi bạn quay lại.</p>
+          </div>
           <section id="matter-workspace" class="matter-workspace" aria-labelledby="matter-title-heading">
             <div class="matter-card">
               <h2 id="matter-title-heading">Tạo hồ sơ mới</h2>
@@ -183,9 +187,12 @@
             </div>
             <form id="legal-qa-form" class="legal-qa-form">
               <div class="legal-qa-grid">
-                <label for="legal-qa-matter">Hồ sơ QA đã tạo
-                  <select id="legal-qa-matter" required><option value="">Đang tải hồ sơ…</option></select>
-                </label>
+                <div class="workflow-matter-control">
+                  <label for="legal-qa-matter">Hồ sơ QA đã tạo
+                    <select id="legal-qa-matter" required><option value="">Đang tải hồ sơ…</option></select>
+                  </label>
+                  <button id="workflow-create-matter" type="button" class="workflow-matter-link">+ Tạo hồ sơ QA mới</button>
+                </div>
                 <div class="workflow-form-note" role="note">✦ Mỗi nghiệp vụ có màn hình riêng. Đầu ra chỉ là bản nháp QA, chưa phải kết quả pháp lý đã được kiểm chứng.</div>
                 <input type="hidden" id="legal-qa-uc" value="UC03" />
               </div>
