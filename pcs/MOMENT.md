@@ -684,3 +684,12 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - **PASS (previous CI only):** Original PR #175 commit `6bc161a992695fc34d057fe06669e684aaa152f5` has completed successful workflow run `42473712712`; this does not prove the corrected assertion executed.
 - **NOT_RUN:** No GitHub PR workflow run yet associated with corrected commit at first check; dedicated R112 test execution and live API/browser E2E unverified.
 - **BLOCKED:** QA deployment pending CI with dedicated test, MatterACL checks and QA reachability. Keep PR draft and no merge until evidence.
+
+
+## R113 — Wire R112 security test into CI (2026-11-08)
+
+- Read `main` PCS STATE/MOMENT: revision 99. Checked PR #157 OPEN, #158 CLOSED (never redeploy), #159 OPEN, #160 OPEN, #163 OPEN, #175 OPEN. Single 11-UC UI remains `/app#assistant`.
+- **FAIL (coverage gap):** PR #175 prior HEAD `d28db9c` workflow run `42483291372` reported success (9 executed jobs, deployment jobs skipped), but `cloudflare-contract` job logs did **not** invoke `deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs`; thus R112 malformed UTF-8 assertion was not executed. CI success was not R112 PASS.
+- **FIX (test-first):** Added an explicit `cloudflare-contract` step running `node --test deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs` on PR #175 head, commit `2bc7df85e191224b336779f7827b2ef86027b032`. Existing R112 test remains unchanged.
+- **NOT_RUN:** CI result for the new commit pending; no claim of R112 PASS until job logs confirm the exact test and successful result. **BLOCKED:** real remote QA API/browser and full E2E not verified. No deploy, no production, no storage/OAuth changes. Only synthetic fixtures.
+- Next: inspect new Actions job output, fix any failures on this draft branch, then check MatterACL/source tests and QA reachability before safe promotion. SRS v1.1.15 unchanged; Owner final acceptance required.
