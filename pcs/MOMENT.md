@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `104` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T01:04:31.177Z`.
+- **PCS revision:** `105` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T01:20:34.134Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R113 — P0 repair hidden UC screen and missing Back (2026-11-08)
+
+- **Owner-reported real failure:** UC menu changed the route but screen appeared empty, no Back. Confirmed source bug: R112 inserted `<section id="view-workflow">` **without closing** `<section id="view-assistant">`, nesting the new UC view inside the hidden assistant. Router intentionally hides assistant when opening workflow, so the inner UC form and Back were also hidden. R112 mock DOM tests did not check HTML hierarchy.
+- **Fix:** One missing `</section>` inserted before workflow in `web/r0-preview/index.html` on draft [PR #161](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/161). Added R113 Node regression parsing all `<section>` opening/closing tags and verifying 5 top-level route sections are siblings; missing or nested views fail CI.
+- **Evidence:** Cloudflare QA Worker `ai-law-web-qa`, active deployment `4cd494c3-059a-4082-9e12-7e29ad9a34a0`, 100% version `c5994600-9e8c-4946-b63e-2645327bfade`; correct structural source validated after upload, **only workspace_html.mjs changed, 26/27 modules preserved**, `QA_AUTH` and Google Picker bindings preserved. One safety check incorrectly compared module arrays by order after upload, triggering a rollback; verified upload source and candidate version bindings, then activated the verified candidate by version deployment. No production or provider/storage changes.
+- **Tests:** R113 actual HTML hierarchy regression **PASS** in cloudflare-contract job on [GitHub Actions #42433594946](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42433594946); final job completion still pending at first check. Cloudflare Browser Rendering attempted source HTML simulation but did not produce a usable DOM assertion and then hit HTTP 429; **NO live signed-in browser PASS claim**. Owner Android/Desktop signed-in UC/Back test **NOT_RUN**, Owner acceptance **PENDING**.
 
 ## R112 — P0: one dedicated screen per legal function (2026-11-08)
 
