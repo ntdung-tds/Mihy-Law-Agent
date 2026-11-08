@@ -232,6 +232,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r115_uc03_translation.test.mjs
       - name: R116 case details, private R2 upload, cross-tenant denial and verified download
         run: node --test deployment/cloudflare/tests/r116_case_r2.test.mjs
+      - name: R125 detailed immutable D1 audit real SQLite trigger and field-diff integration
+        run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r125_detailed_case_audit_sql.py' -v
       - name: R117 unified full-case D1 transaction, legal classification and one-form upload semantics
         run: node --test deployment/cloudflare/tests/r117_unified_case.test.mjs
       - name: R118 mobile list-first case navigation, detail, edit and return
