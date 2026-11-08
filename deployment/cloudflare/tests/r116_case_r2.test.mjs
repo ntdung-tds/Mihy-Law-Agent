@@ -13,7 +13,7 @@ const NOW=1800000000;
 const PDF=new TextEncoder().encode('%PDF-1.4\nQA synthetic, no client data.\n%%EOF');
 const sha=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
 function fixture({role='lawyer',session=true,allowed=true,write=true,r2=true}={}){
- let receipt=null,hidden=false;
+ let receipt=null,hidden=false,detailVersion=0;
  const events=[],objects=new Map(),calls=[];
  const db={prepare(sql){return {bind(...params){
   calls.push({sql,params});
@@ -24,18 +24,31 @@ function fixture({role='lawyer',session=true,allowed=true,write=true,r2=true}={}
     if(sql.includes('SELECT COUNT(*) AS n FROM qa_case_files_r2'))return {n:receipt?1:0};
     if(sql.includes('SELECT f.file_id'))return hidden?null:receipt;
     if(sql.includes('SELECT hidden_by FROM qa_case_file_hides'))return hidden?{hidden_by:U}:null;
-    if(sql.includes('SELECT version FROM qa_case_details'))return null;
+    if(sql.includes('SELECT version,updated_by,updated_at FROM qa_case_details'))
+     return detailVersion?{version:detailVersion,updated_by:U,updated_at:NOW}:null;
+    if(sql.includes('SELECT version FROM qa_case_details'))return detailVersion?{version:detailVersion}:null;
     if(sql.includes("SELECT 1 AS ok FROM qa_memberships"))return {ok:1};
     if(sql.includes('FROM qa_matter_catalog c LEFT JOIN qa_case_details'))return {title:'Hồ sơ QA mẫu',created_at:NOW,version:null};
     return null;
    },
    async all(){
     if(sql.includes('FROM qa_case_files_r2 f WHERE'))return {results:receipt&&!hidden?[receipt]:[]};
+    if(sql.includes('FROM qa_case_audit_v2 e LEFT JOIN qa_account_profiles')){
+     return {results:events.map((e,i)=>({
+      event_id:'event-'+i,action:e.action,file_id:e.file_id,
+      actor_id:U,actor_name:'QA Lawyer',occurred_at:NOW,
+      changes_json:JSON.stringify(e.changes||{})
+     }))};
+    }
     if(sql.includes('FROM qa_case_events WHERE'))return {results:events};
     if(sql.includes('FROM qa_memberships m LEFT JOIN'))return {results:[{user_id:U,label:'QA Lawyer'}]};
     return {results:[]};
    },
    async run(){
+    if(sql.includes('INSERT INTO qa_case_audit_v2')){
+     events.push({action:'file_downloaded',file_id:params[5],changes:{name:params[7],bytes:params[8]}});
+     return {meta:{changes:1}};
+    }
     if(sql.includes('INSERT INTO qa_case_file_hides')){
      if(!allowed||!write||!receipt||hidden)return {meta:{changes:0}};
      hidden=true;return {meta:{changes:1}};
@@ -44,13 +57,15 @@ function fixture({role='lawyer',session=true,allowed=true,write=true,r2=true}={}
      if(!allowed||!write)return {meta:{changes:0}};
      receipt={file_id:params[3],file_name:params[4],mime_type:params[5],
       byte_length:params[6],sha256:params[7],object_key:params[8],uploaded_at:params[10]};
-     events.push({action:'r2_file_uploaded',file_id:receipt.file_id,actor_id:U,occurred_at:NOW});
+     events.push({action:'file_uploaded',file_id:receipt.file_id,actor_id:U,occurred_at:NOW,
+      changes:{name:receipt.file_name,bytes:receipt.byte_length}});
      // Real D1: the R116 AFTER INSERT audit trigger writes a second row.
      return {meta:{changes:2}};
     }
     if(sql.includes('INSERT INTO qa_case_details')||sql.includes('UPDATE qa_case_details')){
-     events.push({action:'details_saved',file_id:null,actor_id:U,occurred_at:NOW});
-     return {meta:{changes:write?1:0}};
+     if(write){detailVersion++;events.push({action:detailVersion===1?'details_created':'details_updated',
+      file_id:null,actor_id:U,occurred_at:NOW,changes:{reference:{from:null,to:'QA-2026-001'}}});}
+     return {meta:{changes:write?3:0}};
     }
     return {meta:{changes:1}};
    }
@@ -102,6 +117,13 @@ test('R116: uploads synthetic PDF to private R2, stores SHA-256 and verifies byt
  assert.deepEqual(new Uint8Array(await response.arrayBuffer()),PDF);
  assert.match(response.headers.get('Content-Disposition'),/attachment/);
  assert.equal(response.headers.get('Cache-Control'),'private, no-store');
+ const audit=await caseR2Api(req(root+'/events'),f.env,{now:NOW});
+ assert.equal(audit.status,200);
+ const history=await audit.json();
+ assert.equal(history.events[0].action,'file_uploaded',JSON.stringify(history));
+ assert.equal(history.events[1].action,'file_downloaded');
+ assert.equal(history.events[0].actor_name,'QA Lawyer');
+ assert.ok(f.calls.some(c=>c.sql.includes('INSERT INTO qa_case_audit_v2')&&c.params.includes('QA sample.pdf')));
  // Tampered R2 bytes can never be downloaded as a successful file.
  f.objects.set([...f.objects.keys()][0],new TextEncoder().encode('corrupt test'));
  assert.equal((await caseR2Api(req(root+'/files/'+data.id+'/download'),f.env,{now:NOW})).status,503);
