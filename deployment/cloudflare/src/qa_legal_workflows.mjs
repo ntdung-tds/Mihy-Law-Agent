@@ -70,6 +70,8 @@ function localSearch(uc,rows,question){
 export const LEGAL_MATTER_ACCESS_SQL=`
 SELECT 1 FROM qa_matters m
 WHERE m.installation_id=? AND m.tenant_id=? AND m.matter_id=?
+AND NOT EXISTS(SELECT 1 FROM qa_matter_hides h WHERE h.installation_id=m.installation_id
+ AND h.tenant_id=m.tenant_id AND h.matter_id=m.matter_id)
 AND EXISTS(SELECT 1 FROM qa_matter_acl a WHERE
  a.installation_id=m.installation_id AND a.tenant_id=m.tenant_id
  AND a.matter_id=m.matter_id AND a.user_id=? AND a.permission='read'
