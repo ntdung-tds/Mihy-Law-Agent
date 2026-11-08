@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 131,
-  "updated_at": "2026-11-08T20:34:31.974Z",
+  "revision": 132,
+  "updated_at": "2026-11-08T23:41:48.753Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -3279,6 +3279,54 @@
           "Reconcile pre-existing QA Worker HTML/CSS/site Worker/source-of-truth code drift before any full deployment or main merge",
           "Do not ship production, activate real customer documents or merge stacked draft PR without Owner release acceptance"
         ]
+      },
+      {
+        "id": "AL-R0-DOC-SHA-R139-001",
+        "title": "R139 — đối chiếu SHA-256 PDF/DOCX trên trình duyệt trước khi sử dụng nguồn A",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CODE_CI_PASS_9_OF_9_FINAL_HEAD_CI_PENDING_OWNER_ANDROID_NOT_RUN",
+        "branch": "fix/r139-document-source-sha256-preview",
+        "pr": 188,
+        "scope": "R0 PDF/DOCX in-memory source preview integrity guard; SRS v1.1.15 unchanged, no storage",
+        "implementation": [
+          "Frontend calculates SHA-256 over exact browser-selected PDF/DOCX File via SubtleCrypto; matches full 64-hex backend source_sha256 before preview review/import.",
+          "Reject mismatched/unavailable digest with explicit error and disabled import; verify file_type extension consistency in addition to existing filename/size/UC, keep original source unchanged.",
+          "Capture original source A in import request snapshot and recheck after async conversion/hash and immediately before import; silent DOM mutations fail closed.",
+          "If source or file changes during async digest, clear pending/preview and re-enable read button rather than leave frozen; no new back-end endpoint, persistence, Drive/R2 or OAuth behavior."
+        ],
+        "tests": {
+          "synthetic_browser": "PASS_DESKTOP_MOBILE_PDF_DOCX_REAL_MULTIPART_CORRECT_SHA_MISMATCH_SHA_SILENT_SOURCE_EDIT_NO_MODEL_CALL",
+          "github_first_run": "PASS_9_OF_9_RUN_42535824360",
+          "github_final_code_ci": "PASS_9_OF_9_RUN_42536023835_SHA_e1039672c79d5889f1dff2963c2d076bcb8830d8",
+          "github_final_document_head": "PENDING",
+          "owner_authenticated_android": "NOT_RUN",
+          "actual_pdf_docx_fidelity": "NOT_RUN",
+          "scanned_pdf_rotated_hidden_tables_tracked_changes": "NOT_RUN"
+        },
+        "qa": {
+          "website": {
+            "worker": "ai-law-web-qa",
+            "version": "b8e7b660-936a-4bbe-a599-f7900a09a6e8",
+            "deployment": "8a7f7a76-300b-44af-b4b7-62dc79527a13",
+            "traffic_percent": 100,
+            "readback": "PASS_NEW_LEGAL_JS_EXACT_26_SIBLING_MODULES_BYTE_IDENTICAL_2_BINDINGS_IDENTICAL"
+          },
+          "backend": {
+            "worker": "ai-law-standalone-cf-qa",
+            "status": "UNCHANGED_R138"
+          },
+          "storage": "UNCHANGED",
+          "production": "NOT_DEPLOYED"
+        },
+        "srs_change": "SC-041_BASELINE_UNCHANGED",
+        "owner_acceptance": "PENDING",
+        "remaining": [
+          "Verify HEAD CI after PCS and SRS docs commits",
+          "Owner signed-in Android QA test of fictional PDF/DOCX preview and SHA gate, UC03/04/07 reviewed import, actual browser and document fidelity",
+          "No automatic evidence of OCR, tracked changes, rotation or hidden text. Manual comparison remains required and production remains blocked",
+          "Reconcile QA HTML/CSS/site worker baseline drift separately before any full redeploy",
+          "Keep PR #188 draft; Owner must approve final merge and production release"
+        ]
       }
     ],
     "features": [
@@ -3909,8 +3957,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R138 PDF/DOCX QA-only in-memory source preview PR #187: Cloudflare direct synthetic PDF and DOCX conversion PASS; code CI #42520226883 PASS 9/9 including Chromium mobile/desktop and MatterACL. Backend QA version 90f71495-6215-49f6-acb1-a338340cbd16 and site QA 5102dfb0-aa47-482f-b2ee-85448f174b5e 100%, readback 2+4 exact modules, preserved other 9+23 modules and 12+2 binding objects. Owner signed-in file E2E NOT_RUN; SC-040.",
-      "next_action": "Confirm R138 final-head CI; Owner Android signed-in synthetic PDF/DOCX conversion/preview and user-consent E2E with source/manual fidelity check; then SRS R0 document-fidelity edges (rotated/hidden/OCR/tables/tracked Word) as separate small tasks and reconcile QA-vs-GitHub drift. No storage OAuth or production; Owner final acceptance.",
+      "last_completed_step": "R139 PDF/DOCX browser SHA-256 integrity guard PR #188: code CI #42536023835 PASS 9/9; website QA worker version b8e7b660-936a-4bbe-a599-f7900a09a6e8 100%, exact updated legal JS, all 26 unrelated modules and 2 bindings preserved; backend R138 unchanged. Owner Android and legal document fidelity NOT_RUN. SC-041.",
+      "next_action": "Verify R139 final-head CI and Owner Android authorized synthetic PDF/DOCX manual acceptance. Continue small R0 source fidelity tasks only, preserving SRS v1.1.15, no storage/OAuth and no production. Reconcile known website QA/repo drift before full deploy.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
