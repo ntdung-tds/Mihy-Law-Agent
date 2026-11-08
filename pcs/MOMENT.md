@@ -1,12 +1,22 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `113` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T05:56:26.916Z`.
+- **PCS revision:** `114` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T06:45:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R122 — Sửa download bị khóa, chọn nhiều tệp, ẩn riêng tệp QA (2026-11-08)
+
+- **Owner reported:** Sau lưu/sửa hồ sơ, nút `Tải xuống` trên mobile bị vô hiệu hóa; chưa có nút xóa từng tệp; cần chọn 2–3 tệp/lượt và rõ giới hạn.
+- **Verified UI root cause:** `lockMobileDetail()` vô hiệu hóa cả button nằm trong form, bao gồm nút tải xuống tệp. Bản sửa chỉ khóa đầu vào chỉnh sửa và nút Lưu; vẫn cho tải xuống. `resetEditor()` bật lại Lưu khi tạo hồ sơ mới từ chế độ chi tiết, đã có kiểm thử hồi quy.
+- **New QA-only file UI:** Danh sách tệp chờ cho phép chọn nhiều lần từ bộ chọn tệp và bỏ từng tệp trước khi bấm Lưu; tối đa **20 tệp/lần**, **10 MiB/tệp PDF/DOCX**, **50 bản ghi tệp/hồ sơ** bao gồm tệp ẩn. Tệp tải lên tuần tự trong cùng một lần lưu; lỗi từng tệp được phản hồi riêng.
+- **Per-file Xóa = hide only:** Additive D1 `0019_r122_case_file_soft_hide.sql` applied and verified 1 table, 1 index, 2 immutable triggers; API PATCH hide requires session, Origin, active deny-overrides MatterACL write and correct tenant/matter/file. Bản ghi D1 và R2 bytes **không bị xóa vật lý**; UI chỉ hiển thị Xóa khi chỉnh sửa trên mobile. Restore/physical purge của system_admin cần nghiệp vụ phê duyệt và kiểm thử riêng.
+- **CI:** [GitHub Actions #42455594464](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42455594464) completed **PASS 9/9 executed jobs**; Chromium desktop/mobile synthetic includes download ngay sau Lưu, chọn cùng lúc 2 và thêm 1 tệp trước một lần Lưu, hide 1 tệp và giữ các tệp khác, quay lại tạo mới. Backend ACL/CSRF/file soft-hide tests PASS.
+- **Live QA deployments verified 100%:** Backend `ai-law-standalone-cf-qa` version `0e57447e-19a4-461c-97d1-da8df22d3b84`, deployment `aa48d887-bdab-4a3f-b0f8-73d43aaeaca6` (11 modules, 12 inherited bindings). Website `ai-law-web-qa` version `6fa4753d-a62f-40d8-9f45-31d2b6a1bbc8`, deployment `edb6e99b-9d65-427a-bda9-e6971fdefa04` (27 modules, 2 inherited bindings). Live source readback PASS, preserving unrelated module code and additional live HTML/CSS modifications.
+- **Owner acceptance still pending:** Thao tác thực trên Android đã đăng nhập, phục hồi file PDF cũ thực, R2 download và live cross-tenant permission **NOT_RUN**. Tệp PDF cũ bị mất object cần Owner chọn lại đúng file gốc; không thể dựng nội dung từ SHA. Production untouched; private SRS v1.1.15 unchanged; SC-025 documented.
 
 ## R121 — Fix false R2 404, missing stored PDF, oversized mobile detail buttons (2026-11-08)
 
