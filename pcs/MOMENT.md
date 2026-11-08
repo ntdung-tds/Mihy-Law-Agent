@@ -1,12 +1,22 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `121` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T15:58:46.847Z`.
+- **PCS revision:** `122` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T16:18:33.003Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R130 — UC07 kiểm tra bản sửa ngữ pháp với dữ kiện pháp lý (2026-11-08)
+
+- **Owner:** Tiếp tục theo SRS v1.1.15 sau R129, chuyển sang UC07. Chỉ văn bản mẫu/QA, không chuyển thành biên tập file DOCX/PDF thật.
+- **Backend:** Yêu cầu AI đặt một bản sửa duy nhất giữa hai dòng `[BẮT ĐẦU BẢN SỬA]` và `[KẾT THÚC BẢN SỬA]`. `grammarIntegrityCheck` chỉ so nội dung giữa hai dòng với nguồn, không để phần giải thích của AI che sự thay đổi. So số liệu chuẩn hóa, một số ngày chữ/số, modal nghĩa vụ/phủ định và tên bên/tổ chức nhận diện được, trả số lượng thay đổi và tối đa 12 phần tử từng loại. Nếu không tách được bản sửa duy nhất thì cảnh báo cần người kiểm tra. `review_required=true` cả khi không thấy dấu hiệu thiếu: không tự chứng minh tương đương pháp lý, không sửa đầu ra mô hình, không ghi dữ liệu nguồn.
+- **UI:** Panel chi tiết UC07 có thể đóng/mở, mặc định thu gọn mobile, mở desktop; dùng textContent, trạng thái loại bỏ khi đổi UC, giữ nguyên bản nháp. CSS chỉ bổ sung panel UC07, không chỉnh form UC04 R129.
+- **CI:** [#42498703716](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42498703716) **PASS 9/9** nhóm trên commit `868ffe861cff51808f4019285724b842ece9bef6`: Node tests thay số/hạn/điều khoản/tên, trường hợp thiếu/nhân đôi nhãn fail closed, API/ACL và không lưu văn bản, Chromium mobile+desktop panel/cross-UC/no overflow. Đã sửa một test chỉ kiểm tra cách diễn đạt chữ trong thông báo, không nới logic.
+- **QA deploy/source readback PASS 100%:** Backend `ai-law-standalone-cf-qa` version `d8beb0de-6d20-41c4-9b91-02565b348ba3` deployment `b646db26-d441-4cd3-b4be-8f84fdbfa944` (11 modules/12 bindings; chỉ sửa 1). Site `ai-law-web-qa` version `1ed19757-3dc3-4282-a764-e97e7612351c` deployment `7d341446-24f2-4444-8247-250b37a469ce` (27 modules/2 bindings; chỉ sửa HTML/JS/CSS). Live readback bảo toàn UC03, UC04, lịch sử R126, form mobile R129. D1/R2 và production không thay đổi.
+- **Chờ:** Owner đăng nhập Android kiểm thử UC07, kiểm chứng trên tệp thật và chuyên gia xác nhận độ tương đương pháp lý `NOT_RUN`; không coi đây là chức năng sửa DOCX hoàn chỉnh. `SC-033`, SRS v1.1.15 không tăng phiên bản.
+- **QA:** https://ai-law-web-qa.iaict-platform.workers.dev/app#uc-UC07
 
 ## R129 — UC04 mobile gọn, thu gọn form/cảnh báo, cuộn đến kết quả (2026-11-08)
 
