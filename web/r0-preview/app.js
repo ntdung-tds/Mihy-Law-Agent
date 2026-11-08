@@ -151,7 +151,7 @@
   $$('[data-drawer-view]').forEach(n => n.addEventListener('click', () => {
     goto(n.dataset.drawerView); closeFunctionDrawer(false);
   }));
-  $('[data-feature-jump]').forEach(n => n.addEventListener('click', () => {
+  $$('[data-feature-jump]').forEach(n => n.addEventListener('click', () => {
     closeFunctionDrawer(false);
     goto('uc-' + n.dataset.featureJump);
   }));
