@@ -19,10 +19,17 @@
     const uc07Acknowledged=byId('legal-qa-uc07-reviewed');
     const uc07Copy=byId('legal-qa-uc07-copy-edited');
     const uc07CopyStatus=byId('legal-qa-uc07-copy-status');
+    const uc0304Compare=byId('legal-qa-uc03-04-compare');
+    const uc0304Original=byId('legal-qa-uc03-04-original');
+    const uc0304Draft=byId('legal-qa-uc03-04-draft');
+    const uc0304Acknowledged=byId('legal-qa-uc03-04-reviewed');
+    const uc0304Copy=byId('legal-qa-uc03-04-copy-reviewed');
+    const uc0304CopyStatus=byId('legal-qa-uc03-04-copy-status');
     const setStatus=(msg,bad=false)=>{status.textContent=msg;status.dataset.state=bad?'error':'info';};
     let isSubmitting=false;
     let activeUc=null, requestGeneration=0, activeController=null;
     let uc07Review=null; // In-memory only; never a persisted legal sign-off.
+    let uc0304Review=null; // R137: source/draft review in RAM, not approval.
     // R134: keep the exact source/Matter/question snapshot belonging to a
     // displayed result. An old response must not appear or be copied after
     // edits, even when an input was changed programmatically (no DOM event).
@@ -69,10 +76,36 @@
       uc07Compare.open=!(window.matchMedia?.('(max-width: 620px)')?.matches);
       uc07Acknowledged.checked=false;uc07Copy.disabled=true;
     }
+    function clearUc0304Review(){
+      uc0304Review=null;
+      uc0304Compare.hidden=true;uc0304Compare.open=false;
+      uc0304Original.textContent='';uc0304Draft.textContent='';
+      uc0304Acknowledged.checked=false;uc0304Copy.disabled=true;
+      uc0304CopyStatus.textContent='Xác nhận chỉ có hiệu lực trong phiên xem này; không phải phê duyệt pháp lý và không lưu vào hồ sơ.';
+    }
+    function showUc0304Review(data,source,task){
+      // Comparing text is a deliberate local action; no content or approval
+      // is written to a database, log or browser storage.
+      if(!['UC03','UC04'].includes(task)||typeof data.answer!=='string')return;
+      uc0304Review={uc:task,source,draft:data.answer};
+      uc0304Original.textContent=source;
+      uc0304Draft.textContent=data.answer;
+      uc0304Compare.hidden=false;
+      uc0304Compare.open=!(window.matchMedia?.('(max-width: 620px)')?.matches);
+      uc0304Acknowledged.checked=false;uc0304Copy.disabled=true;
+      // The legacy unreviewed copy button must never bypass this gate.
+      copy.hidden=true;copy.disabled=true;
+    }
+    const uc0304StillSame=()=>!!uc0304Review&&
+      ['UC03','UC04'].includes(activeUc)&&uc0304Review.uc===activeUc&&
+      unchangedInputs(currentResultContext)&&
+      currentResultContext?.source===uc0304Review.source&&
+      output.textContent===uc0304Review.draft;
     let matterLoadGeneration=0; // Abort effect of late responses from old workspace or UC.
     function clearResult(){
       currentResultContext=null;
       clearUc07Review();
+      clearUc0304Review();
       result.hidden=true;output.textContent='';
       byId('legal-qa-sources').replaceChildren();
       for(const id of ['legal-qa-translation-check','legal-qa-source-coverage','legal-qa-summary-review','legal-qa-grammar-review']){
@@ -414,6 +447,7 @@
          showSourceCoverage(data.source_coverage);
         }
         if(currentTask==='UC04')showSummaryReview(data.summary_review);
+        if(['UC03','UC04'].includes(currentTask))showUc0304Review(data,source,currentTask);
         if(currentTask==='UC07')showGrammarReview(data.grammar_review);
         if(currentTask==='UC07')showUc07Review(data,source,matter.value);
         byId('legal-qa-result-title').textContent=data.title+' · '+(data.mode==='local_example_only'?'Tìm trong nguồn mẫu':'Bản nháp AI');
@@ -461,7 +495,7 @@
       }
     });
     copy.addEventListener('click',async()=>{
-      if(activeUc==='UC07')return; // R131: no raw model-output clipboard bypass.
+      if(['UC03','UC04','UC07'].includes(activeUc))return; // R137: no unreviewed clipboard bypass.
       if(result.hidden||!output.textContent)return;
       if(['UC03','UC04'].includes(activeUc)&&!unchangedInputs(currentResultContext)){
         clearResult();
@@ -471,6 +505,28 @@
       try{await navigator.clipboard.writeText(output.textContent);
         setStatus('Đã sao chép bản nháp. Chưa xác minh pháp lý.');
       }catch{setStatus('Không sao chép tự động được. Bạn có thể chọn và sao chép văn bản.',true);}
+    });
+    // R137: UC03/04 require in-session source/draft review before copying,
+    // not a persistent legal approval. Input edits and route changes reset it.
+    uc0304Acknowledged.addEventListener('change',()=>{
+      const allowed=uc0304StillSame()&&!uc0304Compare.hidden&&!result.hidden;
+      if(!allowed)uc0304Acknowledged.checked=false;
+      uc0304Copy.disabled=!allowed||!uc0304Acknowledged.checked;
+    });
+    uc0304Copy.addEventListener('click',async()=>{
+      if(result.hidden||uc0304Compare.hidden)return;
+      if(!uc0304StillSame()){
+        clearResult();
+        setStatus('Nguồn hoặc đầu vào đã thay đổi. Hãy tạo lại bản nháp trước khi sao chép.',true);
+        return;
+      }
+      if(uc0304Copy.disabled||!uc0304Acknowledged.checked)return;
+      try{
+        await navigator.clipboard.writeText(uc0304Review.draft);
+        uc0304CopyStatus.textContent='Đã sao chép bản nháp đã đối chiếu. Chưa xác nhận tương đương pháp lý và không lưu vào hồ sơ.';
+      }catch{
+        uc0304CopyStatus.textContent='Không sao chép tự động được; vui lòng chọn và sao chép từ bản nháp sau khi đối chiếu.';
+      }
     });
     // Acknowledgement is a LOCAL user action, not a legal approval, audit
     // event or authorization escalation. It is invalidated by any input change.
