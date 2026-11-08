@@ -163,6 +163,8 @@ def scenario(browser,name,viewport,origin):
         page.locator("#matter-workspace[data-mobile-mode='detail']").wait_for(state="visible")
     assert cases[0]["details"]["reference"]=="QA-LD-001"
     assert page.locator("#matter-list .matter-row").count()==1
+    # File list reload is async after reopening a case on mobile.
+    page.wait_for_function("document.querySelectorAll('#case-r2-list .case-file-download').length === 3",timeout=15000)
     assert page.locator("#case-r2-list .matter-row").count()==3
     assert sum(1 for method,path in calls if method=="POST" and path=="/api/qa/matters")==1
     assert sum(1 for method,path in calls if method=="POST" and path.endswith("/files"))==4
