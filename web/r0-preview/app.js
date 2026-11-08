@@ -105,7 +105,7 @@
     if (currentView === 'workflow' && !uc)
       window.dispatchEvent(new Event('ai-law:workflow-close'));
     currentView = view;
-    $('[data-panel]').forEach(panel => { panel.hidden = panel.dataset.panel !== view; });
+    $$('[data-panel]').forEach(panel => { panel.hidden = panel.dataset.panel !== view; });
     $$('[data-view]').forEach(btn => {
       const selected = btn.dataset.view === view || (uc && btn.dataset.view === 'assistant');
       btn.classList.toggle('active', !!selected);
