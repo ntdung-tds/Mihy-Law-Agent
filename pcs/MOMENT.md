@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `131` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T20:34:31.974Z`.
+- **PCS revision:** `132` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T23:41:48.753Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R139 — Kiểm tra SHA-256 PDF/DOCX trên trình duyệt trước khi sử dụng nguồn A (2026-11-09)
+
+- **Khoảng trống R138:** API trả `source_sha256` nhưng UI chưa tính lại hash để xác minh đúng tệp, và có thể bỏ qua thay đổi nguồn A không phát DOM event giữa preview và dùng nguồn. R139 chỉ sửa tính toàn vẹn của một tệp PDF/DOCX tạm trong UC03/UC04/UC07; không thay SRS v1.1.15, không mở lại OAuth/storage.
+- **Sửa:** PR [#188](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/188) draft trên PR #187. WebCrypto tính SHA-256 **toàn bộ bytes tệp gốc đã chọn**, đối chiếu đủ 64 chữ số hex với `source_sha256` backend; khác hoặc thiếu → fail closed, không hiển thị kết quả dùng được, không thay nguồn A, mở lại nút đọc tệp. Snapshot nguồn A đi cùng file/Matter/UC/consent và kiểm tra trước/sau `await` và tại nút nhập; thay đổi ngầm không event bị chặn, tránh kẹt nút bất đồng bộ. Kiểm tra thêm `file_type` so với đuôi tên. Giữ nguyên giới hạn 1,5 MB, quota, ACL, mô hình, consent, tất cả bản nháp AI.
+- **Test browser và CI:** Chromium desktop/mobile gửi binary multipart PDF và DOCX giả lập. Positive response trả SHA thực từ `hashlib.sha256`, cho phép xem trước/nhập sau khi xác nhận; response SHA sai nhưng đúng 64 hex (QA `qa_r139_badsha.pdf`) bị từ chối, tệp và source A giữ nguyên, không gọi API model AI. Trường hợp `source.value` sửa bằng JS không phát `input` ngay sau checkbox cũng phải từ chối; sau lỗi nút đọc được mở lại. [CI đầu #42535824360](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42535824360) **PASS 9/9**; sau đó sửa thêm fail-closed khi nguồn bị thay đổi trong lúc chờ digest không làm đóng băng nút. [CI mã cuối #42536023835](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42536023835) **PASS 9/9** tại commit `e1039672c79d5889f1dff2963c2d076bcb8830d8`. CI HEAD sau cập nhật tài liệu còn chờ.
+- **Cloudflare QA website đã cập nhật và readback PASS:** `ai-law-web-qa`, version `b8e7b660-936a-4bbe-a599-f7900a09a6e8`, deployment `8a7f7a76-300b-44af-b4b7-62dc79527a13`, **100%**. Chỉ thay `workspace_legal.mjs`, đọc lại byte exact mã R139; **26/26** module khác và **2/2** binding nguyên. Backend vẫn R138, không thay đổi D1/R2/Drive, dữ liệu QA, website HTML/CSS đang chênh lệch đã biết hoặc production.
+- **Giới hạn và tiếp theo:** SHA-256 đúng chứng minh tệp có cùng bytes, **không** chứng minh trích xuất không thiếu trang quét/ẩn/xoay/bảng/Tracked Changes hoặc tương đương nghĩa pháp lý. Chủ dự án cần nghiệm thu Android thực với tài liệu giả lập, kiểm tra pháp lý/fidelity và nhập nguồn; hiện **NOT_RUN**. SRS v1.1.15 giữ nguyên, `SC-041`, PCS rev 132, PR chưa merge, production chưa deploy.
 
 ## R138 — Đọc PDF/DOCX giả lập trong RAM trước khi đưa vào nguồn A (2026-11-09)
 
