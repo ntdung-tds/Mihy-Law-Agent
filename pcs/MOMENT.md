@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `127` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T17:36:27.155Z`.
+- **PCS revision:** `128` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T17:55:32.795Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R135 — UC03 phân biệt nhãn đầu đoạn dịch với trích dẫn nội dòng (2026-11-09)
+
+- **Lỗi và cách xử lý:** R127 có thể đếm mã [A#] nằm trong lời giải thích AI như đoạn dịch đã gắn nhãn. R135 chỉ công nhận một mã nguồn xuất hiện đúng **một lần trong toàn phản hồi** và **ở đầu dòng dịch** (dấu đầu dòng/khoảng trắng được chấp nhận); mã chỉ xuất hiện nội dòng hoặc lặp → đưa vào các nhãn cần người đối chiếu. Kết quả AI thô không bị sửa, không tự kết luận chất lượng hoặc tính pháp lý.
+- **Phạm vi:** PR [#184](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/184) draft, xếp trên PR #183. Backend `translationSourceCoverage` và frontend `showSourceCoverage`, có cảnh báo chi tiết `misplaced_source_ids` và `duplicate_source_ids` (chỉ `textContent`); không sửa UC04/07, quyền truy cập, DB, R2 hay dịch vụ tệp.
+- **Test-first và CI:** R135 thêm kiểm thử đơn vị/API giả lập, nhãn xuất hiện trong bình luận/nội dòng, nhãn lặp, nhãn đúng vị trí, không lưu đầu vào/đầu ra; Chromium desktop/mobile cảnh báo. [CI #42506866873](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42506866873) FAIL vì fixture R127 cũ kỳ vọng nhãn giữa câu hợp lệ; sửa fixture để phản ánh quy tắc đánh nhãn đầu đoạn mới và kiểm tra nhãn lặp bắt buộc cảnh báo. [CI #42506988150](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42506988150) **PASS 9/9** nhóm mã ứng dụng, commit `348843c14f2442ac2474722d04a0fb09223b0480`. CI HEAD cuối sau ghi PCS/tài liệu còn chờ.
+- **Cloudflare QA readback PASS:** Backend `ai-law-standalone-cf-qa` version `2d6663a6-1e7d-4c81-9937-27049c7072cb`, deployment `bd73f0b0-719f-4f34-a378-e1fb5162baf1` (**100%**), một module mới khớp GitHub, **10/10** module còn lại cùng **12/12** bindings giống trước. Website `ai-law-web-qa` version `029f72d2-4e6e-4520-b42a-59103a67eefb`, deployment `b7f18024-362e-483c-8dbe-5b2ea24cf3ea` (**100%**), `workspace_legal.mjs` khớp GitHub, **26/26** module còn lại và **2/2** bindings không đổi. Không cập nhật production.
+- **Chờ:** Người dùng đăng nhập Android thực để xác nhận hành vi; thẩm định ngôn ngữ/pháp lý, PDF/DOCX end-to-end **NOT_RUN**. Giữ SRS v1.1.15 không đổi, nhật ký `SC-037`, PCS revision 128, PR draft.
 
 ## R134 — Loại bỏ bản nháp dịch/tóm tắt cũ khi đầu vào thay đổi (2026-11-09)
 
