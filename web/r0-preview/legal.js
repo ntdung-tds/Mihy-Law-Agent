@@ -24,35 +24,41 @@
       secondary.required=dual;
       const needingQuestion=['UC09','UC10','UC11'].includes(uc.value);
       question.required=needingQuestion;
-      byId('legal-qa-language').disabled=uc.value!=='UC03';
+      const language=byId('legal-qa-language');
+      language.disabled=uc.value!=='UC03';
+      language.closest('label').hidden=uc.value!=='UC03';
+      question.placeholder=['UC10','UC11'].includes(uc.value)
+        ?'Nhập từ khóa tìm trong nguồn văn bản mẫu'
+        :uc.value==='UC09'?'Bạn muốn hỏi điều gì từ nguồn mẫu?'
+        :'Ví dụ: Các mốc thời gian và nghĩa vụ chính?';
       byId('legal-qa-run').textContent=['UC10','UC11'].includes(uc.value)
         ?'Tìm trong nguồn mẫu':'Tạo bản nháp QA';
       clearResult();
     }
     uc.addEventListener('change',updateTaskFields);
     updateTaskFields();
+    function clearWorkflow(){
+      // Never carry source, result or consent between separate screens.
+      requestGeneration++;
+      activeController?.abort();
+      activeController=null;isSubmitting=false;activeUc=null;
+      byId('legal-qa-run').disabled=false;
+      byId('legal-qa-source').value='';
+      secondary.value='';question.value='';
+      byId('legal-qa-consent').checked=false;
+      matter.value='';
+      clearResult();
+    }
     function activateWorkflow(ucCode){
       if(!/^UC(?:0[1-9]|1[01])$/.test(ucCode))return;
-      if(activeUc!==ucCode){
-        // Separate screens must never show stale private inputs, consent or
-        // the result of a previous task. No prompts/results are persisted.
-        requestGeneration++;
-        activeController?.abort();
-        activeController=null;isSubmitting=false;
-        byId('legal-qa-run').disabled=false;
-        byId('legal-qa-source').value='';
-        secondary.value='';question.value='';
-        byId('legal-qa-consent').checked=false;
-        matter.value='';
-        clearResult();
-      }
+      if(activeUc!==ucCode)clearWorkflow();
       activeUc=ucCode;
       uc.value=ucCode;
       updateTaskFields();
       void loadLegalMatters();
     }
     window.addEventListener('ai-law:workflow-open',event=>activateWorkflow(event.detail?.uc));
-
+    window.addEventListener('ai-law:workflow-close',clearWorkflow);
     byId('legal-qa-example').addEventListener('click',()=>{
       byId('legal-qa-source').value=
         'Điều 1. Bên A bàn giao 10 bộ tài liệu vào ngày 15 tháng 9 năm 2026. Bên B thanh toán 2.000.000 đồng sau khi nghiệm thu đủ 10 bộ tài liệu.\n\nĐiều 2. Nếu giao thiếu tài liệu, hai bên lập biên bản ghi nhận số lượng đã giao và hẹn ngày hoàn tất.';
