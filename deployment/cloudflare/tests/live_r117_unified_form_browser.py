@@ -507,12 +507,27 @@ def scenario(browser,name,viewport,origin):
     assert page.locator("#legal-qa-translation-check").is_visible()
     assert page.locator("#legal-qa-output").inner_text().startswith("[A1] Article 1")
     assert page.locator("#legal-qa-result").is_visible()
+    # R137: UC03 must provide an in-session source/draft comparison. Raw
+    # model output cannot be copied without deliberate human acknowledgment.
+    review=page.locator("#legal-qa-uc03-04-compare")
+    ack=page.locator("#legal-qa-uc03-04-reviewed")
+    gated_copy=page.locator("#legal-qa-uc03-04-copy-reviewed")
+    assert review.is_visible() and page.locator("#legal-qa-copy").is_hidden()
+    assert not gated_copy.is_enabled() and not ack.is_checked()
+    if not review.evaluate("(e)=>e.open"):
+        review.locator(":scope > summary").click()
+    assert "Điều 1." in page.locator("#legal-qa-uc03-04-original").inner_text()
+    assert "Article 1." in page.locator("#legal-qa-uc03-04-draft").inner_text()
+    ack.check()
+    assert gated_copy.is_enabled(), "User acknowledgement alone enables current draft copy"
     # R134: UC03 cannot keep an old translation/evidence/copy shortcut after
     # changing the question, and must clear any draft when Matter is revoked.
     page.locator("#legal-qa-question").fill("Kiểm tra từ ngữ mới trong văn bản thử nghiệm")
     assert page.locator("#legal-qa-result").is_hidden(), "UC03 answer became stale"
     assert not page.locator("#legal-qa-output").inner_text()
     assert coverage.is_hidden()
+    assert review.is_hidden() and not ack.is_checked()
+    assert not gated_copy.is_enabled()
     page.locator("#legal-qa-run").click()
     coverage.wait_for(state="visible",timeout=15000)
     page.locator("#legal-qa-matter").select_option("")
@@ -523,12 +538,17 @@ def scenario(browser,name,viewport,origin):
     page.locator("#legal-qa-matter").select_option(F)
     page.locator("#legal-qa-run").click()
     coverage.wait_for(state="visible",timeout=15000)
+    review=page.locator("#legal-qa-uc03-04-compare")
+    if not review.evaluate("(e)=>e.open"):
+        review.locator(":scope > summary").click()
+    page.locator("#legal-qa-uc03-04-reviewed").check()
+    assert page.locator("#legal-qa-uc03-04-copy-reviewed").is_enabled()
     page.evaluate("""() => {
       document.getElementById('legal-qa-question').value =
         'Yêu cầu đổi bằng lập trình nhưng không gửi sự kiện input';
     }""")
-    page.locator("#legal-qa-copy").click()
-    assert page.locator("#legal-qa-result").is_hidden(), "Silent edit must block UC03 copy"
+    page.locator("#legal-qa-uc03-04-copy-reviewed").click()
+    assert page.locator("#legal-qa-result").is_hidden(), "Silent edit must block UC03 reviewed copy"
     assert not page.locator("#legal-qa-output").inner_text()
     # Simulate a pending provider reply which arrives after the user edits input.
     page.locator("#legal-qa-matter").select_option(F)
@@ -630,6 +650,36 @@ def scenario(browser,name,viewport,origin):
     assert check.evaluate("(e)=>e.open"),"Warning must support reopen"
     assert not page.locator("#legal-qa-source-coverage").is_visible()
     assert page.locator("#legal-qa-output").inner_text().startswith("[A1] Bên A")
+    # R137: UC04 summary retains its collapsible mobile controls but requires
+    # comparison of source/summary before any clipboard action is enabled.
+    review=page.locator("#legal-qa-uc03-04-compare")
+    ack=page.locator("#legal-qa-uc03-04-reviewed")
+    gated_copy=page.locator("#legal-qa-uc03-04-copy-reviewed")
+    assert review.is_visible()
+    assert page.locator("#legal-qa-copy").is_hidden()
+    assert not gated_copy.is_enabled()
+    if not review.evaluate("(e)=>e.open"):
+        review.locator(":scope > summary").click()
+    assert "Điều 1." in page.locator("#legal-qa-uc03-04-original").inner_text()
+    assert "Bên A" in page.locator("#legal-qa-uc03-04-draft").inner_text()
+    ack.check()
+    assert gated_copy.is_enabled()
+    # Silent field mutation must deny copy EVEN when checkmark remains checked.
+    page.evaluate("""() => {
+      document.getElementById('legal-qa-question').value =
+         'Dữ liệu khác sau khi xác nhận nhưng không phát sự kiện';
+    }""")
+    gated_copy.click()
+    assert page.locator("#legal-qa-result").is_hidden()
+    assert not ack.is_checked()
+    assert not gated_copy.is_enabled()
+    # Mobile UC04 auto-collapses the source form after success. Open it again
+    # before the next explicit submit; do not click a hidden form button.
+    if not inputs.evaluate("(e)=>e.open"):
+        inputs.locator(":scope > summary").click()
+    page.locator("#legal-qa-run").click()
+    check.wait_for(state="visible",timeout=15000)
+    review.wait_for(state="visible",timeout=15000)
     # R134: reopening collapsed UC04 form and editing a source invalidates
     # existing summary and its QA review flags, without changing other UCs.
     if not inputs.evaluate("(e)=>e.open"):

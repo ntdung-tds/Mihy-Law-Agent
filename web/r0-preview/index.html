@@ -319,6 +319,25 @@
                 <button type="button" id="legal-qa-uc07-copy-edited" disabled>Sao chép bản sửa đã đối chiếu</button>
                 <p id="legal-qa-uc07-copy-status" role="status" aria-live="polite">Xác nhận chỉ áp dụng cho lần xem này; không phải phê duyệt pháp lý và không lưu vào hồ sơ.</p>
               </details>
+              <details id="legal-qa-uc03-04-compare" class="legal-qa-uc07-compare" hidden>
+                <summary>Đối chiếu nguồn và bản nháp trước khi sao chép</summary>
+                <div class="legal-qa-uc07-compare-grid">
+                  <section aria-labelledby="legal-qa-uc03-04-original-title">
+                    <h4 id="legal-qa-uc03-04-original-title">Nội dung nguồn</h4>
+                    <pre id="legal-qa-uc03-04-original" tabindex="0"></pre>
+                  </section>
+                  <section aria-labelledby="legal-qa-uc03-04-draft-title">
+                    <h4 id="legal-qa-uc03-04-draft-title">Bản dịch / tóm tắt AI cần rà soát</h4>
+                    <pre id="legal-qa-uc03-04-draft" tabindex="0"></pre>
+                  </section>
+                </div>
+                <label class="legal-qa-uc07-reviewed">
+                  <input id="legal-qa-uc03-04-reviewed" type="checkbox" />
+                  Tôi đã tự đối chiếu toàn văn nguồn và bản nháp, đặc biệt các đoạn bị cảnh báo, chủ thể, quyền, nghĩa vụ, tiền và thời hạn.
+                </label>
+                <button type="button" id="legal-qa-uc03-04-copy-reviewed" disabled>Sao chép bản nháp đã đối chiếu</button>
+                <p id="legal-qa-uc03-04-copy-status" role="status" aria-live="polite">Xác nhận chỉ có hiệu lực trong phiên xem này; không phải phê duyệt pháp lý và không lưu vào hồ sơ.</p>
+              </details>
               <pre id="legal-qa-output"></pre>
               <div id="legal-qa-sources"></div>
               <button type="button" id="legal-qa-copy">Sao chép bản nháp</button>
