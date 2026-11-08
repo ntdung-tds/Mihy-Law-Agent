@@ -101,6 +101,8 @@ function makePrompt(uc,rows,other,question,lang){
  const detail=TASKS[uc][1];
  return [
   'NHIỆM VỤ '+uc+': '+detail,
+  uc==='UC04'?
+   'KIỂM TRA BẢN TÓM TẮT: Khi nêu nghĩa vụ, chủ thể, tiền, hạn, mốc thời gian hoặc trách nhiệm trong các đoạn nguồn [A1], [A2]..., dẫn mã [A#] tương ứng. Không bỏ các nghĩa vụ/mốc quan trọng; nếu nguồn không đủ rõ, ghi [CẦN ĐỐI CHIẾU]. Không tự tạo nghĩa vụ hoặc mốc mới, không kết luận pháp lý.':'',
   uc==='UC03'?
    'ĐỐI CHIẾU BẢN DỊCH: Mỗi đoạn nguồn [A1], [A2]... phải có nhãn tương ứng [A1], [A2]... trước đoạn dịch. Giữ đúng thứ tự, số điều, con số, tên riêng. Không tự tạo mã nguồn; nếu không dịch được đoạn nào, ghi rõ [CẦN KIỂM TRA] tại đoạn đó. Nhãn không chứng minh bản dịch đúng.':'',
   lang?'NGÔN NGỮ ĐÍCH UC03: '+lang:'',
@@ -225,6 +227,58 @@ export function translationIntegrityCheck(source,translation){
  };
 }
 
+/** R128 UC04 — deterministic high-risk omission indicators for HUMAN review.
+ * A marker does not prove semantic coverage, numbers may be legitimately
+ * paraphrased, and a summary need not repeat every source detail.
+ * No source text or model output is persisted.
+ */
+export function summaryReviewCheck(rows,answer){
+ const src=Array.isArray(rows)?rows:[];
+ const draft=String(answer||'');
+ const datePattern=/\b\d{1,2}[/-]\d{1,2}[/-]\d{4}\b|\bngày\s+\d{1,2}\s+tháng\s+\d{1,2}(?:\s+năm\s+\d{4})?/giu;
+ const dateKey=value=>{
+  const raw=value.trim();
+  const numeric=/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/u.exec(raw);
+  const written=/^ngày\s+(\d{1,2})\s+tháng\s+(\d{1,2})(?:\s+năm\s+(\d{4}))?$/iu.exec(raw);
+  const m=numeric||written;
+  if(!m)return raw.toLocaleLowerCase('vi-VN');
+  return Number(m[1])+'/'+Number(m[2])+'/'+(m[3]||'?');
+ };
+ const dates=text=>new Set([...text.matchAll(datePattern)].map(m=>dateKey(m[0])));
+ const noCitations=text=>text.replace(/\[(?:A|B)[1-9]\d*\]/gu,'');
+ const numbers=text=>{
+  const clean=noCitations(text).replace(datePattern,' ');
+  return new Set([...clean.matchAll(/(?<![\p{L}\p{N}])\d+(?:[.,]\d+)*(?![\p{L}\p{N}])/gu)]
+   .map(m=>/^\d{1,3}(?:[.,]\d{3})+$/u.test(m[0])?m[0].replace(/[.,]/gu,''):m[0]));
+ };
+ const critical=/(?:\bphải\b|nghĩa\s+vụ|thanh\s+toán|bàn\s+giao|thời\s+hạn|hạn\s+chót|chịu\s+trách\s+nhiệm|bồi\s+thường|phạt\s+vi\s+phạm|chấm\s+dứt|cam\s+kết|\bshall\b|\bmust\b|\bdeadline\b|\bpayment\b|\bdeliver\b|\bpenalty\b)/iu;
+ const important=src.filter(x=>/^A[1-9]\d*$/.test(x?.id||'')&&
+  typeof x.text==='string'&&critical.test(x.text));
+ const citations=new Set([...draft.matchAll(/\[(A[1-9]\d*)\]/gu)].map(m=>m[1]));
+ const absentAnchors=important.filter(x=>!citations.has(x.id)).map(x=>x.id);
+ const source=src.map(x=>typeof x?.text==='string'?x.text:'').join('\n');
+ const sourceNumbers=numbers(source),answerNumbers=numbers(draft);
+ const sourceDates=dates(source),answerDates=dates(draft);
+ const absentNumbers=[...sourceNumbers].filter(n=>!answerNumbers.has(n));
+ const absentDates=[...sourceDates].filter(n=>!answerDates.has(n));
+ const missing=absentAnchors.length+absentNumbers.length+absentDates.length;
+ return {
+  status:missing?'review_required':'no_obvious_omission_not_verified',
+  critical_source_count:important.length,
+  marked_critical_count:important.length-absentAnchors.length,
+  missing_critical_source_count:absentAnchors.length,
+  missing_critical_source_ids:absentAnchors.slice(0,12),
+  source_number_count:sourceNumbers.size,
+  missing_number_count:absentNumbers.length,
+  missing_numbers:absentNumbers.slice(0,12),
+  source_date_count:sourceDates.size,
+  missing_date_count:absentDates.length,
+  missing_dates:absentDates.slice(0,12),
+  review_required:true,
+  note:'Kiểm tra tự động CHỈ tìm dấu hiệu thiếu mã đoạn nghĩa vụ, số và ngày rõ ràng; bản tóm tắt có thể diễn đạt lại hoặc lược bỏ thông tin không trọng yếu. KHÔNG xác nhận đủ ý, đúng nghĩa hay giá trị pháp lý. Luật sư phải đối chiếu văn bản nguồn.'
+ };
+}
+
 // Always enforce byte limits on the stream itself: Content-Length can be
 // absent or forged. Never log or persist these bytes.
 async function readLimitedSource(req,max){
@@ -311,5 +365,6 @@ export async function legalApi(req,env,opts={}){
    translation_check:translationIntegrityCheck(body.source_text,output),
    source_coverage:translationSourceCoverage(primary,output)
   }:{}),
+  ...(body.uc==='UC04'?{summary_review:summaryReviewCheck(primary,output)}:{}),
   review_notice:'Bản nháp AI từ nội dung mẫu. Chưa kiểm chứng pháp lý, nguồn chính thức hoặc độ chính xác ngôn ngữ.'});
 }
