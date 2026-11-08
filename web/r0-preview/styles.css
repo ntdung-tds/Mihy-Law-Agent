@@ -660,8 +660,9 @@ body.drawer-open{overflow:hidden}
   opacity:1;-webkit-text-fill-color:#263e55;color:#263e55;background:#f7f9fd;
   border-color:#dde7f2;box-shadow:none}
  #matter-workspace[data-mobile-mode="detail"] .case-r2-panel{margin-top:10px}
- #view-documents .sub-page-heading:has(+ .demo-disclaimer + .workflow-resume + #matter-workspace[data-mobile-mode="create"]) #upload-btn,
- #matter-workspace[data-mobile-mode="create"] ~ .qa-document-box{display:none!important}
+ #view-documents:has(#matter-workspace[data-mobile-mode="create"]) #upload-btn,
+ #view-documents:has(#matter-workspace[data-mobile-mode="detail"]) #upload-btn,
+ #view-documents:has(#matter-workspace[data-mobile-mode="edit"]) #upload-btn{display:none!important}
  #matter-workspace[data-mobile-mode="detail"] .case-unified-heading h2{font-size:23px}
  #matter-workspace .case-editor-navigation{display:flex;width:100%;gap:8px}
  #matter-workspace .case-editor-navigation button{width:auto;flex:1;min-height:43px;margin:0}
