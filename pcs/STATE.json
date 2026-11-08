@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 110,
-  "updated_at": "2026-11-08T04:48:34.749Z",
+  "revision": 111,
+  "updated_at": "2026-11-08T05:18:11.509Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2345,6 +2345,101 @@
           "live_cross_tenant_acl": "NOT_RUN"
         },
         "owner_acceptance": "PENDING_R118"
+      },
+      {
+        "id": "AL-R0-CASE-ACTIONS-R119-001",
+        "priority": "P0",
+        "title": "R119 beautiful mobile View/Edit/Hide case buttons, server-side soft hide and system-admin-only purge policy",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_CHROMIUM_DESKTOP_MOBILE_PASS_IMMUTABLE_D1_TOMBSTONES_OWNER_SIGNED_IN_E2E_NOT_RUN",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/168",
+        "srs": "Owner UX semantics recorded SC-022; frozen private SRS v1.1.15 unchanged",
+        "implementation": {
+          "buttons": [
+            "Xem",
+            "Sửa",
+            "Xóa"
+          ],
+          "mobile": "45px touch targets, distinct blue/purple/light-red icons, three-column row, confirmation and cancel",
+          "permissions": "Xem with read, Sửa/Xóa only with server-side active versioned MatterACL write and deny overrides; no trust in client can_write",
+          "delete_kind": "SOFT_HIDE_ONLY",
+          "table": "qa_matter_hides",
+          "hide_audit": "hidden_by + hidden_at immutable; DB triggers prohibit update/delete of tombstone",
+          "retention": "qa_matters/qa_matter_catalog/qa_case_details/qa_case_files_r2/R2 objects unchanged",
+          "inaccessible_when_hidden": [
+            "matter list",
+            "rename",
+            "case detail",
+            "case file upload/list/download",
+            "legacy Drive document routes",
+            "AI workflow legal access"
+          ],
+          "endpoint": "PATCH /api/qa/matters/:id with action='hide' and expected_version",
+          "physical_delete": "NOT_IMPLEMENTED, NO_USER_API; QA roles only lawyer/tenant_admin; no system_admin role to grant physical purging",
+          "restore": "NOT_IMPLEMENTED, future privileged policy gate",
+          "production": "UNTOUCHED"
+        },
+        "qa_schema": {
+          "migration": "deployment/cloudflare/migrations/0018_r119_matter_soft_hide.sql",
+          "applied": "PASS",
+          "table": "qa_matter_hides",
+          "triggers": [
+            "qa_matter_hides_no_update",
+            "qa_matter_hides_no_delete"
+          ],
+          "preexisting_hides": 0,
+          "real_d1_explain_insert": "PASS_NO_MUTATION_12_BINDINGS"
+        },
+        "qa_backend": {
+          "worker": "ai-law-standalone-cf-qa",
+          "deployment": "855f158f-a123-4757-beb2-224b7307b6f2",
+          "version": "bc63ede0-781a-4983-b4a3-2f98f02930dd",
+          "traffic": "100%",
+          "modules": 11,
+          "updated": [
+            "matter_workspace.mjs",
+            "qa_case_r2.mjs",
+            "qa_legal_workflows.mjs",
+            "qa_documents.mjs"
+          ],
+          "unchanged": 7,
+          "bindings_preserved": 12,
+          "legacy_drive_and_live_ai_patches_preserved": "PASS",
+          "readback": "PASS"
+        },
+        "qa_site": {
+          "worker": "ai-law-web-qa",
+          "deployment": "b6728373-9417-4c99-8878-0aa7e90b7426",
+          "version": "16c74ff2-f556-4948-90a0-40dbf04c62f5",
+          "traffic": "100%",
+          "modules": 27,
+          "updated": [
+            "workspace_html.mjs",
+            "workspace_css.mjs",
+            "workspace_matters.mjs"
+          ],
+          "unchanged": 24,
+          "bindings_preserved": 2,
+          "readback": "PASS"
+        },
+        "tests": {
+          "ci_run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42449716851",
+          "passed_jobs": 9,
+          "failed_jobs": 0,
+          "conditional_skipped": 21,
+          "soft_hide_acl_and_version": "PASS_MOCK",
+          "hidden_case_r2_and_ai_deny": "PASS_CONTRACT",
+          "direct_d1_qa_tombstone_schema": "PASS",
+          "direct_d1_qa_explain_insert": "PASS",
+          "chromium_mobile_actions_cancel_confirm": "PASS_SYNTHETIC",
+          "chromium_desktop_actions_cancel_confirm": "PASS_SYNTHETIC",
+          "saved_r2_objects_after_hide": "PASS_MOCK",
+          "physical_delete_api": "ABSENT",
+          "owner_android_live_case_hide": "NOT_RUN",
+          "owner_browser_real_r2_roundtrip": "NOT_RUN",
+          "live_multi_tenant_negative": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "owner_acceptance": "PENDING_R119"
       }
     ],
     "features": [
