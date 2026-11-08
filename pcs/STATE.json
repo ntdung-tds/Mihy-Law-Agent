@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 116,
-  "updated_at": "2026-11-08T10:00:30.715Z",
+  "revision": 117,
+  "updated_at": "2026-11-08T10:48:06.204Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2640,7 +2640,7 @@
         "id": "AL-R0-CASE-SCROLL-R124-001",
         "title": "R124: thu gọn phần đính kèm, cuộn riêng danh sách tệp và lịch sử trên mobile",
         "priority": "P1",
-        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_OWNER_ACCEPTANCE_PENDING",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_OWNER_UX_ACCEPTED",
         "branch": "style/r124-scroll-collapse-case-documents",
         "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/173",
         "implementation": "Native details/summary for attachments with persistent displayed file count; bounded touch-scrolling for files/history and keyboard-scrolling regions; full R123 icon/download/edit behavior preserved.",
@@ -2658,10 +2658,61 @@
           "source_readback": "PASS",
           "owner_android": "NOT_RUN",
           "backend_d1_r2": "UNCHANGED",
-          "production": "UNTOUCHED"
+          "production": "UNTOUCHED",
+          "owner_ui_acceptance": "CONFIRMED_IN_CHAT_2026-11-08",
+          "owner_android_file_e2e": "NOT_RUN"
         },
         "note": "Detailed audit trail by fields requested previously is still not delivered by this R124 UI-only change; do not mark complete.",
-        "owner_acceptance": "PENDING_R124"
+        "owner_acceptance": "OWNER_ACCEPTED_IN_CHAT_2026-11-08"
+      },
+      {
+        "id": "AL-R0-CASE-AUDIT-R125-001",
+        "title": "R125: lịch sử hồ sơ và tệp chi tiết, actor/time và thay đổi từng trường D1",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_OWNER_E2E_PENDING",
+        "branch": "feat/r125-detailed-case-audit",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/174",
+        "changes": {
+          "migration": "0020_r125_detailed_case_audit.sql additive, 17 statements, append-only trigger, backfill 8 legacy events; no existing QA file bytes modified",
+          "new": "Create, detail insert/update, title rename, R2 upload, R2 file hide, matter hide; verified download delivery after SHA-256; legacy history marked as incomplete",
+          "permissions": "Tenant + active deny-overrides MatterACL read; before/after redacted for members without write; no public R2 access",
+          "ui": "Compact expandable per-event timeline in scrollable history: actor, event time, field old/new; file metadata; no raw HTML injection; mobile layout retained",
+          "verification": "Trigger-safe scoped readback instead of D1 meta.changes===1 on detail/rename/hide"
+        },
+        "tests": {
+          "ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42472426132",
+          "executed": "PASS_9_OF_9",
+          "real_sqlite": "PASS",
+          "synthetic_browser_mobile_desktop": "PASS",
+          "api_acl": "PASS",
+          "live_signed_in_owner_android": "NOT_RUN",
+          "live_per_role_audit_visibility": "NOT_RUN",
+          "file_download_actual_device": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "qa": {
+          "d1": "MIGRATION_APPLIED_17_OF_17; legacy_events_backfilled=8; 1 table, 1 index, 9 triggers",
+          "backend": {
+            "script": "ai-law-standalone-cf-qa",
+            "version": "43b89f10-3094-4dfc-9281-66d2e4db6f22",
+            "deployment": "7a9ff370-09bb-461f-a73e-9a1aa443afc8",
+            "traffic_percent": 100,
+            "modules": 11,
+            "bindings": 12
+          },
+          "site": {
+            "script": "ai-law-web-qa",
+            "version": "81415417-9a4a-45f1-b8b7-f6e6136c8210",
+            "deployment": "dd24cabf-0b11-4b4b-8ebb-51fead6f05f9",
+            "traffic_percent": 100,
+            "modules": 27,
+            "bindings": 2
+          },
+          "readback": "PASS_BOTH_WORKERS"
+        },
+        "remaining": "No historical before/after for legacy events because it was never recorded. Device/IP not inferred. R2 file repairs not separately classified; future scoped work if approved. No system-admin physical deletion in R125.",
+        "owner_acceptance": "PENDING_R125",
+        "srs_change": "SC-028; SRS v1.1.15 private unchanged"
       }
     ],
     "features": [
