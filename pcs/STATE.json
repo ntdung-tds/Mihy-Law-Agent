@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 107,
-  "updated_at": "2026-11-08T02:13:48.810Z",
+  "revision": 108,
+  "updated_at": "2026-11-08T03:40:01.528Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2121,6 +2121,103 @@
         },
         "caveat": "Numeric presence check is not proof of correct translation, payment terms, legal effect, names, dates in words or completeness; false positives possible for localized/spelled-out numbers. Source and result remain QA-only with manual review.",
         "owner_acceptance": "PENDING_R115"
+      },
+      {
+        "id": "AL-R0-CASE-R2-R116-001",
+        "priority": "P0",
+        "title": "R116 real QA case dossier details and temporary isolated Cloudflare R2 PDF/DOCX storage",
+        "status": "QA_DEPLOYED_D1_R2_PRESENT_CI_PASS_9_OF_9_OWNER_SIGNED_IN_REAL_UPLOAD_NOT_RUN",
+        "scope": "Owner 2026-11-08 explicitly requested real case detail persistence in D1 and temporary private R2 for PDF/DOCX. SRS v1.1.15 baseline unchanged; addition logged SC-019; Drive/OneDrive and production unchanged.",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/165",
+        "d1": {
+          "database": "ai-law-standalone-cf-qa",
+          "migration": "deployment/cloudflare/migrations/0017_r116_case_details_r2.sql",
+          "tables": [
+            "qa_case_details",
+            "qa_case_files_r2",
+            "qa_case_events"
+          ],
+          "schema_readback": "PASS_3_TABLES_5_TRIGGERS",
+          "immutable_events": true,
+          "optimistic_version": true,
+          "active_tenant_assignee": true
+        },
+        "r2": {
+          "bucket": "ai-law-qa-case-files",
+          "region": "APAC",
+          "public_managed_domain": false,
+          "custom_domain_count": 0,
+          "binding": "CASE_FILES_R2",
+          "binding_live": true,
+          "old_binding_count": 11,
+          "live_binding_count": 12,
+          "private_object_key": "installation/tenant/matter/random_file_uuid",
+          "max_file_bytes": 10485760,
+          "allowed": [
+            "PDF",
+            "DOCX"
+          ],
+          "checksum": "SHA-256",
+          "smoke": "REAL_R2_PUT_LIST_GET_DELETE_PASS_METADATA_ONLY_BYTES_NOT_EXPOSED_BY_ADMIN_TOOL",
+          "remaining_smoke_objects": 0
+        },
+        "qa_backend": {
+          "worker": "ai-law-standalone-cf-qa",
+          "version": "f465622c-a75b-48bb-897f-9eaf47eb8d0a",
+          "deployment": "ad483808-e95f-4ed3-b524-1bb707a1f9f2",
+          "modules": 11,
+          "updated": [
+            "worker.mjs",
+            "qa_case_r2.mjs"
+          ],
+          "preserved": 9,
+          "old_bindings_preserved": true,
+          "sha_readback": "PASS"
+        },
+        "qa_site": {
+          "worker": "ai-law-web-qa",
+          "version": "aa3e4bf5-be8e-4f75-956a-c37cb4363ca2",
+          "deployment": "9b4698f3-42e7-4e5a-987d-e3cc07c95c9b",
+          "modules": 27,
+          "updated": [
+            "site_worker.mjs",
+            "workspace_html.mjs",
+            "workspace_css.mjs",
+            "workspace_matters.mjs"
+          ],
+          "preserved": 23,
+          "bindings": [
+            "QA_AUTH",
+            "GOOGLE_PICKER_API_KEY"
+          ],
+          "html_top_level_panels": "PASS",
+          "legacy_drive_hidden_not_removed": true
+        },
+        "tests": {
+          "ci_run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42443309606",
+          "ci_executed": "PASS_9_OF_9",
+          "ci_skipped": "21_CONDITIONAL",
+          "r116_auth_acl_negatives": "PASS_MOCK",
+          "r116_pdf_put_get_download_sha": "PASS_MOCK",
+          "d1_schema_applied": "PASS_REAL_QA",
+          "r2_bucket_admin_smoke": "PASS_PUT_LIST_GET_DELETE",
+          "source_worker_readback": "PASS_11_AND_27",
+          "user_synthetic_browser_upload_download": "NOT_RUN",
+          "real_android_owner": "NOT_RUN",
+          "real_desktop_owner": "NOT_RUN",
+          "cross_tenant_live_case_denial": "NOT_RUN",
+          "backup_restore": "NOT_RUN",
+          "actual_file_migration_out_of_r2": "NOT_RUN",
+          "srs_clause_mapping": "NOT_VERIFIED",
+          "production": "UNTOUCHED"
+        },
+        "gaps": [
+          "Authenticated browser upload -> D1 receipt -> R2 -> reload/download digest with authorized QA account still NOT_RUN. Admin R2 direct object smoke is not full website E2E.",
+          "MatterACL negative checks PASS in code fixtures, not live with revoked tenant accounts.",
+          "Archive/export, R2 temporary retention schedule and migration to tenant-owned storage are not accepted. No automatic deletion, do not put customer documents in QA.",
+          "Exact private SRS v1.1.15 clauses and acceptance mapping unavailable in this session."
+        ],
+        "owner_acceptance": "PENDING_R116"
       }
     ],
     "features": [
