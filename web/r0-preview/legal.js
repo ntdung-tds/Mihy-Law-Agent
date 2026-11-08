@@ -125,7 +125,7 @@
       root.dataset.state=warning?'warning':'info';
       const heading=document.createElement('strong');
       heading.textContent='Đối chiếu mã đoạn nguồn: '+marked+'/'+total+
-        ' đoạn có nhãn trong bản nháp';
+        ' đoạn có nhãn đứng đầu dòng dịch';
       root.append(heading);
       if(warning){
        const ids=Array.isArray(coverage.missing_source_ids)?
@@ -134,9 +134,23 @@
        p.textContent='Đoạn cần kiểm tra: '+ids.join(', ')+
         (missing>ids.length?' và '+(missing-ids.length)+' đoạn khác':'');
        root.append(p);
+       // R135: tell the reviewer why a visible marker is untrusted.
+       // Render as text only; the model response must never become HTML.
+       for(const [field,label] of [
+        ['misplaced_source_ids','Nhãn chưa đứng đầu dòng dịch'],
+        ['duplicate_source_ids','Nhãn xuất hiện lặp']
+       ]){
+        const values=Array.isArray(coverage[field])?
+         coverage[field].filter(id=>/^A[1-9]\d*$/.test(id)).slice(0,30):[];
+        if(values.length){
+         const detail=document.createElement('p');
+         detail.textContent=label+': '+values.join(', ');
+         root.append(detail);
+        }
+       }
       }
       const note=document.createElement('p');
-      note.textContent='Có nhãn [A#] không chứng minh nội dung đã dịch đúng, đủ hoặc tương đương pháp lý. Bắt buộc luật sư đối chiếu từng đoạn nguồn.';
+      note.textContent='Chỉ vị trí nhãn được kiểm tra tự động; có nhãn [A#] không chứng minh nội dung đã dịch đúng, đủ hoặc tương đương pháp lý. Bắt buộc luật sư đối chiếu từng đoạn nguồn.';
       root.append(note);root.hidden=false;
     }
     function showSummaryReview(check){

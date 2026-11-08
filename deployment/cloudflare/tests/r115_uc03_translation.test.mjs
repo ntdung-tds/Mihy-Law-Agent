@@ -15,7 +15,7 @@ const TRANSLATION='Article 1. Party A must pay 2,000,000 VND before 15/09/2026. 
 test('R127 UC03: source markers are deterministic, missing passages flagged with human review',()=>{
  const rows=[{id:'A1',text:'Điều 1. Thời hạn.'},
   {id:'A2',text:'Điều 2. Số tiền.'},{id:'A3',text:'Điều 3. Ký tên.'}];
- const partial=translationSourceCoverage(rows,'[A1] Article 1. [A3] Article 3.');
+ const partial=translationSourceCoverage(rows,'[A1] Article 1.\n[A3] Article 3.');
  assert.equal(partial.status,'review_required');
  assert.equal(partial.source_segment_count,3);
  assert.equal(partial.marked_segment_count,2);
@@ -23,13 +23,13 @@ test('R127 UC03: source markers are deterministic, missing passages flagged with
  assert.deepEqual(partial.missing_source_ids,['A2']);
  assert.equal(partial.review_required,true);
  assert.match(partial.note,/KHÔNG chứng minh/);
- const complete=translationSourceCoverage(rows,'[A1] X. [A2] Y. [A3] Z.');
+ const complete=translationSourceCoverage(rows,'[A1] X.\n[A2] Y.\n[A3] Z.');
  assert.equal(complete.status,'markers_present_not_verified');
  assert.equal(complete.marked_segment_count,3);
  assert.equal(complete.review_required,true,'all labels do NOT imply legal equivalence');
  const fake=translationSourceCoverage(rows,'[A1] [A1] [A9] [B2] and [A2, A3]');
- assert.deepEqual(fake.missing_source_ids,['A2','A3']);
- assert.equal(fake.marked_segment_count,1,'duplicates, unknown and grouped references cannot raise coverage');
+ assert.deepEqual(fake.missing_source_ids,['A1','A2','A3']);
+ assert.equal(fake.marked_segment_count,0,'duplicates, unknown and grouped references cannot raise coverage');
  const many=translationSourceCoverage(
   Array.from({length:35},(_,i)=>({id:'A'+(i+1),text:'Synthetic'})),'[A1]');
  assert.equal(many.missing_source_count,34);
@@ -107,11 +107,11 @@ function req(uc='UC03',source=SOURCE){
 }
 
 test('R115 UC03: actual legalApi returns honest warning and original AI translation; no body persistence',async()=>{
- const f=env('Article 1. Party A pays before 15/09/2026. [A1]');
+ const f=env('[A1] Article 1. Party A pays before 15/09/2026.');
  const r=await legalApi(req(),f.e,{now:1800000000});
  assert.equal(r.status,200,await r.clone().text());
  const d=await r.json();
- assert.equal(d.answer,'Article 1. Party A pays before 15/09/2026. [A1]');
+ assert.equal(d.answer,'[A1] Article 1. Party A pays before 15/09/2026.');
  assert.equal(d.translation_check.status,'review_required');
  assert.ok(d.translation_check.missing_numbers.includes('2000000'));
  assert.equal(d.translation_check.review_required,true);

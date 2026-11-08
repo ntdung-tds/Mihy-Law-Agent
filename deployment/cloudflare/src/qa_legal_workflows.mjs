@@ -167,19 +167,33 @@ export function sourceReferencesExist(answer,sourceRows){
 export function translationSourceCoverage(sourceRows,answer){
  const sources=Array.isArray(sourceRows)?sourceRows:[];
  const expected=sources.filter(x=>/^A[1-9]\d*$/.test(x?.id||'')).map(x=>x.id);
- const observed=new Set();
- for(const match of String(answer||'').matchAll(/\[(A[1-9]\d*)\]/gu)){
-  if(expected.includes(match[1]))observed.add(match[1]);
+ const valid=new Set(expected),all=new Map(),atStart=new Map();
+ const raw=String(answer||'');
+ // R135: An anchor quoted inside the AI explanation is NOT a translated
+ // paragraph. Only a sole [A#] preceding text on its own output line
+ // qualifies as positioned; repeated references remain ambiguous.
+ for(const match of raw.matchAll(/\[(A[1-9]\d*)\]/gu)){
+  const id=match[1];
+  if(valid.has(id))all.set(id,(all.get(id)||0)+1);
  }
- const missing=expected.filter(id=>!observed.has(id));
+ for(const match of raw.matchAll(/^[ \t]*(?:[-*][ \t]+)?\[(A[1-9]\d*)\](?=[ \t]|$)/gmu)){
+  const id=match[1];
+  if(valid.has(id))atStart.set(id,(atStart.get(id)||0)+1);
+ }
+ const marked=expected.filter(id=>all.get(id)===1&&atStart.get(id)===1);
+ const missing=expected.filter(id=>all.get(id)!==1||atStart.get(id)!==1);
+ const misplaced=expected.filter(id=>(all.get(id)||0)>0&&!atStart.has(id));
+ const duplicated=expected.filter(id=>(all.get(id)||0)>1);
  return {
   status:missing.length?'review_required':'markers_present_not_verified',
   source_segment_count:expected.length,
-  marked_segment_count:observed.size,
+  marked_segment_count:marked.length,
   missing_source_ids:missing.slice(0,30),
   missing_source_count:missing.length,
+  misplaced_source_ids:misplaced.slice(0,30),
+  duplicate_source_ids:duplicated.slice(0,30),
   review_required:true,
-  note:'Đối chiếu mã đoạn [A#] chỉ phát hiện đoạn CHƯA được đánh dấu trong đầu ra, KHÔNG chứng minh đoạn đã dịch đầy đủ, đúng nghĩa hoặc chính xác pháp lý. Luật sư phải so từng đoạn với bản gốc.'
+  note:'Chỉ công nhận một mã [A#] duy nhất đứng đầu dòng dịch; mã được nhắc trong lời giải thích hoặc bị lặp đều phải rà soát. Đây là kiểm tra vị trí nhãn, KHÔNG chứng minh dịch đủ, đúng nghĩa hoặc có giá trị pháp lý. Luật sư phải đối chiếu từng đoạn nguồn.'
  };
 }
 
