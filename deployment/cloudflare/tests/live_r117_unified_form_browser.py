@@ -83,7 +83,7 @@ def scenario(browser,name,viewport,origin):
             for f in files[c["id"]]:
                 if u==path+"/files/"+f["id"]+"/download" and method=="GET":
                     if f.get("hidden"):return reply(route,404,{"error":"hidden"})
-                    data=b"%PDF-1.4\\nSynthetic QA document only\\n%%EOF"
+                    data=b"%PDF-1.4\nSynthetic QA document only\n%%EOF"
                     return route.fulfill(status=200,content_type="application/pdf",body=data,
                         headers={"Content-Length":str(len(data))})
                 if u==path+"/files/"+f["id"] and method=="PATCH":
@@ -136,15 +136,15 @@ def scenario(browser,name,viewport,origin):
     if name=="mobile":page.locator("#case-mobile-edit").click()
     docs=[
         {"name":"QA evidence B.pdf","mimeType":"application/pdf",
-         "buffer":b"%PDF-1.4\\nSynthetic QA document only\\n%%EOF"},
+         "buffer":b"%PDF-1.4\nSynthetic QA document only\n%%EOF"},
         {"name":"QA evidence C.pdf","mimeType":"application/pdf",
-         "buffer":b"%PDF-1.4\\nSynthetic QA document only\\n%%EOF"}
+         "buffer":b"%PDF-1.4\nSynthetic QA document only\n%%EOF"}
     ]
     page.locator("#case-r2-file").set_input_files(docs)
     assert page.locator("#case-selected-files .case-pending-row").count()==2
     page.locator("#case-r2-file").set_input_files({
       "name":"QA evidence D.pdf","mimeType":"application/pdf",
-      "buffer":b"%PDF-1.4\\nSynthetic QA document only\\n%%EOF"})
+      "buffer":b"%PDF-1.4\nSynthetic QA document only\n%%EOF"})
     assert page.locator("#case-selected-files .case-pending-row").count()==3
     page.locator("#matter-create").click()
     page.get_by_text("Đã lưu hồ sơ và 3 tệp vào R2 thành công.").wait_for(timeout=15000)
@@ -157,7 +157,10 @@ def scenario(browser,name,viewport,origin):
     page.get_by_text("Đã ẩn tệp khỏi danh sách; dữ liệu gốc vẫn còn trên R2.").wait_for(timeout=15000)
     assert len(files[I])==4 and sum(bool(f.get("hidden")) for f in files[I])==1
     assert page.locator("#case-r2-list .case-file-download").count()==3
-    if name=="mobile":page.locator("#case-close").click()
+    if name=="mobile":
+        page.locator("#case-close").click()
+        page.locator("#matter-list .case-action--view").first.click()
+        page.locator("#matter-workspace[data-mobile-mode='detail']").wait_for(state="visible")
     assert cases[0]["details"]["reference"]=="QA-LD-001"
     assert page.locator("#matter-list .matter-row").count()==1
     assert page.locator("#case-r2-list .matter-row").count()==3
