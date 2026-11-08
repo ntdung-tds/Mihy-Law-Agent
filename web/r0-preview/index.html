@@ -300,6 +300,25 @@
               <div id="legal-qa-source-coverage" class="legal-qa-translation-check" role="status" aria-live="polite" hidden></div>
               <details id="legal-qa-summary-review" class="legal-qa-translation-check" role="status" aria-live="polite" hidden></details>
               <details id="legal-qa-grammar-review" class="legal-qa-translation-check" role="status" aria-live="polite" hidden></details>
+              <details id="legal-qa-uc07-compare" class="legal-qa-uc07-compare" hidden>
+                <summary>Đối chiếu bản gốc và bản sửa đề xuất</summary>
+                <div class="legal-qa-uc07-compare-grid">
+                  <section aria-labelledby="legal-qa-uc07-original-title">
+                    <h4 id="legal-qa-uc07-original-title">Bản gốc</h4>
+                    <pre id="legal-qa-uc07-original" tabindex="0"></pre>
+                  </section>
+                  <section aria-labelledby="legal-qa-uc07-edited-title">
+                    <h4 id="legal-qa-uc07-edited-title">Bản sửa đề xuất</h4>
+                    <pre id="legal-qa-uc07-edited" tabindex="0"></pre>
+                  </section>
+                </div>
+                <label class="legal-qa-uc07-reviewed">
+                  <input id="legal-qa-uc07-reviewed" type="checkbox" />
+                  Tôi đã tự đối chiếu bản gốc và bản sửa, kể cả số liệu, thời hạn, quyền, nghĩa vụ và chủ thể.
+                </label>
+                <button type="button" id="legal-qa-uc07-copy-edited" disabled>Sao chép bản sửa đã đối chiếu</button>
+                <p id="legal-qa-uc07-copy-status" role="status" aria-live="polite">Xác nhận chỉ áp dụng cho lần xem này; không phải phê duyệt pháp lý và không lưu vào hồ sơ.</p>
+              </details>
               <pre id="legal-qa-output"></pre>
               <div id="legal-qa-sources"></div>
               <button type="button" id="legal-qa-copy">Sao chép bản nháp</button>
