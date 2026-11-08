@@ -101,7 +101,7 @@ test('R138 conversion rejects oversize, mislabeled files, invalid PDF/ZIP signat
    mime:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',status:400},
   {name:'fake.exe',status:400},
   {mime:'text/plain',status:400},
-  {name:'a/../b.pdf',status:400},
+  {name:'x'.repeat(121)+'.pdf',status:400},
  ];
  for(const {status,...input} of cases){
   const f=fixture();
