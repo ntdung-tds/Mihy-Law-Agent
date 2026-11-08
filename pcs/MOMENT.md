@@ -1,12 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `118` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T11:18:20.251Z`.
+- **PCS revision:** `119` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T13:25:28.471Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R127 — UC03 cảnh báo đoạn nguồn chưa đối chiếu (2026-11-08)
+
+- **Mục tiêu:** Sau R126, ưu tiên UC03 (dịch văn bản) theo issue #156, chỉ trong miền QA văn bản mẫu. R127 bổ sung kiểm tra sự hiện diện nhãn `[A1]`, `[A2]`… của từng đoạn nguồn trong bản dịch AI; nếu thiếu, nêu các mã cần đối chiếu. Có đủ mã **không chứng minh** bản dịch đúng/đủ/tương đương pháp lý; người có chuyên môn luôn phải thẩm định. Giữ nguyên kiểm tra chữ số/số điều R115 và kết quả model gốc.
+- **UI:** Panel cảnh báo riêng tại màn UC03; số nhãn xuất hiện / tổng số đoạn và danh sách thiếu; không dùng HTML tự chèn; xóa toàn bộ kết quả và cảnh báo khi chuyển UC/tenant. Các UC khác không nhận field mới.
+- **An toàn:** Khi triển khai QA, phát hiện module AI đang chạy dùng bộ kiểm tra mã trích dẫn cũ. Đã xác minh đây là **khác biệt duy nhất** so với nguồn R126 trên GitHub; bản R127 đưa QA về bộ kiểm tra trích dẫn chặt hơn, không ghi đè thay đổi không liên quan. Quota, session, MatterACL còn nguyên.
+- **CI:** [#42484211865](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42484211865) 9/9 nhóm PASS; unit mã đoạn thiếu, nhãn lặp, mã giả, giới hạn trả về; Chromium mobile/desktop synthetic kiểm tra cảnh báo A2, dữ liệu nháp và reset sang UC04.
+- **Live QA 100% readback PASS:** Backend `ai-law-standalone-cf-qa` version `d35b58db-38d4-43ee-b5de-ae365b2b7862`, deployment `5083472e-f92b-45dc-8346-599b7ba339de` (11 modules / 12 bindings, 10 module khác không đổi). Site `ai-law-web-qa` version `3a39d312-f0ce-4556-b1f9-310b001728cd`, deployment `f3ce8f06-a120-4eee-ae97-671e4e946ca3` (27 modules / 2 bindings, 25 module khác không đổi). Không migration D1/R2; production untouched.
+- **Chưa nghiệm thu:** Tài khoản Owner Android thực, file PDF/DOCX thật → OCR/extract→dịch, thẩm định bản dịch chính xác `NOT_RUN`. SRS v1.1.15 frozen; ghi `SC-030` không mở rộng yêu cầu.
 
 ## R126 — Xem thêm lịch sử theo trang, cuộn riêng mobile (2026-11-08)
 

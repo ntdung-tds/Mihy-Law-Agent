@@ -226,3 +226,9 @@
 - R125 append-only audit tiếp tục giữ nguyên. Bổ sung GET /api/qa/cases/:id/events: trang tối đa 30 sự kiện, mốc next_cursor (timestamp,event_id), xem tiếp theo thời gian/tie-breaker để không còn giới hạn thực tế 100 sự kiện; query bind, kiểm tra tham số chặt chẽ và MatterACL theo từng trang.
 - UI mobile giữ vùng cuộn R124, nút Xem thêm lịch sử nhỏ, append không đặt lại scroll, bỏ qua phản hồi cũ khi chuyển hồ sơ. Không nới quyền xem giá trị trước/sau; read-only vẫn mask.
 - CI [#42474761235](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42474761235) PASS 9/9; unit 67 sự kiện có timestamp trùng + invalid cursor, Chromium desktop/mobile. QA backend 100% `217f45e7-1b25-4a79-9974-a8df2fe01335`, site 100% `57d22f4a-c661-4031-adef-b249c1343b37`, live source/binding readback PASS. Không migration D1, không đụng production; owner authenticated Android E2E NOT_RUN. SRS v1.1.15 vẫn giữ nguyên.
+
+## SC-030 — 2026-11-08 — Đối chiếu mã đoạn nguồn bản dịch nháp UC03 QA
+
+- R127 text-only QA UC03: model nhận yêu cầu đặt đúng mã [A#] trước từng đoạn dịch, server kiểm tra sự có mặt của từng nhãn và trả số lượng, mã thiếu để luật sư rà soát. Phát hiện nhãn không có nghĩa xác nhận ngữ nghĩa hay tính pháp lý. Giữ cảnh báo số liệu/số điều R115 và kiểm tra strict source IDs R111; không thay đổi hoạt động các UC khác.
+- UI mobile/desktop hiển thị cảnh báo đoạn thiếu bên cạnh numeric review, reset khi đổi nghiệp vụ, giữ text-only DOM. Không tích hợp PDF/DOCX thật trong lượt này; không lưu dữ liệu nguồn/đầu ra.
+- CI [#42484211865](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42484211865) 9/9 PASS (synthetic browser + unit); QA backend 100% `d35b58db-38d4-43ee-b5de-ae365b2b7862`, site 100% `3a39d312-f0ce-4556-b1f9-310b001728cd`; source/binding readback PASS. Người dùng Android thật, thẩm định bản dịch, file PDF/DOCX E2E NOT_RUN. D1/R2 và production không đổi, SRS v1.1.15 vẫn giữ nguyên.
