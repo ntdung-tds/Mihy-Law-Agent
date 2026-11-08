@@ -121,32 +121,29 @@
     }
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
-  $$('[data-view]').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.view === view);
-      if (btn.dataset.view === view) btn.setAttribute('aria-current', 'page');
-      else btn.removeAttribute('aria-current');
-    });
-    $('#breadcrumb-current').textContent = viewLabels[view];
-    if (view === 'documents') { renderDocuments(); window.dispatchEvent(new Event('ai-law:documents-open')); }
-    if (updateHash && window.location.hash !== `#${view}`) window.history.replaceState(null, '', `#${view}`);
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }
   $$('[data-view]').forEach(n => n.addEventListener('click', () => goto(n.dataset.view)));
   $$('[data-go]').forEach(n => n.addEventListener('click', () => goto(n.dataset.go)));
 
   const drawer = $('#function-drawer'), backdrop = $('#drawer-backdrop'), trigger = $('#rail-features');
+  const desktopTrigger=$('#desktop-features');
+  let lastDrawerTrigger=trigger;
   function closeFunctionDrawer(restoreFocus = true) {
     drawer.hidden = true; backdrop.hidden = true; drawer.setAttribute('aria-hidden', 'true');
-    trigger.setAttribute('aria-expanded', 'false'); document.body.classList.remove('drawer-open');
-    if (restoreFocus) trigger.focus();
+    trigger.setAttribute('aria-expanded', 'false');
+    desktopTrigger.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('drawer-open');
+    if (restoreFocus) lastDrawerTrigger.focus();
   }
-  function openFunctionDrawer() {
+  function openFunctionDrawer(event) {
+    lastDrawerTrigger=event?.currentTarget||trigger;
     drawer.hidden = false; backdrop.hidden = false; drawer.setAttribute('aria-hidden', 'false');
-    trigger.setAttribute('aria-expanded', 'true'); document.body.classList.add('drawer-open');
+    trigger.setAttribute('aria-expanded', 'true');
+    desktopTrigger.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('drawer-open');
     $('#drawer-close').focus();
   }
   trigger.addEventListener('click', openFunctionDrawer);
-  $('#desktop-features').addEventListener('click', openFunctionDrawer);
+  desktopTrigger.addEventListener('click', openFunctionDrawer);
   $('#drawer-close').addEventListener('click', () => closeFunctionDrawer());
   backdrop.addEventListener('click', () => closeFunctionDrawer());
   $$('[data-drawer-view]').forEach(n => n.addEventListener('click', () => {
