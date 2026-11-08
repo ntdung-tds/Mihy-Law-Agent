@@ -54,6 +54,34 @@ test('R131 UC07: authoritative text extraction never includes model commentary a
  assert.equal(risk.isolated_proposal,true);
  assert.equal(risk.status,'review_required');
 });
+test('R133 UC07: inline or quoted duplicate delimiters fail closed before copy and persistence',async()=>{
+ const start='[BẮT ĐẦU BẢN SỬA]',end='[KẾT THÚC BẢN SỬA]';
+ const source='Bên A phải thanh toán 2.000.000 đồng trước ngày 15/09/2026.';
+ const revised='Bên A phải thanh toán 3.000.000 đồng trước ngày 16/09/2026.';
+ const cases=[
+  start+'\n'+revised+' [BẮT ĐẦU BẢN SỬA] nhúng trong văn bản\n'+end,
+  start+'\n'+revised+' [KẾT THÚC BẢN SỬA] nhúng trong văn bản\n'+end,
+  'AI trích dẫn '+start+' trong lời giải thích.\n'+start+'\n'+revised+'\n'+end,
+  start+'\n'+revised+'\n'+end+'\nAI trích dẫn '+end+' trong chú thích.'
+ ];
+ for(const raw of cases){
+  assert.equal(grammarEditedText(raw),null,raw);
+  const check=grammarIntegrityCheck(source,raw);
+  assert.equal(check.isolated_proposal,false,raw);
+  assert.equal(check.status,'manual_review_no_proposed_version',raw);
+  assert.equal(check.review_required,true);
+  const q=fixture();
+  q.env.AI.run=async()=>({response:raw});
+  const answer=await legalApi(request({uc:'UC07',source}),q.env,{now:NOW});
+  assert.equal(answer.status,200);
+  const data=await answer.json();
+  assert.equal(data.grammar_edited_text,null,raw);
+  assert.equal(data.grammar_review.isolated_proposal,false,raw);
+  assert.ok(q.calls.every(x=>x.params.every(v=>v!==source&&v!==raw)),
+    'No raw model output or input persisted');
+ }
+});
+
 test('R131 UC07: real API exposes isolated edit only, blocks on malformed structure, no other UC leaks',async()=>{
  const source='Bên A phải thanh toán 2.000.000 đồng trước 15/09/2026 cho Công ty Minh Anh.';
  const text='Bên B có thể thanh toán 3.000.000 đồng trước 16/09/2026 cho Công ty Minh Anh.';
