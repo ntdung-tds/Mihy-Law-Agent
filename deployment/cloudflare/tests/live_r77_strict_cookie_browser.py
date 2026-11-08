@@ -53,22 +53,23 @@ def main():
                         name+" failed to restore protected QA app after first-party landing"
                     )
                     print(f"PASS {name}: direct Google-style redirect withholds Strict cookie; 200 landing restores private workspace")
-                    # R79: actual Chromium sees a readable, accessible file chooser
-                    # in the protected documents panel, not a wide native input.
-                    picker=page.locator(".qa-document-file-control")
+                    # R116: previous Google Drive chooser is paused. The new
+                    # private R2 file control must stay readable on both widths.
+                    assert page.locator(".qa-document-box").get_attribute("hidden") is not None
+                    page.evaluate("document.getElementById('qa-case-detail').hidden=false")
+                    picker=page.locator("#case-r2-file")
                     picker.wait_for(state="visible",timeout=10000)
                     box=picker.bounding_box()
-                    assert box and box["x"] >= -1 and box["x"] + box["width"] <= viewport["width"]+2, (
-                        name+" file chooser overflows the viewport: "+str(box)
+                    assert box and box["x"] >= -1 and box["x"]+box["width"] <= viewport["width"]+2, (
+                        name+" private R2 file chooser overflows viewport: "+str(box)
                     )
-                    filename="qa-synthetic-filename-that-must-wrap-within-mobile-view.pdf"
-                    page.locator("#document-file").set_input_files({
-                        "name":filename,
-                        "mimeType":"application/pdf",
+                    filename="qa-synthetic-filename-with-no-client-data.pdf"
+                    picker.set_input_files({
+                        "name":filename,"mimeType":"application/pdf",
                         "buffer":b"%PDF-1.4\\n1 0 obj\\n<< >>\\nendobj\\n%%EOF\\n",
                     })
-                    assert page.locator("#document-file-name").inner_text()==filename
-                    print(f"PASS {name}: responsive PDF/DOCX picker and selected filename visible without horizontal overflow")
+                    assert picker.evaluate("(el)=>el.files?.[0]?.name")==filename
+                    print(f"PASS {name}: isolated R2 QA file chooser visible and responsive")
                     context.close()
             finally:
                 browser.close()
