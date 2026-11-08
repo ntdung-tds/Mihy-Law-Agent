@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
   "revision": 103,
-  "updated_at": "2026-11-08T00:40:30.608Z",
+  "updated_at": "2026-11-08T00:41:22.619Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1850,7 +1850,7 @@
           "anonymous_qa_health": "PASS",
           "authenticated_owner_rename_e2e": "NOT_RUN",
           "production": "UNTOUCHED",
-          "r111_dedicated_ci_gate": "PASS_CLOUDFLARE_CONTRACT_JOB_https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42430607926",
+          "r111_dedicated_ci_gate": "PASS_9_OF_9_FINAL_CODE_RUN_42430607926",
           "original_suite_exclusion": "PREVIOUS_9_JOB_CI_DID_NOT_EXECUTE_R108_R109_DEDICATED_TEST_FILES"
         },
         "blockers": [
@@ -1888,7 +1888,7 @@
           "verified_official_legal_research": "NOT_IMPLEMENTED",
           "docx_pdf_file_workflow": "NOT_IMPLEMENTED_PAUSED_STORAGE",
           "production": "UNTOUCHED",
-          "r111_dedicated_ci_gate": "PASS_CLOUDFLARE_CONTRACT_JOB_https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42430607926",
+          "r111_dedicated_ci_gate": "PASS_9_OF_9_FINAL_CODE_RUN_42430607926",
           "original_suite_exclusion": "PREVIOUS_9_JOB_CI_DID_NOT_EXECUTE_R108_R109_DEDICATED_TEST_FILES"
         },
         "blockers": [
@@ -1927,7 +1927,7 @@
           "owner_real_authenticated_ai_e2e": "NOT_RUN",
           "independent_legal_accuracy": "NOT_RUN",
           "production": "UNTOUCHED",
-          "r111_dedicated_ci_gate": "PASS_CLOUDFLARE_CONTRACT_JOB_https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42430607926",
+          "r111_dedicated_ci_gate": "PASS_9_OF_9_FINAL_CODE_RUN_42430607926",
           "original_suite_exclusion": "PREVIOUS_9_JOB_CI_DID_NOT_EXECUTE_R108_R109_DEDICATED_TEST_FILES"
         },
         "blockers": [
@@ -1940,7 +1940,7 @@
       {
         "id": "AL-R0-LEGAL-R111-001",
         "title": "R111 verified CI coverage and source ID guard for existing 11-UC QA",
-        "status": "CODE_CI_CLOUDFLARE_PASS_FULL_CI_PENDING_QA_DEPLOY_NOT_RUN",
+        "status": "CODE_CI_PASS_9_OF_9_OWNER_E2E_NOT_RUN_QA_DEPLOY_NOT_RUN",
         "priority": "P1",
         "scope": "Only synthetic-text source-citation guard and CI verification for already built R108-R110. No new UI, Google/OneDrive/OAuth, files, customer data or production.",
         "acceptance": [
@@ -1956,7 +1956,7 @@
           "red_ci": "FAIL_REPRODUCED_7_PASS_1_FAIL_RUN_42430559379",
           "node_guard_local": "PASS_9_OF_9_PURE_HELPER_CASES",
           "cloudflare_ci": "PASS_R108_NODE_R109_R111_NODE_REAL_SQLITE_RUN_42430607926",
-          "full_workflow": "IN_PROGRESS_RUN_42430607926",
+          "full_workflow": "PASS_9_OF_9_EXECUTED_21_CONDITIONAL_SKIPPED_RUN_42430607926",
           "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/160",
           "qa_live_deploy": "NOT_RUN",
           "owner_android_desktop": "NOT_RUN",
