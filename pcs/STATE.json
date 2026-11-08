@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 115,
-  "updated_at": "2026-11-08T08:34:55.543Z",
+  "revision": 116,
+  "updated_at": "2026-11-08T10:00:30.715Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2635,6 +2635,33 @@
         },
         "srs_change": "SC-026 UI-only; frozen private v1.1.15 unchanged",
         "owner_acceptance": "PENDING_R123"
+      },
+      {
+        "id": "AL-R0-CASE-SCROLL-R124-001",
+        "title": "R124: thu gọn phần đính kèm, cuộn riêng danh sách tệp và lịch sử trên mobile",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_OWNER_ACCEPTANCE_PENDING",
+        "branch": "style/r124-scroll-collapse-case-documents",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/173",
+        "implementation": "Native details/summary for attachments with persistent displayed file count; bounded touch-scrolling for files/history and keyboard-scrolling regions; full R123 icon/download/edit behavior preserved.",
+        "evidence": {
+          "ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42469244931",
+          "ci_executed": "PASS_9_OF_9",
+          "chromium": "PASS_DESKTOP_MOBILE_SYNTHETIC_SCROLL_COLLAPSE",
+          "qa_site_worker": "ai-law-web-qa",
+          "qa_version": "139028a3-5776-42b7-aba5-36e20a391c9a",
+          "qa_deployment": "9b580c7e-0386-46e9-b73c-4cc3bc5897d8",
+          "traffic_percent": 100,
+          "modules": 27,
+          "preserved_modules": 24,
+          "bindings": 2,
+          "source_readback": "PASS",
+          "owner_android": "NOT_RUN",
+          "backend_d1_r2": "UNCHANGED",
+          "production": "UNTOUCHED"
+        },
+        "note": "Detailed audit trail by fields requested previously is still not delivered by this R124 UI-only change; do not mark complete.",
+        "owner_acceptance": "PENDING_R124"
       }
     ],
     "features": [
