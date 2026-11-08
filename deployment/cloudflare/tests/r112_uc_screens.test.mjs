@@ -17,6 +17,10 @@ test('R112: 11 menu actions navigate to distinct task routes, never the shared a
  assert.match(app,/workflow-open/);
  assert.doesNotMatch(app,/goto\('overview'\); closeFunctionDrawer\(false\);[\s\S]{0,140}scrollIntoView/);
 });
+test('R114: menu and routed-panel collections never use single-element querySelector for .forEach',()=>{
+ assert.doesNotMatch(app,/(?<!\$)\$\('[^']+'\)\.forEach/);
+});
+
 test('R112: the QA form belongs to exactly one isolated workflow screen with a dedicated heading',()=>{
  assert.equal((html.match(/id="legal-qa-form"/g)||[]).length,1);
  assert.match(html,/id="view-workflow"[^>]*data-panel="workflow"/);
