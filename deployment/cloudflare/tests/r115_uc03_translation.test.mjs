@@ -72,12 +72,12 @@ test('R115 UC03: citation [A1] is not a translated number; other UCs are unaffec
  const a=translationIntegrityCheck('Điều 1. Nộp 99 đồng.','Article 1. [A1] Fee payable.');
  assert.ok(a.missing_numbers.includes('99'));
  const source=readFileSync('deployment/cloudflare/src/qa_legal_workflows.mjs','utf8');
- assert.match(source,/body.uc==='UC03'\?\{translation_check/);
+ assert.match(source,/body.uc==='UC03'\?\{\s*translation_check/);
  const html=readFileSync('web/r0-preview/index.html','utf8');
  const ui=readFileSync('web/r0-preview/legal.js','utf8');
  const css=readFileSync('web/r0-preview/styles.css','utf8');
  assert.match(html,/id="legal-qa-translation-check"[^>]*hidden/);
- assert.match(ui,/if\(currentTask==='UC03'\)showTranslationCheck\(data.translation_check\)/);
+ assert.match(ui,/if\(currentTask==='UC03'\)\{\s*showTranslationCheck\(data.translation_check\)/);
  assert.match(ui,/check.hidden=true;check.replaceChildren\(\)/);
  assert.doesNotMatch(ui,/translation-check[\s\S]{0,600}innerHTML/);
  assert.match(css,/legal-qa-translation-check\[hidden\]/);
