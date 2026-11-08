@@ -91,7 +91,7 @@ def scenario(browser,name,viewport,origin):
     page.goto(origin+"/#documents",wait_until="domcontentloaded")
     if name=="mobile":
         # User requirement: no create form before tapping "Tạo mới".
-        page.locator("#matter-list").wait_for(state="visible",timeout=15000)
+        page.locator(".qa-case-saved-list").wait_for(state="visible",timeout=15000)
         assert not page.locator("#matter-form").is_visible(),"mobile starts list-first"
         assert page.locator("#upload-btn").is_visible()
         page.locator("#upload-btn").click()
