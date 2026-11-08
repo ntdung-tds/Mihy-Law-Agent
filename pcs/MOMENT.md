@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `125` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T17:10:15.796Z`.
+- **PCS revision:** `127` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T17:36:27.155Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R134 — Loại bỏ bản nháp dịch/tóm tắt cũ khi đầu vào thay đổi (2026-11-09)
+
+- **Góc lỗi:** R131 đã khóa/cập nhật bản sửa UC07 theo đầu vào, nhưng UC03 và UC04 vẫn giữ bản nháp/cảnh báo/copy trước đó sau khi người dùng sửa nguồn hoặc Matter. Một request gửi trước khi người dùng nhấn Nạp ví dụ cũng có thể hoàn thành muộn và gắn với biểu mẫu đã thay đổi. Đây là vấn đề tính nhất quán của UI, không thêm chức năng pháp lý.
+- **Triển khai:** R134 PR [#183](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/183) dựa trên R133 PR #182, chỉ thay đổi `web/r0-preview/legal.js` và Chromium regression. Lưu snapshot đầy đủ UC/ngữ cảnh trong RAM, hủy và ẩn kết quả khi đổi văn bản, câu hỏi, Matter, ngôn ngữ hoặc consent; kiểm tra snapshot khi phản hồi đến và trước khi copy để chống trường hợp không có DOM event. Nút Nạp ví dụ hủy request đang chờ. Không ảnh hưởng UC07 reviewer, server, ACL hay D1/R2.
+- **CI:** [#42504812956](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42504812956) **PASS 9/9** tại mã ứng dụng `27e8191d605b70d68a02751bc85983227d6c8ce2`, gồm browser desktop/mobile và luồng response muộn. Bổ sung kiểm thử chặn copy khi trường bị sửa không phát `input/change`. Lượt [CI #42505197959](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42505197959) FAIL một bài browser do hai lần đo layout trong lúc cuộn mượt; đã thay bằng snapshot cùng một frame, **giữ nguyên ngưỡng kiểm thử**. [CI #42505512889](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42505512889) **PASS 9/9** trên HEAD code `edc0b1acfd6c50b66ba758eed9490c1c57d85f1f`, gồm Chromium desktop/mobile.
+- **QA website deployment:** `ai-law-web-qa` version `d90158e1-1b74-40ec-864c-db1b846cea85`, deployment `3960fb46-6eb4-4f1c-82b8-042c94041886`, traffic **100%**; readback khớp module `workspace_legal.mjs` từ GitHub, **26/26 module còn lại** nguyên vẹn, **2/2 binding** giữ nguyên. Backend vẫn phiên bản R133; production không đổi.
+- **Nghiệm thu:** Người dùng Android thật, kiểm duyệt pháp lý bản dịch/tóm tắt, TC tài liệu PDF/DOCX vẫn **NOT_RUN**. SRS v1.1.15 giữ nguyên, delta `SC-036`, PCS revision 127; PR draft, không tự merge.
 
 ## R133 — UC07 chống nhãn AI trùng trong nội dòng (2026-11-08)
 

@@ -478,6 +478,54 @@ def scenario(browser,name,viewport,origin):
     assert page.locator("#legal-qa-translation-check").is_visible()
     assert page.locator("#legal-qa-output").inner_text().startswith("[A1] Article 1")
     assert page.locator("#legal-qa-result").is_visible()
+    # R134: UC03 cannot keep an old translation/evidence/copy shortcut after
+    # changing the question, and must clear any draft when Matter is revoked.
+    page.locator("#legal-qa-question").fill("Kiểm tra từ ngữ mới trong văn bản thử nghiệm")
+    assert page.locator("#legal-qa-result").is_hidden(), "UC03 answer became stale"
+    assert not page.locator("#legal-qa-output").inner_text()
+    assert coverage.is_hidden()
+    page.locator("#legal-qa-run").click()
+    coverage.wait_for(state="visible",timeout=15000)
+    page.locator("#legal-qa-matter").select_option("")
+    assert page.locator("#legal-qa-result").is_hidden(), "Matter switch must invalidate answer"
+    assert not page.locator("#legal-qa-output").inner_text()
+    # R134 fail-closed clipboard fallback: a script can modify a field without
+    # dispatching input/change. Copy must still compare the original snapshot.
+    page.locator("#legal-qa-matter").select_option(F)
+    page.locator("#legal-qa-run").click()
+    coverage.wait_for(state="visible",timeout=15000)
+    page.evaluate("""() => {
+      document.getElementById('legal-qa-question').value =
+        'Yêu cầu đổi bằng lập trình nhưng không gửi sự kiện input';
+    }""")
+    page.locator("#legal-qa-copy").click()
+    assert page.locator("#legal-qa-result").is_hidden(), "Silent edit must block UC03 copy"
+    assert not page.locator("#legal-qa-output").inner_text()
+    # Simulate a pending provider reply which arrives after the user edits input.
+    page.locator("#legal-qa-matter").select_option(F)
+    page.evaluate("""() => {
+       const nativeFetch=window.fetch.bind(window);
+       window.__qaReleaseStale=null;window.__qaDelayedOnce=false;
+       window.fetch=(url, options) => {
+         if(url==='/api/qa/legal/run'&&!window.__qaDelayedOnce){
+           window.__qaDelayedOnce=true;
+           return new Promise(resolve=>{
+             window.__qaReleaseStale=()=>resolve(nativeFetch(url,options));
+           });
+         }
+         return nativeFetch(url,options);
+       };
+    }""")
+    page.locator("#legal-qa-run").click()
+    page.wait_for_function("typeof window.__qaReleaseStale === 'function'")
+    page.locator("#legal-qa-source").fill(
+       "Điều 1. Bên A hoàn tất nghĩa vụ trước ngày 20/09/2026. "
+       "Đây là dữ liệu hư cấu đã chỉnh trong khi phản hồi AI đang chờ.")
+    assert page.locator("#legal-qa-run").is_enabled(), "Pending request should be canceled"
+    page.evaluate("window.__qaReleaseStale()")
+    page.wait_for_timeout(250)
+    assert page.locator("#legal-qa-result").is_hidden(), "Late UC03 answer must be discarded"
+    assert not page.locator("#legal-qa-output").inner_text()
     # Switching UCs must clear all previous answer, source evidence and flags.
     page.goto(origin+"/#uc-UC04",wait_until="domcontentloaded")
     page.wait_for_function("""() => document.querySelector('#legal-qa-source-coverage')?.hidden === true
@@ -507,8 +555,14 @@ def scenario(browser,name,viewport,origin):
         inputs.locator(":scope > summary").click()
         assert inputs.evaluate("(e)=>e.open"),"Users must be able to reopen inputs"
         assert page.locator("#legal-qa-example").is_visible()
-        input_row=page.locator("#legal-qa-example").bounding_box()
-        run_row=page.locator("#legal-qa-run").bounding_box()
+        # Snapshot both aligned buttons atomically during any smooth scroll:
+        # serial bounding_box() reads can sample different animation frames.
+        input_row,run_row=page.evaluate("""() => {
+          return ['legal-qa-example', 'legal-qa-run'].map(id => {
+            const r=document.getElementById(id).getBoundingClientRect();
+            return {x:r.x,y:r.y,width:r.width,height:r.height};
+          });
+        }""")
         assert input_row and run_row and abs(input_row["y"]-run_row["y"])<=4,"UC04 buttons should share a compact row"
         assert input_row["height"]>=40 and run_row["height"]>=40
         inputs.locator(":scope > summary").click()
@@ -529,6 +583,16 @@ def scenario(browser,name,viewport,origin):
     assert check.evaluate("(e)=>e.open"),"Warning must support reopen"
     assert not page.locator("#legal-qa-source-coverage").is_visible()
     assert page.locator("#legal-qa-output").inner_text().startswith("[A1] Bên A")
+    # R134: reopening collapsed UC04 form and editing a source invalidates
+    # existing summary and its QA review flags, without changing other UCs.
+    if not inputs.evaluate("(e)=>e.open"):
+        inputs.locator(":scope > summary").click()
+    page.locator("#legal-qa-source").fill(
+        "Điều 1. Bên B thanh toán 5.000.000 đồng ngày 30/09/2026. "
+        "Đây là văn bản thử nghiệm mới sau bản tóm tắt trước.")
+    assert page.locator("#legal-qa-result").is_hidden(), "UC04 summary stale"
+    assert page.locator("#legal-qa-summary-review").is_hidden()
+    assert not page.locator("#legal-qa-output").inner_text()
     mobile_width=page.evaluate("document.documentElement.scrollWidth")
     assert mobile_width<=viewport["width"]+4,(name,mobile_width,viewport)
     page.goto(origin+"/#uc-UC07",wait_until="domcontentloaded")
