@@ -71,7 +71,7 @@ test('R62: wrong route methods fail closed before reaching auth worker',async()=
 test('R138: file preview POST passes through same-origin QA service but denies other origins/methods',async()=>{
  const form=new FormData();
  form.append('uc','UC03');
- form.append('file',new Blob(['%PDF-1.4'],'application/pdf'),'synthetic.pdf');
+ form.append('file',new Blob(['%PDF-1.4'],{type:'application/pdf'}),'synthetic.pdf');
  const request=new Request(ORIGIN+'/api/qa/legal/extract',{method:'POST',
   headers:{Origin:ORIGIN,'Sec-Fetch-Site':'same-origin',Cookie:'al_qa_session='+ORIGINAL},
   body:form});
