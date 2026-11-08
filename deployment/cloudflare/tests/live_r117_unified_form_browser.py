@@ -65,6 +65,33 @@ def scenario(browser,name,viewport,origin):
                         "missing_dates":["20/9/2026"],
                         "review_required":True}
                 })
+            if data["uc"]=="UC07":
+                assert data["matter_id"]==F
+                assert data["synthetic_consent"] is True
+                return reply(route,payload={
+                    "uc":"UC07","title":"Sửa lỗi ngữ pháp",
+                    "mode":"ai_draft_not_verified","source_hash":"a"*64,
+                    "source_anchors":[{"id":"A1","preview":"Bên A phải thanh toán"}],
+                    "answer":"[BẮT ĐẦU BẢN SỬA]\\nBên B có thể thanh toán 3.000.000 đồng vào ngày 16/09/2026.\\n[KẾT THÚC BẢN SỬA]\\nDanh sách chỉnh sửa cần rà soát.",
+                    "review_notice":"Bản sửa chỉ là đề xuất QA.",
+                    "grammar_review":{
+                        "status":"review_required","isolated_proposal":True,
+                        "number_changed_count":2,
+                        "number_changes":[
+                            {"value":"2000000","from_count":1,"to_count":0},
+                            {"value":"3000000","from_count":0,"to_count":1}],
+                        "date_changed_count":2,
+                        "date_changes":[
+                            {"value":"15/9/2026","from_count":1,"to_count":0},
+                            {"value":"16/9/2026","from_count":0,"to_count":1}],
+                        "duty_changed_count":1,
+                        "duty_changes":[{"value":"phải","from_count":1,"to_count":0}],
+                        "party_changed_count":2,
+                        "party_changes":[
+                            {"value":"bên a","from_count":1,"to_count":0},
+                            {"value":"bên b","from_count":0,"to_count":1}],
+                        "review_required":True}
+                })
             assert data["uc"]=="UC03"
             assert data["matter_id"]==F
             assert data["synthetic_consent"] is True
@@ -483,8 +510,39 @@ def scenario(browser,name,viewport,origin):
     page.wait_for_function("""() => document.querySelector('#legal-qa-summary-review')?.hidden === true
       && document.querySelector('#legal-qa-output')?.textContent === ''""",timeout=15000)
     assert not page.locator("#legal-qa-result").is_visible()
+    # R130 UC07 synthetic QA: warning is visible on both screen sizes,
+    # collapsed by default on mobile; the original output text is unchanged.
+    page.locator("#legal-qa-example").click()
+    page.locator("#legal-qa-matter").select_option(F)
+    page.locator("#legal-qa-consent").check()
+    page.locator("#legal-qa-run").click()
+    grammar=page.locator("#legal-qa-grammar-review")
+    grammar.wait_for(state="visible",timeout=15000)
+    assert grammar.get_attribute("data-state")=="warning"
+    assert grammar.evaluate("(e)=>e.tagName")=="DETAILS"
+    assert "Cần đối chiếu" in grammar.locator(":scope > summary").inner_text()
+    assert grammar.evaluate("(e)=>e.open")==(name!="mobile")
+    if not grammar.evaluate("(e)=>e.open"):
+        grammar.locator(":scope > summary").click()
+    assert "2000000" in grammar.inner_text()
+    assert "16/9/2026" in grammar.inner_text()
+    assert "nghĩa vụ" in grammar.inner_text().lower()
+    assert "bên a" in grammar.inner_text().lower()
+    assert "KHÔNG xác minh" in grammar.inner_text()
+    assert page.locator("#legal-qa-output").inner_text().startswith("[BẮT ĐẦU BẢN SỬA]")
+    assert not page.locator("#legal-qa-source-coverage").is_visible()
+    assert not page.locator("#legal-qa-summary-review").is_visible()
+    grammar.locator(":scope > summary").click()
+    assert not grammar.evaluate("(e)=>e.open")
+    grammar.locator(":scope > summary").click()
+    assert grammar.evaluate("(e)=>e.open")
+    assert page.evaluate("document.documentElement.scrollWidth")<=viewport["width"]+4
+    page.goto(origin+"/#uc-UC04",wait_until="domcontentloaded")
+    page.wait_for_function("""() => document.querySelector('#legal-qa-grammar-review')?.hidden === true
+      && document.querySelector('#legal-qa-output')?.textContent === ''""",timeout=15000)
+    assert not page.locator("#legal-qa-result").is_visible()
     assert not errors,(name,errors)
-    print(f"PASS {name}: one create/save, D1 details, PDF upload, two-category filter, edit/reload, no overflow")
+    print(f"PASS {name}: UC03/04/07 mobile/desktop review warnings isolated and no overflow")
     context.close()
 
 def main():

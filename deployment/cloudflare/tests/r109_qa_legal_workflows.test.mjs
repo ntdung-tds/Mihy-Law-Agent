@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {legalApi,LEGAL_MATTER_ACCESS_SQL,LEGAL_QUOTA_SQL,sourceReferencesExist,summaryReviewCheck} from '../src/qa_legal_workflows.mjs';
+import {legalApi,LEGAL_MATTER_ACCESS_SQL,LEGAL_QUOTA_SQL,sourceReferencesExist,summaryReviewCheck,grammarIntegrityCheck} from '../src/qa_legal_workflows.mjs';
 
 const I='11111111-1111-4111-8111-111111111111';
 const U='22222222-2222-4222-8222-222222222222';
@@ -38,6 +38,85 @@ function request({
  return new Request(BASE+'/api/qa/legal/run',{method,headers,
   body:method==='POST'?JSON.stringify(body):undefined});
 }
+test('R130 UC07: proposed version only, with number/date/modal/party-name changes flagged',()=>{
+ const source='Bên A phải thanh toán 2.000.000 đồng trước ngày 15 tháng 9 năm 2026 cho Công ty Minh Anh.';
+ const edited='Bên B có thể thanh toán 3.000.000 đồng trước ngày 16/09/2026 cho Công ty Minh Bách.';
+ const answer='[BẮT ĐẦU BẢN SỬA]\n'+edited+
+  '\n[KẾT THÚC BẢN SỬA]\nDANH SÁCH CHỈNH SỬA:\n2.000.000, ngày 15 tháng 9 năm 2026, Bên A và Công ty Minh Anh.';
+ const risk=grammarIntegrityCheck(source,answer);
+ assert.equal(risk.status,'review_required');
+ assert.equal(risk.isolated_proposal,true);
+ assert.ok(risk.number_changed_count>=2,JSON.stringify(risk));
+ assert.ok(risk.date_changed_count>=2,JSON.stringify(risk));
+ assert.ok(risk.duty_changed_count>=1,JSON.stringify(risk));
+ assert.ok(risk.party_changed_count>=2,JSON.stringify(risk));
+ assert.equal(risk.review_required,true);
+ assert.match(risk.note,/không chứng minh/i);
+ assert.ok(risk.number_changes.some(x=>x.value==='3000000'),
+  'Output explanation quotes old source but must not suppress detected changed amount');
+ const intact=grammarIntegrityCheck(source,
+  '[BẮT ĐẦU BẢN SỬA]\nBên A phải thanh toán 2,000,000 đồng trước 15/09/2026 cho Công ty Minh Anh.\n[KẾT THÚC BẢN SỬA]\n' +
+  'Đã sửa dấu câu, không đổi nghĩa.');
+ assert.equal(intact.status,'no_obvious_change_not_verified',JSON.stringify(intact));
+ assert.equal(intact.number_changed_count,0);
+ assert.equal(intact.date_changed_count,0);
+ assert.equal(intact.duty_changed_count,0);
+ assert.equal(intact.party_changed_count,0);
+ assert.equal(intact.review_required,true,'Even matching tokens cannot certify legal equivalence');
+});
+test('R130 UC07: missing, duplicated or reversed proposal boundaries fail closed',()=>{
+ const source='Bên A phải thanh toán 10 triệu vào ngày 30/09/2026.';
+ for(const response of [
+  'Phiên bản đề xuất: Bên A có thể thanh toán 20 triệu ngày 01/10/2026.',
+  '[KẾT THÚC BẢN SỬA]\nBên A phải thanh toán.\n[BẮT ĐẦU BẢN SỬA]',
+  '[BẮT ĐẦU BẢN SỬA]\nBên A phải thanh toán.\n[KẾT THÚC BẢN SỬA]\n[BẮT ĐẦU BẢN SỬA]\nBên A có thể trả.',
+  '[BẮT ĐẦU BẢN SỬA]\n \n[KẾT THÚC BẢN SỬA]'
+ ]){
+  const check=grammarIntegrityCheck(source,response);
+  assert.equal(check.status,'manual_review_no_proposed_version',response);
+  assert.equal(check.isolated_proposal,false);
+  assert.equal(check.review_required,true);
+ }
+ const many=grammarIntegrityCheck(
+  'Bên A phải trả 100 đồng vào ngày 01/01/2026.\n'+Array.from({length:22},(_,i)=>'Số tiền '+(1000+i)+'.').join(' '),
+  '[BẮT ĐẦU BẢN SỬA]\nBên B có thể trả 999 đồng vào ngày 02/01/2026.\n[KẾT THÚC BẢN SỬA]');
+ assert.ok(many.number_changed_count>12);
+ assert.equal(many.number_changes.length,12);
+ assert.equal(many.review_required,true);
+});
+test('R130 UC07: API returns scoped grammar risk without changing model output, other UCs isolated',async()=>{
+ const source='Bên A phải thanh toán 2.000.000 đồng trước 15/09/2026 cho Công ty Minh Anh.';
+ const originalResponse='[BẮT ĐẦU BẢN SỬA]\nBên B có thể thanh toán 3,000,000 đồng trước 16/09/2026 cho Công ty Minh Anh.\n[KẾT THÚC BẢN SỬA]\n' +
+  'Bản chỉnh sửa là bản đề xuất QA, cần luật sư duyệt.';
+ const f=fixture();
+ f.env.AI.run=async(model,args)=>{f.providerCalls.push({model,args});return {response:originalResponse};};
+ const result=await legalApi(request({uc:'UC07',source}),f.env,{now:NOW});
+ assert.equal(result.status,200,await result.clone().text());
+ const body=await result.json();
+ assert.equal(body.answer,originalResponse);
+ assert.equal(body.grammar_review.status,'review_required');
+ assert.equal(body.grammar_review.review_required,true);
+ assert.equal(body.grammar_review.isolated_proposal,true);
+ assert.ok(body.grammar_review.number_changed_count>0);
+ assert.ok(body.grammar_review.duty_changed_count>0);
+ assert.ok(body.grammar_review.party_changed_count>0);
+ assert.equal(body.review_required,true);
+ assert.equal(result.headers.get('Cache-Control'),'no-store');
+ assert.match(f.providerCalls[0].args.messages[1].content,/BẮT ĐẦU BẢN SỬA/);
+ assert.ok(f.calls.every(x=>x.params.every(p=>p!==source&&p!==originalResponse)),
+  'Do not persist private draft or source text in D1');
+ for(const uc of ['UC03','UC04']){
+  const other=fixture();
+  const rr=await legalApi(request({uc}),other.env,{now:NOW});
+  assert.equal(rr.status,200);
+  assert.equal(Object.hasOwn(await rr.json(),'grammar_review'),false);
+ }
+ const denied=fixture({acl:false});
+ const no=await legalApi(request({uc:'UC07',source}),denied.env,{now:NOW});
+ assert.equal(no.status,404);
+ assert.equal(denied.providerCalls.length,0);
+});
+
 test('R128 UC04: omission signals for missing obligation anchors, key amounts and dates',()=>{
  const rows=[{id:'A1',text:'Điều 1. Bên A phải thanh toán 2.000.000 đồng vào ngày 15 tháng 9 năm 2026.'},
   {id:'A2',text:'Điều 2. Bên B bàn giao 10 tài liệu trước ngày 20/09/2026.'}];

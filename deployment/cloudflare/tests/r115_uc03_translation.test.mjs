@@ -43,7 +43,7 @@ test('R127 UC03: UI has coverage panel, clears stale history on workflow switch,
  assert.match(source,/Mỗi đoạn nguồn \[A1\]/);
  assert.match(html,/id="legal-qa-source-coverage"/);
  assert.match(ui,/showSourceCoverage\(data\.source_coverage\)/);
- assert.match(ui,/\['legal-qa-translation-check','legal-qa-source-coverage'(?:,'legal-qa-summary-review')?\]/);
+ assert.match(ui,/\['legal-qa-translation-check','legal-qa-source-coverage'(?:,'legal-qa-summary-review')?(?:,'legal-qa-grammar-review')?\]/);
  assert.match(ui,/root\.replaceChildren\(\);root\.hidden=true/);
  assert.doesNotMatch(ui,/source-coverage[\s\S]{0,900}innerHTML/);
 });

@@ -101,6 +101,8 @@ function makePrompt(uc,rows,other,question,lang){
  const detail=TASKS[uc][1];
  return [
   'NHIỆM VỤ '+uc+': '+detail,
+  uc==='UC07'?
+   'BẮT BUỘC ĐỊNH DẠNG UC07: Mở bản văn sửa chính tả/ngữ pháp bằng dòng duy nhất [BẮT ĐẦU BẢN SỬA], kết thúc bằng dòng duy nhất [KẾT THÚC BẢN SỬA]. Bên trong hai dòng CHỈ là toàn văn sau sửa, không chú giải. Sau đó ghi DANH SÁCH CHỈNH SỬA và giải thích bằng văn bản riêng. KHÔNG thay số, ngày, mã điều khoản, tên bên, tên riêng, từ thể hiện quyền/nghĩa vụ/phủ định. Nếu có nguy cơ đổi ý nghĩa, cảnh báo và không tự quyết. Không sao chép lại hai nhãn trong phần giải thích.':'',
   uc==='UC04'?
    'KIỂM TRA BẢN TÓM TẮT: Khi nêu nghĩa vụ, chủ thể, tiền, hạn, mốc thời gian hoặc trách nhiệm trong các đoạn nguồn [A1], [A2]..., dẫn mã [A#] tương ứng. Không bỏ các nghĩa vụ/mốc quan trọng; nếu nguồn không đủ rõ, ghi [CẦN ĐỐI CHIẾU]. Không tự tạo nghĩa vụ hoặc mốc mới, không kết luận pháp lý.':'',
   uc==='UC03'?
@@ -279,6 +281,88 @@ export function summaryReviewCheck(rows,answer){
  };
 }
 
+/** R130 UC07: mechanical comparison of the exact proposed version,
+ * never the model's explanations (which can quote facts to hide changes).
+ * Both parser ambiguity and absent template FAIL CLOSED as review_required.
+ * This is not legal/semantic equivalence checking.
+ */
+export function grammarIntegrityCheck(source,answer){
+ const original=String(source||''),raw=String(answer||'');
+ const start='[BẮT ĐẦU BẢN SỬA]',end='[KẾT THÚC BẢN SỬA]';
+ const startLine=/^\s*\[BẮT ĐẦU BẢN SỬA\]\s*$/gmu;
+ const endLine=/^\s*\[KẾT THÚC BẢN SỬA\]\s*$/gmu;
+ const starts=[...raw.matchAll(startLine)],ends=[...raw.matchAll(endLine)];
+ const isolated=starts.length===1&&ends.length===1&&
+  starts[0].index<ends[0].index;
+ const proposed=isolated?raw.slice(starts[0].index+starts[0][0].length,ends[0].index).trim():'';
+ if(!proposed)return{
+  status:'manual_review_no_proposed_version',isolated_proposal:false,
+  number_changed_count:0,number_changes:[],date_changed_count:0,date_changes:[],
+  duty_changed_count:0,duty_changes:[],party_changed_count:0,party_changes:[],
+  review_required:true,
+  note:'Không tách được bản đề xuất duy nhất: không được suy luận kết quả từ phần giải thích của AI. Cần rà soát toàn văn bằng người có chuyên môn.'
+ };
+ const stripCitations=text=>text.replace(/\[(?:A|B)[1-9]\d*\]/gu,' ');
+ const datePattern=/\b\d{1,2}[/-]\d{1,2}[/-]\d{4}\b|\bngày\s+\d{1,2}\s+tháng\s+\d{1,2}(?:\s+năm\s+\d{4})?/giu;
+ const dateKey=text=>{
+  const x=/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/u.exec(text.trim())||
+   /^ngày\s+(\d{1,2})\s+tháng\s+(\d{1,2})(?:\s+năm\s+(\d{4}))?$/iu.exec(text.trim());
+  return x?Number(x[1])+'/'+Number(x[2])+'/'+(x[3]||'?'):text.toLowerCase();
+ };
+ const dates=text=>[...stripCitations(text).matchAll(datePattern)].map(m=>dateKey(m[0]));
+ const numbers=text=>{
+  const clean=stripCitations(text).replace(datePattern,' ');
+  return [...clean.matchAll(/(?<![\p{L}\p{N}])\d+(?:[.,]\d+)*(?![\p{L}\p{N}])/gu)]
+   .map(m=>/^\d{1,3}(?:[.,]\d{3})+$/u.test(m[0])?m[0].replace(/[.,]/gu,''):m[0]);
+ };
+ const obligations=Object.freeze([
+  ['phải',/(?<!\p{L})phải(?!\p{L})/giu],
+  ['không được',/không\s+được/giu],
+  ['có quyền',/có\s+quyền/giu],
+  ['có nghĩa vụ',/có\s+nghĩa\s+vụ/giu],
+  ['được phép',/được\s+phép/giu],
+  ['chịu trách nhiệm',/chịu\s+trách\s+nhiệm/giu],
+  ['không phải',/không\s+phải/giu],
+  ['shall',/(?<!\p{L})shall(?!\p{L})/giu],
+  ['must',/(?<!\p{L})must(?!\p{L})/giu],
+  ['may',/(?<!\p{L})may(?!\p{L})/giu],
+  ['not',/(?<!\p{L})not(?!\p{L})/giu]
+ ]);
+ const duty=text=>obligations.flatMap(([name,re])=>Array.from(text.matchAll(re),()=>name));
+ const parties=text=>{
+  const ids=[...text.matchAll(/Bên\s+[A-Z](?!\p{L})/gu)].map(m=>m[0].replace(/\s+/gu,' ').toLocaleLowerCase('vi-VN'));
+  const named=[...text.matchAll(/(?:Công\s+ty|Ông|Bà)\s+(?:\p{Lu}[\p{L}\p{M}]*)(?:\s+\p{Lu}[\p{L}\p{M}]*){0,4}/gu)]
+   .map(m=>m[0].replace(/\s+/gu,' ').toLocaleLowerCase('vi-VN'));
+  return [...ids,...named];
+ };
+ const diff=(from,to)=>{
+  const left=new Map(),right=new Map();
+  for(const item of from)left.set(item,(left.get(item)||0)+1);
+  for(const item of to)right.set(item,(right.get(item)||0)+1);
+  const changed=[];
+  for(const key of new Set([...left.keys(),...right.keys()])){
+   const before=left.get(key)||0,after=right.get(key)||0;
+   if(before!==after)changed.push({value:key,from_count:before,to_count:after});
+  }
+  return {count:changed.length,items:changed.slice(0,12)};
+ };
+ const numerals=diff(numbers(original),numbers(proposed));
+ const timing=diff(dates(original),dates(proposed));
+ const modal=diff(duty(original),duty(proposed));
+ const identity=diff(parties(original),parties(proposed));
+ const risk=numerals.count+timing.count+modal.count+identity.count>0;
+ return {
+  status:risk?'review_required':'no_obvious_change_not_verified',
+  isolated_proposal:true,
+  number_changed_count:numerals.count,number_changes:numerals.items,
+  date_changed_count:timing.count,date_changes:timing.items,
+  duty_changed_count:modal.count,duty_changes:modal.items,
+  party_changed_count:identity.count,party_changes:identity.items,
+  review_required:true,
+  note:'Chỉ so khớp ký hiệu số, mốc ngày, một số từ nghĩa vụ/phủ định và nhãn chủ thể/tên riêng nhận diện được trong BẢN SỬA; không chứng minh sửa đúng hoặc giữ nguyên nghĩa pháp lý. Luật sư phải đối chiếu từng câu. Kết quả có thể có dương tính/âm tính giả.'
+ };
+}
+
 // Always enforce byte limits on the stream itself: Content-Length can be
 // absent or forged. Never log or persist these bytes.
 async function readLimitedSource(req,max){
@@ -366,5 +450,6 @@ export async function legalApi(req,env,opts={}){
    source_coverage:translationSourceCoverage(primary,output)
   }:{}),
   ...(body.uc==='UC04'?{summary_review:summaryReviewCheck(primary,output)}:{}),
+  ...(body.uc==='UC07'?{grammar_review:grammarIntegrityCheck(body.source_text,output)}:{}),
   review_notice:'Bản nháp AI từ nội dung mẫu. Chưa kiểm chứng pháp lý, nguồn chính thức hoặc độ chính xác ngôn ngữ.'});
 }

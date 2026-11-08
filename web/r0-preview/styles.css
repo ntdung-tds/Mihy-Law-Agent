@@ -1166,3 +1166,38 @@ body.drawer-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){
  #view-workflow #legal-qa-summary-review>summary::after{transition:none}
 }
+
+/* R130: UC07 grammar review toggles; no changes to other UC layouts. */
+#view-workflow #legal-qa-grammar-review{
+ min-width:0;margin:10px 0 14px;padding:10px 12px;border-radius:10px;
+ overflow-wrap:anywhere;
+}
+#view-workflow #legal-qa-grammar-review>summary.legal-qa-grammar-toggle{
+ display:flex;align-items:center;justify-content:space-between;gap:8px;
+ list-style:none;min-height:42px;cursor:pointer;font-size:12px;
+ font-weight:750;line-height:1.4;
+}
+#view-workflow #legal-qa-grammar-review>summary::-webkit-details-marker{display:none}
+#view-workflow #legal-qa-grammar-review>summary::marker{content:''}
+#view-workflow #legal-qa-grammar-review>summary::after{
+ content:'⌄';font-size:20px;font-weight:700;flex:none;
+}
+#view-workflow #legal-qa-grammar-review[open]>summary::after{transform:rotate(180deg)}
+#view-workflow #legal-qa-grammar-review>summary:focus-visible{
+ outline:2px solid #4779b2;outline-offset:2px;border-radius:7px;
+}
+#view-workflow .legal-qa-grammar-content{
+ padding-top:8px;border-top:1px solid currentColor;
+ font-size:12px;line-height:1.5;overflow-wrap:anywhere;
+}
+#view-workflow .legal-qa-grammar-content p{margin:5px 0 0}
+#view-workflow .legal-qa-grammar-diff strong{display:inline;font-size:12px}
+#view-workflow .legal-qa-review-note{font-size:11px;font-weight:550}
+@media(max-width:620px){
+ #view-workflow[data-active-uc="UC07"] #legal-qa-grammar-review{
+  margin:9px 0 11px;padding:9px 11px;
+ }
+ #view-workflow[data-active-uc="UC07"] #legal-qa-grammar-review>summary{
+  min-height:40px;font-size:12px;
+ }
+}
