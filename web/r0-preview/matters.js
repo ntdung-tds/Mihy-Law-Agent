@@ -135,7 +135,10 @@
   const statusLabels={open:'Mới mở',in_progress:'Đang xử lý',on_hold:'Tạm dừng',closed:'Đã đóng'};
   for(const m of filtered){
    const row=document.createElement('div');row.className='matter-row';row.setAttribute('role','listitem');
-   const detail=document.createElement('div');detail.className='case-saved-summary';
+   const detail=document.createElement('button');detail.type='button';
+   detail.className='case-saved-summary case-row-open';
+   detail.setAttribute('aria-label','Xem chi tiết '+m.title);
+   detail.addEventListener('click',()=>void openCase(m.id));
    const name=document.createElement('strong');name.textContent=m.title;
    const sub=document.createElement('small');
    sub.textContent=[m.category||'Chưa phân loại',m.case_reference||('Mã '+m.id.slice(0,8)),
