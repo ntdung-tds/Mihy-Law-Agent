@@ -58,7 +58,7 @@ class AuditV2SQLite(unittest.TestCase):
   self.assertEqual(changed['status'],{'from':'open','to':'in_progress'})
   self.assertIsNone(changed['priority'])
   self.assertEqual(row['actor_id'],U)
-  self.db.execute('UPDATE qa_matter_catalog SET title=?,updated_by=?,updated_at=? WHERE installation_id=? AND tenant_id=? AND matter_id=?',('Tên mới',U,N+3,I,T,M))
+  self.db.execute('UPDATE qa_matter_catalog SET title=?,version=version+1,updated_by=?,updated_at=? WHERE installation_id=? AND tenant_id=? AND matter_id=?',('Tên mới',U,N+3,I,T,M))
   self.assertEqual(json.loads(self.events('title_changed')[0]['changes_json'])['title'],{'from':'Tệp QA - hồ sơ','to':'Tên mới'})
   self.db.execute("""INSERT INTO qa_case_files_r2(
    installation_id,tenant_id,matter_id,file_id,file_name,mime_type,
