@@ -51,7 +51,7 @@ test('R130 UC07: proposed version only, with number/date/modal/party-name change
  assert.ok(risk.duty_changed_count>=1,JSON.stringify(risk));
  assert.ok(risk.party_changed_count>=2,JSON.stringify(risk));
  assert.equal(risk.review_required,true);
- assert.match(risk.note,/KHÔNG xác minh/);
+ assert.match(risk.note,/không chứng minh/i);
  assert.ok(risk.number_changes.some(x=>x.value==='3000000'),
   'Output explanation quotes old source but must not suppress detected changed amount');
  const intact=grammarIntegrityCheck(source,
