@@ -133,7 +133,7 @@ def scenario(browser,name,viewport,origin):
     assert pdf_icon.first.get_attribute("role")=="img"
     assert pdf_icon.first.get_attribute("aria-label")=="Tệp PDF"
     assert pdf_icon.first.locator("svg path").count()==2
-    assert pdf_icon.first.locator("svg text").inner_text()=="PDF"
+    assert pdf_icon.first.locator("svg text").text_content()=="PDF"
     first_row=page.locator("#case-r2-list .case-file-row").first.bounding_box()
     assert first_row and first_row["height"]<=108,(name,first_row)
     assert page.locator("#case-r2-list .case-file-download").is_enabled(), "download must remain usable after saving on mobile"
@@ -272,7 +272,7 @@ def scenario(browser,name,viewport,origin):
     word=page.locator("#case-r2-list .case-file-type-icon--word")
     word.wait_for(state="visible",timeout=15000)
     assert word.get_attribute("aria-label")=="Tài liệu Word"
-    assert word.locator("svg text").inner_text()=="W"
+    assert word.locator("svg text").text_content()=="W"
     assert page.locator("#case-r2-list .case-file-name").inner_text()=="QA example Word.docx"
     word_row=page.locator("#case-r2-list .case-file-row").first.bounding_box()
     assert word_row and word_row["height"]<=108,(name,word_row)
