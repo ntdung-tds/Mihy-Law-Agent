@@ -14,6 +14,7 @@
     const setStatus=(msg,bad=false)=>{status.textContent=msg;status.dataset.state=bad?'error':'info';};
     let isSubmitting=false;
     let activeUc=null, requestGeneration=0, activeController=null;
+    let matterLoadGeneration=0; // Abort effect of late responses from old workspace or UC.
     function clearResult(){
       result.hidden=true;output.textContent='';
       byId('legal-qa-sources').replaceChildren();
@@ -40,6 +41,7 @@
     function clearWorkflow(){
       // Never carry source, result or consent between separate screens.
       requestGeneration++;
+      matterLoadGeneration++;
       activeController?.abort();
       activeController=null;isSubmitting=false;activeUc=null;
       byId('legal-qa-run').disabled=false;
@@ -71,27 +73,36 @@
       setStatus('Đã nạp dữ liệu giả lập. Chọn hồ sơ và xác nhận trước khi chạy.');
     });
     async function loadLegalMatters(){
+      // Only the most recent authorized workspace/UC response may populate the
+      // visible selector. No account IDs or source text are persisted locally.
+      const loadedUc=activeUc, generation=++matterLoadGeneration;
+      if(!loadedUc)return;
+      const stillCurrent=()=>generation===matterLoadGeneration&&activeUc===loadedUc;
       try {
         const r=await fetch('/api/qa/matters',{credentials:'same-origin',cache:'no-store'});
+        if(!stillCurrent())return;
         if(r.status===401){location.replace('/login');return;}
         if(!r.ok)throw Error('matter unavailable');
         const data=await r.json();
+        if(!stillCurrent())return;
+        if(!Array.isArray(data.matters))throw Error('invalid matter response');
         const previously=matter.value;
         matter.replaceChildren();
         const empty=document.createElement('option');
         empty.value='';empty.textContent='Chọn hồ sơ QA…';
         matter.append(empty);
-        for(const m of data.matters||[]){
+        for(const m of data.matters){
           if(typeof m.id!=='string'||typeof m.title!=='string')continue;
           const item=document.createElement('option');
           item.value=m.id;item.textContent=m.title;
           matter.append(item);
         }
         matter.value=previously&&[...matter.options].some(o=>o.value===previously)?previously:'';
-        setStatus((data.matters||[]).length
+        setStatus(data.matters.length
           ?'Chọn hồ sơ có quyền truy cập để thử nghiệp vụ AI với văn bản mẫu.'
-          :'Chưa có hồ sơ QA. Vào Tài liệu → Tạo hồ sơ trước.');
+          :'Chưa có hồ sơ QA. Chọn “Tạo hồ sơ QA mới” để tiếp tục.');
       } catch {
+        if(!stillCurrent())return;
         matter.replaceChildren();
         const opt=document.createElement('option');
         opt.value='';opt.textContent='Danh mục hồ sơ chưa sẵn sàng';matter.append(opt);
@@ -100,9 +111,10 @@
     }
     window.addEventListener('ai-law:legal-open',()=>void loadLegalMatters());
     window.addEventListener('ai-law:workspace-switch',()=>{
-      matter.replaceChildren();clearResult();byId('legal-qa-source').value='';
-      secondary.value='';question.value='';byId('legal-qa-consent').checked=false;
-      void loadLegalMatters();
+      const current=activeUc;
+      clearWorkflow();
+      matter.replaceChildren();
+      if(current)activateWorkflow(current);
     });
     legalForm.addEventListener('submit',async event=>{
       event.preventDefault();
@@ -185,7 +197,6 @@
     // app.js initializes the route before this deferred module.
     const direct=/^#uc-(UC(?:0[1-9]|1[01]))$/.exec(location.hash);
     if(direct)activateWorkflow(direct[1]);
-    else void loadLegalMatters();
   }
 
  // Overview cards open their own workflow screen; never reuse #assistant.
