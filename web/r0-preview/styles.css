@@ -639,3 +639,34 @@ body.drawer-open{overflow:hidden}
  #case-save-state{display:block;margin-top:11px}
  .qa-case-unified .case-r2-panel{padding:12px}
 }
+
+/* R118: mobile list-first. Creating or reading a case is an explicit view, not
+   a form occupying the listing page. Desktop retains the unified R117 layout. */
+.case-editor-navigation{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:9px}
+#case-mobile-edit[hidden]{display:none!important}
+@media(max-width:720px){
+ #matter-workspace[data-mobile-mode="list"] .qa-case-unified{display:none!important}
+ #matter-workspace[data-mobile-mode="create"] .qa-case-saved-list,
+ #matter-workspace[data-mobile-mode="detail"] .qa-case-saved-list,
+ #matter-workspace[data-mobile-mode="edit"] .qa-case-saved-list{display:none!important}
+ #matter-workspace[data-mobile-mode="detail"] .case-unified-actions,
+ #matter-workspace[data-mobile-mode="detail"] .case-main-title,
+ #matter-workspace[data-mobile-mode="detail"] #case-r2-file,
+ #matter-workspace[data-mobile-mode="detail"] .case-r2-panel>label,
+ #matter-workspace[data-mobile-mode="detail"] .case-r2-panel>small{display:none!important}
+ #matter-workspace[data-mobile-mode="detail"] .case-form-grid input:disabled,
+ #matter-workspace[data-mobile-mode="detail"] .case-form-grid select:disabled,
+ #matter-workspace[data-mobile-mode="detail"] .case-summary-label textarea:disabled{
+  opacity:1;-webkit-text-fill-color:#263e55;color:#263e55;background:#f7f9fd;
+  border-color:#dde7f2;box-shadow:none}
+ #matter-workspace[data-mobile-mode="detail"] .case-r2-panel{margin-top:10px}
+ #view-documents .sub-page-heading:has(+ .demo-disclaimer + .workflow-resume + #matter-workspace[data-mobile-mode="create"]) #upload-btn,
+ #matter-workspace[data-mobile-mode="create"] ~ .qa-document-box{display:none!important}
+ #matter-workspace[data-mobile-mode="detail"] .case-unified-heading h2{font-size:23px}
+ #matter-workspace .case-editor-navigation{display:flex;width:100%;gap:8px}
+ #matter-workspace .case-editor-navigation button{width:auto;flex:1;min-height:43px;margin:0}
+ #matter-workspace[data-mobile-mode="list"] .qa-case-saved-list{margin-top:0}
+ #matter-workspace[data-mobile-mode="list"] .qa-case-saved-list .matter-row{padding:13px 12px;cursor:pointer}
+ #matter-workspace[data-mobile-mode="list"] .qa-case-saved-list .matter-row button{min-height:43px}
+ #view-documents .sub-page-heading{align-items:flex-start}
+}
