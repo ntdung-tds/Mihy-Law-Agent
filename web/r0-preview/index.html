@@ -169,12 +169,14 @@
                   </label>
                 </div>
                 <div id="case-r2-upload-form" class="case-r2-panel">
-                  <div class="case-r2-heading"><h3>Tài liệu đính kèm</h3><small>Cloudflare R2 private · PDF/DOCX · tối đa 10 MB/tệp</small></div>
+                  <div class="case-r2-heading"><h3>Tài liệu đính kèm</h3><small>R2 private · PDF/DOCX · 10 MB/tệp · 20 tệp/lần · 50 bản ghi/hồ sơ</small></div>
                   <label for="case-r2-file">Chọn tệp hồ sơ (có thể chọn nhiều tệp)</label>
                   <input id="case-r2-file" name="case_files" type="file" multiple
                     accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                  <div id="case-selected-files" class="case-selected-files" aria-label="Tệp đã chọn chờ lưu"></div>
                   <small>Tệp được lưu vào R2 khi bấm “Lưu hồ sơ”. Nếu tải tệp lỗi, thông tin D1 vẫn được giữ và hệ thống sẽ báo rõ tệp chưa lưu.</small>
                   <p id="case-r2-feedback" role="status" aria-live="polite"></p>
+                  <p id="case-r2-count" class="case-r2-count" aria-live="polite"></p>
                   <div id="case-r2-list" class="matter-list" aria-label="Tệp đã lưu thuộc hồ sơ đang mở"></div>
                 </div>
                 <div class="case-unified-actions">

@@ -74,7 +74,11 @@ def main():
                         "name":filename,"mimeType":"application/pdf",
                         "buffer":b"%PDF-1.4\\n1 0 obj\\n<< >>\\nendobj\\n%%EOF\\n",
                     })
-                    assert picker.evaluate("(el)=>el.files?.[0]?.name")==filename
+                    # R122 retains files in the visible pending queue while clearing the
+                    # native picker value to allow selecting more files on Android.
+                    assert page.locator("#case-selected-files .case-pending-row").count()==1
+                    assert filename in page.locator("#case-selected-files").inner_text()
+                    assert picker.evaluate("(el)=>el.files?.length")==0
                     print(f"PASS {name}: isolated R2 QA file chooser visible and responsive")
                     context.close()
             finally:

@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 113,
-  "updated_at": "2026-11-08T05:55:55.898Z",
+  "revision": 114,
+  "updated_at": "2026-11-08T06:45:00.000Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2561,6 +2561,52 @@
           "production": "UNTOUCHED"
         },
         "owner_acceptance": "PENDING_R121"
+      },
+      {
+        "id": "AL-R0-CASE-ATTACH-R122-001",
+        "title": "R122 - tải xuống tệp không bị khóa trên mobile, hàng đợi chọn nhiều tệp, ẩn riêng tệp bằng tombstone D1",
+        "priority": "P0",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_OWNER_SIGNED_IN_ANDROID_E2E_PENDING",
+        "branch": "fix/r122-case-attachments-mobile",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/171",
+        "implementation": {
+          "mobile": "Không vô hiệu hóa button tải tệp khi chuyển chế độ chỉ xem; resetEditor mở lại nút Lưu khi tạo mới",
+          "upload": "Tệp chọn đồng thời hoặc qua nhiều lần chọn được giữ trong hàng đợi có nút Bỏ, tối đa 20 tệp/lần, PDF/DOCX 10MiB/tệp",
+          "file_delete": "Chỉ ẩn tệp qua D1 qa_case_file_hides immutable; quyền write + tenant/MatterACL + CSRF; không xóa vật lý R2",
+          "limits": "Tổng tối đa 50 bản ghi tệp/hồ sơ, gồm cả tệp đã ẩn",
+          "original_missing_pdf": "Không thể dựng lại dữ liệu R2 cũ chỉ từ D1; Owner phải tải lại đúng tệp gốc trong hồ sơ cũ",
+          "srs": "SC-025 bổ sung chức năng đính kèm theo yêu cầu Owner; SRS v1.1.15 giữ nguyên"
+        },
+        "tests": {
+          "ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42455594464",
+          "ci_executed": "PASS_9_OF_9",
+          "qa_browser": "PASS_CHROMIUM_MOBILE_DESKTOP_SYNTHETIC",
+          "qa_backend": "PASS_NODE_SYNTHETIC",
+          "qa_d1_migration": "APPLIED_CONFIRMED",
+          "signed_in_owner_android": "NOT_RUN",
+          "real_owner_original_file_restore": "NOT_RUN",
+          "live_cross_tenant_permission": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "qa": {
+          "backend": {
+            "script": "ai-law-standalone-cf-qa",
+            "version": "0e57447e-19a4-461c-97d1-da8df22d3b84",
+            "deployment": "aa48d887-bdab-4a3f-b0f8-73d43aaeaca6",
+            "percent": 100,
+            "modules": 11,
+            "bindings": 12
+          },
+          "frontend": {
+            "script": "ai-law-web-qa",
+            "version": "6fa4753d-a62f-40d8-9f45-31d2b6a1bbc8",
+            "deployment": "edb6e99b-9d65-427a-bda9-e6971fdefa04",
+            "percent": 100,
+            "modules": 27,
+            "bindings": 2
+          }
+        },
+        "owner_acceptance": "PENDING_R122"
       }
     ],
     "features": [
