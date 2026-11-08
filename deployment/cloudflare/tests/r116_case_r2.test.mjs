@@ -75,7 +75,7 @@ function fixture({role='lawyer',session=true,allowed=true,write=true,r2=true}={}
   async get(k){const bytes=objects.get(k);return bytes?{arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)}:null;},
   async delete(k){objects.delete(k);}
  };
- return {env:{AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,DB:db,...(r2?{CASE_FILES_R2:R2}:{} )},objects,calls,get receipt(){return receipt;}};
+ return {env:{AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,DB:db,...(r2?{CASE_FILES_R2:R2}:{} )},objects,calls,events,get receipt(){return receipt;}};
 }
 function req(path,method='GET',body,headers={},cookie=true){
  return new Request(BASE+path,{method,headers:{
@@ -100,6 +100,19 @@ test('R116: real detail APIs honor signed-in active MatterACL and optimistic ver
  assert.equal((await caseR2Api(req(root,'PATCH',JSON.stringify({...body,extra:'x'}),{'Content-Type':'application/json'}),f.env,{now:NOW})).status,400);
  assert.equal((await caseR2Api(req(root,'PATCH',JSON.stringify({...body,assignee_user_id:'bad'}),{'Content-Type':'application/json'}),f.env,{now:NOW})).status,400);
  assert.equal((await caseR2Api(req(root,'PATCH',JSON.stringify({...body,deadline:'2026-02-30'}),{'Content-Type':'application/json'}),f.env,{now:NOW})).status,400);
+});
+test('R125: read-only users see actor/time, never historical before-after values',async()=>{
+ const f=fixture({write:false});
+ f.events.push({action:'details_updated',file_id:null,actor_id:U,occurred_at:NOW,
+  changes:{summary:{from:'Tài liệu QA cũ',to:'Tài liệu QA mới'}}});
+ const response=await caseR2Api(req(root+'/events'),f.env,{now:NOW});
+ assert.equal(response.status,200);
+ const audit=(await response.json()).events[0];
+ assert.equal(audit.actor_name,'QA Lawyer');
+ assert.equal(audit.action,'details_updated');
+ assert.deepEqual(audit.changes.summary,{from:'[cần quyền sửa]',to:'[cần quyền sửa]'});
+ assert.ok(!JSON.stringify(audit).includes('Tài liệu QA cũ'));
+ assert.ok(!JSON.stringify(audit).includes('Tài liệu QA mới'));
 });
 test('R116: uploads synthetic PDF to private R2, stores SHA-256 and verifies byte-identical download',async()=>{
  const f=fixture();
