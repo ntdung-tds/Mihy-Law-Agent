@@ -8,6 +8,12 @@
 
 
 
+## R113 — Tenant/MatterACL deny must not spend AI quota (2026-11-09)
+
+- **Scope:** Regression-only extension of existing draft PR #175, synthetic data, no product/source change. Three denial paths: missing session (401), revoked/foreign MatterACL (404), viewer role (403). Every denial must make zero AI provider calls and zero quota SQL calls.
+- **Test-first commit:** `1e9a61f92f6b98aa838d384e25e93866d1d6d698`, `deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs`. CI **NOT_RUN / pending verification** at time of writing; do not count this case as PASS until CI actually executes it.
+- **QA:** Both Cloudflare QA hostnames remain DNS-unresolvable from this execution environment (curl error 6); authenticated API/browser and E2E **BLOCKED**. No QA or production deploy, no merge. SRS v1.1.15 and single `/app#assistant` UI unchanged; PR #158 remains closed.
+
 ## R110 — Reject invented source anchors and oversized streaming AI inputs (2026-11-08)
 
 - **Scope:** Source-only security hardening of the **existing** R109 11-UC QA panel and `/api/qa/legal/run`, not a second application. Duplicate PR #158 was closed unmerged and never deployed; R109 PR #157 remains the canonical UI.
