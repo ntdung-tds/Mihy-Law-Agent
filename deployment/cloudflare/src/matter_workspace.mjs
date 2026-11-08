@@ -94,7 +94,7 @@ async function create(req,env,identity,now){
  if(!data||typeof data.title!=='string'||Object.keys(data).some(k=>!['title','details'].includes(k)))return bad();
  const details=Object.hasOwn(data,'details')?validateInitialCaseDetails(data.details,identity.user_id):null;
  if(Object.hasOwn(data,'details')&&!details)return bad();
- if(details?.assignee_user_id!==identity.user_id){
+ if(details&&details.assignee_user_id!==identity.user_id){
   const assignee=await env.DB.prepare(
    "SELECT 1 AS ok FROM qa_memberships WHERE installation_id=? AND tenant_id=? AND user_id=? AND status='active' LIMIT 1"
   ).bind(env.INSTALLATION_ID,identity.tenant_id,details.assignee_user_id).first();
