@@ -13,6 +13,7 @@
     const output=byId('legal-qa-output'),copy=byId('legal-qa-copy');
     const setStatus=(msg,bad=false)=>{status.textContent=msg;status.dataset.state=bad?'error':'info';};
     let isSubmitting=false;
+    let activeUc=null, requestGeneration=0, activeController=null;
     function clearResult(){
       result.hidden=true;output.textContent='';
       byId('legal-qa-sources').replaceChildren();
@@ -30,6 +31,28 @@
     }
     uc.addEventListener('change',updateTaskFields);
     updateTaskFields();
+    function activateWorkflow(ucCode){
+      if(!/^UC(?:0[1-9]|1[01])$/.test(ucCode))return;
+      if(activeUc!==ucCode){
+        // Separate screens must never show stale private inputs, consent or
+        // the result of a previous task. No prompts/results are persisted.
+        requestGeneration++;
+        activeController?.abort();
+        activeController=null;isSubmitting=false;
+        byId('legal-qa-run').disabled=false;
+        byId('legal-qa-source').value='';
+        secondary.value='';question.value='';
+        byId('legal-qa-consent').checked=false;
+        matter.value='';
+        clearResult();
+      }
+      activeUc=ucCode;
+      uc.value=ucCode;
+      updateTaskFields();
+      void loadLegalMatters();
+    }
+    window.addEventListener('ai-law:workflow-open',event=>activateWorkflow(event.detail?.uc));
+
     byId('legal-qa-example').addEventListener('click',()=>{
       byId('legal-qa-source').value=
         'Điều 1. Bên A bàn giao 10 bộ tài liệu vào ngày 15 tháng 9 năm 2026. Bên B thanh toán 2.000.000 đồng sau khi nghiệm thu đủ 10 bộ tài liệu.\n\nĐiều 2. Nếu giao thiếu tài liệu, hai bên lập biên bản ghi nhận số lượng đã giao và hẹn ngày hoàn tất.';
@@ -89,18 +112,23 @@
         setStatus('Chỉ sử dụng văn bản giả lập và xác nhận trước khi chạy.',true);return;
       }
       isSubmitting=true;byId('legal-qa-run').disabled=true;clearResult();
+      const generation=requestGeneration;
+      const currentTask=uc.value;
+      const controller=new AbortController();
+      activeController=controller;
       setStatus('Đang xử lý nguồn QA. Không tải dữ liệu lên Drive…');
       try {
         const response=await fetch('/api/qa/legal/run',{method:'POST',
           headers:{'Content-Type':'application/json'},
-          credentials:'same-origin',cache:'no-store',
-          body:JSON.stringify({uc:uc.value,matter_id:matter.value,
+          credentials:'same-origin',cache:'no-store',signal:controller.signal,
+          body:JSON.stringify({uc:currentTask,matter_id:matter.value,
             source_text:source,source_text_2:extra,
             question:question.value.trim(),
             language:byId('legal-qa-language').value,synthetic_consent:true})
         });
         if(response.status===401){location.replace('/login');return;}
         const data=await response.json().catch(()=>({}));
+        if(generation!==requestGeneration||activeUc!==currentTask)return;
         if(!response.ok){
           if(response.status===404)void loadLegalMatters();
           throw Error(data.error||'Tác vụ QA không thể thực hiện.');
@@ -133,8 +161,14 @@
         result.hidden=false;
         setStatus('Hoàn tất bản nháp QA. Hãy đối chiếu nguồn và kiểm duyệt thủ công.');
         result.scrollIntoView({behavior:'smooth',block:'nearest'});
-      } catch(error){setStatus(error?.message||'Lỗi kết nối đến mô hình QA.',true);}
-      finally{isSubmitting=false;byId('legal-qa-run').disabled=false;}
+      } catch(error){
+        if(generation===requestGeneration&&error?.name!=='AbortError')
+          setStatus(error?.message||'Lỗi kết nối đến mô hình QA.',true);
+      } finally {
+        if(generation===requestGeneration){
+          isSubmitting=false;byId('legal-qa-run').disabled=false;activeController=null;
+        }
+      }
     });
     copy.addEventListener('click',async()=>{
       if(result.hidden||!output.textContent)return;
@@ -142,24 +176,16 @@
         setStatus('Đã sao chép bản nháp. Chưa xác minh pháp lý.');
       }catch{setStatus('Không sao chép tự động được. Bạn có thể chọn và sao chép văn bản.',true);}
     });
-    void loadLegalMatters();
-  }
-
- // Intercept only known workflow cards. The old R0 informational modal
- // remains intact in the static, network-free preview implementation.
+    // app.js runs before this def // Overview cards open their own workflow screen; never reuse #assistant.
  document.addEventListener('click',event=>{
   const target=event.target.closest?.('[data-demo-action]');
   if(!target||!document.querySelector('#legal-qa-form'))return;
   event.preventDefault();
   event.stopImmediatePropagation();
-  const selected=document.querySelector('#legal-qa-uc');
-  selected.value=target.dataset.feature;
-  selected.dispatchEvent(new Event('change'));
-  if(window.location.hash!=='#assistant')window.location.hash='#assistant';
-  else window.dispatchEvent(new Event('ai-law:legal-open'));
-  window.requestAnimationFrame?.(()=>document.querySelector('#legal-qa-heading')?.scrollIntoView({behavior:'smooth',block:'start'}));
+  const uc=target.dataset.feature;
+  if(!/^UC(?:0[1-9]|1[01])$/.test(uc))return;
+  const destination='#uc-'+uc;
+  if(window.location.hash!==destination)window.location.hash=destination;
+  else window.dispatchEvent(new CustomEvent('ai-law:workflow-open',{detail:{uc}}));
  },true);
- window.addEventListener('hashchange',()=>{
-  if(location.hash==='#assistant')window.dispatchEvent(new Event('ai-law:legal-open'));
- });
 })();
