@@ -17,6 +17,10 @@ test('R112: 11 menu actions navigate to distinct task routes, never the shared a
  assert.match(app,/workflow-open/);
  assert.doesNotMatch(app,/goto\('overview'\); closeFunctionDrawer\(false\);[\s\S]{0,140}scrollIntoView/);
 });
+test('R114: menu and routed-panel collections never use single-element querySelector for .forEach',()=>{
+ assert.doesNotMatch(app,/(?<!\$)\$\('[^']+'\)\.forEach/);
+});
+
 test('R112: the QA form belongs to exactly one isolated workflow screen with a dedicated heading',()=>{
  assert.equal((html.match(/id="legal-qa-form"/g)||[]).length,1);
  assert.match(html,/id="view-workflow"[^>]*data-panel="workflow"/);
@@ -94,7 +98,8 @@ test('R112: actual router opens 11 distinct task panels, updates heading and sup
  'search-shortcut','matter-search','notifications','side-guide','sidebar-explore','modal-close',
  'modal-ack','modal-backdrop','modal-title','modal-description','modal-meta','upload-btn',
  'local-file','chat-input','chat-form','chat-preview-reply','research-form',
- 'today-date','year','toast','workflow-title','workflow-code','workflow-stage','workflow-summary'];
+ 'today-date','year','toast','workflow-title','workflow-code','workflow-stage','workflow-summary',
+ 'workflow-create-matter','workflow-resume','workflow-resume-panel','matter-title'];
  for(const id of needed)make(id);
  const root={
   body:{style:{},classList:{add(){},remove(){}}},
@@ -145,6 +150,12 @@ test('R112: actual router opens 11 distinct task panels, updates heading and sup
  assert.equal(panels.find(n=>n.dataset.panel==='assistant').hidden,false);
  location.hash='#uc-UC03';
  assert.equal(nodes.get('workflow-code').textContent,'UC03');
+ nodes.get('workflow-create-matter').fire('click');
+ assert.equal(current,'#documents','Matter setup routes to documents');
+ assert.equal(nodes.get('workflow-resume-panel').hidden,false,'Resume action must be visible');
+ nodes.get('workflow-resume').fire('click');
+ assert.equal(current,'#uc-UC03','Resume must restore original task');
+ assert.equal(nodes.get('workflow-resume-panel').hidden,true,'Resume should disappear after navigating back');
  location.hash='#uc-UC12';
  assert.equal(panels.find(n=>n.dataset.panel==='overview').hidden,false);
 });

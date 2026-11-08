@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 105,
-  "updated_at": "2026-11-08T01:20:15.852Z",
+  "revision": 106,
+  "updated_at": "2026-11-08T02:00:22.219Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2001,13 +2001,14 @@
           "Live QA HTML/CSS contained previous BYOS UI not present on GitHub parent branch. Surgical deploy preserved that live content, so do not overwrite whole live modules with bare PR files without reconciling.",
           "Private SRS v1.1.15 exact clause mapping unavailable; baseline remains unchanged."
         ],
-        "owner_acceptance": "PENDING"
+        "owner_acceptance": "PENDING",
+        "owner_confirmation": "2026-11-08 Owner confirmed separate UC screens and Back: 'Đã ok, bước tiếp theo'. UI navigation only; all feature functionality not signed off."
       },
       {
         "id": "AL-R0-UI-R113-001",
         "title": "P0 hotfix: blank UC screen due to workflow panel nested in hidden assistant; restore back button",
         "priority": "P0",
-        "status": "QA_DEPLOYED_STRUCTURE_TEST_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "status": "OWNER_UI_NAV_ACCEPTED_OTHER_AUTHENTICATED_E2E_NOT_RUN",
         "scope": "Close missing </section> for assistant; workflow and 4 other view panels must be top-level siblings. No API/ACL/drive/product expansion.",
         "root_cause": "R112 moved legal form into a new <section id=view-workflow> but omitted the closing </section> of view-assistant. CSS hides assistant and therefore nested workflow and its Back button.",
         "code": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/161",
@@ -2024,7 +2025,47 @@
           "live_browser_rendering_simulation": "INCONCLUSIVE_RATE_LIMITED_NO_RESULT",
           "owner_final_acceptance": "PENDING"
         },
-        "note": "QA browser Rendering anonymous-only cannot test signed-in view, synthetic browser HTML simulation had no usable result and service returned 429. Do not report live authenticated E2E PASS. Production and OAuth/Drive unchanged."
+        "note": "QA browser Rendering anonymous-only cannot test signed-in view, synthetic browser HTML simulation had no usable result and service returned 429. Do not report live authenticated E2E PASS. Production and OAuth/Drive unchanged.",
+        "owner_confirmation": "2026-11-08 Owner: Đã ok, bước tiếp theo. Confirms prior blank screen/Back P0 fix only, not full 11-UC functional acceptance."
+      },
+      {
+        "id": "AL-R0-UI-R114-001",
+        "priority": "P0",
+        "title": "R114: từ 11 màn UC mở tạo hồ sơ QA, quay về đúng UC; ngăn danh sách Matter cũ ghi đè sau đổi không gian",
+        "status": "QA_DEPLOYED_CI_PASS_9_OF_9_REAL_OWNER_SIGNED_IN_E2E_NOT_RUN",
+        "scope": "Existing D1 Matter QA create and 11 legal UC routes only; no Drive/OAuth, new API, production or real legal text.",
+        "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/162",
+        "integration": "Menu workflow -> Tạo hồ sơ QA mới -> tài liệu (Matter form) -> Quay lại nghiệp vụ đang thực hiện -> refresh permitted Matter list; route-only ephemeral return UC; source text is scrubbed on leaving.",
+        "security": "Matter response generation gate suppresses stale workspace/UC results and stale HTTP 401; active 401 still fails closed; old select options scrubbed immediately.",
+        "qa": {
+          "deployment_id": "de49c56e-659e-4f65-a5f4-1302e347096f",
+          "version_id": "f048bb9c-1072-424c-9e99-90c537abec49",
+          "traffic": "100%",
+          "source_readback": "PASS_27_OF_27",
+          "changed_modules": [
+            "workspace_html.mjs",
+            "workspace_css.mjs",
+            "workspace_js.mjs",
+            "workspace_legal.mjs"
+          ],
+          "preserved_modules": 23,
+          "service_bindings": "QA_AUTH_AND_GOOGLE_PICKER_API_KEY_PRESERVED",
+          "existing_BYOS_HTML_CSS": "PRESERVED"
+        },
+        "tests": {
+          "github_actions": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42436404811",
+          "full_ci": "PASS_9_OF_9_EXECUTED_21_CONDITIONAL_SKIPPED",
+          "r112_router_sibling_and_back": "PASS",
+          "r114_matter_resume_navigation": "PASS",
+          "r114_stale_matter_acl_response_and_401": "PASS",
+          "live_qa_readback": "PASS",
+          "live_owner_signed_in_mobile": "NOT_RUN",
+          "live_owner_signed_in_desktop": "NOT_RUN",
+          "legal_accuracy": "NOT_RUN",
+          "original_private_srs_exact_clause_mapping": "NOT_VERIFIED",
+          "production": "UNTOUCHED"
+        },
+        "owner_acceptance": "PENDING_R114"
       }
     ],
     "features": [

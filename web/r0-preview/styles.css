@@ -548,3 +548,20 @@ body.drawer-open{overflow:hidden}
  #view-workflow .legal-qa-panel{margin-top:16px}
  .workflow-form-note{min-height:0}
 }
+
+/* R114: return from Matter QA setup to the originating UC screen. */
+.workflow-matter-control{display:flex;flex-direction:column;gap:8px;min-width:0}
+.workflow-matter-control>label{width:100%;min-width:0}
+.workflow-matter-link{align-self:flex-start;min-height:43px;border:1px solid #b9c9de;border-radius:10px;
+ background:#fff;color:#274d79;padding:9px 13px;font-size:13px;font-weight:750}
+.workflow-matter-link:hover{background:#eff5fc;border-color:#718eb3}
+.workflow-matter-link:focus-visible{outline:2px solid #4779b2;outline-offset:2px}
+.workflow-resume{display:flex;align-items:center;flex-wrap:wrap;gap:11px;margin-bottom:16px;
+ padding:13px;border:1px solid #cfdff2;border-radius:12px;background:#eef5ff}
+.workflow-resume[hidden]{display:none!important}
+.workflow-resume p{font-size:12px;color:#506686;margin:0}
+@media(max-width:620px){
+ .workflow-matter-link{width:100%;text-align:center}
+ .workflow-resume{display:block}
+ .workflow-resume p{margin-top:8px}
+}

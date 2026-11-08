@@ -1,12 +1,21 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `105` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T01:20:34.134Z`.
+- **PCS revision:** `106` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-08T02:00:43.829Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R114 — P0 existing QA Matter setup and resume original UC (2026-11-08)
+
+- **Owner acceptance of prior navigation fix:** Owner's “Đã ok, bước tiếp theo” confirms R113 separate UC screen and Back navigation UX. This does **not** sign off real authenticated 11-UC legal functionality, DOCX/PDF ingestion, legal accuracy or release.
+- **Next small R0 slice:** [Draft PR #162](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/162), stacked above PR #161. The existing 11 UC pages now offer “Tạo hồ sơ QA mới” directly beside the existing Matter selector. It opens the existing D1 Matter screen, where “Quay lại nghiệp vụ đang thực hiện” returns to the originating UC, causing a fresh authorized Matter list load. Only the UC code is kept in temporary page memory; previous source/consent/output are cleared when leaving. No new API or document storage.
+- **Security:** Async `/api/qa/matters` responses are generation-gated and ignored after UC/tenant/workspace changes, including stale 401; a current 401 still redirects to login. Selector labels are scrubbed at scope changes. No server authorization, token, consent, Drive, Picker or production code modified.
+- **Evidence:** [GitHub Actions #42436404811](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42436404811) **PASS 9/9 executed jobs**, 21 branch-conditional skipped; R112 router/menu/sidebar/back/HTML hierarchy PASS, new R114 Node VM actual controller test of stale workspace A/B and current 401 PASS, source syntax PASS. A prior red CI run [#42436272416](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42436272416) exposed accidentally reverted single-element selector `$('[data-view]')`; corrected to `$$` and added regression.
+- **QA deployment:** Cloudflare `ai-law-web-qa` deployment `de49c56e-659e-4f65-a5f4-1302e347096f`, 100%-traffic version `f048bb9c-1072-424c-9e99-90c537abec49`. Readback **PASS 27/27 modules**, 4 UI modules patched and other 23 preserved; existing live BYOS HTML/CSS retained (GitHub branch and old QA had a known divergence), `QA_AUTH` and Picker key bindings preserved. The five top-level routed screens remain siblings; no blank-screen regression.
+- **Acceptance gates:** Real authenticated Owner Android/desktop navigation/create/resume/permission denial **NOT_RUN**, no actual positive AI output legally verified; Owner R114 final acceptance **PENDING**. Do not merge stacked drafts or deploy production until gates pass. SRS v1.1.15 private baseline unchanged.
 
 ## R113 — P0 repair hidden UC screen and missing Back (2026-11-08)
 
