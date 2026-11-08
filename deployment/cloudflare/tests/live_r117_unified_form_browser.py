@@ -43,7 +43,7 @@ def scenario(browser,name,viewport,origin):
         if u=="/api/qa/drive/status":
             return reply(route,503,{"error":"paused"})
         if u=="/api/qa/matters" and method=="GET":
-            return reply(route,payload={"matters":[as_row(c) for c in cases]})
+            return reply(route,payload={"matters":[as_row(c) for c in cases if not c.get("hidden",False)]})
         if u=="/api/qa/matters" and method=="POST":
             data=json.loads(req.post_data)
             assert "title" in data and "details" in data
@@ -80,7 +80,12 @@ def scenario(browser,name,viewport,origin):
             if u==path+"/events":
                 return reply(route,payload={"events":[{"action":"details_saved","created_at":1800000000}]})
             if u=="/api/qa/matters/"+c["id"] and method=="PATCH":
-                v=json.loads(req.post_data);c["title_version"]+=1;c["title"]=v["title"]
+                v=json.loads(req.post_data)
+                if v.get("action")=="hide":
+                    assert v["expected_version"]==c["title_version"]
+                    c["hidden"]=True
+                    return reply(route,payload={"id":c["id"],"hidden":True,"physical_deleted":False})
+                c["title_version"]+=1;c["title"]=v["title"]
                 return reply(route,payload={"id":c["id"],"title":c["title"],"version":c["title_version"]})
         return reply(route,404,{"error":"synthetic unavailable"})
     context=browser.new_context(viewport=viewport)
@@ -132,7 +137,11 @@ def scenario(browser,name,viewport,origin):
         page.locator("#matter-list").wait_for(state="visible")
     page.locator("#matter-category-filter").select_option("Lao động")
     assert page.locator("#matter-list .matter-row").count()==1
-    page.locator("#matter-list .matter-row .case-row-open").click()
+    assert page.locator("#matter-list .case-action").count()==3
+    assert page.locator("#matter-list .case-action--view").is_visible()
+    assert page.locator("#matter-list .case-action--edit").is_visible()
+    assert page.locator("#matter-list .case-action--hide").is_visible()
+    page.locator("#matter-list .case-action--view").click()
     page.get_by_text("Đã mở hồ sơ. Chỉnh sửa hoặc chọn thêm tệp rồi bấm “Lưu thay đổi”.").wait_for(timeout=15000)
     if name=="mobile":
         assert page.locator("#matter-workspace").get_attribute("data-mobile-mode")=="detail"
@@ -151,6 +160,20 @@ def scenario(browser,name,viewport,origin):
         page.locator("#case-close").click()
         assert page.locator("#matter-list").is_visible()
         assert not page.locator("#matter-form").is_visible()
+    # R119: an ordinary user can only hide (no physical DELETE).
+    page.locator("#matter-list .case-action--hide").click()
+    panel=page.locator("#matter-list .case-hide-confirm")
+    panel.wait_for(state="visible")
+    assert "giữ nguyên" in panel.inner_text()
+    page.locator("#matter-list .case-hide-cancel").click()
+    assert len(cases)==2 and not cases[0].get("hidden",False)
+    page.locator("#matter-list .case-action--hide").click()
+    page.locator("#matter-list .case-hide-approve").click()
+    page.get_by_text("Đã ẩn hồ sơ khỏi danh sách. Dữ liệu và tài liệu vẫn được giữ nguyên.").wait_for(timeout=15000)
+    assert cases[0]["hidden"] is True
+    assert len(cases)==2 and len(files[I])==1
+    assert page.locator("#matter-list .matter-row").count()==0
+    assert sum(1 for method,path in calls if method=="DELETE" and "/api/qa/matters/" in path)==0
     width=page.evaluate("document.documentElement.scrollWidth")
     assert width<=viewport["width"]+4,(name,width,viewport)
     assert not errors,(name,errors)
