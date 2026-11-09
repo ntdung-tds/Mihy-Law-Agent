@@ -8,6 +8,12 @@
 
 
 
+## R119 — SQL-backed authorization on UC10/UC11 local retrieval (2026-11-09)
+
+- **Scope:** [Draft PR #197](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/197) stacked on draft PR #196. Regression-only; the Node 22 SQLite engine executes the exported `LEGAL_MATTER_ACCESS_SQL` inside the actual `legalApi` path for UC10 and UC11. Nine synthetic cases per UC: valid read positive control, missing grant, wrong tenant/user/installation, deny-overrides, stale ACL version, expired grant, and write-only. Valid readers get in-memory sample-only findings. Invalid readers get HTTP 404, no findings/anchors or source echo. Every case requires **zero AI calls** and **zero AI quota SQL**.
+- **Test evidence:** `deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs` test commit `4c4f95654a135819876dfbc06b09dc4917940a0c`; [Actions #42588990923](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42588990923), `cloudflare-contract` job `129065665580` log **PASS**, explicit `ok 13 - R119 actual SQLite ACL is required before UC10/UC11 local retrieval`, 13/13 Node test file subtests PASS. Workflow-wide completion on the latest docs commit is a separate gate; do not infer it.
+- **Limits:** This is a disposable local SQLite check, not authenticated live Cloudflare D1/API, official legal search, or mobile E2E. QA host DNS remained unreachable from test environment, so real D1/browser is **BLOCKED/NOT_RUN**. All PRs remain draft; no merge/deploy, no real client content, OAuth/Drive/OneDrive or production change. SRS v1.1.15 unchanged; Owner acceptance pending. Main PCS revision 99 has not been promoted.
+
 ## R113 — Tenant/MatterACL deny must not spend AI quota (2026-11-09)
 
 - **Scope:** Regression-only extension of existing draft PR #175, synthetic data, no product/source change. Three denial paths: missing session (401), revoked/foreign MatterACL (404), viewer role (403). Every denial must make zero AI provider calls and zero quota SQL calls.

@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
 import {legalApi,LEGAL_MATTER_ACCESS_SQL,LEGAL_QUOTA_SQL,sourceReferencesExist} from '../src/qa_legal_workflows.mjs';
 
 const I='11111111-1111-4111-8111-111111111111';
@@ -246,5 +247,72 @@ test('R118 UC10/UC11 reject cross-origin requests before ACL, search or quota',a
   assert.equal(f.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false,
    uc+' must not charge quota');
   assert.equal(f.providerCalls.length,0,uc+' must not invoke AI');
+ }
+});
+
+
+test('R119 actual SQLite ACL is required before UC10/UC11 local retrieval',async()=>{
+ // Exercise the handler with the actual exported SQL, not fixture({acl:false}).
+ // Only generated synthetic IDs and a disposable in-memory SQLite database.
+ const cases=[
+  {name:'valid read access',allow:true},
+  {name:'missing grant'},
+  {name:'foreign tenant grant',tenant:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'},
+  {name:'foreign user grant',user:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'},
+  {name:'foreign installation grant',installation:'cccccccc-cccc-4ccc-8ccc-cccccccccccc'},
+  {name:'explicit read deny',deny:true},
+  {name:'stale ACL version',version:1},
+  {name:'expired grant',validTo:NOW},
+  {name:'write-only grant',permission:'write'}
+ ];
+ for(const uc of ['UC10','UC11']){
+  for(const scenario of cases){
+   const db=new DatabaseSync(':memory:');
+   try{
+    db.exec([
+     'CREATE TABLE qa_matters(installation_id TEXT,tenant_id TEXT,matter_id TEXT,acl_version INTEGER);',
+     'CREATE TABLE qa_matter_acl(installation_id TEXT,tenant_id TEXT,matter_id TEXT,user_id TEXT,permission TEXT,effect TEXT,acl_version INTEGER,valid_from INTEGER,valid_to INTEGER);'
+    ].join('\n'));
+    db.prepare('INSERT INTO qa_matters VALUES(?,?,?,?)').run(I,T,M,2);
+    const addGrant=effect=>db.prepare(
+     'INSERT INTO qa_matter_acl VALUES(?,?,?,?,?,?,?,?,?)').run(
+     scenario.installation??I,scenario.tenant??T,M,scenario.user??U,
+     scenario.permission??'read',effect,scenario.version??2,
+     NOW-10,scenario.validTo??null);
+    if(scenario.name!=='missing grant')addGrant('allow');
+    if(scenario.deny)addGrant('deny');
+    const f=fixture({ai:false});
+    const mockPrepare=f.env.DB.prepare.bind(f.env.DB);
+    f.env.DB.prepare=sql=>sql===LEGAL_MATTER_ACCESS_SQL?{
+     bind(...params){
+      f.calls.push({sql,params});
+      return {async first(){return db.prepare(sql).get(...params)??null;}};
+     }
+    }:mockPrepare(sql);
+    const response=await legalApi(request({
+     uc,question:'giao hàng tháng 9',
+     source:'SYNTHETIC_PRIVATE_R119_MARKER '+SOURCE
+    }),f.env,{now:NOW});
+    const context=uc+' '+scenario.name;
+    assert.equal(f.calls.filter(c=>c.sql===LEGAL_MATTER_ACCESS_SQL).length,1,
+     context+' must perform exactly one real ACL query');
+    assert.equal(f.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false,
+     context+' must never charge AI quota');
+    assert.equal(f.providerCalls.length,0,context+' must never invoke AI');
+    const result=await response.json();
+    if(scenario.allow){
+     assert.equal(response.status,200,context);
+     assert.equal(result.mode,'local_example_only',context);
+     assert.ok(result.findings.length>0,context+' must retrieve from sample');
+     assert.ok(result.findings.some(x=>x.source_id==='A1'),context);
+    }else{
+     assert.equal(response.status,404,context);
+     assert.equal(result.findings,undefined,context+' must hide results');
+     assert.equal(result.source_anchors,undefined,context+' must hide anchors');
+     assert.doesNotMatch(JSON.stringify(result),/SYNTHETIC_PRIVATE_R119_MARKER|giao hàng ngày 15/,
+      context+' must never echo source');
+    }
+   }finally{db.close();}
+  }
  }
 });
