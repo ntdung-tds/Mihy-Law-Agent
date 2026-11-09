@@ -721,3 +721,11 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - **PASS (CI):** PR #175 head `2b8da7bc9c1a4b37d613b7712061bb7864b7b149`, [Actions run #42502504092](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42502504092): 9/9 executed jobs success, 21 conditional/live jobs skipped. `cloudflare-contract` job 128798095212 includes successful step `R112 legal AI synthetic source, tenant ACL and malformed UTF-8 regression`. This is synthetic CI evidence only, not live tenant E2E or legal validation.
 - **BLOCKED (QA):** `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` both fail DNS resolution from this execution environment (`curl: (6) Could not resolve host`); no authenticated live API/browser proof. Do not deploy QA or production on this evidence.
 - **NOT_RUN:** live MatterACL negative-path and source provider E2E; all 11 workflows full acceptance, owner signoff. No new product code or merge in this follow-up. Next independent task: review tenant/MatterACL negative tests and branch integration order (#157 → #159; #160/#163 siblings; #175 based on #163), test-first.
+
+
+## R114 — SQL-backed MatterACL regression (2026-11-09)
+
+- **PR:** #190 draft, branch `test/r114-sql-matteracl-gpt`, test-first commit `281b6593d5cb78379a08e0e919710fc1619d8208`; based on existing #175 stack, not merge-ready against `main` (stacked changes).
+- **Scope:** Seven Python unittest cases execute the exported `LEGAL_MATTER_ACCESS_SQL` against in-memory SQLite with only synthetic tenant/matter/user rows: positive read allow, cross-tenant ACL, cross-tenant matter, explicit deny, stale ACL version, expired/future grant and write-only permission.
+- **Status:** test committed; CI **NOT_RUN/unverified** at time of this note (no workflow returned for commit). Live Cloudflare D1/QA authenticated API and browser **BLOCKED/NOT_RUN**; 11-UC E2E **NOT_RUN**. SQLite test is not proof of live D1 isolation or legal acceptance.
+- **Boundary:** no product source, UI, storage/OAuth, production or SRS change. PR #158 stays closed; `/app#assistant` remains sole 11-UC UI. Next: confirm CI, fix failures, then D1/API and browser synthetic E2E after safe QA access.
