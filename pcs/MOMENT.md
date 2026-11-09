@@ -8,6 +8,14 @@
 
 
 
+## R122 — Deny isolation by principal and installation (2026-11-09)
+
+- **Read-first:** `pcs/STATE.json` main revision 99, stacked branch PCS revision 102; PR #157 OPEN, #158 CLOSED (do not restore), #159 OPEN; R121 PR #201 OPEN draft. R121 final HEAD `ca614b3d69fc3677f3cb15be5ba0b072f405da30` GitHub Actions #42634522922 SUCCESS (9 executed jobs); R121 SQL count 13 verified in earlier run #42622077254, not yet directly verified for #42634522922.
+- **Test-first change:** New branch `test/r122-matteracl-deny-principal-gpt`, test-only commit `cd3159b816a3e298fd0f58eec7966fdc1c87dbc7`. Two synthetic SQLite cases executing actual exported `LEGAL_MATTER_ACCESS_SQL`: deny assigned to a different user or installation must not override the current user's valid read allow. Expected 15 cases total; mark PASS only after verifying CI test output. No product/UI changes.
+- **QA reachability:** Both `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` still fail DNS lookup (curl 6 / HTTP 000) from execution runtime. Actual D1/API/browser QA BLOCKED; 11-UC E2E NOT_RUN.
+- **Boundaries:** SRS v1.1.15 unchanged, single `/app#assistant`, no PR #158 reimplementation, no Drive/OneDrive/OAuth, customer data, production deploy or merge. CI is not legal/Owner acceptance.
+- **Next:** Verify actual R122 HEAD CI runs all 15 cases; fix FAIL, then pursue authenticated live QA tenant-denial evidence when environment is reachable.
+
 ## R120 — Final-head CI verification and QA connectivity (2026-11-09)
 
 - **Read-first:** `pcs/STATE.json` revision 102 and latest branch `pcs/MOMENT.md`; PR #157 OPEN draft, #158 CLOSED draft (do not restore), #159 OPEN draft, #198 OPEN draft.
