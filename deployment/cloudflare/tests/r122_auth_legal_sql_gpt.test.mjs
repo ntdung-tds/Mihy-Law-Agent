@@ -100,7 +100,7 @@ const sessionCookie=response=>{
  const found=response.headers.get('Set-Cookie')?.match(/al_qa_session=([0-9a-f-]{36})/);
  assert.ok(found,'Expected isolated QA HttpOnly session cookie');return found[1];
 };
-const usage=db=>db.prepare('SELECT COUNT(*) AS rows,COALESCE(SUM(requests),0) AS requests FROM qa_legal_ai_quota').get();
+const usage=db=>({...db.prepare('SELECT COUNT(*) AS rows,COALESCE(SUM(requests),0) AS requests FROM qa_legal_ai_quota').get()});
 
 test('R122 real cookie+SQLite: two users, tenant switch, MatterACL, local search, AI quota',async()=>{
  const db=database();
@@ -182,7 +182,7 @@ test('R122 real cookie+SQLite: two users, tenant switch, MatterACL, local search
   assert.equal((await legitDraft.json()).mode,'ai_draft_not_verified');
   assert.equal(aiCalls,1);
   assert.deepEqual(usage(db),{rows:1,requests:1});
-  assert.deepEqual(db.prepare('SELECT tenant_id,user_id,requests FROM qa_legal_ai_quota').get(),
+  assert.deepEqual({...db.prepare('SELECT tenant_id,user_id,requests FROM qa_legal_ai_quota').get()},
    {tenant_id:TB,user_id:B,requests:1});
 
   // Subsequent rejected request must leave model/quota unchanged.
