@@ -117,6 +117,24 @@ class SqlMatterAclRegression(unittest.TestCase):
         self.grant(effect="deny", valid_from=NOW+1)
         self.assertTrue(self.accessible())
 
+    def test_other_user_deny_does_not_revoke_current_allow(self):
+        self.matter()
+        self.grant(effect="allow")
+        self.db.execute(
+            "INSERT INTO qa_matter_acl VALUES (?,?,?,?,?,?,?,?,?)",
+            (INSTALL, TENANT_A, MATTER, "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+             "read", "deny", 2, NOW-10, None))
+        self.assertTrue(self.accessible())
+
+    def test_other_installation_deny_does_not_revoke_current_allow(self):
+        self.matter()
+        self.grant(effect="allow")
+        self.db.execute(
+            "INSERT INTO qa_matter_acl VALUES (?,?,?,?,?,?,?,?,?)",
+            ("cccccccc-cccc-4ccc-8ccc-cccccccccccc", TENANT_A, MATTER,
+             USER, "read", "deny", 2, NOW-10, None))
+        self.assertTrue(self.accessible())
+
     def test_foreign_tenant_deny_does_not_revoke_current_allow(self):
         self.matter()
         self.grant(effect="allow")
