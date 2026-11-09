@@ -6,7 +6,45 @@
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
+## R126 — Stacked integration risk audit (2026-11-10)
 
+- **Read-first:** main PCS STATE/MOMENT revision 99; R122 branch STATE/MOMENT revision 102. PR #157 and #159 OPEN; PR #158 CLOSED and must not be restored; PR #201 and #203 OPEN. Sole UI /app#assistant, SRS v1.1.15 unchanged.
+- **Verified CI evidence:** last previously documented R125 PR #203 run #42670191380 had 9/9 executed jobs PASS; live Cloudflare jobs skipped. No newer successful HEAD run was established by commit lookup for short SHA cf27fa73; mark **NOT_VERIFIED**, do not assume CI latest HEAD PASS. 15 synthetic SQLite MatterACL cases remain previously verified, not D1/API/E2E.
+- **New integration finding:** GitHub compare main...test/r122-matteracl-deny-principal-gpt reports **92 commits ahead, 0 behind, 25 changed files**. Changes span Worker, site, quota migration, IAM/MatterACL, UI and tests. Therefore PR #203 is NOT a small isolated merge against main even though its last incremental test commit is small; merging directly without dependency/QA review is unsafe.
+- **QA:** prior R125 direct HTTP/DNS BLOCKED, deployed-code parity NOT_VERIFIED, authenticated tenant-deny-before-AI/quota and 11 UC E2E NOT_RUN. No fresh live HTTP or browser PASS established in this review. No product code changes, merge, deployment, customer data or storage/OAuth access.
+- **Next independent task:** audit exact stacked PR base/head and isolate minimal test-only delta for controlled integration; verify deploy artifact parity and a reachable QA API/browser path before any deploy; then test deny-before-provider/quota and UC03/04/07 with synthetic fixtures. Owner acceptance remains pending.
+
+
+
+
+## R125 — Final HEAD CI verification and QA gate (2026-11-10)
+
+- **Read-first:** main PCS STATE/MOMENT revision 99; stacked PR #203 PCS revision 102. PR #157 OPEN draft, #158 CLOSED (do not reimplement), #159 OPEN draft; #203 OPEN draft based on #201. Single UI remains `/app#assistant`, SRS v1.1.15 unchanged.
+- **Verified HEAD:** PR #203 HEAD `2cab9256479d75cc7d9984a1b7c00acd3a02f9eb`; [GitHub Actions #42670191380](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42670191380) completed SUCCESS. All **9 executed CI jobs PASS**; optional Cloudflare live/deploy jobs SKIPPED. Direct `cloudflare-contract` job `129344376594` log: `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v` -> **Ran 15 tests**, **OK**, including foreign principal/installation deny and stale/future deny cases. PASS applies to synthetic SQLite SQL, not live D1/API, AI/quota or legal acceptance.
+- **QA attempt:** HTTPS probes from this execution environment to both `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` failed `curl (6) Could not resolve host`, HTTP 000. Live QA API/browser **BLOCKED**; deployed-code parity **NOT_VERIFIED**; 11-UC E2E **NOT_RUN**. Do not infer missing Worker deployments from DNS failure; R124 control-plane evidence indicates deployments exist.
+- **Decision:** No redundant SQL-only test PR, no merge or QA deployment while deployed artifact cannot be inspected and live authenticated synthetic E2E cannot be verified. No production, customer data, Drive/OneDrive/OAuth, or SRS changes. Next independent task: verify exact QA deploy source and route from a reachable permitted environment, then deny-before-AI/quota tenant test, UC03/04/07, IAM/Matters, remaining 8 UC and E2E. Owner retains final acceptance.
+
+## R124 — Cloudflare QA control-plane investigation (2026-11-09)
+
+- **Read-first:** `main` PCS STATE/MOMENT revision 99; stacked PR #203 PCS revision 102. PR #157 OPEN draft (single `/app#assistant`), #158 CLOSED, #159 OPEN draft. PR #203 OPEN draft, no merge. Latest PR #203 HEAD `d17e8cfd86e950b752857c735dbebaa1a2eb254e` CI [#42649918708](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42649918708): 9 executed jobs PASS, R114 SQL regression step PASS. This is NOT live QA E2E.
+- **New independent evidence:** Cloudflare read-only API lists both `ai-law-web-qa` (last deployment 2026-11-09 01:15:20Z, version `1f85992e-2963-497f-aa35-00dfa69f8526`) and `ai-law-standalone-cf-qa` (2026-11-09 01:14:43Z, version `53b80b55-22d5-438a-b52a-0d14b14b8009`), each 100% traffic, workers.dev subdomain enabled. Standalone QA settings expose binding types `AI` (ai), `DB` (d1), `CASE_FILES_R2` (r2_bucket), without reading secret values. Web QA has `QA_AUTH` service binding. These prove configured Workers/deployments exist, NOT that HTTP routes or deployed code are correct.
+- **BLOCKED:** Browser/HTTP endpoints inaccessible from current environment (previous `curl (6)`; independent URL open also failed). Cloudflare script-content endpoint returned no inspectable content, so deployed code/version parity with PR #157/#159 and `/app#assistant` remains NOT_VERIFIED. Do not deploy or claim API/E2E PASS without inspecting exact deploy artifact and performing authenticated synthetic QA requests.
+- **Next:** verify workers.dev route with an independent permitted HTTP path and inspect deployed Worker artifact/version; then test tenant/MatterACL deny-before-AI/quota on QA, UC03/04/07 synthetic E2E, and remaining 8 UC. No product changes, no new SQL-only PR, no storage/OAuth, no production or customer data.
+
+## R123 — Verify R122 HEAD CI and identify live QA gate (2026-11-09)
+
+- **Read-first:** main PCS STATE/MOMENT revision 99; stacked R122 branch MOMENT revision 102. PR #157 OPEN draft (11 UC single UI), #158 CLOSED unmerged (must not restore), #159 OPEN draft (source hardening), #201 OPEN draft and #203 OPEN draft. R122 head before this PCS-only commit: `1b708fb6cf50801c5be587973373f75d76a8b6f3`.
+- **Verified CI:** [Actions #42641399971](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42641399971) completed SUCCESS: nine executed jobs passed. Actual `cloudflare-contract` job `129243146754` log explicitly shows `Ran 15 tests in 0.006s` and `OK` for synthetic SQLite MatterACL regression. PASS for synthetic SQL only, not live D1/tenant isolation, API, quota, or AI.
+- **QA:** both `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` returned `curl (6) Could not resolve host` / HTTP 000 on this runner. Live QA API/browser and 11 UC E2E remain BLOCKED/NOT_RUN. Live Cloudflare QA workflow jobs in this CI run were SKIPPED; local standalone-browser job PASS must not be conflated with live QA browser acceptance.
+- **Disposition:** no product code change, no merge, no deploy; avoid adding redundant synthetic SQL cases until live QA connectivity and test credentials/isolated fixtures can be verified safely. Next: independently investigate QA DNS/deployment reachability; verify exact deploy source and bindings before QA-only deploy, then run tenant/MatterACL deny-before-AI/quota and UC03/04/07 real QA smoke with synthetic inputs. Never touch Drive/OneDrive/OAuth, production or customer data. E2E NOT_RUN; owner final acceptance outstanding.
+
+## R122 — Deny isolation by principal and installation (2026-11-09)
+
+- **Read-first:** `pcs/STATE.json` main revision 99, stacked branch PCS revision 102; PR #157 OPEN, #158 CLOSED (do not restore), #159 OPEN; R121 PR #201 OPEN draft. R121 final HEAD `ca614b3d69fc3677f3cb15be5ba0b072f405da30` GitHub Actions #42634522922 SUCCESS (9 executed jobs); R121 SQL count 13 verified in earlier run #42622077254, not yet directly verified for #42634522922.
+- **Test-first change:** New branch `test/r122-matteracl-deny-principal-gpt`, test-only commit `cd3159b816a3e298fd0f58eec7966fdc1c87dbc7`. Two synthetic SQLite cases executing actual exported `LEGAL_MATTER_ACCESS_SQL`: deny assigned to a different user or installation must not override the current user's valid read allow. Expected 15 cases total; mark PASS only after verifying CI test output. No product/UI changes.
+- **QA reachability:** Both `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` still fail DNS lookup (curl 6 / HTTP 000) from execution runtime. Actual D1/API/browser QA BLOCKED; 11-UC E2E NOT_RUN.
+- **Boundaries:** SRS v1.1.15 unchanged, single `/app#assistant`, no PR #158 reimplementation, no Drive/OneDrive/OAuth, customer data, production deploy or merge. CI is not legal/Owner acceptance.
+- **Next:** Verify actual R122 HEAD CI runs all 15 cases; fix FAIL, then pursue authenticated live QA tenant-denial evidence when environment is reachable.
 
 ## R120 — Final-head CI verification and QA connectivity (2026-11-09)
 
@@ -804,3 +842,11 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - **Scope:** PR #157/#159 OPEN, #158 CLOSED; PR #201 draft. main `pcs/STATE.json` revision 99, stacked branch PCS independent. No production code/UI modification; `/app#assistant` remains sole 11-UC UI.
 - **BLOCKED / NOT_RUN (live QA):** Fresh curl probes to `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` failed DNS (`curl (6)`, HTTP 000). Authenticated synthetic D1/API/browser MatterACL and zero-quota/zero-AI side effects NOT_RUN; 11-UC E2E and legal review NOT_RUN. Cloudflare live QA jobs skipped, not passed. No merge/deploy.
 - **Next:** verify new PCS-only commit CI, then review stacked PR dependency/merge safety; run live synthetic QA only after reachability and deployment verification. No Drive/OneDrive/OAuth, production or customer data touched.
+
+## R125 — QA access and deployed-version gate (2026-11-10)
+
+- **Preflight:** main pcs/STATE.json revision 99; PR #157 OPEN, #158 CLOSED (do not revive), #159 OPEN; PR #203 remains draft stacked on #201. PR #203 HEAD bd3d9b42fdbff82ace544ec58e2ca5dd3bc9d6cb GitHub Actions #42659804617 completed/success (CI PASS, not live QA acceptance).
+- **QA DNS:** direct unauthenticated HEAD checks for ai-law-web-qa.iaict-platform.workers.dev and ai-law-standalone-cf-qa.iaict-platform.workers.dev both BLOCKED by curl (6) DNS resolution, HTTP 000. No API or browser E2E claim.
+- **Cloudflare control plane PASS:** GET deployments confirms web deployment 016f78da-c2c0-45d6-993d-53ad33ebf7d9 (version 1f85992e-2963-497f-aa35-00dfa69f8526, 100%, 2026-11-09T01:15:20Z) and backend deployment a4563676-9f87-4739-8eb2-31d4e98ceb34 (version 53b80b55-22d5-438a-b52a-0d14b14b8009, 100%, 2026-11-09T01:14:43Z). Binding names/types only: web QA_AUTH service; backend AI and DB/D1 present. No secret values read.
+- **Deployed code readback:** NOT_VERIFIED: content/v2 connector response not interpretable in this run. Cannot prove deployed Worker code corresponds to PR #157/#159 or current test branches. No deploy performed.
+- **Next independent task:** inspect QA version modules through a supported readback path and verify HTTP/API/browser with synthetic users before any deploy or acceptance. Tenant/MatterACL deny before AI/quota, UC03/04/07, remaining UCs and 11-UC E2E remain NOT_RUN on live QA. Production, Drive, OneDrive, OAuth, SRS v1.1.15 and sole /app#assistant UI unchanged.
