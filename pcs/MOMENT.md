@@ -8,6 +8,14 @@
 
 
 
+## R130 — Verify R129 HEAD CI and live QA gate (2026-11-10)
+
+- **Read-first:** main PCS STATE revision 99 and MOMENT; stacked PR #205 STATE revision 106 and MOMENT. PR #157/#159 remain OPEN Draft; PR #158 CLOSED unmerged and must not be restored. PR #204/#205 OPEN Draft; #205 targets #204 and changes three files only. Sole 11-UC UI remains `/app#assistant`.
+- **PASS — final R129 HEAD CI:** PR #205 commit `59e56ba776796d80ffc9a458a0d671d2e14a0745`, [Actions #42707501922](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42707501922) completed SUCCESS: nine executed jobs successful, 21 optional/live/deploy jobs SKIPPED. Unit job succeeded; R127 mocked fail-closed regression is in unit discovery. **R123 live HTTPS security step SKIPPED**, not PASS. This verifies the prior HEAD, not this documentation commit.
+- **BLOCKED — QA reachability:** Direct curl HTTPS to both `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` failed DNS resolution (curl 6, HTTP 000) from this execution environment. The independent GitHub runner's previous R123 negative HTTP PASS remains historical evidence only; no new live result. Source parity NOT_VERIFIED. Positive authenticated cross-tenant MatterACL/D1, AI provider side effects and 11-UC browser E2E NOT_RUN.
+- **Dependency safety:** PR #204 itself is stacked on R122, so neither #204 nor #205 is approved for direct merge to main. No new product code/test duplication, branch merge, QA/production deployment, SRS changes, Drive/OneDrive/OAuth operations, or customer data.
+- **Next independent work:** inspect #204 upstream chain and isolate minimal live QA gate without broad upstream diffs; run from a reachable runner with explicitly authorized synthetic QA identity, verify deployed code parity and authenticated MatterACL before any QA promotion.
+
 ## R129 — Isolate R127 security gate PR dependency (2026-11-10)
 
 - **Read-first:** main PCS STATE revision 99 and MOMENT, stacked branch STATE revision 106 and MOMENT; PR #157/#159 OPEN, #158 CLOSED; #204/#205 OPEN draft. No second 11-UC UI, `/app#assistant` preserved.
