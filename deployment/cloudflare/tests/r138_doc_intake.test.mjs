@@ -28,7 +28,7 @@ function qaZip(entries){
  for(const {name,xml,method=8} of entries){
   const n=ENC.encode(name),raw=ENC.encode(xml),packed=method===8?deflateRawSync(raw):raw,crc=crc32(raw);
   const l=new Uint8Array(30+n.length+packed.length);
-  u32(l,0,0x04034b50);u16(l,4,20);u16(l,8,0);u16(l,10,method);
+  u32(l,0,0x04034b50);u16(l,4,20);u16(l,6,0);u16(l,8,method);
   u32(l,14,crc);u32(l,18,packed.length);u32(l,22,raw.length);u16(l,26,n.length);
   l.set(n,30);l.set(packed,30+n.length);local.push(l);
   const c=new Uint8Array(46+n.length);
