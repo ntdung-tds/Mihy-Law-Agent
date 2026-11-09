@@ -8,6 +8,13 @@
 
 
 
+## R127 — Fail closed on unreachable live QA (2026-11-10)
+
+- **Read-first:** PCS revision 106 on stacked R123 branch; PR #157/#159 OPEN, #158 CLOSED; PR #204 live QA negative gate final-head CI #42684059708 PASS 9/9 and 11/11 HTTP negative cases. Main PCS remains rev99. Actual authenticated tenant/MatterACL and 11-UC E2E NOT_RUN.
+- **Bug found:** `r123_live_auth_denials_gpt.py` classified DNS/timeout/429/5xx as BLOCKED, but exited **0 whenever FAIL=0**, even if all eleven probes were BLOCKED. This could produce a false-green CI security gate when QA is unreachable.
+- **Test-first:** `tests/test_r127_qa_failclosed_gpt.py` added first (commit `0cd27582`) with mocked all-network-failure and all-429 cases requiring nonzero exit; then one-line script fix (commit `be84df08`) makes any BLOCKED fail the process while preserving explicit BLOCKED evidence. Positive expected denial remains PASS. No customer data, credentials or app code touched.
+- **Gates:** CI on R127 HEAD **NOT_VERIFIED** until workflow completes. QA authenticated E2E, deployed source parity and legal acceptance **NOT_RUN/NOT_VERIFIED**. This branch is stacked on PR #204; do not merge into main without dependency review. No QA/production deployment.
+
 ## R120 — Final-head CI verification and QA connectivity (2026-11-09)
 
 - **Read-first:** `pcs/STATE.json` revision 102 and latest branch `pcs/MOMENT.md`; PR #157 OPEN draft, #158 CLOSED draft (do not restore), #159 OPEN draft, #198 OPEN draft.
