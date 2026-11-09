@@ -8,6 +8,13 @@
 
 
 
+## R125 — Final HEAD CI verification and QA gate (2026-11-10)
+
+- **Read-first:** main PCS STATE/MOMENT revision 99; stacked PR #203 PCS revision 102. PR #157 OPEN draft, #158 CLOSED (do not reimplement), #159 OPEN draft; #203 OPEN draft based on #201. Single UI remains `/app#assistant`, SRS v1.1.15 unchanged.
+- **Verified HEAD:** PR #203 HEAD `2cab9256479d75cc7d9984a1b7c00acd3a02f9eb`; [GitHub Actions #42670191380](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42670191380) completed SUCCESS. All **9 executed CI jobs PASS**; optional Cloudflare live/deploy jobs SKIPPED. Direct `cloudflare-contract` job `129344376594` log: `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v` -> **Ran 15 tests**, **OK**, including foreign principal/installation deny and stale/future deny cases. PASS applies to synthetic SQLite SQL, not live D1/API, AI/quota or legal acceptance.
+- **QA attempt:** HTTPS probes from this execution environment to both `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` failed `curl (6) Could not resolve host`, HTTP 000. Live QA API/browser **BLOCKED**; deployed-code parity **NOT_VERIFIED**; 11-UC E2E **NOT_RUN**. Do not infer missing Worker deployments from DNS failure; R124 control-plane evidence indicates deployments exist.
+- **Decision:** No redundant SQL-only test PR, no merge or QA deployment while deployed artifact cannot be inspected and live authenticated synthetic E2E cannot be verified. No production, customer data, Drive/OneDrive/OAuth, or SRS changes. Next independent task: verify exact QA deploy source and route from a reachable permitted environment, then deny-before-AI/quota tenant test, UC03/04/07, IAM/Matters, remaining 8 UC and E2E. Owner retains final acceptance.
+
 ## R124 — Cloudflare QA control-plane investigation (2026-11-09)
 
 - **Read-first:** `main` PCS STATE/MOMENT revision 99; stacked PR #203 PCS revision 102. PR #157 OPEN draft (single `/app#assistant`), #158 CLOSED, #159 OPEN draft. PR #203 OPEN draft, no merge. Latest PR #203 HEAD `d17e8cfd86e950b752857c735dbebaa1a2eb254e` CI [#42649918708](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42649918708): 9 executed jobs PASS, R114 SQL regression step PASS. This is NOT live QA E2E.
