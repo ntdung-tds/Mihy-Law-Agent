@@ -361,7 +361,9 @@
            data.storage!=='none'||data.review_required!==true||
            data.file_name!==selected.name||data.file_size!==selected.size||
            data.file_type!==(selected.name.toLowerCase().endsWith('.pdf')?'pdf':'docx')||
-           data.uc!==task||!/^[a-f0-9]{64}$/.test(data.source_sha256||'')){
+           data.uc!==task||!/^[a-f0-9]{64}$/.test(data.source_sha256||'')||
+           !Array.isArray(data.document_warnings)||
+           data.document_warnings.some(v=>v!=='tables_present_review_layout')){
           throw Error('Kết quả trích xuất không đủ điều kiện đối chiếu.');
         }
         // R139: the server hash is only useful if independently verified.
@@ -376,10 +378,14 @@
         importedFile={...current,text:extracted,sha256:localSha};
         fileText.textContent=extracted;
         fileMeta.textContent=selected.name+' · '+selected.size+' byte · SHA-256 '+
-          data.source_sha256.slice(0,16)+'…';
+          data.source_sha256.slice(0,16)+'…'+
+          (data.document_warnings.includes('tables_present_review_layout')?
+            ' · Có bảng trong Word — hãy đối chiếu từng ô và bố cục ở tệp gốc.':'');
         fileReviewed.checked=false;fileUse.disabled=true;
         filePreview.hidden=false;
-        setFileStatus('Đã đọc văn bản QA; mở tệp gốc để đối chiếu trước khi đưa vào nguồn A.');
+        setFileStatus(data.document_warnings.includes('tables_present_review_layout')?
+          'DOCX có bảng: kiểm tra từng ô, hàng, cột và nội dung bị gộp trên tệp gốc trước khi đưa vào nguồn A.':
+          'Đã đọc văn bản QA; mở tệp gốc để đối chiếu trước khi đưa vào nguồn A.');
       }catch(error){
         if(!fileStillSame(current)||error?.name==='AbortError')return;
         importedFile=null;filePreview.hidden=true;fileReviewed.checked=false;

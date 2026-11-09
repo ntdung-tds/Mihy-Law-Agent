@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `132` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-08T23:41:48.753Z`.
+- **PCS revision:** `133` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-09T00:08:35.017Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R140 — Kiểm tra DOCX OOXML, chặn Track Changes/nội dung ẩn và cảnh báo bảng (2026-11-09)
+
+- **Rủi ro được xử lý:** R138/R139 đã kiểm tra PDF/DOCX size/MIME/SHA, nhưng DOCX chỉ được nhận qua 4 byte chữ ký ZIP. Một file ZIP giả Word hoặc Word có nội dung đã xóa/thêm theo Track Changes, chữ ẩn, note/comment có thể bị chuyển đổi thành nguồn AI không đầy đủ. Để tránh sai kết luận, R140 chặn các dấu hiệu đã biết **trước** `toMarkdown` và không tự xác nhận độ chính xác pháp lý.
+- **Mã:** Draft [PR #189](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/189) xếp trên R139 PR #188. Bổ sung preflight ZIP/OOXML có giới hạn theo local/central directory, nội dung `[Content_Types].xml`, `_rels/.rels`, `word/document.xml`, CRC của XML, tệp ZIP nén DEFLATE và STORED, giới hạn entry/kích thước giải nén và từ chối cấu trúc sai. Chặn các chỉ dấu `w:ins/w:del/w:move*`, `w:vanish`, `w:trackRevisions`, comments/notes/altChunk/embedded entries. DOCX có `w:tbl` nhưng hợp lệ được trích kèm cờ `tables_present_review_layout`, giao diện nhắc đối chiếu từng ô, hàng, cột và ô gộp trên file Word gốc. Giữ nguyên R139 SHA-256 và R138 nguồn A/consent. Không thay đổi PDF/OCR, DB/R2, Drive, IAM hay SRS.
+- **QA trước triển khai:** CI đầu [#42537577876](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42537577876) FAIL vì mẫu ZIP DEFLATE test ghi compression method vào trường time của local header; vòng chẩn đoán [#42537910404](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42537910404) chứng minh parser xử lý ZIP STORED đúng và chỉ mẫu DEFLATE lỗi. Đã sửa fixture; không hạ bảo mật để làm test xanh. [CI mã #42538011903](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42538011903) **PASS 9/9**, Node kiểm tra Word ZIP nén/không nén hợp lệ, bảng, 13 tình huống lỗi; Chromium desktop/mobile dùng DOCX nén thật giả lập; hồi quy các bước SHA-256/UC03/04/07 vẫn PASS.
+- **Cloudflare QA deployed, đọc lại thành công:** Backend `ai-law-standalone-cf-qa` version `b4185498-fb20-4d93-b80d-3fda4d205d41`, deployment `7864ed52-7c98-4592-8c62-3cdeaf3024af`, **100%**, đúng module `qa_legal_workflows.mjs`; 10 module khác + 12 bindings không đổi. Website `ai-law-web-qa` version `719c9b90-77e4-4a19-a109-740679210a15`, deployment `336fc132-d79b-4d3a-8879-8f109217201d`, **100%**, đúng module `workspace_legal.mjs`; 26 module khác + 2 bindings không đổi. Chênh lệch QA vs GitHub ở module khác được bảo toàn. Không deploy production.
+- **Giới hạn và nghiệm thu:** DOCX có thể có text ẩn qua styles hoặc thành phần khác chưa được nhận diện; ảnh scan/Word tables vẫn cần kiểm tra thủ công, ZIP đặc biệt có thể bị từ chối. R140 không chứng minh được tính đầy đủ của văn bản Word, không thay thế thẩm định luật sư. **Owner Android đăng nhập thật, kiểm thử Word thực tế và tài liệu pháp lý E2E vẫn NOT_RUN.** SC-042; PCS revision 133, SRS v1.1.15 giữ nguyên, PR draft, chủ dự án nghiệm thu cuối.
 
 ## R139 — Kiểm tra SHA-256 PDF/DOCX trên trình duyệt trước khi sử dụng nguồn A (2026-11-09)
 

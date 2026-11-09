@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 132,
-  "updated_at": "2026-11-08T23:41:48.753Z",
+  "revision": 133,
+  "updated_at": "2026-11-09T00:08:35.017Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -3327,6 +3327,60 @@
           "Reconcile QA HTML/CSS/site worker baseline drift separately before any full redeploy",
           "Keep PR #188 draft; Owner must approve final merge and production release"
         ]
+      },
+      {
+        "id": "AL-R0-DOCX-FIDELITY-R140-001",
+        "title": "R140 DOCX: kiểm tra ZIP/OOXML, chặn Track Changes/hidden/notes; cảnh báo bảng cần đối chiếu",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CODE_CI_PASS_9_OF_9_FINAL_HEAD_CI_PENDING_OWNER_AUTHENTICATED_DOCX_E2E_NOT_RUN",
+        "branch": "fix/r140-docx-structure-track-hidden-preflight",
+        "pr": 189,
+        "scope": "R0 in-memory PDF/DOCX source fidelity safeguard; SRS v1.1.15 baseline unchanged; DOCX only",
+        "implementation": [
+          "Validate DOCX OOXML ZIP central+local headers, package content-type, word/document.xml XML, bounded stored/deflated entries and critical XML CRC, deny encrypted/ambiguous/unsafe structure before toMarkdown.",
+          "Reject common track changes/hidden text, comment/footnote/endnote/embedded and altChunk Word files requiring human resolution before conversion.",
+          "For valid DOCX with tables, emit deterministic tables_present_review_layout flag; frontend warns the reviewer to inspect source cells and merged row/column semantics.",
+          "No new upload mechanism, storage persistence, auth/ACL policy, quota, PDF OCR engine, or production change."
+        ],
+        "tests": {
+          "node_docx": "PASS_STORE_AND_DEFLATE_ZIP_OOXML_TABLE_FLAGS_REJECT_13_UNSAFE_VARIANTS_BEFORE_PROVIDER",
+          "browser": "PASS_CHROMIUM_DESKTOP_AND_MOBILE_SYNTHETIC_REAL_DOCX_OOXML_PARTS_AND_TABLE_WARNING;R139_SHA_INTEGRITY_PRESERVED",
+          "initial_red": "FAIL_42537577876_FIXTURE_COMPRESSION_METHOD_WRONG_OFFSET",
+          "diagnostic_red": "FAIL_42537910404_DIRECT_PREFLIGHT_CONFIRMED_STORED_PASS_DEFLATE_TEST_HEADER_BAD",
+          "corrected_code_ci": "PASS_9_OF_9_RUN_42538011903_SHA_42a94b35f7fc25e645048ed72445e0a4578b7adf",
+          "final_head_ci": "PENDING_AFTER_SRS_PCS_CHECKPOINT",
+          "authenticated_owner_android": "NOT_RUN",
+          "complex_real_docx_track_changes": "NOT_RUN",
+          "legal_document_completeness": "NOT_RUN"
+        },
+        "qa": {
+          "backend": {
+            "worker": "ai-law-standalone-cf-qa",
+            "version": "b4185498-fb20-4d93-b80d-3fda4d205d41",
+            "deployment": "7864ed52-7c98-4592-8c62-3cdeaf3024af",
+            "traffic_percent": 100,
+            "readback": "PASS_UPDATED_QA_LEGAL_MODULE_EXACT_10_OTHER_MODULES_IDENTICAL_12_BINDINGS_UNCHANGED"
+          },
+          "website": {
+            "worker": "ai-law-web-qa",
+            "version": "719c9b90-77e4-4a19-a109-740679210a15",
+            "deployment": "336fc132-d79b-4d3a-8879-8f109217201d",
+            "traffic_percent": 100,
+            "readback": "PASS_UPDATED_WORKSPACE_LEGAL_MODULE_EXACT_26_OTHER_MODULES_IDENTICAL_2_BINDINGS_UNCHANGED"
+          },
+          "html_css_site_worker_drift": "PREEXISTING_DRIFT_PRESERVED",
+          "storage": "UNCHANGED",
+          "production": "NOT_DEPLOYED"
+        },
+        "srs_change": "SC-042_BASELINE_V1_1_15_UNCHANGED",
+        "owner_acceptance": "PENDING",
+        "remaining": [
+          "Confirm final PR head CI 9/9 after documentary PCS checkpoint",
+          "Owner authenticated Android QA acceptance with real synthetic valid DOCX, revised/tracked/hidden DOCX and table copy; compare original to extracted text",
+          "R140 is a bounded DOCX preflight; may reject legitimate complex docs and does not guarantee all hidden style content, image OCR or Word fidelity",
+          "Maintain storage OAuth paused and production/main gated by Owner",
+          "Reconcile existing live Worker HTML/CSS/site source drift before full redeploy"
+        ]
       }
     ],
     "features": [
@@ -3957,8 +4011,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R139 PDF/DOCX browser SHA-256 integrity guard PR #188: code CI #42536023835 PASS 9/9; website QA worker version b8e7b660-936a-4bbe-a599-f7900a09a6e8 100%, exact updated legal JS, all 26 unrelated modules and 2 bindings preserved; backend R138 unchanged. Owner Android and legal document fidelity NOT_RUN. SC-041.",
-      "next_action": "Verify R139 final-head CI and Owner Android authorized synthetic PDF/DOCX manual acceptance. Continue small R0 source fidelity tasks only, preserving SRS v1.1.15, no storage/OAuth and no production. Reconcile known website QA/repo drift before full deploy.",
+      "last_completed_step": "R140 DOCX structural/fidelity preflight PR #189: code CI #42538011903 PASS 9/9; backend QA version b4185498-fb20-4d93-b80d-3fda4d205d41 100% with exact DOCX module readback and 10 other modules/12 bindings unchanged; site QA version 719c9b90-77e4-4a19-a109-740679210a15 100%, exact UI module readback and 26 others/2 bindings unchanged. Owner authenticated Word fidelity NOT_RUN, SC-042.",
+      "next_action": "Verify R140 final-head CI and then Owner Android acceptance using synthetic DOCX (valid, tracked, hidden, table). Avoid saying PDF OCR or full DOCX fidelity verified. Continue small SRS R0 source slices only; OAuth/storage paused and no production until Owner final acceptance.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
