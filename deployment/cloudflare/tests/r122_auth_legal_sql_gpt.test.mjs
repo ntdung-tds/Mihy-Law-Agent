@@ -20,7 +20,7 @@ const MA='77777777-7777-4777-8777-777777777777';
 const MS='88888888-8888-4888-8888-888888888888';
 const MP='99999999-9999-4999-8999-999999999999';
 const MN='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-const URL='https://standalone.synthetic.invalid';
+const ORIGIN='https://standalone.synthetic.invalid';
 const ISSUER='https://idp.synthetic.invalid';
 const NOW=1800000000;
 const SOURCE='Điều 1. Hai bên giao hàng ngày 15 tháng 9 và thanh toán sau khi nghiệm thu.';
@@ -86,10 +86,10 @@ function request(path,{method='GET',cookie,body}={}){
  const headers={};
  if(cookie)headers.Cookie='al_qa_session='+cookie;
  if(method==='POST'){
-  headers.Origin=URL;headers['Sec-Fetch-Site']='same-origin';
+  headers.Origin=ORIGIN;headers['Sec-Fetch-Site']='same-origin';
   headers['Content-Type']='application/json';
  }
- return new Request(URL+path,{method,headers,...(method==='POST'?{body:JSON.stringify(body)}:{})});
+ return new Request(ORIGIN+path,{method,headers,...(method==='POST'?{body:JSON.stringify(body)}:{})});
 }
 function sourceRequest(uc,matter,cookie){
  return request('/api/qa/legal/run',{method:'POST',cookie,
