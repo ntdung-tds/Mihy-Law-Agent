@@ -209,6 +209,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r62_site_relay.test.mjs
       - name: Execute actual authz queries and FK/deny rules against SQLite
         run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_sqlite_acl.py' -v
+      - name: R114 execute synthetic SQL MatterACL tenant isolation regression
+        run: python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v
       - name: R112 legal AI synthetic source, tenant ACL and malformed UTF-8 regression
         run: node --test deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs
       - name: Verify unified R0 preview QA auth, CSRF, 11-function right rail (synthetic mocks)
