@@ -213,6 +213,9 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v
       - name: R112 legal AI synthetic source, tenant ACL and malformed UTF-8 regression
         run: node --test deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs
+      - name: R121 isolated QA live anonymous HTTP, no login or client data
+        if: ${{ github.head_ref == 'qa/r121-anon-http-gpt' || github.ref == 'refs/heads/qa/r121-anon-http-gpt' }}
+        run: python deployment/cloudflare/tests/r121_live_anonymous_http_gpt.py
       - name: Verify unified R0 preview QA auth, CSRF, 11-function right rail (synthetic mocks)
         run: node --test deployment/cloudflare/tests/preview_worker.test.mjs
       - name: Verify real QA matter list/create role boundary and D1 transaction contract
