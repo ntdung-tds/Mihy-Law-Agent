@@ -442,7 +442,7 @@ async function readLimitedSource(req,max){
  * Never unpack to disk or treat a mere PK signature as a DOCX document.
  */
 export async function docxSourcePreflight(bytes){
- const fail=reason=>({ok:false,reason,at:(new Error().stack||'').split('\n')[2]?.trim()});
+ const fail=reason=>({ok:false,reason});
  const u16=i=>bytes[i]|(bytes[i+1]<<8);
  const u32=i=>(bytes[i]|(bytes[i+1]<<8)|(bytes[i+2]<<16)|(bytes[i+3]<<24))>>>0;
  const sig=(i,value)=>i>=0&&i+4<=bytes.length&&u32(i)===value;
