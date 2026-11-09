@@ -67,7 +67,8 @@ def main():
         record("app_requires_login",probe("/app#assistant"),302,check_location="/login"),
         record("session_requires_login",probe("/api/qa/session"),401),
         record("legal_api_requires_login",probe("/api/qa/legal/run",method="POST",origin=WEB,payload=data),401),
-        record("foreign_origin_blocked",probe("/api/qa/legal/run",method="POST",origin="https://attacker.invalid",payload=data),400),
+        # The QA website relay denies foreign Origin with 403 before backend 400 validation.
+        record("foreign_origin_blocked",probe("/api/qa/legal/run",method="POST",origin="https://attacker.invalid",payload=data),403),
     ]
     print("R121_ANONYMOUS_LIVE_QA "+json.dumps(result,separators=(",",":")))
     passed=sum(x["status"]=="PASS" for x in result)
