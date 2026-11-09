@@ -1,12 +1,18 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `102` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T19:48:33.817Z`.
+- **PCS revision:** `103` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-09T06:05:41.999Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R117 — Real SQL MatterACL denial joins QA legal API (2026-11-09)
+
+- **Scope:** Test-only, synthetic tenant/user/installation IDs. Draft [PR #194](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/194) based on draft PR #193. Uses Node 22 SQLite to execute the **actual** `LEGAL_MATTER_ACCESS_SQL` in the `legalApi` request path; 7 deny cases (foreign tenant/user/installation, explicit deny, stale version, expiry, write-only), plus 1 valid read positive control. Denials must be HTTP 404, no AI provider call, no quota SQL attempt, and no source echo. Not live Cloudflare D1 or provider-end-to-end testing.
+- **Evidence:** Test commit `809b889cd18979459b25c61373bb6219875947e0`; GitHub [Actions #42570873130](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42570873130), `cloudflare-contract` job 129007692281 **PASS**, detailed log `ok 11 - R117 SQL-backed MatterACL denials stop before AI and quota`, total 11/11 Node subtests PASS for that test file. Whole workflow status was in progress during evidence collection; do not claim 9/9 yet. Latest PCS-only commits need separate HEAD CI verification.
+- **Gates:** QA DNS/browser, authenticated cloud D1/API, external Workers AI and owner mobile E2E remain **BLOCKED/NOT_RUN**. All dependent PRs remain draft; do not merge/deploy, handle real client data or touch Drive/OAuth/production. SRS v1.1.15 unchanged; Owner final acceptance.
 
 ## R113 — Tenant/MatterACL deny must not spend AI quota (2026-11-09)
 
