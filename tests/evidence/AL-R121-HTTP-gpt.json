@@ -1,0 +1,91 @@
+{
+  "schema": "ai-law-qa-evidence-v1",
+  "run_id": "R121-LIVE-ANON-HTTP-2026-11-09-gpt",
+  "date": "2026-11-09",
+  "scope": "QA-only anonymous live HTTP, external GitHub Actions runner; no customer data, passwords, session cookies, production or uploads",
+  "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/200",
+  "source_commit": "9485dd54a1d2346e1fbfcdc9f74994976b52e572",
+  "runner_ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42617358184",
+  "runner_job": "cloudflare-contract",
+  "source_test": "deployment/cloudflare/tests/r121_live_anonymous_http_gpt.py",
+  "observed_http_cases": [
+    {
+      "name": "backend_health",
+      "expected": 200,
+      "actual": 200,
+      "status": "PASS"
+    },
+    {
+      "name": "website_health",
+      "expected": 200,
+      "actual": 200,
+      "status": "PASS"
+    },
+    {
+      "name": "login_public",
+      "expected": 200,
+      "actual": 200,
+      "status": "PASS"
+    },
+    {
+      "name": "app_requires_login",
+      "expected": 302,
+      "actual": 302,
+      "status": "PASS"
+    },
+    {
+      "name": "session_requires_login",
+      "expected": 401,
+      "actual": 401,
+      "status": "PASS"
+    },
+    {
+      "name": "legal_api_requires_login",
+      "expected": 401,
+      "actual": 401,
+      "status": "PASS"
+    },
+    {
+      "name": "foreign_origin_blocked",
+      "expected": 403,
+      "actual": 403,
+      "status": "PASS"
+    }
+  ],
+  "result": "PASS_7_OF_7_LIVE_ANONYMOUS_HTTP",
+  "limits": {
+    "browser_rendering": {
+      "status": "UNSTABLE",
+      "prior": "HTTP 429 service rate limiting",
+      "other_attempt": "HTTP 422 network connection closed",
+      "public_login_html_returned_once": true
+    },
+    "authenticated_login": "NOT_RUN",
+    "multi_user_tenant_browser_e2e": "NOT_RUN",
+    "ai_provider_call_count_verified_externally": "NOT_RUN",
+    "legal_11_uc_e2e": "NOT_RUN"
+  },
+  "test_design_review": {
+    "first_run": "FAIL_1_OF_7_ASSERTION_ONLY",
+    "description": "First regression expected backend legalApi 400 for foreign Origin; actual public website relay deliberately responds 403 before backend. Corrected test to 403 based on reviewed site_worker.mjs and verified final live result.",
+    "product_bug_observed": false,
+    "application_code_changed": false
+  },
+  "quota_observation": {
+    "before": {
+      "quota_rows": 2,
+      "quota_requests": 4
+    },
+    "after": {
+      "quota_rows": 2,
+      "quota_requests": 4
+    },
+    "unchanged": true,
+    "d1_queries": "read-only aggregate SELECT; no user IDs/contents exposed",
+    "warning": "Unchanged aggregate is corroborating evidence, not authenticated per-request AI provider trace."
+  },
+  "ci_status_at_evidence_creation": "cloudflare-contract_PASS; whole workflow status separately verified after documentation commit",
+  "frozen_srs": "v1.1.15",
+  "production_deployed": false,
+  "owner_accepted": false
+}
