@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 104,
-  "updated_at": "2026-11-09T12:30:38.250Z",
+  "revision": 105,
+  "updated_at": "2026-11-09T13:16:46.891Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
