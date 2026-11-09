@@ -765,3 +765,11 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - **PR:** #195 (draft; stacked on #193). Synthetic-only, test-first commit `484237272e2f648ac516418524fcf62b9f99e000`; added one Node test with six denial scenarios across UC10 and UC11 (401 missing session, 403 viewer, 404 missing/foreign MatterACL). Each asserts no findings leak, no AI provider call and no quota SQL.
 - **Evidence:** Static test addition PASS; CI for R117 **NOT_RUN / awaiting verified workflow logs**. Earlier R116 Actions #42564559088 9/9 jobs PASS but does not establish R117 success.
 - **QA:** D1/API authenticated and browser E2E **BLOCKED / NOT_RUN**; QA DNS previously failed from runner, not re-established here. Do not claim tenant isolation E2E. No merge, deploy, SRS/UI change or Drive/OneDrive/OAuth modification. Next: verify CI HEAD #195 and QA host availability, then run synthetic live authz tests if safely available.
+
+## R118 — UC10/UC11 cross-origin fail-closed regression (2026-11-09)
+
+- **Baseline:** PCS STATE revision 102 on R117 stack; main revision 99. PR #157/#159 OPEN, PR #158 CLOSED; R117 PR #195 OPEN. R117 Actions #42576820758 9/9 executed jobs success; CI evidence, not D1/browser E2E.
+- **Change:** PR #196 draft on separate branch test/r118-local-search-origin-gpt, test-first commit d50fe364b07ff8fb159108fbe111855524fb5fe1. Two synthetic UC10/UC11 hostile-Origin regression cases assert HTTP 400, no source/findings disclosure, no MatterACL query, no quota SQL and no AI call. No production code or UI changed.
+- **Evidence:** Test source committed PASS; new-head CI NOT_RUN / awaiting workflow verification. QA host probes 2026-11-09: both ai-law-web-qa.iaict-platform.workers.dev and ai-law-standalone-cf-qa.iaict-platform.workers.dev failed DNS (curl 6, HTTP 000): live D1/API/browser BLOCKED, 11-UC E2E NOT_RUN.
+- **Constraints:** No merge, QA/production deploy, customer data, Drive/OneDrive/OAuth or SRS changes. Sole 11-UC UI remains /app#assistant.
+- **Next:** Verify PR #196 HEAD CI and actual Node test execution, fix FAIL if present; attempt safe synthetic D1/API/browser QA only after connectivity and deployment review. No legal acceptance claims.
