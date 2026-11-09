@@ -8,6 +8,13 @@
 
 
 
+## R124 — Cloudflare QA control-plane investigation (2026-11-09)
+
+- **Read-first:** `main` PCS STATE/MOMENT revision 99; stacked PR #203 PCS revision 102. PR #157 OPEN draft (single `/app#assistant`), #158 CLOSED, #159 OPEN draft. PR #203 OPEN draft, no merge. Latest PR #203 HEAD `d17e8cfd86e950b752857c735dbebaa1a2eb254e` CI [#42649918708](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42649918708): 9 executed jobs PASS, R114 SQL regression step PASS. This is NOT live QA E2E.
+- **New independent evidence:** Cloudflare read-only API lists both `ai-law-web-qa` (last deployment 2026-11-09 01:15:20Z, version `1f85992e-2963-497f-aa35-00dfa69f8526`) and `ai-law-standalone-cf-qa` (2026-11-09 01:14:43Z, version `53b80b55-22d5-438a-b52a-0d14b14b8009`), each 100% traffic, workers.dev subdomain enabled. Standalone QA settings expose binding types `AI` (ai), `DB` (d1), `CASE_FILES_R2` (r2_bucket), without reading secret values. Web QA has `QA_AUTH` service binding. These prove configured Workers/deployments exist, NOT that HTTP routes or deployed code are correct.
+- **BLOCKED:** Browser/HTTP endpoints inaccessible from current environment (previous `curl (6)`; independent URL open also failed). Cloudflare script-content endpoint returned no inspectable content, so deployed code/version parity with PR #157/#159 and `/app#assistant` remains NOT_VERIFIED. Do not deploy or claim API/E2E PASS without inspecting exact deploy artifact and performing authenticated synthetic QA requests.
+- **Next:** verify workers.dev route with an independent permitted HTTP path and inspect deployed Worker artifact/version; then test tenant/MatterACL deny-before-AI/quota on QA, UC03/04/07 synthetic E2E, and remaining 8 UC. No product changes, no new SQL-only PR, no storage/OAuth, no production or customer data.
+
 ## R123 — Verify R122 HEAD CI and identify live QA gate (2026-11-09)
 
 - **Read-first:** main PCS STATE/MOMENT revision 99; stacked R122 branch MOMENT revision 102. PR #157 OPEN draft (11 UC single UI), #158 CLOSED unmerged (must not restore), #159 OPEN draft (source hardening), #201 OPEN draft and #203 OPEN draft. R122 head before this PCS-only commit: `1b708fb6cf50801c5be587973373f75d76a8b6f3`.
