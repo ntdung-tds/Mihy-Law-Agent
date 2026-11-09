@@ -441,8 +441,8 @@ async function readLimitedSource(req,max){
  * Parse ZIP central directory, and inspect only bounded Word XML parts.
  * Never unpack to disk or treat a mere PK signature as a DOCX document.
  */
-async function docxSourcePreflight(bytes){
- const fail=reason=>({ok:false,reason});
+export async function docxSourcePreflight(bytes){
+ const fail=reason=>({ok:false,reason,at:(new Error().stack||'').split('\n')[2]?.trim()});
  const u16=i=>bytes[i]|(bytes[i+1]<<8);
  const u32=i=>(bytes[i]|(bytes[i+1]<<8)|(bytes[i+2]<<16)|(bytes[i+3]<<24))>>>0;
  const sig=(i,value)=>i>=0&&i+4<=bytes.length&&u32(i)===value;
