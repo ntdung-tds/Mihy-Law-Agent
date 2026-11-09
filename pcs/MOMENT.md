@@ -8,6 +8,13 @@
 
 
 
+## R128 — Verify R127 final-head CI and distinguish skipped live QA (2026-11-10)
+
+- **Read-first:** Branch PCS STATE revision 106 (main remains 99); PR #157/#159 OPEN draft, #158 CLOSED draft and must not be restored; PR #205 OPEN draft, stacked on main with 33 changed files. Preserve sole 11-UC UI at /app#assistant.
+- **PASS — GitHub CI:** PR #205 head `3b212ac8051ef3f35e032a267ffc25d46b5f5b6b`, [Actions #42688579632](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42688579632) completed success; all 9 executed jobs success. The `unit` job runs `python -m unittest discover -s tests -v`, which includes `tests/test_r127_qa_failclosed_gpt.py` (three synthetic mocked tests for network failure, HTTP 429, expected 401). This is CI evidence, not an authenticated QA result.
+- **BLOCKED/NOT_RUN — live:** The `cloudflare-contract` step `R123 live HTTPS authenticated-boundary negative QA without credentials` was SKIPPED. All optional live/deploy jobs were skipped. Live tenant MatterACL/API/D1/browser and 11-UC E2E remain NOT_RUN; deployed source parity NOT_VERIFIED. Do not mislabel skipped live checks as PASS or infer DNS has recovered.
+- **Changes:** Evidence-only PCS update; no product code, merge, QA deploy or production changes. The current stacked PR #205 is not safe to merge directly without dependency isolation. Next independently isolate the R127 two-file fix into a narrow PR after reviewing base and run live QA only when reachable and safe.
+
 ## R127 — Fail closed on unreachable live QA (2026-11-10)
 
 - **Read-first:** PCS revision 106 on stacked R123 branch; PR #157/#159 OPEN, #158 CLOSED; PR #204 live QA negative gate final-head CI #42684059708 PASS 9/9 and 11/11 HTTP negative cases. Main PCS remains rev99. Actual authenticated tenant/MatterACL and 11-UC E2E NOT_RUN.
