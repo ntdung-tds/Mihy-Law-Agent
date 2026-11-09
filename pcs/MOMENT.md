@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `104` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-09T12:30:38.250Z`.
+- **PCS revision:** `105` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-09T13:16:46.891Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -22,6 +22,14 @@
 - **Verified CI 2026-11-09:** PR #198 branch HEAD `406df70511b8769ab9d52f811fc9f39f065f6dda`, [Actions #42597937720](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42597937720) completed SUCCESS; **9/9 executed jobs PASS**, remaining optional live/deploy jobs SKIPPED. `cloudflare-contract` job `129095065795` log explicitly runs `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v`: **11/11 SQLite SQL tests PASS**, including expired deny and foreign-tenant deny. This is synthetic SQL/CI only, not D1/API/browser QA or legal acceptance. This PCS documentation commit itself requires a separate final-HEAD CI verification.
 
 - **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
+
+## R122 — Full synthetic authenticated cookie → tenant → MatterACL → AI quota integration (2026-11-09)
+
+- **Scope:** [Draft PR #202](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/202) stacked on R121 draft PR #200, test-only. Exercised actual `mobileApi` (PBKDF2 QA password login, real SQL cookie session, membership, tenant switching) plus actual `legalApi` and exported `LEGAL_MATTER_ACCESS_SQL`/`LEGAL_QUOTA_SQL` using one disposable Node 22 `node:sqlite` database. Two synthetic accounts, independent tenants/matters and role memberships. No live QA D1 mutation or real user/login credentials.
+- **Behavior tested:** Distinct secure HttpOnly cookies; unauthorized cross-tenant switch 404 preserves session, authorized switch rotates SID and invalidates old SID; no cross-tenant source access before switch; no same-tenant other-user private MatterACL read; tenant_admin cannot bypass MatterACL by role; positive authorized UC10 local source-only retrieval; authorized UC04 AI draft increments exactly one quota row scoped to the correct user/tenant. Every rejected request causes **zero** additional model calls or quota charges; UC10 local search also invokes neither AI nor quota. The model was a synthetic stub—no Workers AI provider call or billing.
+- **Test-fix loop:** Initial R122 GitHub CI failed on test-only JavaScript identifier `URL` shadowing global URL constructor; second failed on comparing Node SQLite's null-prototype row objects to plain objects despite matching values. Both were fixed in the test file; product source unchanged.
+- **Executed proof:** Test commit `0340abae34d1b2dce4cc0024397858ddac1db4e7`, [Actions #42623840843](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42623840843), `cloudflare-contract` job `129182436414`: **PASS** with direct `ok 1 - R122 real cookie+SQLite: two users, tenant switch, MatterACL, local search, AI quota` and 0 failures. Full workflow for latest docs HEAD is a separate gate; do not infer PASS until verified.
+- **Evidence:** `deployment/cloudflare/tests/r122_auth_legal_sql_gpt.test.mjs`, `tests/evidence/AL-R122-AUTH-gpt.json`, and CI test step. This is **local synthetic integration**, not live signed-in Cloudflare HTTP/browser QA; real account/tenant API, actual AI provider usage traces and 11 legal UC mobile E2E remain **NOT_RUN**. Main PCS remains revision 99, branch PCS revision 105. SRS v1.1.15 unchanged; no app code, merge/deploy, production, OAuth/Drive or real documents. Owner final acceptance pending.
 
 ## R121 — Live anonymous QA HTTP and Browser Rendering 429 separation (2026-11-09)
 
