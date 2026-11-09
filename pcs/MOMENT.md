@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `102` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T19:48:33.817Z`.
+- **PCS revision:** `103` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-09T12:14:34.184Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -22,6 +22,13 @@
 - **Verified CI 2026-11-09:** PR #198 branch HEAD `406df70511b8769ab9d52f811fc9f39f065f6dda`, [Actions #42597937720](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42597937720) completed SUCCESS; **9/9 executed jobs PASS**, remaining optional live/deploy jobs SKIPPED. `cloudflare-contract` job `129095065795` log explicitly runs `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v`: **11/11 SQLite SQL tests PASS**, including expired deny and foreign-tenant deny. This is synthetic SQL/CI only, not D1/API/browser QA or legal acceptance. This PCS documentation commit itself requires a separate final-HEAD CI verification.
 
 - **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
+
+## R120 — Cloudflare D1 read-only and anonymous QA reachability (2026-11-09)
+
+- **Scope:** Actual connected Cloudflare nonproduction account; QA backend `ai-law-standalone-cf-qa` and QA website `ai-law-web-qa` both have 100% active deployments. Worker settings confirm `DB` binding points to the QA D1 database and a Workers AI binding exists. No credentials/secrets/client content exported. No application source changes.
+- **Real D1 SQL outcome:** **PASS 7/7** direct read-only Cloudflare D1 SQL using the exported `LEGAL_MATTER_ACCESS_SQL`: valid existing read grant, cross-installation, cross-tenant, cross-matter, cross-user denial, bound SQL-injection string, and time before earliest grant validity. Verified 0 written rows, `changed_db=false`; initial/final QA counts unchanged (4 matters, 8 ACL rows, 2 quota rows). Preliminary future-clock negative assumption was invalid for an open-ended grant, corrected to a valid pre-grant boundary. Do **not** treat the initial mismatch as a product bug.
+- **Reachability:** Cloudflare Browser Rendering `/health` returned `{"status":"configured","scope":"nonprod_qa_only"}` **PASS**. Anonymous QA website browser access **BLOCKED HTTP 429**; public web fetch was also inaccessible. Authenticated QA HTTP API and Android/browser application E2E remain **NOT_RUN/BLOCKED**, as do actual AI/no-quota side-effect checks; D1 SQL PASS is not application authorization acceptance.
+- **Evidence:** `tests/evidence/AL-R120-CF-D1-gpt.json` on QA evidence branch, draft PR to review. Existing PR stack must not be automatically merged; keep SRS v1.1.15 unchanged, Google Drive/OneDrive paused, no production deploy or customer data. Owner acceptance pending. Main PCS revision remains 99 until a reviewed merge.
 
 ## R113 — Tenant/MatterACL deny must not spend AI quota (2026-11-09)
 

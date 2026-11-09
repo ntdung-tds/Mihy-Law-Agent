@@ -1,0 +1,86 @@
+{
+  "schema": "ai-law-qa-evidence-v1",
+  "run_id": "R120-CF-D1-READONLY-2026-11-09-gpt",
+  "date": "2026-11-09",
+  "scope": "Isolated QA only; no production changes; SRS v1.1.15 unchanged",
+  "mode": "Direct Cloudflare API SELECT queries against existing QA D1 using the same exported LEGAL_MATTER_ACCESS_SQL from qa_legal_workflows.mjs",
+  "checks": [
+    {
+      "id": "r120-01",
+      "case": "active valid read grant",
+      "status": "PASS"
+    },
+    {
+      "id": "r120-02",
+      "case": "foreign installation denied",
+      "status": "PASS"
+    },
+    {
+      "id": "r120-03",
+      "case": "foreign tenant denied",
+      "status": "PASS"
+    },
+    {
+      "id": "r120-04",
+      "case": "foreign matter denied",
+      "status": "PASS"
+    },
+    {
+      "id": "r120-05",
+      "case": "foreign user denied",
+      "status": "PASS"
+    },
+    {
+      "id": "r120-06",
+      "case": "bound SQL injection string denied",
+      "status": "PASS"
+    },
+    {
+      "id": "r120-07",
+      "case": "time before earliest validity start denied",
+      "status": "PASS"
+    }
+  ],
+  "data_integrity": {
+    "status": "PASS",
+    "rows_written": 0,
+    "changed_db": false,
+    "counts_before": {
+      "matters": 4,
+      "acl": 8,
+      "quota": 2
+    },
+    "counts_after": {
+      "matters": 4,
+      "acl": 8,
+      "quota": 2
+    }
+  },
+  "reachability": {
+    "backend_health": {
+      "status": "PASS",
+      "via": "Cloudflare Browser Rendering",
+      "response_status": "configured",
+      "scope": "nonprod_qa_only"
+    },
+    "web_signed_in_browser": {
+      "status": "BLOCKED",
+      "reason": "Cloudflare Browser Rendering HTTP 429 rate limit; unauthenticated direct web fetch also inaccessible"
+    }
+  },
+  "caveats": [
+    "This is a real Cloudflare D1 read-only SQL test, not signed-in HTTP application API or mobile browser E2E.",
+    "Does not test actual AI invocation, billing/quota write side effects, or enforcement of no app data access for SaaS system administrators.",
+    "Initial time-travel negative probe used a future timestamp and incorrectly expected an indefinite grant to expire; the invalid test assumption was corrected by checking a point before the earliest valid_from. No product defect established by that preliminary mismatch.",
+    "No original legal data, customer account identifier, secret, authentication token, raw grant row, or document content exported.",
+    "Owner acceptance, private SRS clause mapping, full 11-UC E2E, production gates NOT_RUN."
+  ],
+  "outcome": "PASS_D1_SQL_ONLY__AUTH_BROWSER_BLOCKED",
+  "pr_deps": [
+    "#198",
+    "#196",
+    "#157",
+    "#159"
+  ],
+  "owner_acceptance": "NOT_RUN"
+}
