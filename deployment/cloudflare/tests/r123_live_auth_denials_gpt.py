@@ -89,7 +89,7 @@ def main():
     failed = sum(x["result"] == "FAIL" for x in tests)
     blocked = sum(x["result"] == "BLOCKED" for x in tests)
     print(f"R123_RESULT PASS={passed} FAIL={failed} BLOCKED={blocked} AUTHENTICATED_LOGIN=NOT_RUN")
-    return 1 if failed else 0
+    return 1 if (failed or blocked) else 0
 
 
 if __name__ == "__main__":
