@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {deflateRawSync} from 'node:zlib';
-import {documentExtractApi,LEGAL_MATTER_ACCESS_SQL,LEGAL_QUOTA_SQL}
+import {documentExtractApi,docxSourcePreflight,LEGAL_MATTER_ACCESS_SQL,LEGAL_QUOTA_SQL}
  from '../src/qa_legal_workflows.mjs';
 
 const BASE='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
@@ -185,6 +185,8 @@ test('R140 DOCX preflight: deflated/stored OOXML and tables are detected before 
  for(const method of [0,8]){
   const f=fixture();
   const doc=qaDocx({method,body:'<w:tbl><w:tr><w:tc>'+DOC_BODY+'</w:tc></w:tr></w:tbl>'});
+  const proof=await docxSourcePreflight(doc);
+  assert.equal(proof.ok,true,JSON.stringify({method,proof}));
   const r=await documentExtractApi(req({name:'table.docx',mime:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',bytes:doc}),f.env,{now:NOW});
   assert.equal(r.status,200,await r.clone().text());
   const data=await r.json();
