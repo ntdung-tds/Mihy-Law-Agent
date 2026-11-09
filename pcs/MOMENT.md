@@ -8,6 +8,12 @@
 
 
 
+## R119 — Scope of deny grants (2026-11-09)
+
+- **Test-first:** PR #198 (`b0a47ccd`) adds two synthetic SQLite cases executing the exported `LEGAL_MATTER_ACCESS_SQL`: expired deny must not override active allow; deny from another tenant must not override active allow. No product change.
+- **CI:** NOT_RUN at commit creation; verify the PR HEAD workflow and actual test count before marking PASS. Prior R118 CI #42583079116 PASS (9 jobs) applies only to prior commit.
+- **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
+
 ## R113 — Tenant/MatterACL deny must not spend AI quota (2026-11-09)
 
 - **Scope:** Regression-only extension of existing draft PR #175, synthetic data, no product/source change. Three denial paths: missing session (401), revoked/foreign MatterACL (404), viewer role (403). Every denial must make zero AI provider calls and zero quota SQL calls.
