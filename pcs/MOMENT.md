@@ -6,6 +6,15 @@
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
+## R126 — Stacked integration risk audit (2026-11-10)
+
+- **Read-first:** main PCS STATE/MOMENT revision 99; R122 branch STATE/MOMENT revision 102. PR #157 and #159 OPEN; PR #158 CLOSED and must not be restored; PR #201 and #203 OPEN. Sole UI /app#assistant, SRS v1.1.15 unchanged.
+- **Verified CI evidence:** last previously documented R125 PR #203 run #42670191380 had 9/9 executed jobs PASS; live Cloudflare jobs skipped. No newer successful HEAD run was established by commit lookup for short SHA cf27fa73; mark **NOT_VERIFIED**, do not assume CI latest HEAD PASS. 15 synthetic SQLite MatterACL cases remain previously verified, not D1/API/E2E.
+- **New integration finding:** GitHub compare main...test/r122-matteracl-deny-principal-gpt reports **92 commits ahead, 0 behind, 25 changed files**. Changes span Worker, site, quota migration, IAM/MatterACL, UI and tests. Therefore PR #203 is NOT a small isolated merge against main even though its last incremental test commit is small; merging directly without dependency/QA review is unsafe.
+- **QA:** prior R125 direct HTTP/DNS BLOCKED, deployed-code parity NOT_VERIFIED, authenticated tenant-deny-before-AI/quota and 11 UC E2E NOT_RUN. No fresh live HTTP or browser PASS established in this review. No product code changes, merge, deployment, customer data or storage/OAuth access.
+- **Next independent task:** audit exact stacked PR base/head and isolate minimal test-only delta for controlled integration; verify deploy artifact parity and a reachable QA API/browser path before any deploy; then test deny-before-provider/quota and UC03/04/07 with synthetic fixtures. Owner acceptance remains pending.
+
+
 
 
 ## R125 — Final HEAD CI verification and QA gate (2026-11-10)
