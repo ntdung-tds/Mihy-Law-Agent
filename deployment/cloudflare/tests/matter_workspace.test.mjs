@@ -48,13 +48,13 @@ test('real D1 list query is scoped to tenant and explicit allow-minus-deny ACL',
  assert.match(MATTER_LIST_SQL,/c\.installation_id=\? AND c\.tenant_id=\?/);
  assert.match(MATTER_LIST_SQL,/AND NOT EXISTS/);
  assert.match(MATTER_LIST_SQL,/a\.acl_version=m\.acl_version/);
- const row={matter_id:'case-01',title:'Synthetic QA case',created_at:now};
+ const row={matter_id:'case-01',title:'Synthetic QA case',created_at:now,version:1,can_write:1};
  const f=fixture({rows:[row]});
  const r=await matterApi(request('/api/qa/matters'),f.env,{now});
  assert.equal(r.status,200);
- assert.deepEqual((await r.json()).matters,[{id:row.matter_id,title:row.title,created_at:now}]);
+ assert.deepEqual((await r.json()).matters,[{id:row.matter_id,title:row.title,created_at:now,version:1,can_write:true}]);
  const q=f.statements.find(x=>x.sql===MATTER_LIST_SQL);
- assert.deepEqual(q.params,[INSTALL,TENANT,USER,now,now,USER,now,now]);
+ assert.deepEqual(q.params,[USER,now,now,USER,now,now,INSTALL,TENANT,USER,now,now,USER,now,now]);
 });
 test('creation checks CSRF and refuses empty, oversized and markup names',async()=>{
  const f=fixture();

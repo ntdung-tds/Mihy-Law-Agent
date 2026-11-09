@@ -1,12 +1,46 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `99` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T09:22:00.000Z`.
+- **PCS revision:** `102` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-07T19:48:33.817Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R113 — Tenant/MatterACL deny must not spend AI quota (2026-11-09)
+
+- **Scope:** Regression-only extension of existing draft PR #175, synthetic data, no product/source change. Three denial paths: missing session (401), revoked/foreign MatterACL (404), viewer role (403). Every denial must make zero AI provider calls and zero quota SQL calls.
+- **Test-first commit:** `1e9a61f92f6b98aa838d384e25e93866d1d6d698`, `deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs`. CI **NOT_RUN / pending verification** at time of writing; do not count this case as PASS until CI actually executes it.
+- **QA:** Both Cloudflare QA hostnames remain DNS-unresolvable from this execution environment (curl error 6); authenticated API/browser and E2E **BLOCKED**. No QA or production deploy, no merge. SRS v1.1.15 and single `/app#assistant` UI unchanged; PR #158 remains closed.
+
+## R110 — Reject invented source anchors and oversized streaming AI inputs (2026-11-08)
+
+- **Scope:** Source-only security hardening of the **existing** R109 11-UC QA panel and `/api/qa/legal/run`, not a second application. Duplicate PR #158 was closed unmerged and never deployed; R109 PR #157 remains the canonical UI.
+- **Source + tests:** [PR #159](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/159). Bound request **stream bytes** to 36KB even if Content-Length is absent, and fail closed if a model response explicitly cites an invented `[A99]`, `[B12]` or longer anchor not present in the source map. Accept safe object-shaped `{answer}` from provider. This validation checks anchor existence, **not factual/legal correctness**.
+- **CI:** [Actions #42407576294](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42407576294) **PASS 9/9**, including source security tests, real SQLite quota regression, account/tenant, Chromium synthetic standalone and install kit.
+- **QA surgical deployment:** `ai-law-standalone-cf-qa` deployment `301ecbe7-5a2e-47f9-9962-56b44ad2b26f`, **100%** traffic. Exactly `qa_legal_workflows.mjs` changed among 10 modules; guarded before/after source readback PASS, the other 9 source modules and all existing AI/D1/OAuth binding names/types preserved. Website unchanged (still 27 R109 modules). Browser-rendered /health online; read-only D1 retained 1 existing QA matter and 1 AI quota row.
+- **Outstanding gates:** signed-in Owner mobile/desktop 11-UC model flow, hallucination/meaning checks, exact private SRS v1.1.15 clause mapping, legal review and final acceptance **NOT_RUN**. All legal AI outputs remain *drafts with human review*. Google Drive/OneDrive paused, production untouched.
+
+## R109 — Eleven legal workflows: source-limited QA draft and local retrieval (2026-11-08)
+
+- **Owner directive:** Complete all other AI Law functions, without reopening Google Drive/OneDrive. No production or real client legal documents. Source branch `feat/r109-qa-legal-text-workflows`, stacked on R108, [draft PR #157](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/157). Exact private SRS v1.1.15 clause mapping unavailable; baseline untouched.
+- **Delivered narrow QA slice:** `/api/qa/legal/run` requires signed-in principal, active tenant/read MatterACL with deny-overrides, same-origin POST, explicit fictional-source checkbox, strict input size and allowed UC set. UC01,02,03,04,05,06,07,08,09 produce **AI drafts requiring legal review** from user-pasted sample text only. UC10 and UC11 return **deterministic local search results only inside pasted sample**; **no** official court decision/statute database, verified law citations or legal effect claims. No DOCX/PDF file bytes or document storage in this task.
+- **Safety:** AI request allowance bounded to **12 per user/day** using D1 `qa_legal_ai_quota` table (five numeric/ID columns, no source text or model output). MatterACL is enforced server-side for each request; model output/source anchors are displayed only in memory, no app persistence. Input and output are explicitly labeled QA synthetic/unverified; provider failure returns 503 rather than fabricated text.
+- **Real infrastructure:** Cloudflare Workers AI `AI` binding added to standalone QA, 10 old OAuth/D1/secret bindings preserved. Live model smoke with fictional Vietnamese contract returned a useful summary. QA D1 migration applied once, 0 quota rows at installation, 1 existing synthetic matter intact.
+- **QA deployment:** backend `ai-law-standalone-cf-qa` deployment `8cee0745-05a1-45a1-bf36-1bdd934bc223` (10 modules: 1 new legal engine + 1 patched route), web `ai-law-web-qa` deployment `132f1e4d-44c7-40a3-ad74-bc0d9d1e51b4` (27 modules; protected form, compact responsive CSS and JS). Content/route readback PASS, all unrelated OAuth/Drive and QA_AUTH/Picker bindings unchanged. Public /health browser PASS; authenticated Browser Rendering blocked HTTP 429.
+- **CI:** Source [Actions #42397098574](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42397098574) **9/9 PASS** including Node legal task/ACL, real SQLite quota and existing PG/Chromium regressions. Latest docs/final-head CI must be checked separately.
+- **Owner QA link:** [AI Law — Trợ lý AI](https://ai-law-web-qa.iaict-platform.workers.dev/app#assistant), then **Nạp ví dụ QA**, select matter, check fictional-source consent, run. Full [11-UC synthetic QA checklist](../deployment/cloudflare/QA_R109_LEGAL_TEXT.md).
+- **Acceptance gates:** Real signed-in Owner phone/mobile E2E NOT_RUN, original input DOCX/PDF/Word flow NOT_IMPLEMENTED, official law and judgments search NOT_IMPLEMENTED, legal accuracy/references NOT_VERIFIED. Do NOT claim all 11 UC product requirements complete. Production untouched; Owner accepts last.
+
+## R108 — Non-storage functions: matter rename with ACL, version and audit (2026-11-07)
+
+- **Owner direction:** Skip Google Drive/OneDrive and finish remaining AI Law functions. **No further Google/OneDrive debugging, no OAuth/Drive mutation, no production release.** Full non-storage backlog by UC and acceptance gates: [issue #156](https://github.com/ntdung-tds/Mihy-Law-Agent/issues/156).
+- **Delivered QA source:** [PR #155](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/155) (draft, branched independently from `main`). Authenticated QA case title can be edited inline on desktop/mobile. API requires current tenant + active write MatterACL with deny-overrides, optimistic `version`, bounded title/CSRF input; SQL update is atomic with an append-only audit trigger. A conflict triggers refresh, not a silent overwrite. No case file is changed.
+- **Real database:** D1 QA R108 migration applied on existing table, `version/updated_at/updated_by` columns + `qa_matter_title_events` and `trg_qa_matter_title_audit` verified; existing **1** QA case remains intact at version 1. No customer identities/titles exported.
+- **Source CI:** [Actions run #42394048779](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42394048779) **9/9 PASS**, including actual SQLite migrations/audit/deny-overrides, Node API validation and existing login/browser regression.
+- **QA deployment:** backend `ai-law-standalone-cf-qa` deployment `b806d232-14c4-46df-a38e-b840b1e30a63` (9 modules, 2 surgically changed), website `ai-law-web-qa` deployment `fa3c8962-fd7f-4abe-a701-f65a593ec335` (26 modules, 3 surgically changed), both 100%. Readback exactly matched intended case modules and preserved every unrelated module + all prior OAuth/D1/QA_AUTH/Picker binding names/types. Anonymous /health Cloudflare browser PASS; a second /login browser probe was BLOCKED 429 by browser-rendering rate limits.
+- **Remaining verification:** Authenticated Owner phone/browser case rename/reload/denied role **NOT_RUN**. None of 11 legal AI UCs is accepted by this slice. Original private SRS v1.1.15 remains unchanged; exact SRS mapping is NOT_VERIFIED in this chat. Production untouched; Owner acceptance PENDING.
 
 ## R102 — Stop forcing Google account consent at every document save (2026-11-07)
 
@@ -641,3 +675,57 @@ Continue functional R0 slices on separate task branches while retaining the save
 ## Publication boundary
 
 Synthetic preview source and public-safe PCS notes only. No internal SRS, genuine legal/client data, secrets, screenshots or private Drive identifiers.
+
+
+### R112 — 2026-11-08 · Invalid UTF-8 source regression (branch-only checkpoint)
+- **PASS:** Read `pcs/STATE.json` and `pcs/MOMENT.md` (base revision 99), checked PR #157 OPEN, #158 CLOSED (never reimplement), #159 OPEN, #160 OPEN and #163 OPEN. Reviewed PR #163's fail-closed streaming patch and existing `TextDecoder('utf-8',{fatal:true})` in the QA legal API.
+- **PASS (change authored):** Draft PR #175 adds a synthetic malformed-UTF-8 request test asserting HTTP 400, no MatterACL query, no quota consumption, no Workers AI invocation, and no leaked source content. Only a test file changed; no production code or UI change.
+- **NOT_RUN:** New PR #175 head `aa0888ef893859b938be72bdacb18254d4b31648` has no associated PR workflow runs at initial check; the test is not yet proven executed. Existing CI green on other PRs does not prove this test passed. QA real API/browser E2E NOT_RUN.
+- **BLOCKED:** QA deployment gated on dedicated Node test actually running and passing, reviewed integration order for #159/#160/#163, and real API/browser proof.
+- **Next:** Ensure `.github/workflows/tests.yml` from PR #160 explicitly runs `deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs`; run red/green Node test and CI on integration branch, then only consider QA deploy. SRS v1.1.15 frozen; no Drive/OneDrive/OAuth, real customer data or production changes. Owner final acceptance remains pending.
+
+
+### R112 follow-up — 2026-11-08 (test assertion correction)
+- **PASS (committed):** PR #175 branch `test/r112-qa-invalid-utf8-failclosed` commit `422833fbe4de9bea796343226913ddcd4da1f0dd` corrects the response-leak assertion from a literal backslash sequence to regex `/\uFFFD|source_text/`, detecting the actual U+FFFD replacement character. Only synthetic test changed; no UI, server logic, Drive/OAuth or production change.
+- **PASS (previous CI only):** Original PR #175 commit `6bc161a992695fc34d057fe06669e684aaa152f5` has completed successful workflow run `42473712712`; this does not prove the corrected assertion executed.
+- **NOT_RUN:** No GitHub PR workflow run yet associated with corrected commit at first check; dedicated R112 test execution and live API/browser E2E unverified.
+- **BLOCKED:** QA deployment pending CI with dedicated test, MatterACL checks and QA reachability. Keep PR draft and no merge until evidence.
+
+
+## R113 — Wire R112 security test into CI (2026-11-08)
+
+- Read `main` PCS STATE/MOMENT: revision 99. Checked PR #157 OPEN, #158 CLOSED (never redeploy), #159 OPEN, #160 OPEN, #163 OPEN, #175 OPEN. Single 11-UC UI remains `/app#assistant`.
+- **FAIL (coverage gap):** PR #175 prior HEAD `d28db9c` workflow run `42483291372` reported success (9 executed jobs, deployment jobs skipped), but `cloudflare-contract` job logs did **not** invoke `deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs`; thus R112 malformed UTF-8 assertion was not executed. CI success was not R112 PASS.
+- **FIX (test-first):** Added an explicit `cloudflare-contract` step running `node --test deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs` on PR #175 head, commit `2bc7df85e191224b336779f7827b2ef86027b032`. Existing R112 test remains unchanged.
+- **NOT_RUN:** CI result for the new commit pending; no claim of R112 PASS until job logs confirm the exact test and successful result. **BLOCKED:** real remote QA API/browser and full E2E not verified. No deploy, no production, no storage/OAuth changes. Only synthetic fixtures.
+- Next: inspect new Actions job output, fix any failures on this draft branch, then check MatterACL/source tests and QA reachability before safe promotion. SRS v1.1.15 unchanged; Owner final acceptance required.
+
+
+### R113 CI verification — 2026-11-08
+- **PASS:** Actions run [42487816242](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42487816242), `cloudflare-contract` job `128753434091`, step 16 **R112 legal AI synthetic source, tenant ACL and malformed UTF-8 regression** completed `success`. Nine executed jobs passed; 21 deployment/conditional jobs skipped. This resolves prior R112 CI coverage gap on PR #175 branch, but is not proof of deployed QA behavior or legal acceptance.
+- **PASS:** Re-read `main` PCS revision 99 and MOMENT; PR #157/#159/#160/#163/#175 OPEN, PR #158 CLOSED, not merged. PR #175 remains draft; no UI/production/storage change.
+- **NOT_RUN:** Remote QA authenticated API, browser E2E, complete 11 UC acceptance and legal review. **BLOCKED:** QA reachability/authenticated proof not established in this run. Do not deploy or merge on CI alone.
+- **Next:** Review integration dependency order #159/#160/#163/#175 and test tenant/MatterACL/source failures with synthetic fixtures on an isolated branch; only promote QA after safe code/deploy review and live verification. Owner final sign-off remains required.
+
+## R112 — 2026-11-08 23:56 ICT: verified latest CI and QA reachability
+
+- **PASS CI:** PR #175 HEAD `41d18aab5d59dc788619d7e3e097079419b85354`, GitHub Actions run [#42492702659](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42492702659) completed success; 9 executed jobs successful. `cloudflare-contract` step 16 explicitly executed `R112 legal AI synthetic source, tenant ACL and malformed UTF-8 regression` and succeeded. This is synthetic contract evidence only, not deployed E2E or legal validation.
+- **PASS status read:** main PCS revision 99; PR #157/#159/#160/#163/#175 OPEN draft; PR #158 CLOSED and not redeployed. UI stays at `/app#assistant` with 11 UC.
+- **BLOCKED QA:** fresh HEAD requests to `ai-law-web-qa.iaict-platform.workers.dev/app#assistant` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev/` fail DNS resolution (curl error 6, HTTP 000). Authenticated API, browser E2E, live MatterACL and source verification remain NOT_RUN. No QA deployment attempted because live verification cannot complete.
+- **Next:** Review dependency/order of PR #157 → #159/#160/#163 → #175, then independently add a missing synthetic tenant/MatterACL denial regression test first. Do not merge/deploy until safe and live QA reachable. No production, OAuth, Drive/OneDrive or customer data touched.
+
+
+## R112 follow-up — latest head CI and QA connectivity (2026-11-09)
+
+- **Baseline:** main PCS revision 99; branch MOMENT identifies revision 102. PR #157/#159/#160/#163/#175 OPEN; duplicate PR #158 CLOSED and not redeployed. SRS v1.1.15 unchanged.
+- **PASS (CI):** PR #175 head `2b8da7bc9c1a4b37d613b7712061bb7864b7b149`, [Actions run #42502504092](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42502504092): 9/9 executed jobs success, 21 conditional/live jobs skipped. `cloudflare-contract` job 128798095212 includes successful step `R112 legal AI synthetic source, tenant ACL and malformed UTF-8 regression`. This is synthetic CI evidence only, not live tenant E2E or legal validation.
+- **BLOCKED (QA):** `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` both fail DNS resolution from this execution environment (`curl: (6) Could not resolve host`); no authenticated live API/browser proof. Do not deploy QA or production on this evidence.
+- **NOT_RUN:** live MatterACL negative-path and source provider E2E; all 11 workflows full acceptance, owner signoff. No new product code or merge in this follow-up. Next independent task: review tenant/MatterACL negative tests and branch integration order (#157 → #159; #160/#163 siblings; #175 based on #163), test-first.
+
+
+## R114 — SQL-backed MatterACL regression (2026-11-09)
+
+- **PR:** #190 draft, branch `test/r114-sql-matteracl-gpt`, test-first commit `281b6593d5cb78379a08e0e919710fc1619d8208`; based on existing #175 stack, not merge-ready against `main` (stacked changes).
+- **Scope:** Seven Python unittest cases execute the exported `LEGAL_MATTER_ACCESS_SQL` against in-memory SQLite with only synthetic tenant/matter/user rows: positive read allow, cross-tenant ACL, cross-tenant matter, explicit deny, stale ACL version, expired/future grant and write-only permission.
+- **Status:** test committed; CI **NOT_RUN/unverified** at time of this note (no workflow returned for commit). Live Cloudflare D1/QA authenticated API and browser **BLOCKED/NOT_RUN**; 11-UC E2E **NOT_RUN**. SQLite test is not proof of live D1 isolation or legal acceptance.
+- **Boundary:** no product source, UI, storage/OAuth, production or SRS change. PR #158 stays closed; `/app#assistant` remains sole 11-UC UI. Next: confirm CI, fix failures, then D1/API and browser synthetic E2E after safe QA access.

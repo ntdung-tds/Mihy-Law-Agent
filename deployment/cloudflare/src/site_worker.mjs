@@ -20,6 +20,7 @@ import { WORKSPACE_JS } from './workspace_js.mjs';
 import { WORKSPACE_SESSION } from './workspace_session.mjs';
 import { WORKSPACE_MATTERS } from './workspace_matters.mjs';
 import { WORKSPACE_DOCUMENTS } from './workspace_documents.mjs';
+import { WORKSPACE_LEGAL } from './workspace_legal.mjs';
 import { ACCOUNT_HTML } from './account_html.mjs';
 import { ACCOUNT_CSS } from './account_css.mjs';
 import { ACCOUNT_JS } from './account_js.mjs';
@@ -29,13 +30,14 @@ import { DRIVE_INLINE_HTML } from './drive_inline_html.mjs';
 import { DRIVE_INLINE_JS } from './drive_inline_js.mjs';
 
 const AUTH_ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
-const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile','/api/qa/profile/avatar','/api/qa/drive/status','/api/qa/drive/connect','/api/qa/drive/disconnect']);
+const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/legal/run','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile','/api/qa/profile/avatar','/api/qa/drive/status','/api/qa/drive/connect','/api/qa/drive/disconnect']);
 const privateAssets=new Map([
  ['/styles.css',[WORKSPACE_CSS,'text/css; charset=utf-8']],
  ['/app.js',[WORKSPACE_JS,'application/javascript; charset=utf-8']],
  ['/session.js',[WORKSPACE_SESSION,'application/javascript; charset=utf-8']],
  ['/matters.js',[WORKSPACE_MATTERS,'application/javascript; charset=utf-8']],
  ['/documents.js',[WORKSPACE_DOCUMENTS,'application/javascript; charset=utf-8']],
+ ['/legal.js',[WORKSPACE_LEGAL,'application/javascript; charset=utf-8']],
  ['/account.css',[ACCOUNT_CSS,'text/css; charset=utf-8']],
  ['/account.js',[ACCOUNT_JS,'application/javascript; charset=utf-8']],
  ['/drive-inline.js',[DRIVE_INLINE_JS,'application/javascript; charset=utf-8']]
@@ -88,9 +90,9 @@ const unavailable=()=>respond('Không thể xác minh phiên làm việc. Vui l�
 const missing=()=>respond('Không tìm thấy trang.','text/plain; charset=utf-8',404);
 async function relay(request,env,path){
  if(!env||!env.QA_AUTH||typeof env.QA_AUTH.fetch!=='function')throw Error('QA service binding not configured');
- if(request.method!=='GET'&&request.method!=='POST')return respond('Method not allowed','text/plain; charset=utf-8',405);
+ if(!['GET','POST','PATCH'].includes(request.method))return respond('Method not allowed','text/plain; charset=utf-8',405);
  const inbound=new URL(request.url);
- if(request.method==='POST' && (request.headers.get('Origin')!==inbound.origin ||
+ if(request.method!=='GET' && (request.headers.get('Origin')!==inbound.origin ||
    request.headers.get('Sec-Fetch-Site')==='cross-site'))
    return respond(JSON.stringify({error:'Không hợp lệ: nguồn truy cập không được phép.'}),'application/json; charset=utf-8',403);
  const target=new URL(path,AUTH_ORIGIN);
@@ -99,10 +101,10 @@ async function relay(request,env,path){
  if(cookie)h.set('Cookie',cookie);
  const type=request.headers.get('Content-Type');
  if(type)h.set('Content-Type',type);
- if(request.method==='POST'){h.set('Origin',target.origin);h.set('Sec-Fetch-Site','same-origin');}
+ if(request.method!=='GET'){h.set('Origin',target.origin);h.set('Sec-Fetch-Site','same-origin');}
  const upstream=await env.QA_AUTH.fetch(new Request(target,{
   method:request.method,headers:h,
-  body:request.method==='POST'?request.body:undefined,duplex:'half',redirect:'manual'
+  body:request.method!=='GET'?request.body:undefined,duplex:'half',redirect:'manual'
  }));
  const out=new Headers(headers('application/json; charset=utf-8'));
  for(const field of ['Content-Type','Set-Cookie','Cache-Control','Cross-Origin-Resource-Policy','Content-Disposition','Content-Length']){
@@ -173,7 +175,9 @@ export async function handleSite(req,env){
   const [body,type]=publicAssets.get(path);
   return respond(body,type,200,{publicPage:true});
  }
- if(API.has(path)||isDocumentApi){
+ const isMatterRename=/^\/api\/qa\/matters\/[0-9a-f-]{36}$/.test(path);
+ if(API.has(path)||isDocumentApi||isMatterRename){
+  if(isMatterRename&&req.method!=='PATCH')return missing();
   if(isDocumentApi&&(
       (path==='/api/qa/documents'&&!['GET','POST'].includes(req.method))||
       (path!=='/api/qa/documents'&&path.startsWith('/api/qa/documents/upload/')&&req.method!=='POST')||
@@ -182,7 +186,7 @@ export async function handleSite(req,env){
   if((['/api/qa/session','/api/qa/workspaces','/api/qa/drive/status'].includes(path)&&req.method!=='GET') ||
     (path==='/api/qa/profile'&&!['GET','POST'].includes(req.method)) ||
     (path==='/api/qa/matters'&&!['GET','POST'].includes(req.method)) ||
-    (['/api/qa/login','/api/qa/logout','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile/avatar','/api/qa/drive/connect','/api/qa/drive/disconnect'].includes(path)&&req.method!=='POST'))return missing();
+    (['/api/qa/legal/run','/api/qa/login','/api/qa/logout','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile/avatar','/api/qa/drive/connect','/api/qa/drive/disconnect'].includes(path)&&req.method!=='POST'))return missing();
   try{return await relay(req,env,path+(isDocumentApi?url.search:''));}catch{return unavailable();}
  }
  if(req.method==='GET'&&path==='/app/')return redirect('/app'+url.search,308);

@@ -448,3 +448,74 @@ body.drawer-open{overflow:hidden}
 @media(max-width:600px){
  .qa-document-box #drive-disconnect{width:100%;justify-self:stretch;min-height:44px;font-size:13px}
 }
+
+/* R108: accessible, compact matter rename controls. Only metadata is edited. */
+.matter-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;flex-shrink:0}
+.matter-edit-button,.matter-inline-editor button{font:inherit;font-size:12px;font-weight:700;
+ min-height:36px;padding:7px 11px;border-radius:9px;border:1px solid #aebeda;
+ color:#243e68;background:white;cursor:pointer}
+.matter-inline-editor{display:flex;align-items:center;flex-wrap:wrap;gap:8px;max-width:100%}
+.matter-inline-editor label{font-size:12px;font-weight:700;color:#4c617f}
+.matter-inline-editor input{min-width:140px;max-width:100%;width:clamp(150px,25vw,250px);
+ border-radius:9px;border:1px solid #abbad0;padding:8px 10px;font:inherit;font-size:13px}
+.matter-inline-editor button[type="submit"]{background:#29395f;color:white;border-color:#29395f}
+.matter-inline-editor button:disabled{opacity:.5;cursor:default}
+.matter-edit-button:focus-visible,.matter-inline-editor input:focus-visible,
+.matter-inline-editor button:focus-visible{outline:2px solid #3876bf;outline-offset:2px}
+@media(max-width:620px){.matter-actions{width:100%;justify-content:space-between}
+ .matter-inline-editor{width:100%}.matter-inline-editor label{width:100%}
+ .matter-inline-editor input{width:100%}}
+
+/* R109. Source-only legal AI QA panel. Inputs and outputs are never persisted. */
+.legal-qa-panel{width:100%;max-width:1100px;margin:28px auto 0;padding:22px;
+ border:1px solid #dbe3ef;border-radius:20px;background:#fff;
+ box-shadow:0 12px 38px rgba(27,43,75,.055);text-align:left}
+.legal-qa-heading{margin-bottom:19px}
+.legal-qa-chip{display:inline-block;padding:6px 10px;border-radius:10px;
+ background:#ecf4ff;color:#2d5684;font-size:11px;font-weight:850;letter-spacing:.04em}
+.legal-qa-heading h2{font-size:clamp(19px,2.6vw,26px);margin:13px 0 8px;color:#172945}
+.legal-qa-heading p{font-size:13px;line-height:1.65;color:#556880;max-width:750px}
+.legal-qa-form{display:grid;gap:14px}
+.legal-qa-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.legal-qa-form label{display:grid;gap:7px;font-size:13px;font-weight:760;color:#243952}
+.legal-qa-form select,.legal-qa-form textarea,.legal-qa-form input:not([type="checkbox"]){
+ display:block;width:100%;min-width:0;border:1px solid #cbd6e5;border-radius:11px;
+ background:white;color:#23334f;padding:12px 13px;font:inherit;font-size:14px;
+ line-height:1.45}
+.legal-qa-form textarea{resize:vertical;min-height:120px;overflow-wrap:anywhere}
+.legal-qa-form select:focus-visible,.legal-qa-form input:focus-visible,
+.legal-qa-form textarea:focus-visible,.legal-qa-actions button:focus-visible{
+ outline:2px solid #4779b2;outline-offset:2px}
+.legal-qa-consent{display:flex!important;align-items:flex-start;flex-direction:row;
+ gap:10px!important;padding:12px;background:#f4f8fd;border:1px solid #d9e5f2;
+ border-radius:11px;font-weight:500!important;line-height:1.5!important}
+.legal-qa-consent input{width:18px;height:18px;margin:2px 0 0;flex-shrink:0}
+.legal-qa-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+.legal-qa-actions button{min-height:44px}
+#legal-qa-run:disabled{opacity:.5;cursor:wait}
+#legal-qa-feedback{flex:1;min-width:210px;font-size:12px;color:#617189;line-height:1.5}
+#legal-qa-feedback[data-state="error"]{color:#b13444}
+.legal-qa-result{margin-top:22px;padding:17px;border-radius:12px;border:1px solid #d6e1ef;
+ background:#f8fafc}
+.legal-qa-result h3{font-size:17px;color:#263955}
+.legal-qa-disclaimer{color:#8e4826;font-size:12px;font-weight:700}
+#legal-qa-output{font-family:inherit;font-size:14px;line-height:1.65;
+ white-space:pre-wrap;overflow-wrap:anywhere;max-height:650px;overflow:auto;
+ padding:12px;background:white;border:1px solid #dfe7f0;border-radius:8px}
+#legal-qa-sources{font-size:11px;line-height:1.6;color:#697a91}
+#legal-qa-sources p{border-bottom:1px solid #e0e6ee;padding:4px 0;overflow-wrap:anywhere}
+#legal-qa-copy{min-height:40px;padding:8px 13px;border:1px solid #8ea6c6;
+ background:#fff;border-radius:9px;font-weight:700;color:#284664;cursor:pointer}
+@media(max-width:620px){
+ .legal-qa-panel{padding:14px;margin-top:18px;border-radius:14px}
+ .legal-qa-grid{grid-template-columns:minmax(0,1fr)}
+ .legal-qa-actions{display:block}.legal-qa-actions button{width:100%}
+ #legal-qa-feedback{margin:10px 0 0}
+}
+
+.legal-qa-panel [hidden]{display:none!important}
+
+.legal-qa-example{font:inherit;font-size:13px;font-weight:750;min-height:44px;
+ padding:9px 14px;background:#fff;color:#2e536f;border:1px solid #abc0d6;
+ border-radius:10px;cursor:pointer}
+.legal-qa-example:focus-visible{outline:2px solid #4779b2;outline-offset:2px}

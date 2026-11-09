@@ -33,3 +33,25 @@
 ```pcs-change
 {"kind":"DECIDE","id":"CR-20261107-BYOS-02","decision":"APPROVED","actor":"owner","ref":"Current project conversation: Owner 'Ok, làm' after BYOS destination and Google Drive/OneDrive folder assignment proposal","at":"2026-11-07T10:41:27.169Z","verified_external_decision":false}
 ```
+
+
+## R108 — Implementation checkpoint, no SRS revision (2026-11-07)
+
+- **Owner priority:** Pause Google Drive and OneDrive problem solving. Implement the remaining functions in small independent slices, with concrete source and real QA evidence; see [non-storage checklist #156](https://github.com/ntdung-tds/Mihy-Law-Agent/issues/156).
+- **R108 implementation:** Versioned title-edit operation for the existing QA matter metadata register with effective current-tenant write ACL, deny-overrides, CSRF, 409 optimistic conflict, SQLite transactional audit trigger and mobile inline editor. This does not implement legal AI analysis, Word review, file storage or any new user-facing document provider.
+- **SRS mapping:** Private v1.1.15 baseline unchanged. Its original artifact was not available in this conversation for clause-by-clause validation, so R108 is an implementation proposal to the existing QA matter management capability and the exact SRS reference is **NOT_VERIFIED**. Do not silently label it a new SRS feature or an accepted test case.
+- **Evidence:** PR #155; GitHub Actions #42394048779 9/9 PASS; QA D1 migration applied, existing case preserved; QA web/backend surgical deployments verified without unrelated module changes. Real authenticated customer acceptance **NOT_RUN**, production untouched.
+
+
+## R109 — Owner-requested implementation progress for remaining legal UC (2026-11-08)
+
+- **Direction:** Stop developing Google Drive/OneDrive functionality; make measurable progress on remaining AI Law SRS use cases with synthetic QA data, without asking owner for routine technical approvals. The private v1.1.15 baseline is unchanged and clause-by-clause mapping remains NOT_VERIFIED in this context.
+- **Source-only QA interface added:** Authenticated per-matter request form for all 11 UC labels. UC01/02/03/04/05/06/07/08/09 call Workers AI to produce **unverified review drafts** solely from user-pasted fictional source text. UC10/11 search only that fictional text and **do not** implement official case law or statutory search; no invented court decisions, URLs or article authority.
+- **Security/operations:** One QA-only D1 quota table, max 12 AI calls per current user per UTC day. Authorization uses active MatterACL and deny override; sources and outputs are not stored in application D1; explicit fictional data consent and size limits. The input may be processed by Cloudflare Workers AI, so no real client/legal personal data is authorized in this QA stage.
+- **Production and test gates:** Public/source CI synthetic and real provider smoke PASS, Cloudflare QA website/backend readback PASS, but authentic end-user E2E and legal answer correctness NOT_RUN; original DOCX/PDF/Word Track Changes, official corpus retrieval, revision/audit+review approval and full SRS release gates remain separate and incomplete. Owner final acceptance pending.
+- **Evidence:** [R109 draft PR #157](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/157), [CI #42397098574](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42397098574), [QA acceptance matrix](../deployment/cloudflare/QA_R109_LEGAL_TEXT.md), [non-storage project checklist #156](https://github.com/ntdung-tds/Mihy-Law-Agent/issues/156).
+
+
+## R110 — QA security correction only; no SRS v1.1.15 baseline revision (2026-11-08)
+
+The existing eleven-UC R109 synthetic-text QA surface is unchanged. R110 adds a bounded streaming request reader and rejects explicit nonexistent AI source-anchor identifiers, including long ones; existing MatterACL, tenant login, quota, provider selection and source/output non-persistence are preserved. Real legal correctness, full PDF/DOCX workflow, official Vietnamese law retrieval and acceptance remain unverified. This is a technical correction to existing QA implementation, **not a new SRS requirement**. PR #159, CI #42407576294 PASS 9/9, QA-only backend deploy `301ecbe7-5a2e-47f9-9962-56b44ad2b26f`; production untouched. PR #158 duplicate was closed unmerged.
