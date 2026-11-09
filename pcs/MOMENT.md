@@ -8,6 +8,21 @@
 
 
 
+## R120 — Final-head CI verification and QA connectivity (2026-11-09)
+
+- **Read-first:** `pcs/STATE.json` revision 102 and latest branch `pcs/MOMENT.md`; PR #157 OPEN draft, #158 CLOSED draft (do not restore), #159 OPEN draft, #198 OPEN draft.
+- **Final-head verification:** PR #198 commit `b218c8e8f3e080ad20a2d8545ac2c4128c9b64f6`, [Actions #42606137403](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42606137403) **PASS**: 9/9 executed jobs success, 21 optional live/deploy jobs skipped. `cloudflare-contract` job `129122511436` log directly confirms **11/11 synthetic SQLite MatterACL tests PASS**, including expired and foreign-tenant deny cases. This evidence covers the final HEAD before this documentation-only commit; CI for this new documentation commit remains **NOT_RUN** until checked separately.
+- **QA connectivity:** Direct HTTPS HEAD to `ai-law-web-qa.iaict-platform.workers.dev/app` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev/app` both **BLOCKED** by DNS `curl (6)` from this runtime. Authenticated API/D1/browser QA and 11-UC E2E **NOT_RUN**; no live PASS claim.
+- **Changes:** PCS evidence only, no product code change, no merge/deploy. Next independent task: test-first tenant/MatterACL source denial regression or verify QA from reachable environment. Keep only `/app#assistant`, no Drive/OneDrive/OAuth, no production, SRS v1.1.15 unchanged.
+
+## R119 — Scope of deny grants (2026-11-09)
+
+- **Test-first:** PR #198 (`b0a47ccd`) adds two synthetic SQLite cases executing the exported `LEGAL_MATTER_ACCESS_SQL`: expired deny must not override active allow; deny from another tenant must not override active allow. No product change.
+- **CI:** NOT_RUN at commit creation; verify the PR HEAD workflow and actual test count before marking PASS. Prior R118 CI #42583079116 PASS (9 jobs) applies only to prior commit.
+- **Verified CI 2026-11-09:** PR #198 branch HEAD `406df70511b8769ab9d52f811fc9f39f065f6dda`, [Actions #42597937720](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42597937720) completed SUCCESS; **9/9 executed jobs PASS**, remaining optional live/deploy jobs SKIPPED. `cloudflare-contract` job `129095065795` log explicitly runs `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v`: **11/11 SQLite SQL tests PASS**, including expired deny and foreign-tenant deny. This is synthetic SQL/CI only, not D1/API/browser QA or legal acceptance. This PCS documentation commit itself requires a separate final-HEAD CI verification.
+
+- **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
+
 ## R113 — Tenant/MatterACL deny must not spend AI quota (2026-11-09)
 
 - **Scope:** Regression-only extension of existing draft PR #175, synthetic data, no product/source change. Three denial paths: missing session (401), revoked/foreign MatterACL (404), viewer role (403). Every denial must make zero AI provider calls and zero quota SQL calls.
