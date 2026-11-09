@@ -788,3 +788,11 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - **Evidence:** Test source committed PASS; new-head CI NOT_RUN / awaiting workflow verification. QA host probes 2026-11-09: both ai-law-web-qa.iaict-platform.workers.dev and ai-law-standalone-cf-qa.iaict-platform.workers.dev failed DNS (curl 6, HTTP 000): live D1/API/browser BLOCKED, 11-UC E2E NOT_RUN.
 - **Constraints:** No merge, QA/production deploy, customer data, Drive/OneDrive/OAuth or SRS changes. Sole 11-UC UI remains /app#assistant.
 - **Next:** Verify PR #196 HEAD CI and actual Node test execution, fix FAIL if present; attempt safe synthetic D1/API/browser QA only after connectivity and deployment review. No legal acceptance claims.
+
+
+## R121 — stale/future deny scope synthetic regression (2026-11-09)
+
+- **Baseline:** main PCS STATE revision 99; stacked branch PCS remains independent. PR #157/#159 OPEN, #158 CLOSED. PR #198 OPEN draft. Prior Actions #42606137403: nine executed jobs PASS including R114 synthetic SQL step; not live QA proof.
+- **Test-first change:** R121 branch test/r121-matteracl-stale-deny-gpt; commit ff055f550564e5446e962162fa5e7e980f40bf39 adds two SQLite tests to exact exported LEGAL_MATTER_ACCESS_SQL: deny from old acl_version and deny with future valid_from must not override current read allow. No product code or UI changed.
+- **Evidence:** New tests committed; R121 HEAD CI **NOT_RUN / pending check**. Live D1/API/browser QA **BLOCKED / NOT_RUN** (prior DNS failures; no fresh authenticated access). E2E 11 UC **NOT_RUN**, legal review **NOT_RUN**. Do not count synthetic CI as customer/tenant acceptance.
+- **Next:** verify R121 CI actually executes 13 MatterACL tests; investigate and fix any failure; then prioritize real synthetic QA D1/API/browser authz and zero-quota/zero-AI side effects. No merge/deploy production, no Drive/OneDrive/OAuth.
