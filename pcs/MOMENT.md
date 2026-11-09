@@ -739,3 +739,8 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - **NOT_RUN:** New commit's workflow job execution not yet returned; no assertion of R114 CI PASS. QA D1/API/browser and 11-UC E2E NOT_RUN/BLOCKED; legal acceptance NOT_RUN.
 - **Integration:** PR #191 depends on draft PR #190 (which itself contains inherited changes). Do not merge directly to main. No QA/production deploy, Drive/OneDrive/OAuth changes, or customer data.
 - **Next:** Verify job step in run logs and repair any failure; then D1/API QA denial/no-AI/no-quota and browser E2E when safe.
+
+## R115 — CI executes R114 SQL MatterACL regression (2026-11-09)
+
+- **Evidence:** [GitHub Actions #42542897370](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42542897370), head `ef7aef24cf2bee1550d41c930211748e783105bc`, 9/9 executing jobs SUCCESS. `cloudflare-contract` step 16 `R114 execute synthetic SQL MatterACL tenant isolation regression` SUCCESS; workflow invokes `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v` (7 synthetic SQLite scenarios). PASS is restricted to SQL regression, not live D1/API/browser.
+- **Integration:** Draft PR #191 stacked on #190, both unmerged; avoid direct merge to main. QA authenticated D1/API cross-tenant, no-AI/no-quota side effects, full 11-UC E2E and legal acceptance remain NOT_RUN/BLOCKED pending safe environment verification. No deploy, customer data, Drive/OAuth, production, or SRS/UI changes.
