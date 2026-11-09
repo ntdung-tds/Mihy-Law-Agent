@@ -1,0 +1,91 @@
+{
+  "schema": "ai-law-qa-evidence-v1",
+  "run_id": "R123-LIVE-DENIAL-2026-11-10-gpt",
+  "qa_only": true,
+  "scope": "Live anonymous and invalid-cookie HTTPS authorization-denial checks from independent GitHub Actions runner; test-only, no account provisioning",
+  "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/204",
+  "test_source": "deployment/cloudflare/tests/r123_live_auth_denials_gpt.py",
+  "checked_commit": "f24e8837ac7158dfdb259e62f9bcb6f75364c273",
+  "github_actions": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42683712434",
+  "runner_job_id": 129384787555,
+  "outcome": "PASS_11_OF_11_LIVE_HTTP_DENIAL_ONLY",
+  "cases": [
+    {
+      "name": "workspaces_no_session",
+      "actual_http": 401,
+      "status": "PASS"
+    },
+    {
+      "name": "workspaces_unrecognized_session",
+      "actual_http": 401,
+      "status": "PASS"
+    },
+    {
+      "name": "matters_no_session",
+      "actual_http": 401,
+      "status": "PASS"
+    },
+    {
+      "name": "profile_no_session",
+      "actual_http": 401,
+      "status": "PASS"
+    },
+    {
+      "name": "account_requires_login",
+      "actual_http": 302,
+      "status": "PASS"
+    },
+    {
+      "name": "switch_workspace_no_session",
+      "actual_http": 401,
+      "status": "PASS"
+    },
+    {
+      "name": "password_change_no_session",
+      "actual_http": 401,
+      "status": "PASS"
+    },
+    {
+      "name": "legal_run_unrecognized_sid",
+      "actual_http": 401,
+      "status": "PASS"
+    },
+    {
+      "name": "malformed_login_not_authenticating",
+      "actual_http": 401,
+      "status": "PASS"
+    },
+    {
+      "name": "foreign_origin_switch_denied",
+      "actual_http": 403,
+      "status": "PASS"
+    },
+    {
+      "name": "foreign_origin_legal_denied",
+      "actual_http": 403,
+      "status": "PASS"
+    }
+  ],
+  "before": {
+    "quota_rows": 2,
+    "quota_requests": 4
+  },
+  "after": {
+    "quota_rows": 2,
+    "quota_requests": 4
+  },
+  "quota_unchanged": true,
+  "quota_verified_with": "read-only aggregate SQL queries against connected Cloudflare QA D1, no user identifiers or contents exported",
+  "code_changed": "test+CI+PCS only; no application code or QA deploy",
+  "password_guessing": false,
+  "created_test_principals": false,
+  "manual_session_injection": false,
+  "authenticated_positive_login": "NOT_RUN_NO_APPROVED_QA_TEST_CREDENTIAL",
+  "authenticated_tenant_switch": "NOT_RUN",
+  "authenticated_matter_acl_post_api": "NOT_RUN",
+  "external_ai_provider_side_effects": "NOT_RUN_UNOBSERVED",
+  "browser_owner_mobile_e2e": "NOT_RUN",
+  "deployed_source_parity": "NOT_VERIFIED_RAW_SCRIPT_DOWNLOAD_UNAVAILABLE",
+  "SRS": "v1.1.15 unchanged",
+  "owner_final_acceptance": "NOT_RUN"
+}

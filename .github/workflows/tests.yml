@@ -215,6 +215,9 @@ jobs:
         run: node --test deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs
       - name: R122 authenticated cookie, tenant rotation, MatterACL and quota SQL integration
         run: node --test deployment/cloudflare/tests/r122_auth_legal_sql_gpt.test.mjs
+      - name: R123 live HTTPS authenticated-boundary negative QA without credentials
+        if: ${{ github.head_ref == 'qa/r123-auth-denials-gpt' || github.ref == 'refs/heads/qa/r123-auth-denials-gpt' }}
+        run: python deployment/cloudflare/tests/r123_live_auth_denials_gpt.py
       - name: R121 isolated QA live anonymous HTTP, no login or client data
         if: ${{ github.head_ref == 'qa/r121-anon-http-gpt' || github.ref == 'refs/heads/qa/r121-anon-http-gpt' }}
         run: python deployment/cloudflare/tests/r121_live_anonymous_http_gpt.py
