@@ -228,3 +228,23 @@ test('R117 local-only UC10/UC11 still enforce session, role and MatterACL before
   }
  }
 });
+
+
+test('R118 UC10/UC11 reject cross-origin requests before ACL, search or quota',async()=>{
+ for(const uc of ['UC10','UC11']){
+  const f=fixture({ai:false});
+  const res=await legalApi(request({
+   uc,question:'giao hàng tháng 9',origin:'https://attacker.invalid',
+   source:'PRIVATE_SYNTHETIC_MARKER_71829 '+SOURCE
+  }),f.env,{now:NOW});
+  assert.equal(res.status,400,uc+' cross-origin must fail closed');
+  const body=await res.text();
+  assert.doesNotMatch(body,/PRIVATE_SYNTHETIC_MARKER_71829|giao hàng ngày 15|findings/,
+   uc+' must not expose search results or source text');
+  assert.equal(f.calls.some(c=>c.sql===LEGAL_MATTER_ACCESS_SQL),false,
+   uc+' must not query MatterACL for invalid origin');
+  assert.equal(f.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false,
+   uc+' must not charge quota');
+  assert.equal(f.providerCalls.length,0,uc+' must not invoke AI');
+ }
+});
