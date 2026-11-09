@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `103` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-09T12:14:34.184Z`.
+- **PCS revision:** `104` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-09T12:30:38.250Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -22,6 +22,15 @@
 - **Verified CI 2026-11-09:** PR #198 branch HEAD `406df70511b8769ab9d52f811fc9f39f065f6dda`, [Actions #42597937720](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42597937720) completed SUCCESS; **9/9 executed jobs PASS**, remaining optional live/deploy jobs SKIPPED. `cloudflare-contract` job `129095065795` log explicitly runs `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v`: **11/11 SQLite SQL tests PASS**, including expired deny and foreign-tenant deny. This is synthetic SQL/CI only, not D1/API/browser QA or legal acceptance. This PCS documentation commit itself requires a separate final-HEAD CI verification.
 
 - **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
+
+## R121 — Live anonymous QA HTTP and Browser Rendering 429 separation (2026-11-09)
+
+- **Problem:** Earlier Cloudflare Browser Rendering QA calls returned HTTP 429 (provider rate-limited), with a later injected-browser attempt returning provider HTTP 422 (network closed). A separate, plain public login HTML render succeeded once. These provider errors are **not evidence of an AI Law app 429 defect**; no rate limit was disabled or bypassed.
+- **Real end-to-end network boundary, unauthenticated only:** [Draft PR #200](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/200), dedicated GitHub Actions runner real HTTPS QA smoke. `cloudflare-contract` job on source commit `9485dd54a1d2346e1fbfcdc9f74994976b52e572`, [Actions #42617358184](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42617358184): **PASS 7/7** actual anonymous HTTP status checks: backend /health 200; website /health 200; public /login 200; /app redirects 302 to /login; no-cookie /api/qa/session 401; no-cookie POST /api/qa/legal/run 401; foreign Origin POST rejected 403 by website relay. No passwords, cookies, customer data, storage or model requests deliberately authorized.
+- **Actual fix-loop:** Initial test-only check expected backend 400 on foreign Origin, but website relay correctly responds 403 **before** backend. The first CI step failed only on that mistaken assertion; expected 403 after source inspection, then live retest PASS. Application code unchanged. External DNS failures are reported BLOCKED, never PASS.
+- **D1 read-only corroboration:** QA `qa_legal_ai_quota` aggregate remained 2 rows / 4 requests across the final anonymous smoke; no D1 writes in read-only verification. This alone does not prove the actual Workers AI provider did not receive a call, but code authorization ordering and HTTP denials are consistent with no quota use.
+- **Evidence:** `deployment/cloudflare/tests/r121_live_anonymous_http_gpt.py` plus `tests/evidence/AL-R121-HTTP-gpt.json`; CI invokes the live script only on the R121 QA branch. Full CI on latest PCS documentation HEAD is a separate gate.
+- **Limits:** Actual authenticated user login, tenant switching, user-vs-user denial, verified no-AI/no-quota per request and mobile/11-UC E2E remain **NOT_RUN**. Do not call this full owner acceptance. Keep SRS v1.1.15 unchanged, no merge, production, Drive/OneDrive/OAuth or real legal documents. Main PCS revision 99 until independently reviewed integration.
 
 ## R120 — Cloudflare D1 read-only and anonymous QA reachability (2026-11-09)
 
