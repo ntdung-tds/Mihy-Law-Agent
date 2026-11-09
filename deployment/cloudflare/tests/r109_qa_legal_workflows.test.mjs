@@ -209,3 +209,22 @@ test('R113 tenant/MatterACL and role denials never charge quota or invoke model'
    scenario.name+' must not consume quota');
  }
 });
+
+test('R117 local-only UC10/UC11 still enforce session, role and MatterACL before retrieval',async()=>{
+ for(const uc of ['UC10','UC11']){
+  for(const scenario of [
+   {name:'missing session',request:{session:false},fixture:{session:false},status:401},
+   {name:'viewer role',request:{},fixture:{role:'viewer'},status:403},
+   {name:'revoked or foreign MatterACL',request:{},fixture:{acl:false},status:404}
+  ]){
+   const f=fixture({...scenario.fixture,ai:false});
+   const res=await legalApi(request({uc,question:'giao hàng tháng 9',...scenario.request}),f.env,{now:NOW});
+   assert.equal(res.status,scenario.status,uc+' '+scenario.name);
+   assert.equal(f.providerCalls.length,0,uc+' '+scenario.name+' must not invoke AI');
+   assert.equal(f.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false,
+    uc+' '+scenario.name+' must not charge AI quota');
+   assert.equal((await res.json()).findings,undefined,
+    uc+' '+scenario.name+' must not leak source search findings');
+  }
+ }
+});

@@ -759,3 +759,9 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - **PASS (scope):** Reviewed branch PCS revision 102, PR #157/#159 OPEN and #158 CLOSED unmerged; #190/#191/#193 are draft stacked PRs. No new UI; sole 11-UC route `/app#assistant` unchanged.
 - **BLOCKED (live QA):** Fresh `curl -IL` to `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` failed DNS resolution (curl 6; HTTP 000). Authenticated D1/API/browser MatterACL negative paths and zero-AI/zero-quota side effects **NOT_RUN**; 11-UC E2E **NOT_RUN**. No QA or production deployment; no Drive/OneDrive/OAuth or customer data touched.
 - **Next:** Independently strengthen synthetic deny/no-quota regression if gaps remain, then verify D1/API/browser with synthetic accounts only when QA connectivity and safe deploy prerequisites are satisfied. No merge of draft stack until dependency review; Owner signs off only after technical evidence.
+
+## R117 — UC10/UC11 local-only retrieval authz regression (2026-11-09)
+
+- **PR:** #195 (draft; stacked on #193). Synthetic-only, test-first commit `484237272e2f648ac516418524fcf62b9f99e000`; added one Node test with six denial scenarios across UC10 and UC11 (401 missing session, 403 viewer, 404 missing/foreign MatterACL). Each asserts no findings leak, no AI provider call and no quota SQL.
+- **Evidence:** Static test addition PASS; CI for R117 **NOT_RUN / awaiting verified workflow logs**. Earlier R116 Actions #42564559088 9/9 jobs PASS but does not establish R117 success.
+- **QA:** D1/API authenticated and browser E2E **BLOCKED / NOT_RUN**; QA DNS previously failed from runner, not re-established here. Do not claim tenant isolation E2E. No merge, deploy, SRS/UI change or Drive/OneDrive/OAuth modification. Next: verify CI HEAD #195 and QA host availability, then run synthetic live authz tests if safely available.
