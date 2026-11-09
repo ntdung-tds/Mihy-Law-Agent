@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `133` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-09T00:08:35.017Z`.
+- **PCS revision:** `134` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-09T01:16:57.180Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R141 — PDF syntax preflight và cảnh báo ảnh/trang xoay (2026-11-09)
+
+- **Khoảng trống:** Trước R141, PDF nhập vào UC03/UC04/UC07 chỉ kiểm tra chữ ký `%PDF-`; không có chốt ngăn tệp thiếu đuôi xref/EOF, dấu hiệu mã hóa hoặc JavaScript/AcroForm/interactive. DOCX đã có chốt R140 riêng. R141 thêm **preflight PDF bảo thủ trên dấu hiệu raw**, không xây dựng parser PDF toàn diện hoặc làm OCR và không mở rộng SRS.
+- **Sửa trên [PR #192](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/192) draft:** `pdfSourcePreflight` kiểm tra version PDF 1.0–1.7/2.0, `startxref`/trailer `%%EOF`, con trỏ đến classic xref/xref-stream head trong giới hạn. Chặn trước khi gọi converter nếu thấy dấu hiệu `/Encrypt`, JavaScript, `/AcroForm`, `/OpenAction`, `/EmbeddedFiles`, `/Annots`, `/AA`, `/Subtype /Form`, chế độ render chữ `3 Tr`/`7 Tr`. Dấu hiệu ảnh `/Subtype /Image` hoặc `/Rotate 90/180/270` trả cờ cảnh báo để trình duyệt yêu cầu người dùng đối chiếu từng trang PDF gốc, không tự tuyên bố trích đủ văn bản. Không thay đổi DOCX, kết nối OAuth, D1/R2 hay cấu hình phiên/ACL.
+- **CI minh bạch lỗi-và-sửa:** [#42543609868](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42543609868) đầu tiên FAIL test Chromium do nhãn ngắn `Word chứa bảng` chuyển từ câu dài trong metadata, còn cảnh báo `từng ô` vẫn hiển thị ở status; sửa test đúng vị trí, không xóa cảnh báo. [#42543940049](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42543940049) **PASS 9/9 nhóm sau một lần rerun standalone-db**. Lần đầu DB test FAIL migration môi trường thứ hai `expected 't', got 'f'`; job rerun chính nó PASS và không thay mã DB/test. Test R141 mới gồm PDF synthetic classic xref hợp lệ, 11 tình huống PDF nguy hiểm/bị cắt, 3 cảnh báo ảnh/xoay, Chromium desktop/mobile bắt buộc review file gốc trước khi vào nguồn A. R138-R140 hồi quy PASS.
+- **QA deployed/readback PASS:** Backend `ai-law-standalone-cf-qa` version `53b80b55-22d5-438a-b52a-0d14b14b8009`, deployment `a4563676-9f87-4739-8eb2-31d4e98ceb34`, **100%**, thay đúng `qa_legal_workflows.mjs`, giữ nguyên 10 module + 12 binding. Website `ai-law-web-qa` version `1f85992e-2963-497f-aa35-00dfa69f8526`, deployment `016f78da-c2c0-45d6-993d-53ad33ebf7d9`, **100%**, thay đúng `workspace_legal.mjs`, giữ nguyên 26 module + 2 binding. Mã được đọc lại byte-exact, bảo toàn chênh lệch QA/GitHub có sẵn, không triển khai production.
+- **Chưa nghiệm thu:** Đây là **kiểm tra cú pháp hạn chế trên token PDF raw**; PDF có stream nén/font/đồ họa, ảnh scan, chữ xoay trong text transform vẫn có thể trích thiếu mà không xuất hiện token cảnh báo. Không có bằng chứng OCR hoặc tương đương nghĩa văn bản PDF, không được dùng dữ liệu thật. Owner đăng nhập Android, dùng PDF thực tế và đánh giá luật sư vẫn **NOT_RUN**. SC-043, PCS rev 134, SRS v1.1.15 unchanged, PR draft, chủ dự án nghiệm thu cuối.
 
 ## R140 — Kiểm tra DOCX OOXML, chặn Track Changes/nội dung ẩn và cảnh báo bảng (2026-11-09)
 
