@@ -55,6 +55,27 @@ function qaDocx({body=DOC_BODY,settings,extraEntries=[],method=8}={}){
  ]);
 }
 
+
+/** Tiny valid classic-xref PDF with one selectable synthetic text line. */
+function qaPdf({catalog='',page='',streamSuffix='',trailer=''}={}){
+ const data='BT /F1 12 Tf 40 700 Td (Article 1: Party A delivers 10 QA files.) Tj ET'+streamSuffix;
+ const objects=[
+  '<< /Type /Catalog /Pages 2 0 R'+catalog+' >>',
+  '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+  '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R'+page+' >>',
+  '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+  '<< /Length '+ENC.encode(data).length+' >>\nstream\n'+data+'\nendstream'
+ ];
+ let content='%PDF-1.4\n';
+ const offsets=[0];
+ for(let i=0;i<objects.length;i++){offsets.push(ENC.encode(content).length);content+=(i+1)+' 0 obj\n'+objects[i]+'\nendobj\n';}
+ const xref=ENC.encode(content).length;
+ content+='xref\n0 '+offsets.length+'\n0000000000 65535 f \n';
+ for(let i=1;i<offsets.length;i++)content+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
+ content+='trailer\n<< /Root 1 0 R /Size '+offsets.length+trailer+' >>\nstartxref\n'+xref+'\n%%EOF';
+ return ENC.encode(content);
+}
+
 function fixture({session=true,acl=true,quota=true,role='lawyer',
  convert=true,converted=GOOD,revokeAfterConvert=false}={}){
  const calls=[],conversions=[],runs=[];
@@ -82,7 +103,7 @@ function fixture({session=true,acl=true,quota=true,role='lawyer',
  };
  return {env,calls,conversions,runs};
 }
-function req({bytes=new TextEncoder().encode('%PDF-1.4\n% Synthetic QA PDF placeholder'),
+function req({bytes=qaPdf(),
  name='synthetic.pdf',mime='application/pdf',uc='UC03',
  consent=true,matter_id=M,session=true,origin=BASE,method='POST',extras=[]}={}){
  const fd=new FormData();
@@ -96,10 +117,10 @@ function req({bytes=new TextEncoder().encode('%PDF-1.4\n% Synthetic QA PDF place
 }
 test('R138 PDF and DOCX: real multipart bytes, ACL first, conversion text returned only for manual preview',async()=>{
  for(const [name,mime,bytes,uc] of [
-  ['synthetic.pdf','application/pdf',new TextEncoder().encode('%PDF-1.7\nsynthetic sample test'), 'UC03'],
+  ['synthetic.pdf','application/pdf',qaPdf(), 'UC03'],
   ['synthetic.docx','application/vnd.openxmlformats-officedocument.wordprocessingml.document',
    qaDocx(),'UC04'],
-  ['qa.pdf','application/pdf',new TextEncoder().encode('%PDF-1.4\nsynthetic QA sample'), 'UC07']
+  ['qa.pdf','application/pdf',qaPdf(), 'UC07']
  ]){
   const f=fixture();
   const response=await documentExtractApi(req({bytes,name,mime,uc}),f.env,{now:NOW});
@@ -224,6 +245,56 @@ test('R140 DOCX preflight: reject fake/truncated ZIP, duplicate entries, travers
   const body=await r.json();
   assert.ok(!JSON.stringify(body).includes('Confidential clause'),label);
   assert.equal(f.conversions.length,0,label+' should not reach converter');
+  assert.equal(f.runs.length,0);
+ }
+});
+
+
+test('R141 PDF: classic-xref one-page source with no active features reaches text conversion',async()=>{
+ const f=fixture();
+ const response=await documentExtractApi(req({bytes:qaPdf()}),f.env,{now:NOW});
+ assert.equal(response.status,200,await response.clone().text());
+ const data=await response.json();
+ assert.deepEqual(data.document_warnings,[]);
+ assert.equal(data.source_text,GOOD);
+ assert.equal(f.conversions.length,1);
+ assert.equal(f.runs.length,0);
+});
+test('R141 PDF: image/rotated documents require visible source-review warnings',async()=>{
+ for(const [name,bytes,expected] of [
+  ['image.pdf',qaPdf({page:' /Resources << /XObject << /Im0 6 0 R >> >> /Subtype /Image'}),['pdf_image_content_review']],
+  ['rotated.pdf',qaPdf({page:' /Rotate 90'}),['pdf_rotated_page_review']],
+  ['complex.pdf',qaPdf({page:' /Rotate 270 /Subtype /Image'}),['pdf_image_content_review','pdf_rotated_page_review']]
+ ]){
+  const f=fixture();
+  const res=await documentExtractApi(req({name,bytes}),f.env,{now:NOW});
+  assert.equal(res.status,200,name+': '+res.status+', '+await res.clone().text());
+  const data=await res.json();
+  assert.deepEqual(data.document_warnings,expected);
+  assert.equal(data.review_required,true);
+  assert.equal(f.conversions.length,1);
+  assert.equal(f.runs.length,0);
+ }
+});
+test('R141 PDF: reject missing EOF, encryption, scripts/interactive form and known hidden render mode BEFORE converter',async()=>{
+ const dangerous=[
+  ['missing EOF',qaPdf().slice(0,-5)],
+  ['wrong version',ENC.encode('%PDF-9.0\n%%EOF')],
+  ['encrypted',qaPdf({trailer:' /Encrypt 7 0 R'})],
+  ['script',qaPdf({catalog:' /OpenAction << /S /JavaScript /JS (alert(1)) >>'})],
+  ['acroform',qaPdf({catalog:' /AcroForm 7 0 R'})],
+  ['embedded',qaPdf({catalog:' /Names << /EmbeddedFiles << >> >>'})],
+  ['annotations',qaPdf({page:' /Annots [6 0 R]'})],
+  ['dynamic action',qaPdf({page:' /AA << /O 7 0 R >>'})],
+  ['form xobject',qaPdf({page:' /Subtype /Form'})],
+  ['hidden text',qaPdf({streamSuffix:'\n3 Tr\nBT (Hidden clause) Tj ET'})],
+  ['clip text',qaPdf({streamSuffix:'\n7 Tr\nBT (Hidden clause) Tj ET'})],
+ ];
+ for(const [label,bytes] of dangerous){
+  const f=fixture();
+  const res=await documentExtractApi(req({bytes}),f.env,{now:NOW});
+  assert.equal(res.status,422,label+' '+await res.clone().text());
+  assert.equal(f.conversions.length,0,label+' must not call document converter');
   assert.equal(f.runs.length,0);
  }
 });
