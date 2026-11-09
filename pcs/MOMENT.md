@@ -8,6 +8,13 @@
 
 
 
+## R123 — Verify R122 HEAD CI and identify live QA gate (2026-11-09)
+
+- **Read-first:** main PCS STATE/MOMENT revision 99; stacked R122 branch MOMENT revision 102. PR #157 OPEN draft (11 UC single UI), #158 CLOSED unmerged (must not restore), #159 OPEN draft (source hardening), #201 OPEN draft and #203 OPEN draft. R122 head before this PCS-only commit: `1b708fb6cf50801c5be587973373f75d76a8b6f3`.
+- **Verified CI:** [Actions #42641399971](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42641399971) completed SUCCESS: nine executed jobs passed. Actual `cloudflare-contract` job `129243146754` log explicitly shows `Ran 15 tests in 0.006s` and `OK` for synthetic SQLite MatterACL regression. PASS for synthetic SQL only, not live D1/tenant isolation, API, quota, or AI.
+- **QA:** both `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` returned `curl (6) Could not resolve host` / HTTP 000 on this runner. Live QA API/browser and 11 UC E2E remain BLOCKED/NOT_RUN. Live Cloudflare QA workflow jobs in this CI run were SKIPPED; local standalone-browser job PASS must not be conflated with live QA browser acceptance.
+- **Disposition:** no product code change, no merge, no deploy; avoid adding redundant synthetic SQL cases until live QA connectivity and test credentials/isolated fixtures can be verified safely. Next: independently investigate QA DNS/deployment reachability; verify exact deploy source and bindings before QA-only deploy, then run tenant/MatterACL deny-before-AI/quota and UC03/04/07 real QA smoke with synthetic inputs. Never touch Drive/OneDrive/OAuth, production or customer data. E2E NOT_RUN; owner final acceptance outstanding.
+
 ## R122 — Deny isolation by principal and installation (2026-11-09)
 
 - **Read-first:** `pcs/STATE.json` main revision 99, stacked branch PCS revision 102; PR #157 OPEN, #158 CLOSED (do not restore), #159 OPEN; R121 PR #201 OPEN draft. R121 final HEAD `ca614b3d69fc3677f3cb15be5ba0b072f405da30` GitHub Actions #42634522922 SUCCESS (9 executed jobs); R121 SQL count 13 verified in earlier run #42622077254, not yet directly verified for #42634522922.
