@@ -105,6 +105,18 @@ class SqlMatterAclRegression(unittest.TestCase):
         self.grant(effect="deny", valid_to=NOW)
         self.assertTrue(self.accessible())
 
+    def test_old_acl_version_deny_does_not_revoke_current_allow(self):
+        self.matter(version=3)
+        self.grant(effect="allow", version=3)
+        self.grant(effect="deny", version=2)
+        self.assertTrue(self.accessible())
+
+    def test_future_deny_does_not_revoke_current_allow(self):
+        self.matter()
+        self.grant(effect="allow")
+        self.grant(effect="deny", valid_from=NOW+1)
+        self.assertTrue(self.accessible())
+
     def test_foreign_tenant_deny_does_not_revoke_current_allow(self):
         self.matter()
         self.grant(effect="allow")
