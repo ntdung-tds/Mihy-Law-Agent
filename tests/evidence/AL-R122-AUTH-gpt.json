@@ -1,0 +1,42 @@
+{
+  "schema": "ai-law-qa-evidence-v1",
+  "run_id": "R122-AUTH-SQL-2026-11-09-gpt",
+  "date": "2026-11-09",
+  "scope": "Synthetic-only end-to-end handler integration with actual SQLite and real production-path API handlers; not a live Cloudflare signed-in endpoint",
+  "branch": "test/r122-authenticated-legal-sql-gpt",
+  "draft_pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/202",
+  "test_file": "deployment/cloudflare/tests/r122_auth_legal_sql_gpt.test.mjs",
+  "tested_commit": "0340abae34d1b2dce4cc0024397858ddac1db4e7",
+  "evidence_run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42623840843",
+  "evidence_job_id": 129182436414,
+  "result": "PASS",
+  "subtest": "ok 1 - R122 real cookie+SQLite: two users, tenant switch, MatterACL, local search, AI quota",
+  "cases": [
+    "PBKDF2 password login for two distinct synthetic users, secure HttpOnly session cookies",
+    "session identity bound to user and initial allowed tenant",
+    "cross-tenant matter denied 404 with unchanged AI invocation and quota rows",
+    "switch to nonmember tenant rejected 404, original session unchanged",
+    "allowed workspace switch rotates SID, old SID denied 401",
+    "same-tenant other user's private matter denied 404 without source anchors",
+    "local UC10 search only when read MatterACL granted, zero AI and quota calls",
+    "tenant_admin role without MatterACL denied 404 without model/quota",
+    "second user's own matter allowed; other user's tenant rejected",
+    "authorized UC04 synthetic draft calls model stub once and charges exactly one quota row for that tenant/user",
+    "subsequent rejected request leaves AI call count and quota unchanged"
+  ],
+  "initial_test_failures": [
+    "Test-only shadowed global URL constructor: variable renamed ORIGIN",
+    "Test-only strict equality on null-prototype Node SQLite row objects: converted returned rows to plain objects"
+  ],
+  "production_code_changed": false,
+  "schema_changes": false,
+  "real_customer_records_used": false,
+  "model_provider": "synthetic stub, no Cloudflare Workers AI billing",
+  "external_network_calls_from_test": false,
+  "actual_QA_D1_mutation": false,
+  "actual_Cloudflare_authenticated_e2e": "NOT_RUN",
+  "actual_Cloudflare_multi_user_and_tenant_switch": "NOT_RUN",
+  "owner_accepted": false,
+  "SRS": "v1.1.15 unchanged",
+  "note": "The test exercises actual mobileApi and legalApi exported handlers, SQL and session rotation against ephemeral Node SQLite, not a Cloudflare deployed customer session."
+}
