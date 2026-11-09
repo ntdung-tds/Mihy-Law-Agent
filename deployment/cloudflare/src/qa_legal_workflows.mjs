@@ -547,6 +547,43 @@ export async function docxSourcePreflight(bytes){
  }catch{return fail('invalid');}
 }
 
+
+/** R141 bounded PDF syntax preflight. Only visible raw markers are inspected.
+ * PDF object streams and compressed content can conceal semantics: this
+ * cannot prove text/OCR/reading-order fidelity and never claims to do so.
+ */
+export function pdfSourcePreflight(bytes){
+ const fail=reason=>({ok:false,reason,warnings:[]});
+ if(bytes.length<50||bytes.length>1500000)return fail('invalid');
+ try{
+  const header=new TextDecoder('ascii').decode(bytes.slice(0,8));
+  if(!/^%PDF-(?:1\.[0-7]|2\.0)$/u.test(header))return fail('invalid');
+  const raw=new TextDecoder('latin1').decode(bytes);
+  const tail=raw.slice(-Math.min(raw.length,2048));
+  const match=/startxref\s*(\d+)\s*%%EOF\s*$/u.exec(tail);
+  if(!match)return fail('invalid');
+  const start=Number(match[1]);
+  if(!Number.isSafeInteger(start)||start<8||start>=bytes.length)return fail('invalid');
+  const section=raw.slice(start,start+600);
+  // Classic cross-reference or xref stream (PDF 1.5+), bounded header only.
+  if(!/^xref(?:\s|$)/u.test(section)&&
+     !/^\d+\s+\d+\s+obj\b/u.test(section))return fail('invalid');
+  if(/^\d+\s+\d+\s+obj\b/u.test(section)&&
+     !/\/Type\s*\/XRef\b/u.test(section.slice(0,350)))return fail('invalid');
+  // Deny active/interactive PDF features or known invisible text render modes
+  // that are not safely equivalent to a flattened source text preview.
+  const unsafe=/\/(?:Encrypt|OpenAction|AcroForm|JavaScript|EmbeddedFiles|Annots|RichMedia|Launch|AA)(?=\s|$|[<>\[\]/()])/u;
+  if(unsafe.test(raw)||/\/Subtype\s*\/Form\b/u.test(raw)||
+     /(?:^|\s)[37]\s+Tr(?=\s|$)/u.test(raw))return fail('review_sensitive');
+  const warnings=[];
+  if(/\/Subtype\s*\/Image\b/u.test(raw))
+   warnings.push('pdf_image_content_review');
+  if(/\/Rotate\s*-?(?:90|180|270)\b/u.test(raw))
+   warnings.push('pdf_rotated_page_review');
+  return {ok:true,warnings};
+ }catch{return fail('invalid');}
+}
+
 const MAX_QA_FILE_BYTES=1500000;
 const MAX_QA_MULTIPART_BYTES=MAX_QA_FILE_BYTES+16384;
 async function boundedBinary(req,max){
@@ -629,6 +666,12 @@ export async function documentExtractApi(req,env,opts={}){
   if(usage?.meta?.changes!==1)return err(429,'Đã đạt giới hạn 12 lượt AI QA mỗi ngày.');
  }catch{return unavailable();}
  let fidelity={ok:true,warnings:[]};
+ if(ext==='pdf'){
+  fidelity=pdfSourcePreflight(bytes);
+  if(!fidelity.ok)return err(422,fidelity.reason==='review_sensitive'?
+   'PDF chứa mã hóa, thao tác tương tác, phần nhúng hoặc văn bản ẩn cần xử lý riêng. Hãy dùng một PDF QA tĩnh, không chứa dữ liệu thật.':
+   'PDF thiếu cấu trúc đầu/cuối hợp lệ hoặc không đọc được an toàn. Không chuyển tệp này sang bộ trích xuất.');
+ }
  if(ext==='docx'){
   fidelity=await docxSourcePreflight(bytes);
   if(!fidelity.ok)return err(422,fidelity.reason==='review_sensitive'?
