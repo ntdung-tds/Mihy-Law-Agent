@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `105` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-09T13:16:46.891Z`.
+- **PCS revision:** `106` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-09T19:30:15.803Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -22,6 +22,15 @@
 - **Verified CI 2026-11-09:** PR #198 branch HEAD `406df70511b8769ab9d52f811fc9f39f065f6dda`, [Actions #42597937720](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42597937720) completed SUCCESS; **9/9 executed jobs PASS**, remaining optional live/deploy jobs SKIPPED. `cloudflare-contract` job `129095065795` log explicitly runs `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v`: **11/11 SQLite SQL tests PASS**, including expired deny and foreign-tenant deny. This is synthetic SQL/CI only, not D1/API/browser QA or legal acceptance. This PCS documentation commit itself requires a separate final-HEAD CI verification.
 
 - **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
+
+## R123 — Live signed-out and invalid-cookie QA HTTP boundaries (2026-11-10)
+
+- **Scope:** [Draft PR #204](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/204) stacked on R122 PR #202. Test-only authenticated-boundary follow-up, not a new application or storage workflow. Attempted to establish a permitted positive login path; **no approved private QA test account/password** was available in this tool context. We deliberately **did not bypass password authentication by injecting sessions directly into D1**, nor read/export user credentials or real customer records.
+- **Actual QA HTTP tests:** Dedicated GitHub Actions `cloudflare-contract` job `129384787555`, [Actions #42683712434](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42683712434), commit `f24e8837ac7158dfdb259e62f9bcb6f75364c273`: **PASS 11/11** live HTTP negative security requests to the deployed `ai-law-web-qa` Worker via independent runner: no-cookie workspaces/matters/profile 401, random unrecognized cookie workspaces 401, protected /account 302 to /login, no-cookie tenant switch and password change 401, legal AI API with unknown SID 401, invalid-format login 401, and foreign Origin switch/legal requests 403. The legal source marker did not echo in denied responses. No brute-force password attempts.
+- **Real D1 quota corroboration:** Connected QA D1 aggregate read-only before/after remained **2 quota rows and 4 cumulative requests**, `rows_written=0` in each read; consistent with no new quota charges from the denied HTTP checks. This does **not** independently trace the Workers AI provider or prove per-user accounting.
+- **QA control plane:** Both backend and website Workers have active 100% deployments and expected bindings; Cloudflare API version metadata can be read, but raw deployed source readback returned unavailable/undefined, therefore **source parity NOT_VERIFIED**. Provider Browser Rendering can sometimes redirect an invalid cookie to login but also returned provider HTTP 429 or 422 in previous attempts. No disabling rate limits or changing security controls.
+- **Evidence:** `deployment/cloudflare/tests/r123_live_auth_denials_gpt.py`, `tests/evidence/AL-R123-DENY-gpt.json`, branch-limited CI step. Live **positive** password login, actual authorized tenant switch, multi-user MatterACL legal POST, model provider side-effect trace, 11-UC signed-in browser/Android E2E and Owner acceptance **NOT_RUN**. The prior R122 full synthetic SQLite handler integration PASS must not be represented as live Cloudflare login proof.
+- **Change limits:** No application code, SQL writes, QA deploy, production, Drive/OneDrive/OAuth, real files or frozen SRS v1.1.15 change; no PR merge. Main PCS rev99; this draft branch rev106. Next: use an explicitly authorized isolated QA test account/session through normal login, then compare live D1 quota and tenant isolation; no direct session creation to bypass auth.
 
 ## R122 — Full synthetic authenticated cookie → tenant → MatterACL → AI quota integration (2026-11-09)
 
