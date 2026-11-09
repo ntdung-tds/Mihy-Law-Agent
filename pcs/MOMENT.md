@@ -744,3 +744,18 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 
 - **Evidence:** [GitHub Actions #42542897370](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42542897370), head `ef7aef24cf2bee1550d41c930211748e783105bc`, 9/9 executing jobs SUCCESS. `cloudflare-contract` step 16 `R114 execute synthetic SQL MatterACL tenant isolation regression` SUCCESS; workflow invokes `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v` (7 synthetic SQLite scenarios). PASS is restricted to SQL regression, not live D1/API/browser.
 - **Integration:** Draft PR #191 stacked on #190, both unmerged; avoid direct merge to main. QA authenticated D1/API cross-tenant, no-AI/no-quota side effects, full 11-UC E2E and legal acceptance remain NOT_RUN/BLOCKED pending safe environment verification. No deploy, customer data, Drive/OAuth, production, or SRS/UI changes.
+
+
+## R116 — Cross-user / cross-installation MatterACL regression (2026-11-09)
+
+- **Test-first branch:** [draft PR #193](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/193), based on R115 draft PR #191; commit `283678780699852123e5fa53fc7f40d6554d2010`. Adds two synthetic SQLite tests using the exported real SQL, denying grants assigned to a different user or installation. Product code/UI unchanged; sole UI `/app#assistant` preserved, PR #158 stays closed.
+- **Prior CI evidence:** [run #42542897370](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42542897370), `cloudflare-contract` job `128921540378`, log explicitly shows all seven R114 tests executed and PASS. This does not prove R116 or live QA.
+- **Gates:** R116 CI **NOT_RUN / no workflow associated with test commit at first lookup**; D1/API and authenticated Chromium E2E **NOT_RUN**; live QA reachability **BLOCKED pending verified access**; legal review **NOT_RUN**. Do not merge/deploy production or claim acceptance. Next check PR #193 CI and test SQL-backed API denial side effects using synthetic accounts only.
+
+
+## R116 CI verification — 2026-11-09
+
+- **PASS (synthetic CI):** PR #193 head `129f1074ed959a5971c9b23c184b65fc017da1b7`, [Actions #42564559088](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42564559088) completed success, 9/9 executed jobs success. `cloudflare-contract` step 16, `R114 execute synthetic SQL MatterACL tenant isolation regression`, completed success; R114 file on this head has nine tests (original seven plus R116 cross-user and cross-installation). Workflow explicitly invokes Python unittest discovery for that file. This is CI-step success evidence, not an independently inspected individual test transcript or D1 proof.
+- **PASS (scope):** Reviewed branch PCS revision 102, PR #157/#159 OPEN and #158 CLOSED unmerged; #190/#191/#193 are draft stacked PRs. No new UI; sole 11-UC route `/app#assistant` unchanged.
+- **BLOCKED (live QA):** Fresh `curl -IL` to `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` failed DNS resolution (curl 6; HTTP 000). Authenticated D1/API/browser MatterACL negative paths and zero-AI/zero-quota side effects **NOT_RUN**; 11-UC E2E **NOT_RUN**. No QA or production deployment; no Drive/OneDrive/OAuth or customer data touched.
+- **Next:** Independently strengthen synthetic deny/no-quota regression if gaps remain, then verify D1/API/browser with synthetic accounts only when QA connectivity and safe deploy prerequisites are satisfied. No merge of draft stack until dependency review; Owner signs off only after technical evidence.

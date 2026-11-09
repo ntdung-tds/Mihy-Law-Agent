@@ -83,5 +83,21 @@ class SqlMatterAclRegression(unittest.TestCase):
         self.assertFalse(self.accessible())
 
 
+    def test_other_user_grant_does_not_authorize_current_user(self):
+        self.matter()
+        self.db.execute(
+            "INSERT INTO qa_matter_acl VALUES (?,?,?,?,?,?,?,?,?)",
+            (INSTALL, TENANT_A, MATTER, "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+             "read", "allow", 2, NOW-10, None))
+        self.assertFalse(self.accessible())
+
+    def test_other_installation_grant_does_not_authorize(self):
+        self.matter()
+        self.db.execute(
+            "INSERT INTO qa_matter_acl VALUES (?,?,?,?,?,?,?,?,?)",
+            ("cccccccc-cccc-4ccc-8ccc-cccccccccccc", TENANT_A, MATTER,
+             USER, "read", "allow", 2, NOW-10, None))
+        self.assertFalse(self.accessible())
+
 if __name__ == "__main__":
     unittest.main()
