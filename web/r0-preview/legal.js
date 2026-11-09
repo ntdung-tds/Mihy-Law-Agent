@@ -363,7 +363,10 @@
            data.file_type!==(selected.name.toLowerCase().endsWith('.pdf')?'pdf':'docx')||
            data.uc!==task||!/^[a-f0-9]{64}$/.test(data.source_sha256||'')||
            !Array.isArray(data.document_warnings)||
-           data.document_warnings.some(v=>v!=='tables_present_review_layout')){
+           data.document_warnings.some(v=>![
+             'tables_present_review_layout','pdf_image_content_review',
+             'pdf_rotated_page_review'
+           ].includes(v))){
           throw Error('Kết quả trích xuất không đủ điều kiện đối chiếu.');
         }
         // R139: the server hash is only useful if independently verified.
@@ -377,14 +380,23 @@
           throw Error('SHA-256 của tệp không khớp kết quả chuyển đổi. Không cho phép dùng bản trích; hãy chọn lại tệp QA.');
         importedFile={...current,text:extracted,sha256:localSha};
         fileText.textContent=extracted;
+        const tableWarning=data.document_warnings.includes('tables_present_review_layout');
+        const imageWarning=data.document_warnings.includes('pdf_image_content_review');
+        const rotatedWarning=data.document_warnings.includes('pdf_rotated_page_review');
         fileMeta.textContent=selected.name+' · '+selected.size+' byte · SHA-256 '+
           data.source_sha256.slice(0,16)+'…'+
-          (data.document_warnings.includes('tables_present_review_layout')?
-            ' · Có bảng trong Word — hãy đối chiếu từng ô và bố cục ở tệp gốc.':'');
+          (tableWarning?' · Word chứa bảng.':'')+
+          (imageWarning?' · PDF có ảnh.':'')+
+          (rotatedWarning?' · PDF có trang xoay.':'');
         fileReviewed.checked=false;fileUse.disabled=true;
         filePreview.hidden=false;
-        setFileStatus(data.document_warnings.includes('tables_present_review_layout')?
+        setFileStatus(tableWarning?
           'DOCX có bảng: kiểm tra từng ô, hàng, cột và nội dung bị gộp trên tệp gốc trước khi đưa vào nguồn A.':
+          imageWarning||rotatedWarning?
+          'PDF có '+(imageWarning?'ảnh (có thể là phần scan)':'')+
+          (imageWarning&&rotatedWarning?' và ':'')+
+          (rotatedWarning?'trang xoay':'')+
+          '. Cần đối chiếu bằng mắt từng trang tệp gốc; trích xuất có thể thiếu hoặc sai thứ tự nội dung.':
           'Đã đọc văn bản QA; mở tệp gốc để đối chiếu trước khi đưa vào nguồn A.');
       }catch(error){
         if(!fileStillSame(current)||error?.name==='AbortError')return;

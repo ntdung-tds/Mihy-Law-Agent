@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 133,
-  "updated_at": "2026-11-09T00:08:35.017Z",
+  "revision": 134,
+  "updated_at": "2026-11-09T01:16:57.180Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -3381,6 +3381,61 @@
           "Maintain storage OAuth paused and production/main gated by Owner",
           "Reconcile existing live Worker HTML/CSS/site source drift before full redeploy"
         ]
+      },
+      {
+        "id": "AL-R0-PDF-RISK-R141-001",
+        "title": "R141 — PDF syntax risk preflight: chặn dấu hiệu tương tác/mã hóa; cảnh báo ảnh/trang xoay trước nguồn A",
+        "priority": "P1",
+        "status": "QA_DEPLOYED_CODE_CI_PASS_9_OF_9_DB_RETRY_FINAL_DOC_HEAD_CI_PENDING_OWNER_ANDROID_NOT_RUN",
+        "branch": "fix/r141-pdf-risk-preflight-qa",
+        "pr": 192,
+        "scope": "R0 QA synthetic PDF source integrity for UC03/UC04/UC07; frozen SRS v1.1.15 no new storage",
+        "implementation": [
+          "Bounded raw PDF signature/version, startxref/end marker and classic/xref stream head check before AI toMarkdown.",
+          "Fail closed for visible encrypted, interactive/JavaScript/annotation/form XObject or known text render 3/7 Tr tokens; errors never echo PDF text.",
+          "Flag visible PDF image and nonzero page rotation markers as explicit browser source-review warnings; still require human original-file comparison before source A import.",
+          "Preserve all R138-R140 byte SHA, session role and MatterACL, quota, consent and anti-stale gates, existing DOCX preflight unchanged.",
+          "Marker scanning cannot guarantee full PDF/OCR/text fidelity, including compressed object/streams, graphic/rotation transforms, fonts and page layout."
+        ],
+        "tests": {
+          "node_pdf": "PASS_CLASSIC_XREF_SOURCE_11_NEGATIVE_UNSAFE_PDF_3_IMAGE_ROTATION_WARNING_VARIANTS",
+          "chromium": "PASS_DESKTOP_AND_MOBILE_SYNTHETIC_PDF_IMAGE_WARNING_REVIEW_GATE_PRESERVED",
+          "first_run": "FAIL_RUN_42543609868_BROWSER_OLD_DOCX_TABLE_METADATA_ASSERTION",
+          "corrected_run": "PASS_9_OF_9_RUN_42543940049_SHA_fe89fef20a9c78552a1c6c63cb12dd6f5a2f77db",
+          "db_retry": "FIRST_DB_FAIL_OTHER_SCHEMA_MIGRATION_EXPECTED_T_GOT_F_RETRY_PASSED_NO_TEST_OR_DB_CODE_RELAXATION",
+          "final_head_ci": "PENDING_AFTER_SRS_PCS_DOCUMENTATION",
+          "owner_android_signed_in": "NOT_RUN",
+          "real_scanned_pdf_or_ocr": "NOT_RUN",
+          "semantic_legal_fidelity": "NOT_RUN"
+        },
+        "qa": {
+          "backend": {
+            "worker": "ai-law-standalone-cf-qa",
+            "version": "53b80b55-22d5-438a-b52a-0d14b14b8009",
+            "deployment": "a4563676-9f87-4739-8eb2-31d4e98ceb34",
+            "traffic_percent": 100,
+            "readback": "PASS_UPDATED_QA_LEGAL_MODULE_BYTE_EXACT_10_SIBLINGS_IDENTICAL_12_BINDINGS_IDENTICAL"
+          },
+          "website": {
+            "worker": "ai-law-web-qa",
+            "version": "1f85992e-2963-497f-aa35-00dfa69f8526",
+            "deployment": "016f78da-c2c0-45d6-993d-53ad33ebf7d9",
+            "traffic_percent": 100,
+            "readback": "PASS_UPDATED_WORKSPACE_LEGAL_MODULE_BYTE_EXACT_26_SIBLINGS_IDENTICAL_2_BINDINGS_IDENTICAL"
+          },
+          "preexisting_html_css_worker_drift": "PRESERVED",
+          "storage": "UNCHANGED",
+          "production": "NOT_DEPLOYED"
+        },
+        "srs_change": "SC-043_BASELINE_V1_1_15_UNCHANGED",
+        "owner_acceptance": "PENDING",
+        "remaining": [
+          "Confirm final PR HEAD GitHub Actions 9/9 after checkpoint docs",
+          "Owner signed-in Android QA PDF review, actual multiline/rotated/scanned/image original-file E2E remains NOT_RUN",
+          "PDF raw byte token preflight is not full parser and may miss encrypted/compressed/rendered semantics; never claim OCR or full legal-source equivalence",
+          "Retain source-of-truth QA/Repo HTML/CSS Worker drift until separate reconciliation",
+          "Keep stacked PR #192 draft, no main merge or production until Owner final acceptance"
+        ]
       }
     ],
     "features": [
@@ -4011,8 +4066,8 @@
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R140 DOCX structural/fidelity preflight PR #189: code CI #42538011903 PASS 9/9; backend QA version b4185498-fb20-4d93-b80d-3fda4d205d41 100% with exact DOCX module readback and 10 other modules/12 bindings unchanged; site QA version 719c9b90-77e4-4a19-a109-740679210a15 100%, exact UI module readback and 26 others/2 bindings unchanged. Owner authenticated Word fidelity NOT_RUN, SC-042.",
-      "next_action": "Verify R140 final-head CI and then Owner Android acceptance using synthetic DOCX (valid, tracked, hidden, table). Avoid saying PDF OCR or full DOCX fidelity verified. Continue small SRS R0 source slices only; OAuth/storage paused and no production until Owner final acceptance.",
+      "last_completed_step": "R141 PDF raw-syntax risk preflight PR #192: code CI #42543940049 PASS 9/9 after one failed standalone-db migration attempt and successful job rerun; R141 backend QA version 53b80b55-22d5-438a-b52a-0d14b14b8009 and site QA 1f85992e-2963-497f-aa35-00dfa69f8526 each 100% traffic, one-module exact readback, 10+26 siblings and 12+2 bindings unchanged. PDF OCR/fidelity and Owner Android NOT_RUN. SC-043.",
+      "next_action": "Verify R141 final-head CI 9/9; Owner authenticated Android PDF/DOCX QA acceptance with synthetic documents; inspect PDF scan/rotated/hidden/OCR and Word tracked-changes separately, no claims of full source fidelity. Continue SRS R0 functional slices only, storage OAuth paused, no production or merge until Owner approval.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",

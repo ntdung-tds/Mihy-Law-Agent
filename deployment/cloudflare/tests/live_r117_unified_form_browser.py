@@ -37,7 +37,8 @@ def scenario(browser,name,viewport,origin):
             '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:tbl><w:tr><w:tc><w:p><w:r><w:t>Legal QA document with a table and 10 files.</w:t></w:r></w:p></w:tc></w:tr></w:tbl></w:body></w:document>')
     qa_import_docx=docx_buf.getvalue()
     qa_import_files={"qa_r138.pdf":qa_import_pdf,"qa_r138.docx":qa_import_docx,
-                     "qa_r139_badsha.pdf":qa_import_pdf}
+                     "qa_r139_badsha.pdf":qa_import_pdf,
+                     "qa_r141_image.pdf":qa_import_pdf}
     qa_import_text="Điều 1. Bên A giao 10 tài liệu vào ngày 15/09/2026. Bên B thanh toán 2.000.000 đồng."
     def as_row(c):
         return dict(id=c["id"],title=c["title"],created_at=1800000000,
@@ -74,7 +75,9 @@ def scenario(browser,name,viewport,origin):
                                  hashlib.sha256(qa_import_files[file_name]).hexdigest()),
                 "source_text":qa_import_text,
                 "document_warnings":(["tables_present_review_layout"]
-                                      if file_name.endswith(".docx") else []),
+                                      if file_name.endswith(".docx") else
+                                      ["pdf_image_content_review"] if
+                                      file_name=="qa_r141_image.pdf" else []),
                 "mode":"qa_file_text_preview_not_verified",
                 "review_required":True,"storage":"none",
                 "note":"Synthetic text conversion for review; no storage."})
@@ -562,7 +565,8 @@ def scenario(browser,name,viewport,origin):
         assert qa_import_text in page.locator("#legal-qa-file-text").inner_text()
         if filename.endswith(".docx"):
             assert "có bảng" in file_status.inner_text().lower()
-            assert "từng ô" in page.locator("#legal-qa-file-meta").inner_text()
+            assert "Word chứa bảng" in page.locator("#legal-qa-file-meta").inner_text()
+            assert "từng ô" in file_status.inner_text()
         assert not file_use.is_enabled()
         assert "chưa" not in file_status.inner_text().lower() or "lưu" not in file_status.inner_text().lower()
         assert len([c for c in calls if c==("POST","/api/qa/legal/run")])==run_before
@@ -574,6 +578,26 @@ def scenario(browser,name,viewport,origin):
         assert not page.locator("#legal-qa-consent").is_checked()
         assert page.locator("#legal-qa-file-preview").is_hidden()
         assert file_input.input_value()==""
+    # R141: a PDF with detected image content stays preview-only until
+    # reviewer acknowledgment. The warning is visible in both viewports.
+    source_before=source.input_value()
+    run_before=len([c for c in calls if c==("POST","/api/qa/legal/run")])
+    file_input.set_input_files({"name":"qa_r141_image.pdf",
+        "mimeType":"application/pdf","buffer":qa_import_pdf})
+    page.locator("#legal-qa-file-consent").check()
+    page.locator("#legal-qa-file-extract").click()
+    page.locator("#legal-qa-file-preview").wait_for(state="visible",timeout=15000)
+    assert "PDF có ảnh" in page.locator("#legal-qa-file-meta").inner_text()
+    assert "có thể thiếu" in file_status.inner_text().lower()
+    assert not file_use.is_enabled()
+    assert source.input_value()==source_before
+    assert len([c for c in calls if c==("POST","/api/qa/legal/run")])==run_before
+    file_review.check()
+    assert file_use.is_enabled()
+    file_use.click()
+    assert source.input_value()==qa_import_text
+    assert not page.locator("#legal-qa-consent").is_checked()
+    # A subsequent file requires renewed explicit conversion consent.
     # R139: UI must independently calculate SHA-256 from the selected File,
     # not trust server-side checksum formatting or display alone. A forged but
     # correctly shaped digest cannot permit a preview/import or model call.
