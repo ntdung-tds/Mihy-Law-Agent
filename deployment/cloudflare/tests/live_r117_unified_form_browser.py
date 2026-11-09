@@ -565,7 +565,8 @@ def scenario(browser,name,viewport,origin):
         assert qa_import_text in page.locator("#legal-qa-file-text").inner_text()
         if filename.endswith(".docx"):
             assert "có bảng" in file_status.inner_text().lower()
-            assert "từng ô" in page.locator("#legal-qa-file-meta").inner_text()
+            assert "Word chứa bảng" in page.locator("#legal-qa-file-meta").inner_text()
+            assert "từng ô" in file_status.inner_text()
         assert not file_use.is_enabled()
         assert "chưa" not in file_status.inner_text().lower() or "lưu" not in file_status.inner_text().lower()
         assert len([c for c in calls if c==("POST","/api/qa/legal/run")])==run_before
