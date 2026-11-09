@@ -8,6 +8,13 @@
 
 
 
+## R129 — Isolate R127 security gate PR dependency (2026-11-10)
+
+- **Read-first:** main PCS STATE revision 99 and MOMENT, stacked branch STATE revision 106 and MOMENT; PR #157/#159 OPEN, #158 CLOSED; #204/#205 OPEN draft. No second 11-UC UI, `/app#assistant` preserved.
+- **PASS — dependency isolation:** Compared `qa/r123-auth-denials-gpt` to `test/r127-qa-blocked-failclosed-gpt`: 4 commits ahead, 0 behind, only three files (`deployment/cloudflare/tests/r123_live_auth_denials_gpt.py`, `tests/test_r127_qa_failclosed_gpt.py`, `pcs/MOMENT.md`). Retargeted PR #205 base from `main` to PR #204 branch `qa/r123-auth-denials-gpt`, reducing review scope from 33 to 3 files. This does NOT mean safe to merge into main: PR #204 itself has upstream dependencies and the R123 live job is branch-gated and skipped on R127.
+- **BLOCKED — live QA:** Direct curl to both QA workers returned DNS resolution failure (curl 6, HTTP 000) on 2026-11-10. Authenticated MatterACL/D1/API/browser and 11-UC E2E NOT_RUN; source parity NOT_VERIFIED. Prior CI #42688579632 PASS 9 executed jobs but live QA SKIPPED. No CI PASS claimed for this PCS-only commit.
+- **Next:** Verify new PR #205 HEAD CI, audit PR #204 dependency chain and enable a reachable non-production live gate before any merge/deploy. No product code, credentials, client data, Drive/OneDrive/OAuth, production or SRS change.
+
 ## R128 — Verify R127 final-head CI and distinguish skipped live QA (2026-11-10)
 
 - **Read-first:** Branch PCS STATE revision 106 (main remains 99); PR #157/#159 OPEN draft, #158 CLOSED draft and must not be restored; PR #205 OPEN draft, stacked on main with 33 changed files. Preserve sole 11-UC UI at /app#assistant.
