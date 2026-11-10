@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `111` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-10T03:27:59.052Z`.
+- **PCS revision:** `112` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T05:07:46.472Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -22,6 +22,15 @@
 - **Verified CI 2026-11-09:** PR #198 branch HEAD `406df70511b8769ab9d52f811fc9f39f065f6dda`, [Actions #42597937720](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42597937720) completed SUCCESS; **9/9 executed jobs PASS**, remaining optional live/deploy jobs SKIPPED. `cloudflare-contract` job `129095065795` log explicitly runs `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v`: **11/11 SQLite SQL tests PASS**, including expired deny and foreign-tenant deny. This is synthetic SQL/CI only, not D1/API/browser QA or legal acceptance. This PCS documentation commit itself requires a separate final-HEAD CI verification.
 
 - **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
+
+## R126 — Website relay to backend SQLite integrated two-user QA (2026-11-10)
+
+- **Goal and scope:** Continue Owner-consolidated R126 inside Draft PR #208/issue #156 without new backlog, external customer data, OAuth/Drive or product changes. Read main PCS rev99 and latest draft branch rev111 before editing; PR #208 was draft at `a0ff150e9b37293a4779c9cb1d2434ad73ada195`. Private live password login was blocked by network+secret handling; independently exercise **actual site Worker and API Worker together with D1-compatible SQL** instead of repeating handler-only mocks. This is a disposable in-memory test, not deployed Cloudflare E2E.
+- **Implementation:** Added `deployment/cloudflare/tests/r126_site_to_d1_gpt.test.mjs` (Node 22 `node:sqlite`). It assembles 0001/0002/0003/R108/R109 SQL schema, two synthetic QA users, personal+shared tenants, three synthetic matters and explicit private MatterACL; builds actual website modules using the existing `node tools/build_cf_site.mjs`. The generated site Worker calls the *actual* backend Worker through simulated `QA_AUTH.fetch`, which executes real `mobile_auth`, `matter_workspace` and `qa_legal_workflows` against in-memory D1-compatible SQL. No real passwords, public network, QA D1 writes or model provider call.
+- **Verified path:** Anonymous /app redirects and API session rejects; two successful synthetic password logins via site Worker with distinct Strict/HttpOnly/Secure cookies; site private /app/app.js/account becomes available; source-defined default personal tenant for A; A switches to shared organization and again to personal, rotating SID and invalidating old cookie; matter lists for A and B show only own private matters, B `tenant_admin` cannot bypass ACL; reciprocal UC04 requests 404 without AI calls/quota change; authorized UC10 source-only search makes no AI call/charge; foreign-Origin request is stopped at website before backend fetch; authorized UC04 with a stub model creates **exactly one quota row** under correct B tenant/user; both logouts revoke protected access. Asserts the *actual exported* `MATTER_LIST_SQL`, `LEGAL_MATTER_ACCESS_SQL`, and `LEGAL_QUOTA_SQL` queries were executed.
+- **Test/debug loop:** Initial CI failed because `site_worker.mjs` imports generated HTML bundles not checked into source. Added existing site build step to `cloudflare-contract` and changed test to import generated website Worker. Corrected test expectation for source-defined tenant order (`personal` first). No product source defect established by these two initial test-harness failures.
+- **Proof:** Test commit `fd0442877b52ad9d07fabf1c6f4c8861ee379def`, [GitHub Actions #42759935247](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42759935247), `cloudflare-contract` job `129642984435`, direct log `ok 1 - R126 website relay -> backend real SQLite: two cookie users, tenant ACL, quota, logout` = **PASS**. Previous live unsigned public Chromium 18/18 PASS retained, but actual password-positive Cloudflare HTTP remains **NOT_RUN**. Latest evidence `tests/evidence/AL-R126-E2E-gpt-v5.json` preserves v1–v4; branch PCS rev112. Full documentation HEAD CI must be checked separately before reporting final 10/10.
+- **Acceptance boundary:** Still need real QA secure credential delivery to reachable runner, authenticated tenant/MatterACL/AI side-effect verification, logged-in mobile/desktop QA, accurate legal 11-UC acceptance and Owner signoff. **Do not turn integration CI PASS into live HTTP acceptance.** No merge, deploy QA/production, OAuth/storage or frozen SRS v1.1.15 edits; main PCS unchanged rev99.
 
 ## R126 — Real public Chromium QA mobile/desktop gate (2026-11-10)
 
