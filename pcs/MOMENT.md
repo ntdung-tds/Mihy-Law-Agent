@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `109` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-10T02:01:28.011Z`.
+- **PCS revision:** `110` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T03:09:41.147Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -24,6 +24,10 @@
 - **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
 
 ## R126 — Two-account real HTTP QA gate plus live D1 cross-user proof (2026-11-10)
+
+- **Owner-directed continuation in same consolidated R126 package (2026-11-10):** Added a secure alternative to the blocked GitHub Secrets setup: `MIHY_QA_R126_CREDENTIAL_FILE=/absolute/path/mihy_qa_gpt_v1.txt` permits the *same* R126 test runner on an authorized network-reachable QA computer. The file **must be 0600, regular, non-symlink, outside repository**, contain exactly QA-A/QA-B synthetic entries; mixed sources and unsafe permissions fail closed. No passwords, raw responses or cookies printed. Updated owner-private conversation file permissions to 0600 without changing its content. New offline tests for 0600 acceptance, 0644 denial, symlink rejection and source ambiguity: **10/10 R126 offline unit cases PASS**, GitHub unit job in [Actions #42747314595](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42747314595). This does not make the live private HTTP gate pass.
+- **Live read-only QA recheck:** Existing two R125 QA logins remain active; **0** current R125 sessions; AI quota **2 rows / 4 cumulative requests**; D1 query `rows_written=0`. Cloudflare Browser Rendering public login page at **390×844 mobile** exposes login/email/password/submit controls, but independent **1440×900 desktop** call returned Cloudflare Browser Rendering API **429**. These are public anonymous UI checks, not authenticated mobile/desktop E2E. Local runtime QA DNS remains unresolved; real signed-in HTTP and provider call/quota effects **BLOCKED/NOT_RUN**.
+- **Updated evidence:** `tests/evidence/AL-R126-E2E-gpt-v3.json` is a new version (v1 and v2 preserved). Branch PCS revision 110. Github Actions secret-gated job remains disabled, no extra accounts, product code, QA/production deployment, OAuth/Drive or SRS scope change; no merge. One consolidated Owner acceptance checklist stays in issue #156 and Draft PR #208, not new tasks.
 
 - **Purpose:** Continue after R125 by using both already provisioned, strictly synthetic QA identities in normal signed-in HTTP to verify tenant isolation, MatterACL and account logout, without exposing credentials or modifying production.
 - **Credential integrity:** The owner-private file `mihy_qa_gpt_v1.txt` exists in this runtime with permissions `0600`; both QA-A and QA-B password values were compared locally via PBKDF2-HMAC-SHA256 with the corresponding live QA D1 salted verifier prefixes: **2/2 PASS**. No password was logged or committed. Direct container DNS still cannot resolve the QA Workers; browser rendering can view GET login but page CSP blocked injected browser scripts. Cloudflare Secrets Store/GitHub secrets are still not configured, so positive HTTP login remains NOT_RUN rather than guessing credentials or bypassing authentication.
