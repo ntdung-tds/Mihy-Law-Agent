@@ -205,7 +205,7 @@
             translationWarnings=review.paired_segments!==review.total_segments||
               (Array.isArray(review.flags)&&review.flags.length>0);
             for(const entry of review.rows){
-              if(!entry||!/^A[1-9]\\d*$/.test(entry.source_id)||
+              if(!entry||!/^A[1-9]\d*$/.test(entry.source_id)||
                  typeof entry.source_text!=='string'||
                  typeof entry.draft_text!=='string'||entry.source_text.length>5000||
                  entry.draft_text.length>8500||
