@@ -1,5 +1,30 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R134 — Static legal source guard review; live QA DNS blocked (2026-11-10)
+
+- **Preflight PASS:** Read main PCS STATE revision 99 and stacked branch revision 106, latest MOMENT; PR #157/#159 OPEN Draft, #158 CLOSED, #204/#205 OPEN Draft. main...#205 branch 113 commits ahead, 33 changed files: do not merge stacked branch directly.
+- **Static PASS only:** Reviewed `deployment/cloudflare/src/qa_legal_workflows.mjs` on #159: role/session + MatterACL before quota/AI; UC10/11 local source search; citation IDs checked for existence only, not semantic or legal correctness. No claim of deployed parity.
+- **Live QA BLOCKED:** Both QA Worker hostnames fail DNS (`curl (6)`) from current environment; deployed Worker source NOT_VERIFIED; authenticated tenant/D1 denial-before-AI/quota and 11-UC browser E2E NOT_RUN. Historical CI PASS does not constitute live QA or legal acceptance.
+- **Decision:** No product changes, duplicate tests, merge, deploy, OAuth/Drive/OneDrive, production, or real client data. Next: authorized reachable runner, deployed source readback, synthetic authenticated MatterACL API test, then UC03/04/07. [Issue #156 R134](https://github.com/ntdung-tds/Mihy-Law-Agent/issues/156#issuecomment-6757662378).
+
+
+## R133 — Audit stacked PR dependency and live QA gate (2026-11-10)
+
+- **Preflight:** Read main PCS STATE revision 99 and MOMENT, and current stacked branch STATE revision 106 and MOMENT. PR #157 OPEN Draft (base R108), #159 OPEN Draft (base #157), #158 CLOSED and not redeployed. PR #204 OPEN Draft (base R122 branch), #205 OPEN Draft (base #204). Existing sole 11-UC UI `/app#assistant` unchanged.
+- **PASS — CI evidence review:** Actions run [#42724505850](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42724505850) had 9 successful executed jobs; direct Cloudflare QA jobs were SKIPPED. This verifies earlier commit `7ba50a2b6`, not this PCS commit. CI is not authenticated QA E2E or legal acceptance.
+- **PASS — dependency audit:** Comparing main to #205 branch shows 112 commits ahead, 0 behind and 33 changed files. #205's narrow three-file PR view is valid only against #204, not against main. The chain #205 -> #204 -> R122 contains product modules, migrations, UI and tests; no direct main merge is safe without staged dependency review. #159 likewise depends on #157 and R108. #158 remains excluded.
+- **BLOCKED — live QA:** Independent curl to both `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` failed DNS resolution (curl 6) on 2026-11-10. No deployed Worker source parity readback, authenticated cross-tenant MatterACL/D1 denial-before-AI/quota, or real browser E2E. These remain NOT_VERIFIED / NOT_RUN, not PASS.
+- **Decision:** No new product code or redundant SQL tests, no merge/deploy, no OAuth/Drive/OneDrive/production changes. The immediate independent task is isolate a minimal QA HTTP gate on a reachable authorized runner and compare deployed Worker source before authenticated synthetic MatterACL tests. Keep SRS v1.1.15 unchanged and Owner final acceptance pending.
+
+
+## R132 — Latest HEAD CI verified; live QA DNS remains blocked (2026-11-10)
+
+- **Preflight:** Read `pcs/STATE.json` from main (revision 99) and `pcs/MOMENT.md` on R127 branch (revision 106); branch state differs from main. Checked PR #157 and #159 OPEN Draft; PR #158 CLOSED and not reintroduced. PR #204 remains OPEN Draft, PR #205 OPEN Draft targeting #204.
+- **Fresh CI:** PR #205 HEAD `7ba50a2b6e39726fbf85424beb673800be1303a6` run [#42724505850](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42724505850) completed SUCCESS; **9/9 executed jobs PASS**. All direct Cloudflare live jobs SKIPPED, so this is not deployed QA evidence.
+- **Live QA:** Direct HTTP requests to `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` returned `curl: (6) Could not resolve host`; **BLOCKED** in this execution environment. No authenticated tenant/MatterACL API test or browser E2E executed; deployed source readback **NOT_VERIFIED**.
+- **Decision:** No product change, merge or deploy. Continue with isolated test-first security checks only after reviewing actual target code; do not treat CI success as legal acceptance. Keep SRS v1.1.15, sole 11-UC UI `/app#assistant`, synthetic data only, no OAuth/Drive/OneDrive/production changes.
+- **Next:** Confirm QA reachable from an authorized runner; compare deployed Worker source/bindings to intended commit before tenant denial-before-AI/quota tests. If still blocked, review independent tenant/source guard tests without introducing duplicate or dependent changes.
+
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
 - **PCS revision:** `106` (source of truth `pcs/STATE.json`).
 - **Updated:** `2026-11-09T19:30:15.803Z`.
@@ -7,6 +32,35 @@
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R130 — Verify R129 HEAD CI and live QA gate (2026-11-10)
+
+- **Read-first:** main PCS STATE revision 99 and MOMENT; stacked PR #205 STATE revision 106 and MOMENT. PR #157/#159 remain OPEN Draft; PR #158 CLOSED unmerged and must not be restored. PR #204/#205 OPEN Draft; #205 targets #204 and changes three files only. Sole 11-UC UI remains `/app#assistant`.
+- **PASS — final R129 HEAD CI:** PR #205 commit `59e56ba776796d80ffc9a458a0d671d2e14a0745`, [Actions #42707501922](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42707501922) completed SUCCESS: nine executed jobs successful, 21 optional/live/deploy jobs SKIPPED. Unit job succeeded; R127 mocked fail-closed regression is in unit discovery. **R123 live HTTPS security step SKIPPED**, not PASS. This verifies the prior HEAD, not this documentation commit.
+- **BLOCKED — QA reachability:** Direct curl HTTPS to both `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` failed DNS resolution (curl 6, HTTP 000) from this execution environment. The independent GitHub runner's previous R123 negative HTTP PASS remains historical evidence only; no new live result. Source parity NOT_VERIFIED. Positive authenticated cross-tenant MatterACL/D1, AI provider side effects and 11-UC browser E2E NOT_RUN.
+- **Dependency safety:** PR #204 itself is stacked on R122, so neither #204 nor #205 is approved for direct merge to main. No new product code/test duplication, branch merge, QA/production deployment, SRS changes, Drive/OneDrive/OAuth operations, or customer data.
+- **Next independent work:** inspect #204 upstream chain and isolate minimal live QA gate without broad upstream diffs; run from a reachable runner with explicitly authorized synthetic QA identity, verify deployed code parity and authenticated MatterACL before any QA promotion.
+
+## R129 — Isolate R127 security gate PR dependency (2026-11-10)
+
+- **Read-first:** main PCS STATE revision 99 and MOMENT, stacked branch STATE revision 106 and MOMENT; PR #157/#159 OPEN, #158 CLOSED; #204/#205 OPEN draft. No second 11-UC UI, `/app#assistant` preserved.
+- **PASS — dependency isolation:** Compared `qa/r123-auth-denials-gpt` to `test/r127-qa-blocked-failclosed-gpt`: 4 commits ahead, 0 behind, only three files (`deployment/cloudflare/tests/r123_live_auth_denials_gpt.py`, `tests/test_r127_qa_failclosed_gpt.py`, `pcs/MOMENT.md`). Retargeted PR #205 base from `main` to PR #204 branch `qa/r123-auth-denials-gpt`, reducing review scope from 33 to 3 files. This does NOT mean safe to merge into main: PR #204 itself has upstream dependencies and the R123 live job is branch-gated and skipped on R127.
+- **BLOCKED — live QA:** Direct curl to both QA workers returned DNS resolution failure (curl 6, HTTP 000) on 2026-11-10. Authenticated MatterACL/D1/API/browser and 11-UC E2E NOT_RUN; source parity NOT_VERIFIED. Prior CI #42688579632 PASS 9 executed jobs but live QA SKIPPED. No CI PASS claimed for this PCS-only commit.
+- **Next:** Verify new PR #205 HEAD CI, audit PR #204 dependency chain and enable a reachable non-production live gate before any merge/deploy. No product code, credentials, client data, Drive/OneDrive/OAuth, production or SRS change.
+
+## R128 — Verify R127 final-head CI and distinguish skipped live QA (2026-11-10)
+
+- **Read-first:** Branch PCS STATE revision 106 (main remains 99); PR #157/#159 OPEN draft, #158 CLOSED draft and must not be restored; PR #205 OPEN draft, stacked on main with 33 changed files. Preserve sole 11-UC UI at /app#assistant.
+- **PASS — GitHub CI:** PR #205 head `3b212ac8051ef3f35e032a267ffc25d46b5f5b6b`, [Actions #42688579632](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42688579632) completed success; all 9 executed jobs success. The `unit` job runs `python -m unittest discover -s tests -v`, which includes `tests/test_r127_qa_failclosed_gpt.py` (three synthetic mocked tests for network failure, HTTP 429, expected 401). This is CI evidence, not an authenticated QA result.
+- **BLOCKED/NOT_RUN — live:** The `cloudflare-contract` step `R123 live HTTPS authenticated-boundary negative QA without credentials` was SKIPPED. All optional live/deploy jobs were skipped. Live tenant MatterACL/API/D1/browser and 11-UC E2E remain NOT_RUN; deployed source parity NOT_VERIFIED. Do not mislabel skipped live checks as PASS or infer DNS has recovered.
+- **Changes:** Evidence-only PCS update; no product code, merge, QA deploy or production changes. The current stacked PR #205 is not safe to merge directly without dependency isolation. Next independently isolate the R127 two-file fix into a narrow PR after reviewing base and run live QA only when reachable and safe.
+
+## R127 — Fail closed on unreachable live QA (2026-11-10)
+
+- **Read-first:** PCS revision 106 on stacked R123 branch; PR #157/#159 OPEN, #158 CLOSED; PR #204 live QA negative gate final-head CI #42684059708 PASS 9/9 and 11/11 HTTP negative cases. Main PCS remains rev99. Actual authenticated tenant/MatterACL and 11-UC E2E NOT_RUN.
+- **Bug found:** `r123_live_auth_denials_gpt.py` classified DNS/timeout/429/5xx as BLOCKED, but exited **0 whenever FAIL=0**, even if all eleven probes were BLOCKED. This could produce a false-green CI security gate when QA is unreachable.
+- **Test-first:** `tests/test_r127_qa_failclosed_gpt.py` added first (commit `0cd27582`) with mocked all-network-failure and all-429 cases requiring nonzero exit; then one-line script fix (commit `be84df08`) makes any BLOCKED fail the process while preserving explicit BLOCKED evidence. Positive expected denial remains PASS. No customer data, credentials or app code touched.
+- **Gates:** CI on R127 HEAD **NOT_VERIFIED** until workflow completes. QA authenticated E2E, deployed source parity and legal acceptance **NOT_RUN/NOT_VERIFIED**. This branch is stacked on PR #204; do not merge into main without dependency review. No QA/production deployment.
 
 ## R120 — Final-head CI verification and QA connectivity (2026-11-09)
 
@@ -89,6 +143,13 @@
 - **Source CI:** [Actions run #42394048779](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42394048779) **9/9 PASS**, including actual SQLite migrations/audit/deny-overrides, Node API validation and existing login/browser regression.
 - **QA deployment:** backend `ai-law-standalone-cf-qa` deployment `b806d232-14c4-46df-a38e-b840b1e30a63` (9 modules, 2 surgically changed), website `ai-law-web-qa` deployment `fa3c8962-fd7f-4abe-a701-f65a593ec335` (26 modules, 3 surgically changed), both 100%. Readback exactly matched intended case modules and preserved every unrelated module + all prior OAuth/D1/QA_AUTH/Picker binding names/types. Anonymous /health Cloudflare browser PASS; a second /login browser probe was BLOCKED 429 by browser-rendering rate limits.
 - **Remaining verification:** Authenticated Owner phone/browser case rename/reload/denied role **NOT_RUN**. None of 11 legal AI UCs is accepted by this slice. Original private SRS v1.1.15 remains unchanged; exact SRS mapping is NOT_VERIFIED in this chat. Production untouched; Owner acceptance PENDING.
+
+## R131 — CI HEAD verified; QA DNS remains blocked (2026-11-10)
+
+- **Read-first:** `pcs/STATE.json` revision 106 and `pcs/MOMENT.md` on PR #205 branch; main STATE revision 99. PR #157/#159 OPEN Draft; #158 CLOSED and not redeployed; PR #204/#205 OPEN Draft, #205 targets `qa/r123-auth-denials-gpt` with 3 changed files.
+- **CI evidence:** HEAD `1e055953e649f634bb90deac6aa42cd06fc6eb34`, [Actions run #42716653649](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42716653649) completed SUCCESS: 9 executed jobs PASS (standalone-qa/browser/login, cloudflare-contract, unit, staging-kit, db, api, postgres-rls). Live Cloudflare QA jobs SKIPPED; do not treat CI as live QA or legal acceptance.
+- **Live QA attempt:** HTTPS HEAD to both `ai-law-web-qa.iaict-platform.workers.dev/app#assistant` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev/app#assistant` failed DNS `curl (6)`, HTTP 000, from this execution environment. API/D1, deployed-source readback, authenticated MatterACL and browser E2E **BLOCKED/NOT_VERIFIED**. E2E for all 11 UC **NOT_RUN**.
+- **Decision:** No product changes, merge or deploy. Keep QA safety gate fail-closed; next independent task is verifying PR #204/#205 dependency isolation and a reachable authorized QA runner before authenticated tenant-denial tests. Synthetic data only; SRS v1.1.15, UI `/app#assistant`, storage/OAuth and production untouched.
 
 ## R102 — Stop forcing Google account consent at every document save (2026-11-07)
 
