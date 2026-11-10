@@ -534,3 +534,25 @@ body.drawer-open{overflow:hidden}
   font:inherit;font-weight:700;color:#243f64;background:#e8eef9;
   border:1px solid #c6d6ed;border-radius:7px;padding:7px 9px;margin-right:10px;
 }
+
+/* R142: UC03 source-to-translation review, text-only QA; no certified layout. */
+.legal-qa-bilingual-review{
+  margin:14px 0;padding:14px;border:1px solid #d7e1ef;
+  border-radius:12px;background:#f7f9fd;
+}
+.legal-qa-bilingual-review h4{margin:0 0 6px;font-size:15px;color:#1b3355}
+.legal-qa-bilingual-review>p{font-size:12px;line-height:1.55;color:#536581}
+.legal-qa-translation-row{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:8px;padding:12px 0;border-bottom:1px solid #e0e7f0;
+}
+.legal-qa-translation-row>strong{grid-column:1/-1;font-size:12px;color:#34466a}
+.legal-qa-translation-cell{min-width:0;padding:10px;background:#fff;
+  border:1px solid #e1e7f2;border-radius:9px}
+.legal-qa-translation-cell>strong{font-size:11px;color:#586987}
+.legal-qa-translation-cell>p{margin:5px 0 0;font-size:13px;
+  white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}
+@media(max-width:600px){
+  .legal-qa-translation-row{grid-template-columns:minmax(0,1fr)}
+  .legal-qa-bilingual-review{padding:10px}
+}

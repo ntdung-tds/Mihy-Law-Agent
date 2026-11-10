@@ -4,6 +4,7 @@
  */
 import {mobileSession} from './mobile_auth.mjs';
 import {evidenceDiagnostics,wasModelTruncated} from './qa_legal_evidence_gpt.mjs';
+import {buildTranslationReview} from './qa_uc03_bilingual_gpt.mjs';
 
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const MAX_BODY_BYTES=36000,MAX_SOURCE=5000,MAX_QUESTION=600;
@@ -11,7 +12,7 @@ const MAX_OUTPUT=8500,MODEL='@cf/meta/llama-3.1-8b-instruct';
 const TASKS=Object.freeze({
  UC01:['Soạn bản nháp hợp đồng/văn bản','Tạo bản nháp từ các dữ kiện do người dùng cung cấp. Không tự điền tên các bên, điều khoản, số liệu hoặc căn cứ chưa được nêu; đánh dấu [CẦN XÁC MINH].'],
  UC02:['Rà soát hợp đồng','Chỉ ra điều khoản rủi ro, điểm thiếu/không rõ và câu hỏi cần xác minh dựa duy nhất vào nguồn. Không suy đoán vi phạm pháp luật nếu thiếu căn cứ.'],
- UC03:['Dịch tài liệu, hợp đồng','Dịch đầy đủ đoạn được cung cấp sang ngôn ngữ đích, giữ số điều, thuật ngữ, số liệu, tên riêng. Không bỏ đoạn. Không xác nhận tính tương đương pháp lý.'],
+ UC03:['Dịch tài liệu, hợp đồng','Dịch đầy đủ từng đoạn nguồn sang ngôn ngữ đích, giữ số điều, thuật ngữ, số liệu, tên riêng. Trả về CHÍNH XÁC mỗi đoạn dịch dưới nhãn [A1], [A2] theo thứ tự nguồn, nhãn ở đầu dòng riêng của đoạn dịch. Không thêm lời dẫn, tiêu đề hoặc bỏ đoạn. Đây chỉ là bản nháp đối chiếu; không xác nhận tính tương đương pháp lý.'],
  UC04:['Tóm tắt văn bản','Tóm tắt đầy đủ các ý chính, chủ thể, nghĩa vụ, mốc thời gian và điểm chưa rõ; dẫn mã đoạn nguồn khi có thể.'],
  UC05:['Phân tích văn bản','Phân tích cấu trúc, nghĩa vụ, điều kiện, rủi ro và câu hỏi kiểm chứng từ nguồn, không viện dẫn luật không có trong nguồn.'],
  UC06:['So sánh hai văn bản QPPL','So sánh chính xác hai văn bản người dùng dán, nêu các khác biệt theo đoạn và giới hạn đối chiếu. Không kết luận hiệu lực pháp lý nếu không có chứng cứ chính thức.'],
@@ -231,7 +232,11 @@ export async function legalApi(req,env,opts={}){
  }catch{return unavailable();}
  if(!output||!sourceReferencesExist(output,[...primary,...secondary]))return unavailable();
  const evidence=evidenceDiagnostics(body.uc,output,[...primary,...secondary]);
+ // Explicit labelled segments can be aligned conservatively for bilingual
+ // human review. A plain-text model answer never implies complete alignment.
+ const translation_review=body.uc==='UC03'
+  ? buildTranslationReview(output,primary):undefined;
  return json(200,{...common,mode:'ai_draft_not_verified',
-  model:MODEL,answer:output,evidence_diagnostics:evidence,
+  model:MODEL,answer:output,evidence_diagnostics:evidence,translation_review,
   review_notice:'Bản nháp AI từ nội dung mẫu. Trích dẫn chỉ được kiểm tra mã đoạn, chưa xác minh đúng nội dung, căn cứ pháp luật, hiệu lực hoặc bản dịch. Luật sư phải kiểm duyệt.'});
 }

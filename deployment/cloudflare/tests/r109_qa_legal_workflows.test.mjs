@@ -304,3 +304,42 @@ test('R141 UC04 two-paragraph source reports exact uncited anchor IDs for review
  assert.ok(data.evidence_diagnostics.flags.includes('SOURCE_COVERAGE_INCOMPLETE'));
  assert.equal(JSON.stringify(data.evidence_diagnostics).includes('thanh toán'),false);
 });
+
+test('R142 UC03 API returns bilingual review with exact source pairing, not an approved translation',async()=>{
+ const original=SOURCE+'\n\n'+SOURCE2;
+ const labeled=fixture();
+ labeled.env.AI.run=async()=>({
+  response:'[A1] Article 1. Delivery within 15 days.\n[A2] Article 2. Payment within 30 days.'
+ });
+ const response=await legalApi(request({uc:'UC03',source:original,language:'en'}),labeled.env,{now:NOW});
+ assert.equal(response.status,200);
+ const data=await response.json();
+ const review=data.translation_review;
+ assert.equal(data.uc,'UC03');
+ assert.equal(review.mode,'qa_anchor_pairing_not_verified');
+ assert.equal(review.total_segments,2);
+ assert.equal(review.paired_segments,2);
+ assert.deepEqual(review.flags,[]);
+ assert.deepEqual(review.rows.map(x=>x.source_id),['A1','A2']);
+ assert.deepEqual(review.rows.map(x=>x.status),['paired','paired']);
+ assert.match(review.rows[0].source_text,/giao hàng ngày 15/);
+ assert.match(review.rows[0].draft_text,/Delivery within/);
+ assert.equal(review.legal_verification,'not_performed');
+ assert.equal(review.original_formatting_preserved,false);
+ assert.equal(review.human_review_required,true);
+ assert.equal(response.headers.get('Cache-Control'),'no-store');
+
+ const unlabelled=fixture();
+ unlabelled.env.AI.run=async()=>({response:'Unlabelled model translation must not be aligned.'});
+ const incomplete=await legalApi(request({uc:'UC03',source:original,language:'en'}),unlabelled.env,{now:NOW});
+ assert.equal(incomplete.status,200);
+ const bad=await incomplete.json();
+ assert.equal(bad.translation_review.paired_segments,0);
+ assert.deepEqual(bad.translation_review.missing_source_ids,['A1','A2']);
+ assert.ok(bad.translation_review.flags.includes('TRANSLATION_SEGMENTS_MISSING'));
+ assert.equal(bad.translation_review.rows.every(x=>!x.draft_text),true);
+
+ const denied=await legalApi(request({uc:'UC03',source:original}),fixture({acl:false}).env,{now:NOW});
+ assert.equal(denied.status,404);
+ assert.equal((await denied.json()).translation_review,undefined);
+});

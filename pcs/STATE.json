@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 118,
-  "updated_at": "2026-11-10T12:12:31.847Z",
+  "revision": 120,
+  "updated_at": "2026-11-10T12:34:52.656Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1990,7 +1990,7 @@
       {
         "id": "AL-R0-LEGAL-R140-001",
         "title": "R140 local TXT source A/B ingestion into eleven UC QA workflows without provider storage",
-        "status": "SOURCE_CONTRACT_CI_PASS_FULL_CI_PENDING",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
         "priority": "P0",
         "scope": "User-selected local UTF-8 TXT (30–5000 characters and <=20 KB) becomes pasted source text only; PDF/DOCX and cloud-provider uploads remain separate.",
         "acceptance": [
@@ -2000,7 +2000,7 @@
         ],
         "tests": {
           "source_node_vm": "PASS_4_OF_4_ACTIONS_42812630272_CLOUDFLARE_CONTRACT",
-          "full_ci": "PENDING_ACTIONS_42812630272",
+          "full_ci": "PASS_9_OF_9_ACTIONS_42812986365",
           "remote_mobile_browser": "NOT_RUN",
           "actual_customer_data": "PROHIBITED"
         },
@@ -2015,7 +2015,7 @@
         "id": "AL-R0-UC04-R141-001",
         "title": "R141 UC04 summary paragraph citation coverage and uncited source review UI",
         "priority": "P0",
-        "status": "SOURCE_IMPL_CI_PENDING",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
         "scope": "For user-provided source-only synthetic QA summary, show which A paragraph anchors appear in generated text; does not claim semantic completeness.",
         "acceptance": [
           "UC04 response reports total/cited/uncited A anchor IDs without exposing raw source in diagnostics.",
@@ -2023,8 +2023,8 @@
           "Synthetic source tests for partial/full references and API results pass in CI."
         ],
         "tests": {
-          "pure_node": "CI_PENDING_ACTIONS_42813680633",
-          "api": "CI_PENDING_ACTIONS_42813680633",
+          "pure_node": "PASS_ACTIONS_42813941624",
+          "api": "PASS_ACTIONS_42813941624",
           "browser_qa_authenticated": "NOT_RUN_R126_GATE_BLOCKED",
           "legal_review": "NOT_RUN"
         },
@@ -2034,6 +2034,33 @@
         ],
         "owner_acceptance": "PENDING",
         "notes": "UC04 substantive document/PDF/Word and semantic coverage approval remain NOT_RUN; no merge/deploy/secret/customer data."
+      },
+      {
+        "id": "AL-R0-UC03-R142-001",
+        "title": "R142 UC03 review source vs translated paragraphs with per-anchor QA pairing and missing/duplicate alarms",
+        "priority": "P0",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "scope": "Existing authorized user-pasted synthetic source-only UC03; no PDF/DOCX Word layout fidelity, legal certification, provider acceptance or expanded SRS.",
+        "acceptance": [
+          "Model receives a strict per-source-anchor [A#] draft format and API provides ordered source vs suggested translation review rows.",
+          "Missing/duplicate/unstructured/unknown paragraph labels never become silently matched or approved translations.",
+          "Mobile UI displays two-column desktop/single-column mobile review; only plain text is rendered; switching tenants clears source and draft immediately.",
+          "Actual signed-in Cloudflare browser/provider/file and Owner legal quality acceptance remain separate release gates."
+        ],
+        "tests": {
+          "helper_unit": "PASS_4_OF_4_ACTIONS_42816413502_CLOUDFLARE_CONTRACT",
+          "browser_source_vm": "PASS_2_OF_2_ACTIONS_42816413502_CLOUDFLARE_CONTRACT",
+          "authenticated_api_synthetic": "PASS_ACTIONS_42816413502_CLOUDFLARE_CONTRACT",
+          "entire_ci": "PASS_9_OF_9_ACTIONS_42816413502_CODE_HEAD_115f03d81a67c34b0142c691ab674807acfe7c6e",
+          "live_provider_and_tenant_e2e": "NOT_RUN_R126_BLOCKED",
+          "customer_data": "PROHIBITED"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/213",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42816413502"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "R142 code HEAD CI PASS 9/9; current PCS update is docs-only and still needs final-head CI. Draft, no merge/deploy or user acceptance."
       }
     ],
     "features": [

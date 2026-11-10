@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `118` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-10T12:12:31.847Z`.
+- **PCS revision:** `120` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T12:34:52.656Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R142 — UC03 source-to-translation bilingual QA review (2026-11-10)
+
+- **Owner scheduling change:** Owner explicitly cancelled the existing hourly "Thực thi AI Law" automation in this turn. The task was disabled and confirmed `is_enabled=false`. **Do not re-enable or reschedule without a new explicit Owner instruction.** Work now proceeds only on direct requests.
+- **Implementation:** [Draft PR #213](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/213), stacked on #212, adds source-anchor-labelled UC03 translation request, a deterministic parser that pairs [A1]/[A2] to source segments and warns on missing, duplicate and unstructured output, and a safe text-only bilingual review UI (desktop side-by-side/mobile stacked). Clear review rows and old output on workspace switch. No DOCX/PDF visual fidelity, official legal verification or implicit approval.
+- **Evidence:** [Actions #42816413502](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42816413502) at code HEAD `115f03d81a67c34b0142c691ab674807acfe7c6e` completed **9/9 executing jobs PASS**, 21 optional jobs skipped. Specific real-source Node tests 4 helper PASS + 2 browser VM PASS + integrated authenticated synthetic API PASS. PCS revision 120 is a docs-only follow-up; final-head CI should be read separately.
+- **Gates:** Cloudflare real signed-in two-account remote QA remains BLOCKED/NOT_RUN, UC03 source rendering with real Word/PDF files/AI provider legal quality NOT_RUN, no customer data or OAuth/Drive/OneDrive. Neither PR #208 nor stacked #209–#213 has been merged or deployed production. SRS v1.1.15 unchanged. Owner acceptance pending.
 
 ## R141 — UC04 explicitly uncited source-paragraph evidence (2026-11-10)
 
