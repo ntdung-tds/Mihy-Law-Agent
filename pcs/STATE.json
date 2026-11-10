@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 119,
-  "updated_at": "2026-11-10T12:33:46.147Z",
+  "revision": 120,
+  "updated_at": "2026-11-10T12:34:52.656Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2039,7 +2039,7 @@
         "id": "AL-R0-UC03-R142-001",
         "title": "R142 UC03 review source vs translated paragraphs with per-anchor QA pairing and missing/duplicate alarms",
         "priority": "P0",
-        "status": "SOURCE_CONTRACT_CI_PASS_FULL_CI_PENDING",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
         "scope": "Existing authorized user-pasted synthetic source-only UC03; no PDF/DOCX Word layout fidelity, legal certification, provider acceptance or expanded SRS.",
         "acceptance": [
           "Model receives a strict per-source-anchor [A#] draft format and API provides ordered source vs suggested translation review rows.",
@@ -2051,7 +2051,7 @@
           "helper_unit": "PASS_4_OF_4_ACTIONS_42816413502_CLOUDFLARE_CONTRACT",
           "browser_source_vm": "PASS_2_OF_2_ACTIONS_42816413502_CLOUDFLARE_CONTRACT",
           "authenticated_api_synthetic": "PASS_ACTIONS_42816413502_CLOUDFLARE_CONTRACT",
-          "entire_ci": "PENDING_ACTIONS_42816413502",
+          "entire_ci": "PASS_9_OF_9_ACTIONS_42816413502_CODE_HEAD_115f03d81a67c34b0142c691ab674807acfe7c6e",
           "live_provider_and_tenant_e2e": "NOT_RUN_R126_BLOCKED",
           "customer_data": "PROHIBITED"
         },
@@ -2060,7 +2060,7 @@
           "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42816413502"
         ],
         "owner_acceptance": "PENDING",
-        "notes": "Draft stacked on #212; no merge/deploy or fake user sign-off."
+        "notes": "R142 code HEAD CI PASS 9/9; current PCS update is docs-only and still needs final-head CI. Draft, no merge/deploy or user acceptance."
       }
     ],
     "features": [
