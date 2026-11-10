@@ -771,3 +771,15 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: QA public login and anonymous access at 320/390/430/768/1440
         run: python deployment/cloudflare/tests/r126_live_public_browser_gpt.py
+      - name: R126 Chromium login A/B on isolated TLS Worker and disposable SQLite QA
+        run: |
+          set -euo pipefail
+          node tools/build_cf_site.mjs
+          node deployment/cloudflare/tests/r126_browser_server_gpt.mjs > "${RUNNER_TEMP}/r126-browser-fixture-gpt.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 20); do
+            if python -c 'import ssl,urllib.request;urllib.request.urlopen("https://127.0.0.1:18765/health",context=ssl._create_unverified_context(),timeout=2)' >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          python deployment/cloudflare/tests/r126_logged_in_local_browser_gpt.py
