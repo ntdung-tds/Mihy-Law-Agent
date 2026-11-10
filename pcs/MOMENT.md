@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `115` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-10T11:39:16.313Z`.
+- **PCS revision:** `116` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T11:43:47.295Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -23,7 +23,7 @@
 
 
  (querySelector). Fixed with commit `ae516803fd051b79cff067beff57fe23dff58d9f` and must independently verify CI; prior failed job is not retroactively PASS.
-- **Gates:** This is draft code not deployed QA/production; R126 live authenticated two-account Cloudflare QA remains BLOCKED, positive remote UC AI/tenant E2E and legal review NOT_RUN. No actual customer data, passwords, D1 writes, OAuth/Drive/OneDrive, SRS change or merge.
+- **Final code & documentation CI readback:** [Actions #42809293021](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42809293021) at commit `2d08221f5427f1c9432c2c64ade4d312f193406d` completed **9/9 executing jobs SUCCESS**, 21 optional jobs SKIPPED. All four R138 source VM tests PASS, both prior unit and standalone-browser failures resolved. This rev116 PCS-only update still requires its own final HEAD CI verification; never conflate source CI with remote authenticated QA.\n- **Gates:** This is draft code not deployed QA/production; R126 live authenticated two-account Cloudflare QA remains BLOCKED, positive remote UC AI/tenant E2E and legal review NOT_RUN. No actual customer data, passwords, D1 writes, OAuth/Drive/OneDrive, SRS change or merge.
 - **Continuity:** Existing hourly `Thực thi AI Law` automation was updated by Owner request to prioritize completion of **all eleven SRS UCs** while maintaining privacy gates and leaving R126 BLOCKED without repetitive fake QA. Owner retains final signoff.
 
 ## R120 — Final-head CI verification and QA connectivity (2026-11-09)
