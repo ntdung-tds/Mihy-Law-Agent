@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `116` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-10T11:43:47.295Z`.
+- **PCS revision:** `117` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T12:06:15.741Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R139–R140 — 11 UC evidence guard and local TXT input (2026-11-10)
+
+- **Owner directive:** implement all eleven legal workflows under frozen private SRS v1.1.15; this is not a declaration of UC completion. Keep **P0 R0 UC03/UC04/UC07**, followed by R1 UC01/UC02/UC05/UC06/UC08/UC09/UC10/UC11. Existing source-only QA legal endpoint is not a full legal/research/document service.
+- **R139:** [Draft PR #210](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/210) adds server response `evidence_diagnostics` across all eleven UC codes, including missing source-anchor citation flags for analytical drafts, conservative number-preservation warnings for UC03/UC07, explicit UC10/UC11 local sample-only scope, and fail-closed max-token-truncated model output. UI uses textContent for all warnings and still requires independent legal review. [CI #42811334883](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42811334883) completed success 9/9 executing jobs. No user source or draft persistence; model citation ID checks do NOT verify factual correctness.
+- **R140:** [Draft PR #211](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/211), stacked on #210, adds TXT A/B selection on device, strict 30–5000 chars, <=20 KB, .txt, safe characters; no HTTP request at selection. Existing authorized Matter + explicit synthetic consent remain prerequisites for posting content. Generation invalidation prevents stale local reads from old tenant; switching UC06/UC08 to single-source clears B and avoids transmitting hidden source. Local real-source VM regression 4/4 PASS in [CI #42812630272](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42812630272); the full run is pending at this handoff.
+- **Required gates remain:** actual Cloudflare QA signed-in two-account HTTP/browser E2E (R126) BLOCKED; true PDF/DOCX/OCR source integration and user file QA, official legal corpus/time-valid citations, workflow-specific approval/audit/exports, production and Owner acceptance NOT_RUN. No storage/OAuth provider work or customer files. PRs are Draft stacked, do not merge/publish before gates.
 
 ## R138 — 11 UC source-only QA privacy guard and direct menu selection (2026-11-10)
 

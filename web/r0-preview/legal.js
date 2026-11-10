@@ -2,8 +2,8 @@
 (() => {
  'use strict';
  const $=q=>document.querySelector(q);
-  // R109: independent text-only QA workflows. No Drive/file access and no
-  // local persistence of customer text or model output.
+  // R140: QA text-only workflows may read selected TXT locally. No Drive,
+  // provider upload or persistence until an authorized user submits the text.
   const legalForm=$('#legal-qa-form');
   if(legalForm) {
     const byId=id=>$('#'+id);
@@ -18,6 +18,7 @@
     let matterLoadGeneration=0;
     let matterLoadController=null;
     let runController=null;
+    const localFileSequence={a:0,b:0};
     function invalidateRun(){
       workspaceGeneration++;
       runController?.abort();
@@ -33,7 +34,12 @@
     function updateTaskFields(){
       const dual=['UC06','UC08'].includes(uc.value);
       byId('legal-qa-source-b-label').hidden=!dual;
+      byId('legal-qa-file-b-label').hidden=!dual;
       secondary.required=dual;
+      if(!dual){
+        secondary.value='';
+        byId('legal-qa-file-b').value='';
+      }
       const needingQuestion=['UC09','UC10','UC11'].includes(uc.value);
       question.required=needingQuestion;
       byId('legal-qa-language').disabled=uc.value!=='UC03';
@@ -54,6 +60,44 @@
       clearResult();
       setStatus('Đã nạp dữ liệu giả lập. Chọn hồ sơ và xác nhận trước khi chạy.');
     });
+    // Read text locally: users still must select a permitted Matter and
+    // actively consent before any text reaches /api/qa/legal/run.
+    function bindLocalTxt(which,fieldId){
+      const input=byId('legal-qa-file-'+which),field=byId(fieldId);
+      input.addEventListener('change',async()=>{
+        const file=input.files?.[0];
+        if(!file)return;
+        const generation=workspaceGeneration;
+        const sequence=++localFileSequence[which];
+        const isCurrent=()=>generation===workspaceGeneration &&
+          sequence===localFileSequence[which];
+        try {
+          if(!/\.txt$/iu.test(file.name||'')||file.size>20_000 ||
+             file.size===0||file.type&&file.type!=='text/plain'){
+            if(isCurrent())setStatus('Chỉ đọc tệp TXT UTF-8 tối đa 20 KB. Tệp PDF/DOCX cần luồng xử lý riêng.',true);
+            return;
+          }
+          const text=await file.text();
+          if(!isCurrent())return;
+          if(typeof text!=='string'||text.length<30||text.length>5000||
+             /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f\ufffd]/u.test(text)){
+            setStatus('Tệp TXT không hợp lệ hoặc vượt giới hạn 30–5000 ký tự. Không nạp nội dung.',true);
+            return;
+          }
+          field.value=text;
+          byId('legal-qa-consent').checked=false;
+          clearResult();
+          setStatus('Đã đọc TXT '+which.toUpperCase()+' trên thiết bị. Chưa gửi lên máy chủ; xác nhận trước khi chạy.');
+        } catch {
+          if(isCurrent())setStatus('Không thể đọc tệp TXT trên thiết bị.',true);
+        } finally {
+          if(isCurrent())input.value='';
+        }
+      });
+    }
+    bindLocalTxt('a','legal-qa-source');
+    bindLocalTxt('b','legal-qa-source-b');
+
     async function loadLegalMatters(){
       matterLoadController?.abort();
       const generation=++matterLoadGeneration;
@@ -102,6 +146,7 @@
       matter.replaceChildren();
       matter.value='';
       byId('legal-qa-source').value='';
+      byId('legal-qa-file-a').value='';byId('legal-qa-file-b').value='';
       secondary.value='';question.value='';byId('legal-qa-consent').checked=false;
       setStatus('Đang tải hồ sơ của không gian mới…');
       void loadLegalMatters();
@@ -110,7 +155,7 @@
       event.preventDefault();
       if(isSubmitting)return;
       const source=byId('legal-qa-source').value.trim();
-      const extra=secondary.value.trim();
+      const extra=secondary.required?secondary.value.trim():'';
       if(!matter.value){setStatus('Hãy tạo và chọn hồ sơ QA trước.',true);return;}
       if(source.length<30||source.length>5000||
         (secondary.required&&(extra.length<30||extra.length>5000))){
