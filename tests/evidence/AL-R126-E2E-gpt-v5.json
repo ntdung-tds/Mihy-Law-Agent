@@ -1,0 +1,43 @@
+{
+  "schema": "ai-law-qa-evidence-v1",
+  "version": 5,
+  "date": "2026-11-10",
+  "package": "R126 consolidated two-user IAM/MatterACL and QA validation",
+  "test_file": "deployment/cloudflare/tests/r126_site_to_d1_gpt.test.mjs",
+  "workflow_step": "cloudflare-contract: R126 full website Worker relay to backend and disposable D1 QA cross-user integration",
+  "source_commit": "fd0442877b52ad9d07fabf1c6f4c8861ee379def",
+  "source_workflow": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42759935247",
+  "source_job_id": 129642984435,
+  "source_result": "PASS_1_INTEGRATED_CASE",
+  "direct_CI_log": "ok 1 - R126 website relay -> backend real SQLite: two cookie users, tenant ACL, quota, logout",
+  "runtime": "Node 22 with node:sqlite in-memory, built site_worker using tools/build_cf_site.mjs, real backend worker.mjs / mobile_auth.mjs / matter_workspace.mjs / qa_legal_workflows.mjs; no external network",
+  "cases": [
+    "Public login returns 200 and anonymous /app#assistant redirects 302, anonymous session 401",
+    "Both synthetic users successfully call website POST /api/qa/login and receive different Secure HttpOnly SameSite=Strict session cookies",
+    "Authenticated /app#assistant, private /app.js and /account return HTTP 200",
+    "Login uses source-defined default personal tenant for QA-A, then authorized switch to shared organization rotates SID and old SID 401",
+    "Website /api/qa/matters responds with A-only and B-only private matter titles using actual MATTER_LIST_SQL",
+    "Reciprocal same-tenant unauthorized UC04 requests denied 404, no model invocation or quota usage",
+    "Authorized UC10 local pasted-source example returns mode=local_example_only and no AI/quota",
+    "Forged foreign-Origin POST denied 403 by website Worker, upstream QA_AUTH.fetch call count unchanged",
+    "Authorized UC04 draft with synthetic model stub consumes exactly one quota entry for correct tenant and user",
+    "QA-B tenant_admin cannot switch into QA-A personal tenant",
+    "After valid QA-A org-to-personal switch previous SID cannot open /app or session; old org matter denied in personal context",
+    "Both logout; old sessions cannot access private UI or API",
+    "Verified actual exported SQL MATTER_LIST_SQL and LEGAL_MATTER_ACCESS_SQL called and LEGAL_QUOTA_SQL called exactly once"
+  ],
+  "test_fix_loop": [
+    "First CI failed because site_worker requires generated public_html and other bundles. Fixed by running existing tools/build_cf_site.mjs before test, importing generated site worker.",
+    "Adjusted QA-A default tenant expectation to actual SQL ORDER BY t.kind DESC (personal first), explicitly tests both switch directions."
+  ],
+  "live_cloudflare_authenticated_password_e2e": "NOT_RUN",
+  "real_cloudflare_signed_in_mobile_desktop": "NOT_RUN",
+  "actual_workers_AI_provider_trace": "NOT_RUN",
+  "owner_final_signoff": "NOT_RUN",
+  "app_code_changed": false,
+  "deployment_changed": false,
+  "oauth_or_storage_changed": false,
+  "customer_data_used": false,
+  "credential_exposure": false,
+  "full_SRS": "v1.1.15 unchanged"
+}
