@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 115,
-  "updated_at": "2026-11-10T11:39:16.313Z",
+  "revision": 116,
+  "updated_at": "2026-11-10T11:43:47.295Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1934,7 +1934,7 @@
       {
         "id": "AL-R0-LEGAL-R138-001",
         "title": "R138 legal QA UI prevents previous-tenant AI responses for all UC01–UC11 and directly opens workflow from function menu",
-        "status": "SOURCE_PATCH_CI_RECHECK_PENDING_OWNER_E2E_NOT_RUN",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
         "priority": "P0",
         "scope": "Source-only synthetic QA workflow hardening for all 11 existing UC text paths; no official legal source corpus, customer file processing or expanded SRS scope.",
         "acceptance": [
@@ -1947,15 +1947,17 @@
           "source_node_vm": "PASS_4_CASES_ON_INITIAL_CLOUDFLARE_CONTRACT_CI_42808425713",
           "initial_full_ci": "FAIL_42808425713_UNIT_AND_BROWSER_AFTER_DROPPED_QUERYSELECTORALL_DOLLAR",
           "repair": "FIXED_SOURCE_COMMIT_ae516803fd051b79cff067beff57fe23dff58d9f",
-          "post_fix_full_ci": "PENDING",
+          "post_fix_full_ci": "PASS_9_OF_9_EXECUTING_JOBS_AT_PREVIOUS_DOC_HEAD_2d08221f5427f1c9432c2c64ade4d312f193406d_ACTIONS_42809293021",
           "authenticated_remote_browser": "NOT_RUN_R126_GATE_BLOCKED",
-          "provider_and_legal_e2e": "NOT_RUN"
+          "provider_and_legal_e2e": "NOT_RUN",
+          "remote_provider_and_owner_acceptance": "NOT_RUN"
         },
         "evidence": [
           "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/209",
           "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42808425713",
           "deployment/cloudflare/tests/r138_legal_tenant_gpt.test.mjs",
-          "web/r0-preview/legal.js"
+          "web/r0-preview/legal.js",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42809293021"
         ],
         "owner_acceptance": "PENDING",
         "notes": "All 11 UC endpoints on stacked QA code are source-only text drafts/local searches with synthetic consent, not 11 completed SRS workflows. Production and QA deploy not performed."
