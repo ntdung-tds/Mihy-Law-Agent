@@ -192,8 +192,14 @@
               <label for="legal-qa-source">Nguồn mẫu A (30–5000 ký tự)
                 <textarea id="legal-qa-source" required minlength="30" maxlength="5000" rows="6" placeholder="Dán văn bản giả lập, điều khoản thử nghiệm hoặc dữ liệu minh họa. Không dùng hồ sơ khách hàng." spellcheck="false"></textarea>
               </label>
+              <label class="legal-qa-local-file" for="legal-qa-file-a">Hoặc đọc tệp TXT A trên thiết bị · chưa gửi lên máy chủ
+                <input id="legal-qa-file-a" type="file" accept=".txt,text/plain" />
+              </label>
               <label for="legal-qa-source-b" id="legal-qa-source-b-label" hidden>Nguồn mẫu B (dùng cho UC06 và UC08)
                 <textarea id="legal-qa-source-b" maxlength="5000" minlength="30" rows="5" placeholder="Dán văn bản so sánh, chỉ sử dụng nội dung mẫu."></textarea>
+              </label>
+              <label class="legal-qa-local-file" id="legal-qa-file-b-label" for="legal-qa-file-b" hidden>Hoặc đọc tệp TXT B trên thiết bị
+                <input id="legal-qa-file-b" type="file" accept=".txt,text/plain" />
               </label>
               <div class="legal-qa-grid">
                 <label for="legal-qa-question">Yêu cầu cụ thể / từ khóa
