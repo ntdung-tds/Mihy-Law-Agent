@@ -1,5 +1,13 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R134 — Static legal source guard review; live QA DNS blocked (2026-11-10)
+
+- **Preflight PASS:** Read main PCS STATE revision 99 and stacked branch revision 106, latest MOMENT; PR #157/#159 OPEN Draft, #158 CLOSED, #204/#205 OPEN Draft. main...#205 branch 113 commits ahead, 33 changed files: do not merge stacked branch directly.
+- **Static PASS only:** Reviewed `deployment/cloudflare/src/qa_legal_workflows.mjs` on #159: role/session + MatterACL before quota/AI; UC10/11 local source search; citation IDs checked for existence only, not semantic or legal correctness. No claim of deployed parity.
+- **Live QA BLOCKED:** Both QA Worker hostnames fail DNS (`curl (6)`) from current environment; deployed Worker source NOT_VERIFIED; authenticated tenant/D1 denial-before-AI/quota and 11-UC browser E2E NOT_RUN. Historical CI PASS does not constitute live QA or legal acceptance.
+- **Decision:** No product changes, duplicate tests, merge, deploy, OAuth/Drive/OneDrive, production, or real client data. Next: authorized reachable runner, deployed source readback, synthetic authenticated MatterACL API test, then UC03/04/07. [Issue #156 R134](https://github.com/ntdung-tds/Mihy-Law-Agent/issues/156#issuecomment-6757662378).
+
+
 ## R133 — Audit stacked PR dependency and live QA gate (2026-11-10)
 
 - **Preflight:** Read main PCS STATE revision 99 and MOMENT, and current stacked branch STATE revision 106 and MOMENT. PR #157 OPEN Draft (base R108), #159 OPEN Draft (base #157), #158 CLOSED and not redeployed. PR #204 OPEN Draft (base R122 branch), #205 OPEN Draft (base #204). Existing sole 11-UC UI `/app#assistant` unchanged.
