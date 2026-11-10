@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `113` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-10T05:28:37.513Z`.
+- **PCS revision:** `114` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T05:48:46.660Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -22,6 +22,15 @@
 - **Verified CI 2026-11-09:** PR #198 branch HEAD `406df70511b8769ab9d52f811fc9f39f065f6dda`, [Actions #42597937720](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42597937720) completed SUCCESS; **9/9 executed jobs PASS**, remaining optional live/deploy jobs SKIPPED. `cloudflare-contract` job `129095065795` log explicitly runs `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v`: **11/11 SQLite SQL tests PASS**, including expired deny and foreign-tenant deny. This is synthetic SQL/CI only, not D1/API/browser QA or legal acceptance. This PCS documentation commit itself requires a separate final-HEAD CI verification.
 
 - **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
+
+## R126 — Stale tenant matter response privacy fix (2026-11-10)
+
+- **Read-first:** PR #208 was Draft at `1fbee9a3a8b1c89919c5382c500124b6baf2ce78`; PCS branch revision 113, main revision 99. The private signed-in Cloudflare QA gate remains BLOCKED (local DNS unavailable, no authenticated secret-backed GitHub runner), so do not pretend local SQL/browser fixtures count as remote login.
+- **Actual product defect fixed in-place:** In `web/r0-preview/matters.js`, a slow GET `/api/qa/matters` from tenant A could finish *after* `ai-law:workspace-switch` purged the old list, incorrectly repainting tenant A's private matter metadata while the new tenant was loading. The server ACL was not bypassed; this was a client-side stale-response leak. Added request-generation invalidation plus `AbortController`, guarded both HTTP response and delayed JSON parse, and ignored obsolete 401 redirects, with immediate list/recent/counters/feedback scrub.
+- **Real source regression:** Added `deployment/cloudflare/tests/r126_stale_tenant_dom_gpt.test.mjs` to always run in `cloudflare-contract`: four deterministic VM tests execute actual `matters.js` with simulated delayed network replies, including ignored-abort late 200, stale 401 after tenant switch, late JSON body, and current-session 401 redirect. All **4/4 PASS** in [Actions #42764184621](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42764184621) `cloudflare-contract`.
+- **Fix-test loop:** First CI source run [#42763873580](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42763873580) showed four new tests PASS but two older R60 VM tests FAIL, because the test sandbox lacked the real browser's `AbortController` global. Updated only `deployment/cloudflare/tests/session_ui_r60.test.mjs` VM context to provide Node's standard `AbortController`; both R60 cases now PASS, no product auth behavior downgraded. Do not silently classify the initial CI as PASS.
+- **Evidence:** `tests/evidence/AL-R126-E2E-gpt-v7.json` (versions v1–v6 retained); branch PCS revision 114. Connected nonproduction Cloudflare D1 read-only after run: **2 active R125 synthetic QA logins, 0 live sessions, AI quota 2 rows/4 cumulative requests; rows_written=0**. Change on draft PR #208 only. Final documentation HEAD CI must be checked separately.
+- **Acceptance boundary:** The frontend fix has **not been deployed to Cloudflare QA**. Signed-in Cloudflare QA two-account HTTP, remote browser E2E, actual model provider side effects, and Owner final signoff remain NOT_RUN/PENDING. No merge/production or QA deploy, no real customer data, OAuth/Drive/OneDrive or frozen SRS v1.1.15 scope change.
 
 ## R126 — Chromium signed-in mobile/desktop browser on isolated Worker QA (2026-11-10)
 
