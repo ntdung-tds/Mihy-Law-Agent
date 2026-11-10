@@ -8,6 +8,8 @@ Exit 0=PASS, 1=FAIL, 2=BLOCKED. No retries or password guessing.
 """
 import json
 import os
+import re
+import stat
 import sys
 import uuid
 from pathlib import Path
@@ -193,8 +195,53 @@ def execute(qa, credentials):
             raise GateError("BLOCKED",";".join(cleanup_errors))
 
 
+def credentials_from_private_file(filepath):
+    """Owner-only file handoff. Never output its bytes, names of secrets or passwords."""
+    p = Path(filepath)
+    repo_root = Path(__file__).resolve().parents[3]
+    if not p.is_absolute() or p.is_symlink() or not p.is_file():
+        raise GateError("BLOCKED", "PRIVATE_CREDENTIAL_FILE_INVALID")
+    try:
+        p.resolve(strict=True).relative_to(repo_root)
+    except ValueError:
+        pass
+    else:
+        raise GateError("BLOCKED", "PRIVATE_CREDENTIAL_FILE_INSIDE_REPO")
+    try:
+        if not stat.S_ISREG(p.stat().st_mode) or stat.S_IMODE(p.stat().st_mode) != 0o600:
+            raise GateError("BLOCKED", "PRIVATE_CREDENTIAL_FILE_MODE_NOT_0600")
+        if p.stat().st_size > 8192:
+            raise GateError("BLOCKED", "PRIVATE_CREDENTIAL_FILE_TOO_LARGE")
+        raw = p.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        raise GateError("BLOCKED", "PRIVATE_CREDENTIAL_FILE_UNREADABLE") from None
+    if not ("QA-A (" in raw and "QA-B (" in raw):
+        raise GateError("BLOCKED", "PRIVATE_CREDENTIAL_FILE_UNEXPECTED_FORMAT")
+    emails = re.findall(r"^Email:\s*(\S+)\s*$", raw, flags=re.MULTILINE)
+    passwords = re.findall(r"^Password:[ \t]*([^\r\n]+)$", raw, flags=re.MULTILINE)
+    if len(emails) != 2 or len(passwords) != 2 or emails != [
+        "mihy.r125.gpt.a@qa.invalid", "mihy.r125.gpt.b@qa.invalid"
+    ] or any(not 24 <= len(pwd) <= 256 or any(ord(c) < 32 for c in pwd)
+             for pwd in passwords):
+        raise GateError("BLOCKED", "PRIVATE_CREDENTIAL_FILE_UNEXPECTED_FORMAT")
+    return emails[0], passwords[0], emails[1], passwords[1]
+
+
 def main():
     values=tuple(os.getenv(k,"").strip() for k in LOGIN_CREDENTIALS)
+    private_path=os.getenv("MIHY_QA_R126_CREDENTIAL_FILE", "").strip()
+    if private_path:
+        if any(values):
+            print('R126_RESULT '+json.dumps({"status":"BLOCKED",
+                  "reason":"AMBIGUOUS_PRIVATE_CREDENTIAL_SOURCES",
+                  "authenticated":False}))
+            return 2
+        try:
+            values=credentials_from_private_file(private_path)
+        except GateError as err:
+            print('R126_RESULT '+json.dumps({"status":err.category,
+                  "reason":err.reason,"authenticated":False}))
+            return 2
     if not all(values):
         print('R126_RESULT '+json.dumps({"status":"BLOCKED",
               "reason":"PRIVATE_QA_CREDENTIALS_NOT_CONNECTED",
