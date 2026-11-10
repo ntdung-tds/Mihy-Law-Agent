@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 117,
-  "updated_at": "2026-11-10T12:06:15.741Z",
+  "revision": 118,
+  "updated_at": "2026-11-10T12:12:31.847Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2010,6 +2010,30 @@
         ],
         "owner_acceptance": "PENDING",
         "notes": "Draft branch only; no persistent source storage; no QA/production deploy or SRS changes."
+      },
+      {
+        "id": "AL-R0-UC04-R141-001",
+        "title": "R141 UC04 summary paragraph citation coverage and uncited source review UI",
+        "priority": "P0",
+        "status": "SOURCE_IMPL_CI_PENDING",
+        "scope": "For user-provided source-only synthetic QA summary, show which A paragraph anchors appear in generated text; does not claim semantic completeness.",
+        "acceptance": [
+          "UC04 response reports total/cited/uncited A anchor IDs without exposing raw source in diagnostics.",
+          "UC04 displays explicit incomplete coverage warning for reviewer; no unsupported legal verification claim.",
+          "Synthetic source tests for partial/full references and API results pass in CI."
+        ],
+        "tests": {
+          "pure_node": "CI_PENDING_ACTIONS_42813680633",
+          "api": "CI_PENDING_ACTIONS_42813680633",
+          "browser_qa_authenticated": "NOT_RUN_R126_GATE_BLOCKED",
+          "legal_review": "NOT_RUN"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/212",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42813680633"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "UC04 substantive document/PDF/Word and semantic coverage approval remain NOT_RUN; no merge/deploy/secret/customer data."
       }
     ],
     "features": [
