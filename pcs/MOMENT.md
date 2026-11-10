@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `107` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-10T00:54:00.000Z`.
+- **PCS revision:** `108` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T01:34:52.293Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -22,6 +22,15 @@
 - **Verified CI 2026-11-09:** PR #198 branch HEAD `406df70511b8769ab9d52f811fc9f39f065f6dda`, [Actions #42597937720](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42597937720) completed SUCCESS; **9/9 executed jobs PASS**, remaining optional live/deploy jobs SKIPPED. `cloudflare-contract` job `129095065795` log explicitly runs `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v`: **11/11 SQLite SQL tests PASS**, including expired deny and foreign-tenant deny. This is synthetic SQL/CI only, not D1/API/browser QA or legal acceptance. This PCS documentation commit itself requires a separate final-HEAD CI verification.
 
 - **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
+
+## R125 — Provisioned isolated Cloudflare QA accounts and ACL fixtures (2026-11-10)
+
+- **Owner authorization:** Owner explicitly requested the agent create QA credentials and store them. This step completed *account provisioning* in the existing standalone nonproduction Cloudflare D1 without touching customer data or production. The owner-only credential file is `mihy_qa_gpt_v1.txt`, a private downloadable conversation attachment **not in the public GitHub repository**. Cloudflare Secrets Store was examined but **write was blocked by connector safety checks**, so do not claim vault storage there.
+- **Account fixtures:** Two new synthetic QA identities with independent 28-character random passwords, stored only as 100,000-iteration PBKDF2-HMAC-SHA256 salted verifiers in D1: QA-A `mihy.r125.gpt.a@qa.invalid` (role lawyer, personal + organization test tenants), QA-B `mihy.r125.gpt.b@qa.invalid` (role tenant_admin in shared organization test tenant). Created 2 QA tenants, 3 explicitly titled synthetic matters and 3 specific read-allow ACL grants. No direct session creation, no real names/files/content, no OAuth/Drive, no model invocation, no SRS or app/deployment change.
+- **Real Cloudflare D1 provisioning:** Single 18-statement D1 batch **SUCCESS**; returned metadata 55 written rows including schema audit trigger effects. Local PBKDF2 verifier consistency **2/2 PASS**, D1 account status checks 2 active verifiers, QA-A 2 memberships, QA-B 1 membership, 0 sessions created by provisioning.
+- **Live D1 MatterACL proof:** Executed the actual exported read ACL SQL with parameter binding on connected D1 against synthetic QA fixtures: **6/6 PASS**. QA-A can read its own personal and organization matters but not B's private org matter; QA-B can read its own org matter but cannot read QA-A's organization matter *despite tenant_admin role*, or A's personal matter. All verification queries read-only, quota remains 2 rows / 4 requests (no AI charges).
+- **Evidence:** `tests/evidence/AL-R125-QA-gpt.json` and draft evidence-only PR stacked on R124. Public evidence must omit actual passwords, password salts/hashes, user IDs, cookies and private tenant/matter IDs. The credentials file is transferred privately via ChatGPT artifact, must be downloaded and kept in Owner's password vault, and should never be uploaded to GitHub.
+- **Still NOT_RUN:** Real HTTP login with the new credentials, browser-authorized tenant switching, application path MatterACL denial after signed-in HTTP, actual Workers AI invocation/usage trace, full mobile 11-UC E2E, deployed source parity, Owner final acceptance. Existing R124 private-secret GitHub job is still disabled/SKIPPED; no GitHub Actions secrets were created. Keep SRS v1.1.15 unchanged. Main PCS rev99; R125 branch rev108; no PR merge/QA or production deployment.
 
 ## R124 — Secure live QA credential gate and actual test-account blocker (2026-11-10)
 
