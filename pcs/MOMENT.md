@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `110` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-10T03:09:41.147Z`.
+- **PCS revision:** `111` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T03:27:59.052Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -22,6 +22,15 @@
 - **Verified CI 2026-11-09:** PR #198 branch HEAD `406df70511b8769ab9d52f811fc9f39f065f6dda`, [Actions #42597937720](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42597937720) completed SUCCESS; **9/9 executed jobs PASS**, remaining optional live/deploy jobs SKIPPED. `cloudflare-contract` job `129095065795` log explicitly runs `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v`: **11/11 SQLite SQL tests PASS**, including expired deny and foreign-tenant deny. This is synthetic SQL/CI only, not D1/API/browser QA or legal acceptance. This PCS documentation commit itself requires a separate final-HEAD CI verification.
 
 - **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
+
+## R126 — Real public Chromium QA mobile/desktop gate (2026-11-10)
+
+- **In-place continuation of the Owner's merged R126 QA package:** Kept one draft PR [#208](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/208) and umbrella issue #156; no extra R127 task or PR, no merge or app deployment.
+- **ACTUAL live Cloudflare QA HTTP + Chromium:** Added `deployment/cloudflare/tests/r126_live_public_browser_gpt.py` and one branch-limited `r126-qa-public-browser` GitHub Actions job using Playwright 1.55 on Ubuntu, *no credentials*. At commit `2abc3e23f257f8401b85f06d05acbd8436642120`, [Actions #42749341971](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42749341971), job `129608986251` printed direct summary **`R126_PUBLIC_BROWSER PASS count=18`**: responsive public login with no horizontal overflow at 320/390/430/768/1440; password visibility toggle 390/1440; anonymous `/app#assistant` redirects to login at all 5 widths; unauthorized GET session/workspaces/matters/profile each returns 401; `/account` redirects 302; `/health` confirms nonproduction. This is REAL remote browser QA, not synthetic UI, but signed-out only.
+- **Real D1 read-only after browser test:** 2 R125 active QA logins, 0 active user sessions, quota unchanged **2 rows/4 cumulative requests**; `rows_written=0`, no client files or model calls. QA frontend/source deployment parity and legal semantics remain NOT_VERIFIED.
+- **Automation:** Existing hourly `Thực thi AI Law` automation updated (not duplicated) to continue SRS tasks autonomously without asking for routine decisions, read latest PCS/issue/PR, and preserve full PASS/FAIL/BLOCKED/NOT_RUN plus Owner final acceptance. This is a scheduled continuation, not a claim that future steps already executed.
+- **Evidence:** `tests/evidence/AL-R126-E2E-gpt-v4.json` (preserve versions 1–3), PCS branch revision 111. Full CI for final documentation HEAD must still be checked after this commit; do not conflate earlier source commit with final documentation commit.
+- **NOT_RUN / BLOCKED:** Real positive HTTP password login A/B and tenant switch, private matter authorizations with session cookies, Workers AI side-effect/accurate quota, logged-in mobile and desktop E2E and Owner acceptance. Blocker remains missing approved *network-accessible* private-secret QA runner (local runtime DNS fails, opt-in GitHub Actions secret gate SKIPPED). Do not bypass login or manually inject D1 sessions. Frozen SRS v1.1.15 unchanged; no product code, production/QA deployment, customer data or Drive/OneDrive/OAuth work.
 
 ## R126 — Two-account real HTTP QA gate plus live D1 cross-user proof (2026-11-10)
 
