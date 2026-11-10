@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {pbkdf2Sync} from 'node:crypto';
 import {DatabaseSync} from 'node:sqlite';
-import {handleSite} from '../src/site_worker.mjs';
+import {handleSite} from '../../../build/ai-law-web/site_worker.mjs';
 import {handle} from '../src/worker.mjs';
 import {LEGAL_MATTER_ACCESS_SQL,LEGAL_QUOTA_SQL} from '../src/qa_legal_workflows.mjs';
 import {MATTER_LIST_SQL} from '../src/matter_workspace.mjs';
@@ -131,7 +131,15 @@ test('R126 website relay -> backend real SQLite: two cookie users, tenant ACL, q
   assert.equal(wa.workspaces.length,2);assert.equal(wb.workspaces.length,1);
   assert.equal(wb.workspaces[0].role,'tenant_admin');
 
-  // Default login is organization first; A and B share the organization tenant.
+  // Existing QA login orders tenant kinds DESC: A initially enters personal.
+  assert.equal((await (await call('/api/qa/session',{sid:sa})).json()).tenant_id,TA);
+  assert.deepEqual((await (await call('/api/qa/matters',{sid:sa})).json()).matters.map(x=>x.id),[MA]);
+  assert.equal((await call('/api/qa/legal/run',{method:'POST',sid:sa,body:legal('UC04',MB)})).status,404);
+  assert.equal(modelCalls,0);assert.deepEqual(usage(db),pre);
+  const toOrg=await call('/api/qa/switch-workspace',{method:'POST',sid:sa,body:{tenant_id:TB}});
+  assert.equal(toOrg.status,200);
+  const oldInitialSid=sa;sa=extractSid(toOrg);assert.notEqual(sa,oldInitialSid);
+  assert.equal((await call('/api/qa/session',{sid:oldInitialSid})).status,401);
   assert.equal((await (await call('/api/qa/session',{sid:sa})).json()).tenant_id,TB);
   assert.equal((await (await call('/api/qa/session',{sid:sb})).json()).tenant_id,TB);
   const ma=(await (await call('/api/qa/matters',{sid:sa})).json()).matters;
