@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 116,
-  "updated_at": "2026-11-10T11:43:47.295Z",
+  "revision": 117,
+  "updated_at": "2026-11-10T12:06:15.741Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -1961,6 +1961,55 @@
         ],
         "owner_acceptance": "PENDING",
         "notes": "All 11 UC endpoints on stacked QA code are source-only text drafts/local searches with synthetic consent, not 11 completed SRS workflows. Production and QA deploy not performed."
+      },
+      {
+        "id": "AL-R0-LEGAL-R139-001",
+        "title": "R139 all eleven UC QA source citations, numeric evidence and model truncation diagnostics",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "priority": "P0",
+        "scope": "Evidence warnings and fail-closed truncated model results for existing source-only synthetic QA workflows; does not verify legal facts.",
+        "acceptance": [
+          "All 11 UC QA responses carry evidence diagnostics without exposing source text or numerical values in metadata.",
+          "Source-based model tasks flag missing A/B citations; UC03/07 flag numeric changes; UC10/11 are sample-only local search.",
+          "Explicit provider max-token truncation cannot return a misleading successful draft."
+        ],
+        "tests": {
+          "all_11_uc_api": "PASS_CLOUDFLARE_CONTRACT",
+          "source_node": "PASS_R139_REGRESSION",
+          "final_head_ci": "PASS_ACTIONS_42811334883",
+          "qa_signed_in": "NOT_RUN",
+          "legal_approval": "NOT_RUN"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/210",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42811334883"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "Draft branch only; no QA/production deployment; no official corpus, PDF/DOCX E2E or legal verification."
+      },
+      {
+        "id": "AL-R0-LEGAL-R140-001",
+        "title": "R140 local TXT source A/B ingestion into eleven UC QA workflows without provider storage",
+        "status": "SOURCE_CONTRACT_CI_PASS_FULL_CI_PENDING",
+        "priority": "P0",
+        "scope": "User-selected local UTF-8 TXT (30–5000 characters and <=20 KB) becomes pasted source text only; PDF/DOCX and cloud-provider uploads remain separate.",
+        "acceptance": [
+          "Selected file remains on-device until explicit Matter + affirmative consent + submit.",
+          "Invalid, oversized or undecodable text is rejected without truncation.",
+          "Old tenant delayed local reads cannot repopulate source; hidden source B is never transmitted on other UC."
+        ],
+        "tests": {
+          "source_node_vm": "PASS_4_OF_4_ACTIONS_42812630272_CLOUDFLARE_CONTRACT",
+          "full_ci": "PENDING_ACTIONS_42812630272",
+          "remote_mobile_browser": "NOT_RUN",
+          "actual_customer_data": "PROHIBITED"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/211",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42812630272"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "Draft branch only; no persistent source storage; no QA/production deploy or SRS changes."
       }
     ],
     "features": [
