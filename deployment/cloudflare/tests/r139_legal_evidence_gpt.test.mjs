@@ -54,3 +54,20 @@ test('R139 refuses provider truncated output rather than presenting partial lega
   assert.equal(wasModelTruncated({response:'Complete text'}),false);
   assert.equal(wasModelTruncated({choices:[{finish_reason:'stop'}]}),false);
 });
+
+test('R141 UC04 summary exposes omitted source paragraph anchors with no source bytes',()=>{
+  const A2={id:'A2',text:'Điều 2. Bên B phải thanh toán đúng hạn.'};
+  const A3={id:'A3',text:'Điều 3. Hai bên có quyền lập biên bản đối chiếu.'};
+  const partial=evidenceDiagnostics('UC04','Tóm tắt đoạn [A1].',[A,A2,A3]);
+  assert.deepEqual(partial.segment_coverage,{
+    total_source_segments:3,explicitly_cited_segments:1,
+    uncited_source_ids:['A2','A3'],
+    interpretation:'anchor_mention_only_not_content_quality'
+  });
+  assert.ok(partial.flags.includes('SOURCE_COVERAGE_INCOMPLETE'));
+  assert.equal(JSON.stringify(partial).includes('thanh toán'),false);
+  const cited=evidenceDiagnostics('UC04','Theo [A1], [A2] và [A3].',[A,A2,A3]);
+  assert.deepEqual(cited.segment_coverage.uncited_source_ids,[]);
+  assert.ok(!cited.flags.includes('SOURCE_COVERAGE_INCOMPLETE'));
+  assert.equal(evidenceDiagnostics('UC03','Bản dịch',[A]).segment_coverage,null);
+});
