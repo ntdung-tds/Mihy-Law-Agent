@@ -148,6 +148,31 @@
           'Chỉ truy xuất từ nguồn giả lập. Chưa xác minh dữ liệu văn bản pháp luật/bản án chính thức.';
         const sources=byId('legal-qa-sources');
         sources.replaceChildren();
+        // Diagnostics flag review risks; no text claims to verify a legal fact.
+        const diagnostics=data.evidence_diagnostics;
+        let evidenceWarnings=[];
+        if(diagnostics&&typeof diagnostics==='object'){
+          const labels={
+            SOURCE_A_CITATION_MISSING:'Kết quả chưa trích dẫn nguồn A.',
+            SOURCE_B_CITATION_MISSING:'Kết quả so sánh chưa trích dẫn nguồn B.',
+            SOURCE_NUMBER_NOT_PRESERVED:'Một hoặc nhiều số trong nguồn chưa xuất hiện ở bản nháp.',
+            UNEXPECTED_NUMBER_IN_DRAFT:'Bản nháp có số không xuất hiện trong nguồn.',
+          };
+          evidenceWarnings=Array.isArray(diagnostics.flags)
+            ? diagnostics.flags.filter(flag=>Object.hasOwn(labels,flag)):[];
+          const note=document.createElement('p');
+          note.className='legal-qa-evidence-note';
+          note.textContent=diagnostics.reference_coverage==='local_sample_only_not_official_corpus'
+            ? 'Tra cứu chỉ thực hiện trong nguồn mẫu đã dán, không phải kho luật/bản án chính thức.'
+            : 'Mã trích dẫn chỉ được so khớp với đoạn nguồn mẫu, không xác minh nội dung hoặc hiệu lực pháp lý.';
+          sources.append(note);
+          for(const flag of evidenceWarnings){
+            const line=document.createElement('p');
+            line.className='legal-qa-evidence-warning';
+            line.textContent='Cần kiểm duyệt: '+labels[flag];
+            sources.append(line);
+          }
+        }
         const title=document.createElement('strong');
         title.textContent='Nguồn đã sử dụng · SHA-256 '+String(data.source_hash||'').slice(0,12)+'…';
         sources.append(title);
@@ -167,7 +192,10 @@
           }
         }
         result.hidden=false;
-        setStatus('Hoàn tất bản nháp QA. Hãy đối chiếu nguồn và kiểm duyệt thủ công.');
+        setStatus(evidenceWarnings.length
+          ? 'Có cảnh báo về trích dẫn hoặc số liệu. Không sử dụng trước khi kiểm duyệt.'
+          : 'Hoàn tất bản nháp QA. Hãy đối chiếu nguồn và kiểm duyệt thủ công.',
+          evidenceWarnings.length>0);
         result.scrollIntoView({behavior:'smooth',block:'nearest'});
       } catch(error){
         if(generation===workspaceGeneration)
