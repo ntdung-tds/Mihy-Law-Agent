@@ -227,6 +227,10 @@ jobs:
         run: node --test deployment/cloudflare/tests/r139_legal_evidence_gpt.test.mjs
       - name: R140 local TXT file import stays private until explicit consent
         run: node --test deployment/cloudflare/tests/r140_txt_local_gpt.test.mjs
+      - name: R142 UC03 bilingual anchored text review, browser safety and tenant rotation
+        run: |
+          node --test deployment/cloudflare/tests/r142_uc03_bilingual_gpt.test.mjs
+          node --test deployment/cloudflare/tests/r142_uc03_dom_gpt.test.mjs
       - name: R123 live HTTPS authenticated-boundary negative QA without credentials
         if: ${{ github.head_ref == 'qa/r123-auth-denials-gpt' || github.ref == 'refs/heads/qa/r123-auth-denials-gpt' }}
         run: python deployment/cloudflare/tests/r123_live_auth_denials_gpt.py
