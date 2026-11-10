@@ -7,6 +7,7 @@ import io
 import json
 import os
 from pathlib import Path
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -110,6 +111,63 @@ class R126Offline(unittest.TestCase):
         self.assertEqual(ex.exception.category,"FAIL")
         self.assertIn("other_private_matter_exposed",ex.exception.reason)
         self.assertIn("LOGOUT_FAILED",ex.exception.reason)
+
+    @staticmethod
+    def private_fixture(path):
+        path.write_text(
+            "MIHY LAW AI QA\n"
+            "QA-A (lawyer, 2 workspaces)\n"
+            "Email: mihy.r125.gpt.a@qa.invalid\n"
+            "Password: SYNTHETIC_A_private_bundle_only_2026\n"
+            "QA-B (tenant_admin, organization workspace)\n"
+            "Email: mihy.r125.gpt.b@qa.invalid\n"
+            "Password: SYNTHETIC_B_private_bundle_only_2026\n",
+            encoding="utf-8",
+        )
+
+    def test_owner_private_file_mode_0600_valid_outside_checkout(self):
+        with tempfile.TemporaryDirectory() as work:
+            file = Path(work) / "private_qa_bundle.txt"
+            self.private_fixture(file)
+            file.chmod(0o600)
+            creds=R.credentials_from_private_file(str(file))
+            self.assertEqual(len(creds),4)
+            self.assertEqual(creds[0],"mihy.r125.gpt.a@qa.invalid")
+            self.assertEqual(creds[2],"mihy.r125.gpt.b@qa.invalid")
+
+    def test_owner_private_file_open_permissions_fail_closed(self):
+        with tempfile.TemporaryDirectory() as work:
+            file = Path(work) / "private_qa_bundle.txt"
+            self.private_fixture(file)
+            file.chmod(0o644)
+            with self.assertRaises(R.GateError) as caught:
+                R.credentials_from_private_file(str(file))
+            self.assertEqual(caught.exception.reason,
+                             "PRIVATE_CREDENTIAL_FILE_MODE_NOT_0600")
+
+    def test_owner_private_file_symlink_fail_closed(self):
+        with tempfile.TemporaryDirectory() as work:
+            target = Path(work) / "private_qa_bundle.txt"
+            self.private_fixture(target)
+            target.chmod(0o600)
+            link = Path(work) / "link_qa_bundle.txt"
+            link.symlink_to(target)
+            with self.assertRaises(R.GateError) as caught:
+                R.credentials_from_private_file(str(link))
+            self.assertEqual(caught.exception.reason,
+                             "PRIVATE_CREDENTIAL_FILE_INVALID")
+
+    def test_mixed_private_file_and_env_secret_sources_blocked(self):
+        output=io.StringIO()
+        env={key:"" for key in R.LOGIN_CREDENTIALS}
+        env.update({"MIHY_QA_R124_EMAIL":"synthetic@invalid.test",
+                    "MIHY_QA_R126_CREDENTIAL_FILE":"/tmp/not-used.txt"})
+        with patch.dict(os.environ,env):
+            with contextlib.redirect_stdout(output):
+                self.assertEqual(R.main(),2)
+        parsed=json.loads(output.getvalue().split("R126_RESULT ",1)[1])
+        self.assertEqual(parsed["reason"],"AMBIGUOUS_PRIVATE_CREDENTIAL_SOURCES")
+        self.assertNotIn("synthetic@invalid.test",output.getvalue())
 
     def test_missing_private_credentials_blocked_without_any_network(self):
         output=io.StringIO()
