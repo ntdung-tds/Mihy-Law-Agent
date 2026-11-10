@@ -113,7 +113,7 @@
   $$('[data-drawer-view]').forEach(n => n.addEventListener('click', () => {
     goto(n.dataset.drawerView); closeFunctionDrawer(false);
   }));
-  $('[data-feature-jump]').forEach(n => n.addEventListener('click', () => {
+  $$('[data-feature-jump]').forEach(n => n.addEventListener('click', () => {
     // Open the requested UC directly in the authenticated, source-only QA
     // workflow panel; avoid routing the owner through an informational card.
     const selected = $('#legal-qa-uc');
