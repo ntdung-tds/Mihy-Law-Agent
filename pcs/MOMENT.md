@@ -1,12 +1,18 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `117` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-10T12:06:15.741Z`.
+- **PCS revision:** `118` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T12:12:31.847Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R141 — UC04 explicitly uncited source-paragraph evidence (2026-11-10)
+
+- Draft [PR #212](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/212), stacked on #211; true source-only QA UC04 summary results now return `evidence_diagnostics.segment_coverage`: exact A paragraph count, number with citation IDs and list of IDs not cited. Source text is not returned in the coverage object or persisted. The UI shows the reviewer missing IDs and an explicit reminder that anchor mention is NOT proof of summary quality/completeness.
+- Pure helper and actual API synthetic tests verify partial/full citation coverage. [CI #42813680633](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42813680633) PENDING at this handoff; do not mark PASS without reading logs. Source SRS v1.1.15 unchanged.
+- Prior R140 [CI #42812986365](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42812986365) completed SUCCESS 9/9 jobs at documented branch HEAD, no QA/production deploy. Live private Cloudflare auth and real file E2E still BLOCKED/NOT_RUN; Owner final acceptance pending.
 
 ## R139–R140 — 11 UC evidence guard and local TXT input (2026-11-10)
 

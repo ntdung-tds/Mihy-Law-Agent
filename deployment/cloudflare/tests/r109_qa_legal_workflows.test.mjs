@@ -289,3 +289,18 @@ test('R139 model output truncated at token budget fails closed without disclosin
  const raw=await result.text();
  assert.doesNotMatch(raw,/SENSITIVE_PARTIAL_QA_DRAFT_2026/);
 });
+
+test('R141 UC04 two-paragraph source reports exact uncited anchor IDs for review',async()=>{
+ const f=fixture();
+ f.env.AI.run=async()=>({response:'Điều 1 ghi thời hạn giao hàng [A1].'});
+ const response=await legalApi(request({
+  uc:'UC04',source:SOURCE+'\n\n'+SOURCE2
+ }),f.env,{now:NOW});
+ assert.equal(response.status,200,await response.clone().text());
+ const data=await response.json();
+ assert.deepEqual(data.evidence_diagnostics.segment_coverage.uncited_source_ids,['A2']);
+ assert.equal(data.evidence_diagnostics.segment_coverage.total_source_segments,2);
+ assert.equal(data.evidence_diagnostics.segment_coverage.explicitly_cited_segments,1);
+ assert.ok(data.evidence_diagnostics.flags.includes('SOURCE_COVERAGE_INCOMPLETE'));
+ assert.equal(JSON.stringify(data.evidence_diagnostics).includes('thanh toán'),false);
+});

@@ -36,6 +36,20 @@ export function evidenceDiagnostics(uc,answer,sourceRows){
     if(TWO_SOURCES.has(uc)&&!cited.some(id=>id.startsWith('B')))
       flags.push('SOURCE_B_CITATION_MISSING');
   }
+  // UC04 requires a readable coverage map. This counts only explicit
+  // paragraph-anchor mentions, not semantic completeness of the summary.
+  let segmentCoverage=null;
+  if(uc==='UC04'){
+    const sourceIds=sourceRows.filter(r=>r.id.startsWith('A')).map(r=>r.id);
+    const uncited=sourceIds.filter(id=>!cited.includes(id));
+    segmentCoverage={
+      total_source_segments:sourceIds.length,
+      explicitly_cited_segments:sourceIds.length-uncited.length,
+      uncited_source_ids:uncited,
+      interpretation:'anchor_mention_only_not_content_quality'
+    };
+    if(uncited.length)flags.push('SOURCE_COVERAGE_INCOMPLETE');
+  }
   let numberCheck='not_applicable';
   if(NUMBER_SENSITIVE.has(uc)){
     const source=sourceRows.filter(r=>r.id.startsWith('A')).map(r=>r.text).join('\n');
@@ -47,6 +61,7 @@ export function evidenceDiagnostics(uc,answer,sourceRows){
   }
   return {
     citations:cited,
+    segment_coverage:segmentCoverage,
     reference_coverage:!EVIDENCE_EXPECTED.has(uc)?'not_required_for_transform':
       (flags.some(f=>f.endsWith('CITATION_MISSING'))?'incomplete':
         'anchor_ids_matched_not_fact_checked'),

@@ -202,6 +202,7 @@
             SOURCE_B_CITATION_MISSING:'Kết quả so sánh chưa trích dẫn nguồn B.',
             SOURCE_NUMBER_NOT_PRESERVED:'Một hoặc nhiều số trong nguồn chưa xuất hiện ở bản nháp.',
             UNEXPECTED_NUMBER_IN_DRAFT:'Bản nháp có số không xuất hiện trong nguồn.',
+            SOURCE_COVERAGE_INCOMPLETE:'Bản tóm tắt chưa dẫn chiếu đủ các đoạn nguồn.',
           };
           evidenceWarnings=Array.isArray(diagnostics.flags)
             ? diagnostics.flags.filter(flag=>Object.hasOwn(labels,flag)):[];
@@ -211,6 +212,21 @@
             ? 'Tra cứu chỉ thực hiện trong nguồn mẫu đã dán, không phải kho luật/bản án chính thức.'
             : 'Mã trích dẫn chỉ được so khớp với đoạn nguồn mẫu, không xác minh nội dung hoặc hiệu lực pháp lý.';
           sources.append(note);
+          const coverage=diagnostics.segment_coverage;
+          if(coverage&&Number.isInteger(coverage.total_source_segments)&&
+             Number.isInteger(coverage.explicitly_cited_segments)&&
+             Array.isArray(coverage.uncited_source_ids)){
+            const uncovered=coverage.uncited_source_ids
+              .filter(id=>typeof id==='string'&&/^A[1-9]\d*$/.test(id))
+              .slice(0,15);
+            const detail=document.createElement('p');
+            detail.className='legal-qa-evidence-note';
+            detail.textContent='UC04 · Trích dẫn '+coverage.explicitly_cited_segments+
+              '/'+coverage.total_source_segments+' đoạn nguồn. Chưa dẫn: '+
+              (uncovered.join(', ')||'không')+
+              '. Đây chỉ là kiểm tra mã đoạn, không chứng minh tóm tắt đủ ý.';
+            sources.append(detail);
+          }
           for(const flag of evidenceWarnings){
             const line=document.createElement('p');
             line.className='legal-qa-evidence-warning';
