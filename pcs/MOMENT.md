@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `112` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-10T05:07:46.472Z`.
+- **PCS revision:** `113` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T05:28:37.513Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -22,6 +22,15 @@
 - **Verified CI 2026-11-09:** PR #198 branch HEAD `406df70511b8769ab9d52f811fc9f39f065f6dda`, [Actions #42597937720](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42597937720) completed SUCCESS; **9/9 executed jobs PASS**, remaining optional live/deploy jobs SKIPPED. `cloudflare-contract` job `129095065795` log explicitly runs `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v`: **11/11 SQLite SQL tests PASS**, including expired deny and foreign-tenant deny. This is synthetic SQL/CI only, not D1/API/browser QA or legal acceptance. This PCS documentation commit itself requires a separate final-HEAD CI verification.
 
 - **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
+
+## R126 — Chromium signed-in mobile/desktop browser on isolated Worker QA (2026-11-10)
+
+- **Owner direction:** Continue autonomously, no extra work package. Read PR #208 HEAD `6d790e6215bdf195f4168e9601783e8b9f0e3734`, PCS draft rev112 and main rev99. The only Cloudflare signed-in QA path remains BLOCKED by lack of an approved secret-backed reachable runner, so continue *other independent tests* without pretending a browser mock is remote production QA.
+- **Test implementation:** Added `deployment/cloudflare/tests/r126_browser_server_gpt.mjs` and `deployment/cloudflare/tests/r126_logged_in_local_browser_gpt.py` into existing #208. GitHub Actions job `r126-qa-public-browser` first runs the remote anonymous Chromium suite (18/18 PASS) and then launches a TLS-only `127.0.0.1` self-signed disposable Node 22 server hosting the **actual generated website Worker and actual API Worker with D1-compatible Node SQLite**. All synthetic QA principals, sample matter titles, passwords and model outputs are generated in isolated fixture; no Owner test password, client record or real model provider used. Source application code untouched.
+- **Real browser proof:** At source HEAD `dc5d7e209e82fa64ff7c1721fa2b8bf1495b6f8a`, [Actions #42762139802](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42762139802) job `r126-qa-public-browser` directly printed `R126_LOCAL_AUTH_CHROMIUM {status: PASS, checks:45, mobile:390x844, desktop:1440x900, website_and_backend:REAL_CODE, qa_database:DISPOSABLE_SQLITE, live_cloudflare_password_login:NOT_RUN}`. Chrome tested A mobile personal login, B desktop org admin login, actual rendered per-user matter lists, denied cross-user UC04, no quota/AI on deny, mobile workspace drawer select to organization, rotated SID and old session 401, allowed local UC10 for both with no AI/quota, desktop/mobile logout and session revocation. This is **45/45 local signed-in browser checks PASS**; separate remote Cloudflare *anonymous* browser checks remain 18/18 PASS.
+- **Debug loop:** Initial browser job failed at `A_mobile_switch_to_org`: Python Playwright `select_option(label=compiled_regular_expression)` TypeError in test harness, not app. Replaced with the actual option value selected from rendered dropdown; repeat `r126-qa-public-browser` job PASS. Earlier site Worker->backend Node SQLite integrated service-binding test also PASS.
+- **Evidence:** `tests/evidence/AL-R126-E2E-gpt-v6.json` (v1–v5 retained); PCS draft rev113; final HEAD CI for this documentation commit separately must be checked before full success claim. User-visible server/session credentials were never logged; self-signed local TLS key not saved in repo.
+- **Still outstanding:** Actual **Cloudflare QA** positive password login with the Owner's existing two R125 test accounts; remote signed-in mobile/desktop, real D1 quota after authorized requests, provider trace, full legal SRS acceptance and Owner final signoff NOT_RUN/BLOCKED. Do not equate local browser pass with live Cloudflare QA acceptance; no merge/QA or production deploy, no real client data, no SRS v1.1.15, Drive/OneDrive/OAuth scope change. Existing hourly task continues to pick up work without asking routine questions.
 
 ## R126 — Website relay to backend SQLite integrated two-user QA (2026-11-10)
 
