@@ -1,5 +1,13 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R132 — Latest HEAD CI verified; live QA DNS remains blocked (2026-11-10)
+
+- **Preflight:** Read `pcs/STATE.json` from main (revision 99) and `pcs/MOMENT.md` on R127 branch (revision 106); branch state differs from main. Checked PR #157 and #159 OPEN Draft; PR #158 CLOSED and not reintroduced. PR #204 remains OPEN Draft, PR #205 OPEN Draft targeting #204.
+- **Fresh CI:** PR #205 HEAD `7ba50a2b6e39726fbf85424beb673800be1303a6` run [#42724505850](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42724505850) completed SUCCESS; **9/9 executed jobs PASS**. All direct Cloudflare live jobs SKIPPED, so this is not deployed QA evidence.
+- **Live QA:** Direct HTTP requests to `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` returned `curl: (6) Could not resolve host`; **BLOCKED** in this execution environment. No authenticated tenant/MatterACL API test or browser E2E executed; deployed source readback **NOT_VERIFIED**.
+- **Decision:** No product change, merge or deploy. Continue with isolated test-first security checks only after reviewing actual target code; do not treat CI success as legal acceptance. Keep SRS v1.1.15, sole 11-UC UI `/app#assistant`, synthetic data only, no OAuth/Drive/OneDrive/production changes.
+- **Next:** Confirm QA reachable from an authorized runner; compare deployed Worker source/bindings to intended commit before tenant denial-before-AI/quota tests. If still blocked, review independent tenant/source guard tests without introducing duplicate or dependent changes.
+
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
 - **PCS revision:** `106` (source of truth `pcs/STATE.json`).
 - **Updated:** `2026-11-09T19:30:15.803Z`.
