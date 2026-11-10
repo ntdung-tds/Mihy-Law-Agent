@@ -1,5 +1,14 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R133 — Audit stacked PR dependency and live QA gate (2026-11-10)
+
+- **Preflight:** Read main PCS STATE revision 99 and MOMENT, and current stacked branch STATE revision 106 and MOMENT. PR #157 OPEN Draft (base R108), #159 OPEN Draft (base #157), #158 CLOSED and not redeployed. PR #204 OPEN Draft (base R122 branch), #205 OPEN Draft (base #204). Existing sole 11-UC UI `/app#assistant` unchanged.
+- **PASS — CI evidence review:** Actions run [#42724505850](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42724505850) had 9 successful executed jobs; direct Cloudflare QA jobs were SKIPPED. This verifies earlier commit `7ba50a2b6`, not this PCS commit. CI is not authenticated QA E2E or legal acceptance.
+- **PASS — dependency audit:** Comparing main to #205 branch shows 112 commits ahead, 0 behind and 33 changed files. #205's narrow three-file PR view is valid only against #204, not against main. The chain #205 -> #204 -> R122 contains product modules, migrations, UI and tests; no direct main merge is safe without staged dependency review. #159 likewise depends on #157 and R108. #158 remains excluded.
+- **BLOCKED — live QA:** Independent curl to both `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` failed DNS resolution (curl 6) on 2026-11-10. No deployed Worker source parity readback, authenticated cross-tenant MatterACL/D1 denial-before-AI/quota, or real browser E2E. These remain NOT_VERIFIED / NOT_RUN, not PASS.
+- **Decision:** No new product code or redundant SQL tests, no merge/deploy, no OAuth/Drive/OneDrive/production changes. The immediate independent task is isolate a minimal QA HTTP gate on a reachable authorized runner and compare deployed Worker source before authenticated synthetic MatterACL tests. Keep SRS v1.1.15 unchanged and Owner final acceptance pending.
+
+
 ## R132 — Latest HEAD CI verified; live QA DNS remains blocked (2026-11-10)
 
 - **Preflight:** Read `pcs/STATE.json` from main (revision 99) and `pcs/MOMENT.md` on R127 branch (revision 106); branch state differs from main. Checked PR #157 and #159 OPEN Draft; PR #158 CLOSED and not reintroduced. PR #204 remains OPEN Draft, PR #205 OPEN Draft targeting #204.
