@@ -248,3 +248,44 @@ test('R118 UC10/UC11 reject cross-origin requests before ACL, search or quota',a
   assert.equal(f.providerCalls.length,0,uc+' must not invoke AI');
  }
 });
+
+test('R139 evidence flags are returned for AI tasks and local UC10/11 across all 11 UC',async()=>{
+ for(const uc of ['UC01','UC02','UC03','UC04','UC05','UC06','UC07','UC08','UC09','UC10','UC11']){
+  const local=['UC10','UC11'].includes(uc);
+  const f=fixture({ai:!local});
+  const response=await legalApi(request({
+   uc,
+   source2:['UC06','UC08'].includes(uc)?SOURCE2:'',
+   question:['UC09','UC10','UC11'].includes(uc)?'giao hàng tháng 9':''
+  }),f.env,{now:NOW});
+  assert.equal(response.status,200,uc+': '+await response.clone().text());
+  const payload=await response.json();
+  const evidence=payload.evidence_diagnostics;
+  assert.ok(evidence,'must not silently omit review diagnostics for '+uc);
+  assert.equal(evidence.legal_verification,'not_performed');
+  assert.equal(evidence.human_review_required,true);
+  assert.ok(Array.isArray(evidence.flags));
+  assert.ok(Array.isArray(evidence.citations));
+  if(local){
+    assert.equal(evidence.reference_coverage,'local_sample_only_not_official_corpus');
+    assert.equal(f.providerCalls.length,0);
+  }else if(['UC06','UC08'].includes(uc)){
+    assert.ok(evidence.flags.includes('SOURCE_A_CITATION_MISSING'));
+    assert.ok(evidence.flags.includes('SOURCE_B_CITATION_MISSING'));
+  }else if(['UC03','UC07'].includes(uc)){
+    assert.equal(evidence.reference_coverage,'not_required_for_transform');
+    assert.ok(evidence.flags.includes('SOURCE_NUMBER_NOT_PRESERVED'));
+  }else{
+    assert.ok(evidence.flags.includes('SOURCE_A_CITATION_MISSING'));
+  }
+ }
+});
+
+test('R139 model output truncated at token budget fails closed without disclosing partial result',async()=>{
+ const f=fixture();
+ f.env.AI.run=async()=>({response:'SENSITIVE_PARTIAL_QA_DRAFT_2026',finish_reason:'length'});
+ const result=await legalApi(request({uc:'UC04'}),f.env,{now:NOW});
+ assert.equal(result.status,503);
+ const raw=await result.text();
+ assert.doesNotMatch(raw,/SENSITIVE_PARTIAL_QA_DRAFT_2026/);
+});
