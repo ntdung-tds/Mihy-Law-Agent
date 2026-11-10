@@ -47,8 +47,9 @@ export function evidenceDiagnostics(uc,answer,sourceRows){
   }
   return {
     citations:cited,
-    reference_coverage:flags.some(f=>f.endsWith('CITATION_MISSING'))?
-      'incomplete':'cited_ids_exist_not_fact_checked',
+    reference_coverage:!EVIDENCE_EXPECTED.has(uc)?'not_required_for_transform':
+      (flags.some(f=>f.endsWith('CITATION_MISSING'))?'incomplete':
+        'anchor_ids_matched_not_fact_checked'),
     number_check:numberCheck,
     flags,
     legal_verification:'not_performed',
