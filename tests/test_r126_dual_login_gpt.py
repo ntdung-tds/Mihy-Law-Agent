@@ -103,6 +103,14 @@ class R126Offline(unittest.TestCase):
             R.execute(api,self.CREDS)
         self.assertEqual(ex.exception.category,"BLOCKED")
         self.assertIn("LOGOUT_FAILED",ex.exception.reason)
+    def test_acl_leak_remains_fail_even_if_logout_also_fails(self):
+        api=MockQA(leak=True,bad_logout=True)
+        with self.assertRaises(R.GateError) as ex:
+            R.execute(api,self.CREDS)
+        self.assertEqual(ex.exception.category,"FAIL")
+        self.assertIn("other_private_matter_exposed",ex.exception.reason)
+        self.assertIn("LOGOUT_FAILED",ex.exception.reason)
+
     def test_missing_private_credentials_blocked_without_any_network(self):
         output=io.StringIO()
         clean={x:"" for x in R.LOGIN_CREDENTIALS}
