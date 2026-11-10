@@ -13,6 +13,19 @@
     const output=byId('legal-qa-output'),copy=byId('legal-qa-copy');
     const setStatus=(msg,bad=false)=>{status.textContent=msg;status.dataset.state=bad?'error':'info';};
     let isSubmitting=false;
+    // Invalidate all in-flight AI results on workspace or task changes.
+    let workspaceGeneration=0;
+    let matterLoadGeneration=0;
+    let matterLoadController=null;
+    let runController=null;
+    function invalidateRun(){
+      workspaceGeneration++;
+      runController?.abort();
+      runController=null;
+      isSubmitting=false;
+      byId('legal-qa-run').disabled=false;
+      clearResult();
+    }
     function clearResult(){
       result.hidden=true;output.textContent='';
       byId('legal-qa-sources').replaceChildren();
@@ -28,7 +41,7 @@
         ?'Tìm trong nguồn mẫu':'Tạo bản nháp QA';
       clearResult();
     }
-    uc.addEventListener('change',updateTaskFields);
+    uc.addEventListener('change',()=>{invalidateRun();updateTaskFields();});
     updateTaskFields();
     byId('legal-qa-example').addEventListener('click',()=>{
       byId('legal-qa-source').value=
@@ -42,11 +55,20 @@
       setStatus('Đã nạp dữ liệu giả lập. Chọn hồ sơ và xác nhận trước khi chạy.');
     });
     async function loadLegalMatters(){
+      matterLoadController?.abort();
+      const generation=++matterLoadGeneration;
+      const controller=new AbortController();
+      matterLoadController=controller;
+      const current=()=>generation===matterLoadGeneration;
       try {
-        const r=await fetch('/api/qa/matters',{credentials:'same-origin',cache:'no-store'});
+        const r=await fetch('/api/qa/matters',{
+          credentials:'same-origin',cache:'no-store',signal:controller.signal
+        });
+        if(!current())return;
         if(r.status===401){location.replace('/login');return;}
         if(!r.ok)throw Error('matter unavailable');
         const data=await r.json();
+        if(!current())return;
         const previously=matter.value;
         matter.replaceChildren();
         const empty=document.createElement('option');
@@ -63,16 +85,25 @@
           ?'Chọn hồ sơ có quyền truy cập để thử nghiệp vụ AI với văn bản mẫu.'
           :'Chưa có hồ sơ QA. Vào Tài liệu → Tạo hồ sơ trước.');
       } catch {
+        if(!current())return;
         matter.replaceChildren();
         const opt=document.createElement('option');
         opt.value='';opt.textContent='Danh mục hồ sơ chưa sẵn sàng';matter.append(opt);
         setStatus('Không thể tải hồ sơ QA. Hãy thử lại.',true);
+      } finally {
+        if(current())matterLoadController=null;
       }
     }
     window.addEventListener('ai-law:legal-open',()=>void loadLegalMatters());
     window.addEventListener('ai-law:workspace-switch',()=>{
-      matter.replaceChildren();clearResult();byId('legal-qa-source').value='';
+      invalidateRun();
+      matterLoadController?.abort();
+      matterLoadGeneration++;
+      matter.replaceChildren();
+      matter.value='';
+      byId('legal-qa-source').value='';
       secondary.value='';question.value='';byId('legal-qa-consent').checked=false;
+      setStatus('Đang tải hồ sơ của không gian mới…');
       void loadLegalMatters();
     });
     legalForm.addEventListener('submit',async event=>{
@@ -89,18 +120,23 @@
         setStatus('Chỉ sử dụng văn bản giả lập và xác nhận trước khi chạy.',true);return;
       }
       isSubmitting=true;byId('legal-qa-run').disabled=true;clearResult();
+      const generation=workspaceGeneration;
+      const controller=new AbortController();
+      runController=controller;
       setStatus('Đang xử lý nguồn QA. Không tải dữ liệu lên Drive…');
       try {
         const response=await fetch('/api/qa/legal/run',{method:'POST',
           headers:{'Content-Type':'application/json'},
-          credentials:'same-origin',cache:'no-store',
+          credentials:'same-origin',cache:'no-store',signal:controller.signal,
           body:JSON.stringify({uc:uc.value,matter_id:matter.value,
             source_text:source,source_text_2:extra,
             question:question.value.trim(),
             language:byId('legal-qa-language').value,synthetic_consent:true})
         });
+        if(generation!==workspaceGeneration)return;
         if(response.status===401){location.replace('/login');return;}
         const data=await response.json().catch(()=>({}));
+        if(generation!==workspaceGeneration)return;
         if(!response.ok){
           if(response.status===404)void loadLegalMatters();
           throw Error(data.error||'Tác vụ QA không thể thực hiện.');
@@ -133,8 +169,16 @@
         result.hidden=false;
         setStatus('Hoàn tất bản nháp QA. Hãy đối chiếu nguồn và kiểm duyệt thủ công.');
         result.scrollIntoView({behavior:'smooth',block:'nearest'});
-      } catch(error){setStatus(error?.message||'Lỗi kết nối đến mô hình QA.',true);}
-      finally{isSubmitting=false;byId('legal-qa-run').disabled=false;}
+      } catch(error){
+        if(generation===workspaceGeneration)
+          setStatus(error?.message||'Lỗi kết nối đến mô hình QA.',true);
+      } finally {
+        if(generation===workspaceGeneration){
+          isSubmitting=false;
+          runController=null;
+          byId('legal-qa-run').disabled=false;
+        }
+      }
     });
     copy.addEventListener('click',async()=>{
       if(result.hidden||!output.textContent)return;
