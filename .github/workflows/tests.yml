@@ -726,3 +726,24 @@ jobs:
           MIHY_QA_R124_EMAIL: ${{ secrets.MIHY_QA_R124_EMAIL }}
           MIHY_QA_R124_PASSWORD: ${{ secrets.MIHY_QA_R124_PASSWORD }}
         run: python deployment/cloudflare/tests/r124_live_qa_auth_gpt.py
+
+  r126-qa-private-dual:
+    # Owner-controlled secret-gated *actual* QA HTTP; never on PR or main.
+    # Skip means NOT_RUN. Keep test credentials in GitHub Secrets, never source/logs.
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/qa/r126-dual-login-gpt' && vars.MIHY_QA_R126_ENABLED == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Normal HTTPS login A/B, tenant and private MatterACL, local UC10 and logout
+        env:
+          MIHY_QA_R124_EMAIL: ${{ secrets.MIHY_QA_R124_EMAIL }}
+          MIHY_QA_R124_PASSWORD: ${{ secrets.MIHY_QA_R124_PASSWORD }}
+          MIHY_QA_R126_B_EMAIL: ${{ secrets.MIHY_QA_R126_B_EMAIL }}
+          MIHY_QA_R126_B_PASSWORD: ${{ secrets.MIHY_QA_R126_B_PASSWORD }}
+        run: python deployment/cloudflare/tests/r126_live_dual_gpt.py
