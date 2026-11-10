@@ -140,9 +140,11 @@ def execute():
                 state="attached", timeout=12000
             )
             page_a.locator("#rail-features").click()
-            page_a.locator("#workspace-switch-drawer-select").select_option(
-                label=re.compile(r"Tổ chức")
-            )
+            options = page_a.locator("#workspace-switch-drawer-select option").all()
+            org = next((opt.get_attribute("value") for opt in options
+                        if "Tổ chức" in opt.inner_text()), None)
+            check("organization_switch_option_available", bool(org))
+            page_a.locator("#workspace-switch-drawer-select").select_option(value=org)
             page_a.wait_for_function(
                 "() => document.querySelector('#profile-role')?.textContent?.includes('Tổ chức')",
                 timeout=20000,
