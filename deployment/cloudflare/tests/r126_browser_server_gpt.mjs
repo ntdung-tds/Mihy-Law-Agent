@@ -51,7 +51,7 @@ for(const [sql,params] of [
 const hash=pbkdf2Sync(password,Buffer.from(salt,'hex'),100000,32,'sha256').toString('hex');
 for(const [user,email] of [[A,'r126-a@synthetic.invalid'],[B,'r126-b@synthetic.invalid']]){
   db.prepare('INSERT INTO qa_login_verifiers(installation_id,email,user_id,subject,password_salt,password_hash,pbkdf2_iterations,status) VALUES(?,?,?,?,?,?,?,?)')
-    .run(I,email,'fixture-subject-'+user,salt,hash,100000,'active');
+    .run(I,email,user,'fixture-subject-'+user,salt,hash,100000,'active');
 }
 
 function d1(){
