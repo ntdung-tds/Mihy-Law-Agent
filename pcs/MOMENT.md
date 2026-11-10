@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `108` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-10T01:34:52.293Z`.
+- **PCS revision:** `109` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T02:01:28.011Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -22,6 +22,15 @@
 - **Verified CI 2026-11-09:** PR #198 branch HEAD `406df70511b8769ab9d52f811fc9f39f065f6dda`, [Actions #42597937720](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42597937720) completed SUCCESS; **9/9 executed jobs PASS**, remaining optional live/deploy jobs SKIPPED. `cloudflare-contract` job `129095065795` log explicitly runs `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v`: **11/11 SQLite SQL tests PASS**, including expired deny and foreign-tenant deny. This is synthetic SQL/CI only, not D1/API/browser QA or legal acceptance. This PCS documentation commit itself requires a separate final-HEAD CI verification.
 
 - **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
+
+## R126 — Two-account real HTTP QA gate plus live D1 cross-user proof (2026-11-10)
+
+- **Purpose:** Continue after R125 by using both already provisioned, strictly synthetic QA identities in normal signed-in HTTP to verify tenant isolation, MatterACL and account logout, without exposing credentials or modifying production.
+- **Credential integrity:** The owner-private file `mihy_qa_gpt_v1.txt` exists in this runtime with permissions `0600`; both QA-A and QA-B password values were compared locally via PBKDF2-HMAC-SHA256 with the corresponding live QA D1 salted verifier prefixes: **2/2 PASS**. No password was logged or committed. Direct container DNS still cannot resolve the QA Workers; browser rendering can view GET login but page CSP blocked injected browser scripts. Cloudflare Secrets Store/GitHub secrets are still not configured, so positive HTTP login remains NOT_RUN rather than guessing credentials or bypassing authentication.
+- **Live D1 check:** Re-ran actual bound MatterACL read SQL on nonproduction D1 for the 3 R125 synthetic cases and 2 users: **6/6 PASS** (A owns personal+org; A denied B private; B owns its private; B `tenant_admin` denied A private; B denied A personal). Read-only throughout; 0 active sessions for these identities, global QA AI quota 2 rows / 4 cumulative requests. No live AI model request.
+- **Test-first implementation:** [Draft PR #208](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/208), stacked on evidence-only #207, adds `deployment/cloudflare/tests/r126_live_dual_gpt.py` and `tests/test_r126_dual_login_gpt.py`. The normal HTTPS gate uses two approved QA credentials from repository secrets (never printed), validates Secure/HttpOnly/SameSite cookies, sessions and tenant memberships, private matter listings for each user, reciprocal UC04 404 with no source echo, authorized UC10 local-only responses, B cannot enter A personal tenant, A org→personal switch rotates SID and makes the old cookie 401, personal matter isolation, and finally logout/session revocation for both users. 5 offline fake-transport tests PASS in GitHub CI (positive lifecycle, cross-user leakage, insecure cookie, failed logout, no-secrets blocked). Application code is unchanged.
+- **Secret gate:** Added `r126-qa-private-dual` CI job, opt-in ONLY on push to `qa/r126-dual-login-gpt` when owner repo variable `MIHY_QA_R126_ENABLED=true`, consuming four private GitHub secrets; PR and main do not run it. **Current result SKIPPED/NOT_RUN**, not live acceptance, because private GitHub Actions secrets and enable flag are absent. No insecure temporary public endpoint or direct D1 session injection used.
+- **Evidence:** `tests/evidence/AL-R126-E2E-gpt.json`, PCS draft branch revision 109. Real signed-in Cloudflare two-user browser/API and actual provider call/quota trace, full 11-UC legal and mobile owner E2E remain NOT_RUN. No merge, QA or production deployment, real customer data, OAuth/Drive, or SRS v1.1.15 change. Main PCS revision 99. Owner final acceptance pending.
 
 ## R125 — Provisioned isolated Cloudflare QA accounts and ACL fixtures (2026-11-10)
 
