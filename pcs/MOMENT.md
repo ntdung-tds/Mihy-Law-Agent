@@ -1,12 +1,30 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `114` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-10T05:48:46.660Z`.
+- **PCS revision:** `115` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T11:39:16.313Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R138 — 11 UC source-only QA privacy guard and direct menu selection (2026-11-10)
+
+- **Owner directive:** Complete all 11 legal UC01–UC11 strictly per private SRS v1.1.15. Existing R109 endpoint has eleven synthetic-text handlers and local sample-only UC10/UC11, but **this does not make any UC a completed SRS workflow**. Do not claim official legal corpus, Word/PDF fidelity, actual customer AI processing, or Owner acceptance.
+- **Implementation:** Draft [PR #209](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/209) is stacked on **Draft #208** rather than modifying R126 acceptance. `web/r0-preview/legal.js` now cancels and generation-guards in-flight legal model requests and tenant matter list fetches on workspace rotation or UC change, ignores stale 200/401 and delayed JSON, and clears private output immediately. `web/r0-preview/app.js` opens the selected UC directly from each of eleven mobile feature-menu choices.
+- **Regression:** `deployment/cloudflare/tests/r138_legal_tenant_gpt.test.mjs` runs actual legal.js with delayed/ignored-abort transport. Initial [Actions #42808425713](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42808425713) `cloudflare-contract` PASS; `unit` and `standalone-browser` FAIL due to real typo in edited app.js, where `$` (querySelectorAll) became `# Mihy Law AI Agent — PCS Chat Solo MOMENT
+
+- **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
+- **PCS revision:** `115` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T11:39:16.313Z`.
+- **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
+- **SRS:** v1.1.15 remains private and unchanged.
+
+
+
+ (querySelector). Fixed with commit `ae516803fd051b79cff067beff57fe23dff58d9f` and must independently verify CI; prior failed job is not retroactively PASS.
+- **Gates:** This is draft code not deployed QA/production; R126 live authenticated two-account Cloudflare QA remains BLOCKED, positive remote UC AI/tenant E2E and legal review NOT_RUN. No actual customer data, passwords, D1 writes, OAuth/Drive/OneDrive, SRS change or merge.
+- **Continuity:** Existing hourly `Thực thi AI Law` automation was updated by Owner request to prioritize completion of **all eleven SRS UCs** while maintaining privacy gates and leaving R126 BLOCKED without repetitive fake QA. Owner retains final signoff.
 
 ## R120 — Final-head CI verification and QA connectivity (2026-11-09)
 
