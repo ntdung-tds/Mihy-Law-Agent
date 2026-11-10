@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `106` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-09T19:30:15.803Z`.
+- **PCS revision:** `107` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T00:54:00.000Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -22,6 +22,15 @@
 - **Verified CI 2026-11-09:** PR #198 branch HEAD `406df70511b8769ab9d52f811fc9f39f065f6dda`, [Actions #42597937720](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42597937720) completed SUCCESS; **9/9 executed jobs PASS**, remaining optional live/deploy jobs SKIPPED. `cloudflare-contract` job `129095065795` log explicitly runs `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v`: **11/11 SQLite SQL tests PASS**, including expired deny and foreign-tenant deny. This is synthetic SQL/CI only, not D1/API/browser QA or legal acceptance. This PCS documentation commit itself requires a separate final-HEAD CI verification.
 
 - **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
+
+## R124 — Secure live QA credential gate and actual test-account blocker (2026-11-10)
+
+- **Read-first and boundary:** Main PCS remains revision 99, latest stacked security QA branch #204 revision 106. R123 live *negative* HTTP gates PASS 11/11 and historical final CI 9/9; this does not prove successful authorized login.
+- **Actual Cloudflare QA D1 read-only preflight:** **2 active login verifiers**, **12 active memberships**, **zero live sessions** at check time, **one multi-tenant membership identity** in the database but **zero identities that both have an active verifier and at least two active memberships**. 4 allow-read MatterACL grants; 2 AI quota rows unchanged. Therefore a positive *real* login→authorized tenant-switch test is not currently executable with the provisioned QA login population; do not fabricate a PASS or inject a QA session into D1.
+- **Implementation:** [Draft PR #206](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/206), stacked on #204, adds a *disabled-by-default* private-credential live HTTPS test runner `deployment/cloudflare/tests/r124_live_qa_auth_gpt.py`, five offline unit tests `tests/test_r124_live_qa_auth_gpt.py`, and owner-controlled opt-in CI job `r124-qa-private-login`. It requires a dedicated branch push, repository variable `MIHY_QA_R124_ENABLED=true` and approved private GitHub secrets `MIHY_QA_R124_EMAIL`/`MIHY_QA_R124_PASSWORD` — secrets are never echoed or committed and PR jobs cannot invoke this live step. One valid password login attempt only (no brute force), Secure/HttpOnly/SameSite cookie, authenticated session/workspaces/matters listing, synthetic random foreign matter denial without source disclosure, authorized tenant switch + SID rotation + old SID rejection, then logout. Missing credentials BLOCKED; one available tenant PARTIAL; true PASS only after actual live successful login and switch.
+- **QA unit evidence:** Existing CI `unit` job in [Actions #42731313992](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42731313992) executes 5 R124 tests and all PASS (no-credentials blocked, dual-tenant positive mock, single-tenant PARTIAL, denied-source leak fail-closed, insecure cookie rejected). The actual opt-in `r124-qa-private-login` job is **SKIPPED**, not a live PASS. Full final-HEAD workflow must be separately verified once complete.
+- **Evidence:** `tests/evidence/AL-R124-AUTH-gpt.json`. Real Cloudflare password login, tenant switch, authenticated user/tenant MatterACL API, true Workers AI provider side effects, deployed source parity, owner Android browser and full 11-UC E2E remain **NOT_RUN/NOT_VERIFIED**. Prerequisite is a permitted QA test principal with a correctly provisioned verifier and two authorized tenant memberships, along with its credential supplied through private secrets, not chat/public repo.
+- **Constraints:** No new product functionality, SRS v1.1.15 or API changes; no QA/production deployment, merge, account creation, D1 writes, real client records, Google Drive/OneDrive/OAuth or production changes. Owner final acceptance pending. Keep PR stack in Draft.
 
 ## R123 — Live signed-out and invalid-cookie QA HTTP boundaries (2026-11-10)
 

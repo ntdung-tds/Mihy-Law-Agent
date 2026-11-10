@@ -707,3 +707,22 @@ jobs:
       - name: R64 live Cloudflare QA anonymous tenant/session/CSRF on 320/390/430/1440
         if: github.ref_name == 'test/r64-live-qa-session-tenant-gates' || github.head_ref == 'test/r64-live-qa-session-tenant-gates'
         run: python deployment/cloudflare/tests/live_r64_qa_browser.py
+
+  r124-qa-private-login:
+    # Explicit owner-controlled opt-in ONLY. Never run with pull_request secrets.
+    # Missing private QA secrets or enable flag = SKIPPED, not evidence of live PASS.
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/qa/r124-live-login-gpt' && vars.MIHY_QA_R124_ENABLED == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Real QA password login, authorized tenant switch, denied matter and cleanup
+        env:
+          MIHY_QA_R124_EMAIL: ${{ secrets.MIHY_QA_R124_EMAIL }}
+          MIHY_QA_R124_PASSWORD: ${{ secrets.MIHY_QA_R124_PASSWORD }}
+        run: python deployment/cloudflare/tests/r124_live_qa_auth_gpt.py
