@@ -8,7 +8,9 @@ const B={id:'B1',text:'Điều 1. Bên A giao 12 bộ vào ngày 30 tháng 9 nă
 test('R139 citation diagnostics cover all seven source-reasoning UC without pretending legal verification',()=>{
   for(const uc of ['UC01','UC02','UC04','UC05','UC09']){
     const missing=evidenceDiagnostics(uc,'Đề xuất cần thẩm định.',[A]);
-    assert.deepEqual(missing.flags,['SOURCE_A_CITATION_MISSING']);
+    assert.deepEqual(missing.flags,uc==='UC04'
+      ? ['SOURCE_A_CITATION_MISSING','SOURCE_COVERAGE_INCOMPLETE']
+      : ['SOURCE_A_CITATION_MISSING']);
     assert.equal(missing.reference_coverage,'incomplete');
     const cited=evidenceDiagnostics(uc,'Đề xuất chỉ dựa trên [A1].',[A]);
     assert.deepEqual(cited.flags,[]);
