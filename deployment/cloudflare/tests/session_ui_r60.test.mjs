@@ -68,7 +68,7 @@ function mountMatters(){
     document:{querySelector:dom.get,createElement:()=>node()},
     window:{addEventListener:(event,cb)=>{events[event]=cb;}},
     location:{replace:path=>navigations.push(path),hash:''},
-    fetch
+    fetch,AbortController
   });
   return {dom,events,navigations,requests,revoke(){authenticated=false}};
 }
