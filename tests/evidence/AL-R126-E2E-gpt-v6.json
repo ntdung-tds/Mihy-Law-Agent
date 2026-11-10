@@ -1,0 +1,83 @@
+{
+  "schema": "ai-law-qa-evidence-v1",
+  "version": 6,
+  "date": "2026-11-10",
+  "scope": "Owner-approved R126 integrated QA verification, test-only, no deployment",
+  "pull_request": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/208",
+  "source_commit": "dc5d7e209e82fa64ff7c1721fa2b8bf1495b6f8a",
+  "source_ci": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42762139802",
+  "test_files": [
+    "deployment/cloudflare/tests/r126_browser_server_gpt.mjs",
+    "deployment/cloudflare/tests/r126_logged_in_local_browser_gpt.py"
+  ],
+  "run_mode": "LOCAL_LOOPBACK_HTTPS_NODE22_ACTUAL_WEBSITE_WORKER_AND_BACKEND_WITH_DISPOSABLE_SQLITE",
+  "synthetic_test_principals": 2,
+  "synthetic_test_tenants": 2,
+  "synthetic_matters": 3,
+  "browser_engine": "Chromium 1.55 via real GitHub Actions runner",
+  "mobile_viewport": "390x844",
+  "desktop_viewport": "1440x900",
+  "actual_local_chromium": {
+    "status": "PASS",
+    "checks": 45,
+    "direct_log": "R126_LOCAL_AUTH_CHROMIUM {\"status\":\"PASS\",\"checks\":45,\"mobile\":\"390x844\",\"desktop\":\"1440x900\",\"website_and_backend\":\"REAL_CODE\",\"qa_database\":\"DISPOSABLE_SQLITE\",\"live_cloudflare_password_login\":\"NOT_RUN\"}",
+    "validated": [
+      "A mobile actual rendered login form redirects into protected /app",
+      "B desktop actual rendered login form redirects into protected /app",
+      "Two distinct authenticated secure HttpOnly SameSite Strict cookies",
+      "A initially sees personal tenant and only own synthetic matter",
+      "B tenant_admin sees only own organization private matter, no unauthorized tenant picker",
+      "Reciprocal same-tenant UC04 access denied 404 without source reflection or quota",
+      "A mobile switches using visible drawer dropdown to organization; session rotates and old cookie returns 401",
+      "Organization A sees own matter, never organization B private matter",
+      "Authorized UC10 local retrieval for both synthetic users, no provider model call or quota charge",
+      "Desktop and mobile UI logout revoke server sessions, subsequent session GET 401",
+      "Source assets served from real generated website Worker, API served by real worker handlers and real SQLite SQL"
+    ],
+    "evidence_only_no_real_customer_login": true
+  },
+  "actual_public_cloudflare_QA_browser": {
+    "status": "PASS",
+    "checks": 18,
+    "scope": "unsigned remote HTTPS Chromium public login/anonymous routing"
+  },
+  "debug_and_fix_loop": [
+    {
+      "result": "FAIL_TEST_HARNESS",
+      "reason": "incorrect Playwright select_option label parameter received RegExp",
+      "resolution": "select concrete option value from rendered organization option"
+    },
+    {
+      "result": "PASS",
+      "checks": 45
+    }
+  ],
+  "security": {
+    "credentials": "ONLY_STATIC_SYNTHETIC_FIXTURE_PASSWORDS_NOT_OWNER_R125_PASSWORDS",
+    "server_bound": "127.0.0.1_with_disposable_self_signed_TLS",
+    "temporary_database": true,
+    "no_user_files": true,
+    "no_cloudflare_D1_mutations": true,
+    "real_AI_provider_calls": 0,
+    "production_deployment": false,
+    "qa_deployment": false,
+    "application_code_changed": false,
+    "public_repo_real_passwords": false
+  },
+  "outstanding": {
+    "live_signed_in_cloudflare_QA_two_accounts": "NOT_RUN",
+    "signed_in_cloudflare_QA_browser_mobile_and_desktop": "NOT_RUN",
+    "cloudflare_D1_quota_before_after_actual_signed_in_HTTP": "NOT_RUN",
+    "model_provider_side_effect_trace": "NOT_RUN",
+    "owner_final_acceptance": "NOT_RUN"
+  },
+  "SRS": "v1.1.15 unchanged",
+  "prior_evidence_versions": [
+    "AL-R126-E2E-gpt.json",
+    "AL-R126-E2E-gpt-v2.json",
+    "AL-R126-E2E-gpt-v3.json",
+    "AL-R126-E2E-gpt-v4.json",
+    "AL-R126-E2E-gpt-v5.json"
+  ],
+  "note": "Actual browser rendering with isolated local QA Worker/SQLite proves frontend and backend integration but does not replace actual remote Cloudflare QA signed-in acceptance; maintain BLOCKED/NOT_RUN status for that gate."
+}
