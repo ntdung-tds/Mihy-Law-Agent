@@ -225,6 +225,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r138_legal_tenant_gpt.test.mjs
       - name: R139 eleven UC legal citation, numeric QA and truncation diagnostics
         run: node --test deployment/cloudflare/tests/r139_legal_evidence_gpt.test.mjs
+      - name: R140 local TXT file import stays private until explicit consent
+        run: node --test deployment/cloudflare/tests/r140_txt_local_gpt.test.mjs
       - name: R123 live HTTPS authenticated-boundary negative QA without credentials
         if: ${{ github.head_ref == 'qa/r123-auth-denials-gpt' || github.ref == 'refs/heads/qa/r123-auth-denials-gpt' }}
         run: python deployment/cloudflare/tests/r123_live_auth_denials_gpt.py
