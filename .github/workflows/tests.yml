@@ -215,6 +215,12 @@ jobs:
         run: node --test deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs
       - name: R122 authenticated cookie, tenant rotation, MatterACL and quota SQL integration
         run: node --test deployment/cloudflare/tests/r122_auth_legal_sql_gpt.test.mjs
+      - name: R126 full website Worker relay to backend and disposable D1 QA cross-user integration
+        run: |
+          node tools/build_cf_site.mjs
+          node --test deployment/cloudflare/tests/r126_site_to_d1_gpt.test.mjs
+      - name: R126 stale tenant matter DOM responses cannot repaint after workspace switch
+        run: node --test deployment/cloudflare/tests/r126_stale_tenant_dom_gpt.test.mjs
       - name: R123 live HTTPS authenticated-boundary negative QA without credentials
         if: ${{ github.head_ref == 'qa/r123-auth-denials-gpt' || github.ref == 'refs/heads/qa/r123-auth-denials-gpt' }}
         run: python deployment/cloudflare/tests/r123_live_auth_denials_gpt.py
@@ -726,3 +732,56 @@ jobs:
           MIHY_QA_R124_EMAIL: ${{ secrets.MIHY_QA_R124_EMAIL }}
           MIHY_QA_R124_PASSWORD: ${{ secrets.MIHY_QA_R124_PASSWORD }}
         run: python deployment/cloudflare/tests/r124_live_qa_auth_gpt.py
+
+  r126-qa-private-dual:
+    # Owner-controlled secret-gated *actual* QA HTTP; never on PR or main.
+    # Skip means NOT_RUN. Keep test credentials in GitHub Secrets, never source/logs.
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/qa/r126-dual-login-gpt' && vars.MIHY_QA_R126_ENABLED == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Normal HTTPS login A/B, tenant and private MatterACL, local UC10 and logout
+        env:
+          MIHY_QA_R124_EMAIL: ${{ secrets.MIHY_QA_R124_EMAIL }}
+          MIHY_QA_R124_PASSWORD: ${{ secrets.MIHY_QA_R124_PASSWORD }}
+          MIHY_QA_R126_B_EMAIL: ${{ secrets.MIHY_QA_R126_B_EMAIL }}
+          MIHY_QA_R126_B_PASSWORD: ${{ secrets.MIHY_QA_R126_B_PASSWORD }}
+        run: python deployment/cloudflare/tests/r126_live_dual_gpt.py
+
+  r126-qa-public-browser:
+    # Separate real Cloudflare QA mobile + desktop browser gate with ZERO secrets.
+    # Runs only on R126 branch, never production; not an authenticated E2E claim.
+    if: ${{ github.head_ref == 'qa/r126-dual-login-gpt' || github.ref == 'refs/heads/qa/r126-dual-login-gpt' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Playwright Chromium for live public Cloudflare QA
+        run: |
+          python -m pip install 'playwright==1.55.0'
+          python -m playwright install --with-deps chromium
+      - name: QA public login and anonymous access at 320/390/430/768/1440
+        run: python deployment/cloudflare/tests/r126_live_public_browser_gpt.py
+      - name: R126 Chromium login A/B on isolated TLS Worker and disposable SQLite QA
+        run: |
+          set -euo pipefail
+          node tools/build_cf_site.mjs
+          node deployment/cloudflare/tests/r126_browser_server_gpt.mjs > "${RUNNER_TEMP}/r126-browser-fixture-gpt.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 20); do
+            if python -c 'import ssl,urllib.request;urllib.request.urlopen("https://127.0.0.1:18765/health",context=ssl._create_unverified_context(),timeout=2)' >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          python deployment/cloudflare/tests/r126_logged_in_local_browser_gpt.py

@@ -1,0 +1,81 @@
+{
+  "schema": "ai-law-qa-evidence-v1",
+  "version": 3,
+  "scope": "R126 consolidated batch; private-file runner fallback plus real QA read-only preflight",
+  "date": "2026-11-10",
+  "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/208",
+  "source_sha": "1a1843991e4614bb627bbeea7a0742fcf005babf",
+  "source_files": [
+    "deployment/cloudflare/tests/r126_live_dual_gpt.py",
+    "tests/test_r126_dual_login_gpt.py"
+  ],
+  "predecessor": [
+    "tests/evidence/AL-R126-E2E-gpt.json",
+    "tests/evidence/AL-R126-E2E-gpt-v2.json"
+  ],
+  "new_gate": {
+    "env_name": "MIHY_QA_R126_CREDENTIAL_FILE",
+    "purpose": "Allow an approved reachable QA runner to use the owner-only R125 credential handoff without GitHub Actions secrets",
+    "required": "absolute regular file outside public repository with chmod 0600",
+    "safeguards": [
+      "strict QA-A/QA-B label and synthetic account matching",
+      "only two entries",
+      "long passwords",
+      "no symlink",
+      "reject group/other readable file",
+      "reject ambiguous mixing with env secrets",
+      "no secret values logged",
+      "one login attempt per account only",
+      "logout sessions on success/failure"
+    ],
+    "actual_owner_file_format": "PASS",
+    "owner_file_permissions_now": "0600",
+    "plaintext_secrets_in_git": false
+  },
+  "offline_unit": {
+    "status": "PASS",
+    "R126_regressions": 10,
+    "workflow_run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42747314595",
+    "direct_log": "unit PASS, Ran 356 tests total including 10 R126 cases; execution of final doc commit separate"
+  },
+  "live_QA": {
+    "login_mobile_public_accessibility": {
+      "result": "PASS_PUBLIC_GET_ONLY",
+      "viewport": "390x844",
+      "email_password_submit_elements": true
+    },
+    "login_desktop_public_accessibility": {
+      "result": "BLOCKED_PROVIDER_RATE_LIMIT_429",
+      "viewport": "1440x900"
+    },
+    "direct_authorized_A_B_login": "NOT_RUN",
+    "cause": "Local runtime DNS resolution for qa workers.dev unavailable; GitHub Actions secrets & enable flag not configured. Cloudflare Browser Rendering is GET-only for tested path and intermittently returns API 429.",
+    "qa_d1_readonly": {
+      "active_test_logins": 2,
+      "active_test_sessions": 0,
+      "quota_rows": 2,
+      "quota_requests": 4,
+      "rows_written": 0,
+      "changed_db": false
+    },
+    "quota_side_effect_proof": "NOT_RUN: no authorized HTTP request was executed",
+    "workers_AI_provider_trace": "NOT_RUN"
+  },
+  "outcomes": {
+    "offline_gate": "PASS_10",
+    "positive_http": "BLOCKED",
+    "cross_user_API": "NOT_RUN",
+    "mobile_authenticated": "NOT_RUN",
+    "desktop_authenticated": "NOT_RUN",
+    "final_acceptance": "NOT_RUN"
+  },
+  "limits": {
+    "app_code_changed": false,
+    "source_SRS": "v1.1.15 unchanged",
+    "production_deploy": false,
+    "qa_deploy": false,
+    "merge": false,
+    "no_customer_data": true,
+    "no_storage_OAuth_change": true
+  }
+}

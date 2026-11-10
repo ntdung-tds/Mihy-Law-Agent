@@ -1,0 +1,69 @@
+{
+  "schema": "ai-law-qa-evidence-v1",
+  "version": 7,
+  "date": "2026-11-10",
+  "task": "R126 existing consolidated QA acceptance package: prevent stale cross-tenant matter UI repaint",
+  "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/208",
+  "issue": "https://github.com/ntdung-tds/Mihy-Law-Agent/issues/156",
+  "scope": "Small client-side privacy fix and deterministic delayed HTTP response tests, not new SRS functionality",
+  "modified_files": [
+    "web/r0-preview/matters.js",
+    "deployment/cloudflare/tests/r126_stale_tenant_dom_gpt.test.mjs",
+    "deployment/cloudflare/tests/session_ui_r60.test.mjs",
+    ".github/workflows/tests.yml"
+  ],
+  "actual_ui_fix": [
+    "Increment request-generation whenever workspace-switch or sessionExpired invalidates previous matter list",
+    "Abort currently pending GET /api/qa/matters",
+    "Prevent late response 200 or 401 from updating DOM/redirecting session after tenant change",
+    "Discard payload returned by JSON parsing that finishes after tenant switch",
+    "Clear rendered matter list, recent items, counters, stale feedback; permit next tenant refresh without waiting on previous pending request",
+    "Maintain normal current-session 401 logout/redirect fail-closed"
+  ],
+  "direct_CI_source": {
+    "commit": "72e95b1a0f39e5811c7cde468ef825eff9b04002",
+    "run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42764184621",
+    "job": "cloudflare-contract",
+    "new_dom_regressions": "PASS_4_OF_4",
+    "preexisting_r60_revoke_regressions": "PASS_2_OF_2",
+    "category": "ACTUAL_MATTERS_JS_IN_VM_WITH_DEFERRED_NETWORK_RESPONSES",
+    "checked_through_log": true
+  },
+  "fix_loop": [
+    {
+      "result": "PASS",
+      "detail": "Four new cross-tenant stale fetch + stale 401 + delayed body + normal 401 DOM tests passed immediately."
+    },
+    {
+      "result": "FAIL_TEST_HARNESS",
+      "detail": "Two legacy R60 VM test cases missing AbortController global after frontend began using abort signals."
+    },
+    {
+      "result": "PASS",
+      "detail": "Added standard browser AbortController to R60 test VM context; both existing session-revocation tests and all four new cases passed."
+    }
+  ],
+  "live_d1_readonly": {
+    "active_R125_qa_accounts": 2,
+    "active_R125_sessions": 0,
+    "quota_rows": 2,
+    "quota_requests": 4,
+    "rows_written": 0,
+    "db_changed": false
+  },
+  "limitations": {
+    "Cloudflare_QA_deployment_of_fix": "NOT_DEPLOYED",
+    "remote_positive_A_B_login": "NOT_RUN",
+    "remote_signed_in_mobile_E2E": "NOT_RUN",
+    "remote_signed_in_tenant_switch": "NOT_RUN",
+    "remote_AI_provider_quota_trace": "NOT_RUN",
+    "owner_acceptance": "PENDING"
+  },
+  "SRS": "v1.1.15 unchanged",
+  "customer_records_used": false,
+  "credential_file_in_PR": false,
+  "production_deployed": false,
+  "merged": false,
+  "OAuth_Drive_scope_changed": false,
+  "previous_evidence_versions_preserved": true
+}

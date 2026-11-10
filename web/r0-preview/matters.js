@@ -5,14 +5,24 @@
   const list=$('#matter-list'),form=$('#matter-form'),search=$('#matter-search');
   if(!list||!form)return;
   let matters=[],fetchInProgress=false;
+  // A response from a previous tenant/session must never repaint private metadata.
+  let requestGeneration=0,activeListRequest=null;
   const note=(message,isError=false)=>{
     const n=$('#matter-feedback');n.textContent=message;n.style.color=isError?'#a52c35':'#267653';
   };
   // Invalidate previously rendered matter metadata as soon as the server revokes access.
   // This is client-side privacy cleanup, not an authorization decision.
   function scrubMatters(){
+    requestGeneration++;
+    const oldRequest=activeListRequest;
+    activeListRequest=null;
+    fetchInProgress=false;
+    if(oldRequest)oldRequest.abort();
+    const refresh=$('#matter-refresh');if(refresh)refresh.disabled=false;
     matters=[];
     list.replaceChildren();
+    const empty=$('#matter-empty');if(empty){empty.hidden=true;empty.textContent='';}
+    const feedback=$('#matter-feedback');if(feedback)feedback.textContent='';
     const recent=$('#recent-documents');if(recent)recent.replaceChildren();
     for(const selector of ['#matter-total','#nav-matter-count','#dashboard-matter-count']){
       const counter=$(selector);if(counter)counter.textContent='0';
@@ -109,19 +119,30 @@
   }
   async function load(){
     if(fetchInProgress)return;
+    const generation=requestGeneration;
+    const controller=new AbortController();
+    activeListRequest=controller;
     fetchInProgress=true;$('#matter-refresh').disabled=true;
     try{
-      const res=await fetch('/api/qa/matters',{credentials:'same-origin',cache:'no-store'});
+      const res=await fetch('/api/qa/matters',{credentials:'same-origin',cache:'no-store',signal:controller.signal});
+      if(generation!==requestGeneration)return;
       if(res.status===401){sessionExpired();return;}
       if(!res.ok)throw Error('server');
       const payload=await res.json();
+      if(generation!==requestGeneration)return;
       if(!Array.isArray(payload.matters))throw Error('invalid');
       matters=payload.matters.filter(x=>typeof x.id==='string'&&typeof x.title==='string'&&Number.isInteger(x.created_at)).map(x=>({...x,version:Number(x.version||0),can_write:x.can_write===true}));
       show();
       note('Đã đồng bộ '+matters.length+' hồ sơ QA từ máy chủ.');
-    }catch{
+    }catch(error){
+      if(generation!==requestGeneration||error?.name==='AbortError')return;
       note('Không thể tải danh mục hồ sơ từ D1. Hãy thử lại.',true);
-    }finally{fetchInProgress=false;$('#matter-refresh').disabled=false;}
+    }finally{
+      if(activeListRequest===controller){
+        activeListRequest=null;
+        fetchInProgress=false;$('#matter-refresh').disabled=false;
+      }
+    }
   }
   form.addEventListener('submit',async event=>{
     event.preventDefault();
