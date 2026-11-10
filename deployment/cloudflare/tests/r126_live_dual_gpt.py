@@ -185,8 +185,12 @@ def execute(qa, credentials):
                 except GateError:
                     cleanup_errors.append(name+"_LOGOUT_UNCONFIRMED")
         if cleanup_errors:
-            # Never mark PASS if logout/session cleanup failed.
-            raise GateError("BLOCKED",";".join(cleanup_errors)) from pending_error
+            # A security FAIL must remain FAIL, even if logout later also fails.
+            # Cleanup uncertainty alone is BLOCKED, never a successful login gate.
+            if pending_error is not None:
+                raise GateError(pending_error.category,
+                                pending_error.reason+";"+(";".join(cleanup_errors))) from pending_error
+            raise GateError("BLOCKED",";".join(cleanup_errors))
 
 
 def main():
