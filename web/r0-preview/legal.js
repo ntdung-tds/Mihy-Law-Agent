@@ -30,6 +30,8 @@
     function clearResult(){
       result.hidden=true;output.textContent='';
       byId('legal-qa-sources').replaceChildren();
+      byId('legal-qa-translation-review').hidden=true;
+      byId('legal-qa-translation-rows').replaceChildren();
     }
     function updateTaskFields(){
       const dual=['UC06','UC08'].includes(uc.value);
@@ -188,6 +190,55 @@
         }
         if(typeof data.answer!=='string'||!data.answer)throw Error('Kết quả từ máy chủ không hợp lệ.');
         output.textContent=data.answer;
+        // R142: render only an explicitly anchored per-segment UC03 review.
+        // Missing/duplicate segments are visibly unresolved, not silently paired.
+        const translationPanel=byId('legal-qa-translation-review');
+        const translationRows=byId('legal-qa-translation-rows');
+        translationRows.replaceChildren();
+        translationPanel.hidden=true;
+        const review=data.translation_review;
+        let translationWarnings=false;
+        if(data.uc==='UC03'&&review&&Array.isArray(review.rows)){
+          const count=review.rows.length;
+          if(count>0&&count<=80){
+            translationPanel.hidden=false;
+            translationWarnings=review.paired_segments!==review.total_segments||
+              (Array.isArray(review.flags)&&review.flags.length>0);
+            for(const entry of review.rows){
+              if(!entry||!/^A[1-9]\\d*$/.test(entry.source_id)||
+                 typeof entry.source_text!=='string'||
+                 typeof entry.draft_text!=='string'||entry.source_text.length>5000||
+                 entry.draft_text.length>8500||
+                 !['paired','missing','duplicate'].includes(entry.status))continue;
+              const row=document.createElement('article');
+              row.className='legal-qa-translation-row';
+              const heading=document.createElement('strong');
+              heading.textContent='['+entry.source_id+'] · '+
+                (entry.status==='paired'?'Cần kiểm duyệt':'Chưa có đoạn dịch hợp lệ ('+entry.status+')');
+              row.append(heading);
+              for(const [label,text] of [
+                ['Nguồn gốc',entry.source_text],
+                ['Bản dịch nháp',entry.draft_text||'Chưa ghép được đoạn dịch']
+              ]){
+                const cell=document.createElement('div');
+                cell.className='legal-qa-translation-cell';
+                const caption=document.createElement('strong');
+                caption.textContent=label;
+                const body=document.createElement('p');
+                body.textContent=text;
+                cell.append(caption,body);
+                row.append(cell);
+              }
+              translationRows.append(row);
+            }
+            if(translationWarnings){
+              const warning=document.createElement('p');
+              warning.className='legal-qa-evidence-warning';
+              warning.textContent='Đối chiếu UC03 chưa đầy đủ hoặc có đoạn trùng. Không sử dụng trước khi rà soát từng đoạn và số liệu.';
+              translationRows.prepend(warning);
+            }
+          }
+        }
         byId('legal-qa-result-title').textContent=data.title+' · '+(data.mode==='local_example_only'?'Tìm trong nguồn mẫu':'Bản nháp AI');
         byId('legal-qa-review').textContent=data.review_notice||
           'Chỉ truy xuất từ nguồn giả lập. Chưa xác minh dữ liệu văn bản pháp luật/bản án chính thức.';
@@ -253,10 +304,10 @@
           }
         }
         result.hidden=false;
-        setStatus(evidenceWarnings.length
-          ? 'Có cảnh báo về trích dẫn hoặc số liệu. Không sử dụng trước khi kiểm duyệt.'
+        setStatus(evidenceWarnings.length||translationWarnings
+          ? 'Có cảnh báo về nguồn, số liệu hoặc ghép đoạn. Không sử dụng trước khi kiểm duyệt.'
           : 'Hoàn tất bản nháp QA. Hãy đối chiếu nguồn và kiểm duyệt thủ công.',
-          evidenceWarnings.length>0);
+          evidenceWarnings.length>0||translationWarnings);
         result.scrollIntoView({behavior:'smooth',block:'nearest'});
       } catch(error){
         if(generation===workspaceGeneration)
