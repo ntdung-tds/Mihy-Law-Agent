@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `128` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-12T21:30:12.594Z`.
+- **PCS revision:** `130` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-12T22:05:14.116Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R148 — F08 trích xuất chủ thể, nghĩa vụ, số tiền và thời hạn (2026-11-13 VN)
+
+- **Implemented source-only QA vertical slice** in [Draft PR #218](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/218) stacked on #217. F08 is selectable in the existing authenticated Matter-bound AI QA form. The model is asked for per-[A#] `CHU_THE/NGHIA_VU/SO_TIEN/THOI_HAN` with literal source `TRICH` and exact `GIA_TRI`; server-side deterministic parsing/quote matching warns on fabricated amount, cross-paragraph source, duplicates, empty-claim conflicts, invalid/missing labels. Desktop/mobile renders inert source/quote/value and warnings; clears results on tenant switch; no original document modification or D1 source persistence.
+- **CI & evidence:** `deployment/cloudflare/tests/r148_f08_extraction_gpt.test.mjs` (six bounded unit tests), authorized synthetic HTTP/API tests appended to `r109_qa_legal_workflows.test.mjs`, real browser-script VM cases appended to `r142_uc03_dom_gpt.test.mjs`; CI job added. Read actual [PR #218 Actions](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/218/checks) and logs before claiming PASS. [Actions #43315989785](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43315989785) at code HEAD `736e33a263a71c26d2725f8b210e70f73e9feef2` completed SUCCESS: 9/9 executed jobs PASS, 21 optional skipped. Cloudflare contract log confirmed 6/6 helper, 2/2 authenticated synthetic API and 2/2 real source-JS VM F08 tests PASS. PCS revision 130 is documentation-only follow-up; final-head CI must be checked separately.
+- **Limits:** F08 full SRS function **NOT DONE**, 36 Fxx **NOT DONE**. Real PDF/DOCX/scan OCR, multi-file, persistent document model, actual tenant 2-account Cloudflare E2E (R126), lawyer approval and Owner acceptance NOT_RUN/BLOCKED. Literal match does NOT prove legal accuracy or data extraction completeness. No signing, OAuth retries, production merge/deploy, real customer data.
+- **Protected baseline:** `active_task=AL-R0-DEPLOY-001` preserved; F01–F36 catalog `NOT_ASSESSED` until full functional audit and acceptance.
 
 ## R147 — Owner 36 chức năng F01–F36, loại trừ ký số (2026-11-13 VN)
 

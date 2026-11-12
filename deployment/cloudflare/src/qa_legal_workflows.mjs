@@ -8,11 +8,13 @@ import {buildTranslationReview} from './qa_uc03_bilingual_gpt.mjs';
 import {buildGrammarReview} from './qa_uc07_grammar_gpt.mjs';
 import {buildContractClauseReview} from './qa_uc02_contract_gpt.mjs';
 import {buildDraftSourceReview} from './qa_uc01_draft_gpt.mjs';
+import {buildLegalDataReview} from './qa_f08_extraction_gpt.mjs';
 
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const MAX_BODY_BYTES=36000,MAX_SOURCE=5000,MAX_QUESTION=600;
 const MAX_OUTPUT=8500,MODEL='@cf/meta/llama-3.1-8b-instruct';
 const TASKS=Object.freeze({
+ F08:['Trích xuất dữ liệu pháp lý QA','Từ các đoạn [A1], [A2] nguồn mẫu, nhận diện CHỦ THỂ, NGHĨA VỤ, SỐ TIỀN, THỜI HẠN. Với MỖI dữ kiện, trả đúng 4 dòng: nhãn [A1] riêng một dòng; LOAI: CHU_THE hoặc NGHIA_VU hoặc SO_TIEN hoặc THOI_HAN; TRICH: trích nguyên văn chính xác 8–400 ký tự LIÊN TIẾP chỉ từ đúng đoạn nguồn A1; GIA_TRI: chuỗi nguyên văn nằm TRONG TRICH, không suy diễn/chuẩn hóa số hoặc ngày. Có thể có nhiều cụm cùng nhãn [A1]. Với đoạn không nhận diện được gì, ghi một khối [A1] với LOAI: KHONG_CO, TRICH: KHONG_CO, GIA_TRI: KHONG_CO. Không thêm lời dẫn, bảng, tiêu đề, lệnh ngoài cấu trúc hoặc nguồn không có. Đây chỉ là dữ kiện nháp để luật sư kiểm tra; không chứng nhận tính đầy đủ hay chính xác pháp lý.'],
  UC01:['Soạn bản nháp hợp đồng/văn bản','Với MỖI đoạn dữ kiện [A1], [A2] nguồn, đề xuất một điều khoản VĂN BẢN NHÁP theo đúng mẫu 4 dòng: [A1] ở một dòng riêng, CAN_CU: <trích liên tiếp chính xác 12–400 ký tự nguồn A1>, DU_THAO: <điều khoản đề xuất dựa CHỈ trên dữ kiện A1; không tự đặt tên bên, số liệu, ngày, tiền, trách nhiệm hay quy định mới>, CAN_XAC_MINH: <câu hỏi luật sư cần xác nhận trước khi ký>. Nếu chưa đủ thông tin, viết [CẦN XÁC MINH], không tự suy diễn. Không đưa đầu đề hoặc dữ kiện ngoài nguồn. Mọi điều khoản chỉ là bản nháp cần luật sư kiểm duyệt.'],
  UC02:['Rà soát hợp đồng','Rà soát từng đoạn [A1], [A2] của nguồn hợp đồng theo đúng thứ tự. Với MỖI đoạn, trả về đúng 4 dòng: [A1] (dòng độc lập), TRICH: <trích nguyên văn chính xác một chuỗi liên tiếp 12–400 ký tự trong đúng đoạn A1>, NHAN_XET: <nhận xét dự thảo về rủi ro/điểm thiếu; nếu chưa phát hiện thì ghi chưa phát hiện từ đoạn mẫu>, CAN_XAC_MINH: <một câu hỏi cần luật sư xác minh>. Không thay lời trích, không thêm đầu đề/đoạn chưa được cung cấp; không tự tuyên bố vi phạm pháp luật, mức độ rủi ro hay hiệu lực văn bản. Luật sư kiểm tra mọi nhận định.'],
  UC03:['Dịch tài liệu, hợp đồng','Dịch đầy đủ từng đoạn nguồn sang ngôn ngữ đích, giữ số điều, thuật ngữ, số liệu, tên riêng. Trả về CHÍNH XÁC mỗi đoạn dịch dưới nhãn [A1], [A2] theo thứ tự nguồn, nhãn ở đầu dòng riêng của đoạn dịch. Không thêm lời dẫn, tiêu đề hoặc bỏ đoạn. Đây chỉ là bản nháp đối chiếu; không xác nhận tính tương đương pháp lý.'],
@@ -27,7 +29,7 @@ const TASKS=Object.freeze({
 });
 const SEARCH_ONLY=new Set(['UC10','UC11']);
 const DUAL=new Set(['UC06','UC08']);
-const SOURCE_REQUIRED=new Set(['UC02','UC03','UC04','UC05','UC06','UC07','UC08','UC09','UC10','UC11']);
+const SOURCE_REQUIRED=new Set(['F08','UC02','UC03','UC04','UC05','UC06','UC07','UC08','UC09','UC10','UC11']);
 const json=(status,body)=>new Response(JSON.stringify(body),{status,headers:{
  'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
  'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY',
@@ -245,7 +247,9 @@ export async function legalApi(req,env,opts={}){
   ? buildContractClauseReview(output,primary):undefined;
  const drafting_review=body.uc==='UC01'
   ? buildDraftSourceReview(output,primary):undefined;
+ const extraction_review=body.uc==='F08'
+  ? buildLegalDataReview(output,primary):undefined;
  return json(200,{...common,mode:'ai_draft_not_verified',
-  model:MODEL,answer:output,evidence_diagnostics:evidence,translation_review,correction_review,contract_review,drafting_review,
+  model:MODEL,answer:output,evidence_diagnostics:evidence,translation_review,correction_review,contract_review,drafting_review,extraction_review,
   review_notice:'Bản nháp AI từ nội dung mẫu. Trích dẫn chỉ được kiểm tra mã đoạn, chưa xác minh đúng nội dung, căn cứ pháp luật, hiệu lực hoặc bản dịch. Luật sư phải kiểm duyệt.'});
 }

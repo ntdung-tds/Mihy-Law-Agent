@@ -175,6 +175,7 @@
                 </label>
                 <label for="legal-qa-uc">Nghiệp vụ
                   <select id="legal-qa-uc" required>
+                    <option value="F08">F08 · Trích xuất dữ kiện pháp lý (QA)</option>
                     <option value="UC03">UC03 · Dịch tài liệu</option>
                     <option value="UC04">UC04 · Tóm tắt văn bản</option>
                     <option value="UC07">UC07 · Chỉnh ngữ pháp</option>
@@ -241,6 +242,11 @@
                 <h4>UC01 · Điều khoản dự thảo và dữ kiện nguồn</h4>
                 <p>Đề xuất chỉ để kiểm duyệt. Trích dẫn khớp không chứng minh điều khoản đúng pháp lý, đủ thông tin hoặc đã được phê duyệt.</p>
                 <div id="legal-qa-drafting-rows"></div>
+              </section>
+              <section id="legal-qa-extraction-review" class="legal-qa-bilingual-review" aria-label="F08 - trích xuất dữ liệu theo nguồn" hidden>
+                <h4>F08 · Dữ kiện trích xuất cần kiểm duyệt</h4>
+                <p>Đối chiếu chủ thể, nghĩa vụ, số tiền và thời hạn với chính đoạn nguồn. Khớp nguyên văn không có nghĩa đã xác minh đầy đủ hoặc hiệu lực pháp lý.</p>
+                <div id="legal-qa-extraction-rows"></div>
               </section>
               <div id="legal-qa-sources"></div>
               <button type="button" id="legal-qa-copy">Sao chép bản nháp</button>

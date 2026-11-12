@@ -239,6 +239,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r146_uc01_draft_gpt.test.mjs
       - name: R147 36-feature Owner scope and no-signing policy regression
         run: node --test deployment/cloudflare/tests/r147_scope_gpt.test.mjs
+      - name: R148 F08 P0 legal data extraction, source anchors and MatterACL
+        run: node --test deployment/cloudflare/tests/r148_f08_extraction_gpt.test.mjs
       - name: R123 live HTTPS authenticated-boundary negative QA without credentials
         if: ${{ github.head_ref == 'qa/r123-auth-denials-gpt' || github.ref == 'refs/heads/qa/r123-auth-denials-gpt' }}
         run: python deployment/cloudflare/tests/r123_live_auth_denials_gpt.py

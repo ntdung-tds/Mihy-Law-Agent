@@ -38,6 +38,8 @@
       byId('legal-qa-contract-rows').replaceChildren();
       byId('legal-qa-drafting-review').hidden=true;
       byId('legal-qa-drafting-rows').replaceChildren();
+      byId('legal-qa-extraction-review').hidden=true;
+      byId('legal-qa-extraction-rows').replaceChildren();
     }
     function updateTaskFields(){
       const dual=['UC06','UC08'].includes(uc.value);
@@ -423,6 +425,72 @@
             draftingRows.append(row);
           }
         }
+        // R148 F08 is structured, source-linked sample-text extraction.
+        // Literal matching does NOT establish legal interpretation or completeness.
+        const extractPanel=byId('legal-qa-extraction-review');
+        const extractRows=byId('legal-qa-extraction-rows');
+        extractRows.replaceChildren();
+        extractPanel.hidden=true;
+        const extraction=data.extraction_review;
+        let extractionWarnings=data.uc==='F08'&&
+          (!extraction||!Array.isArray(extraction.rows)||!extraction.rows.length);
+        if(data.uc==='F08'&&extraction&&Array.isArray(extraction.rows)&&
+           extraction.rows.length>0&&extraction.rows.length<=80){
+          extractPanel.hidden=false;
+          extractionWarnings=extraction.reviewed_source_segments!==extraction.total_source_segments||
+             (Array.isArray(extraction.flags)&&extraction.flags.length>0);
+          const note=document.createElement('p');
+          note.className=extractionWarnings?'legal-qa-evidence-warning':'legal-qa-evidence-note';
+          note.textContent=extractionWarnings
+           ? 'F08: Có trích xuất chưa ghép nguồn, thiếu/nhầm dữ kiện hoặc trùng. Không sử dụng trước khi kiểm duyệt.'
+           : 'F08: Chỉ đối chiếu chuỗi nguyên văn; luật sư cần rà soát chủ thể, nghĩa vụ, số tiền và thời hạn.';
+          extractRows.append(note);
+          const kinds={CHU_THE:'Chủ thể',NGHIA_VU:'Nghĩa vụ',SO_TIEN:'Số tiền',
+            THOI_HAN:'Thời hạn',KHONG_CO:'AI khai báo không tìm thấy'};
+          const statuses={
+            source_literal_matched_not_legally_verified:'Khớp chữ · chưa xác minh pháp lý',
+            no_item_claim_not_verified:'Chưa chứng minh không có dữ kiện',
+            duplicate:'Trùng dữ kiện',
+            incomplete:'Thiếu trường',
+            source_mismatch:'Không khớp nguồn',
+            inconsistent_no_item:'Trạng thái mâu thuẫn'
+          };
+          for(const item of extraction.rows){
+            if(!item||!/^A[1-9][0-9]*$/.test(item.source_id)||
+               !Object.hasOwn(kinds,item.kind)||
+               !Object.hasOwn(statuses,item.status)||
+               typeof item.source_text!=='string'||item.source_text.length>5000||
+               typeof item.source_quote!=='string'||item.source_quote.length>400||
+               typeof item.value!=='string'||item.value.length>160)continue;
+            const row=document.createElement('article');
+            row.className='legal-qa-translation-row';
+            const heading=document.createElement('strong');
+            heading.textContent='['+item.source_id+'] · '+kinds[item.kind]+' · '+statuses[item.status];
+            row.append(heading);
+            for(const [label,value] of [
+              ['Đoạn nguồn',item.source_text],
+              ['Trích đoạn AI',item.source_quote],
+              ['Giá trị trích xuất',item.value]
+            ]){
+              const cell=document.createElement('div');
+              cell.className='legal-qa-translation-cell';
+              const labelNode=document.createElement('strong');
+              labelNode.textContent=label;
+              const body=document.createElement('p');
+              body.textContent=value;
+              cell.append(labelNode,body);
+              row.append(cell);
+            }
+            if(item.status!=='source_literal_matched_not_legally_verified'){
+              const warning=document.createElement('p');
+              warning.className='legal-qa-evidence-warning';
+              warning.textContent='Dữ kiện này chưa được xác nhận theo nguồn; không dùng làm căn cứ quyết định.';
+              row.append(warning);
+              if(item.status!=='no_item_claim_not_verified')extractionWarnings=true;
+            }
+            extractRows.append(row);
+          }
+        }
         byId('legal-qa-result-title').textContent=data.title+' · '+(data.mode==='local_example_only'?'Tìm trong nguồn mẫu':'Bản nháp AI');
         byId('legal-qa-review').textContent=data.review_notice||
           'Chỉ truy xuất từ nguồn giả lập. Chưa xác minh dữ liệu văn bản pháp luật/bản án chính thức.';
@@ -488,10 +556,10 @@
           }
         }
         result.hidden=false;
-        setStatus(evidenceWarnings.length||translationWarnings||grammarWarnings||contractWarnings||draftingWarnings
+        setStatus(evidenceWarnings.length||translationWarnings||grammarWarnings||contractWarnings||draftingWarnings||extractionWarnings
           ? 'Có cảnh báo về nguồn, số liệu hoặc ghép đoạn. Không sử dụng trước khi kiểm duyệt.'
           : 'Hoàn tất bản nháp QA. Hãy đối chiếu nguồn và kiểm duyệt thủ công.',
-          evidenceWarnings.length>0||translationWarnings||grammarWarnings||contractWarnings||draftingWarnings);
+          evidenceWarnings.length>0||translationWarnings||grammarWarnings||contractWarnings||draftingWarnings||extractionWarnings);
         result.scrollIntoView({behavior:'smooth',block:'nearest'});
       } catch(error){
         if(generation===workspaceGeneration)
