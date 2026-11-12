@@ -37,6 +37,7 @@ function harness(){
   runInNewContext(SOURCE,{
     document:{querySelector:query,createElement:()=>node(),addEventListener(){}},
     window:win,fetch,AbortController,Event,
+    FormData:class {constructor(){this.items=[];}append(...args){this.items.push(args);}},
     location:{hash:'#assistant',replace:path=>redirects.push(path)},
     navigator:{clipboard:{async writeText(){}}}
   },{filename:'legal.js',timeout:5000});
