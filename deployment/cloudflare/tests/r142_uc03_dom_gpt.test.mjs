@@ -105,3 +105,68 @@ test('R142 missing or duplicate paragraph is prominently warned, never silently 
    'Chưa ghép được đoạn dịch');
  assert.equal(h.query('#legal-qa-feedback').dataset.state,'error');
 });
+
+test('R144 UC07 DOM safely displays per-paragraph source, proposed grammar and numeric alarm',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic UC07 QA matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='UC07';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ h.query('#legal-qa-source').value='Điều 1. Bên A giao 10 bộ hàng trong 30 ngày.';
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-form').fire('submit');
+ assert.equal(h.pending.at(-1).path,'/api/qa/legal/run');
+ finish(h.pending.at(-1),{
+   uc:'UC07',title:'Sửa lỗi ngữ pháp',mode:'ai_draft_not_verified',
+   answer:'[A1] Đề xuất chưa được xác minh.',
+   source_anchors:[{id:'A1',preview:'Điều 1...'}],
+   source_hash:'0'.repeat(64),
+   evidence_diagnostics:{flags:[],reference_coverage:'not_required_for_transform'},
+   correction_review:{
+     rows:[{source_id:'A1',source_text:'SOURCE_WITHIN_TEST 10',
+       proposed_text:'<script>UNTRUSTED_DRAFT_20</script>',
+       status:'changed',numeric_check:'literal_numeric_change_requires_review'}],
+     paired_segments:1,total_segments:1,
+     flags:['GRAMMAR_PARAGRAPH_NUMBERS_CHANGED']
+   }
+ });
+ await done;
+ const section=h.query('#legal-qa-grammar-review');
+ const rows=h.query('#legal-qa-grammar-rows');
+ assert.equal(section.hidden,false);
+ assert.equal(rows.children.length,2,'warning and grammar paragraph');
+ const row=rows.children[1];
+ assert.equal(row.children[1].children[1].textContent,'SOURCE_WITHIN_TEST 10');
+ assert.equal(row.children[2].children[1].textContent,
+   '<script>UNTRUSTED_DRAFT_20</script>',
+   'textContent must keep model text inert');
+ assert.match(row.children[3].textContent,/số liệu ở đoạn này đã thay đổi/);
+ assert.equal(h.query('#legal-qa-feedback').dataset.state,'error');
+ h.win.dispatchEvent(new Event('ai-law:workspace-switch'));
+ assert.equal(section.hidden,true);
+ assert.equal(rows.children.length,0);
+ assert.equal(h.query('#legal-qa-output').textContent,'');
+});
+
+test('R144 UC07 DOM detects missing correction payload from stale backend instead of false green',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic UC07 QA matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='UC07';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ h.query('#legal-qa-source').value='Điều 1. Bên A giao 10 bộ hàng trong 30 ngày.';
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-form').fire('submit');
+ finish(h.pending.at(-1),{
+   uc:'UC07',title:'Sửa lỗi ngữ pháp',mode:'ai_draft_not_verified',
+   answer:'An unstructured suggestion.',
+   source_anchors:[{id:'A1',preview:'Điều 1...'}],
+   source_hash:'0'.repeat(64),
+   evidence_diagnostics:{flags:[],reference_coverage:'not_required_for_transform'}
+ });
+ await done;
+ assert.equal(h.query('#legal-qa-grammar-review').hidden,true);
+ assert.equal(h.query('#legal-qa-feedback').dataset.state,'error');
+});
