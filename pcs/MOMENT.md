@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `121` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-12T20:53:57.845Z`.
+- **PCS revision:** `122` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-12T20:56:00Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -11,7 +11,7 @@
 ## R144 — UC07 paragraph-level grammar-review QA (2026-11-13 VN)
 
 - **Status:** [Draft PR #214](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/214), stacked on #213, adds per-[A#] source/proposed grammar reviews, unchanged/changed/missing/duplicate statuses, strict **per-paragraph** numeric comparison, safe source/proposal textContent rendering on desktop/mobile and workspace-switch clearing. Purely synthetic source-only AI QA; never modifies a DOCX or claims legal equivalence/approved redline.
-- **Verified at handoff:** Initial [Actions #43304512580](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43304512580) cloudflare-contract FAIL from double-backslash UI anchor regexp; test caught missing review row. Corrected source at commit `228b90f42b51acc3f610dc13cd0e47be6d6ad60b`. [Retest #43304706691](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43304706691) cloudflare-contract PASS, overall 9-job workflow still IN_PROGRESS at this checkpoint. Do not mark final-head PASS until fetched.
+- **Verified at handoff:** Initial [Actions #43304512580](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43304512580) cloudflare-contract FAIL from double-backslash UI anchor regexp; test caught missing review row. Corrected source at commit `228b90f42b51acc3f610dc13cd0e47be6d6ad60b`. [Retest #43304706691](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43304706691) cloudflare-contract PASS; code-head overall CI must be separately checked. The subsequent PCS revision121 update changed the protected standalone-first `active_task` and the Python unit contract caught it in [Actions #43304950101](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43304950101) (FAIL). This was corrected in PCS revision122 (standalone-first task restored); do not mark final-head CI PASS until fetched.
 - **Autonomy:** Existing hourly task is enabled, not cancelled. Read branch/HEAD and PCS before each change; avoid overlapping [PR #187](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/187) PDF/DOCX intake until integration conflicts are reconciled.
 - **Still NOT_RUN/BLOCKED:** live multi-account signed-in Cloudflare QA (R126), actual DOCX/PDF source editing and approved Word Track Changes, provider quality, official legal source verification, final Owner E2E and production. All PRs remain Draft/unmerged.
 
