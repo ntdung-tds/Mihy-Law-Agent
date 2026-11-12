@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 129,
-  "updated_at": "2026-11-12T22:01:59.552Z",
+  "revision": 130,
+  "updated_at": "2026-11-12T22:05:14.116Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2176,7 +2176,7 @@
         "id": "AL-P0-F08-R148-001",
         "title": "R148 F08 P0 source-anchored legal data extraction (subject/obligation/money/deadline) fictional text vertical slice",
         "priority": "P0",
-        "status": "SOURCE_IMPL_CI_PENDING_F08_NOT_DONE",
+        "status": "SOURCE_CI_PASS_F08_FULL_E2E_NOT_RUN",
         "scope": "Authenticated user-provided fictional text QA, one Matter, no PDF/DOCX scan OCR, no structured persistent files or evidence management.",
         "acceptance": [
           "F08 is selectable and scoped to MatterACL and session; quota is charged only to authorized AI requests and no source/draft is persisted to D1.",
@@ -2185,19 +2185,20 @@
           "F08 as a complete SRS feature remains NOT_RUN/NOT_ACCEPTED until real documents, multi-source/scan OCR, legal quality, lawyer approval and owner two-account E2E."
         ],
         "tests": {
-          "helper_unit": "PENDING_R148_ACTIONS",
-          "authenticated_api_synthetic": "PENDING_R148_ACTIONS",
-          "browser_source_vm": "PENDING_R148_ACTIONS",
-          "full_ci": "PENDING_R148_ACTIONS",
+          "helper_unit": "PASS_6_OF_6_ACTIONS_43315989785_CLOUDFLARE_CONTRACT",
+          "authenticated_api_synthetic": "PASS_2_OF_2_ACTIONS_43315989785_CLOUDFLARE_CONTRACT",
+          "browser_source_vm": "PASS_2_OF_2_ACTIONS_43315989785_CLOUDFLARE_CONTRACT",
+          "full_ci": "PASS_9_OF_9_ACTIONS_43315989785_CODE_HEAD_736e33a263a71c26d2725f8b210e70f73e9feef2",
           "real_signed_in_cloudflare": "BLOCKED_NOT_RUN_R126",
           "pdf_docx_scan_ocr": "NOT_RUN",
           "owner_acceptance": "PENDING"
         },
         "evidence": [
-          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/218"
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/218",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43315989785"
         ],
         "owner_acceptance": "PENDING",
-        "notes": "One real source-only QA slice of F08. Not F08 DONE and not 36/36 DONE. Owner excludes only signing; no production deployment."
+        "notes": "R148 source-only code CI SUCCESS 9/9, helper 6/6, authorized synthetic API 2/2, browser source JS VM 2/2. Full F08 is NOT DONE; Owner signed-in and PDF/DOCX/OCR E2E NOT_RUN. Post-ci PCS change requires independent final HEAD CI confirmation."
       }
     ],
     "features": [
