@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 128,
-  "updated_at": "2026-11-12T21:30:12.594Z",
+  "revision": 129,
+  "updated_at": "2026-11-12T22:01:59.552Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2171,6 +2171,33 @@
         ],
         "owner_acceptance": "PENDING",
         "notes": "Owner 36-feature target and no-signature exception recorded; full code-head CI #43310316716 PASS 9/9, 21 optional jobs skipped. None of the 36 business features was accepted by this scope-only test. PCS rev128 docs-only CI separate."
+      },
+      {
+        "id": "AL-P0-F08-R148-001",
+        "title": "R148 F08 P0 source-anchored legal data extraction (subject/obligation/money/deadline) fictional text vertical slice",
+        "priority": "P0",
+        "status": "SOURCE_IMPL_CI_PENDING_F08_NOT_DONE",
+        "scope": "Authenticated user-provided fictional text QA, one Matter, no PDF/DOCX scan OCR, no structured persistent files or evidence management.",
+        "acceptance": [
+          "F08 is selectable and scoped to MatterACL and session; quota is charged only to authorized AI requests and no source/draft is persisted to D1.",
+          "Server requires per-source A# literal quotes and exact extracted values for CHU_THE/NGHIA_VU/SO_TIEN/THOI_HAN; detect fabricated amounts, cross-segment quotes, invalid/duplicate/missing fields.",
+          "QA UI renders inert sourced extraction data and warnings, clears on tenant switch, does not treat missing review metadata as passed.",
+          "F08 as a complete SRS feature remains NOT_RUN/NOT_ACCEPTED until real documents, multi-source/scan OCR, legal quality, lawyer approval and owner two-account E2E."
+        ],
+        "tests": {
+          "helper_unit": "PENDING_R148_ACTIONS",
+          "authenticated_api_synthetic": "PENDING_R148_ACTIONS",
+          "browser_source_vm": "PENDING_R148_ACTIONS",
+          "full_ci": "PENDING_R148_ACTIONS",
+          "real_signed_in_cloudflare": "BLOCKED_NOT_RUN_R126",
+          "pdf_docx_scan_ocr": "NOT_RUN",
+          "owner_acceptance": "PENDING"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/218"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "One real source-only QA slice of F08. Not F08 DONE and not 36/36 DONE. Owner excludes only signing; no production deployment."
       }
     ],
     "features": [
@@ -2802,7 +2829,7 @@
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
       "last_completed_step": "R143 verified PR #213 final-head CI #42817066883 success 9/9. R144 UC07 source-only implementation and regression tests committed in draft PR #214, first CI #43304512580 failed cloudflare-contract due wrongly double-escaped UI anchor regex; fixed in code HEAD 228b90f4 and retest #43304706691 pending.",
-      "next_action": "Owner requires all F01–F36 from mihy_chucnang_gpt_v1.docx except digital/electronic signing. Verify R147 catalog CI and final PCS HEAD; then trace and decompose 36 high-level features vs frozen private SRS v1.1.15 and actual code; prioritize P0 18 features, then P1 16 and P2 2. Each implemented function requires positive/negative live E2E and Owner acceptance; do not mark 11 source-only QA UCs or 36 targets DONE. F31 retains email/calendar/Word/storage/API, no signing; F35 in goal, prior OAuth QA failures remain explicit. Preserve active_task standalone-first, tenant data privacy, legal review gates, no data/customer deploy.",
+      "next_action": "Owner requires full F01–F36 excluding any digital/electronic signing. R148 F08 source-only extraction PR#218 implementation and CI to verify; fix tests/errors, then continue P0 vertical slices with actual document intake and tenant permission release gates, prioritizing F07/F08/F09/F10 and F18–F22. 36 feature catalog remains NOT_ASSESSED/NOT_RUN, owner acceptance last. Do not overwrite parallel PDF/DOCX PR187, do not restart risky Google OAuth blindly, never expose SaaS SysAdmin customer data. No production merge/deploy.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
