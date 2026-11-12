@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `124` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-12T21:06:26.146Z`.
+- **PCS revision:** `125` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-12T21:15:10.951Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R146 — UC01 source-grounded clause drafting QA (2026-11-13 VN)
+
+- **Implementation:** [Draft PR #216](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/216), stacked on #215, adds synthetic source-to-draft links for UC01. AI is asked for literal [A#] source quote, suggested clause and a lawyer verification question. Deterministic diagnostics warn on missing/duplicate/incomplete/unknown labels, wrong-paragraph quote and numeric tokens added in a proposed clause that do not appear within its source paragraph. No source/draft is persisted. Quote match or unchanged numbers are not substantive legal verification.
+- **QA UI:** Desktop/mobile source, quoted evidence, draft clause and verification question review rows; inert textContent, clear on workspace change, missing structured API data is a warning. No original Word/PDF editing, no approval/execution.
+- **Tests:** Pure helper, existing authenticated synthetic API and real source-script browser VM negative tests added in CI. Code HEAD `4b86aa40b0f21f9f20e27b926182c5f4828ffb54` initial CI **PENDING** as of this checkpoint; do not claim PASS until the actual run/jobs are read.
+- **Previous:** PR #215 UC02 final-head `a10b2bafa1a70114c7922a37ba306f0ed024d766` [Actions #43306969972](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43306969972) completed SUCCESS 9/9 executing jobs, 21 optional skipped.
+- **Still blocked:** R126 live signed-in Cloudflare two-account MatterACL/browser QA, official legal corpus, actual user PDF/DOCX, provider quality/approval, production and Owner acceptance NOT_RUN/BLOCKED. SRS v1.1.15 frozen, task `active_task=AL-R0-DEPLOY-001` protected. No merge/deploy and do not resume Drive/OneDrive/OAuth.
 
 ## R145 — UC02 source-exact contract clause evidence QA (2026-11-13 VN)
 
