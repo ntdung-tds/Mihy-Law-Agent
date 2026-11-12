@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 124,
-  "updated_at": "2026-11-12T21:06:26.146Z",
+  "revision": 126,
+  "updated_at": "2026-11-12T21:19:00.342Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2116,6 +2116,32 @@
         ],
         "owner_acceptance": "PENDING",
         "notes": "R145 code HEAD CI 9/9 SUCCESS; PCS-only revision 124 follow-up needs its own final-head verification. No real Cloudflare signed-in or legal document acceptance, all PRs remain Draft."
+      },
+      {
+        "id": "AL-R1-UC01-R146-001",
+        "title": "R146 UC01 source-grounded drafting review, literal quotes and no newly invented numeric clauses",
+        "priority": "R1",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "scope": "Authorized synthetic-pasted source QA only, not full SRS drafting, approved contract, Word/PDF edit or official legal corpus.",
+        "acceptance": [
+          "Require each [A#] source paragraph to map to a proposed clause, exact source excerpt and independent question requiring lawyer verification.",
+          "Flag absent, duplicate, incomplete, unstructured, unknown and wrong-paragraph citations, plus numeric tokens invented within each proposed clause.",
+          "Preserve existing authenticated MatterACL/session/quota; avoid D1 persisting source text or draft and only render inert text on desktop/mobile.",
+          "No silent success for omitted structured metadata, no automatic document edit and no previous-tenant results on workspace rotation."
+        ],
+        "tests": {
+          "helper_unit": "PASS_5_OF_5_CLOUDFLARE_CONTRACT_43308352589",
+          "authenticated_api_synthetic": "PASS_2_CLOUDFLARE_CONTRACT_43308352589",
+          "browser_source_vm": "PASS_2_CLOUDFLARE_CONTRACT_43308352589",
+          "full_ci": "PASS_9_OF_9_SOURCE_CODE_HEAD_4b86aa40b0f21f9f20e27b926182c5f4828ffb54_ACTIONS_43308352589",
+          "live_cloudflare_two_account": "BLOCKED_NOT_RUN_R126",
+          "actual_docx_pdf": "NOT_RUN"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/216"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "Source code HEAD CI #43308352589 COMPLETED SUCCESS 9 executing jobs, 21 optional SKIPPED. No source or owner acceptance, real Cloudflare signed-in and legal Word/PDF E2E NOT_RUN. PCS documentation-only new HEAD CI separate."
       }
     ],
     "features": [

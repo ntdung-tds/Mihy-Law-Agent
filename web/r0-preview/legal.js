@@ -36,6 +36,8 @@
       byId('legal-qa-grammar-rows').replaceChildren();
       byId('legal-qa-contract-review').hidden=true;
       byId('legal-qa-contract-rows').replaceChildren();
+      byId('legal-qa-drafting-review').hidden=true;
+      byId('legal-qa-drafting-rows').replaceChildren();
     }
     function updateTaskFields(){
       const dual=['UC06','UC08'].includes(uc.value);
@@ -356,6 +358,71 @@
             contractRows.append(row);
           }
         }
+        // R146: show source-grounded UC01 suggestions as an unapproved review,
+        // never apply them to the original or infer legal validity from quotes.
+        const draftingPanel=byId('legal-qa-drafting-review');
+        const draftingRows=byId('legal-qa-drafting-rows');
+        draftingRows.replaceChildren();
+        draftingPanel.hidden=true;
+        const draft=data.drafting_review;
+        let draftingWarnings=data.uc==='UC01'&&
+          (!draft||!Array.isArray(draft.rows)||!draft.rows.length);
+        if(data.uc==='UC01'&&draft&&Array.isArray(draft.rows)&&
+           draft.rows.length>0&&draft.rows.length<=80){
+          draftingPanel.hidden=false;
+          draftingWarnings=draft.matched_quote_segments!==draft.total_segments||
+            (Array.isArray(draft.flags)&&draft.flags.length>0);
+          if(draftingWarnings){
+            const note=document.createElement('p');
+            note.className='legal-qa-evidence-warning';
+            note.textContent='UC01: Có dữ kiện thiếu/trùng, trích dẫn sai nguồn hoặc số mới không có trong nguồn. Không chấp nhận điều khoản trước khi luật sư kiểm duyệt.';
+            draftingRows.append(note);
+          }
+          for(const entry of draft.rows){
+            if(!entry||!/^A[1-9][0-9]*$/.test(entry.source_id)||
+               typeof entry.source_text!=='string'||entry.source_text.length>5000||
+               typeof entry.source_quote!=='string'||entry.source_quote.length>400||
+               typeof entry.draft_clause!=='string'||entry.draft_clause.length>850||
+               typeof entry.verification_question!=='string'||entry.verification_question.length>350||
+               !['missing','duplicate','incomplete','unmatched_source_quote',
+                 'draft_for_human_review'].includes(entry.status))continue;
+            const row=document.createElement('article');
+            row.className='legal-qa-translation-row';
+            const title=document.createElement('strong');
+            const names={
+              missing:'Chưa có dự thảo',
+              duplicate:'Dự thảo trùng',
+              incomplete:'Thiếu trường rà soát',
+              unmatched_source_quote:'Trích dẫn không thuộc đoạn nguồn',
+              draft_for_human_review:'Điều khoản chờ luật sư kiểm duyệt'
+            };
+            title.textContent='['+entry.source_id+'] · '+names[entry.status];
+            row.append(title);
+            for(const [label,text] of [
+              ['Dữ kiện nguồn',entry.source_text],
+              ['Trích dẫn căn cứ',entry.source_quote||'Chưa có trích dẫn'],
+              ['Điều khoản dự thảo',entry.draft_clause||'Chưa có điều khoản hợp lệ'],
+              ['Thông tin cần xác minh',entry.verification_question||'Chưa có câu hỏi']
+            ]){
+              const cell=document.createElement('div');
+              cell.className='legal-qa-translation-cell';
+              const labelNode=document.createElement('strong');
+              labelNode.textContent=label;
+              const p=document.createElement('p');
+              p.textContent=text;
+              cell.append(labelNode,p);
+              row.append(cell);
+            }
+            if(entry.number_check==='draft_has_number_absent_from_source'){
+              const warn=document.createElement('p');
+              warn.className='legal-qa-evidence-warning';
+              warn.textContent='Cảnh báo: dự thảo có số không xuất hiện trong dữ kiện đoạn này. Phải đối chiếu, không tự điền.';
+              row.append(warn);
+              draftingWarnings=true;
+            }
+            draftingRows.append(row);
+          }
+        }
         byId('legal-qa-result-title').textContent=data.title+' · '+(data.mode==='local_example_only'?'Tìm trong nguồn mẫu':'Bản nháp AI');
         byId('legal-qa-review').textContent=data.review_notice||
           'Chỉ truy xuất từ nguồn giả lập. Chưa xác minh dữ liệu văn bản pháp luật/bản án chính thức.';
@@ -421,10 +488,10 @@
           }
         }
         result.hidden=false;
-        setStatus(evidenceWarnings.length||translationWarnings||grammarWarnings||contractWarnings
+        setStatus(evidenceWarnings.length||translationWarnings||grammarWarnings||contractWarnings||draftingWarnings
           ? 'Có cảnh báo về nguồn, số liệu hoặc ghép đoạn. Không sử dụng trước khi kiểm duyệt.'
           : 'Hoàn tất bản nháp QA. Hãy đối chiếu nguồn và kiểm duyệt thủ công.',
-          evidenceWarnings.length>0||translationWarnings||grammarWarnings||contractWarnings);
+          evidenceWarnings.length>0||translationWarnings||grammarWarnings||contractWarnings||draftingWarnings);
         result.scrollIntoView({behavior:'smooth',block:'nearest'});
       } catch(error){
         if(generation===workspaceGeneration)

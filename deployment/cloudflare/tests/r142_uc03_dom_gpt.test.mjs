@@ -245,3 +245,70 @@ test('R145 UC02 browser highlights unmatched quotes and never treats missing met
  assert.match(h.query('#legal-qa-contract-rows').children[0].textContent,
   /điều khoản thiếu, trích dẫn không khớp/);
 });
+
+test('R146 UC01 browser shows source and draft with invented-number warning; clears on tenant rotation',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic UC01 QA matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='UC01';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ h.query('#legal-qa-source').value='Điều 1. Bên A giao 10 bộ hàng trong vòng 30 ngày.';
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-form').fire('submit');
+ assert.equal(h.pending.at(-1).path,'/api/qa/legal/run');
+ finish(h.pending.at(-1),{
+   uc:'UC01',title:'Soạn bản nháp hợp đồng/văn bản',mode:'ai_draft_not_verified',
+   answer:'[A1] Trích dữ kiện và điều khoản QA.',
+   source_hash:'0'.repeat(64),source_anchors:[{id:'A1',preview:'Điều 1...'}],
+   evidence_diagnostics:{flags:[],reference_coverage:'anchor_ids_matched_not_fact_checked'},
+   drafting_review:{
+     rows:[{source_id:'A1',source_text:'Điều 1. Bên A giao 10 bộ hàng trong vòng 30 ngày.',
+       source_quote:'Bên A giao 10 bộ hàng',
+       draft_clause:'<strong>UNTRUSTED_DRAFT_99</strong>',
+       verification_question:'Các bên xác minh lại thời hạn chưa?',
+       status:'draft_for_human_review',
+       number_check:'draft_has_number_absent_from_source',
+       literal_source_quote_matched:true}],
+     total_segments:1,matched_quote_segments:1,flags:['DRAFT_NUMBER_NOT_IN_SOURCE']
+   }
+ });
+ await done;
+ const panel=h.query('#legal-qa-drafting-review');
+ const rows=h.query('#legal-qa-drafting-rows');
+ assert.equal(panel.hidden,false);
+ assert.equal(rows.children.length,2,'warning followed by draft row');
+ const draft=rows.children[1];
+ assert.match(draft.children[0].textContent,/chờ luật sư kiểm duyệt/);
+ assert.equal(draft.children[1].children[1].textContent,
+  'Điều 1. Bên A giao 10 bộ hàng trong vòng 30 ngày.');
+ assert.equal(draft.children[3].children[1].textContent,
+  '<strong>UNTRUSTED_DRAFT_99</strong>',
+  'model output must remain plain text, not render HTML');
+ assert.match(draft.children[5].textContent,/số không xuất hiện/);
+ assert.equal(h.query('#legal-qa-feedback').dataset.state,'error');
+ h.win.dispatchEvent(new Event('ai-law:workspace-switch'));
+ assert.equal(panel.hidden,true);
+ assert.equal(rows.children.length,0);
+ assert.equal(h.query('#legal-qa-output').textContent,'');
+});
+test('R146 UC01 absent structured review metadata cannot render a false green result',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic UC01 QA matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='UC01';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ h.query('#legal-qa-source').value='Điều 1. Bên A giao 10 bộ hàng trong vòng 30 ngày.';
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-form').fire('submit');
+ finish(h.pending.at(-1),{
+   uc:'UC01',title:'Soạn bản nháp hợp đồng/văn bản',mode:'ai_draft_not_verified',
+   answer:'Bản nháp chưa ghép nguồn.',
+   source_hash:'0'.repeat(64),source_anchors:[{id:'A1',preview:'Điều 1...'}],
+   evidence_diagnostics:{flags:[],reference_coverage:'anchor_ids_matched_not_fact_checked'}
+ });
+ await done;
+ assert.equal(h.query('#legal-qa-drafting-review').hidden,true);
+ assert.equal(h.query('#legal-qa-feedback').dataset.state,'error');
+});
