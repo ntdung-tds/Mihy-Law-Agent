@@ -442,3 +442,54 @@ test('R145 UC02 flags fabricated cross-clause quote and blocks unauthorized cont
  assert.equal(denied.calls.some(call=>call.sql===LEGAL_QUOTA_SQL),false);
  assert.equal(denied.providerCalls.length,0);
 });
+
+test('R146 UC01 authorized API returns source-anchored unapproved draft clauses',async()=>{
+ const source=SOURCE+'\n\n'+SOURCE2;
+ const f=fixture();
+ f.env.AI.run=async()=>({response:
+  '[A1]\nCAN_CU: Bên cung cấp giao hàng ngày 15 tháng 9\n'+
+  'DU_THAO: Bên cung cấp giao hàng ngày 15 tháng 9.\n'+
+  'CAN_XAC_MINH: Ngày giao hàng đã được thống nhất chưa?\n'+
+  '[A2]\nCAN_CU: Bên cung cấp giao hàng ngày 30 tháng 9\n'+
+  'DU_THAO: Bên cung cấp giao hàng ngày 30 tháng 9.\n'+
+  'CAN_XAC_MINH: Có cần xác nhận lịch giao bằng văn bản không?'});
+ const response=await legalApi(request({uc:'UC01',source}),f.env,{now:NOW});
+ assert.equal(response.status,200,await response.clone().text());
+ const data=await response.json(),review=data.drafting_review;
+ assert.equal(review.mode,'qa_source_to_proposed_clause_not_verified');
+ assert.equal(review.total_segments,2);
+ assert.equal(review.matched_quote_segments,2);
+ assert.deepEqual(review.numeric_warning_source_ids,[]);
+ assert.deepEqual(review.flags,[]);
+ assert.equal(review.rows[0].status,'draft_for_human_review');
+ assert.equal(review.rows[1].status,'draft_for_human_review');
+ assert.match(review.rows[1].source_text,/30 tháng 9/);
+ assert.match(review.rows[0].draft_clause,/15 tháng 9/);
+ assert.equal(review.substantive_terms_verified,false);
+ assert.equal(review.legal_verification,'not_performed');
+ assert.equal(review.changes_applied_to_document,false);
+ assert.equal(response.headers.get('Cache-Control'),'no-store');
+ assert.ok(f.calls.every(call=>call.params.every(v=>v!==source)),
+  'source text is not persisted to D1');
+});
+
+test('R146 UC01 flags invented draft numeric terms and denies revoked MatterACL before AI',async()=>{
+ const f=fixture();
+ f.env.AI.run=async()=>({response:
+  '[A1]\nCAN_CU: Bên cung cấp giao hàng ngày 15 tháng 9\n'+
+  'DU_THAO: Bên cung cấp sẽ giao hàng trong vòng 45 ngày.\n'+
+  'CAN_XAC_MINH: Các bên đã thống nhất lịch giao chưa?'});
+ const accepted=await legalApi(request({uc:'UC01'}),f.env,{now:NOW});
+ assert.equal(accepted.status,200,await accepted.clone().text());
+ const review=(await accepted.json()).drafting_review;
+ assert.deepEqual(review.numeric_warning_source_ids,['A1']);
+ assert.equal(review.rows[0].number_check,'draft_has_number_absent_from_source');
+ assert.ok(review.flags.includes('DRAFT_NUMBER_NOT_IN_SOURCE'));
+
+ const denied=fixture({acl:false});
+ const res=await legalApi(request({uc:'UC01'}),denied.env,{now:NOW});
+ assert.equal(res.status,404);
+ assert.equal((await res.json()).drafting_review,undefined);
+ assert.equal(denied.calls.some(x=>x.sql===LEGAL_QUOTA_SQL),false);
+ assert.equal(denied.providerCalls.length,0);
+});
