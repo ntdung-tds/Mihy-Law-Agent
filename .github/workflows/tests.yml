@@ -235,6 +235,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r144_uc07_grammar_gpt.test.mjs
       - name: R145 UC02 quote-to-source clause review (all data synthetic)
         run: node --test deployment/cloudflare/tests/r145_uc02_quote_gpt.test.mjs
+      - name: R146 UC01 source-linked clause drafting evidence (synthetic QA only)
+        run: node --test deployment/cloudflare/tests/r146_uc01_draft_gpt.test.mjs
       - name: R123 live HTTPS authenticated-boundary negative QA without credentials
         if: ${{ github.head_ref == 'qa/r123-auth-denials-gpt' || github.ref == 'refs/heads/qa/r123-auth-denials-gpt' }}
         run: python deployment/cloudflare/tests/r123_live_auth_denials_gpt.py
