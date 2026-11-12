@@ -5,6 +5,7 @@
 import {mobileSession} from './mobile_auth.mjs';
 import {evidenceDiagnostics,wasModelTruncated} from './qa_legal_evidence_gpt.mjs';
 import {buildTranslationReview} from './qa_uc03_bilingual_gpt.mjs';
+import {buildGrammarReview} from './qa_uc07_grammar_gpt.mjs';
 
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const MAX_BODY_BYTES=36000,MAX_SOURCE=5000,MAX_QUESTION=600;
@@ -16,7 +17,7 @@ const TASKS=Object.freeze({
  UC04:['Tóm tắt văn bản','Tóm tắt đầy đủ các ý chính, chủ thể, nghĩa vụ, mốc thời gian và điểm chưa rõ; dẫn mã đoạn nguồn khi có thể.'],
  UC05:['Phân tích văn bản','Phân tích cấu trúc, nghĩa vụ, điều kiện, rủi ro và câu hỏi kiểm chứng từ nguồn, không viện dẫn luật không có trong nguồn.'],
  UC06:['So sánh hai văn bản QPPL','So sánh chính xác hai văn bản người dùng dán, nêu các khác biệt theo đoạn và giới hạn đối chiếu. Không kết luận hiệu lực pháp lý nếu không có chứng cứ chính thức.'],
- UC07:['Sửa lỗi ngữ pháp','Đưa ra phiên bản được đề xuất và danh sách thay đổi ngữ pháp/chính tả, không làm thay đổi số liệu, quyền, nghĩa vụ hoặc ý nghĩa pháp lý; gắn cảnh báo nếu đổi nghĩa. Không tự sửa file DOCX.'],
+ UC07:['Sửa lỗi ngữ pháp','Với MỖI đoạn [A1], [A2] từ nguồn, đề xuất phiên bản chính tả/ngữ pháp của toàn đoạn dưới ĐÚNG nhãn nguồn [A1], [A2] ở đầu dòng, đúng thứ tự (kể cả đoạn không cần sửa). Không thêm lời dẫn hoặc mã đoạn tự tạo. Giữ chính xác số liệu, ngày tháng, tên riêng, quyền, nghĩa vụ hoặc ý nghĩa pháp lý; nếu không chắc, chép nguyên đoạn. Không tự sửa file DOCX. Luật sư cần kiểm duyệt toàn bộ.'],
  UC08:['Đọc và phân tích nhiều hồ sơ','So sánh nguồn A/B về sự kiện, điểm thống nhất, mâu thuẫn và thông tin còn thiếu; chỉ sử dụng hai nguồn được cung cấp.'],
  UC09:['Trả lời câu hỏi pháp lý','Chỉ trả lời trong phạm vi nguồn trích dẫn do người dùng cung cấp; nếu không có thông tin để trả lời thì ghi rõ KHÔNG ĐỦ CĂN CỨ. Không tự tạo tên luật/án lệ/điều khoản.'],
  UC10:['Tìm bản án theo chủ đề','Chỉ tìm kiếm trong văn bản bản án mẫu do người dùng dán. Không kết nối kho bản án chính thức.'],
@@ -236,7 +237,9 @@ export async function legalApi(req,env,opts={}){
  // human review. A plain-text model answer never implies complete alignment.
  const translation_review=body.uc==='UC03'
   ? buildTranslationReview(output,primary):undefined;
+ const correction_review=body.uc==='UC07'
+  ? buildGrammarReview(output,primary):undefined;
  return json(200,{...common,mode:'ai_draft_not_verified',
-  model:MODEL,answer:output,evidence_diagnostics:evidence,translation_review,
+  model:MODEL,answer:output,evidence_diagnostics:evidence,translation_review,correction_review,
   review_notice:'Bản nháp AI từ nội dung mẫu. Trích dẫn chỉ được kiểm tra mã đoạn, chưa xác minh đúng nội dung, căn cứ pháp luật, hiệu lực hoặc bản dịch. Luật sư phải kiểm duyệt.'});
 }

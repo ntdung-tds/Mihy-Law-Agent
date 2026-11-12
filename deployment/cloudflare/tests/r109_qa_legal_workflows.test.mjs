@@ -343,3 +343,48 @@ test('R142 UC03 API returns bilingual review with exact source pairing, not an a
  assert.equal(denied.status,404);
  assert.equal((await denied.json()).translation_review,undefined);
 });
+
+test('R144 UC07 real API returns scoped paragraph-level grammar review and numerical risks',async()=>{
+ const source='Điều 1. Bên A giao 10 bộ hợp đồng vào ngày 15 tháng 9 năm 2026.'+
+  '\n\n'+'Điều 2. Bên B thanh toán 20 triệu đồng trong vòng 30 ngày kể từ nghiệm thu.';
+ const f=fixture();
+ f.env.AI.run=async()=>({response:
+  '[A1] Điều 1. Bên A giao 20 bộ hợp đồng vào ngày 15 tháng 9 năm 2026.\n'+
+  '[A2] Điều 2. Bên B thanh toán 10 triệu đồng trong vòng 30 ngày kể từ nghiệm thu.'});
+ const response=await legalApi(request({uc:'UC07',source}),f.env,{now:NOW});
+ assert.equal(response.status,200,await response.clone().text());
+ const payload=await response.json();
+ const review=payload.correction_review;
+ assert.equal(review.mode,'qa_source_vs_suggested_grammar_not_verified');
+ assert.equal(review.total_segments,2);
+ assert.equal(review.paired_segments,2);
+ assert.equal(review.numeric_risk_segments,2,'swaps must be identified within individual paragraphs');
+ assert.ok(review.flags.includes('GRAMMAR_PARAGRAPH_NUMBERS_CHANGED'));
+ assert.equal(review.rows[0].status,'changed');
+ assert.equal(review.rows[0].numeric_check,'literal_numeric_change_requires_review');
+ assert.match(review.rows[0].source_text,/giao 10 bộ/);
+ assert.match(review.rows[0].proposed_text,/giao 20 bộ/);
+ assert.equal(review.changes_applied_to_document,false);
+ assert.equal(review.legal_verification,'not_performed');
+ assert.equal(response.headers.get('Cache-Control'),'no-store');
+ assert.equal(f.providerCalls.length,0,'a stubbed fake output is used for this test');
+ assert.ok(f.calls.every(c=>c.params.every(v=>v!==source)),'no source copied to D1');
+
+ const fDenied=fixture({acl:false});
+ const denied=await legalApi(request({uc:'UC07',source}),fDenied.env,{now:NOW});
+ assert.equal(denied.status,404);
+ assert.equal((await denied.json()).correction_review,undefined);
+ assert.equal(fDenied.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false);
+});
+
+test('R144 UC07 does not invent paragraph mapping when provider omits labels',async()=>{
+ const f=fixture();
+ f.env.AI.run=async()=>({response:'Đây là bản sửa không có mã nguồn.'});
+ const response=await legalApi(request({uc:'UC07',source:SOURCE}),f.env,{now:NOW});
+ assert.equal(response.status,200);
+ const review=(await response.json()).correction_review;
+ assert.equal(review.paired_segments,0);
+ assert.deepEqual(review.missing_source_ids,['A1']);
+ assert.deepEqual(review.flags,['GRAMMAR_PARAGRAPHS_MISSING','GRAMMAR_UNSTRUCTURED_CONTENT']);
+ assert.equal(review.rows[0].proposed_text,'');
+});
