@@ -19,8 +19,29 @@
     let matterLoadController=null;
     let runController=null;
     const localFileSequence={a:0,b:0};
+    let documentReadGeneration=0;
+    let documentReadController=null;
+    let documentPreviewText='';
+    let documentPreviewMatter='';
+    function clearDocumentPreview(){
+      documentReadGeneration++;
+      documentReadController?.abort();
+      documentReadController=null;
+      documentPreviewText='';
+      documentPreviewMatter='';
+      byId('legal-qa-doc-read').disabled=false;
+      byId('legal-qa-doc-use').hidden=true;
+      byId('legal-qa-doc-preview').hidden=true;
+      byId('legal-qa-doc-preview').textContent='';
+    }
+    function clearDocumentInput(){
+      clearDocumentPreview();
+      byId('legal-qa-doc-file').value='';
+      byId('legal-qa-doc-status').textContent='Chỉ tệp QA giả lập; chọn hồ sơ và xác nhận trước khi đọc.';
+    }
     function invalidateRun(){
       workspaceGeneration++;
+      clearDocumentInput();
       runController?.abort();
       runController=null;
       isSubmitting=false;
@@ -42,6 +63,7 @@
       byId('legal-qa-extraction-rows').replaceChildren();
     }
     function updateTaskFields(){
+      byId('legal-qa-doc-panel').hidden=!['UC03','UC04','UC07','F08'].includes(uc.value);
       const dual=['UC06','UC08'].includes(uc.value);
       byId('legal-qa-source-b-label').hidden=!dual;
       byId('legal-qa-file-b-label').hidden=!dual;
@@ -58,6 +80,10 @@
       clearResult();
     }
     uc.addEventListener('change',()=>{invalidateRun();updateTaskFields();});
+    matter.addEventListener('change',()=>{
+      invalidateRun();
+      setStatus('Đã đổi hồ sơ QA; hãy kiểm tra lại dữ liệu trước khi gửi.');
+    });
     updateTaskFields();
     byId('legal-qa-example').addEventListener('click',()=>{
       byId('legal-qa-source').value=
@@ -95,6 +121,7 @@
             return;
           }
           field.value=text;
+          clearDocumentInput();
           byId('legal-qa-consent').checked=false;
           clearResult();
           setStatus('Đã đọc TXT '+which.toUpperCase()+' trên thiết bị. Chưa gửi lên máy chủ; xác nhận trước khi chạy.');
