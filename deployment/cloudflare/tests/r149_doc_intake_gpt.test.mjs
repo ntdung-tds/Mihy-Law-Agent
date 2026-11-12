@@ -12,7 +12,7 @@ const SID='55555555-5555-4555-8555-555555555555';
 const NOW=1800000000;
 const GOOD='Điều 1. Bên A giao 10 bộ hồ sơ vào ngày 15/09/2026. Bên B thanh toán 2.000.000 đồng.';
 function fixture({session=true,acl=true,quota=true,role='lawyer',
- convert=true,converted=GOOD,revokeAfterConvert=false}={}){
+ convert=true,converted=GOOD,revokeAfterConvert=false,aclExpiresAt=null}={}){
  const calls=[],conversions=[],runs=[];
  let aclReads=0;
  const env={AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,
@@ -22,7 +22,8 @@ function fixture({session=true,acl=true,quota=true,role='lawyer',
       if(sql.includes('FROM qa_sessions s'))return session?{user_id:U,tenant_id:T,role_key:role}:null;
       if(sql===LEGAL_MATTER_ACCESS_SQL){
      aclReads++;
-     return acl&&!(revokeAfterConvert&&aclReads>1)?{'1':1}:null;
+     return acl&&!(revokeAfterConvert&&aclReads>1)&& 
+      (aclExpiresAt===null||args[4]<aclExpiresAt)?{'1':1}:null;
     }
       return null;
      },async run(){return {meta:{changes:quota?1:0}};}};
@@ -150,4 +151,14 @@ test('R149 F08 PDF/DOCX conversion is preview-only and cannot become AI extracti
  assert.equal(f.runs.length,0,'document preview never executes the legal model');
  assert.ok(f.calls.every(c=>c.args.every(x=>x!==GOOD)),
   'uploaded legal sample is not stored as D1 rows');
+});
+
+test('R150: MatterACL expiry during PDF conversion must not reveal extracted text',async()=>{
+ const f=fixture({aclExpiresAt:NOW+1});
+ const response=await documentExtractApi(req(),f.env,{now:NOW,afterConvertNow:NOW+2});
+ assert.equal(response.status,404,await response.clone().text());
+ assert.ok(!(await response.text()).includes(GOOD));
+ assert.equal(f.conversions.length,1);
+ assert.equal(f.calls.filter(x=>x.sql===LEGAL_MATTER_ACCESS_SQL).length,2);
+ assert.equal(f.runs.length,0);
 });
