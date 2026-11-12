@@ -312,3 +312,71 @@ test('R146 UC01 absent structured review metadata cannot render a false green re
  assert.equal(h.query('#legal-qa-drafting-review').hidden,true);
  assert.equal(h.query('#legal-qa-feedback').dataset.state,'error');
 });
+
+test('R148 F08 source-linked extraction displays inert money text and clears on tenant switch',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F08 QA matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='F08';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ h.query('#legal-qa-source').value='Điều 1. Bên A thanh toán 2.000.000 đồng trong vòng 30 ngày.';
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-form').fire('submit');
+ assert.equal(h.pending.at(-1).path,'/api/qa/legal/run');
+ finish(h.pending.at(-1),{
+  uc:'F08',title:'Trích xuất dữ liệu pháp lý QA',mode:'ai_draft_not_verified',
+  answer:'[A1] LOAI: SO_TIEN TRICH: 2.000.000 đồng',
+  source_hash:'0'.repeat(64),source_anchors:[{id:'A1',preview:'Điều 1...'}],
+  evidence_diagnostics:{flags:[],reference_coverage:'not_required_for_transform'},
+  extraction_review:{
+    rows:[{source_id:'A1',
+      source_text:'Điều 1. Bên A thanh toán 2.000.000 đồng trong vòng 30 ngày.',
+      kind:'SO_TIEN',source_quote:'thanh toán 2.000.000 đồng',
+      value:'<script>UNTRUSTED_MONEY</script>',
+      status:'source_mismatch',literal_quote_matched:true,
+      literal_value_matched:false}],
+    total_source_segments:1,reviewed_source_segments:1,
+    flags:['EXTRACTION_SOURCE_MISMATCH']
+  }
+ });
+ await done;
+ const panel=h.query('#legal-qa-extraction-review');
+ const rows=h.query('#legal-qa-extraction-rows');
+ assert.equal(panel.hidden,false);
+ assert.equal(rows.children.length,2,'warning and extraction row');
+ assert.equal(h.query('#legal-qa-feedback').dataset.state,'error');
+ const row=rows.children[1];
+ assert.match(row.children[0].textContent,/Số tiền/);
+ assert.equal(row.children[1].children[1].textContent,
+  'Điều 1. Bên A thanh toán 2.000.000 đồng trong vòng 30 ngày.');
+ assert.equal(row.children[3].children[1].textContent,
+  '<script>UNTRUSTED_MONEY</script>',
+  'untrusted AI output is textContent only');
+ assert.match(row.children[4].textContent,/Dữ kiện này chưa được xác nhận/);
+ h.win.dispatchEvent(new Event('ai-law:workspace-switch'));
+ assert.equal(panel.hidden,true);
+ assert.equal(rows.children.length,0);
+ assert.equal(h.query('#legal-qa-output').textContent,'');
+});
+
+test('R148 F08 missing extraction review metadata never gets green completion state',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F08 QA matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='F08';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ h.query('#legal-qa-source').value='Điều 1. Bên A thanh toán 2.000.000 đồng trong vòng 30 ngày.';
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-form').fire('submit');
+ finish(h.pending.at(-1),{
+  uc:'F08',title:'Trích xuất dữ liệu pháp lý QA',mode:'ai_draft_not_verified',
+  answer:'Không có dữ liệu đối chiếu.',
+  source_hash:'0'.repeat(64),source_anchors:[{id:'A1',preview:'Điều 1...'}],
+  evidence_diagnostics:{flags:[],reference_coverage:'not_required_for_transform'}
+ });
+ await done;
+ assert.equal(h.query('#legal-qa-extraction-review').hidden,true);
+ assert.equal(h.query('#legal-qa-feedback').dataset.state,'error');
+});
