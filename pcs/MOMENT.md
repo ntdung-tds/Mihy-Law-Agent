@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `130` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-12T22:05:14.116Z`.
+- **PCS revision:** `131` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-12T22:14:06.666Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R149 — F07 đọc PDF/DOCX QA xem trước, có xác nhận trước khi dùng nguồn (2026-11-13 VN)
+
+- **Implementation:** [Draft PR #219](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/219), stacked on #218. Selective port (not merge) of prior [PR #187](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/187) document-preview endpoint into latest R148: new `/api/qa/legal/extract` POST, bounded multipart 1.5MB PDF/DOCX signatures, same-origin, authorized lawyer/tenant_admin, MatterACL before + after conversion, existing quota, `env.AI.toMarkdown` text only, no original file/text persistence. Allow F08 in addition to UC03/04/07. Worker/site relay routed.
+- **Manual-approval UI:** choosing file performs no HTTP transfer; pressing Read requires a Matter + fictional-data consent; conversion only produces a text preview without calling legal AI or populating source. A separate Use action fills source A and resets AI consent. Clear stale preview on tenant/UC/Matter rotation, no HTML interpretation. Responsive 1.5MB bounded file selection and scrollable text preview. No automatic legal review, upload persistence, or publish.
+- **Tests:** ported original synthetic multipart/ACL/quota/revocation test suite to `r149_doc_intake_gpt.test.mjs`, additional F08 preview case, browser-side source-script VM positive/negative delayed-tenant tests; CI updated. [Actions #43317844290](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43317844290) **PENDING at handoff**; read exact logs/CI and repair. PCS rev131 docs-only follow-up will have its own CI.
+- **Gates:** Actual Cloudflare provider `toMarkdown`, true PDF/DOCX visual fidelity, scan OCR, file history/search/persistence and two-account real login/MatterACL E2E (R126), lawyer audit/approval and Owner acceptance remain BLOCKED/NOT_RUN. No signing, customer files, automatic merge or production deploy. F07, F08 and all 36 full features NOT_DONE.
 
 ## R148 — F08 trích xuất chủ thể, nghĩa vụ, số tiền và thời hạn (2026-11-13 VN)
 
