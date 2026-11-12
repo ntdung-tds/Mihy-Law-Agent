@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 131,
-  "updated_at": "2026-11-12T22:14:06.666Z",
+  "revision": 132,
+  "updated_at": "2026-11-12T22:16:18.518Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2204,7 +2204,7 @@
         "id": "AL-P0-F07-R149-001",
         "title": "R149 F07 authenticated PDF/DOCX in-memory preview and explicit approved source A handoff",
         "priority": "P0",
-        "status": "SOURCE_IMPL_CI_PENDING_F07_FULL_NOT_DONE",
+        "status": "SOURCE_CI_PASS_F07_FULL_E2E_NOT_RUN",
         "scope": "Fictional QA PDF/DOCX <=1.5MB, UC03/04/07/F08, no persistent upload, no real customer files, no scan OCR promise.",
         "acceptance": [
           "Bounded multipart bytes, extension/MIME/magic, role+MatterACL before and after conversion, quota and no file content persistence.",
@@ -2213,9 +2213,9 @@
           "Negative tests for unauthorized access, quota, malformed/oversized files, provider failure and revocation; actual signed-in Cloudflare and genuine PDF/DOCX OCR QA remain NOT_RUN."
         ],
         "tests": {
-          "multipart_node": "PENDING_ACTIONS_43317844290",
-          "real_browser_source_vm": "PENDING_ACTIONS_43317844290",
-          "full_ci": "PENDING_ACTIONS_43317844290",
+          "multipart_node": "PASS_5_OF_5_ACTIONS_43317844290_CLOUDFLARE_CONTRACT",
+          "real_browser_source_vm": "PASS_2_OF_2_ACTIONS_43317844290_CLOUDFLARE_CONTRACT",
+          "full_ci": "PASS_9_OF_9_ACTIONS_43317844290_CODE_HEAD_0fd924d14dea524d07da1f532b3a64af97463ab6",
           "provider_live_conversion": "NOT_RUN",
           "real_signed_in_cloudflare": "BLOCKED_NOT_RUN_R126",
           "scan_ocr_accuracy": "NOT_RUN",
@@ -2227,7 +2227,7 @@
           "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/187"
         ],
         "owner_acceptance": "PENDING",
-        "notes": "Selective forward-port of prior R138 preview handler from #187 into latest current stack, with F08 support and a new consent-first UI. No merge/deploy production."
+        "notes": "Actual code CI PASS 9/9 at 0fd924d1, multipart 5/5 and source browser VM 2/2. Docs-only PCS final-head CI requires separate verification. Full F07, provider live and R126 2-account E2E NOT_RUN; no production merge/deploy."
       }
     ],
     "features": [
