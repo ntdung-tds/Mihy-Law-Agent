@@ -493,3 +493,49 @@ test('R146 UC01 flags invented draft numeric terms and denies revoked MatterACL 
  assert.equal(denied.calls.some(x=>x.sql===LEGAL_QUOTA_SQL),false);
  assert.equal(denied.providerCalls.length,0);
 });
+
+test('R148 F08 source-bounded extraction through real authorized QA API',async()=>{
+ const source=SOURCE+'\n\n'+SOURCE2;
+ const fixtureGood=fixture();
+ fixtureGood.env.AI.run=async()=>({response:
+  '[A1]\nLOAI: THOI_HAN\nTRICH: Bên cung cấp giao hàng ngày 15 tháng 9\nGIA_TRI: 15 tháng 9\n'+
+  '[A2]\nLOAI: THOI_HAN\nTRICH: Bên cung cấp giao hàng ngày 30 tháng 9\nGIA_TRI: 30 tháng 9'});
+ const resp=await legalApi(request({uc:'F08',source}),fixtureGood.env,{now:NOW});
+ assert.equal(resp.status,200,await resp.clone().text());
+ const data=await resp.json();
+ assert.equal(data.uc,'F08');
+ assert.equal(data.mode,'ai_draft_not_verified');
+ const review=data.extraction_review;
+ assert.equal(review.mode,'qa_literal_extraction_not_verified');
+ assert.equal(review.total_source_segments,2);
+ assert.equal(review.verified_literal_items,2);
+ assert.deepEqual(review.flags,[]);
+ assert.deepEqual(review.rows.map(r=>r.source_id),['A1','A2']);
+ assert.equal(review.rows[0].value,'15 tháng 9');
+ assert.equal(review.rows[1].value,'30 tháng 9');
+ assert.equal(review.extraction_completeness_verified,false);
+ assert.equal(review.legal_verification,'not_performed');
+ assert.equal(review.changes_applied_to_document,false);
+ assert.equal(resp.headers.get('Cache-Control'),'no-store');
+ assert.ok(fixtureGood.calls.every(call=>call.params.every(p=>p!==source)),
+  'never write a business source to D1');
+});
+
+test('R148 F08 catches cross-source fabricated monetary facts and denies revoked MatterACL before AI',async()=>{
+ const fake=fixture();
+ fake.env.AI.run=async()=>({response:
+  '[A1]\nLOAI: SO_TIEN\nTRICH: bên nhận thanh toán 10 triệu đồng\nGIA_TRI: 99 triệu đồng'});
+ const res=await legalApi(request({uc:'F08'}),fake.env,{now:NOW});
+ assert.equal(res.status,200);
+ const review=(await res.json()).extraction_review;
+ assert.deepEqual(review.mismatch_source_ids,['A1']);
+ assert.ok(review.flags.includes('EXTRACTION_SOURCE_MISMATCH'));
+ assert.equal(review.rows[0].literal_quote_matched,true);
+ assert.equal(review.rows[0].literal_value_matched,false);
+ const denied=fixture({acl:false});
+ const r=await legalApi(request({uc:'F08'}),denied.env,{now:NOW});
+ assert.equal(r.status,404);
+ assert.equal((await r.json()).extraction_review,undefined);
+ assert.equal(denied.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false);
+ assert.equal(denied.providerCalls.length,0);
+});
