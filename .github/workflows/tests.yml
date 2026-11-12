@@ -231,6 +231,8 @@ jobs:
         run: |
           node --test deployment/cloudflare/tests/r142_uc03_bilingual_gpt.test.mjs
           node --test deployment/cloudflare/tests/r142_uc03_dom_gpt.test.mjs
+      - name: R144 UC07 paragraph-level grammar edits and number preservation QA
+        run: node --test deployment/cloudflare/tests/r144_uc07_grammar_gpt.test.mjs
       - name: R123 live HTTPS authenticated-boundary negative QA without credentials
         if: ${{ github.head_ref == 'qa/r123-auth-denials-gpt' || github.ref == 'refs/heads/qa/r123-auth-denials-gpt' }}
         run: python deployment/cloudflare/tests/r123_live_auth_denials_gpt.py
