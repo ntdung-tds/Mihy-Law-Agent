@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 127,
-  "updated_at": "2026-11-12T21:27:20.263Z",
+  "revision": 128,
+  "updated_at": "2026-11-12T21:30:12.594Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2147,7 +2147,7 @@
         "id": "AL-SCOPE-R147-001",
         "title": "R147 Owner-requested 36-feature F01–F36 register and explicit exclusion of digital/electronic signing",
         "priority": "P0",
-        "status": "SCOPE_REGISTERED_CI_PENDING",
+        "status": "SCOPE_REGISTERED_CONTRACT_CI_PASS_FEATURES_NOT_RUN",
         "scope": "All F01–F36 in Owner-provided Mihy Law functional catalog; F31 excludes digital/electronic signing and certificate workflows but retains email/calendar/Word/storage/API; detailed private SRS v1.1.15 not changed.",
         "acceptance": [
           "Exactly 36 codes; P0 18, P1 16, P2 2; 7 source groups and personal/office mode cells transcribed without dropping any function.",
@@ -2156,10 +2156,12 @@
           "P0 security gates preserve Tenant isolation, no SaaS SysAdmin business-data visibility, lawyer review prior publication; Owner final acceptance last."
         ],
         "tests": {
-          "catalog_contract": "PENDING_ACTIONS_43310316716",
+          "catalog_contract": "PASS_6_OF_6_CLOUDFLARE_CONTRACT_ACTIONS_43310316716",
           "feature_live_e2e": "NOT_RUN_FOR_ALL_36_PENDING_SRS_MAPPING",
           "authorized_multiaccount_e2e": "BLOCKED_NOT_RUN_R126",
-          "customer_data": "PROHIBITED_UNTIL_GATES"
+          "customer_data": "PROHIBITED_UNTIL_GATES",
+          "full_ci": "PASS_9_OF_9_CODE_HEAD_065b007318780b042340694e6542e3730b6496c8_ACTIONS_43310316716",
+          "final_pcs_head_ci": "PENDING_REV128_DOCS_ONLY"
         },
         "evidence": [
           "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/217",
@@ -2168,7 +2170,7 @@
           "pcs/srs_changed_gpt_v1.md"
         ],
         "owner_acceptance": "PENDING",
-        "notes": "This is an Owner-approved scope capture and executable contract; it does not implement or accept the 36 business functions. Signing exception is a subcapability of F31, not removal of F31."
+        "notes": "Owner 36-feature target and no-signature exception recorded; full code-head CI #43310316716 PASS 9/9, 21 optional jobs skipped. None of the 36 business features was accepted by this scope-only test. PCS rev128 docs-only CI separate."
       }
     ],
     "features": [
