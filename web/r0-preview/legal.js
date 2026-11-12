@@ -32,6 +32,8 @@
       byId('legal-qa-sources').replaceChildren();
       byId('legal-qa-translation-review').hidden=true;
       byId('legal-qa-translation-rows').replaceChildren();
+      byId('legal-qa-grammar-review').hidden=true;
+      byId('legal-qa-grammar-rows').replaceChildren();
     }
     function updateTaskFields(){
       const dual=['UC06','UC08'].includes(uc.value);
@@ -239,6 +241,60 @@
             }
           }
         }
+        // R144: compare each proposed grammatical edit with its exact source
+        // segment. Never auto-apply changes to source or to the original file.
+        const grammarPanel=byId('legal-qa-grammar-review');
+        const grammarRows=byId('legal-qa-grammar-rows');
+        grammarPanel.hidden=true;
+        grammarRows.replaceChildren();
+        let grammarWarnings=false;
+        const correction=data.correction_review;
+        if(data.uc==='UC07'&&correction&&Array.isArray(correction.rows)&&
+           correction.rows.length>0&&correction.rows.length<=80){
+          grammarPanel.hidden=false;
+          grammarWarnings=correction.paired_segments!==correction.total_segments||
+            (Array.isArray(correction.flags)&&correction.flags.length>0);
+          if(grammarWarnings){
+            const note=document.createElement('p');
+            note.className='legal-qa-evidence-warning';
+            note.textContent='UC07: Có đoạn bị thiếu/trùng hoặc thay đổi số liệu. Không chấp nhận tự động; luật sư phải kiểm duyệt.';
+            grammarRows.append(note);
+          }
+          for(const entry of correction.rows){
+            if(!entry||!/^A[1-9]\\d*$/.test(entry.source_id)||
+               typeof entry.source_text!=='string'||
+               typeof entry.proposed_text!=='string'||
+               entry.source_text.length>5000||entry.proposed_text.length>8500||
+               !['unchanged','changed','missing','duplicate'].includes(entry.status))continue;
+            const line=document.createElement('article');
+            line.className='legal-qa-translation-row';
+            const title=document.createElement('strong');
+            title.textContent='['+entry.source_id+'] · '+
+              ({unchanged:'Giữ nguyên',changed:'Đề xuất sửa',missing:'Thiếu đề xuất',duplicate:'Đề xuất trùng'}[entry.status]);
+            line.append(title);
+            for(const [name,value] of [
+              ['Đoạn nguồn',entry.source_text],
+              ['Đề xuất từ AI',entry.proposed_text||'Chưa có đề xuất có thể đối chiếu']
+            ]){
+              const cell=document.createElement('div');
+              cell.className='legal-qa-translation-cell';
+              const label=document.createElement('strong');
+              label.textContent=name;
+              const p=document.createElement('p');
+              p.textContent=value;
+              cell.append(label,p);
+              line.append(cell);
+            }
+            if(entry.numeric_check==='literal_numeric_change_requires_review'){
+              const warning=document.createElement('p');
+              warning.className='legal-qa-evidence-warning';
+              warning.textContent='Cảnh báo: số liệu ở đoạn này đã thay đổi; cần đối chiếu nguyên bản.';
+              line.append(warning);
+              grammarWarnings=true;
+            }
+            grammarRows.append(line);
+          }
+        }
         byId('legal-qa-result-title').textContent=data.title+' · '+(data.mode==='local_example_only'?'Tìm trong nguồn mẫu':'Bản nháp AI');
         byId('legal-qa-review').textContent=data.review_notice||
           'Chỉ truy xuất từ nguồn giả lập. Chưa xác minh dữ liệu văn bản pháp luật/bản án chính thức.';
@@ -304,10 +360,10 @@
           }
         }
         result.hidden=false;
-        setStatus(evidenceWarnings.length||translationWarnings
+        setStatus(evidenceWarnings.length||translationWarnings||grammarWarnings
           ? 'Có cảnh báo về nguồn, số liệu hoặc ghép đoạn. Không sử dụng trước khi kiểm duyệt.'
           : 'Hoàn tất bản nháp QA. Hãy đối chiếu nguồn và kiểm duyệt thủ công.',
-          evidenceWarnings.length>0||translationWarnings);
+          evidenceWarnings.length>0||translationWarnings||grammarWarnings);
         result.scrollIntoView({behavior:'smooth',block:'nearest'});
       } catch(error){
         if(generation===workspaceGeneration)
