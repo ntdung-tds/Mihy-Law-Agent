@@ -266,13 +266,17 @@ export async function documentExtractApi(req,env,opts={}){
  const extracted=result.data.trim();
  if(!safeText(extracted,30,MAX_SOURCE))
   return err(422,'Nội dung trích xuất rỗng, không hợp lệ hoặc vượt 5000 ký tự. Hãy dùng một đoạn tệp QA nhỏ hơn.');
- // Permissions may be revoked while document conversion is in progress.
- // Check the exact same tenant/Matter ACL again before revealing extracted text.
+ // Recheck at the actual post-conversion time: a valid_to boundary can pass
+ // without changing ACL version while a third-party conversion is in flight.
+ // opts.afterConvertNow is used only for deterministic synthetic regression tests.
+ const afterConvertNow=opts.afterConvertNow??(opts.now===undefined?
+  Math.floor(Date.now()/1000):now);
  let stillAllowed;
  try{
   stillAllowed=await env.DB.prepare(LEGAL_MATTER_ACCESS_SQL).bind(
    env.INSTALLATION_ID,principal.tenant_id,data.get('matter_id'),
-   principal.user_id,now,now,principal.user_id,now,now).first();
+   principal.user_id,afterConvertNow,afterConvertNow,
+   principal.user_id,afterConvertNow,afterConvertNow).first();
  }catch{return unavailable();}
  if(!stillAllowed)return err(404,'Không tìm thấy hồ sơ có quyền truy cập.');
  const digest=await crypto.subtle.digest('SHA-256',bytes);
