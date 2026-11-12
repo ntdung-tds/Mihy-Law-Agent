@@ -263,7 +263,7 @@
             grammarRows.append(note);
           }
           for(const entry of correction.rows){
-            if(!entry||!/^A[1-9]\\d*$/.test(entry.source_id)||
+            if(!entry||!/^A[1-9]\d*$/.test(entry.source_id)||
                typeof entry.source_text!=='string'||
                typeof entry.proposed_text!=='string'||
                entry.source_text.length>5000||entry.proposed_text.length>8500||
