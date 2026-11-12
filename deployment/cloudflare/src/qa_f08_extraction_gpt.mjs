@@ -48,7 +48,7 @@ export function buildLegalDataReview(answer,sourceRows){
     const type=block.fields.LOAI||'',quote=block.fields.TRICH||'',value=block.fields.GIA_TRI||'';
     const sourceText=sourceMap.get(block.source_id);
     const key=[block.source_id,type,quote,value].join('\u0000');
-    const row={source_id:block.source_id,kind:type,source_quote:quote,value,
+    const row={source_id:block.source_id,source_text:sourceText,kind:type,source_quote:quote,value,
       status:'incomplete',literal_quote_matched:false,literal_value_matched:false};
     if(seen.has(key)){duplicates.push(block.source_id);row.status='duplicate';rows.push(row);continue;}
     seen.add(key);
