@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `126` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-12T21:19:00.342Z`.
+- **PCS revision:** `127` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-12T21:27:20.263Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R147 — Owner 36 chức năng F01–F36, loại trừ ký số (2026-11-13 VN)
+
+- **Owner directive:** “Làm đủ nhé, trừ ký số”. Original 3-page file `mihy_chucnang_gpt_v1.docx` (SHA-256 `2bc8d9f3774334807bba7b42de0a5aac65bf3b0446b8cd63603ae5e59c12d374`) explicitly identifies 36 **high-level proposed** features across A–G, 18 P0 / 16 P1 / 2 P2; **the file says it is NOT an SRS**. Scope is now recorded, not falsely declared implemented.
+- **Implementation in [Draft PR #217](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/217):** machine-readable `pcs/mihy_scope_gpt_v1.json` captures each F01–F36 title, group, priority and individual/office applicability; `pcs/srs_changed_gpt_v1.md` records authorized scope change while SRS v1.1.15 remains frozen. F31 retains email/calendar/Word/storage/external API but **EXCLUDES electronic/digital signatures, certificates and any signing flow**. F35 remains a future target; prior Drive/OneDrive/OAuth QA failures do not vanish.
+- **QA:** 6 real source-derived contract tests in `deployment/cloudflare/tests/r147_scope_gpt.test.mjs` added to Cloudflare contract Actions. [CI #43310316716](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43310316716) was QUEUED / not PASS at first handoff. Further documentation commits need independent final-HEAD CI; read actual jobs and logs. Scope test PASS does not imply any business Fxx is implemented.
+- **Gates:** all Fxx `implementation=NOT_ASSESSED`, `verification=NOT_RUN`, `acceptance=OWNER_PENDING`; SRS trace pending decomposition. Current source-only UC01–UC11 QA is not a substitute for 36 complete end-to-end workflows. R126 multi-account authenticated Cloudflare E2E BLOCKED, official legal sources, effective-date legal checks, real DOCX/PDF/OCR, lawyer approval workflow and Owner final acceptance still NOT_RUN.
+- **Governance:** preserve `state.current.active_task=AL-R0-DEPLOY-001` (standalone-first) and SaaS SysAdmin zero access to customer business data. Existing hourly automation is enabled; update it to the 36-feature owner directive without duplicate schedule. No signing. No merge/production deploy/customer data.
 
 ## R146 — UC01 source-grounded clause drafting QA (2026-11-13 VN)
 
