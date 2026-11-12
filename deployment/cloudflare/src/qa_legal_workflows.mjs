@@ -7,12 +7,13 @@ import {evidenceDiagnostics,wasModelTruncated} from './qa_legal_evidence_gpt.mjs
 import {buildTranslationReview} from './qa_uc03_bilingual_gpt.mjs';
 import {buildGrammarReview} from './qa_uc07_grammar_gpt.mjs';
 import {buildContractClauseReview} from './qa_uc02_contract_gpt.mjs';
+import {buildDraftSourceReview} from './qa_uc01_draft_gpt.mjs';
 
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const MAX_BODY_BYTES=36000,MAX_SOURCE=5000,MAX_QUESTION=600;
 const MAX_OUTPUT=8500,MODEL='@cf/meta/llama-3.1-8b-instruct';
 const TASKS=Object.freeze({
- UC01:['Soạn bản nháp hợp đồng/văn bản','Tạo bản nháp từ các dữ kiện do người dùng cung cấp. Không tự điền tên các bên, điều khoản, số liệu hoặc căn cứ chưa được nêu; đánh dấu [CẦN XÁC MINH].'],
+ UC01:['Soạn bản nháp hợp đồng/văn bản','Với MỖI đoạn dữ kiện [A1], [A2] nguồn, đề xuất một điều khoản VĂN BẢN NHÁP theo đúng mẫu 4 dòng: [A1] ở một dòng riêng, CAN_CU: <trích liên tiếp chính xác 12–400 ký tự nguồn A1>, DU_THAO: <điều khoản đề xuất dựa CHỈ trên dữ kiện A1; không tự đặt tên bên, số liệu, ngày, tiền, trách nhiệm hay quy định mới>, CAN_XAC_MINH: <câu hỏi luật sư cần xác nhận trước khi ký>. Nếu chưa đủ thông tin, viết [CẦN XÁC MINH], không tự suy diễn. Không đưa đầu đề hoặc dữ kiện ngoài nguồn. Mọi điều khoản chỉ là bản nháp cần luật sư kiểm duyệt.'],
  UC02:['Rà soát hợp đồng','Rà soát từng đoạn [A1], [A2] của nguồn hợp đồng theo đúng thứ tự. Với MỖI đoạn, trả về đúng 4 dòng: [A1] (dòng độc lập), TRICH: <trích nguyên văn chính xác một chuỗi liên tiếp 12–400 ký tự trong đúng đoạn A1>, NHAN_XET: <nhận xét dự thảo về rủi ro/điểm thiếu; nếu chưa phát hiện thì ghi chưa phát hiện từ đoạn mẫu>, CAN_XAC_MINH: <một câu hỏi cần luật sư xác minh>. Không thay lời trích, không thêm đầu đề/đoạn chưa được cung cấp; không tự tuyên bố vi phạm pháp luật, mức độ rủi ro hay hiệu lực văn bản. Luật sư kiểm tra mọi nhận định.'],
  UC03:['Dịch tài liệu, hợp đồng','Dịch đầy đủ từng đoạn nguồn sang ngôn ngữ đích, giữ số điều, thuật ngữ, số liệu, tên riêng. Trả về CHÍNH XÁC mỗi đoạn dịch dưới nhãn [A1], [A2] theo thứ tự nguồn, nhãn ở đầu dòng riêng của đoạn dịch. Không thêm lời dẫn, tiêu đề hoặc bỏ đoạn. Đây chỉ là bản nháp đối chiếu; không xác nhận tính tương đương pháp lý.'],
  UC04:['Tóm tắt văn bản','Tóm tắt đầy đủ các ý chính, chủ thể, nghĩa vụ, mốc thời gian và điểm chưa rõ; dẫn mã đoạn nguồn khi có thể.'],
@@ -242,7 +243,9 @@ export async function legalApi(req,env,opts={}){
   ? buildGrammarReview(output,primary):undefined;
  const contract_review=body.uc==='UC02'
   ? buildContractClauseReview(output,primary):undefined;
+ const drafting_review=body.uc==='UC01'
+  ? buildDraftSourceReview(output,primary):undefined;
  return json(200,{...common,mode:'ai_draft_not_verified',
-  model:MODEL,answer:output,evidence_diagnostics:evidence,translation_review,correction_review,contract_review,
+  model:MODEL,answer:output,evidence_diagnostics:evidence,translation_review,correction_review,contract_review,drafting_review,
   review_notice:'Bản nháp AI từ nội dung mẫu. Trích dẫn chỉ được kiểm tra mã đoạn, chưa xác minh đúng nội dung, căn cứ pháp luật, hiệu lực hoặc bản dịch. Luật sư phải kiểm duyệt.'});
 }
