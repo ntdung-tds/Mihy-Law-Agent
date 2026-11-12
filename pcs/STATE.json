@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 120,
-  "updated_at": "2026-11-10T12:34:52.656Z",
+  "revision": 121,
+  "updated_at": "2026-11-12T20:53:57.845Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2061,6 +2061,34 @@
         ],
         "owner_acceptance": "PENDING",
         "notes": "R142 code HEAD CI PASS 9/9; current PCS update is docs-only and still needs final-head CI. Draft, no merge/deploy or user acceptance."
+      },
+      {
+        "id": "AL-R0-UC07-R144-001",
+        "title": "R144 UC07 text-only source-to-grammar proposed edits per paragraph and literal numeric change QA",
+        "priority": "P0",
+        "status": "SOURCE_FIX_CI_PENDING",
+        "scope": "Existing authenticated source-only synthetic-text UC07; no Word file mutation, DOCX Track Changes, PDF, legal accuracy approval or SRS expansion.",
+        "acceptance": [
+          "For each [A#] paragraph, display original and proposed grammar with missing/duplicate/unstructured warnings rather than treating arbitrary output as a complete revision.",
+          "Review exact numbers by paragraph so swapping numbers across source segments triggers a warning even if global token totals match.",
+          "Treat model text as inert, distinguish unchanged/changed and never modify customer source or file automatically; clear results on workspace switch.",
+          "All real signed-in Cloudflare two-account and Word-document E2E and Owner acceptance remain gated."
+        ],
+        "tests": {
+          "helper_unit": "PENDING_CURRENT_CI_43304706691",
+          "authenticated_api_synthetic": "PASS_FIRST_CI_43304512580",
+          "browser_source_vm": "FAIL_FIRST_CI_43304512580_ANCHOR_REGEX_FIXED_228b90f4_PENDING_CURRENT_CI",
+          "full_ci": "PENDING_CURRENT_CI_43304706691",
+          "live_cloudflare_signed_in": "NOT_RUN_R126_BLOCKED",
+          "actual_docx_pdf": "NOT_RUN"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/214",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43304512580",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43304706691"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "First real CI found browser double-backslash regexp error; repaired in source. Draft stacked PR, do not merge/deploy."
       }
     ],
     "features": [
@@ -2690,9 +2718,9 @@
       }
     ],
     "current": {
-      "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R110 source-bound QA legal workflow hardening on PR159; CI 9/9 PASS run 42407576294. Deployed only qa_legal_workflows.mjs content to Cloudflare backend QA deployment 301ecbe7-5a2e-47f9-9962-56b44ad2b26f (100%); other 9 modules and existing AI/D1/OAuth bindings exact-match preserved. Real browser /health online; read-only D1 count 1 matter/1 AI quota record. PR158 duplicate was closed without merge/deploy. Real signed-in model E2E, legal accuracy/Owner acceptance NOT_RUN.",
-      "next_action": "Continue existing 11-UC R109 QA (one canonical /app#assistant surface), verify login and model outputs on real mobile with fictional documents. Prioritize exact source quotes for UC03/04/07, distinct negative tests, role ACL and model failure cases. Do not work on Google Drive/OneDrive or touch production. Keep SRS v1.1.15 private/frozen and report NOT_RUN for unverified gates.",
+      "active_task": "AL-R0-UC07-R144-001",
+      "last_completed_step": "R143 verified PR #213 final-head CI #42817066883 success 9/9. R144 UC07 source-only implementation and regression tests committed in draft PR #214, first CI #43304512580 failed cloudflare-contract due wrongly double-escaped UI anchor regex; fixed in code HEAD 228b90f4 and retest #43304706691 pending.",
+      "next_action": "Verify R144 corrected code-head and PCS final-head CI. If any failure inspect exact log and repair; then continue within frozen SRS v1.1.15 on next smallest scoped UC remaining (prioritize UC01/02 and actual document path only after integration conflicts with PR187 are reconciled). Do not restart paused Drive/OneDrive/OAuth work, merge or deploy production. Maintain live Cloudflare account E2E NOT_RUN.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
