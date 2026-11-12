@@ -247,8 +247,10 @@
         const grammarRows=byId('legal-qa-grammar-rows');
         grammarPanel.hidden=true;
         grammarRows.replaceChildren();
-        let grammarWarnings=false;
         const correction=data.correction_review;
+        // Older/malformed API results are never treated as a complete review.
+        let grammarWarnings=data.uc==='UC07'&&
+          (!correction||!Array.isArray(correction.rows)||!correction.rows.length);
         if(data.uc==='UC07'&&correction&&Array.isArray(correction.rows)&&
            correction.rows.length>0&&correction.rows.length<=80){
           grammarPanel.hidden=false;
