@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `122` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-12T20:56:00Z`.
+- **PCS revision:** `124` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-12T21:06:26.146Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R145 — UC02 source-exact contract clause evidence QA (2026-11-13 VN)
+
+- **Implementation:** [Draft PR #215](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/215), stacked on #214, adds model-requested review of each source clause [A#] with an exact quote, provisional note and question for a human lawyer. A deterministic, tenant-scoped API output checks the quote against only that source paragraph and flags missing/duplicate/incomplete, unknown or wrong-paragraph quotations. This prevents falsely presenting an unrelated model quotation as a verified source, but cannot assess legal correctness of any observations.
+- **UI/tests:** Text-only source/quote/note/question cards under UC02 desktop+mobile, model text inserted with textContent and cleared on tenant rotation. New actual helper, authenticated API fake-data and browser-JS VM checks. [Actions #43306356358](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43306356358) at code HEAD `62d276671ee1707e9fabbdadad13b4dc10d50feb` completed **SUCCESS 9/9 executing jobs**, including actual 5/5 helper, 2/2 API and 2/2 source-JS VM UC02 tests; 21 optional jobs skipped. PCS-only HEAD revision 124 still needs separately confirmed CI. No real Cloudflare account E2E.
+- **Prior UC07 completed code/source CI:** [Actions #43305252972](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43305252972) on PR #214 last HEAD `c89e1bbec8fd6e5fd06cec33962f86c3e231f69a` completed **SUCCESS**, 9 executing jobs PASS; original regex and PCS protected-task regression were fixed. This is source-level QA, not real signed-in/real-legal-document acceptance.
+- **Gates:** SRS v1.1.15 frozen/private. R126 real signed-in multi-account Cloudflare/browser E2E BLOCKED/NOT_RUN; actual DOCX/PDF/Word fidelity, official legal corpus, provider quality and Owner final acceptance NOT_RUN. PRs remain draft, no merge or production deploy. Existing hourly task remains enabled; no duplicate.
 
 ## R144 — UC07 paragraph-level grammar-review QA (2026-11-13 VN)
 

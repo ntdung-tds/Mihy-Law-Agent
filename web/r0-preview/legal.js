@@ -34,6 +34,8 @@
       byId('legal-qa-translation-rows').replaceChildren();
       byId('legal-qa-grammar-review').hidden=true;
       byId('legal-qa-grammar-rows').replaceChildren();
+      byId('legal-qa-contract-review').hidden=true;
+      byId('legal-qa-contract-rows').replaceChildren();
     }
     function updateTaskFields(){
       const dual=['UC06','UC08'].includes(uc.value);
@@ -297,6 +299,63 @@
             grammarRows.append(line);
           }
         }
+        // R145: show an independent UC02 clause/quote evidence gate. Literal
+        // source quotation is checked by the server, NOT legal fact accuracy.
+        const contractPanel=byId('legal-qa-contract-review');
+        const contractRows=byId('legal-qa-contract-rows');
+        contractRows.replaceChildren();
+        contractPanel.hidden=true;
+        const contract=data.contract_review;
+        let contractWarnings=data.uc==='UC02'&&
+          (!contract||!Array.isArray(contract.rows)||!contract.rows.length);
+        if(data.uc==='UC02'&&contract&&Array.isArray(contract.rows)&&
+           contract.rows.length>0&&contract.rows.length<=80){
+          contractPanel.hidden=false;
+          contractWarnings=contract.literal_quote_matched_segments!==contract.total_segments||
+            (Array.isArray(contract.flags)&&contract.flags.length>0);
+          if(contractWarnings){
+            const notice=document.createElement('p');
+            notice.className='legal-qa-evidence-warning';
+            notice.textContent='UC02: Có điều khoản thiếu, trích dẫn không khớp hoặc bản nháp không đúng cấu trúc. Bắt buộc kiểm duyệt nguồn trước khi dùng.';
+            contractRows.append(notice);
+          }
+          for(const item of contract.rows){
+            if(!item||!/^A[1-9][0-9]*$/.test(item.source_id)||
+               typeof item.source_text!=='string'||item.source_text.length>5000||
+               typeof item.model_quote!=='string'||item.model_quote.length>400||
+               typeof item.review_note!=='string'||item.review_note.length>500||
+               typeof item.verification_question!=='string'||item.verification_question.length>350||
+               !['missing','duplicate','incomplete','quote_mismatch',
+                 'quote_matched_not_legally_verified'].includes(item.status))continue;
+            const row=document.createElement('article');
+            row.className='legal-qa-translation-row';
+            const title=document.createElement('strong');
+            const descriptions={
+              missing:'Thiếu nhận xét',duplicate:'Trùng bản nháp',
+              incomplete:'Thiếu trường kiểm chứng',
+              quote_mismatch:'Trích dẫn không khớp',
+              quote_matched_not_legally_verified:'Trích nguồn đúng chữ — chưa xác minh nhận định'
+            };
+            title.textContent='['+item.source_id+'] · '+descriptions[item.status];
+            row.append(title);
+            for(const [label,text] of [
+              ['Điều khoản nguồn',item.source_text],
+              ['Trích đoạn AI dẫn',item.model_quote||'Chưa có trích đoạn đối chiếu'],
+              ['Nhận xét nháp',item.review_note||'Chưa có nhận xét hợp lệ'],
+              ['Câu hỏi cần xác minh',item.verification_question||'Chưa có câu hỏi']
+            ]){
+              const cell=document.createElement('div');
+              cell.className='legal-qa-translation-cell';
+              const head=document.createElement('strong');
+              head.textContent=label;
+              const paragraph=document.createElement('p');
+              paragraph.textContent=text;
+              cell.append(head,paragraph);
+              row.append(cell);
+            }
+            contractRows.append(row);
+          }
+        }
         byId('legal-qa-result-title').textContent=data.title+' · '+(data.mode==='local_example_only'?'Tìm trong nguồn mẫu':'Bản nháp AI');
         byId('legal-qa-review').textContent=data.review_notice||
           'Chỉ truy xuất từ nguồn giả lập. Chưa xác minh dữ liệu văn bản pháp luật/bản án chính thức.';
@@ -362,10 +421,10 @@
           }
         }
         result.hidden=false;
-        setStatus(evidenceWarnings.length||translationWarnings||grammarWarnings
+        setStatus(evidenceWarnings.length||translationWarnings||grammarWarnings||contractWarnings
           ? 'Có cảnh báo về nguồn, số liệu hoặc ghép đoạn. Không sử dụng trước khi kiểm duyệt.'
           : 'Hoàn tất bản nháp QA. Hãy đối chiếu nguồn và kiểm duyệt thủ công.',
-          evidenceWarnings.length>0||translationWarnings||grammarWarnings);
+          evidenceWarnings.length>0||translationWarnings||grammarWarnings||contractWarnings);
         result.scrollIntoView({behavior:'smooth',block:'nearest'});
       } catch(error){
         if(generation===workspaceGeneration)

@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 122,
-  "updated_at": "2026-11-12T20:56:08.752Z",
+  "revision": 124,
+  "updated_at": "2026-11-12T21:06:26.146Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2066,7 +2066,7 @@
         "id": "AL-R0-UC07-R144-001",
         "title": "R144 UC07 text-only source-to-grammar proposed edits per paragraph and literal numeric change QA",
         "priority": "P0",
-        "status": "SOURCE_FIX_CI_PENDING",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
         "scope": "Existing authenticated source-only synthetic-text UC07; no Word file mutation, DOCX Track Changes, PDF, legal accuracy approval or SRS expansion.",
         "acceptance": [
           "For each [A#] paragraph, display original and proposed grammar with missing/duplicate/unstructured warnings rather than treating arbitrary output as a complete revision.",
@@ -2078,7 +2078,7 @@
           "helper_unit": "PENDING_CURRENT_CI_43304706691",
           "authenticated_api_synthetic": "PASS_FIRST_CI_43304512580",
           "browser_source_vm": "FAIL_FIRST_CI_43304512580_ANCHOR_REGEX_FIXED_228b90f4_PENDING_CURRENT_CI",
-          "full_ci": "PENDING_PCS_REV122_RETEST_AFTER_UNIT_CONTRACT_FAIL_43304950101",
+          "full_ci": "PASS_9_OF_9_ACTIONS_43305252972_FINAL_HEAD_c89e1bbec8fd6e5fd06cec33962f86c3e231f69a",
           "live_cloudflare_signed_in": "NOT_RUN_R126_BLOCKED",
           "actual_docx_pdf": "NOT_RUN"
         },
@@ -2088,7 +2088,34 @@
           "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43304706691"
         ],
         "owner_acceptance": "PENDING",
-        "notes": "One cloudflare-contract browser-regexp FAIL corrected at commit 228b90f4 (CI #43304706691 contract PASS); later PCS rev121 accidentally violated protected standalone-first active_task: CI #43304950101 unit FAIL; restored protected task in revision122. R144 tracked separately in tasks, no DOCX/live E2E/Owner approval. Final-head CI pending."
+        "notes": "R144 original CI caught doubled UI regex, fixed; PCS active task protected, corrected; final-head PR214 CI #43305252972 SUCCESS 9/9 code/source jobs. No live signed-in E2E or customer data, no merge/deploy."
+      },
+      {
+        "id": "AL-R1-UC02-R145-001",
+        "title": "R145 UC02 source-anchored contract clause review with exact quote check per paragraph",
+        "priority": "R1",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "scope": "Existing authorized QA user-pasted fictional text, not official legal corpus, actual Word/PDF contract ingestion, legal advice or full SRS UC acceptance.",
+        "acceptance": [
+          "For every source [A#] paragraph request one literal quote, provisional observation and lawyer verification question.",
+          "Flag omissions, duplicates, incomplete output, unknown labels, and quotes from a different source paragraph; exact quote match is NOT proof of correct legal risk claim.",
+          "Show original clause, quote, observation and question on mobile/desktop as inert text; clear on tenant workspace changes.",
+          "Preserve existing MatterACL/session/quota and no source/AI result DB persistence; no cross-tenant E2E claims."
+        ],
+        "tests": {
+          "helper_unit": "PASS_5_OF_5_CLOUDFLARE_CONTRACT_43306356358",
+          "authenticated_api_synthetic": "PASS_2_CASES_CLOUDFLARE_CONTRACT_43306356358",
+          "browser_source_vm": "PASS_2_CASES_CLOUDFLARE_CONTRACT_43306356358",
+          "full_ci": "PASS_9_OF_9_CODE_HEAD_62d276671ee1707e9fabbdadad13b4dc10d50feb_ACTIONS_43306356358",
+          "real_multiaccount_cloudflare": "BLOCKED_NOT_RUN_R126",
+          "user_uploaded_docx_pdf": "NOT_RUN"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/215",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43306356358"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "R145 code HEAD CI 9/9 SUCCESS; PCS-only revision 124 follow-up needs its own final-head verification. No real Cloudflare signed-in or legal document acceptance, all PRs remain Draft."
       }
     ],
     "features": [

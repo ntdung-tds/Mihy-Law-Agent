@@ -388,3 +388,57 @@ test('R144 UC07 does not invent paragraph mapping when provider omits labels',as
  assert.deepEqual(review.flags,['GRAMMAR_PARAGRAPHS_MISSING','GRAMMAR_UNSTRUCTURED_CONTENT']);
  assert.equal(review.rows[0].proposed_text,'');
 });
+
+test('R145 UC02 authorized API returns source-matched contract clause comments, not verified law',async()=>{
+ const source=SOURCE+'\n\n'+SOURCE2;
+ const f=fixture();
+ f.env.AI.run=async()=>({response:
+  '[A1]\nTRICH: Bên cung cấp giao hàng ngày 15 tháng 9\n'+
+  'NHAN_XET: Cần làm rõ cách xác định thời hạn giao hàng.\n'+
+  'CAN_XAC_MINH: Ngày giao hàng được xác nhận như thế nào?\n'+
+  '[A2]\nTRICH: Bên cung cấp giao hàng ngày 30 tháng 9\n'+
+  'NHAN_XET: Cần kiểm tra điều kiện bàn giao chứng từ.\n'+
+  'CAN_XAC_MINH: Có biên bản nghiệm thu chưa?'});
+ const response=await legalApi(request({uc:'UC02',source}),f.env,{now:NOW});
+ assert.equal(response.status,200,await response.clone().text());
+ const payload=await response.json();
+ const review=payload.contract_review;
+ assert.equal(review.mode,'qa_literal_quote_clause_review_not_verified');
+ assert.equal(review.total_segments,2);
+ assert.equal(review.literal_quote_matched_segments,2);
+ assert.deepEqual(review.flags,[]);
+ assert.deepEqual(review.rows.map(row=>row.source_id),['A1','A2']);
+ assert.equal(review.rows[0].status,'quote_matched_not_legally_verified');
+ assert.match(review.rows[0].source_text,/giao hàng ngày 15/);
+ assert.match(review.rows[1].source_text,/giao hàng ngày 30/);
+ assert.equal(review.semantic_claims_verified,false);
+ assert.equal(review.legal_verification,'not_performed');
+ assert.equal(review.human_review_required,true);
+ assert.equal(response.headers.get('Cache-Control'),'no-store');
+ assert.ok(f.calls.every(call=>call.params.every(value=>value!==source)),
+  'the source or model notes must not be stored in D1');
+});
+
+test('R145 UC02 flags fabricated cross-clause quote and blocks unauthorized contract access',async()=>{
+ const source=SOURCE+'\n\n'+SOURCE2;
+ const f=fixture();
+ f.env.AI.run=async()=>({response:
+  '[A1]\nTRICH: Bên cung cấp giao hàng ngày 30 tháng 9\n'+
+  'NHAN_XET: Lời trích đã bị chuyển nhầm từ đoạn nguồn khác.\n'+
+  'CAN_XAC_MINH: Có xác định đúng điều khoản không?\n'+
+  '[A2]\nTRICH: Bên cung cấp giao hàng ngày 30 tháng 9\n'+
+  'NHAN_XET: Luật sư cần thẩm tra thời điểm bàn giao.\n'+
+  'CAN_XAC_MINH: Bằng chứng giao hàng nằm ở đâu?'});
+ const response=await legalApi(request({uc:'UC02',source}),f.env,{now:NOW});
+ assert.equal(response.status,200);
+ const review=(await response.json()).contract_review;
+ assert.deepEqual(review.unmatched_quote_source_ids,['A1']);
+ assert.equal(review.rows[0].literal_source_quote_matched,false);
+ assert.ok(review.flags.includes('CONTRACT_QUOTES_NOT_IN_SOURCE'));
+ const denied=fixture({acl:false});
+ const error=await legalApi(request({uc:'UC02',source}),denied.env,{now:NOW});
+ assert.equal(error.status,404);
+ assert.equal((await error.json()).contract_review,undefined);
+ assert.equal(denied.calls.some(call=>call.sql===LEGAL_QUOTA_SQL),false);
+ assert.equal(denied.providerCalls.length,0);
+});
