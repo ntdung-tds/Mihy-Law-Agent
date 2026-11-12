@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 130,
-  "updated_at": "2026-11-12T22:05:14.116Z",
+  "revision": 132,
+  "updated_at": "2026-11-12T22:16:18.518Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2199,6 +2199,35 @@
         ],
         "owner_acceptance": "PENDING",
         "notes": "R148 source-only code CI SUCCESS 9/9, helper 6/6, authorized synthetic API 2/2, browser source JS VM 2/2. Full F08 is NOT DONE; Owner signed-in and PDF/DOCX/OCR E2E NOT_RUN. Post-ci PCS change requires independent final HEAD CI confirmation."
+      },
+      {
+        "id": "AL-P0-F07-R149-001",
+        "title": "R149 F07 authenticated PDF/DOCX in-memory preview and explicit approved source A handoff",
+        "priority": "P0",
+        "status": "SOURCE_CI_PASS_F07_FULL_E2E_NOT_RUN",
+        "scope": "Fictional QA PDF/DOCX <=1.5MB, UC03/04/07/F08, no persistent upload, no real customer files, no scan OCR promise.",
+        "acceptance": [
+          "Bounded multipart bytes, extension/MIME/magic, role+MatterACL before and after conversion, quota and no file content persistence.",
+          "UI reads file only on explicit read click after Matter selection and fictional-data consent, previews text without triggering AI, second action populates source A and resets model consent.",
+          "Stale conversion responses cannot reveal extracted text after tenant/workspace, task or Matter change; only inert plain text render.",
+          "Negative tests for unauthorized access, quota, malformed/oversized files, provider failure and revocation; actual signed-in Cloudflare and genuine PDF/DOCX OCR QA remain NOT_RUN."
+        ],
+        "tests": {
+          "multipart_node": "PASS_5_OF_5_ACTIONS_43317844290_CLOUDFLARE_CONTRACT",
+          "real_browser_source_vm": "PASS_2_OF_2_ACTIONS_43317844290_CLOUDFLARE_CONTRACT",
+          "full_ci": "PASS_9_OF_9_ACTIONS_43317844290_CODE_HEAD_0fd924d14dea524d07da1f532b3a64af97463ab6",
+          "provider_live_conversion": "NOT_RUN",
+          "real_signed_in_cloudflare": "BLOCKED_NOT_RUN_R126",
+          "scan_ocr_accuracy": "NOT_RUN",
+          "owner_acceptance": "PENDING"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/219",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43317844290",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/187"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "Actual code CI PASS 9/9 at 0fd924d1, multipart 5/5 and source browser VM 2/2. Docs-only PCS final-head CI requires separate verification. Full F07, provider live and R126 2-account E2E NOT_RUN; no production merge/deploy."
       }
     ],
     "features": [
@@ -2830,7 +2859,7 @@
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
       "last_completed_step": "R143 verified PR #213 final-head CI #42817066883 success 9/9. R144 UC07 source-only implementation and regression tests committed in draft PR #214, first CI #43304512580 failed cloudflare-contract due wrongly double-escaped UI anchor regex; fixed in code HEAD 228b90f4 and retest #43304706691 pending.",
-      "next_action": "Owner requires full F01–F36 excluding any digital/electronic signing. R148 F08 source-only extraction PR#218 implementation and CI to verify; fix tests/errors, then continue P0 vertical slices with actual document intake and tenant permission release gates, prioritizing F07/F08/F09/F10 and F18–F22. 36 feature catalog remains NOT_ASSESSED/NOT_RUN, owner acceptance last. Do not overwrite parallel PDF/DOCX PR187, do not restart risky Google OAuth blindly, never expose SaaS SysAdmin customer data. No production merge/deploy.",
+      "next_action": "Owner requires F01–F36 all functional except signatures; R149 PR219 F07 PDF/DOCX source preview and F08 integration code pending CI. Fix exact failed tests; then continue real-document QA, valid samples and MatterACL live test gates; do not claim F07/F08 fully DONE. R126 signed-in Cloudflare E2E still BLOCKED, no customer data/prod deploy, complete F01–F36 by P0/P1/P2 with Owner acceptance last.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",

@@ -19,8 +19,29 @@
     let matterLoadController=null;
     let runController=null;
     const localFileSequence={a:0,b:0};
+    let documentReadGeneration=0;
+    let documentReadController=null;
+    let documentPreviewText='';
+    let documentPreviewMatter='';
+    function clearDocumentPreview(){
+      documentReadGeneration++;
+      documentReadController?.abort();
+      documentReadController=null;
+      documentPreviewText='';
+      documentPreviewMatter='';
+      byId('legal-qa-doc-read').disabled=false;
+      byId('legal-qa-doc-use').hidden=true;
+      byId('legal-qa-doc-preview').hidden=true;
+      byId('legal-qa-doc-preview').textContent='';
+    }
+    function clearDocumentInput(){
+      clearDocumentPreview();
+      byId('legal-qa-doc-file').value='';
+      byId('legal-qa-doc-status').textContent='Chỉ tệp QA giả lập; chọn hồ sơ và xác nhận trước khi đọc.';
+    }
     function invalidateRun(){
       workspaceGeneration++;
+      clearDocumentInput();
       runController?.abort();
       runController=null;
       isSubmitting=false;
@@ -42,6 +63,7 @@
       byId('legal-qa-extraction-rows').replaceChildren();
     }
     function updateTaskFields(){
+      byId('legal-qa-doc-panel').hidden=!['UC03','UC04','UC07','F08'].includes(uc.value);
       const dual=['UC06','UC08'].includes(uc.value);
       byId('legal-qa-source-b-label').hidden=!dual;
       byId('legal-qa-file-b-label').hidden=!dual;
@@ -58,6 +80,10 @@
       clearResult();
     }
     uc.addEventListener('change',()=>{invalidateRun();updateTaskFields();});
+    matter.addEventListener('change',()=>{
+      invalidateRun();
+      setStatus('Đã đổi hồ sơ QA; hãy kiểm tra lại dữ liệu trước khi gửi.');
+    });
     updateTaskFields();
     byId('legal-qa-example').addEventListener('click',()=>{
       byId('legal-qa-source').value=
@@ -95,6 +121,7 @@
             return;
           }
           field.value=text;
+          clearDocumentInput();
           byId('legal-qa-consent').checked=false;
           clearResult();
           setStatus('Đã đọc TXT '+which.toUpperCase()+' trên thiết bị. Chưa gửi lên máy chủ; xác nhận trước khi chạy.');
@@ -107,6 +134,92 @@
     }
     bindLocalTxt('a','legal-qa-source');
     bindLocalTxt('b','legal-qa-source-b');
+
+    // R149 F07: a file is never converted until the user explicitly clicks
+    // "Đọc" after choosing a permitted Matter and giving fictional-data consent.
+    // Conversion is preview-only; a SECOND click copies text into source A.
+    const docFile=byId('legal-qa-doc-file');
+    const docRead=byId('legal-qa-doc-read');
+    const docUse=byId('legal-qa-doc-use');
+    const docPreview=byId('legal-qa-doc-preview');
+    const docStatus=byId('legal-qa-doc-status');
+    docFile.addEventListener('change',()=>{
+      clearDocumentPreview();
+      docStatus.textContent=docFile.files?.[0]
+        ?'Đã chọn tệp trên thiết bị. Chưa gửi lên máy chủ hoặc vào nguồn AI.'
+        :'Chưa chọn tệp PDF/DOCX QA.';
+    });
+    docRead.addEventListener('click',async()=>{
+      const file=docFile.files?.[0];
+      const selectedMatter=matter.value,selectedUC=uc.value;
+      if(!['UC03','UC04','UC07','F08'].includes(selectedUC)){
+        docStatus.textContent='Tác vụ này chưa hỗ trợ nguồn PDF/DOCX QA.';return;
+      }
+      if(!selectedMatter||!byId('legal-qa-consent').checked){
+        docStatus.textContent='Chọn hồ sơ được phép và xác nhận dữ liệu giả lập trước khi đọc.';return;
+      }
+      if(!file||!/^.{1,116}\.(pdf|docx)$/iu.test(file.name||'')||
+         file.size<5||file.size>1500000){
+        docStatus.textContent='Chỉ nhận PDF/DOCX QA tối đa 1,5 MB có tên tệp hợp lệ.';return;
+      }
+      clearDocumentPreview();
+      const generation=documentReadGeneration,workspace=workspaceGeneration;
+      const controller=new AbortController();
+      documentReadController=controller;
+      docRead.disabled=true;
+      docStatus.textContent='Đang trích văn bản mẫu. Không chạy AI pháp lý, không lưu tệp.';
+      const body=new FormData();
+      body.append('uc',selectedUC);
+      body.append('matter_id',selectedMatter);
+      body.append('synthetic_consent','true');
+      body.append('file',file,file.name);
+      const current=()=>generation===documentReadGeneration&&
+        workspace===workspaceGeneration&&matter.value===selectedMatter&&
+        uc.value===selectedUC;
+      try {
+        const response=await fetch('/api/qa/legal/extract',{
+          method:'POST',credentials:'same-origin',cache:'no-store',
+          signal:controller.signal,body
+        });
+        if(!current())return;
+        if(response.status===401){location.replace('/login');return;}
+        const data=await response.json().catch(()=>({}));
+        if(!current())return;
+        if(!response.ok)throw Error(data.error||'Không chuyển đổi được tệp QA.');
+        if(data.mode!=='qa_file_text_preview_not_verified'||
+           data.uc!==selectedUC||data.file_name!==file.name||
+           data.file_size!==file.size||
+           typeof data.source_text!=='string'||
+           data.source_text.length<30||data.source_text.length>5000)
+          throw Error('Tệp chuyển đổi chưa có nội dung đủ điều kiện đối chiếu.');
+        documentPreviewText=data.source_text;
+        documentPreviewMatter=selectedMatter;
+        docPreview.textContent=data.source_text;
+        docPreview.hidden=false;
+        docUse.hidden=false;
+        docStatus.textContent='Chỉ xem trước; đối chiếu toàn văn với tệp gốc, bảng, trang scan và số liệu. Nếu đúng, bấm Dùng đoạn này làm nguồn A.';
+      }catch(error){
+        if(!current())return;
+        docStatus.textContent=(error?.message||'Lỗi đọc tài liệu QA.')+
+          ' Không thử lại ngay để tránh trừ quota hai lần.';
+      }finally{
+        if(current()){
+          documentReadController=null;
+          docRead.disabled=false;
+        }
+      }
+    });
+    docUse.addEventListener('click',()=>{
+      if(!documentPreviewText||!documentPreviewMatter||
+         matter.value!==documentPreviewMatter||
+         !['UC03','UC04','UC07','F08'].includes(uc.value))return;
+      byId('legal-qa-source').value=documentPreviewText;
+      byId('legal-qa-consent').checked=false;
+      clearDocumentInput();
+      clearResult();
+      docStatus.textContent='Đã nạp văn bản trích xuất vào nguồn A trên thiết bị. Chưa gọi AI; hãy kiểm duyệt và xác nhận lại trước khi chạy.';
+      setStatus('Đã nạp nguồn A từ tệp giả lập sau khi xem trước. Chưa gửi yêu cầu AI.');
+    });
 
     async function loadLegalMatters(){
       matterLoadController?.abort();

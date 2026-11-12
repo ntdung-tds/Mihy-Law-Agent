@@ -556,3 +556,26 @@ body.drawer-open{overflow:hidden}
   .legal-qa-translation-row{grid-template-columns:minmax(0,1fr)}
   .legal-qa-bilingual-review{padding:10px}
 }
+
+/* R149 QA PDF/DOCX memory-only review; responsive, text-first, no previews persisted. */
+.legal-qa-doc-panel{
+  margin:10px 0;padding:12px;background:#f7f9fd;
+  border:1px solid #d7e1ef;border-radius:12px;min-width:0;
+}
+.legal-qa-doc-panel>label{display:grid;gap:8px;font-size:13px;line-height:1.5}
+.legal-qa-doc-panel input[type=file]{min-width:0;max-width:100%;font-size:12px}
+.legal-qa-doc-panel .legal-qa-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.legal-qa-doc-panel button{min-height:32px;padding:6px 10px;border-radius:9px}
+.legal-qa-doc-panel>p{margin:5px 0;font-size:12px;color:#52647e;overflow-wrap:anywhere}
+#legal-qa-doc-preview{
+  display:block;margin:9px 0 0;padding:12px;max-height:280px;
+  overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;
+  background:#fff;border:1px solid #d7e1ef;border-radius:9px;
+  font-size:12px;line-height:1.55;
+}
+#legal-qa-doc-preview[hidden],#legal-qa-doc-use[hidden]{display:none}
+@media(max-width:600px){
+  .legal-qa-doc-panel{padding:10px}
+  .legal-qa-doc-panel .legal-qa-actions{gap:6px}
+  .legal-qa-doc-panel button{font-size:12px}
+}
