@@ -381,3 +381,72 @@ test('R148 F08 missing extraction review metadata never gets green completion st
  assert.equal(h.query('#legal-qa-extraction-review').hidden,true);
  assert.equal(h.query('#legal-qa-feedback').dataset.state,'error');
 });
+
+test('R149 F07 local file selection does not transmit until consent + explicit read, then manual accept',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F07 QA matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='F08';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ const file={name:'synthetic.pdf',size:154,type:'application/pdf'};
+ h.query('#legal-qa-doc-file').files=[file];
+ h.query('#legal-qa-doc-file').fire('change');
+ assert.equal(h.pending.length,1,'selection alone must not upload');
+ await h.query('#legal-qa-doc-read').fire('click');
+ assert.equal(h.pending.length,1,'must deny without explicit fictional consent');
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-doc-read').fire('click');
+ assert.equal(h.pending.length,2);
+ const req=h.pending.at(-1);
+ assert.equal(req.path,'/api/qa/legal/extract');
+ assert.equal(req.options.method,'POST');
+ assert.equal(req.options.credentials,'same-origin');
+ const fields=req.options.body.items;
+ assert.ok(fields.some(x=>x[0]==='matter_id'&&x[1]===MATTER));
+ assert.ok(fields.some(x=>x[0]==='uc'&&x[1]==='F08'));
+ assert.ok(fields.some(x=>x[0]==='synthetic_consent'&&x[1]==='true'));
+ assert.ok(fields.some(x=>x[0]==='file'&&x[1]===file));
+ const extracted='Điều 1. Bên A thanh toán 2.000.000 đồng trong vòng 30 ngày.';
+ finish(req,{
+   uc:'F08',file_name:file.name,file_size:file.size,
+   mode:'qa_file_text_preview_not_verified',source_text:extracted
+ });
+ await done;
+ assert.equal(h.query('#legal-qa-doc-preview').hidden,false);
+ assert.equal(h.query('#legal-qa-doc-preview').textContent,extracted);
+ assert.equal(h.query('#legal-qa-source').value,'','preview does not silently replace source A');
+ assert.equal(h.query('#legal-qa-doc-use').hidden,false);
+ assert.equal(h.pending.length,2,'conversion must NOT launch model AI');
+ h.query('#legal-qa-doc-use').fire('click');
+ assert.equal(h.query('#legal-qa-source').value,extracted);
+ assert.equal(h.query('#legal-qa-consent').checked,false,'model run needs separate consent');
+ assert.equal(h.query('#legal-qa-doc-preview').hidden,true);
+ assert.equal(h.pending.length,2,'manual accept must NOT call the model');
+});
+
+test('R149 F07 delayed conversion result cannot leak after workspace switch or selected Matter change',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F07 QA matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='F08';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ h.query('#legal-qa-consent').checked=true;
+ h.query('#legal-qa-doc-file').files=[{name:'synthetic.docx',size:128,type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}];
+ const done=h.query('#legal-qa-doc-read').fire('click');
+ const req=h.pending.at(-1);
+ assert.equal(req.path,'/api/qa/legal/extract');
+ h.win.dispatchEvent(new Event('ai-law:workspace-switch'));
+ finish(req,{
+   uc:'F08',file_name:'synthetic.docx',file_size:128,
+   mode:'qa_file_text_preview_not_verified',
+   source_text:'Điều 1. Bên A thanh toán 2.000.000 đồng trong vòng 30 ngày.'
+ });
+ await done;
+ assert.equal(h.query('#legal-qa-doc-preview').hidden,true);
+ assert.equal(h.query('#legal-qa-doc-use').hidden,true);
+ assert.equal(h.query('#legal-qa-source').value,'');
+ assert.equal(h.query('#legal-qa-doc-preview').textContent,'');
+ assert.equal(h.query('#legal-qa-doc-file').value,'');
+});
