@@ -158,7 +158,7 @@
       if(!selectedMatter||!byId('legal-qa-consent').checked){
         docStatus.textContent='Chọn hồ sơ được phép và xác nhận dữ liệu giả lập trước khi đọc.';return;
       }
-      if(!file||!/^.{1,116}\\.(pdf|docx)$/iu.test(file.name||'')||
+      if(!file||!/^.{1,116}\.(pdf|docx)$/iu.test(file.name||'')||
          file.size<5||file.size>1500000){
         docStatus.textContent='Chỉ nhận PDF/DOCX QA tối đa 1,5 MB có tên tệp hợp lệ.';return;
       }
