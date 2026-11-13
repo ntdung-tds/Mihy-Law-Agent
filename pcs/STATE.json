@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 133,
-  "updated_at": "2026-11-13T02:21:47.184Z",
+  "revision": 134,
+  "updated_at": "2026-11-13T02:24:48.807Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2233,7 +2233,7 @@
         "id": "AL-P0-F09-R152-001",
         "title": "R152 F09 P0 matter source question answering with literal citations and explicit insufficient evidence",
         "priority": "P0",
-        "status": "SOURCE_IMPL_CI_PENDING_F09_FULL_NOT_DONE",
+        "status": "SOURCE_CI_PASS_F09_FULL_E2E_NOT_RUN",
         "scope": "One authorized Matter / user-supplied fictional text; reuse manual PDF/DOCX review-only source import, not full per-file case document search/index, legal source validation, audit or lawyer approval.",
         "acceptance": [
           "UC09 structured answer and independent check question; model must cite exact excerpts from corresponding [A#] paragraphs, or explicitly say KHÔNG ĐỦ CĂN CỨ without inventing citations.",
@@ -2243,11 +2243,11 @@
           "Permission, rate limit and model provider cases tested with synthetic fixtures, live signed-in real account E2E remains BLOCKED/NOT_RUN and legal completeness must be lawyer/Owner checked."
         ],
         "tests": {
-          "helper_unit": "PASS_6_OF_6_ACTIONS_43351051659_INITIAL_CODE_HEAD_PENDING_UPDATED_HEAD",
-          "authenticated_api_synthetic": "PASS_3_OF_3_ACTIONS_43351051659_INITIAL_CODE_HEAD_PENDING_UPDATED_HEAD",
-          "browser_source_vm": "PASS_2_OF_2_ACTIONS_43351051659_INITIAL_CODE_HEAD_PENDING_UPDATED_HEAD",
-          "pdf_docx_source_preview": "PASS_1_OF_1_ACTIONS_43351051659_INITIAL_CODE_HEAD_PENDING_UPDATED_HEAD",
-          "full_ci": "PENDING_ACTIONS_43351393652_FINAL_CODE_HEAD_14fd89e20e973c35904e84b06eba9a244ce2ee0c",
+          "helper_unit": "PASS_6_OF_6_ACTIONS_43351393652_CLOUDFLARE_CONTRACT",
+          "authenticated_api_synthetic": "PASS_3_OF_3_ACTIONS_43351393652_CLOUDFLARE_CONTRACT",
+          "browser_source_vm": "PASS_2_OF_2_ACTIONS_43351393652_CLOUDFLARE_CONTRACT",
+          "pdf_docx_source_preview": "PASS_1_OF_1_ACTIONS_43351393652_CLOUDFLARE_CONTRACT",
+          "full_ci": "PASS_9_OF_9_ACTIONS_43351393652_CODE_HEAD_14fd89e20e973c35904e84b06eba9a244ce2ee0c",
           "live_signed_in_two_accounts": "BLOCKED_NOT_RUN_R126",
           "official_law_sources_and_case_files": "NOT_RUN",
           "owner_acceptance": "PENDING"
@@ -2258,7 +2258,7 @@
           "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43351393652"
         ],
         "owner_acceptance": "PENDING",
-        "notes": "Partial F09 slice on top of R151 session recheck PR221; valid refusal is explicit and not proof of absence, unsupported draft has copy disabled. Does NOT complete F09 nor all 36."
+        "notes": "R152 code HEAD completed 9/9 SUCCESS, 21 optional skipped. 6 helper, 3 API, 2 real JS browser VM, 1 PDF review-only conversion synthetic tests PASS. Valid explicit refusal no false citation-missing flag; unsupported F09 one-click copy disabled. Not complete F09: real signed-in/cloud/OCR/official sources/audit/Owner E2E NOT_RUN. PCS docs-only follow-up requires final-head CI separately."
       }
     ],
     "features": [
