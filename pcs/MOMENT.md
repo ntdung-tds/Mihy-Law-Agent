@@ -1,12 +1,19 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `136` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-13T04:17:08.901Z`.
+- **PCS revision:** `137` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-13T06:10:51.565Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R155 — F20 tìm tên tệp lưu theo MatterACL, không tìm nội dung (2026-11-13 VN)
+
+- **Implementation:** [Draft PR #225](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/225), stacked on #224. Existing `qa_file_links` / `qa_document_receipts` already link uploaded document receipts with a Matter. Added `GET /api/qa/documents?matter_id=UUID&q=text` to filter *filename metadata only*, after existing verified session, allowed role, Tenant and MatterACL read allow-minus-deny. Bounded parameterized SQLite `instr(lower(file_name),lower(?))` avoids SQL wildcard expansion; 2–80 chars, duplicate/control input rejected, at most 50 records and `has_more` for more matches. Without q, preserve existing list.
+- **UI:** QA documents screen now has explicitly labelled filename-only search, button / Enter; request cancellation, race filtering after query/Matter/Tenant changes, and reset query when switching Matters. HTML/text is not rendered from untrusted receipt names. Cached older HTML lacking new search controls leaves existing upload/download UI working (tested after first CI caught 25 previous UI fixture regressions). No Drive token required merely to search existing D1 receipt metadata and no new storage provider introduced.
+- **Actual test loop:** Initial [Actions #43375893398](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43375893398) cloudflare-contract **FAIL**: new UI required new HTML controls, causing 25 failures of legacy `r75_drive_connect_ui` fixture; fixed conditional fallbacks in `documents.js`, preserving old workflows. Subsequent [Actions #43376326061](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43376326061) Cloudflare contract **PASS**, 6/6 new SQL/ACL cases plus 4/4 browser source-script VM cases, legacy R75 PASS. Added fifth test for Matter change clearing filters; [Actions #43376705145](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43376705145) Cloudflare contract **PASS with 6/6 SQL and 5/5 browser VM tests**; full 9-job CI was still running at this checkpoint. PCS rev137 is docs follow-up with separate final HEAD CI.
+- **Scope/gates:** F20 full SRS **NOT_DONE**. Metadata search is NOT OCR, AI fulltext legal case search, file content storage/indexing or an accepted workflow. Existing Google Drive upload/OAuth path remains blocked/unverified in live QA; no blind retries. R126 real signed-in dual-tenant Cloudflare E2E, actual PDF/DOCX read fidelity, lawyer approval and Owner acceptance NOT_RUN/BLOCKED. No data from real customers, signing, PR merge or production deploy; protected standalone-first `active_task=AL-R0-DEPLOY-001` unchanged.
 
 ## R154 — F07 đọc nhiều PDF/DOCX QA (1–3 tệp) có kiểm soát (2026-11-13 VN)
 
