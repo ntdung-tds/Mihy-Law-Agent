@@ -61,6 +61,8 @@
       byId('legal-qa-drafting-rows').replaceChildren();
       byId('legal-qa-extraction-review').hidden=true;
       byId('legal-qa-extraction-rows').replaceChildren();
+      byId('legal-qa-question-review').hidden=true;
+      byId('legal-qa-question-rows').replaceChildren();
     }
     function updateTaskFields(){
       byId('legal-qa-doc-panel').hidden=!['UC03','UC04','UC07','F08'].includes(uc.value);
@@ -604,6 +606,82 @@
             extractRows.append(row);
           }
         }
+        // R152 F09: source-quote matching is NOT semantic, legal, or
+        // effective-date proof. Render untrusted model values as inert text.
+        const qPanel=byId('legal-qa-question-review');
+        const qRows=byId('legal-qa-question-rows');
+        qPanel.hidden=true;
+        qRows.replaceChildren();
+        const qReview=data.question_review;
+        let questionWarnings=data.uc==='UC09'&&
+          (!qReview||!Array.isArray(qReview.references)||
+           typeof qReview.answer!=='string');
+        if(data.uc==='UC09'&&qReview&&Array.isArray(qReview.references)&&
+           qReview.references.length<=24&&
+           typeof qReview.answer==='string'&&qReview.answer.length<=1000&&
+           typeof qReview.question==='string'&&qReview.question.length<=600&&
+           typeof qReview.verification_question==='string'&&
+           qReview.verification_question.length<=350){
+          qPanel.hidden=false;
+          questionWarnings=(Array.isArray(qReview.flags)&&qReview.flags.length>0)||
+            qReview.reference_integrity==='review_required'||
+            qReview.question!==question.value;
+          const note=document.createElement('p');
+          note.className=questionWarnings?'legal-qa-evidence-warning':'legal-qa-evidence-note';
+          note.textContent=questionWarnings
+            ?'F09: Câu trả lời hoặc trích dẫn thiếu căn cứ, sai định dạng hay không khớp câu hỏi hiện tại. Luật sư phải xem lại toàn bộ.'
+            :qReview.answer_state==='insufficient_source_claim_not_verified'
+              ?'AI báo không đủ căn cứ. Đây chưa phải kết luận rằng hồ sơ không có chứng cứ.'
+              :'Trích dẫn chỉ khớp nguyên văn. Nội dung, hiệu lực và độ đầy đủ chưa được xác minh.';
+          qRows.append(note);
+          const main=document.createElement('article');
+          main.className='legal-qa-translation-row';
+          const heading=document.createElement('strong');
+          heading.textContent='Câu hỏi và trả lời nháp · chờ kiểm duyệt';
+          main.append(heading);
+          for(const [name,value] of [
+            ['Câu hỏi',qReview.question],
+            ['Trả lời từ AI',qReview.answer||'Không có câu trả lời đủ điều kiện'],
+            ['Điểm cần xác minh',qReview.verification_question||'Chưa có câu hỏi xác minh']
+          ]){
+            const cell=document.createElement('div');
+            cell.className='legal-qa-translation-cell';
+            const title=document.createElement('strong');
+            title.textContent=name;
+            const p=document.createElement('p');
+            p.textContent=value;
+            cell.append(title,p);
+            main.append(cell);
+          }
+          qRows.append(main);
+          for(const ref of qReview.references){
+            if(!ref||!/^A[1-9][0-9]*$/.test(ref.source_id)||
+               typeof ref.source_text!=='string'||ref.source_text.length>5000||
+               typeof ref.model_quote!=='string'||ref.model_quote.length>400||
+               !['literal_quote_matched_not_semantic_proof','duplicate','incomplete','source_mismatch'].includes(ref.status))continue;
+            const row=document.createElement('article');
+            row.className='legal-qa-translation-row';
+            const heading=document.createElement('strong');
+            heading.textContent='['+ref.source_id+'] · '+
+              (ref.status==='literal_quote_matched_not_semantic_proof'
+                ?'Khớp chữ, chưa chứng minh đúng nghĩa': 'Trích dẫn chưa khớp nguồn');
+            row.append(heading);
+            for(const [label,value] of [
+              ['Đoạn hồ sơ gốc',ref.source_text],
+              ['Trích nguyên văn được dẫn',ref.model_quote||'Thiếu trích dẫn']
+            ]){
+              const cell=document.createElement('div');
+              cell.className='legal-qa-translation-cell';
+              const title=document.createElement('strong');
+              title.textContent=label;
+              const p=document.createElement('p');
+              p.textContent=value;
+              cell.append(title,p);
+              row.append(cell);
+            }
+            qRows.append(row);
+          }
+        }
         byId('legal-qa-result-title').textContent=data.title+' · '+(data.mode==='local_example_only'?'Tìm trong nguồn mẫu':'Bản nháp AI');
         byId('legal-qa-review').textContent=data.review_notice||
           'Chỉ truy xuất từ nguồn giả lập. Chưa xác minh dữ liệu văn bản pháp luật/bản án chính thức.';
@@ -669,10 +747,10 @@
           }
         }
         result.hidden=false;
-        setStatus(evidenceWarnings.length||translationWarnings||grammarWarnings||contractWarnings||draftingWarnings||extractionWarnings
+        setStatus(evidenceWarnings.length||translationWarnings||grammarWarnings||contractWarnings||draftingWarnings||extractionWarnings||questionWarnings
           ? 'Có cảnh báo về nguồn, số liệu hoặc ghép đoạn. Không sử dụng trước khi kiểm duyệt.'
           : 'Hoàn tất bản nháp QA. Hãy đối chiếu nguồn và kiểm duyệt thủ công.',
-          evidenceWarnings.length>0||translationWarnings||grammarWarnings||contractWarnings||draftingWarnings||extractionWarnings);
+          evidenceWarnings.length>0||translationWarnings||grammarWarnings||contractWarnings||draftingWarnings||extractionWarnings||questionWarnings);
         result.scrollIntoView({behavior:'smooth',block:'nearest'});
       } catch(error){
         if(generation===workspaceGeneration)
