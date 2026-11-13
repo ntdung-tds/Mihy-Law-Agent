@@ -671,3 +671,27 @@ test('R154 F07 tenant change during second upload discards first conversion and 
  assert.equal(h.query('#legal-qa-source').value,'');
  assert.equal(h.query('#legal-qa-doc-file').value,'');
 });
+
+test('R154 F07 revoked user consent while a file is converting cannot leave a stuck button or preview',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F07 consent matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='F08';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ h.query('#legal-qa-doc-file').files=[{name:'one.pdf',size:100,type:'application/pdf'}];
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-doc-read').fire('click');
+ assert.equal(h.query('#legal-qa-doc-read').disabled,true);
+ h.query('#legal-qa-consent').checked=false;
+ finish(h.pending[1],{uc:'F08',file_name:'one.pdf',file_size:100,
+  mode:'qa_file_text_preview_not_verified',
+  source_text:'Điều 1. Bên A có 10 bộ tài liệu phải bàn giao sau 20 ngày.'});
+ await done;
+ assert.equal(h.query('#legal-qa-doc-read').disabled,false);
+ assert.equal(h.query('#legal-qa-doc-use').hidden,true);
+ assert.equal(h.query('#legal-qa-doc-preview').hidden,true);
+ assert.equal(h.query('#legal-qa-doc-preview').textContent,'');
+ assert.equal(h.query('#legal-qa-source').value,'');
+ assert.match(h.query('#legal-qa-doc-status').textContent,/Đã hủy xác nhận/);
+});
