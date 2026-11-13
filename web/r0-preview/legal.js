@@ -180,9 +180,10 @@
       docRead.disabled=true;
       docStatus.textContent='Đang đọc lần lượt '+files.length+
         ' tệp mẫu; chưa chạy AI và chưa lưu vào hồ sơ.';
-      const current=()=>generation===documentReadGeneration&&
+      const sameWorkspace=()=>generation===documentReadGeneration&&
         workspace===workspaceGeneration&&matter.value===selectedMatter&&
-        uc.value===selectedUC&&byId('legal-qa-consent').checked;
+        uc.value===selectedUC;
+      const current=()=>sameWorkspace()&&byId('legal-qa-consent').checked;
       const converted=[];
       try {
         for(let i=0;i<files.length;i++){
@@ -241,9 +242,17 @@
         docStatus.textContent=(error?.message||'Lỗi đọc tài liệu QA.')+
           ' Không sử dụng nguồn chưa đủ tệp; không thử lại ngay để tránh trừ quota nhiều lần.';
       }finally{
-        if(current()){
+        if(sameWorkspace()){
           documentReadController=null;
           docRead.disabled=false;
+          if(!byId('legal-qa-consent').checked){
+            documentPreviewText='';
+            documentPreviewMatter='';
+            docPreview.textContent='';
+            docPreview.hidden=true;
+            docUse.hidden=true;
+            docStatus.textContent='Đã hủy xác nhận dữ liệu QA. Không sử dụng kết quả chuyển đổi.';
+          }
         }
       }
     });
