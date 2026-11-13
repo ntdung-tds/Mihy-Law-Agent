@@ -75,6 +75,7 @@ export function buildMatterQuestionReview(modelAnswer,sourceRows,question){
  if(mismatches.length)flags.push('ANSWER_SOURCE_QUOTES_MISMATCH');
  if(unknown.size)flags.push('ANSWER_UNKNOWN_SOURCE_ID');
  if(unexpected)flags.push('ANSWER_UNSTRUCTURED_CONTENT');
+ if(enough&&NO_EVIDENCE.test(answer))flags.push('ANSWER_STATUS_ANSWER_CONTRADICTION');
  if(shortage&&!refusalValid)flags.push('ANSWER_REFUSAL_INCONSISTENT');
  const supported=enough&&references.length>0&&references.every(r=>
    r.status==='literal_quote_matched_not_semantic_proof')&&flags.length===0;

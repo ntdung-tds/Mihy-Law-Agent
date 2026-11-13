@@ -88,3 +88,12 @@ test('R152 F09 refuses invalid source structures and invalid question lengths',(
  assert.throws(()=>buildMatterQuestionReview(FACT,SOURCE,'a'),TypeError);
  assert.throws(()=>buildMatterQuestionReview(FACT,SOURCE,'x'.repeat(601)),TypeError);
 });
+
+test('R153 F09 contradictory positive status with explicit no-evidence answer must be review-required',()=>{
+ const result=buildMatterQuestionReview(
+  'TRANG_THAI: CO_CAN_CU\nTRA_LOI: KHÔNG ĐỦ CĂN CỨ.\n'+
+  'CAN_XAC_MINH: Cần xác minh tài liệu gốc nào?\n'+
+  '[A1]\nTRICH: Bên A giao 10 bộ hồ sơ vào ngày 15/09/2026.',SOURCE,QUESTION);
+ assert.ok(result.flags.includes('ANSWER_STATUS_ANSWER_CONTRADICTION'));
+ assert.equal(result.reference_integrity,'review_required');
+});
