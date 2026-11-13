@@ -22,8 +22,8 @@ const rows=[
   created_at:NOW+2,verification_status:'unverified'}
 ];
 
-function fixture({signedIn=true,acl=true,role='lawyer',records=rows}={}){
- const calls=[],drive=[];
+function fixture({signedIn=true,acl=true,role='lawyer',records=rows,aclSequence=null}={}){
+ const calls=[],drive=[];let aclChecks=0;
  const env={AI_LAW_CF_MODE:'isolated-qa-only',
   INSTALLATION_ID:I,JWT_ISSUER:'https://issuer.test',
   DB:{prepare(sql){return {bind(...params){
@@ -33,7 +33,7 @@ function fixture({signedIn=true,acl=true,role='lawyer',records=rows}={}){
      if(sql.includes('FROM qa_sessions s'))
        return signedIn?{user_id:U,tenant_id:T,role_key:role}:null;
      if(sql===DOCUMENT_ACL_SQL)
-       return acl&&params[2]===M?{ok:1}:null;
+       return (aclSequence?aclSequence[aclChecks++]:acl)&&params[2]===M?{ok:1}:null;
      return null;
     },
     async all(){
@@ -177,4 +177,17 @@ test('R157 decomposed Vietnamese query NFC-equivalent matches and remains Matter
  const denied=fixture({records,acl:false});
  assert.equal((await documentsApi(req('q='+encodeURIComponent(decomposed)),denied.env,{now:NOW})).status,404);
  assert.ok(!denied.calls.some(x=>x.sql===UNICODE_SEARCH_SQL));
+});
+
+// R158: Permission can be revoked while the bounded filename query is running.
+// No receipt names may be returned after the latest MatterACL check denies access.
+test('R158 revocation between initial MatterACL and filename scan fails closed',async()=>{
+ for(const query of ['q=Ho','q='+encodeURIComponent('hồ sơ')]){
+  const records=[{...rows[0],file_name:'HỒ SƠ.pdf'}];
+  const f=fixture({records,aclSequence:[true,false]});
+  const response=await documentsApi(req(query),f.env,{now:NOW});
+  assert.equal(response.status,404,'revoked read must not return prior filenames');
+  assert.ok(!JSON.stringify(await response.json()).includes('HỒ SƠ.pdf'));
+  assert.equal(f.calls.filter(x=>x.sql===DOCUMENT_ACL_SQL).length,2);
+ }
 });
