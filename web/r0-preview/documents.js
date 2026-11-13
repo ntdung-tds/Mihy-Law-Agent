@@ -514,7 +514,12 @@
   }
   finally{uploading=false;uploadGate();}
  });
- select.addEventListener('change',()=>{void refreshFiles();});
+ select.addEventListener('change',()=>{
+  // A different Matter starts with its own complete receipt list, not the
+  // previous Matter's filename filter or its delayed response.
+  if(search)search.value='';
+  void refreshFiles();
+ });
  window.addEventListener('ai-law:documents-open',()=>{void driveStatus();void refreshMatters();});
  window.addEventListener('ai-law:workspace-switch',()=>{
   reset();setDrive('loading','Đang chuyển không gian làm việc…');
