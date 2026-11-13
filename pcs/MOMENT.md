@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `134` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-13T02:24:48.807Z`.
+- **PCS revision:** `135` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-13T04:14:57.300Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R154 — F07 đọc nhiều PDF/DOCX QA (1–3 tệp) có kiểm soát (2026-11-13 VN)
+
+- **Code:** [Draft PR #224](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/224), stacked on #223 R153 F09 refusal consistency. File picker now selects **1–3 PDF/DOCX fictional samples, 1.5MB each**; no upload on selection. User must select authorized Matter and explicitly agree before pressing Read; files are converted *sequentially* via existing /api/qa/legal/extract with R150/151 ACL/session post-conversion rechecks; each file costs one existing daily AI QA quota. No new backend batch persistence.
+- **Fail closed/all-or-none review:** every file must return safe 30–5000-character plaintext; combined source A max 5000 characters. Invalid count/name/size/duplicate filenames rejected before requests; failures or limit overruns discard all partial conversions and never enable source approval. Stop before any unnecessary next conversion once combined size exceeds limit. Preview displays file labels only to humans; source A contains only ordered extracted paragraphs. Second user click loads source A and resets separate AI consent. Source not persisted; model does not auto-run.
+- **Safety:** workspace/Tenant, UC, Matter rotation and withdrawn fictitious consent suppress stale conversions, clear preview and unlock the read control; extracted text rendered as inert text. No customer data.
+- **Tests:** Existing actual source JS VM browser contract file `deployment/cloudflare/tests/r142_uc03_dom_gpt.test.mjs` contains **7 new R154 multi-file negative/positive tests**, including first-success/second-error, >3 files, duplicate names, overall size, halt third request, tenant switch, consent revoked mid-conversion. [Actions #43364173960](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43364173960) CI pending at this checkpoint. Source-only/unit/VM PASS is not real browser Cloudflare account QA.
+- **Still NOT_DONE:** F07 full SRS (stored multi-file intake, OCR scans, actual PDF/DOCX extraction accuracy, cross-tenant authenticated live QA, audit/versioning), F09 Matter-linked retrieval and all 36 Fxx. R126 two-account live E2E BLOCKED/NOT_RUN. All PRs remain Draft, no merge/deploy production or signing. PCS rev135 preserves protected standalone-first active_task=AL-R0-DEPLOY-001; Owner final acceptance only.
 
 ## R152 — F09 hỏi đáp theo hồ sơ có trích dẫn nguồn và trả lời không đủ căn cứ (2026-11-13 VN)
 
