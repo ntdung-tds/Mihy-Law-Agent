@@ -129,7 +129,7 @@ async function list(req,env,p,now){
   return result(400,{error:'Từ khóa tìm tệp QA không hợp lệ.'});
  if(!await permit(env,p,matter,'read',now))return forbidden();
  const searched=q.length>=2;
- const unicodeSearch=searched&&/[^\\x00-\\x7f]/u.test(q);
+ const unicodeSearch=searched&&/[^\x00-\x7f]/u.test(q);
  const sql=unicodeSearch?UNICODE_SEARCH_SQL:searched?SEARCH_SQL:LIST_SQL;
  const rows=await env.DB.prepare(sql)
    .bind(env.INSTALLATION_ID,p.tenant_id,matter,...(searched&&!unicodeSearch?[q]:[])).all();
