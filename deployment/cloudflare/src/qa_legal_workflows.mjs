@@ -382,6 +382,13 @@ export async function legalApi(req,env,opts={}){
   ? buildLegalDataReview(output,primary):undefined;
  const question_review=body.uc==='UC09'
   ? buildMatterQuestionReview(output,primary,body.question):undefined;
+ // A structurally valid explicit refusal intentionally has no source quote.
+ // Do not conflate that with a fabricated factual answer that omitted a cite.
+ // The refusal is still an unverified model claim, not evidence of absence.
+ if(question_review?.reference_integrity==='model_declines_no_source_not_verified'){
+  evidence.flags=evidence.flags.filter(flag=>flag!=='SOURCE_A_CITATION_MISSING');
+  evidence.reference_coverage='explicit_insufficiency_not_proof_of_absence';
+ }
  return json(200,{...common,mode:'ai_draft_not_verified',
   model:MODEL,answer:output,evidence_diagnostics:evidence,translation_review,correction_review,contract_review,drafting_review,extraction_review,question_review,
   review_notice:'Bản nháp AI từ nội dung mẫu. Trích dẫn chỉ được kiểm tra mã đoạn, chưa xác minh đúng nội dung, căn cứ pháp luật, hiệu lực hoặc bản dịch. Luật sư phải kiểm duyệt.'});
