@@ -73,6 +73,16 @@ export const SEARCH_SQL=[
  'AND instr(lower(r.file_name),lower(?))>0',
  'ORDER BY r.created_at DESC,r.file_id DESC LIMIT 51'
 ].join(' ');
+// R156: SQLite built-in lower() only folds ASCII. For non-ASCII queries,
+// scan a bounded, already Matter-scoped receipt set and fold in JavaScript.
+// Refuse an oversized scope rather than return falsely complete results.
+export const UNICODE_SEARCH_SQL=[
+ 'SELECT r.file_id,r.file_name,r.mime_type,r.byte_length,r.sha256,r.created_at,r.verification_status',
+ 'FROM qa_document_receipts r JOIN qa_file_links f',
+ 'ON f.installation_id=r.installation_id AND f.tenant_id=r.tenant_id AND f.file_id=r.file_id',
+ 'WHERE r.installation_id=? AND r.tenant_id=? AND f.matter_id=?',
+ 'ORDER BY r.created_at DESC,r.file_id DESC LIMIT 1001'
+].join(' ');
 export const READ_SQL=[
  'SELECT r.file_id,r.file_name,r.mime_type,r.byte_length,r.sha256,r.verification_status,',
  'f.matter_id,f.provider_object_id,f.provider FROM qa_document_receipts r JOIN qa_file_links f',
@@ -119,9 +129,18 @@ async function list(req,env,p,now){
   return result(400,{error:'Từ khóa tìm tệp QA không hợp lệ.'});
  if(!await permit(env,p,matter,'read',now))return forbidden();
  const searched=q.length>=2;
- const rows=await env.DB.prepare(searched?SEARCH_SQL:LIST_SQL)
-   .bind(env.INSTALLATION_ID,p.tenant_id,matter,...(searched?[q]:[])).all();
- const records=rows.results||[];
+ const unicodeSearch=searched&&/[^\x00-\x7f]/u.test(q);
+ const sql=unicodeSearch?UNICODE_SEARCH_SQL:searched?SEARCH_SQL:LIST_SQL;
+ const rows=await env.DB.prepare(sql)
+   .bind(env.INSTALLATION_ID,p.tenant_id,matter,...(searched&&!unicodeSearch?[q]:[])).all();
+ const scoped=rows.results||[];
+ if(unicodeSearch&&scoped.length>1000)return result(503,{
+  code:'QA_SEARCH_SCOPE_TOO_LARGE',
+  error:'Phạm vi tìm kiếm QA vượt giới hạn an toàn; chưa thể trả kết quả đầy đủ.'
+ });
+ const records=unicodeSearch?scoped.filter(x=>
+  String(x.file_name||'').normalize('NFC').toLocaleLowerCase('vi')
+   .includes(q.toLocaleLowerCase('vi'))):scoped;
  const more=searched&&records.length>50;
  return result(200,{
   documents:records.slice(0,50).map(x=>({
