@@ -61,6 +61,18 @@ export const LIST_SQL=[
  'WHERE r.installation_id=? AND r.tenant_id=? AND f.matter_id=?',
  'ORDER BY r.created_at DESC,r.file_id DESC LIMIT 50'
 ].join(' ');
+// R155: Search only metadata previously linked to this exact Matter; NEVER
+// search other tenants, other matters, document contents or provider Drive.
+// SQLite instr() uses literal substrings, so %, _ and backslashes cannot
+// become wildcard SQL operators or expose unscoped filenames.
+export const SEARCH_SQL=[
+ 'SELECT r.file_id,r.file_name,r.mime_type,r.byte_length,r.sha256,r.created_at,r.verification_status',
+ 'FROM qa_document_receipts r JOIN qa_file_links f',
+ 'ON f.installation_id=r.installation_id AND f.tenant_id=r.tenant_id AND f.file_id=r.file_id',
+ 'WHERE r.installation_id=? AND r.tenant_id=? AND f.matter_id=?',
+ 'AND instr(lower(r.file_name),lower(?))>0',
+ 'ORDER BY r.created_at DESC,r.file_id DESC LIMIT 51'
+].join(' ');
 export const READ_SQL=[
  'SELECT r.file_id,r.file_name,r.mime_type,r.byte_length,r.sha256,r.verification_status,',
  'f.matter_id,f.provider_object_id,f.provider FROM qa_document_receipts r JOIN qa_file_links f',
@@ -95,13 +107,29 @@ async function readForm(req){
  return new Response(new Blob(chunks),{headers:{'Content-Type':type}}).formData();
 }
 async function list(req,env,p,now){
- const matter=new URL(req.url).searchParams.get('matter_id');
+ const url=new URL(req.url),matter=url.searchParams.get('matter_id');
+ const queries=url.searchParams.getAll('q');
+ // F20 is a bounded per-Matter FILENAME filter only; never accept an
+ // unbounded search or treat unverified provider content as indexed legal text.
+ if(queries.length>1)return result(400,{error:'Từ khóa tìm tệp QA không hợp lệ.'});
+ const raw=queries.length?queries[0]:'';
+ const q=raw.trim();
+ if(q!==raw||raw.length>80||q.length===1||
+    /[\\u0000-\\u001f\\u007f]/u.test(q)||q!==q.normalize('NFC'))
+  return result(400,{error:'Từ khóa tìm tệp QA không hợp lệ.'});
  if(!await permit(env,p,matter,'read',now))return forbidden();
- const rows=await env.DB.prepare(LIST_SQL).bind(env.INSTALLATION_ID,p.tenant_id,matter).all();
- return result(200,{documents:(rows.results||[]).map(x=>({
-  id:x.file_id,name:x.file_name,mime_type:x.mime_type,bytes:x.byte_length,
-  sha256:x.sha256,status:x.verification_status,created_at:x.created_at
- }))});
+ const searched=q.length>=2;
+ const rows=await env.DB.prepare(searched?SEARCH_SQL:LIST_SQL)
+   .bind(env.INSTALLATION_ID,p.tenant_id,matter,...(searched?[q]:[])).all();
+ const records=rows.results||[];
+ const more=searched&&records.length>50;
+ return result(200,{
+  documents:records.slice(0,50).map(x=>({
+   id:x.file_id,name:x.file_name,mime_type:x.mime_type,bytes:x.byte_length,
+   sha256:x.sha256,status:x.verification_status,created_at:x.created_at
+  })),
+  search_scope:'file_name_only',has_more:more
+ });
 }
 // R86 direct upload control plane: requests contain only a bounded JSON
 // manifest. Google Drive, not this Worker, receives the PDF/DOCX bytes.
