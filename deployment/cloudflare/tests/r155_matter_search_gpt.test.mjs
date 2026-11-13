@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {documentsApi,DOCUMENT_ACL_SQL,LIST_SQL,SEARCH_SQL} from '../src/qa_documents.mjs';
+import {documentsApi,DOCUMENT_ACL_SQL,LIST_SQL,SEARCH_SQL,UNICODE_SEARCH_SQL} from '../src/qa_documents.mjs';
 
 const HOST='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
 const I='11111111-1111-4111-8111-111111111111';
@@ -38,6 +38,7 @@ function fixture({signedIn=true,acl=true,role='lawyer',records=rows}={}){
     },
     async all(){
      if(sql===LIST_SQL)return {results:records.slice(0,50)};
+     if(sql===UNICODE_SEARCH_SQL)return {results:records.slice(0,1001)};
      if(sql===SEARCH_SQL){
       const q=params[3].toLowerCase();
       return {results:records.filter(r=>r.file_name.toLowerCase().includes(q))
@@ -137,4 +138,28 @@ test('R155 a search returning more than 50 states the limit, does not leak extra
  assert.equal(d.has_more,true);
  assert.equal(d.documents.some(x=>x.name==='synthetic-doc-050.pdf'),false);
  assert.equal(f.calls.find(c=>c.sql===SEARCH_SQL).params[3],'synthetic');
+});
+
+
+test('R156 accented uppercase filenames match Unicode query only inside authorized Matter',async()=>{
+ const records=[{...rows[0],file_name:'HỒ SƠ.pdf'},
+  {...rows[0],file_id:'66666666-6666-4666-8666-666666666664',file_name:'Hồ sơ.pdf'},
+  {...rows[0],file_id:'66666666-6666-4666-8666-666666666665',file_name:'ho so.pdf'}];
+ const f=fixture({records});
+ const r=await documentsApi(req('q='+encodeURIComponent('hồ sơ')),f.env,{now:NOW});
+ assert.equal(r.status,200);
+ assert.deepEqual((await r.json()).documents.map(x=>x.name),['HỒ SƠ.pdf','Hồ sơ.pdf']);
+ assert.ok(f.calls.some(x=>x.sql===UNICODE_SEARCH_SQL));
+ assert.ok(f.calls.some(x=>x.sql===DOCUMENT_ACL_SQL));
+ const denied=fixture({records,acl:false});
+ assert.equal((await documentsApi(req('q='+encodeURIComponent('hồ sơ')),denied.env,{now:NOW})).status,404);
+ assert.ok(!denied.calls.some(x=>x.sql===UNICODE_SEARCH_SQL));
+});
+
+test('R156 Unicode scoped scan fails closed beyond QA cap, not a partial result',async()=>{
+ const records=Array.from({length:1001},(_,i)=>({...rows[0],file_name:'HỒ SƠ '+i+'.pdf'}));
+ const f=fixture({records});
+ const r=await documentsApi(req('q='+encodeURIComponent('hồ sơ')),f.env,{now:NOW});
+ assert.equal(r.status,503);
+ assert.ok(!JSON.stringify(await r.json()).includes('HỒ SƠ 0'));
 });
