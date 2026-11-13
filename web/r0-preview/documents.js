@@ -6,7 +6,9 @@
  const file=$('document-file'),feedback=$('document-feedback'),list=$('qa-document-list');
  const fileName=$('document-file-name');
  const search=$('qa-document-search'),searchRun=$('qa-document-search-run');
- if(!select||!form||!file||!list||!search||!searchRun)return;
+ // Older cached HTML may not contain the new search inputs yet. Its file
+ // upload/download controls must remain usable during asset-version skew.
+ if(!select||!form||!file||!list)return;
  let filesLoadGeneration=0,filesLoadController=null;
  function invalidateFileSearch(){
   filesLoadGeneration++;
@@ -22,7 +24,8 @@
  function reset(){
   invalidateFileSearch();
   select.replaceChildren();list.replaceChildren();message('');
-  search.value='';file.value='';showSelectedFile();
+  if(search)search.value='';
+  file.value='';showSelectedFile();
  }
  function opt(value,label){const o=document.createElement('option');o.value=value;o.textContent=label;return o;}
  async function refreshMatters(){
@@ -82,18 +85,19 @@
  async function refreshFiles(){
   invalidateFileSearch();
   const generation=filesLoadGeneration;
-  const matterId=select.value,q=search.value.trim();
+  const matterId=select.value,q=search?.value?.trim()||'';
   list.replaceChildren();
   if(!uuid.test(matterId))return;
   if(q.length===1||q.length>80){
    message('Nhập từ khóa từ 2–80 ký tự hoặc để trống để xem tệp trong hồ sơ.','error');
    return;
   }
-  const controller=new AbortController();
+  const controller=typeof AbortController==='function'
+    ?new AbortController():{signal:undefined,abort(){}};
   filesLoadController=controller;
   const current=()=>generation===filesLoadGeneration&&
-    select.value===matterId&&search.value.trim()===q;
-  searchRun.disabled=true;
+    select.value===matterId&&(search?.value?.trim()||'')===q;
+  if(searchRun)searchRun.disabled=true;
   try{
    const url='/api/qa/documents?matter_id='+encodeURIComponent(matterId)+
      (q?'&q='+encodeURIComponent(q):'');
@@ -105,7 +109,7 @@
    const data=await res.json();
    if(!current())return;
    const docs=Array.isArray(data.documents)?data.documents:[];
-   if(data.search_scope!=='file_name_only'||docs.length>50)
+   if((q&&data.search_scope!=='file_name_only')||docs.length>50)
     throw Error('BAD_LIST_RESPONSE');
    if(!docs.length){
     const p=document.createElement('p');
@@ -143,12 +147,12 @@
   }finally{
    if(generation===filesLoadGeneration){
     filesLoadController=null;
-    searchRun.disabled=false;
+    if(searchRun)searchRun.disabled=false;
    }
   }
  }
- searchRun.addEventListener('click',()=>{void refreshFiles();});
- search.addEventListener('keydown',event=>{
+ if(searchRun)searchRun.addEventListener('click',()=>{void refreshFiles();});
+ if(search)search.addEventListener('keydown',event=>{
   if(event.key!=='Enter')return;
   event.preventDefault();void refreshFiles();
  });
