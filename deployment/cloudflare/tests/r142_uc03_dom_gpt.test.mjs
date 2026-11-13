@@ -525,3 +525,200 @@ test('R152 F09 browser warns when review metadata is missing or question mismatc
  h.win.dispatchEvent(new Event('ai-law:workspace-switch'));
  assert.equal(h.query('#legal-qa-copy').disabled,false,'workspace reset clears stale disabled state');
 });
+
+test('R154 F07 two files convert sequentially with one manual preview; source A does not contain filenames',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F07 source matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='UC09';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ const one={name:'one.pdf',size:109,type:'application/pdf'};
+ const two={name:'two.docx',size:218,type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'};
+ h.query('#legal-qa-doc-file').files=[one,two];
+ h.query('#legal-qa-doc-file').fire('change');
+ assert.equal(h.pending.length,1,'file selection is local');
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-doc-read').fire('click');
+ assert.equal(h.pending.length,2,'first upload starts only after click');
+ assert.equal(h.query('#legal-qa-doc-read').disabled,true);
+ const first=h.pending[1];
+ assert.equal(first.path,'/api/qa/legal/extract');
+ assert.equal(first.options.body.items.find(x=>x[0]==='file')[1],one);
+ const textOne='Điều 1. Hồ sơ bàn giao 10 bộ tài liệu ngày 15/09/2026.';
+ finish(first,{uc:'UC09',file_name:one.name,file_size:one.size,
+  mode:'qa_file_text_preview_not_verified',source_text:textOne});
+ await flush();
+ assert.equal(h.pending.length,3,'second file starts after first succeeds');
+ const second=h.pending[2];
+ assert.equal(second.options.body.items.find(x=>x[0]==='file')[1],two);
+ assert.equal(h.query('#legal-qa-doc-use').hidden,true,'no partial approval');
+ const textTwo='Điều 2. Bên B thanh toán 2.000.000 đồng sau nghiệm thu.';
+ finish(second,{uc:'UC09',file_name:two.name,file_size:two.size,
+  mode:'qa_file_text_preview_not_verified',source_text:textTwo});
+ await done;
+ assert.equal(h.query('#legal-qa-doc-read').disabled,false);
+ assert.equal(h.query('#legal-qa-doc-preview').hidden,false);
+ assert.match(h.query('#legal-qa-doc-preview').textContent,/Tệp 1: one.pdf/);
+ assert.match(h.query('#legal-qa-doc-preview').textContent,/Tệp 2: two.docx/);
+ assert.equal(h.query('#legal-qa-source').value,'','conversion is preview only');
+ assert.equal(h.query('#legal-qa-doc-use').hidden,false);
+ assert.equal(h.pending.length,3,'preview never invokes language model');
+ h.query('#legal-qa-doc-use').fire('click');
+ assert.equal(h.query('#legal-qa-source').value,textOne+'\n\n'+textTwo);
+ assert.equal(h.query('#legal-qa-source').value.includes('one.pdf'),false);
+ assert.equal(h.query('#legal-qa-source').value.includes('two.docx'),false);
+ assert.equal(h.query('#legal-qa-consent').checked,false,
+   'separate model-run consent is still required');
+ assert.equal(h.pending.length,3,'manual source acceptance does not call AI');
+});
+
+test('R154 F07 failed second file never displays a partial conversion or calls third upload',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F07 matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='F08';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ const files=['a.pdf','b.pdf','c.pdf'].map((name,i)=>({name,size:101+i,type:'application/pdf'}));
+ h.query('#legal-qa-doc-file').files=files;
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-doc-read').fire('click');
+ finish(h.pending[1],{uc:'F08',file_name:files[0].name,file_size:files[0].size,
+  mode:'qa_file_text_preview_not_verified',source_text:'Điều 1. Bên A giao 10 bộ hồ sơ trong 20 ngày.'});
+ await flush();
+ assert.equal(h.pending.length,3);
+ finish(h.pending[2],{error:'Không trích được văn bản tin cậy từ tệp QA.'},422);
+ await done;
+ assert.equal(h.pending.length,3,'third file never uploaded after failure');
+ assert.equal(h.query('#legal-qa-doc-preview').hidden,true);
+ assert.equal(h.query('#legal-qa-doc-preview').textContent,'');
+ assert.equal(h.query('#legal-qa-doc-use').hidden,true);
+ assert.equal(h.query('#legal-qa-source').value,'');
+ assert.match(h.query('#legal-qa-doc-status').textContent,/Không sử dụng nguồn chưa đủ tệp/);
+ assert.equal(h.query('#legal-qa-doc-read').disabled,false);
+});
+
+test('R154 F07 rejects too many, invalid or duplicate files before charging QA quota',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F07 matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='UC09';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ h.query('#legal-qa-consent').checked=true;
+ const file=name=>({name,size:101,type:'application/pdf'});
+ for(const files of [
+  [file('a.pdf'),file('b.pdf'),file('c.pdf'),file('d.pdf')],
+  [file('a.pdf'),file('A.PDF')],
+  [file('a.pdf'),file('a.exe')],
+  [file('a.pdf'),{name:'b.docx',size:1500001,type:'application/octet-stream'}]
+ ]){
+  h.query('#legal-qa-doc-file').files=files;
+  await h.query('#legal-qa-doc-read').fire('click');
+  assert.equal(h.pending.length,1,'invalid batch must not upload any file');
+  assert.equal(h.query('#legal-qa-doc-use').hidden,true);
+ }
+});
+
+test('R154 F07 combined source over 5000 chars cannot be approved for AI',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F07 matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='F08';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ const files=[{name:'a.pdf',size:100,type:'application/pdf'},
+   {name:'b.pdf',size:110,type:'application/pdf'}];
+ h.query('#legal-qa-doc-file').files=files;
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-doc-read').fire('click');
+ finish(h.pending[1],{uc:'F08',file_name:files[0].name,file_size:files[0].size,
+  mode:'qa_file_text_preview_not_verified',source_text:'a'.repeat(3200)});
+ await flush();
+ finish(h.pending[2],{uc:'F08',file_name:files[1].name,file_size:files[1].size,
+  mode:'qa_file_text_preview_not_verified',source_text:'b'.repeat(2100)});
+ await done;
+ assert.equal(h.query('#legal-qa-doc-preview').hidden,true);
+ assert.equal(h.query('#legal-qa-doc-use').hidden,true);
+ assert.equal(h.query('#legal-qa-source').value,'');
+ assert.match(h.query('#legal-qa-doc-status').textContent,/5.000 ký tự/);
+});
+
+test('R154 F07 tenant change during second upload discards first conversion and delayed second response',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F07 matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='UC09';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ const files=[{name:'a.pdf',size:100,type:'application/pdf'},
+   {name:'b.pdf',size:110,type:'application/pdf'}];
+ h.query('#legal-qa-doc-file').files=files;
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-doc-read').fire('click');
+ finish(h.pending[1],{uc:'UC09',file_name:files[0].name,file_size:files[0].size,
+  mode:'qa_file_text_preview_not_verified',source_text:'Điều 1. Nguồn A ngày 20/09/2026 không được lộ.'});
+ await flush();
+ assert.equal(h.pending.length,3);
+ h.win.dispatchEvent(new Event('ai-law:workspace-switch'));
+ finish(h.pending[2],{uc:'UC09',file_name:files[1].name,file_size:files[1].size,
+  mode:'qa_file_text_preview_not_verified',source_text:'Điều 2. Nguồn B ngày 21/09/2026 không được lộ.'});
+ await done;
+ assert.equal(h.query('#legal-qa-doc-preview').hidden,true);
+ assert.equal(h.query('#legal-qa-doc-preview').textContent,'');
+ assert.equal(h.query('#legal-qa-doc-use').hidden,true);
+ assert.equal(h.query('#legal-qa-source').value,'');
+ assert.equal(h.query('#legal-qa-doc-file').value,'');
+});
+
+test('R154 F07 revoked user consent while a file is converting cannot leave a stuck button or preview',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F07 consent matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='F08';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ h.query('#legal-qa-doc-file').files=[{name:'one.pdf',size:100,type:'application/pdf'}];
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-doc-read').fire('click');
+ assert.equal(h.query('#legal-qa-doc-read').disabled,true);
+ h.query('#legal-qa-consent').checked=false;
+ finish(h.pending[1],{uc:'F08',file_name:'one.pdf',file_size:100,
+  mode:'qa_file_text_preview_not_verified',
+  source_text:'Điều 1. Bên A có 10 bộ tài liệu phải bàn giao sau 20 ngày.'});
+ await done;
+ assert.equal(h.query('#legal-qa-doc-read').disabled,false);
+ assert.equal(h.query('#legal-qa-doc-use').hidden,true);
+ assert.equal(h.query('#legal-qa-doc-preview').hidden,true);
+ assert.equal(h.query('#legal-qa-doc-preview').textContent,'');
+ assert.equal(h.query('#legal-qa-source').value,'');
+ assert.match(h.query('#legal-qa-doc-status').textContent,/Đã hủy xác nhận/);
+});
+
+test('R154 F07 stops the third file conversion if two source texts already exceed 5000 chars',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F07 source limit'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='F08';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ const files=[{name:'a.pdf',size:100,type:'application/pdf'},
+  {name:'b.pdf',size:120,type:'application/pdf'},
+  {name:'c.pdf',size:140,type:'application/pdf'}];
+ h.query('#legal-qa-doc-file').files=files;
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-doc-read').fire('click');
+ finish(h.pending[1],{uc:'F08',file_name:files[0].name,file_size:files[0].size,
+  mode:'qa_file_text_preview_not_verified',source_text:'x'.repeat(3200)});
+ await flush();
+ assert.equal(h.pending.length,3);
+ finish(h.pending[2],{uc:'F08',file_name:files[1].name,file_size:files[1].size,
+  mode:'qa_file_text_preview_not_verified',source_text:'y'.repeat(2100)});
+ await done;
+ assert.equal(h.pending.length,3,'third file must not consume a needless QA conversion');
+ assert.equal(h.query('#legal-qa-doc-use').hidden,true);
+ assert.equal(h.query('#legal-qa-doc-preview').hidden,true);
+ assert.equal(h.query('#legal-qa-source').value,'');
+ assert.match(h.query('#legal-qa-doc-status').textContent,/5.000 ký tự/);
+});

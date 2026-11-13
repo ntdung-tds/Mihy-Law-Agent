@@ -146,14 +146,19 @@
     const docUse=byId('legal-qa-doc-use');
     const docPreview=byId('legal-qa-doc-preview');
     const docStatus=byId('legal-qa-doc-status');
+    // R154: selection alone does no network work. Each file is still
+    // individually authorized/quota limited by /api/qa/legal/extract.
+    // Keep intermediate converted text private and render/accept none until
+    // ALL selected files pass and their combined source fits the AI limit.
     docFile.addEventListener('change',()=>{
       clearDocumentPreview();
-      docStatus.textContent=docFile.files?.[0]
-        ?'Đã chọn tệp trên thiết bị. Chưa gửi lên máy chủ hoặc vào nguồn AI.'
+      const n=docFile.files?.length||0;
+      docStatus.textContent=n
+        ?'Đã chọn '+n+' tệp. Chưa gửi dữ liệu; mỗi tệp đọc sẽ dùng một lượt hạn mức QA.'
         :'Chưa chọn tệp PDF/DOCX QA.';
     });
     docRead.addEventListener('click',async()=>{
-      const file=docFile.files?.[0];
+      const files=Array.from(docFile.files||[]);
       const selectedMatter=matter.value,selectedUC=uc.value;
       if(!['UC03','UC04','UC07','F08','UC09'].includes(selectedUC)){
         docStatus.textContent='Tác vụ này chưa hỗ trợ nguồn PDF/DOCX QA.';return;
@@ -161,54 +166,100 @@
       if(!selectedMatter||!byId('legal-qa-consent').checked){
         docStatus.textContent='Chọn hồ sơ được phép và xác nhận dữ liệu giả lập trước khi đọc.';return;
       }
-      if(!file||!/^.{1,116}\.(pdf|docx)$/iu.test(file.name||'')||
-         file.size<5||file.size>1500000){
-        docStatus.textContent='Chỉ nhận PDF/DOCX QA tối đa 1,5 MB có tên tệp hợp lệ.';return;
+      if(files.length<1||files.length>3||
+         files.some(file=>!file||!/^.{1,116}\.(pdf|docx)$/iu.test(file.name||'')||
+           !Number.isSafeInteger(file.size)||file.size<5||file.size>1500000)||
+         new Set(files.map(file=>file.name.toLocaleLowerCase())).size!==files.length){
+        docStatus.textContent='Chỉ chọn 1–3 PDF/DOCX QA, tên khác nhau; mỗi tệp tối đa 1,5 MB.';
+        return;
       }
       clearDocumentPreview();
       const generation=documentReadGeneration,workspace=workspaceGeneration;
       const controller=new AbortController();
       documentReadController=controller;
       docRead.disabled=true;
-      docStatus.textContent='Đang trích văn bản mẫu. Không chạy AI pháp lý, không lưu tệp.';
-      const body=new FormData();
-      body.append('uc',selectedUC);
-      body.append('matter_id',selectedMatter);
-      body.append('synthetic_consent','true');
-      body.append('file',file,file.name);
-      const current=()=>generation===documentReadGeneration&&
+      docStatus.textContent='Đang đọc lần lượt '+files.length+
+        ' tệp mẫu; chưa chạy AI và chưa lưu vào hồ sơ.';
+      const sameWorkspace=()=>generation===documentReadGeneration&&
         workspace===workspaceGeneration&&matter.value===selectedMatter&&
         uc.value===selectedUC;
+      const current=()=>sameWorkspace()&&byId('legal-qa-consent').checked;
+      const converted=[];
       try {
-        const response=await fetch('/api/qa/legal/extract',{
-          method:'POST',credentials:'same-origin',cache:'no-store',
-          signal:controller.signal,body
-        });
+        for(let i=0;i<files.length;i++){
+          if(!current())return;
+          const file=files[i];
+          docStatus.textContent='Đang đọc tệp '+(i+1)+'/'+files.length+
+            ' (mỗi tệp trừ một lượt QA).';
+          const body=new FormData();
+          body.append('uc',selectedUC);
+          body.append('matter_id',selectedMatter);
+          body.append('synthetic_consent','true');
+          body.append('file',file,file.name);
+          const response=await fetch('/api/qa/legal/extract',{
+            method:'POST',credentials:'same-origin',cache:'no-store',
+            signal:controller.signal,body
+          });
+          if(!current())return;
+          if(response.status===401){location.replace('/login');return;}
+          const data=await response.json().catch(()=>({}));
+          if(!current())return;
+          if(!response.ok)throw Error(data.error||'Không đọc được tệp '+(i+1)+'.');
+          if(data.mode!=='qa_file_text_preview_not_verified'||
+             data.uc!==selectedUC||data.file_name!==file.name||
+             data.file_size!==file.size||
+             typeof data.source_text!=='string'||
+             data.source_text.trim().length<30||data.source_text.length>5000)
+            throw Error('Nội dung tệp '+(i+1)+' không đủ điều kiện đối chiếu.');
+          converted.push(data.source_text);
+          // Stop as soon as the combined source exceeds the model limit.
+          // Never spend quota converting the remaining files pointlessly.
+          const currentLength=converted.reduce((sum,text)=>sum+text.length,0)+
+            2*(converted.length-1);
+          if(currentLength>5000){
+            throw Error('Tổng nội dung các tệp vượt 5.000 ký tự nguồn AI. Chọn ít tệp hoặc rút gọn phần được phép.');
+          }
+        }
+        const combined=converted.join('\n\n');
         if(!current())return;
-        if(response.status===401){location.replace('/login');return;}
-        const data=await response.json().catch(()=>({}));
-        if(!current())return;
-        if(!response.ok)throw Error(data.error||'Không chuyển đổi được tệp QA.');
-        if(data.mode!=='qa_file_text_preview_not_verified'||
-           data.uc!==selectedUC||data.file_name!==file.name||
-           data.file_size!==file.size||
-           typeof data.source_text!=='string'||
-           data.source_text.length<30||data.source_text.length>5000)
-          throw Error('Tệp chuyển đổi chưa có nội dung đủ điều kiện đối chiếu.');
-        documentPreviewText=data.source_text;
+        if(combined.length>5000){
+          throw Error('Tổng nội dung '+files.length+
+            ' tệp vượt 5.000 ký tự nguồn AI. Chọn ít tệp hoặc rút gọn phần được phép.');
+        }
+        // File labels are displayed only in the manual preview. Never
+        // silently introduce file names or labels as legal AI source facts.
+        documentPreviewText=combined;
         documentPreviewMatter=selectedMatter;
-        docPreview.textContent=data.source_text;
+        docPreview.textContent=files.length===1?combined:
+          converted.map((text,i)=>'Tệp '+(i+1)+': '+files[i].name+'\n'+text)
+            .join('\n\n-----\n\n');
         docPreview.hidden=false;
         docUse.hidden=false;
-        docStatus.textContent='Chỉ xem trước; đối chiếu toàn văn với tệp gốc, bảng, trang scan và số liệu. Nếu đúng, bấm Dùng đoạn này làm nguồn A.';
+        docStatus.textContent='Đã xem trước đầy đủ '+files.length+
+          ' tệp. Kiểm tra đối chiếu bản gốc, số liệu và trang scan; chỉ bấm Dùng làm nguồn A nếu chính xác.';
       }catch(error){
         if(!current())return;
+        // Fail atomically. Earlier conversions may have consumed the QA
+        // allowance, but must never leak as a partial approved source.
+        documentPreviewText='';
+        documentPreviewMatter='';
+        docPreview.textContent='';
+        docPreview.hidden=true;
+        docUse.hidden=true;
         docStatus.textContent=(error?.message||'Lỗi đọc tài liệu QA.')+
-          ' Không thử lại ngay để tránh trừ quota hai lần.';
+          ' Không sử dụng nguồn chưa đủ tệp; không thử lại ngay để tránh trừ quota nhiều lần.';
       }finally{
-        if(current()){
+        if(sameWorkspace()){
           documentReadController=null;
           docRead.disabled=false;
+          if(!byId('legal-qa-consent').checked){
+            documentPreviewText='';
+            documentPreviewMatter='';
+            docPreview.textContent='';
+            docPreview.hidden=true;
+            docUse.hidden=true;
+            docStatus.textContent='Đã hủy xác nhận dữ liệu QA. Không sử dụng kết quả chuyển đổi.';
+          }
         }
       }
     });
@@ -220,11 +271,11 @@
       byId('legal-qa-consent').checked=false;
       clearDocumentInput();
       clearResult();
-      docStatus.textContent='Đã nạp văn bản trích xuất vào nguồn A trên thiết bị. Chưa gọi AI; hãy kiểm duyệt và xác nhận lại trước khi chạy.';
-      setStatus('Đã nạp nguồn A từ tệp giả lập sau khi xem trước. Chưa gửi yêu cầu AI.');
+      docStatus.textContent='Đã nạp nguồn A từ các tệp giả lập sau xem trước. Chưa chạy AI; kiểm duyệt và xác nhận lại trước khi gửi.';
+      setStatus('Đã nạp nguồn A từ tệp QA sau xem trước. Chưa gửi yêu cầu AI.');
     });
 
-    async function loadLegalMatters(){
+        async function loadLegalMatters(){
       matterLoadController?.abort();
       const generation=++matterLoadGeneration;
       const controller=new AbortController();
