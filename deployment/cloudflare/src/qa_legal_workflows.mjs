@@ -9,6 +9,7 @@ import {buildGrammarReview} from './qa_uc07_grammar_gpt.mjs';
 import {buildContractClauseReview} from './qa_uc02_contract_gpt.mjs';
 import {buildDraftSourceReview} from './qa_uc01_draft_gpt.mjs';
 import {buildLegalDataReview} from './qa_f08_extraction_gpt.mjs';
+import {buildMatterQuestionReview} from './qa_f09_answer_gpt.mjs';
 
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const MAX_BODY_BYTES=36000,MAX_SOURCE=5000,MAX_QUESTION=600;
@@ -23,7 +24,7 @@ const TASKS=Object.freeze({
  UC06:['So sánh hai văn bản QPPL','So sánh chính xác hai văn bản người dùng dán, nêu các khác biệt theo đoạn và giới hạn đối chiếu. Không kết luận hiệu lực pháp lý nếu không có chứng cứ chính thức.'],
  UC07:['Sửa lỗi ngữ pháp','Với MỖI đoạn [A1], [A2] từ nguồn, đề xuất phiên bản chính tả/ngữ pháp của toàn đoạn dưới ĐÚNG nhãn nguồn [A1], [A2] ở đầu dòng, đúng thứ tự (kể cả đoạn không cần sửa). Không thêm lời dẫn hoặc mã đoạn tự tạo. Giữ chính xác số liệu, ngày tháng, tên riêng, quyền, nghĩa vụ hoặc ý nghĩa pháp lý; nếu không chắc, chép nguyên đoạn. Không tự sửa file DOCX. Luật sư cần kiểm duyệt toàn bộ.'],
  UC08:['Đọc và phân tích nhiều hồ sơ','So sánh nguồn A/B về sự kiện, điểm thống nhất, mâu thuẫn và thông tin còn thiếu; chỉ sử dụng hai nguồn được cung cấp.'],
- UC09:['Trả lời câu hỏi pháp lý','Chỉ trả lời trong phạm vi nguồn trích dẫn do người dùng cung cấp; nếu không có thông tin để trả lời thì ghi rõ KHÔNG ĐỦ CĂN CỨ. Không tự tạo tên luật/án lệ/điều khoản.'],
+ UC09:['Trả lời câu hỏi pháp lý','Chỉ dựa trên nguồn mẫu từng đoạn [A1], [A2] và câu hỏi người dùng. Trả về đúng cấu trúc: TRANG_THAI: CO_CAN_CU hoặc KHONG_DU_CAN_CU; TRA_LOI: câu trả lời nháp dựa hoàn toàn vào đoạn nguồn hoặc đúng KHÔNG ĐỦ CĂN CỨ; CAN_XAC_MINH: một câu hỏi luật sư phải xác minh. Nếu CO_CAN_CU: sau đó thêm MỘT hoặc vài khối 2 dòng: [A1] trên dòng riêng; TRICH: chuỗi trích liên tiếp NGUYÊN VĂN 12–400 ký tự trong đúng đoạn A1 để kiểm tra. Không thêm lời dẫn, kết luận luật mới, không chế nguồn hay trích dẫn nhầm đoạn. Nếu KHONG_DU_CAN_CU: TRA_LOI bắt buộc là KHÔNG ĐỦ CĂN CỨ và không tạo khối trích dẫn. Luật sư phải kiểm duyệt mọi nhận định, trích đúng chữ không chứng minh ý nghĩa pháp lý.'],
  UC10:['Tìm bản án theo chủ đề','Chỉ tìm kiếm trong văn bản bản án mẫu do người dùng dán. Không kết nối kho bản án chính thức.'],
  UC11:['Tìm quy định theo chủ đề','Chỉ tìm kiếm trong văn bản quy định mẫu do người dùng dán. Không kết nối cơ sở dữ liệu pháp luật chính thức.']
 });
@@ -379,7 +380,9 @@ export async function legalApi(req,env,opts={}){
   ? buildDraftSourceReview(output,primary):undefined;
  const extraction_review=body.uc==='F08'
   ? buildLegalDataReview(output,primary):undefined;
+ const question_review=body.uc==='UC09'
+  ? buildMatterQuestionReview(output,primary,body.question):undefined;
  return json(200,{...common,mode:'ai_draft_not_verified',
-  model:MODEL,answer:output,evidence_diagnostics:evidence,translation_review,correction_review,contract_review,drafting_review,extraction_review,
+  model:MODEL,answer:output,evidence_diagnostics:evidence,translation_review,correction_review,contract_review,drafting_review,extraction_review,question_review,
   review_notice:'Bản nháp AI từ nội dung mẫu. Trích dẫn chỉ được kiểm tra mã đoạn, chưa xác minh đúng nội dung, căn cứ pháp luật, hiệu lực hoặc bản dịch. Luật sư phải kiểm duyệt.'});
 }
