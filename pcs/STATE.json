@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 134,
-  "updated_at": "2026-11-13T02:24:48.807Z",
+  "revision": 135,
+  "updated_at": "2026-11-13T04:14:57.300Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2259,6 +2259,35 @@
         ],
         "owner_acceptance": "PENDING",
         "notes": "R152 code HEAD completed 9/9 SUCCESS, 21 optional skipped. 6 helper, 3 API, 2 real JS browser VM, 1 PDF review-only conversion synthetic tests PASS. Valid explicit refusal no false citation-missing flag; unsupported F09 one-click copy disabled. Not complete F09: real signed-in/cloud/OCR/official sources/audit/Owner E2E NOT_RUN. PCS docs-only follow-up requires final-head CI separately."
+      },
+      {
+        "id": "AL-P0-F07-R154-001",
+        "title": "R154 F07 P0 multi-file 1–3 PDF/DOCX QA manual review, bounded all-or-none source intake",
+        "priority": "P0",
+        "status": "SOURCE_IMPL_CI_PENDING_F07_FULL_NOT_DONE",
+        "scope": "Authorized fictional PDF/DOCX files only; existing per-file cloud conversion and tenant MatterACL; no permanent attachment storage, true scan OCR, official legal evidence or full document fidelity.",
+        "acceptance": [
+          "One user selection accepts 1–3 files up to 1.5MB each, unique names; file selection itself does no network request.",
+          "Explicit Matter plus QA fictional consent before sequential existing authorized extraction API per file; each conversion costs one normal daily QA allowance.",
+          "Keep partial conversions ephemeral; show/allow source A only when all selected files convert successfully and combined body <=5000 characters; do not send filename labels to model as legal facts.",
+          "Reject first error and stop remaining file conversions; stop as soon as aggregate source exceeds limit, avoiding further quota charges.",
+          "Retain independent user approval after preview and separate AI-run consent; tenant/Matter/UC switch and consent revocation must discard or suppress stale output.",
+          "Cross-account real Cloudflare E2E, genuine PDF/DOCX and scan/OCR/legal fidelity, Owner acceptance are pending independent release gates."
+        ],
+        "tests": {
+          "browser_source_vm": "PENDING_ACTIONS_43364173960_NEW_BATCH_CASES",
+          "inherited_backend_multipart_acl": "PENDING_ACTIONS_43364173960",
+          "full_ci": "PENDING_ACTIONS_43364173960",
+          "real_signed_in_cloudflare_two_accounts": "BLOCKED_NOT_RUN_R126",
+          "actual_pdf_docx_scan_ocr": "NOT_RUN",
+          "owner_acceptance": "PENDING"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/224",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43364173960"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "UI multi-select batch is client-sequential with existing per-file authorized API; there is no new atomic multi-file backend storage transaction. Source A is all-or-none visible, and model QA does not auto-run."
       }
     ],
     "features": [
@@ -2890,7 +2919,7 @@
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
       "last_completed_step": "R143 verified PR #213 final-head CI #42817066883 success 9/9. R144 UC07 source-only implementation and regression tests committed in draft PR #214, first CI #43304512580 failed cloudflare-contract due wrongly double-escaped UI anchor regex; fixed in code HEAD 228b90f4 and retest #43304706691 pending.",
-      "next_action": "Continue Owner F01–F36 except signing. PR222 F09 sourced Q&A code and tests; verify latest code-head CI #43351393652, repair failures then update PCS and issue #156 honestly. R150/151 security patches inherited from PR220/221, final CI #43348613287 SUCCESS 9/9 but not live login. Prioritize actual P0 incomplete requirements: F07 scan OCR/multi-file and F09 real Matter-linked file search, F03 official effective dates, F18–F22 business workflows. Keep no-sign scope, standalone-first active task unchanged, real R126 2-account E2E BLOCKED; no automatic merge/deploy production.",
+      "next_action": "Owner requires F01–F36 except signing. PR224 R154 F07 1–3 PDF/DOCX in-memory QA source preview on stacked PR223, latest browser source VM CI #43364173960 pending; inspect all jobs, fix failures, update task evidence. Then prioritize real signed-in two-account Cloudflare E2E R126, real document extraction/OCR fidelity and end-to-end Matter-linked storage/search with explicit Tenant privacy gates. Do not imply full F07/F08/F09 or 36/36 done. Preserve active_task standalone-first; no customer data, no production merge/deploy.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
