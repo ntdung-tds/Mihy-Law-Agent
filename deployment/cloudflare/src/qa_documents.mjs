@@ -141,6 +141,9 @@ async function list(req,env,p,now){
  const records=unicodeSearch?scoped.filter(x=>
   String(x.file_name||'').normalize('NFC').toLocaleLowerCase('vi')
    .includes(q.toLocaleLowerCase('vi'))):scoped;
+ // R158: A grant can be revoked between the initial ACL gate and receipt scan.
+ // Recheck before returning any filenames; deny wins over an in-flight search.
+ if(!await permit(env,p,matter,'read',now))return forbidden();
  const more=searched&&records.length>50;
  return result(200,{
   documents:records.slice(0,50).map(x=>({

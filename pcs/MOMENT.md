@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `138` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-13T06:13:22.057Z`.
+- **PCS revision:** `139` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-14T02:03:27+07:00`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -993,3 +993,8 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - **Evidence:** Test source committed PASS; new-head CI NOT_RUN / awaiting workflow verification. QA host probes 2026-11-09: both ai-law-web-qa.iaict-platform.workers.dev and ai-law-standalone-cf-qa.iaict-platform.workers.dev failed DNS (curl 6, HTTP 000): live D1/API/browser BLOCKED, 11-UC E2E NOT_RUN.
 - **Constraints:** No merge, QA/production deploy, customer data, Drive/OneDrive/OAuth or SRS changes. Sole 11-UC UI remains /app#assistant.
 - **Next:** Verify PR #196 HEAD CI and actual Node test execution, fix FAIL if present; attempt safe synthetic D1/API/browser QA only after connectivity and deployment review. No legal acceptance claims.
+
+## R158 — F20 ACL revocation recheck (2026-11-14 VN)
+
+- Draft PR #228 stacked on #227; test-first `528bbbe` and fix `29268aa`. Recheck MatterACL after scoped filename metadata scan and before responding, returning generic 404 on revoked read for ASCII and Unicode paths. Synthetic negative test exercises grant then revoke between the two checks. Not an atomic DB transaction; live QA and race timing remain NOT_RUN.
+- CI at code HEAD not yet observed; **NOT_RUN/pending**, never mark PASS until exact final HEAD workflow completes. F20 remains filename-only PARTIAL, no fulltext/OCR/Drive proof. R126 dual-account signed-in Cloudflare remains BLOCKED/NOT_RUN. SRS v1.1.15 frozen; `AL-R0-DEPLOY-001` protected, standalone first. No signing, customer data, merge or production deploy.
