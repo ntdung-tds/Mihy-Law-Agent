@@ -220,7 +220,7 @@ export async function documentExtractApi(req,env,opts={}){
  }catch{return invalid();}
  if([...data.keys()].length!==4||
   [...data.keys()].some(x=>!['file','uc','matter_id','synthetic_consent'].includes(x))||
-  !['UC03','UC04','UC07','F08'].includes(data.get('uc'))||
+  !['UC03','UC04','UC07','F08','UC09'].includes(data.get('uc'))||
   !UUID.test(data.get('matter_id')||'')||data.get('synthetic_consent')!=='true')
   return invalid();
  const file=data.get('file'),fileName=file?.name;
