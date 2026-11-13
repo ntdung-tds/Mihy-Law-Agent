@@ -1,8 +1,8 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `139` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-14T02:03:27+07:00`.
+- **PCS revision:** `140` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-14T04:03:00+07:00`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
@@ -998,3 +998,8 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 
 - Draft PR #228 stacked on #227; test-first `528bbbe` and fix `29268aa`. Recheck MatterACL after scoped filename metadata scan and before responding, returning generic 404 on revoked read for ASCII and Unicode paths. Synthetic negative test exercises grant then revoke between the two checks. Not an atomic DB transaction; live QA and race timing remain NOT_RUN.
 - CI at code HEAD not yet observed; **NOT_RUN/pending**, never mark PASS until exact final HEAD workflow completes. F20 remains filename-only PARTIAL, no fulltext/OCR/Drive proof. R126 dual-account signed-in Cloudflare remains BLOCKED/NOT_RUN. SRS v1.1.15 frozen; `AL-R0-DEPLOY-001` protected, standalone first. No signing, customer data, merge or production deploy.
+
+## R159 — F20 ambiguous Matter selector rejection (2026-11-14 VN)
+
+- [Draft PR #229](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/229) stacked on #228. Test-first negative regression for duplicate `matter_id` parameters and code change rejecting ambiguous selectors with HTTP 400 before receipt SQL. No new storage, OAuth, or fulltext feature.
+- **QA:** synthetic regression committed; final-head CI NOT_RUN/pending verification. F20 remains filename-only PARTIAL; R126 real signed-in dual-account E2E BLOCKED/NOT_RUN. Protected `AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, no signing/customer data/merge/production deploy.
