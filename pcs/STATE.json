@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 137,
-  "updated_at": "2026-11-13T06:10:51.565Z",
+  "revision": 138,
+  "updated_at": "2026-11-13T06:13:22.057Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2293,7 +2293,7 @@
         "id": "AL-P0-F20-R155-001",
         "title": "R155 F20 filename-only lookup for existing Matter-linked document receipts with Tenant/MatterACL guards",
         "priority": "P0",
-        "status": "SOURCE_IMPL_CI_PENDING_F20_FULL_NOT_DONE",
+        "status": "SOURCE_CI_PASS_F20_FULL_E2E_NOT_RUN",
         "scope": "Existing synthetic QA qa_document_receipts joined to qa_file_links; search receipt file names only. No PDF/DOCX full-content index, new provider grant, file import or SRS scope expansion.",
         "acceptance": [
           "Endpoint lists/searches only existing receipts by current authorized Matter with active read allow-minus-deny ACL and tenant scope, no query cross-tenant.",
@@ -2306,7 +2306,7 @@
           "backend_filename_sql_and_acl": "PASS_6_OF_6_ACTIONS_43376705145_CLOUDFLARE_CONTRACT",
           "browser_source_vm": "PASS_5_OF_5_ACTIONS_43376705145_CLOUDFLARE_CONTRACT",
           "previous_document_ui_regression": "PASS_ACTIONS_43376705145_CLOUDFLARE_CONTRACT",
-          "full_ci": "PENDING_ACTIONS_43376705145",
+          "full_ci": "PASS_9_OF_9_CODE_HEAD_11fbc296452f2ab041a4137b8c2a257946888baf_ACTIONS_43376705145",
           "real_d1_and_drive_after_grant": "NOT_RUN",
           "cross_tenant_live_signed_in": "BLOCKED_NOT_RUN_R126",
           "owner_acceptance": "PENDING"
@@ -2316,7 +2316,7 @@
           "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43376705145"
         ],
         "owner_acceptance": "PENDING",
-        "notes": "Search references EXISTING metadata only; no provider API called, no content stored or parsed. R155 source-level tests use fixture DB; do not imply actual customer Drive or full F20 acceptance. All PRs draft."
+        "notes": "R155 code HEAD CI #43376705145 SUCCESS 9/9 executing jobs, 21 optional skipped; 6 backend SQL/ACL synthetic tests and 5 browser-script VM tests PASS, existing R75 Google Drive UI regression PASS after cached HTML fix. Filename metadata only, not fulltext/real stored provider E2E. PCS-only follow-up needs separate final-head CI."
       }
     ],
     "features": [
