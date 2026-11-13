@@ -65,7 +65,7 @@
       byId('legal-qa-question-rows').replaceChildren();
     }
     function updateTaskFields(){
-      byId('legal-qa-doc-panel').hidden=!['UC03','UC04','UC07','F08'].includes(uc.value);
+      byId('legal-qa-doc-panel').hidden=!['UC03','UC04','UC07','F08','UC09'].includes(uc.value);
       const dual=['UC06','UC08'].includes(uc.value);
       byId('legal-qa-source-b-label').hidden=!dual;
       byId('legal-qa-file-b-label').hidden=!dual;
@@ -154,7 +154,7 @@
     docRead.addEventListener('click',async()=>{
       const file=docFile.files?.[0];
       const selectedMatter=matter.value,selectedUC=uc.value;
-      if(!['UC03','UC04','UC07','F08'].includes(selectedUC)){
+      if(!['UC03','UC04','UC07','F08','UC09'].includes(selectedUC)){
         docStatus.textContent='Tác vụ này chưa hỗ trợ nguồn PDF/DOCX QA.';return;
       }
       if(!selectedMatter||!byId('legal-qa-consent').checked){
@@ -214,7 +214,7 @@
     docUse.addEventListener('click',()=>{
       if(!documentPreviewText||!documentPreviewMatter||
          matter.value!==documentPreviewMatter||
-         !['UC03','UC04','UC07','F08'].includes(uc.value))return;
+         !['UC03','UC04','UC07','F08','UC09'].includes(uc.value))return;
       byId('legal-qa-source').value=documentPreviewText;
       byId('legal-qa-consent').checked=false;
       clearDocumentInput();
