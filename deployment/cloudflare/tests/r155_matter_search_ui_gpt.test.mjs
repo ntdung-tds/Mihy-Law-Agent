@@ -134,3 +134,29 @@ test('R155 stale search with cached HTML missing new search controls keeps docum
  assert.equal(typeof els['document-file'].listeners.change,'function',
   'old cached HTML must preserve existing file selection behavior');
 });
+
+test('R155 switching Matter clears prior filename query and drops stale results',async()=>{
+ const h=harness();
+ await flush();
+ const query=h.els['qa-document-search'];
+ query.value='hop dong';
+ h.els['qa-document-search-run'].fire('click');
+ const stale=h.waiting.at(-1);
+ const nextMatter='77777777-7777-4777-8777-777777777777';
+ h.els['document-matter'].value=nextMatter;
+ h.els['document-matter'].fire('change');
+ assert.equal(query.value,'');
+ assert.match(h.waiting.at(-1).url,new RegExp('matter_id='+nextMatter));
+ assert.equal(h.waiting.at(-1).url.includes('&q='),false);
+ const fresh=h.waiting.at(-1);
+ finish(fresh,{documents:[record('New matter receipt.pdf')],
+  search_scope:'file_name_only',has_more:false});
+ await flush();
+ finish(stale,{documents:[record('Former Matter private receipt.pdf')],
+  search_scope:'file_name_only',has_more:false});
+ await flush();
+ assert.equal(h.els['qa-document-list'].children.length,1);
+ assert.match(h.els['qa-document-list'].children[0].children[0].textContent,
+  /New matter receipt/);
+ assert.ok(!h.els['qa-document-list'].children[0].children[0].textContent.includes('Former'));
+});
