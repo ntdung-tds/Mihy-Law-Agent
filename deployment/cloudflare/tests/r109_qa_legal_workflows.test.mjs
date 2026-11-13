@@ -599,9 +599,12 @@ test('R152 F09 explicit insufficiency does not invent a quote or legal source',a
  const res=await legalApi(request({uc:'UC09',question:'Cơ quan nào có thẩm quyền phê duyệt hồ sơ?'}),
   f.env,{now:NOW});
  assert.equal(res.status,200);
- const review=(await res.json()).question_review;
+ const data=await res.json(),review=data.question_review;
  assert.equal(review.answer_state,'insufficient_source_claim_not_verified');
  assert.equal(review.references.length,0);
  assert.deepEqual(review.flags,[]);
  assert.equal(review.factual_completeness_verified,false);
+ assert.deepEqual(data.evidence_diagnostics.flags,[],
+  'honest explicit refusal must not be reported as an uncited fabricated answer');
+ assert.equal(data.evidence_diagnostics.reference_coverage,'explicit_insufficiency_not_proof_of_absence');
 });
