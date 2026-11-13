@@ -695,3 +695,30 @@ test('R154 F07 revoked user consent while a file is converting cannot leave a st
  assert.equal(h.query('#legal-qa-source').value,'');
  assert.match(h.query('#legal-qa-doc-status').textContent,/Đã hủy xác nhận/);
 });
+
+test('R154 F07 stops the third file conversion if two source texts already exceed 5000 chars',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F07 source limit'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='F08';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ const files=[{name:'a.pdf',size:100,type:'application/pdf'},
+  {name:'b.pdf',size:120,type:'application/pdf'},
+  {name:'c.pdf',size:140,type:'application/pdf'}];
+ h.query('#legal-qa-doc-file').files=files;
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-doc-read').fire('click');
+ finish(h.pending[1],{uc:'F08',file_name:files[0].name,file_size:files[0].size,
+  mode:'qa_file_text_preview_not_verified',source_text:'x'.repeat(3200)});
+ await flush();
+ assert.equal(h.pending.length,3);
+ finish(h.pending[2],{uc:'F08',file_name:files[1].name,file_size:files[1].size,
+  mode:'qa_file_text_preview_not_verified',source_text:'y'.repeat(2100)});
+ await done;
+ assert.equal(h.pending.length,3,'third file must not consume a needless QA conversion');
+ assert.equal(h.query('#legal-qa-doc-use').hidden,true);
+ assert.equal(h.query('#legal-qa-doc-preview').hidden,true);
+ assert.equal(h.query('#legal-qa-source').value,'');
+ assert.match(h.query('#legal-qa-doc-status').textContent,/5.000 ký tự/);
+});
