@@ -12,14 +12,14 @@ const SID='55555555-5555-4555-8555-555555555555';
 const NOW=1800000000;
 const GOOD='Điều 1. Bên A giao 10 bộ hồ sơ vào ngày 15/09/2026. Bên B thanh toán 2.000.000 đồng.';
 function fixture({session=true,acl=true,quota=true,role='lawyer',
- convert=true,converted=GOOD,revokeAfterConvert=false,aclExpiresAt=null}={}){
+ convert=true,converted=GOOD,revokeAfterConvert=false,aclExpiresAt=null,revokeSessionAfterConvert=false}={}){
  const calls=[],conversions=[],runs=[];
- let aclReads=0;
+ let aclReads=0,sessionReads=0;
  const env={AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,
   DB:{prepare(sql){return {bind(...args){
     calls.push({sql,args});
     return {async first(){
-      if(sql.includes('FROM qa_sessions s'))return session?{user_id:U,tenant_id:T,role_key:role}:null;
+      if(sql.includes('FROM qa_sessions s')){sessionReads++;return session&&!(revokeSessionAfterConvert&&sessionReads>1)?{user_id:U,tenant_id:T,role_key:role}:null;}
       if(sql===LEGAL_MATTER_ACCESS_SQL){
      aclReads++;
      return acl&&!(revokeAfterConvert&&aclReads>1)&& 
@@ -160,5 +160,15 @@ test('R150: MatterACL expiry during PDF conversion must not reveal extracted tex
  assert.ok(!(await response.text()).includes(GOOD));
  assert.equal(f.conversions.length,1);
  assert.equal(f.calls.filter(x=>x.sql===LEGAL_MATTER_ACCESS_SQL).length,2);
+ assert.equal(f.runs.length,0);
+});
+
+
+test('R151: revoked authenticated session during PDF conversion cannot receive source preview',async()=>{
+ const f=fixture({revokeSessionAfterConvert:true});
+ const response=await documentExtractApi(req(),f.env,{now:NOW,afterConvertNow:NOW+2});
+ assert.equal(response.status,401,await response.clone().text());
+ assert.ok(!(await response.text()).includes(GOOD));
+ assert.equal(f.conversions.length,1);
  assert.equal(f.runs.length,0);
 });
