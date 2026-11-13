@@ -1,12 +1,20 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `132` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-12T22:16:18.518Z`.
+- **PCS revision:** `133` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-13T02:21:47.184Z`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+## R152 — F09 hỏi đáp theo hồ sơ có trích dẫn nguồn và trả lời không đủ căn cứ (2026-11-13 VN)
+
+- **Source code:** [Draft PR #222](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/222) stacked on #221 R151 security. Added `qa_f09_answer_gpt.mjs` deterministic parser for `TRANG_THAI: CO_CAN_CU / KHONG_DU_CAN_CU`, tentative answer, verification question, and per-[A#] literal `TRICH` from original paragraph. Missing/duplicate/false/mismatched citations or inconsistent refusal flagged. Literal byte matches never verify legal correctness, claim relevance, current laws or absence of evidence.
+- **Browser/UI:** UC09 labelled F09 QA; source, question, model reply, verification question and exact citation vs original paragraph shown as inert text on mobile/desktop. Invalid or missing structured review blocks one-click copy. Tenant switch clears previous result. F07 review-only PDF/DOCX route now also accepts UC09 as a source after explicit read, preview and separate model consent, no automatic legal AI call.
+- **QA evidence:** Initial [Actions #43351051659](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43351051659) code-head SUCCESS 9/9 executed jobs including 6 helper, 3 API, 2 actual browser-source VM, 1 PDF converter tests (all fictional). Follow-up fixes: explicit valid refusal does not trigger generic "citation missing" false alarm; source-invalid F09 disables one-click copy. Latest source HEAD `14fd89e20e973c35904e84b06eba9a244ce2ee0c` [Actions #43351393652](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43351393652) QUEUED at this checkpoint; confirm job logs before marking final code CI PASS. PCS rev133 docs-only final-HEAD CI separate.
+- **Security lineage:** [PR #220](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/220) tests MatterACL expiration after extraction; [PR #221](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/221) revalidates revoked login session; source CI #43348613287 SUCCESS 9/9. All remain draft, unmerged. Real signed-in two-account Cloudflare R126 E2E remains BLOCKED; do not claim live deployment.
+- **Unmet SRS F09:** Matter-linked *stored* file indexing, official legal source/time validity, complete multi-file answers, lawyer final approval, audit, live client account E2E, Owner acceptance. The 36 Owner-directed F01–F36 except signing are NOT DONE. No customer data, no signing, no automatic production merge/deploy.
 
 ## R149 — F07 đọc PDF/DOCX QA xem trước, có xác nhận trước khi dùng nguồn (2026-11-13 VN)
 
