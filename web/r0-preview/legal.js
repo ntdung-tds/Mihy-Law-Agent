@@ -212,6 +212,13 @@
              data.source_text.trim().length<30||data.source_text.length>5000)
             throw Error('Nội dung tệp '+(i+1)+' không đủ điều kiện đối chiếu.');
           converted.push(data.source_text);
+          // Stop as soon as the combined source exceeds the model limit.
+          // Never spend quota converting the remaining files pointlessly.
+          const currentLength=converted.reduce((sum,text)=>sum+text.length,0)+
+            2*(converted.length-1);
+          if(currentLength>5000){
+            throw Error('Tổng nội dung các tệp vượt 5.000 ký tự nguồn AI. Chọn ít tệp hoặc rút gọn phần được phép.');
+          }
         }
         const combined=converted.join('\n\n');
         if(!current())return;
