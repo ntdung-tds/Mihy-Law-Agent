@@ -50,6 +50,7 @@
     }
     function clearResult(){
       result.hidden=true;output.textContent='';
+      copy.disabled=false;
       byId('legal-qa-sources').replaceChildren();
       byId('legal-qa-translation-review').hidden=true;
       byId('legal-qa-translation-rows').replaceChildren();
@@ -682,6 +683,9 @@
             qRows.append(row);
           }
         }
+        // A known-invalid or missing F09 reference review must not offer
+        // one-click copying of an unsupported draft as if it were usable.
+        copy.disabled=data.uc==='UC09'&&!!questionWarnings;
         byId('legal-qa-result-title').textContent=data.title+' · '+(data.mode==='local_example_only'?'Tìm trong nguồn mẫu':'Bản nháp AI');
         byId('legal-qa-review').textContent=data.review_notice||
           'Chỉ truy xuất từ nguồn giả lập. Chưa xác minh dữ liệu văn bản pháp luật/bản án chính thức.';
