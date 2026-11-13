@@ -115,7 +115,7 @@ async function list(req,env,p,now){
  const raw=queries.length?queries[0]:'';
  const q=raw.trim();
  if(q!==raw||raw.length>80||q.length===1||
-    /[\\u0000-\\u001f\\u007f]/u.test(q)||q!==q.normalize('NFC'))
+    /[\u0000-\u001f\u007f]/u.test(q)||q!==q.normalize('NFC'))
   return result(400,{error:'Từ khóa tìm tệp QA không hợp lệ.'});
  if(!await permit(env,p,matter,'read',now))return forbidden();
  const searched=q.length>=2;
