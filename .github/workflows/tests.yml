@@ -243,6 +243,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r148_f08_extraction_gpt.test.mjs
       - name: R149 F07 multipart PDF/DOCX review-only conversion and tenant guards
         run: node --test deployment/cloudflare/tests/r149_doc_intake_gpt.test.mjs
+      - name: R152 F09 cited case QA, explicit insufficiency and no fabricated evidence
+        run: node --test deployment/cloudflare/tests/r152_f09_answer_gpt.test.mjs
       - name: R123 live HTTPS authenticated-boundary negative QA without credentials
         if: ${{ github.head_ref == 'qa/r123-auth-denials-gpt' || github.ref == 'refs/heads/qa/r123-auth-denials-gpt' }}
         run: python deployment/cloudflare/tests/r123_live_auth_denials_gpt.py
