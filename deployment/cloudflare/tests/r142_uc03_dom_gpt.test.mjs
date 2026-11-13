@@ -493,6 +493,7 @@ test('R152 F09 browser source-to-answer review is inert and cleared across tenan
  assert.equal(rows.children[2].children[1].children[1].textContent,
    'Điều 1. Bên A giao 10 bộ hồ sơ vào ngày 15/9/2026.');
  assert.equal(h.query('#legal-qa-feedback').dataset.state,'info');
+ assert.equal(h.query('#legal-qa-copy').disabled,false,'reviewable draft may be copied for human editing');
  h.win.dispatchEvent(new Event('ai-law:workspace-switch'));
  assert.equal(panel.hidden,true);
  assert.equal(rows.children.length,0);
@@ -519,4 +520,8 @@ test('R152 F09 browser warns when review metadata is missing or question mismatc
  await done;
  assert.equal(h.query('#legal-qa-question-review').hidden,true);
  assert.equal(h.query('#legal-qa-feedback').dataset.state,'error');
+ assert.equal(h.query('#legal-qa-copy').disabled,true,
+  'no one-click copy for missing source integrity metadata');
+ h.win.dispatchEvent(new Event('ai-law:workspace-switch'));
+ assert.equal(h.query('#legal-qa-copy').disabled,false,'workspace reset clears stale disabled state');
 });
