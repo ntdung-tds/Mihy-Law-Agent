@@ -163,3 +163,18 @@ test('R156 Unicode scoped scan fails closed beyond QA cap, not a partial result'
  assert.equal(r.status,503);
  assert.ok(!JSON.stringify(await r.json()).includes('HỒ SƠ 0'));
 });
+
+
+test('R157 decomposed Vietnamese query NFC-equivalent matches and remains MatterACL scoped',async()=>{
+ const records=[{...rows[0],file_name:'HỒ SƠ.pdf'},
+  {...rows[0],file_id:'66666666-6666-4666-8666-666666666664',file_name:'Hồ sơ.pdf'}];
+ const decomposed='hồ sơ'.normalize('NFD');
+ const f=fixture({records});
+ const response=await documentsApi(req('q='+encodeURIComponent(decomposed)),f.env,{now:NOW});
+ assert.equal(response.status,200);
+ assert.deepEqual((await response.json()).documents.map(x=>x.name),['HỒ SƠ.pdf','Hồ sơ.pdf']);
+ assert.ok(f.calls.some(x=>x.sql===DOCUMENT_ACL_SQL));
+ const denied=fixture({records,acl:false});
+ assert.equal((await documentsApi(req('q='+encodeURIComponent(decomposed)),denied.env,{now:NOW})).status,404);
+ assert.ok(!denied.calls.some(x=>x.sql===UNICODE_SEARCH_SQL));
+});
