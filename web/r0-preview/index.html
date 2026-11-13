@@ -197,14 +197,14 @@
                 <input id="legal-qa-file-a" type="file" accept=".txt,text/plain" />
               </label>
               <div id="legal-qa-doc-panel" class="legal-qa-doc-panel">
-                <label for="legal-qa-doc-file">Hoặc chọn PDF/DOCX giả lập · tối đa 1,5 MB · chỉ xem trước
-                  <input id="legal-qa-doc-file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                <label for="legal-qa-doc-file">Chọn 1–3 tệp PDF/DOCX QA · mỗi tệp tối đa 1,5 MB · chỉ xem trước
+                  <input id="legal-qa-doc-file" type="file" multiple accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
                 </label>
                 <div class="legal-qa-actions">
                   <button type="button" id="legal-qa-doc-read">Đọc tệp QA để xem trước</button>
                   <button type="button" id="legal-qa-doc-use" hidden>Dùng đoạn này làm nguồn A</button>
                 </div>
-                <p id="legal-qa-doc-status" role="status" aria-live="polite">Chỉ tệp giả lập; chỉ gửi sau khi chọn hồ sơ, xác nhận và nhấn đọc.</p>
+                <p id="legal-qa-doc-status" role="status" aria-live="polite">Chỉ tệp QA giả lập. Mỗi tệp đọc trừ một lượt QA; không lưu tệp. Chỉ gửi sau khi xác nhận và nhấn đọc.</p>
                 <pre id="legal-qa-doc-preview" aria-label="Nội dung tệp trích xuất cần kiểm duyệt" hidden></pre>
               </div>
               <label for="legal-qa-source-b" id="legal-qa-source-b-label" hidden>Nguồn mẫu B (dùng cho UC06 và UC08)
