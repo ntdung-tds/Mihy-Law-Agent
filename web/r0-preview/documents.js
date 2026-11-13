@@ -5,14 +5,25 @@
  const select=$('document-matter'),form=$('document-upload-form');
  const file=$('document-file'),feedback=$('document-feedback'),list=$('qa-document-list');
  const fileName=$('document-file-name');
- if(!select||!form||!file||!list)return;
+ const search=$('qa-document-search'),searchRun=$('qa-document-search-run');
+ if(!select||!form||!file||!list||!search||!searchRun)return;
+ let filesLoadGeneration=0,filesLoadController=null;
+ function invalidateFileSearch(){
+  filesLoadGeneration++;
+  filesLoadController?.abort();
+  filesLoadController=null;
+ }
  const uuid=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
  function message(text,state=''){feedback.textContent=text;feedback.dataset.state=state;}
  function showSelectedFile(){
   if(fileName)fileName.textContent=file.files?.[0]?.name||'Chưa có tệp được chọn';
  }
  file.addEventListener('change',showSelectedFile);
- function reset(){select.replaceChildren();list.replaceChildren();message('');file.value='';showSelectedFile();}
+ function reset(){
+  invalidateFileSearch();
+  select.replaceChildren();list.replaceChildren();message('');
+  search.value='';file.value='';showSelectedFile();
+ }
  function opt(value,label){const o=document.createElement('option');o.value=value;o.textContent=label;return o;}
  async function refreshMatters(){
   reset();select.append(opt('','Chọn hồ sơ QA…'));
@@ -69,33 +80,78 @@
   finally{link.textContent='Tải về';link.removeAttribute('aria-disabled');}
  }
  async function refreshFiles(){
-  list.replaceChildren();const id=select.value;
-  if(!uuid.test(id))return;
+  invalidateFileSearch();
+  const generation=filesLoadGeneration;
+  const matterId=select.value,q=search.value.trim();
+  list.replaceChildren();
+  if(!uuid.test(matterId))return;
+  if(q.length===1||q.length>80){
+   message('Nhập từ khóa từ 2–80 ký tự hoặc để trống để xem tệp trong hồ sơ.','error');
+   return;
+  }
+  const controller=new AbortController();
+  filesLoadController=controller;
+  const current=()=>generation===filesLoadGeneration&&
+    select.value===matterId&&search.value.trim()===q;
+  searchRun.disabled=true;
   try{
-   const res=await fetch('/api/qa/documents?matter_id='+encodeURIComponent(id),
-     {credentials:'same-origin',cache:'no-store'});
+   const url='/api/qa/documents?matter_id='+encodeURIComponent(matterId)+
+     (q?'&q='+encodeURIComponent(q):'');
+   const res=await fetch(url,{credentials:'same-origin',cache:'no-store',
+     signal:controller.signal});
+   if(!current())return;
    if(res.status===401){location.replace('/login');return;}
-   if(!res.ok)throw Error('not_ready');
-   const {documents=[]}=await res.json();
-   if(!documents.length){const p=document.createElement('p');p.textContent='Chưa có tệp QA.';list.append(p);}
-   for(const d of documents){
+   if(!res.ok)throw Error('NOT_READY');
+   const data=await res.json();
+   if(!current())return;
+   const docs=Array.isArray(data.documents)?data.documents:[];
+   if(data.search_scope!=='file_name_only'||docs.length>50)
+    throw Error('BAD_LIST_RESPONSE');
+   if(!docs.length){
+    const p=document.createElement('p');
+    p.textContent=q?'Không tìm thấy tệp theo tên trong hồ sơ có quyền truy cập.':
+      'Chưa có tệp QA đã ghi nhận trong hồ sơ.';
+    list.append(p);
+   }
+   for(const d of docs){
     if(!uuid.test(d.id))continue;
     const row=document.createElement('div');row.className='matter-row';
     const label=document.createElement('span');
-    label.textContent=(d.name||'Tệp QA')+' · Chưa kiểm chứng nội dung · '+Math.ceil(Number(d.bytes)/1024)+' KB';
+    label.textContent=(d.name||'Tệp QA')+
+      ' · Chưa kiểm chứng nội dung · '+Math.ceil(Number(d.bytes)/1024)+' KB';
     if(driveBox?.dataset.state==='connected'){
-     const a=document.createElement('a');a.href='/api/qa/documents/'+d.id+'/download';
+     const a=document.createElement('a');
+     a.href='/api/qa/documents/'+d.id+'/download';
      a.textContent='Tải về';a.rel='nofollow';
      a.addEventListener('click',e=>{e.preventDefault();return downloadVerified(d,a);});
      row.append(label,a);
     }else{
-     const note=document.createElement('small');note.textContent='Kết nối Drive để tải về';
+     const note=document.createElement('small');
+     note.textContent='Kết nối Drive để tải về';
      row.append(label,note);
     }
     list.append(row);
    }
-  }catch{message('Tệp Google Drive chưa sẵn sàng hoặc chưa được cấp quyền.');}
+   if(data.has_more){
+    const warning=document.createElement('p');
+    warning.textContent='Đang hiển thị 50 tệp đầu tiên. Hãy tìm bằng tên cụ thể hơn.';
+    list.append(warning);
+   }
+  }catch(e){
+   if(!current()||e?.name==='AbortError')return;
+   message('Không tìm được danh sách tệp trong hồ sơ được cấp quyền.','error');
+  }finally{
+   if(generation===filesLoadGeneration){
+    filesLoadController=null;
+    searchRun.disabled=false;
+   }
+  }
  }
+ searchRun.addEventListener('click',()=>{void refreshFiles();});
+ search.addEventListener('keydown',event=>{
+  if(event.key!=='Enter')return;
+  event.preventDefault();void refreshFiles();
+ });
  const driveBox=$('drive-setup'),driveMessage=$('drive-status'),connect=$('drive-connect'),
   disconnect=$('drive-disconnect');
  const uploadButton=form.querySelector('button[type="submit"]');
