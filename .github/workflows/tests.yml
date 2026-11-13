@@ -257,6 +257,10 @@ jobs:
         run: node --test deployment/cloudflare/tests/matter_workspace.test.mjs
       - name: R72 Drive document upload/download, MatterACL, integrity and fail-closed QA gates
         run: node --test deployment/cloudflare/tests/r72_documents.test.mjs
+      - name: R155 F20 bounded MatterACL receipt filename search without Drive access
+        run: node --test deployment/cloudflare/tests/r155_matter_search_gpt.test.mjs
+      - name: R155 F20 browser filename search UI and stale-workspace guards
+        run: node --test deployment/cloudflare/tests/r155_matter_search_ui_gpt.test.mjs
       - name: R81 Google Drive multipart wire protocol and safe provider error diagnostics
         run: node --test deployment/cloudflare/tests/r81_drive_provider_upload.test.mjs
       - name: R86 direct browser Drive metadata-only upload tickets and ACL, replay proof

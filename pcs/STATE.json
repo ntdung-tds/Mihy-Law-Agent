@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 136,
-  "updated_at": "2026-11-13T04:17:08.901Z",
+  "revision": 138,
+  "updated_at": "2026-11-13T06:13:22.057Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2288,6 +2288,35 @@
         ],
         "owner_acceptance": "PENDING",
         "notes": "R154 code CI #43364173960 completed SUCCESS 9/9 executed jobs, 21 skipped. 7 new real source-browser VM multi-file tests passed (including quota-saving early abort, tenant switch, consent revoke). F07 and F09 remain incomplete pending real tenant/account OCR/file persistence and Owner acceptance. PCS doc-only final-head verification remains separately pending."
+      },
+      {
+        "id": "AL-P0-F20-R155-001",
+        "title": "R155 F20 filename-only lookup for existing Matter-linked document receipts with Tenant/MatterACL guards",
+        "priority": "P0",
+        "status": "SOURCE_CI_PASS_F20_FULL_E2E_NOT_RUN",
+        "scope": "Existing synthetic QA qa_document_receipts joined to qa_file_links; search receipt file names only. No PDF/DOCX full-content index, new provider grant, file import or SRS scope expansion.",
+        "acceptance": [
+          "Endpoint lists/searches only existing receipts by current authorized Matter with active read allow-minus-deny ACL and tenant scope, no query cross-tenant.",
+          "Bounded 2–80 character literal name search with parameterized SQLite instr; wildcard characters are literal, no SQL interpolation.",
+          "At most 50 rows returned; signal whether another result exists instead of silently implying exhaustiveness.",
+          "QA documents UI labels filename-only search clearly, offers explicit button/Enter, and suppresses stale results upon changing query, Matter or tenant; preserves previous UI under cached-HTML asset skew.",
+          "F20 full functionality, provider upload/recovery, legal case full-text search, audit and real signed-in two-account E2E remain NOT_RUN/BLOCKED; no customer data or automatic deployment."
+        ],
+        "tests": {
+          "backend_filename_sql_and_acl": "PASS_6_OF_6_ACTIONS_43376705145_CLOUDFLARE_CONTRACT",
+          "browser_source_vm": "PASS_5_OF_5_ACTIONS_43376705145_CLOUDFLARE_CONTRACT",
+          "previous_document_ui_regression": "PASS_ACTIONS_43376705145_CLOUDFLARE_CONTRACT",
+          "full_ci": "PASS_9_OF_9_CODE_HEAD_11fbc296452f2ab041a4137b8c2a257946888baf_ACTIONS_43376705145",
+          "real_d1_and_drive_after_grant": "NOT_RUN",
+          "cross_tenant_live_signed_in": "BLOCKED_NOT_RUN_R126",
+          "owner_acceptance": "PENDING"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/225",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43376705145"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "R155 code HEAD CI #43376705145 SUCCESS 9/9 executing jobs, 21 optional skipped; 6 backend SQL/ACL synthetic tests and 5 browser-script VM tests PASS, existing R75 Google Drive UI regression PASS after cached HTML fix. Filename metadata only, not fulltext/real stored provider E2E. PCS-only follow-up needs separate final-head CI."
       }
     ],
     "features": [
@@ -2919,7 +2948,7 @@
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
       "last_completed_step": "R143 verified PR #213 final-head CI #42817066883 success 9/9. R144 UC07 source-only implementation and regression tests committed in draft PR #214, first CI #43304512580 failed cloudflare-contract due wrongly double-escaped UI anchor regex; fixed in code HEAD 228b90f4 and retest #43304706691 pending.",
-      "next_action": "Owner requires F01–F36 except signing. PR224 R154 F07 1–3 PDF/DOCX in-memory QA source preview on stacked PR223, latest browser source VM CI #43364173960 pending; inspect all jobs, fix failures, update task evidence. Then prioritize real signed-in two-account Cloudflare E2E R126, real document extraction/OCR fidelity and end-to-end Matter-linked storage/search with explicit Tenant privacy gates. Do not imply full F07/F08/F09 or 36/36 done. Preserve active_task standalone-first; no customer data, no production merge/deploy.",
+      "next_action": "Owner: finish all F01–F36 excluding digital/electronic signing. Draft PR225 R155 F20 receipt filename-only search now exists, code CI #43376705145 latest pending for 9-job completion; verify and correct failed tests before recording PASS. Real persistent documents still depend on customer-authorized Google Drive, paused OAuth integration unresolved; filename search is not content index. Next distinct P0: add secure Matter-linked fulltext indexing only with properly specified source/perms/deletion, or address actual doc/Cloudflare E2E blocked gates; don't invent storage providers or merge. Preserve AL-R0-DEPLOY-001 standalone-first, Tenant privacy, human lawyer and Owner acceptance.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",

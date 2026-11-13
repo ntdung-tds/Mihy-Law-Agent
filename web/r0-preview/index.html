@@ -154,6 +154,14 @@
               <button type="submit">Lưu tệp QA vào Drive</button>
             </form>
             <p id="document-feedback" role="status" aria-live="polite"></p>
+            <div class="legal-qa-actions" role="search" aria-label="Tìm tệp đã ghi nhận trong hồ sơ QA">
+              <label for="qa-document-search">Tìm theo tên tệp đã lưu trong hồ sơ
+                <input id="qa-document-search" type="search" maxlength="80"
+                  placeholder="Nhập ít nhất 2 ký tự" autocomplete="off" />
+              </label>
+              <button id="qa-document-search-run" type="button">Tìm tệp</button>
+            </div>
+            <small>Chỉ tìm theo tên tệp trong hồ sơ có quyền truy cập, không tìm toàn văn PDF/DOCX.</small>
             <div id="qa-document-list" class="matter-list" role="list"></div>
           </section>
           <div class="document-panel" hidden><div class="document-toolbar"><div class="filter-tabs" role="group" aria-label="Lọc trạng thái"><button class="filter-tab selected" data-filter="all">Tất cả <span>0</span></button><button class="filter-tab" data-filter="review">Đang rà soát</button><button class="filter-tab" data-filter="draft">Bản nháp</button><button class="filter-tab" data-filter="done">Hoàn tất</button></div><div class="list-search"><svg class="icon"><use href="#i-search"/></svg><input id="document-search" aria-label="Tìm tài liệu minh họa" placeholder="Chưa có tài liệu" /></div></div><div id="document-list" class="document-rows"></div><div id="empty-docs" class="empty-state" hidden>Chưa có tệp tài liệu.</div></div>
