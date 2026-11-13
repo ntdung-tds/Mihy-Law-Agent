@@ -279,6 +279,15 @@ export async function documentExtractApi(req,env,opts={}){
    principal.user_id,afterConvertNow,afterConvertNow).first();
  }catch{return unavailable();}
  if(!stillAllowed)return err(404,'Không tìm thấy hồ sơ có quyền truy cập.');
+ // The session may have been revoked, expired, or rotated during third-party
+ // conversion even when the MatterACL remains valid. Fail closed before
+ // returning any converted source bytes to the previous session.
+ let currentSession;
+ try{currentSession=await mobileSession(req,env,afterConvertNow);}catch{return unavailable();}
+ if(!currentSession||currentSession.user_id!==principal.user_id||
+  currentSession.tenant_id!==principal.tenant_id||
+  !['lawyer','tenant_admin'].includes(currentSession.role_key))
+  return err(401,'Phiên AI Law đã hết hạn.');
  const digest=await crypto.subtle.digest('SHA-256',bytes);
  const sha=[...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');
  return json(200,{
