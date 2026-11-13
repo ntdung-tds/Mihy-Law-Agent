@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 132,
-  "updated_at": "2026-11-12T22:16:18.518Z",
+  "revision": 134,
+  "updated_at": "2026-11-13T02:24:48.807Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2228,6 +2228,37 @@
         ],
         "owner_acceptance": "PENDING",
         "notes": "Actual code CI PASS 9/9 at 0fd924d1, multipart 5/5 and source browser VM 2/2. Docs-only PCS final-head CI requires separate verification. Full F07, provider live and R126 2-account E2E NOT_RUN; no production merge/deploy."
+      },
+      {
+        "id": "AL-P0-F09-R152-001",
+        "title": "R152 F09 P0 matter source question answering with literal citations and explicit insufficient evidence",
+        "priority": "P0",
+        "status": "SOURCE_CI_PASS_F09_FULL_E2E_NOT_RUN",
+        "scope": "One authorized Matter / user-supplied fictional text; reuse manual PDF/DOCX review-only source import, not full per-file case document search/index, legal source validation, audit or lawyer approval.",
+        "acceptance": [
+          "UC09 structured answer and independent check question; model must cite exact excerpts from corresponding [A#] paragraphs, or explicitly say KHÔNG ĐỦ CĂN CỨ without inventing citations.",
+          "Deterministic negative flags for wrong-paragraph quote, fabricated citation, missing/duplicate/unstructured evidence, contradictory refusal; literal quote match must not be treated as semantic/legal certainty.",
+          "Source-to-answer review visible on mobile/desktop as inert text. Missing or mismatched review blocks one-click copy; tenant/workspace switching clears previous output.",
+          "F07 approved PDF/DOCX preview can be used as source A for UC09 only after separate consent; no automatic model call or source persistence.",
+          "Permission, rate limit and model provider cases tested with synthetic fixtures, live signed-in real account E2E remains BLOCKED/NOT_RUN and legal completeness must be lawyer/Owner checked."
+        ],
+        "tests": {
+          "helper_unit": "PASS_6_OF_6_ACTIONS_43351393652_CLOUDFLARE_CONTRACT",
+          "authenticated_api_synthetic": "PASS_3_OF_3_ACTIONS_43351393652_CLOUDFLARE_CONTRACT",
+          "browser_source_vm": "PASS_2_OF_2_ACTIONS_43351393652_CLOUDFLARE_CONTRACT",
+          "pdf_docx_source_preview": "PASS_1_OF_1_ACTIONS_43351393652_CLOUDFLARE_CONTRACT",
+          "full_ci": "PASS_9_OF_9_ACTIONS_43351393652_CODE_HEAD_14fd89e20e973c35904e84b06eba9a244ce2ee0c",
+          "live_signed_in_two_accounts": "BLOCKED_NOT_RUN_R126",
+          "official_law_sources_and_case_files": "NOT_RUN",
+          "owner_acceptance": "PENDING"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/222",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43351051659",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43351393652"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "R152 code HEAD completed 9/9 SUCCESS, 21 optional skipped. 6 helper, 3 API, 2 real JS browser VM, 1 PDF review-only conversion synthetic tests PASS. Valid explicit refusal no false citation-missing flag; unsupported F09 one-click copy disabled. Not complete F09: real signed-in/cloud/OCR/official sources/audit/Owner E2E NOT_RUN. PCS docs-only follow-up requires final-head CI separately."
       }
     ],
     "features": [
@@ -2859,7 +2890,7 @@
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
       "last_completed_step": "R143 verified PR #213 final-head CI #42817066883 success 9/9. R144 UC07 source-only implementation and regression tests committed in draft PR #214, first CI #43304512580 failed cloudflare-contract due wrongly double-escaped UI anchor regex; fixed in code HEAD 228b90f4 and retest #43304706691 pending.",
-      "next_action": "Owner requires F01–F36 all functional except signatures; R149 PR219 F07 PDF/DOCX source preview and F08 integration code pending CI. Fix exact failed tests; then continue real-document QA, valid samples and MatterACL live test gates; do not claim F07/F08 fully DONE. R126 signed-in Cloudflare E2E still BLOCKED, no customer data/prod deploy, complete F01–F36 by P0/P1/P2 with Owner acceptance last.",
+      "next_action": "Continue Owner F01–F36 except signing. PR222 F09 sourced Q&A code and tests; verify latest code-head CI #43351393652, repair failures then update PCS and issue #156 honestly. R150/151 security patches inherited from PR220/221, final CI #43348613287 SUCCESS 9/9 but not live login. Prioritize actual P0 incomplete requirements: F07 scan OCR/multi-file and F09 real Matter-linked file search, F03 official effective dates, F18–F22 business workflows. Keep no-sign scope, standalone-first active task unchanged, real R126 2-account E2E BLOCKED; no automatic merge/deploy production.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",

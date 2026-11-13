@@ -450,3 +450,78 @@ test('R149 F07 delayed conversion result cannot leak after workspace switch or s
  assert.equal(h.query('#legal-qa-doc-preview').textContent,'');
  assert.equal(h.query('#legal-qa-doc-file').value,'');
 });
+
+test('R152 F09 browser source-to-answer review is inert and cleared across tenant switch',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F09 matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='UC09';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ h.query('#legal-qa-question').value='Bên A giao hồ sơ vào ngày nào?';
+ h.query('#legal-qa-source').value='Điều 1. Bên A giao 10 bộ hồ sơ vào ngày 15/9/2026.';
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-form').fire('submit');
+ assert.equal(h.pending.at(-1).path,'/api/qa/legal/run');
+ finish(h.pending.at(-1),{
+  uc:'UC09',title:'Trả lời câu hỏi pháp lý',mode:'ai_draft_not_verified',
+  answer:'[A1] Dự thảo câu trả lời theo nguồn.',
+  source_hash:'0'.repeat(64),source_anchors:[{id:'A1',preview:'Điều 1...'}],
+  evidence_diagnostics:{flags:[],reference_coverage:'anchor_ids_matched_not_fact_checked'},
+  question_review:{
+   question:'Bên A giao hồ sơ vào ngày nào?',
+   answer:'<script>UNTRUSTED_ANSWER</script>',
+   verification_question:'Kiểm chứng ngày giao bằng văn bản?',
+   answer_state:'proposed_answer_not_verified',
+   reference_integrity:'literal_quotes_matched_not_semantic_proof',
+   references:[{
+     source_id:'A1',
+     source_text:'Điều 1. Bên A giao 10 bộ hồ sơ vào ngày 15/9/2026.',
+     model_quote:'Bên A giao 10 bộ hồ sơ vào ngày 15/9/2026.',
+     status:'literal_quote_matched_not_semantic_proof',literal_match:true
+   }],flags:[]
+  }
+ });
+ await done;
+ const panel=h.query('#legal-qa-question-review');
+ const rows=h.query('#legal-qa-question-rows');
+ assert.equal(panel.hidden,false);
+ assert.equal(rows.children.length,3);
+ assert.equal(rows.children[1].children[2].children[1].textContent,
+   '<script>UNTRUSTED_ANSWER</script>',
+   'untrusted model answer is textContent, not injected HTML');
+ assert.equal(rows.children[2].children[1].children[1].textContent,
+   'Điều 1. Bên A giao 10 bộ hồ sơ vào ngày 15/9/2026.');
+ assert.equal(h.query('#legal-qa-feedback').dataset.state,'info');
+ assert.equal(h.query('#legal-qa-copy').disabled,false,'reviewable draft may be copied for human editing');
+ h.win.dispatchEvent(new Event('ai-law:workspace-switch'));
+ assert.equal(panel.hidden,true);
+ assert.equal(rows.children.length,0);
+ assert.equal(h.query('#legal-qa-output').textContent,'');
+});
+
+test('R152 F09 browser warns when review metadata is missing or question mismatches',async()=>{
+ const h=harness();
+ finish(h.pending[0],{matters:[{id:MATTER,title:'Synthetic F09 matter'}]});
+ await flush();
+ h.query('#legal-qa-uc').value='UC09';
+ h.query('#legal-qa-uc').fire('change');
+ h.query('#legal-qa-matter').value=MATTER;
+ h.query('#legal-qa-question').value='Bên A giao hồ sơ vào ngày nào?';
+ h.query('#legal-qa-source').value='Điều 1. Bên A giao 10 bộ hồ sơ vào ngày 15/9/2026.';
+ h.query('#legal-qa-consent').checked=true;
+ const done=h.query('#legal-qa-form').fire('submit');
+ finish(h.pending.at(-1),{
+  uc:'UC09',title:'Trả lời câu hỏi pháp lý',mode:'ai_draft_not_verified',
+  answer:'[A1] Câu trả lời chưa có dữ liệu ghép.',
+  source_hash:'0'.repeat(64),source_anchors:[{id:'A1',preview:'Điều 1...'}],
+  evidence_diagnostics:{flags:[],reference_coverage:'anchor_ids_matched_not_fact_checked'}
+ });
+ await done;
+ assert.equal(h.query('#legal-qa-question-review').hidden,true);
+ assert.equal(h.query('#legal-qa-feedback').dataset.state,'error');
+ assert.equal(h.query('#legal-qa-copy').disabled,true,
+  'no one-click copy for missing source integrity metadata');
+ h.win.dispatchEvent(new Event('ai-law:workspace-switch'));
+ assert.equal(h.query('#legal-qa-copy').disabled,false,'workspace reset clears stale disabled state');
+});

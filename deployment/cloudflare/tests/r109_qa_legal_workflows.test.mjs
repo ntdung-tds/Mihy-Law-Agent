@@ -539,3 +539,72 @@ test('R148 F08 catches cross-source fabricated monetary facts and denies revoked
  assert.equal(denied.calls.some(c=>c.sql===LEGAL_QUOTA_SQL),false);
  assert.equal(denied.providerCalls.length,0);
 });
+
+test('R152 F09 authorized source Q&A returns exact quote review without claiming legal proof',async()=>{
+ const f=fixture();
+ const question='Bên cung cấp giao hàng vào ngày nào?';
+ f.env.AI.run=async()=>({response:
+  'TRANG_THAI: CO_CAN_CU\n'+
+  'TRA_LOI: Nguồn mẫu nói bên cung cấp giao hàng ngày 15 tháng 9.\n'+
+  'CAN_XAC_MINH: Ngày giao hàng đã được các bên xác nhận chưa?\n'+
+  '[A1]\nTRICH: Bên cung cấp giao hàng ngày 15 tháng 9'});
+ const res=await legalApi(request({uc:'UC09',question}),f.env,{now:NOW});
+ assert.equal(res.status,200,await res.clone().text());
+ const payload=await res.json();
+ const review=payload.question_review;
+ assert.equal(review.mode,'qa_matter_question_source_quotes_not_verified');
+ assert.equal(review.question,question);
+ assert.equal(review.references.length,1);
+ assert.equal(review.references[0].source_id,'A1');
+ assert.equal(review.references[0].literal_match,true);
+ assert.equal(review.reference_integrity,'literal_quotes_matched_not_semantic_proof');
+ assert.deepEqual(review.flags,[]);
+ assert.equal(review.answer_semantics_verified,false);
+ assert.equal(review.source_effective_date_verified,false);
+ assert.equal(review.human_review_required,true);
+ assert.equal(res.headers.get('Cache-Control'),'no-store');
+ assert.ok(f.calls.every(c=>c.params.every(p=>p!==SOURCE)),
+  'legal source never persisted to D1');
+});
+
+test('R152 F09 fabricated cross-paragraph quote is flagged and MatterACL denial never runs model',async()=>{
+ const f=fixture();
+ f.env.AI.run=async()=>({response:
+  'TRANG_THAI: CO_CAN_CU\n'+
+  'TRA_LOI: Bên cung cấp giao hàng vào ngày 30 tháng 9.\n'+
+  'CAN_XAC_MINH: Có biên bản giao hàng kèm chữ ký không?\n'+
+  '[A1]\nTRICH: Bên cung cấp giao hàng ngày 30 tháng 9'});
+ const res=await legalApi(request({uc:'UC09',source:SOURCE+'\n\n'+SOURCE2,
+  question:'Bên cung cấp giao ngày nào?'}),f.env,{now:NOW});
+ assert.equal(res.status,200);
+ const review=(await res.json()).question_review;
+ assert.deepEqual(review.mismatched_source_ids,['A1']);
+ assert.equal(review.references[0].status,'source_mismatch');
+ assert.ok(review.flags.includes('ANSWER_SOURCE_QUOTES_MISMATCH'));
+ const denied=fixture({acl:false});
+ const forbidden=await legalApi(request({uc:'UC09',question:'Bên cung cấp giao ngày nào?'}),
+  denied.env,{now:NOW});
+ assert.equal(forbidden.status,404);
+ assert.equal((await forbidden.json()).question_review,undefined);
+ assert.equal(denied.calls.some(x=>x.sql===LEGAL_QUOTA_SQL),false);
+ assert.equal(denied.providerCalls.length,0);
+});
+
+test('R152 F09 explicit insufficiency does not invent a quote or legal source',async()=>{
+ const f=fixture();
+ f.env.AI.run=async()=>({response:
+  'TRANG_THAI: KHONG_DU_CAN_CU\n'+
+  'TRA_LOI: KHÔNG ĐỦ CĂN CỨ.\n'+
+  'CAN_XAC_MINH: Có thêm văn bản cho câu hỏi này không?'});
+ const res=await legalApi(request({uc:'UC09',question:'Cơ quan nào có thẩm quyền phê duyệt hồ sơ?'}),
+  f.env,{now:NOW});
+ assert.equal(res.status,200);
+ const data=await res.json(),review=data.question_review;
+ assert.equal(review.answer_state,'insufficient_source_claim_not_verified');
+ assert.equal(review.references.length,0);
+ assert.deepEqual(review.flags,[]);
+ assert.equal(review.factual_completeness_verified,false);
+ assert.deepEqual(data.evidence_diagnostics.flags,[],
+  'honest explicit refusal must not be reported as an uncited fabricated answer');
+ assert.equal(data.evidence_diagnostics.reference_coverage,'explicit_insufficiency_not_proof_of_absence');
+});

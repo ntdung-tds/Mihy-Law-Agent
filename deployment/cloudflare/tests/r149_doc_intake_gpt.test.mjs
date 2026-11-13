@@ -172,3 +172,17 @@ test('R151: revoked authenticated session during PDF conversion cannot receive s
  assert.equal(f.conversions.length,1);
  assert.equal(f.runs.length,0);
 });
+
+test('R152 F09 source PDF conversion is authorized preview-only, not an implicit model question',async()=>{
+ const fx=fixture();
+ const resp=await documentExtractApi(req({uc:'UC09'}),fx.env,{now:NOW});
+ assert.equal(resp.status,200,await resp.clone().text());
+ const data=await resp.json();
+ assert.equal(data.uc,'UC09');
+ assert.equal(data.source_text,GOOD);
+ assert.equal(data.mode,'qa_file_text_preview_not_verified');
+ assert.equal(data.review_required,true);
+ assert.equal(data.storage,'none');
+ assert.equal(fx.runs.length,0,'file-to-text preview must not run legal AI automatically');
+ assert.equal(fx.conversions.length,1);
+});
