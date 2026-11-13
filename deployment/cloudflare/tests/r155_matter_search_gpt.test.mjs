@@ -191,3 +191,14 @@ test('R158 revocation between initial MatterACL and filename scan fails closed',
   assert.equal(f.calls.filter(x=>x.sql===DOCUMENT_ACL_SQL).length,2);
  }
 });
+
+test('R159 repeated matter_id parameters fail closed before any receipt lookup',async()=>{
+ const f=fixture();
+ const url=HOST+'/api/qa/documents?matter_id='+M+'&matter_id='+OTHER+'&q=ho';
+ const response=await documentsApi(new Request(url,{headers:{
+  Cookie:'al_qa_session=55555555-5555-4555-8555-555555555555'
+ }}),f.env,{now:NOW});
+ assert.equal(response.status,400);
+ assert.ok(!f.calls.some(x=>[LIST_SQL,SEARCH_SQL,UNICODE_SEARCH_SQL].includes(x.sql)));
+ assert.ok(!JSON.stringify(await response.json()).includes('Ho so 01.pdf'));
+});

@@ -117,7 +117,10 @@ async function readForm(req){
  return new Response(new Blob(chunks),{headers:{'Content-Type':type}}).formData();
 }
 async function list(req,env,p,now){
- const url=new URL(req.url),matter=url.searchParams.get('matter_id');
+ const url=new URL(req.url),matters=url.searchParams.getAll('matter_id');
+ // R159: never let duplicate Matter selectors be interpreted differently by layers.
+ if(matters.length!==1)return result(400,{error:'Hồ sơ QA không hợp lệ.'});
+ const matter=matters[0];
  const queries=url.searchParams.getAll('q');
  // F20 is a bounded per-Matter FILENAME filter only; never accept an
  // unbounded search or treat unverified provider content as indexed legal text.
