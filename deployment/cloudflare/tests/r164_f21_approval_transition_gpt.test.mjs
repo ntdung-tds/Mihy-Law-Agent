@@ -7,7 +7,7 @@ const verified={outputId:'output-1',tenantId:'tenant-a',matterTenantId:'tenant-a
  outputTenantId:'tenant-a',outputMatterId:'matter-a',outputAuthorId:'lawyer-a',
  reviewerAssignmentTenantId:'tenant-a',reviewerAssignmentMatterId:'matter-a',
  reviewerAssignmentActorId:'lawyer-b',matterApprove:true,denied:false,
- qualifiedLawyer:true,assignedReviewer:true,outputStatus:'pending_review',sourceVerified:true};
+ qualifiedLawyer:true,assignedReviewer:true,outputStatus:'pending_review',sourceVerified:true,outputVersion:3};
 
 test('R164: never trust client approval fields; only server-loaded context can authorize',async()=>{
  let committed=0;
