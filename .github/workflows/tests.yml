@@ -267,6 +267,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r164_f21_approval_transition_gpt.test.mjs
       - name: R166 F21 approval identifier control-character regression
         run: node --test deployment/cloudflare/tests/r166_f21_identifier_control_gpt.test.mjs
+      - name: R167 F21 persisted output revision CAS contract
+        run: node --test deployment/cloudflare/tests/r167_f21_cas_version_gpt.test.mjs
       - name: R155 F20 browser filename search UI and stale-workspace guards
         run: node --test deployment/cloudflare/tests/r155_matter_search_ui_gpt.test.mjs
       - name: R81 Google Drive multipart wire protocol and safe provider error diagnostics
