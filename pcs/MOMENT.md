@@ -8,6 +8,11 @@
 
 
 
+## R164 — F21 server-trusted approval transition boundary (2026-11-15 VN)
+
+- [Draft PR #234](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/234) stacked on #233. Test-first synthetic Node negative contract `8ca757f`, fail-closed transition module `7adb683`, CI registration `e57549a`. Reject caller-supplied policy flags, bind verified session actor/Tenant to trusted store context; require atomic compare-and-swap plus audit receipt from future DB adapter.
+- **F21 PARTIAL / QA NOT_RUN:** no actual store adapter, D1 atomic transaction, HTTP endpoint, UI, issuance, or human lawyer acceptance. CI new HEAD pending independent verification. Never count synthetic adapter receipts as real audit. R126 signed-in Cloudflare dual-account QA remains BLOCKED/NOT_RUN. SRS v1.1.15 frozen; `AL-R0-DEPLOY-001` standalone-first protected; 36 Fxx remain target without signing. No merge, production deploy, customer data, or OAuth retry.
+
 ## R163 — F21 bind reviewer assignment to verified session actor (2026-11-14 VN)
 
 - [Draft PR #233](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/233) stacked on #232. Test-first negative contract for wrong/missing reviewer identity (fb27b813); guard requires trusted persisted assignment reviewer identity equal verified session actor (5d5c9de9). Updated earlier synthetic fixture (e66fd1b) and registered R163 Node test in CI (9df5d89). Assignment identity must be read from server-trusted record, never request input.
