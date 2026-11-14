@@ -16,7 +16,7 @@ export async function approveMatterOutput({store,session,input}={}){
  try{
   const c=await store.loadVerifiedApprovalContext({
    outputId:input.outputId,actorId:session.actorId,tenantId:session.tenantId});
-  if(!c||c.actorId!==session.actorId||c.tenantId!==session.tenantId||
+  if(!c||c.outputId!==input.outputId||c.actorId!==session.actorId||c.tenantId!==session.tenantId||
      !canApproveMatterOutput(c))return denied;
   // Adapter must revalidate ACL, assignment and output version inside transaction;
   // an optimistic read alone is insufficient against concurrent revocation.
