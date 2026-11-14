@@ -8,6 +8,11 @@
 
 
 
+## R163 — F21 bind reviewer assignment to verified session actor (2026-11-14 VN)
+
+- [Draft PR #233](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/233) stacked on #232. Test-first negative contract for wrong/missing reviewer identity (fb27b813); guard requires trusted persisted assignment reviewer identity equal verified session actor (5d5c9de9). Updated earlier synthetic fixture (e66fd1b) and registered R163 Node test in CI (9df5d89). Assignment identity must be read from server-trusted record, never request input.
+- **F21 PARTIAL / real QA NOT_RUN**: no integrated API, D1, audit, UI, lawyer approval or issuance. CI final HEAD pending independent verification. R126 two-account signed-in E2E BLOCKED/NOT_RUN. Preserve SRS v1.1.15, standalone-first `AL-R0-DEPLOY-001`, 36 Fxx target without signing. No merge/deploy/customer data.
+
 ## R162 — F21 reviewer assignment bound to Tenant/Matter (2026-11-14 VN)
 
 - [Draft PR #232](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/232) stacked on #231. Test-first: negative cases for assignment from another Tenant/Matter, missing or invalid assignment scope; guard now requires `reviewerAssignmentTenantId === tenantId` and `reviewerAssignmentMatterId === matterId` in addition to existing F21 independent qualified lawyer, output ownership and MatterACL controls. Assignment IDs must be loaded from server-trusted persisted assignment records; never trust request-supplied values.

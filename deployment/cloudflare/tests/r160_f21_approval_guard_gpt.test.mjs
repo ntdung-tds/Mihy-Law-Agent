@@ -5,6 +5,7 @@ const base={tenantId:'tenant-a',matterTenantId:'tenant-a',matterId:'matter-a',
  actorId:'lawyer-b',authorId:'lawyer-a',role:'lawyer',matterRead:true,
  outputTenantId:'tenant-a',outputMatterId:'matter-a',outputAuthorId:'lawyer-a',
  reviewerAssignmentTenantId:'tenant-a',reviewerAssignmentMatterId:'matter-a',
+ reviewerAssignmentActorId:'lawyer-b',
  matterApprove:true,denied:false,qualifiedLawyer:true,assignedReviewer:true,
  outputStatus:'pending_review',sourceVerified:true};
 test('R160 F21 requires explicit independent qualified lawyer review',()=>{
