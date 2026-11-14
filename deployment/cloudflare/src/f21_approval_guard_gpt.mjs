@@ -6,11 +6,14 @@
 export function canApproveMatterOutput(c){
  if(!c||typeof c!=='object'||Array.isArray(c))return false;
  for(const key of ['tenantId','matterTenantId','matterId','actorId','authorId',
-  'outputTenantId','outputMatterId','outputAuthorId'])
+  'outputTenantId','outputMatterId','outputAuthorId',
+  'reviewerAssignmentTenantId','reviewerAssignmentMatterId'])
   if(typeof c[key]!=='string'||!c[key].trim())return false;
  return c.tenantId===c.matterTenantId&&
   c.outputTenantId===c.tenantId&&c.outputMatterId===c.matterId&&
   c.outputAuthorId===c.authorId&&
+  c.reviewerAssignmentTenantId===c.tenantId&&
+  c.reviewerAssignmentMatterId===c.matterId&&
   c.actorId!==c.authorId&&c.role==='lawyer'&&
   c.matterRead===true&&c.matterApprove===true&&c.denied===false&&
   c.qualifiedLawyer===true&&c.assignedReviewer===true&&

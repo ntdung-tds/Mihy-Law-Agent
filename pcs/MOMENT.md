@@ -8,6 +8,11 @@
 
 
 
+## R162 — F21 reviewer assignment bound to Tenant/Matter (2026-11-14 VN)
+
+- [Draft PR #232](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/232) stacked on #231. Test-first: negative cases for assignment from another Tenant/Matter, missing or invalid assignment scope; guard now requires `reviewerAssignmentTenantId === tenantId` and `reviewerAssignmentMatterId === matterId` in addition to existing F21 independent qualified lawyer, output ownership and MatterACL controls. Assignment IDs must be loaded from server-trusted persisted assignment records; never trust request-supplied values.
+- **F21 PARTIAL / application QA NOT_RUN**: pure policy only, not API, D1, audit, reviewer workflow or actual lawyer approval. CI final HEAD to be verified independently. R126 signed-in Cloudflare two-account E2E BLOCKED/NOT_RUN. SRS v1.1.15 frozen; 36 Fxx target not accepted; no signing, customer data, OAuth retry, merge or production deploy. Preserve `AL-R0-DEPLOY-001` standalone-first.
+
 ## R155 — F20 tìm tên tệp lưu theo MatterACL, không tìm nội dung (2026-11-13 VN)
 
 - **Implementation:** [Draft PR #225](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/225), stacked on #224. Existing `qa_file_links` / `qa_document_receipts` already link uploaded document receipts with a Matter. Added `GET /api/qa/documents?matter_id=UUID&q=text` to filter *filename metadata only*, after existing verified session, allowed role, Tenant and MatterACL read allow-minus-deny. Bounded parameterized SQLite `instr(lower(file_name),lower(?))` avoids SQL wildcard expansion; 2–80 chars, duplicate/control input rejected, at most 50 records and `has_more` for more matches. Without q, preserve existing list.
