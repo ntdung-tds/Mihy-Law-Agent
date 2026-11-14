@@ -263,6 +263,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r160_f21_approval_guard_gpt.test.mjs
       - name: R163 F21 reviewer identity assignment negative contract
         run: node --test deployment/cloudflare/tests/r163_f21_reviewer_identity_gpt.test.mjs
+      - name: R164 F21 server-trusted approval transition and audit boundary
+        run: node --test deployment/cloudflare/tests/r164_f21_approval_transition_gpt.test.mjs
       - name: R155 F20 browser filename search UI and stale-workspace guards
         run: node --test deployment/cloudflare/tests/r155_matter_search_ui_gpt.test.mjs
       - name: R81 Google Drive multipart wire protocol and safe provider error diagnostics
