@@ -8,6 +8,11 @@
 
 
 
+## R165 — F21 persisted output identity binding (2026-11-15 VN)
+
+- [Draft PR #235](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/235) stacked on #234. Test-first negative contract commit `a8bf0203` and guard fix `95238425`: approval must bind server-loaded `outputId` exactly to the requested output ID; absent or mismatched persisted identity denies before transition. This prevents a valid approval context for one output from authorizing a different output.
+- **F21 PARTIAL / real QA NOT_RUN:** no D1 adapter, transaction/audit persistence, endpoint, UI, or human lawyer acceptance. CI final HEAD must be verified independently. R126 signed-in Cloudflare two-account E2E BLOCKED/NOT_RUN. Preserve SRS v1.1.15, `AL-R0-DEPLOY-001` standalone-first, all 36 Fxx targets excluding signing. No merge, production deploy, real customer data, or blind OAuth retry.
+
 ## R164 — F21 server-trusted approval transition boundary (2026-11-15 VN)
 
 - [Draft PR #234](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/234) stacked on #233. Test-first synthetic Node negative contract `8ca757f`, fail-closed transition module `7adb683`, CI registration `e57549a`. Reject caller-supplied policy flags, bind verified session actor/Tenant to trusted store context; require atomic compare-and-swap plus audit receipt from future DB adapter.
