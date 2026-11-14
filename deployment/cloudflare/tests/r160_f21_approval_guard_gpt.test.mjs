@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {canApproveMatterOutput} from '../src/f21_approval_guard_gpt.mjs';
 const base={tenantId:'tenant-a',matterTenantId:'tenant-a',matterId:'matter-a',
  actorId:'lawyer-b',authorId:'lawyer-a',role:'lawyer',matterRead:true,
+ outputTenantId:'tenant-a',outputMatterId:'matter-a',outputAuthorId:'lawyer-a',
  matterApprove:true,denied:false,qualifiedLawyer:true,assignedReviewer:true,
  outputStatus:'pending_review',sourceVerified:true};
 test('R160 F21 requires explicit independent qualified lawyer review',()=>{
@@ -21,4 +22,14 @@ test('R160 F21 missing or untrusted approval context fails closed',()=>{
   {...base,qualifiedLawyer:'true'},{...base,actorId:42}]){
   assert.equal(canApproveMatterOutput(value),false);
  }
+});
+
+test('R161 F21 approval binds output tenant, matter and persisted author to verified context',()=>{
+ assert.equal(canApproveMatterOutput(base),true);
+ for(const patch of [
+  {outputTenantId:'tenant-b'},{outputMatterId:'matter-b'},
+  {outputAuthorId:'lawyer-c'},{outputTenantId:''},
+  {outputMatterId:null},{outputAuthorId:undefined},
+  {outputMatterId:42},
+ ]) assert.equal(canApproveMatterOutput({...base,...patch}),false,JSON.stringify(patch));
 });
