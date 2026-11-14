@@ -8,6 +8,12 @@
 
 
 
+## R167 — F21 persisted revision and Matter-scoped CAS boundary (2026-11-15 VN)
+
+- Stacked on Draft PR #236; test-first R167 synthetic regression requires server-loaded nonnegative safe integer `outputVersion` and forwards trusted `matterId` + `expectedVersion` to `approveWithAudit`, ignoring any client-supplied versions/Matter selector. Rejects missing, negative, fractional, unsafe or string revisions before write. Existing R164/R165 fixture updated and CI test registered.
+- **PARTIAL / real QA NOT_RUN:** no D1 implementation, atomic CAS+audit transaction, API, UI or real lawyer approval. Adapter must recheck Tenant/MatterACL, reviewer assignment, source and revision in the same DB transaction. Synthetic receipt is not durable proof. R126 signed-in Cloudflare two-account QA remains BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, PCS revision 140, `AL-R0-DEPLOY-001` standalone-first protected, 36 Fxx targets excluding signing. No merge/deploy, real customer data, secret changes or OAuth retry. CI final HEAD pending verification.
+
 ## R166 CI failure fix (2026-11-15 VN)
 
 - Verified [Actions #43635450380](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43635450380): **cloudflare-contract FAIL**, 8 other executing jobs SUCCESS, 21 SKIPPED. Inspected actual source: `validId` contained literal `\\n` between JS tokens and double-escaped Unicode regex sequences, breaking JavaScript parsing and control-character detection.
