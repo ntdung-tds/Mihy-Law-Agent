@@ -18,12 +18,12 @@ export async function approveMatterOutput({store,session,input}={}){
   const c=await store.loadVerifiedApprovalContext({
    outputId:input.outputId,actorId:session.actorId,tenantId:session.tenantId});
   if(!c||c.outputId!==input.outputId||c.actorId!==session.actorId||c.tenantId!==session.tenantId||
-     !canApproveMatterOutput(c))return denied;
-  // Adapter must revalidate ACL, assignment and output version inside transaction;
+     !canApproveMatterOutput(c)||!Number.isSafeInteger(c.outputVersion)||c.outputVersion<0)return denied;
+  // Adapter MUST compare expectedVersion and Matter scope, revalidate ACL and assignment inside transaction;
   // an optimistic read alone is insufficient against concurrent revocation.
   const receipt=await store.approveWithAudit({
    outputId:input.outputId,actorId:session.actorId,tenantId:session.tenantId,
-   expectedStatus:'pending_review'});
+   matterId:c.matterId,expectedVersion:c.outputVersion,expectedStatus:'pending_review'});
   return receipt?.changed===true&&receipt?.auditWritten===true
    ?{status:'APPROVED'}:{status:'CONFLICT_OR_AUDIT_FAILURE'};
  }catch{
