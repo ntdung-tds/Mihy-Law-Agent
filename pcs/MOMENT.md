@@ -8,6 +8,16 @@
 
 
 
+## R166 CI failure fix (2026-11-15 VN)
+
+- Verified [Actions #43635450380](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43635450380): **cloudflare-contract FAIL**, 8 other executing jobs SUCCESS, 21 SKIPPED. Inspected actual source: `validId` contained literal `\\n` between JS tokens and double-escaped Unicode regex sequences, breaking JavaScript parsing and control-character detection.
+- Fixed both defects in commit `90cc2c4d72f8f9833dbff164d3e56958988cfe28` on Draft PR #236. **Post-fix CI NOT_RUN/NOT_VERIFIED** at time of this note; do not claim PASS. F21 remains PARTIAL; no real DB transaction/API/audit/UI; R126 BLOCKED/NOT_RUN. PCS revision 140 and protected active task unchanged.
+
+## R166 — F21 reject control-bearing approval identifiers (2026-11-15 VN)
+
+- [Draft PR #236](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/236) stacked on #235. Test-first regression `9a64bc1` covers C0/C1, DEL and Unicode line separators in requested output ID and verified session actor/Tenant IDs; `81725d4` rejects before adapter read; `dfa2407` registers GitHub CI.
+- **F21 PARTIAL; R126 BLOCKED/NOT_RUN.** This is identifier validation only, not an actual D1 transaction, audit, endpoint, UI or lawyer approval. CI at final HEAD requires verification; do not claim PASS until completed. Preserve SRS v1.1.15, PCS revision 140, protected `AL-R0-DEPLOY-001`, standalone-first, all F01–F36 except signing. No merge, production deploy, customer data or blind OAuth retries.
+
 ## R165 — F21 persisted output identity binding (2026-11-15 VN)
 
 - [Draft PR #235](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/235) stacked on #234. Test-first negative contract commit `a8bf0203` and guard fix `95238425`: approval must bind server-loaded `outputId` exactly to the requested output ID; absent or mismatched persisted identity denies before transition. This prevents a valid approval context for one output from authorizing a different output.

@@ -6,7 +6,8 @@
  */
 import {canApproveMatterOutput} from './f21_approval_guard_gpt.mjs';
 
-const validId=x=>typeof x==='string'&&x.length<=128&&x.trim()===x&&x.length>0;
+const validId=x=>typeof x==='string'&&x.length<=128&&x.trim()===x&&x.length>0&&
+ !/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/u.test(x);
 export async function approveMatterOutput({store,session,input}={}){
  const denied={status:'DENIED'};
  if(!store||typeof store.loadVerifiedApprovalContext!=='function'||
