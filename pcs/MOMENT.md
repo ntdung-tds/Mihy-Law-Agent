@@ -8,6 +8,11 @@
 
 
 
+## R166 CI failure fix (2026-11-15 VN)
+
+- Verified [Actions #43635450380](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43635450380): **cloudflare-contract FAIL**, 8 other executing jobs SUCCESS, 21 SKIPPED. Inspected actual source: `validId` contained literal `\\n` between JS tokens and double-escaped Unicode regex sequences, breaking JavaScript parsing and control-character detection.
+- Fixed both defects in commit `90cc2c4d72f8f9833dbff164d3e56958988cfe28` on Draft PR #236. **Post-fix CI NOT_RUN/NOT_VERIFIED** at time of this note; do not claim PASS. F21 remains PARTIAL; no real DB transaction/API/audit/UI; R126 BLOCKED/NOT_RUN. PCS revision 140 and protected active task unchanged.
+
 ## R166 — F21 reject control-bearing approval identifiers (2026-11-15 VN)
 
 - [Draft PR #236](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/236) stacked on #235. Test-first regression `9a64bc1` covers C0/C1, DEL and Unicode line separators in requested output ID and verified session actor/Tenant IDs; `81725d4` rejects before adapter read; `dfa2407` registers GitHub CI.
