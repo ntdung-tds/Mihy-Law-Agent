@@ -259,6 +259,7 @@ jobs:
         run: node --test deployment/cloudflare/tests/r72_documents.test.mjs
       - name: R155 F20 bounded MatterACL receipt filename search without Drive access
         run: node --test deployment/cloudflare/tests/r155_matter_search_gpt.test.mjs
+          node --test deployment/cloudflare/tests/r160_f21_approval_guard_gpt.test.mjs
       - name: R155 F20 browser filename search UI and stale-workspace guards
         run: node --test deployment/cloudflare/tests/r155_matter_search_ui_gpt.test.mjs
       - name: R81 Google Drive multipart wire protocol and safe provider error diagnostics
