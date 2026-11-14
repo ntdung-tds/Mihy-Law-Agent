@@ -1003,3 +1003,9 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 
 - [Draft PR #229](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/229) stacked on #228. Test-first negative regression for duplicate `matter_id` parameters and code change rejecting ambiguous selectors with HTTP 400 before receipt SQL. No new storage, OAuth, or fulltext feature.
 - **QA:** synthetic regression committed; final-head CI NOT_RUN/pending verification. F20 remains filename-only PARTIAL; R126 real signed-in dual-account E2E BLOCKED/NOT_RUN. Protected `AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, no signing/customer data/merge/production deploy.
+
+## R160 — F21 lawyer approval policy primitive (2026-11-14 VN)
+
+- [Draft PR #230](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/230) stacked on #229. Test-first synthetic negative contract, then pure fail-closed policy helper; CI workflow explicitly invokes new Node test. Rejects self-approval, cross-Tenant, System Admin, missing MatterACL approve/read, denied access, missing reviewer assignment/qualification, unverified source and wrong output status.
+- **F21 PARTIAL/NOT_RUN for real product:** helper is NOT wired to HTTP, D1 persistence, audit, actual professional qualification, lawyer issuance, office approval levels, mobile/desktop E2E. Synthetic CI for R160 pending exact HEAD check. No release/acceptance claim.
+- SRS v1.1.15 frozen; PCS active_task `AL-R0-DEPLOY-001` preserved. F01–F36 target without signing; standalone-first; R126 live dual-account Cloudflare BLOCKED/NOT_RUN. No customer data, OAuth retries, merge or production deploy.
