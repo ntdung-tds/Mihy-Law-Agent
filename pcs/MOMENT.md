@@ -1,5 +1,11 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R173 — F21 evidence reconciliation and D1 blocker (2026-11-15 VN)
+
+- Verified PR #239 HEAD `b5d06da71b7fc325c642392c76d97ef9e51fea0d` (base `feature/r168-f21-trusted-matter-id-gpt`), Actions #43706823693 completed SUCCESS: 9 executed jobs SUCCESS, 21 SKIPPED. This establishes CI contract checks only, **not** live D1 CAS/audit or human approval. Previous R172 NOT_VERIFIED is superseded **for that exact HEAD only**.
+- Examined F21 transition and guard: `loadVerifiedApprovalContext` / `approveWithAudit` remain abstract adapter calls. No trustworthy D1 approval-output/reviewer/audit table definitions located from repository code-search; do not invent a schema or report real transactional approval PASS. F21 PARTIAL; R126 signed-in dual-account QA BLOCKED/NOT_RUN.
+- No product code changed in this evidence-only reconciliation. Next engineering slice requires reading canonical D1 migrations and integrating a real atomic CAS+audit adapter with synthetic SQLite positive/negative tests; preserve MatterACL and separation-of-duties. SRS v1.1.15 frozen; PCS revision 140, protected `AL-R0-DEPLOY-001`, standalone-first and signing excluded. No merge/deploy/customer data.
+
 ## R172 — F21 CAS version overflow guard (2026-11-15 VN)
 
 - Test-first negative regression on existing Draft PR #239: persisted outputVersion at `Number.MAX_SAFE_INTEGER` must be DENIED before any CAS/audit adapter write, because the successor is not a safe integer; also deny out-of-range, negative and fractional versions. Test commit `fa1545a2`, implementation commit `97efc35d`.
