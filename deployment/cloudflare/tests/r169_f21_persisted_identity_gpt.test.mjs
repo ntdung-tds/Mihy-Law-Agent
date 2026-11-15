@@ -45,3 +45,15 @@ test('R171: reject invisible format controls before CAS/audit',async()=>{
   assert.equal(writes,0);
  }
 });
+
+// R172: CAS version must have a safe successor; never write with exhausted version.
+test('R172: reject exhausted output version before CAS/audit',async()=>{
+ for(const version of [Number.MAX_SAFE_INTEGER,Number.MAX_SAFE_INTEGER+1,-1,1.5]){
+  let writes=0;
+  const store={loadVerifiedApprovalContext:async()=>({...context,outputVersion:version}),
+   approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}};
+  const result=await approveMatterOutput({store,session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}});
+  assert.equal(result.status,'DENIED',String(version));
+  assert.equal(writes,0,String(version));
+ }
+});
