@@ -1,5 +1,12 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R172 — F21 CAS version overflow guard (2026-11-15 VN)
+
+- Test-first negative regression on existing Draft PR #239: persisted outputVersion at `Number.MAX_SAFE_INTEGER` must be DENIED before any CAS/audit adapter write, because the successor is not a safe integer; also deny out-of-range, negative and fractional versions. Test commit `fa1545a2`, implementation commit `97efc35d`.
+- Narrow change only in F21 transition boundary. **CI at final HEAD NOT_VERIFIED** until Actions result is inspected; no claim of real D1 persistence or lawyer approval. F21 PARTIAL, R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, PCS revision 140, `AL-R0-DEPLOY-001` protected, standalone-first, F01–F36 excluding all signing. No OAuth retry, customer data, merge or production deployment.
+
+
 ## R171 — F21 invisible Unicode format identifier guard (2026-11-15 VN)
 
 - Test-first regression added to existing PR #239: persisted approval author/output-author IDs containing Unicode format controls (zero-width, bidi marks/overrides/isolates, BOM) must be DENIED with zero CAS/audit writes. Commit `9aec25ee`.
