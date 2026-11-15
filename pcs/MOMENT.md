@@ -8,6 +8,12 @@
 
 
 
+## R168 — F21 reject unsafe persisted Matter identifiers (2026-11-15 VN)
+
+- [Draft PR #238](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/238) stacked on #237. Test-first negative regression `r168_f21_trusted_matter_id_gpt.test.mjs` rejects persisted Matter identifiers containing control/Unicode separator characters, surrounding whitespace, or >128 characters before any approval/audit adapter call. Transition now checks `validId(c.matterId)`; Cloudflare contract workflow registers test. No client-supplied Matter accepted.
+- R167 HEAD `e3040e8b` [Actions #43650671068](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43650671068) verified **9 SUCCESS / 21 SKIPPED**; R168 final HEAD CI pending verification.
+- **F21 PARTIAL; real QA NOT_RUN.** No real D1 adapter, atomic CAS+audit transaction, API, UI or lawyer approval. R126 signed-in Cloudflare two-account E2E BLOCKED/NOT_RUN. Preserve SRS v1.1.15, PCS revision 140 and `AL-R0-DEPLOY-001` standalone-first; no signing, real customer data, merge, production deploy or blind OAuth retry.
+
 ## R167 — F21 persisted revision and Matter-scoped CAS boundary (2026-11-15 VN)
 
 - Stacked on Draft PR #236; test-first R167 synthetic regression requires server-loaded nonnegative safe integer `outputVersion` and forwards trusted `matterId` + `expectedVersion` to `approveWithAudit`, ignoring any client-supplied versions/Matter selector. Rejects missing, negative, fractional, unsafe or string revisions before write. Existing R164/R165 fixture updated and CI test registered.
