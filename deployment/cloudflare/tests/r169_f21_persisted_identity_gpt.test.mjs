@@ -25,3 +25,11 @@ test('R169: reject malformed persisted identity and scope before CAS/audit',asyn
   }
  }
 });
+
+
+test('R170: approval guard module loads and rejects Unicode control IDs', async () => {
+ const {validApprovalId}=await import('../src/f21_approval_guard_gpt.mjs');
+ assert.equal(validApprovalId('lawyer-b'),true);
+ for(const id of ['lawyer\nother','lawyer\u2028other','lawyer\u0000other',' lawyer','x'.repeat(129)])
+  assert.equal(validApprovalId(id),false);
+});
