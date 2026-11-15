@@ -4,7 +4,7 @@
  * client-supplied booleans. No approval persistence, API or release yet.
  */
 export const validApprovalId=x=>typeof x==='string'&&x.length>0&&x.length<=128&&x.trim()===x&&
- !/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/u.test(x);
+ !/[\u0000-\u001f\u007f-\u009f\u2028\u2029\p{Cf}]/u.test(x);
 
 export function canApproveMatterOutput(c){
  if(!c||typeof c!=='object'||Array.isArray(c))return false;
