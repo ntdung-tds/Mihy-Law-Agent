@@ -33,3 +33,15 @@ test('R170: approval guard module loads and rejects Unicode control IDs', async 
  for(const id of ['lawyer\nother','lawyer\u2028other','lawyer\u0000other',' lawyer','x'.repeat(129)])
   assert.equal(validApprovalId(id),false);
 });
+
+// R171: invisible format controls must not enter persisted approval identities.
+test('R171: reject invisible format controls before CAS/audit',async()=>{
+ const {validApprovalId}=await import('../src/f21_approval_guard_gpt.mjs');
+ for(const id of ['lawyer\u200bother','lawyer\u200eother','lawyer\u202eother','lawyer\u2066other','lawyer\ufeffother']){
+  assert.equal(validApprovalId(id),false,'format control');
+  let writes=0;
+  const store={loadVerifiedApprovalContext:async()=>({...context,authorId:id,outputAuthorId:id}),approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}};
+  assert.equal((await approveMatterOutput({store,session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}})).status,'DENIED');
+  assert.equal(writes,0);
+ }
+});
