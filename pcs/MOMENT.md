@@ -8,6 +8,12 @@
 
 
 
+
+## R169 — F21 persisted identity/scope validation (2026-11-15 VN)
+
+- [Draft PR #239](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/239) stacked on #238. Test-first `r169_f21_persisted_identity_gpt.test.mjs` rejects malformed persisted author, output, reviewer assignment and Tenant/Matter scope identifiers before any approval/audit write; Cloudflare contract CI registered. No client trust or real D1 adapter.
+- **F21 PARTIAL; human E2E NOT_RUN.** R126 dual-account Cloudflare QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140, `AL-R0-DEPLOY-001` standalone-first preserved. No signing, customer data, merge or production deployment.
+
 ## R168 — F21 reject unsafe persisted Matter identifiers (2026-11-15 VN)
 
 - [Draft PR #238](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/238) stacked on #237. Test-first negative regression `r168_f21_trusted_matter_id_gpt.test.mjs` rejects persisted Matter identifiers containing control/Unicode separator characters, surrounding whitespace, or >128 characters before any approval/audit adapter call. Transition now checks `validId(c.matterId)`; Cloudflare contract workflow registers test. No client-supplied Matter accepted.
