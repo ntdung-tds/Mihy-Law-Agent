@@ -271,6 +271,8 @@ jobs:
         run: node --test deployment/cloudflare/tests/r167_f21_cas_version_gpt.test.mjs
       - name: R168 F21 persisted Matter identifier regression
         run: node --test deployment/cloudflare/tests/r168_f21_trusted_matter_id_gpt.test.mjs
+      - name: R169 F21 persisted identity and scope regression
+        run: node --test deployment/cloudflare/tests/r169_f21_persisted_identity_gpt.test.mjs
       - name: R155 F20 browser filename search UI and stale-workspace guards
         run: node --test deployment/cloudflare/tests/r155_matter_search_ui_gpt.test.mjs
       - name: R81 Google Drive multipart wire protocol and safe provider error diagnostics
