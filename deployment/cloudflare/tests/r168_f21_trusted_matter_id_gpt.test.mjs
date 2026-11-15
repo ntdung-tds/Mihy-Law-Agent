@@ -11,7 +11,7 @@ const base={outputId:'out-1',tenantId:'tenant-a',matterTenantId:'tenant-a',matte
  outputVersion:3};
 
 test('R168: invalid persisted Matter identifiers cannot reach approval/audit adapter',async()=>{
- for(const matterId of ['matter\\nother','matter\\u2028other',' matter-a','matter-a ', 'x'.repeat(129)]){
+ for(const matterId of ['matter\nother','matter\u2028other',' matter-a','matter-a ', 'x'.repeat(129)]){
   let writes=0;
   const context={...base,matterId,outputMatterId:matterId,reviewerAssignmentMatterId:matterId};
   const store={loadVerifiedApprovalContext:async()=>context,
