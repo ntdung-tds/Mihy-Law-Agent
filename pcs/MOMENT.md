@@ -9,6 +9,12 @@
 
 
 
+## R170 — F21 approval guard parser fix (2026-11-15 VN)
+
+- Discovered a concrete JavaScript syntax defect in `deployment/cloudflare/src/f21_approval_guard_gpt.mjs`: literal backslash-n tokens outside strings and doubly escaped Unicode control regex. This can prevent the module from loading and incorrectly validate control-bearing IDs.
+- Test-first regression added to existing R169 CI test `r169_f21_persisted_identity_gpt.test.mjs` (guard import, valid ID and control/Unicode rejection). Fixed guard parsing and regex on the **existing** Draft PR #239 branch; no duplicate PR. Commits `f271d8b7`, `568f11d0`, `daca17db`.
+- **CI final HEAD NOT_VERIFIED** until Actions finishes. F21 remains **PARTIAL**: no D1 CAS+atomic audit, API, UI or lawyer E2E. R126 signed-in Cloudflare QA remains **BLOCKED/NOT_RUN**. SRS v1.1.15 frozen; PCS revision 140; `AL-R0-DEPLOY-001` preserved. No signing, real customer data, merge or production deployment.
+
 ## R169 — F21 persisted identity/scope validation (2026-11-15 VN)
 
 - [Draft PR #239](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/239) stacked on #238. Test-first `r169_f21_persisted_identity_gpt.test.mjs` rejects malformed persisted author, output, reviewer assignment and Tenant/Matter scope identifiers before any approval/audit write; Cloudflare contract CI registered. No client trust or real D1 adapter.
