@@ -3,7 +3,10 @@
  * assignment, professional qualification and persisted output/source state. Never trust
  * client-supplied booleans. No approval persistence, API or release yet.
  */
-export const validApprovalId=x=>typeof x==='string'&&x.length>0&&x.length<=128&&x.trim()===x&&\n !/[\\u0000-\\u001f\\u007f-\\u009f\\u2028\\u2029]/u.test(x);\n\nexport function canApproveMatterOutput(c){
+export const validApprovalId=x=>typeof x==='string'&&x.length>0&&x.length<=128&&x.trim()===x&&
+ !/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/u.test(x);
+
+export function canApproveMatterOutput(c){
  if(!c||typeof c!=='object'||Array.isArray(c))return false;
  for(const key of ['tenantId','matterTenantId','matterId','actorId','authorId',
   'outputTenantId','outputMatterId','outputAuthorId',
