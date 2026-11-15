@@ -1,5 +1,12 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R171 — F21 invisible Unicode format identifier guard (2026-11-15 VN)
+
+- Test-first regression added to existing PR #239: persisted approval author/output-author IDs containing Unicode format controls (zero-width, bidi marks/overrides/isolates, BOM) must be DENIED with zero CAS/audit writes. Commit `9aec25ee`.
+- Both F21 guard and transition identifier validators now reject Unicode `General_Category=Format (Cf)` in addition to existing C0/C1/line separators; commits `c1d428fc`, `7de7c46b`. Local Node v22 regex/representative-input smoke PASS; **GitHub final-HEAD CI NOT_VERIFIED** until checked. No D1 adapter, API, UI, lawyer E2E; F21 PARTIAL. R126 BLOCKED/NOT_RUN.
+- Preserve SRS v1.1.15 frozen, PCS revision 140, protected `AL-R0-DEPLOY-001`, standalone-first, all F01–F36 excluding signing; no production merge/deploy, customer data, or OAuth retry.
+
+
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
 - **PCS revision:** `140` (source of truth `pcs/STATE.json`).
 - **Updated:** `2026-11-14T04:03:00+07:00`.
