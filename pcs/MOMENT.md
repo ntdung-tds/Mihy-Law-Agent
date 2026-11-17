@@ -1,5 +1,11 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R177 — F21 inherited approval context fail-closed (2026-11-18 VN)
+
+- Test-first regression commit `1e87909a`: a synthetic adapter context inheriting all approval identities and policy flags from its prototype must be `DENIED`, with zero CAS/audit writes. The pre-fix guard accepted inherited properties; this is a security boundary hardening, not a D1 adapter implementation.
+- Fix commit `198feebe`: `canApproveMatterOutput` requires own properties for all persisted identity, scope and approval policy fields before evaluation. CI run #44153307141 queued at first inspection; **final HEAD CI NOT_VERIFIED**. No live D1/human E2E PASS claimed.
+- F21 PARTIAL (transactional D1 CAS/audit adapter/API/UI still absent); R126 BLOCKED/NOT_RUN. PCS revision 140 and protected `AL-R0-DEPLOY-001` unchanged. SRS v1.1.15 frozen; standalone-first, F01–F36 target, signing excluded; no OAuth retry, customer data, merge or production deployment.
+
 ## R176 — F21 top-level accessor fail-closed (2026-11-17 VN)
 
 - Test-first: added R176 negative regression to registered R169 Cloudflare contract suite. A hostile top-level argument Proxy throwing on `store`, `session`, or `input` must yield `DENIED` with zero adapter reads/writes. Test commit `6addb77c`.
