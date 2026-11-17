@@ -1,5 +1,12 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R176 — F21 top-level accessor fail-closed (2026-11-17 VN)
+
+- Test-first: added R176 negative regression to registered R169 Cloudflare contract suite. A hostile top-level argument Proxy throwing on `store`, `session`, or `input` must yield `DENIED` with zero adapter reads/writes. Test commit `6addb77c`.
+- Fixed approval entrypoint by moving argument destructuring inside `try` (commit `c3c100f`), so hostile property access cannot escape as rejected Promise before fail-closed handling. **CI at final HEAD NOT_VERIFIED** pending Actions; no production/human E2E PASS claimed.
+- F21 PARTIAL: D1 transactional CAS+audit adapter/API/UI/human approval remain missing; R126 signed-in dual-account QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140 and `AL-R0-DEPLOY-001` protected; no signing, OAuth retry, customer data, merge or production deploy.
+
+
 ## R175 — F21 malformed transport accessor fail-closed (2026-11-17 VN)
 
 - Test-first regression in registered R169 suite: synthetic throwing session/input accessors must return DENIED with zero DB reads/writes. Updated F21 transition preflight to catch accessor errors, distinguish preflight DENIED from transactional CONFLICT_OR_AUDIT_FAILURE. Commits 362c01c, b06a42a, f738e75, dc3e819, aba0c154; issue #156 comment 6941124018.
