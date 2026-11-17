@@ -70,3 +70,14 @@ test('R175: malformed session/input accessors deny without DB reads or writes',a
   assert.equal(reads,0);assert.equal(writes,0);
  }
 });
+
+// R176: hostile top-level argument destructuring must fail closed before any store access.
+test('R176: throwing top-level argument accessors deny without DB operations',async()=>{
+ for(const key of ['store','session','input']){
+  let reads=0,writes=0;
+  const args={store:{loadVerifiedApprovalContext:async()=>{reads++;return context;},approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}},session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}};
+  const hostile=new Proxy(args,{get(target,property){if(property===key)throw Error('synthetic top-level accessor');return Reflect.get(target,property);}});
+  assert.equal((await approveMatterOutput(hostile)).status,'DENIED',key);
+  assert.equal(reads,0);assert.equal(writes,0);
+ }
+});
