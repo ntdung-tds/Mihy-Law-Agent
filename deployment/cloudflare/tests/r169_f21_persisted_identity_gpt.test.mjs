@@ -92,3 +92,16 @@ test('R177: inherited persisted approval fields fail closed before CAS/audit',as
  assert.equal(result.status,'DENIED');
  assert.equal(writes,0);
 });
+
+// R178: transport identifiers must be owned by the verified session/request envelope.
+test('R178: inherited session or input identifiers deny before DB access',async()=>{
+ for(const field of ['session','input']){
+  let reads=0,writes=0;
+  const args={store:{loadVerifiedApprovalContext:async()=>{reads++;return context;},
+   approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}},
+   session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}};
+  args[field]=Object.create(args[field]);
+  assert.equal((await approveMatterOutput(args)).status,'DENIED',field);
+  assert.equal(reads,0,field);assert.equal(writes,0,field);
+ }
+});
