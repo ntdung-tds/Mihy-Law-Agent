@@ -1,5 +1,11 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R179 — F21 persisted output CAS fields fail closed (2026-11-18 VN)
+
+- Test-first `6cbbfca`: synthetic adapter context inheriting `outputId` or `outputVersion` must be DENIED without CAS/audit write.
+- Fix `3ba1aa2`: require own persisted output identity and CAS version before approval transition. This is an input trust-boundary fix only, NOT a D1 adapter.
+- F21 PARTIAL (D1 atomic CAS/audit, API/UI and human E2E absent); R126 BLOCKED/NOT_RUN. CI at final HEAD NOT_VERIFIED pending run. SRS v1.1.15 frozen; PCS revision 140 and AL-R0-DEPLOY-001 standalone-first unchanged; F01–F36 target, signing excluded. No OAuth retry, real customer data, merge or production deploy.
+
 ## R178 — F21 inherited transport identity fail-closed (2026-11-18 VN)
 
 - Test-first regression commit `3a56fc4`: synthetic session or input with identifiers inherited from a prototype must be DENIED before any adapter read or CAS/audit write.
