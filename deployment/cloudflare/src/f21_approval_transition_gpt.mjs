@@ -15,6 +15,8 @@ export async function approveMatterOutput(args={}){
  const {store,session,input}=args;
  if(!store||typeof store.loadVerifiedApprovalContext!=='function'||
     typeof store.approveWithAudit!=='function'||!session||!input||
+    !Object.hasOwn(session,'actorId')||!Object.hasOwn(session,'tenantId')||
+    !Object.hasOwn(input,'outputId')||
     !validId(session.actorId)||!validId(session.tenantId)||!validId(input.outputId))
   return denied;
   preflightPassed=true;
