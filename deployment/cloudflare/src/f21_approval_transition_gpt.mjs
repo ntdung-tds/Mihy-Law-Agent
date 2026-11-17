@@ -10,11 +10,11 @@ const validId=x=>typeof x==='string'&&x.length<=128&&x.trim()===x&&x.length>0&&
  !/[\u0000-\u001f\u007f-\u009f\u2028\u2029\p{Cf}]/u.test(x);
 export async function approveMatterOutput({store,session,input}={}){
  const denied={status:'DENIED'};
+ try{
  if(!store||typeof store.loadVerifiedApprovalContext!=='function'||
     typeof store.approveWithAudit!=='function'||!session||!input||
     !validId(session.actorId)||!validId(session.tenantId)||!validId(input.outputId))
   return denied;
- try{
   const c=await store.loadVerifiedApprovalContext({
    outputId:input.outputId,actorId:session.actorId,tenantId:session.tenantId});
   if(!c||c.outputId!==input.outputId||c.actorId!==session.actorId||c.tenantId!==session.tenantId||
@@ -28,6 +28,7 @@ export async function approveMatterOutput({store,session,input}={}){
   return receipt?.changed===true&&receipt?.auditWritten===true
    ?{status:'APPROVED'}:{status:'CONFLICT_OR_AUDIT_FAILURE'};
  }catch{
+  // Malformed transport accessors and DB errors must fail closed without leaking data.
   // Do not leak customer data, SQL, or identity details through errors.
   return {status:'CONFLICT_OR_AUDIT_FAILURE'};
  }
