@@ -57,3 +57,16 @@ test('R172: reject exhausted output version before CAS/audit',async()=>{
   assert.equal(writes,0,String(version));
  }
 });
+
+// R175: hostile transport accessors must not escape the fail-closed approval boundary.
+test('R175: malformed session/input accessors deny without DB reads or writes',async()=>{
+ for(const field of ['session','input']){
+  let reads=0,writes=0;
+  const args={session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'},
+   store:{loadVerifiedApprovalContext:async()=>{reads++;return context;},
+    approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}}};
+  args[field]=new Proxy({}, {get(){throw Error('synthetic accessor failure');}});
+  assert.equal((await approveMatterOutput(args)).status,'DENIED');
+  assert.equal(reads,0);assert.equal(writes,0);
+ }
+});
