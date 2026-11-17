@@ -11,7 +11,10 @@ export function canApproveMatterOutput(c){
  for(const key of ['tenantId','matterTenantId','matterId','actorId','authorId',
   'outputTenantId','outputMatterId','outputAuthorId',
   'reviewerAssignmentTenantId','reviewerAssignmentMatterId','reviewerAssignmentActorId'])
-  if(!validApprovalId(c[key]))return false;
+  if(!Object.hasOwn(c,key)||!validApprovalId(c[key]))return false;
+ for(const key of ['role','matterRead','matterApprove','denied','qualifiedLawyer',
+  'assignedReviewer','outputStatus','sourceVerified'])
+  if(!Object.hasOwn(c,key))return false;
  return c.tenantId===c.matterTenantId&&
   c.outputTenantId===c.tenantId&&c.outputMatterId===c.matterId&&
   c.outputAuthorId===c.authorId&&
