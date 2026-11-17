@@ -1,5 +1,12 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R178 — F21 inherited transport identity fail-closed (2026-11-18 VN)
+
+- Test-first regression commit `3a56fc4`: synthetic session or input with identifiers inherited from a prototype must be DENIED before any adapter read or CAS/audit write.
+- Fix commit `3ecc2ea`: approval transition requires own actorId/tenantId on session and own outputId on input. This hardens a transport trust boundary; it does not create a verified session or D1 transaction.
+- F21 PARTIAL: real D1 CAS+audit, API/UI and lawyer E2E not implemented. R126 BLOCKED/NOT_RUN. CI for final HEAD pending independent verification. SRS v1.1.15 frozen; PCS revision 140, AL-R0-DEPLOY-001 standalone-first unchanged. No signing, OAuth retries, customer data, merge or production deploy.
+
+
 ## R177 — F21 inherited approval context fail-closed (2026-11-18 VN)
 
 - Test-first regression commit `1e87909a`: a synthetic adapter context inheriting all approval identities and policy flags from its prototype must be `DENIED`, with zero CAS/audit writes. The pre-fix guard accepted inherited properties; this is a security boundary hardening, not a D1 adapter implementation.
