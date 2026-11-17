@@ -105,3 +105,18 @@ test('R178: inherited session or input identifiers deny before DB access',async(
   assert.equal(reads,0,field);assert.equal(writes,0,field);
  }
 });
+
+
+// R179: adapter-supplied output identity/version must be owned fields, not prototype defaults.
+test('R179: inherited outputId or outputVersion deny before CAS/audit',async()=>{
+ for(const field of ['outputId','outputVersion']){
+  let writes=0;
+  const c={...context};
+  delete c[field];
+  Object.setPrototypeOf(c,{[field]:context[field]});
+  const store={loadVerifiedApprovalContext:async()=>c,
+   approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}};
+  assert.equal((await approveMatterOutput({store,session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}})).status,'DENIED',field);
+  assert.equal(writes,0,field);
+ }
+});
