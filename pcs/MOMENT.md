@@ -1,5 +1,10 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R175 — F21 malformed transport accessor fail-closed (2026-11-17 VN)
+
+- Test-first regression in registered R169 suite: synthetic throwing session/input accessors must return DENIED with zero DB reads/writes. Updated F21 transition preflight to catch accessor errors, distinguish preflight DENIED from transactional CONFLICT_OR_AUDIT_FAILURE. Commits 362c01c, b06a42a, f738e75, dc3e819, aba0c154; issue #156 comment 6941124018.
+- Final HEAD CI **NOT_VERIFIED**; no PASS claim. F21 remains PARTIAL (no verified D1 atomic CAS+audit adapter/API/UI/human E2E), R126 Cloudflare dual-account QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140, protected AL-R0-DEPLOY-001 standalone-first. F01-F36 target, signing excluded. No customer data, OAuth retry, merge or production deploy.
+
 ## R173 — F21 evidence reconciliation and D1 blocker (2026-11-15 VN)
 
 - Verified PR #239 HEAD `b5d06da71b7fc325c642392c76d97ef9e51fea0d` (base `feature/r168-f21-trusted-matter-id-gpt`), Actions #43706823693 completed SUCCESS: 9 executed jobs SUCCESS, 21 SKIPPED. This establishes CI contract checks only, **not** live D1 CAS/audit or human approval. Previous R172 NOT_VERIFIED is superseded **for that exact HEAD only**.
