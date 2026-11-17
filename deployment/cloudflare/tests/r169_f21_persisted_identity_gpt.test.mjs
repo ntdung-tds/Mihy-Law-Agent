@@ -81,3 +81,14 @@ test('R176: throwing top-level argument accessors deny without DB operations',as
   assert.equal(reads,0);assert.equal(writes,0);
  }
 });
+
+// R177: adapter context must not inherit policy decisions from a prototype.
+test('R177: inherited persisted approval fields fail closed before CAS/audit',async()=>{
+ let writes=0;
+ const inherited=Object.create(context);
+ const store={loadVerifiedApprovalContext:async()=>inherited,
+  approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}};
+ const result=await approveMatterOutput({store,session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}});
+ assert.equal(result.status,'DENIED');
+ assert.equal(writes,0);
+});
