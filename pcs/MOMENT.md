@@ -1,3 +1,9 @@
+## R188 — F21 persisted author/output identity guard (2026-11-19 VN)
+
+- Draft PR #241 stacked on #240. Test-first negative regression commit 2e750c3 demonstrates intended invariant: draft author_id and output_id must not be rewritten before approval. Fix commit 6f2a474 adds SQLite trigger preventing persisted author, installation/Tenant/Matter/output identity and created_at rewrites. Prevents reattribution bypass of author/reviewer separation in QA schema.
+- New tests 2 cases; local execution NOT_RUN and final HEAD CI NOT_VERIFIED. Migration NOT_APPLIED. This is not the D1 adapter, session/MatterACL transactional recheck, qualified lawyer check, API/UI or real E2E. F21 PARTIAL; R126 BLOCKED/NOT_RUN.
+- Preserve SRS v1.1.15 frozen, PCS revision 140, AL-R0-DEPLOY-001 standalone-first, F01–F36 excluding signing. No customer data, OAuth retry, merge or production deploy.
+
 ## R187 — F21 isolated QA approval persistence schema (2026-11-19 VN)
 
 - Draft PR #240 stacked on #239, commits 574b031 and ddfc2e6: added isolated QA D1/SQLite tables for F21 output revision, reviewer assignment and immutable approval audit; trigger makes state update and audit insert one SQLite statement. Four synthetic SQLite positive/negative tests authored (local equivalent PASS 4/4); GitHub CI at final HEAD NOT_VERIFIED and test not yet registered in CI. Migration NOT_APPLIED.
