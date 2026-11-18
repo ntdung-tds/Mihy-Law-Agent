@@ -1,5 +1,12 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R180 — F21 adapter receipt attestation ownership (2026-11-18 VN)
+
+- Test-first `1f2119a`: added negative regression requiring CAS `changed` and audit `auditWritten` attestations to be own properties of the adapter receipt, not inherited from a prototype. Prior code accepted inherited true flags; synthetic test designed to fail before fix.
+- Fix `a20c543`: approval transition now rejects inherited receipt flags and returns `CONFLICT_OR_AUDIT_FAILURE` rather than `APPROVED`. This hardens an adapter trust boundary, **not** a real D1 atomic CAS/audit implementation.
+- CI at final HEAD **NOT_VERIFIED** pending GitHub Actions. F21 PARTIAL; R126 BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140, protected AL-R0-DEPLOY-001 standalone-first; F01–F36 target, signing excluded. No OAuth retries, customer data, merge or production deployment.
+
+
 ## R179 — F21 persisted output CAS fields fail closed (2026-11-18 VN)
 
 - Test-first `6cbbfca`: synthetic adapter context inheriting `outputId` or `outputVersion` must be DENIED without CAS/audit write.
