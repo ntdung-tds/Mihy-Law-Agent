@@ -65,6 +65,13 @@ CREATE TRIGGER IF NOT EXISTS trg_qa_f21_event_no_delete
 BEFORE DELETE ON qa_approval_events
 BEGIN SELECT RAISE(ABORT,'F21_AUDIT_IMMUTABLE'); END;
 
+-- R189: approved outputs must originate from the guarded draft-to-approved UPDATE.
+-- A direct INSERT with state='approved' bypasses the UPDATE audit trigger.
+CREATE TRIGGER IF NOT EXISTS trg_qa_f21_no_preapproved_insert
+BEFORE INSERT ON qa_approval_outputs
+WHEN NEW.state <> 'draft'
+BEGIN SELECT RAISE(ABORT,'F21_APPROVAL_TRANSITION_REQUIRED'); END;
+
 -- R188: fail closed on identity/scope rewrites, even while output is draft.
 -- The author is a persisted origin identity and must not be re-attributed to bypass
 -- author/reviewer separation. This is NOT a substitute for MatterACL in the adapter.
