@@ -120,3 +120,18 @@ test('R179: inherited outputId or outputVersion deny before CAS/audit',async()=>
   assert.equal(writes,0,field);
  }
 });
+
+// R180: untrusted adapter receipt must explicitly own both transaction attestations.
+test('R180: inherited CAS/audit receipt flags never report approval',async()=>{
+ for(const field of ['changed','auditWritten']){
+  const receipt={changed:true,auditWritten:true};
+  delete receipt[field];
+  Object.setPrototypeOf(receipt,{[field]:true});
+  let writes=0;
+  const store={loadVerifiedApprovalContext:async()=>({...context}),
+   approveWithAudit:async()=>{writes++;return receipt;}};
+  const result=await approveMatterOutput({store,session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}});
+  assert.equal(writes,1,field);
+  assert.equal(result.status,'CONFLICT_OR_AUDIT_FAILURE',field);
+ }
+});
