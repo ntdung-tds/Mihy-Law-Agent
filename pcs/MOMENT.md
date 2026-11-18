@@ -1,3 +1,9 @@
+## R191 — F21 synthetic approval schema tests wired into CI (2026-11-19 VN)
+
+- Draft PR #244 stacked on #243, commit cc4314d: added a no-secret, path-scoped GitHub Actions workflow running synthetic SQLite tests R187–R190 on PR changes. Prior tests were authored but not registered in CI; this addresses the specific execution-evidence gap rather than repeating an unverified PASS claim.
+- At creation, final HEAD CI NOT_VERIFIED (no workflow runs returned for cc4314d). No migration applied, no live D1/session/Tenant/MatterACL/lawyer qualification/API/UI or signed-in browser E2E. F21 PARTIAL; R126 BLOCKED/NOT_RUN.
+- Preserve PCS revision 140, SRS v1.1.15 frozen, protected AL-R0-DEPLOY-001 standalone-first, F01–F36 excluding signing. No OAuth retry, customer data, merge or production deployment.
+
 ## R190 — F21 approval event INSERT consistency guard (2026-11-19 VN)
 
 - Test-first commit `c420518`: two synthetic SQLite negative regressions for forged audit INSERT against a draft and forged version/actor after legitimate approval.
