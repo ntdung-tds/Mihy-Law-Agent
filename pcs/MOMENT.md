@@ -1,3 +1,9 @@
+## R187 — F21 isolated QA approval persistence schema (2026-11-19 VN)
+
+- Draft PR #240 stacked on #239, commits 574b031 and ddfc2e6: added isolated QA D1/SQLite tables for F21 output revision, reviewer assignment and immutable approval audit; trigger makes state update and audit insert one SQLite statement. Four synthetic SQLite positive/negative tests authored (local equivalent PASS 4/4); GitHub CI at final HEAD NOT_VERIFIED and test not yet registered in CI. Migration NOT_APPLIED.
+- **PARTIAL**: schema is not a real approval adapter; qualified lawyer, session, Tenant/MatterACL allow-minus-deny and authorization recheck in the same transaction, API/UI and actual signed-in E2E are NOT_RUN. Do not treat SQLite triggers as complete authorization. R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen; PCS revision 140 and protected AL-R0-DEPLOY-001 standalone-first unchanged; F01–F36 target with signing excluded. No OAuth retry, customer data, merge or production deployment.
+
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
 ## R180 — F21 adapter receipt attestation ownership (2026-11-18 VN)
