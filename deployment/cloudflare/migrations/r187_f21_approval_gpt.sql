@@ -64,3 +64,16 @@ BEGIN SELECT RAISE(ABORT,'F21_AUDIT_IMMUTABLE'); END;
 CREATE TRIGGER IF NOT EXISTS trg_qa_f21_event_no_delete
 BEFORE DELETE ON qa_approval_events
 BEGIN SELECT RAISE(ABORT,'F21_AUDIT_IMMUTABLE'); END;
+
+-- R188: fail closed on identity/scope rewrites, even while output is draft.
+-- The author is a persisted origin identity and must not be re-attributed to bypass
+-- author/reviewer separation. This is NOT a substitute for MatterACL in the adapter.
+CREATE TRIGGER IF NOT EXISTS trg_qa_f21_identity_immutable
+BEFORE UPDATE ON qa_approval_outputs
+WHEN NEW.installation_id IS NOT OLD.installation_id
+  OR NEW.tenant_id IS NOT OLD.tenant_id
+  OR NEW.matter_id IS NOT OLD.matter_id
+  OR NEW.output_id IS NOT OLD.output_id
+  OR NEW.author_id IS NOT OLD.author_id
+  OR NEW.created_at IS NOT OLD.created_at
+BEGIN SELECT RAISE(ABORT,'F21_IDENTITY_IMMUTABLE'); END;
