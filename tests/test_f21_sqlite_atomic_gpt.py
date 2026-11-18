@@ -10,6 +10,7 @@ CREATE TABLE outputs(id TEXT PRIMARY KEY, tenant TEXT NOT NULL, matter TEXT NOT 
  author TEXT NOT NULL, status TEXT NOT NULL, version INTEGER NOT NULL);
 CREATE TABLE assignments(output_id TEXT NOT NULL, reviewer TEXT NOT NULL,
  active INTEGER NOT NULL, PRIMARY KEY(output_id, reviewer));
+CREATE TABLE matter_acl(tenant TEXT NOT NULL, matter TEXT NOT NULL, actor TEXT NOT NULL, permission TEXT NOT NULL, effect TEXT NOT NULL, active INTEGER NOT NULL);
 CREATE TABLE audit(id INTEGER PRIMARY KEY, output_id TEXT NOT NULL,
  actor TEXT NOT NULL, event TEXT NOT NULL);
 """
@@ -22,8 +23,10 @@ def approve(conn, *, output_id, tenant, matter, actor, expected_version, inject_
         changed = conn.execute("""UPDATE outputs SET status='approved', version=version+1
           WHERE id=? AND tenant=? AND matter=? AND version=? AND status='pending_review'
           AND author<>? AND EXISTS(SELECT 1 FROM assignments
-            WHERE output_id=outputs.id AND reviewer=? AND active=1)""",
-            (output_id, tenant, matter, expected_version, actor, actor)).rowcount
+            WHERE output_id=outputs.id AND reviewer=? AND active=1)
+          AND EXISTS(SELECT 1 FROM matter_acl WHERE tenant=outputs.tenant AND matter=outputs.matter AND actor=? AND permission='approve' AND effect='allow' AND active=1)
+          AND NOT EXISTS(SELECT 1 FROM matter_acl WHERE tenant=outputs.tenant AND matter=outputs.matter AND actor=? AND permission='approve' AND effect='deny' AND active=1)""",
+            (output_id, tenant, matter, expected_version, actor, actor, actor, actor)).rowcount
         if changed != 1:
             conn.rollback()
             return False
@@ -44,6 +47,7 @@ class AtomicApprovalTests(unittest.TestCase):
         self.db.executescript(SCHEMA)
         self.db.execute("INSERT INTO outputs VALUES('o1','t1','m1','author','pending_review',0)")
         self.db.execute("INSERT INTO assignments VALUES('o1','reviewer',1)")
+        self.db.execute("INSERT INTO matter_acl VALUES('t1','m1','reviewer','approve','allow',1)")
 
     def tearDown(self):
         self.db.close()
@@ -81,6 +85,16 @@ class AtomicApprovalTests(unittest.TestCase):
     def test_cross_tenant_and_matter_denied(self):
         for tenant,matter in [('t2','m1'),('t1','m2')]:
             self.assertFalse(approve(self.db,output_id='o1',tenant=tenant,matter=matter,actor='reviewer',expected_version=0))
+        self.assertEqual(self.state(), (('pending_review',0),0))
+
+    def test_active_matter_deny_overrides_allow_at_write(self):
+        self.db.execute("INSERT INTO matter_acl VALUES('t1','m1','reviewer','approve','deny',1)")
+        self.assertFalse(approve(self.db,output_id='o1',tenant='t1',matter='m1',actor='reviewer',expected_version=0))
+        self.assertEqual(self.state(), (('pending_review',0),0))
+
+    def test_missing_approval_allow_denied(self):
+        self.db.execute("UPDATE matter_acl SET active=0 WHERE actor='reviewer'")
+        self.assertFalse(approve(self.db,output_id='o1',tenant='t1',matter='m1',actor='reviewer',expected_version=0))
         self.assertEqual(self.state(), (('pending_review',0),0))
 
     def test_author_cannot_self_approve(self):
