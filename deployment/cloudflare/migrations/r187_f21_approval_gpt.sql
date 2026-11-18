@@ -84,3 +84,23 @@ WHEN NEW.installation_id IS NOT OLD.installation_id
   OR NEW.author_id IS NOT OLD.author_id
   OR NEW.created_at IS NOT OLD.created_at
 BEGIN SELECT RAISE(ABORT,'F21_IDENTITY_IMMUTABLE'); END;
+
+-- R190: an audit event must exactly reflect the already-approved persisted output.
+-- The AFTER UPDATE audit trigger inserts after the output row has transitioned;
+-- direct fabricated events for drafts or mismatched versions/actors/timestamps fail.
+-- This protects QA metadata only; D1 adapter must still enforce session/MatterACL.
+CREATE TRIGGER IF NOT EXISTS trg_qa_f21_event_insert_guard
+BEFORE INSERT ON qa_approval_events
+WHEN NOT EXISTS (
+ SELECT 1 FROM qa_approval_outputs o
+ WHERE o.installation_id=NEW.installation_id
+   AND o.tenant_id=NEW.tenant_id
+   AND o.matter_id=NEW.matter_id
+   AND o.output_id=NEW.output_id
+   AND o.state='approved'
+   AND o.version=NEW.version
+   AND o.approved_by=NEW.actor_id
+   AND o.approved_at=NEW.occurred_at
+   AND NEW.action='approved'
+)
+BEGIN SELECT RAISE(ABORT,'F21_AUDIT_EVENT_NOT_BACKED_BY_APPROVAL'); END;

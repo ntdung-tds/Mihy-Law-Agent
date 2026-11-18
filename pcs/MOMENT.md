@@ -1,3 +1,10 @@
+## R190 — F21 approval event INSERT consistency guard (2026-11-19 VN)
+
+- Test-first commit `c420518`: two synthetic SQLite negative regressions for forged audit INSERT against a draft and forged version/actor after legitimate approval.
+- Fix commit `28155a1`: BEFORE INSERT trigger on `qa_approval_events` requires matching persisted approved output, version, actor and timestamp; normal AFTER UPDATE audit insertion remains permitted. This closes the direct forged-event gap noted in issue #156 without enabling a production approval endpoint.
+- **Tests NOT_RUN, final-head CI NOT_VERIFIED** until execution/log inspection; migration NOT_APPLIED. R190 only protects QA metadata. Real D1 adapter with transactional session, lawyer qualification, Tenant/MatterACL allow-minus-deny, API/UI and signed-in E2E still missing. F21 PARTIAL; R126 BLOCKED/NOT_RUN.
+- Preserve PCS revision 140, SRS v1.1.15 frozen, `AL-R0-DEPLOY-001` standalone-first and F01–F36 excluding all signing. No OAuth retries, customer data, merge or production deployment.
+
 ## R189 — F21 direct approved INSERT audit bypass (2026-11-19 VN)
 
 - Draft PR #242 stacked on #241. Test-first regression commit 8976bda adds two synthetic SQLite cases: pre-approved output INSERT must be rejected without audit, while draft INSERT remains allowed. Fix commit c6b9f30 adds a BEFORE INSERT trigger rejecting non-draft state; previously the audit trigger only ran on draft-to-approved UPDATE, permitting an approved row to appear without an approval event.
