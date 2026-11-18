@@ -1,3 +1,15 @@
+## R192 — Verify R191 F21 CI evidence (2026-11-19 VN)
+
+- Verified final PR #244 HEAD `7c7e3d31f3b032e385bad89a2bc1c7f53b5dfc9b`: GitHub Actions `F21 QA approval schema contracts` run #44417092314 completed SUCCESS, job #135200113135 SUCCESS. Inspected raw job logs: R187-R189 **8/8 PASS** and R190 **2/2 PASS**, total **10/10 synthetic SQLite schema tests PASS**. The checkout used PR merge ref `c22456080b0d8dc4a8d32c2c5b46fdaa3e8dc520`; DOCX POC run #44417092299 also SUCCESS. No skipped synthetic F21 cases in this job.
+- Evidence is limited to synthetic SQLite migration invariants; **D1 migration NOT_APPLIED**, live D1 adapter, verified session/Tenant/MatterACL, qualified lawyer, API/UI and signed-in browser E2E remain NOT_RUN/BLOCKED. F21 PARTIAL; R126 BLOCKED/NOT_RUN. No Fxx marked DONE and no Owner acceptance.
+- Preserve PCS revision 140, frozen SRS v1.1.15, `AL-R0-DEPLOY-001` standalone-first and F01-F36 excluding signing. No OAuth retry, customer data, merge or production deploy.
+
+## R191 — F21 synthetic approval schema tests wired into CI (2026-11-19 VN)
+
+- Draft PR #244 stacked on #243, commit cc4314d: added a no-secret, path-scoped GitHub Actions workflow running synthetic SQLite tests R187–R190 on PR changes. Prior tests were authored but not registered in CI; this addresses the specific execution-evidence gap rather than repeating an unverified PASS claim.
+- At creation, final HEAD CI NOT_VERIFIED (no workflow runs returned for cc4314d). No migration applied, no live D1/session/Tenant/MatterACL/lawyer qualification/API/UI or signed-in browser E2E. F21 PARTIAL; R126 BLOCKED/NOT_RUN.
+- Preserve PCS revision 140, SRS v1.1.15 frozen, protected AL-R0-DEPLOY-001 standalone-first, F01–F36 excluding signing. No OAuth retry, customer data, merge or production deployment.
+
 ## R190 — F21 approval event INSERT consistency guard (2026-11-19 VN)
 
 - Test-first commit `c420518`: two synthetic SQLite negative regressions for forged audit INSERT against a draft and forged version/actor after legitimate approval.
