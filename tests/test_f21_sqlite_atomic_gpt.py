@@ -59,6 +59,16 @@ class AtomicApprovalTests(unittest.TestCase):
         self.assertFalse(approve(self.db,output_id='o1',tenant='t1',matter='m1',actor='reviewer',expected_version=0,inject_audit_failure=True))
         self.assertEqual(self.state(), (('pending_review',0),0))
 
+    def test_real_sqlite_audit_trigger_abort_rolls_back_cas(self):
+        # Database-raised audit failure must undo the state transition.
+        self.db.execute("""CREATE TRIGGER reject_approval_audit
+            BEFORE INSERT ON audit
+            WHEN NEW.event='approved'
+            BEGIN SELECT RAISE(ABORT, 'synthetic audit rejected'); END""")
+        self.assertFalse(approve(self.db, output_id='o1', tenant='t1', matter='m1',
+                                 actor='reviewer', expected_version=0))
+        self.assertEqual(self.state(), (('pending_review', 0), 0))
+
     def test_stale_version_rejected(self):
         self.assertFalse(approve(self.db,output_id='o1',tenant='t1',matter='m1',actor='reviewer',expected_version=1))
         self.assertEqual(self.state(), (('pending_review',0),0))
