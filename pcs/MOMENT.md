@@ -1,5 +1,63 @@
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R180 — F21 adapter receipt attestation ownership (2026-11-18 VN)
+
+- Test-first `1f2119a`: added negative regression requiring CAS `changed` and audit `auditWritten` attestations to be own properties of the adapter receipt, not inherited from a prototype. Prior code accepted inherited true flags; synthetic test designed to fail before fix.
+- Fix `a20c543`: approval transition now rejects inherited receipt flags and returns `CONFLICT_OR_AUDIT_FAILURE` rather than `APPROVED`. This hardens an adapter trust boundary, **not** a real D1 atomic CAS/audit implementation.
+- CI at final HEAD **NOT_VERIFIED** pending GitHub Actions. F21 PARTIAL; R126 BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140, protected AL-R0-DEPLOY-001 standalone-first; F01–F36 target, signing excluded. No OAuth retries, customer data, merge or production deployment.
+
+
+## R179 — F21 persisted output CAS fields fail closed (2026-11-18 VN)
+
+- Test-first `6cbbfca`: synthetic adapter context inheriting `outputId` or `outputVersion` must be DENIED without CAS/audit write.
+- Fix `3ba1aa2`: require own persisted output identity and CAS version before approval transition. This is an input trust-boundary fix only, NOT a D1 adapter.
+- F21 PARTIAL (D1 atomic CAS/audit, API/UI and human E2E absent); R126 BLOCKED/NOT_RUN. CI at final HEAD NOT_VERIFIED pending run. SRS v1.1.15 frozen; PCS revision 140 and AL-R0-DEPLOY-001 standalone-first unchanged; F01–F36 target, signing excluded. No OAuth retry, real customer data, merge or production deploy.
+
+## R178 — F21 inherited transport identity fail-closed (2026-11-18 VN)
+
+- Test-first regression commit `3a56fc4`: synthetic session or input with identifiers inherited from a prototype must be DENIED before any adapter read or CAS/audit write.
+- Fix commit `3ecc2ea`: approval transition requires own actorId/tenantId on session and own outputId on input. This hardens a transport trust boundary; it does not create a verified session or D1 transaction.
+- F21 PARTIAL: real D1 CAS+audit, API/UI and lawyer E2E not implemented. R126 BLOCKED/NOT_RUN. CI for final HEAD pending independent verification. SRS v1.1.15 frozen; PCS revision 140, AL-R0-DEPLOY-001 standalone-first unchanged. No signing, OAuth retries, customer data, merge or production deploy.
+
+
+## R177 — F21 inherited approval context fail-closed (2026-11-18 VN)
+
+- Test-first regression commit `1e87909a`: a synthetic adapter context inheriting all approval identities and policy flags from its prototype must be `DENIED`, with zero CAS/audit writes. The pre-fix guard accepted inherited properties; this is a security boundary hardening, not a D1 adapter implementation.
+- Fix commit `198feebe`: `canApproveMatterOutput` requires own properties for all persisted identity, scope and approval policy fields before evaluation. CI run #44153307141 queued at first inspection; **final HEAD CI NOT_VERIFIED**. No live D1/human E2E PASS claimed.
+- F21 PARTIAL (transactional D1 CAS/audit adapter/API/UI still absent); R126 BLOCKED/NOT_RUN. PCS revision 140 and protected `AL-R0-DEPLOY-001` unchanged. SRS v1.1.15 frozen; standalone-first, F01–F36 target, signing excluded; no OAuth retry, customer data, merge or production deployment.
+
+## R176 — F21 top-level accessor fail-closed (2026-11-17 VN)
+
+- Test-first: added R176 negative regression to registered R169 Cloudflare contract suite. A hostile top-level argument Proxy throwing on `store`, `session`, or `input` must yield `DENIED` with zero adapter reads/writes. Test commit `6addb77c`.
+- Fixed approval entrypoint by moving argument destructuring inside `try` (commit `c3c100f`), so hostile property access cannot escape as rejected Promise before fail-closed handling. **CI at final HEAD NOT_VERIFIED** pending Actions; no production/human E2E PASS claimed.
+- F21 PARTIAL: D1 transactional CAS+audit adapter/API/UI/human approval remain missing; R126 signed-in dual-account QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140 and `AL-R0-DEPLOY-001` protected; no signing, OAuth retry, customer data, merge or production deploy.
+
+
+## R175 — F21 malformed transport accessor fail-closed (2026-11-17 VN)
+
+- Test-first regression in registered R169 suite: synthetic throwing session/input accessors must return DENIED with zero DB reads/writes. Updated F21 transition preflight to catch accessor errors, distinguish preflight DENIED from transactional CONFLICT_OR_AUDIT_FAILURE. Commits 362c01c, b06a42a, f738e75, dc3e819, aba0c154; issue #156 comment 6941124018.
+- Final HEAD CI **NOT_VERIFIED**; no PASS claim. F21 remains PARTIAL (no verified D1 atomic CAS+audit adapter/API/UI/human E2E), R126 Cloudflare dual-account QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140, protected AL-R0-DEPLOY-001 standalone-first. F01-F36 target, signing excluded. No customer data, OAuth retry, merge or production deploy.
+
+## R173 — F21 evidence reconciliation and D1 blocker (2026-11-15 VN)
+
+- Verified PR #239 HEAD `b5d06da71b7fc325c642392c76d97ef9e51fea0d` (base `feature/r168-f21-trusted-matter-id-gpt`), Actions #43706823693 completed SUCCESS: 9 executed jobs SUCCESS, 21 SKIPPED. This establishes CI contract checks only, **not** live D1 CAS/audit or human approval. Previous R172 NOT_VERIFIED is superseded **for that exact HEAD only**.
+- Examined F21 transition and guard: `loadVerifiedApprovalContext` / `approveWithAudit` remain abstract adapter calls. No trustworthy D1 approval-output/reviewer/audit table definitions located from repository code-search; do not invent a schema or report real transactional approval PASS. F21 PARTIAL; R126 signed-in dual-account QA BLOCKED/NOT_RUN.
+- No product code changed in this evidence-only reconciliation. Next engineering slice requires reading canonical D1 migrations and integrating a real atomic CAS+audit adapter with synthetic SQLite positive/negative tests; preserve MatterACL and separation-of-duties. SRS v1.1.15 frozen; PCS revision 140, protected `AL-R0-DEPLOY-001`, standalone-first and signing excluded. No merge/deploy/customer data.
+
+## R172 — F21 CAS version overflow guard (2026-11-15 VN)
+
+- Test-first negative regression on existing Draft PR #239: persisted outputVersion at `Number.MAX_SAFE_INTEGER` must be DENIED before any CAS/audit adapter write, because the successor is not a safe integer; also deny out-of-range, negative and fractional versions. Test commit `fa1545a2`, implementation commit `97efc35d`.
+- Narrow change only in F21 transition boundary. **CI at final HEAD NOT_VERIFIED** until Actions result is inspected; no claim of real D1 persistence or lawyer approval. F21 PARTIAL, R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, PCS revision 140, `AL-R0-DEPLOY-001` protected, standalone-first, F01–F36 excluding all signing. No OAuth retry, customer data, merge or production deployment.
+
+
+## R171 — F21 invisible Unicode format identifier guard (2026-11-15 VN)
+
+- Test-first regression added to existing PR #239: persisted approval author/output-author IDs containing Unicode format controls (zero-width, bidi marks/overrides/isolates, BOM) must be DENIED with zero CAS/audit writes. Commit `9aec25ee`.
+- Both F21 guard and transition identifier validators now reject Unicode `General_Category=Format (Cf)` in addition to existing C0/C1/line separators; commits `c1d428fc`, `7de7c46b`. Local Node v22 regex/representative-input smoke PASS; **GitHub final-HEAD CI NOT_VERIFIED** until checked. No D1 adapter, API, UI, lawyer E2E; F21 PARTIAL. R126 BLOCKED/NOT_RUN.
+- Preserve SRS v1.1.15 frozen, PCS revision 140, protected `AL-R0-DEPLOY-001`, standalone-first, all F01–F36 excluding signing; no production merge/deploy, customer data, or OAuth retry.
+
+
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
 - **PCS revision:** `140` (source of truth `pcs/STATE.json`).
 - **Updated:** `2026-11-14T04:03:00+07:00`.
@@ -7,6 +65,18 @@
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+
+## R170 — F21 approval guard parser fix (2026-11-15 VN)
+
+- Discovered a concrete JavaScript syntax defect in `deployment/cloudflare/src/f21_approval_guard_gpt.mjs`: literal backslash-n tokens outside strings and doubly escaped Unicode control regex. This can prevent the module from loading and incorrectly validate control-bearing IDs.
+- Test-first regression added to existing R169 CI test `r169_f21_persisted_identity_gpt.test.mjs` (guard import, valid ID and control/Unicode rejection). Fixed guard parsing and regex on the **existing** Draft PR #239 branch; no duplicate PR. Commits `f271d8b7`, `568f11d0`, `daca17db`.
+- **CI final HEAD NOT_VERIFIED** until Actions finishes. F21 remains **PARTIAL**: no D1 CAS+atomic audit, API, UI or lawyer E2E. R126 signed-in Cloudflare QA remains **BLOCKED/NOT_RUN**. SRS v1.1.15 frozen; PCS revision 140; `AL-R0-DEPLOY-001` preserved. No signing, real customer data, merge or production deployment.
+
+## R169 — F21 persisted identity/scope validation (2026-11-15 VN)
+
+- [Draft PR #239](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/239) stacked on #238. Test-first `r169_f21_persisted_identity_gpt.test.mjs` rejects malformed persisted author, output, reviewer assignment and Tenant/Matter scope identifiers before any approval/audit write; Cloudflare contract CI registered. No client trust or real D1 adapter.
+- **F21 PARTIAL; human E2E NOT_RUN.** R126 dual-account Cloudflare QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140, `AL-R0-DEPLOY-001` standalone-first preserved. No signing, customer data, merge or production deployment.
 
 ## R168 — F21 reject unsafe persisted Matter identifiers (2026-11-15 VN)
 
