@@ -1,3 +1,9 @@
+## R189 — F21 direct approved INSERT audit bypass (2026-11-19 VN)
+
+- Draft PR #242 stacked on #241. Test-first regression commit 8976bda adds two synthetic SQLite cases: pre-approved output INSERT must be rejected without audit, while draft INSERT remains allowed. Fix commit c6b9f30 adds a BEFORE INSERT trigger rejecting non-draft state; previously the audit trigger only ran on draft-to-approved UPDATE, permitting an approved row to appear without an approval event.
+- Local tests NOT_RUN (GitHub DNS unavailable in container); final HEAD CI NOT_VERIFIED; migration NOT_APPLIED. This is isolated QA schema protection, NOT a verified D1 adapter/session/MatterACL authorization transaction, qualified-lawyer approval, API/UI or real E2E. F21 PARTIAL; R126 BLOCKED/NOT_RUN.
+- Preserve PCS revision 140, SRS v1.1.15 frozen, AL-R0-DEPLOY-001 standalone-first, all F01–F36 excluding signing. No OAuth retries, customer data, merge or production deploy.
+
 ## R188 — F21 persisted author/output identity guard (2026-11-19 VN)
 
 - Draft PR #241 stacked on #240. Test-first negative regression commit 2e750c3 demonstrates intended invariant: draft author_id and output_id must not be rewritten before approval. Fix commit 6f2a474 adds SQLite trigger preventing persisted author, installation/Tenant/Matter/output identity and created_at rewrites. Prevents reattribution bypass of author/reviewer separation in QA schema.
