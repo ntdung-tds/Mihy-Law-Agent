@@ -1,3 +1,9 @@
+## R199 — F21 persisted version bound (2026-11-19 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS changes, PR #246 HEAD/base, issue #156 and parallel open PRs before editing. Draft PR #247 stacked on #246; distinct test-first source guard fixes `outputVersion=0` previously accepted by source transition despite R187 QA SQLite requiring `version>=1`.
+- New `r199_f21_version_bound_gpt.test.py` checks positive version contract; source `f21_approval_transition_gpt.mjs` now rejects version <1. No-secret workflow added. **CI NOT_VERIFIED** pending actual run/log inspection; no claim of functional approval.
+- **F21 PARTIAL**: `pending_review` vs QA `draft/approved` unresolved, D1 migration NOT_APPLIED, atomic authorization/MatterACL/qualified lawyer/audit adapter and browser E2E NOT_RUN. R126 BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140, protected `AL-R0-DEPLOY-001` unchanged; no signing, OAuth retry, customer data, merge or production deployment.
+
 ## R197 — Verify R195 final-head state-contract CI (2026-11-19 VN)
 
 - Verified PR #246 HEAD `c258bc1536923bd1c037d40f64d26deaa2e43e54`, base PR #245 HEAD `217392ee81738bd43cae2525e68965d20e233a89`. GitHub Actions #44455067545 completed SUCCESS; inspected raw job #135327997950, checkout PR merge `c0f5c68dfe314d0cb4ada2d0ee0b7ae567c4eb09`: **2/2 synthetic state-contract tests PASS**, `Ran 2 tests in 0.010s`, exit 0. This proves the mismatch is reproducible, **not** that it has been resolved.
