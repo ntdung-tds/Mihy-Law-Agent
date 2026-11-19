@@ -19,8 +19,11 @@ INSERT INTO qa_memberships VALUES('i','t','reviewer');
 class ApprovedDeletionGuard(unittest.TestCase):
     def setUp(self):
         self.db = sqlite3.connect(":memory:")
-        self.db.execute("PRAGMA foreign_keys=OFF")
         self.db.executescript(BASE + SQL)
+        # Migration enables FK; explicitly disable it after schema setup to exercise
+        # the independent DELETE trigger rather than an FK restriction.
+        self.db.execute("PRAGMA foreign_keys=OFF")
+        self.assertEqual(self.db.execute("PRAGMA foreign_keys").fetchone()[0], 0)
         self.db.execute("INSERT INTO qa_approval_outputs (installation_id,tenant_id,matter_id,output_id,author_id,created_at) VALUES('i','t','m','o','author',1)")
         self.db.execute("INSERT INTO qa_approval_assignments VALUES('i','t','m','o','reviewer',1)")
         self.db.execute("UPDATE qa_approval_outputs SET state='approved',version=2,approved_by='reviewer',approved_at=2 WHERE output_id='o'")
