@@ -1,3 +1,9 @@
+## R196 — Fix R195 CI zero-test discovery failure (2026-11-19 VN)
+
+- Read real GitHub Actions run #44448991129, job #135307995317: FAILED exit 5, `Ran 0 tests / NO TESTS RAN`. Root cause: Python unittest discovery could not import dotted filename `r195_f21_state_contract_gpt.test.py`.
+- Fixed CI invocation to execute test script directly in commit `f162b1b`; new HEAD CI NOT_VERIFIED until workflow finishes and logs inspected. Issue #156 comment 6999233822. No schema, API, UI, migration or production changes.
+- F21 PARTIAL; pending_review vs persisted draft/approved blocker unresolved; R126 BLOCKED/NOT_RUN. Preserve SRS v1.1.15, PCS revision 140, protected `AL-R0-DEPLOY-001`, 36 Fxx target excluding signing. No customer data, OAuth retry, merge or deploy.
+
 ## R195 — F21 state compatibility blocker reproduced in test source (2026-11-19 VN)
 
 - Draft PR #246 stacked on #245; test-first commit 7d57da0 adds two synthetic regression cases and commit 3c7ff00 wires no-secret CI. The existing source-only F21 transition requests `expectedStatus:'pending_review'`, but R187 QA persistence schema allows only `draft`/`approved`. Directly persisting pending_review is rejected by schema CHECK; draft is not equivalent to review-ready.
