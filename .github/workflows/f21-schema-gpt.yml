@@ -6,6 +6,7 @@ on:
       - 'deployment/cloudflare/migrations/r187_f21_approval_gpt.sql'
       - 'deployment/cloudflare/tests/test_r18*_f21*_gpt.py'
       - 'deployment/cloudflare/tests/test_r190_f21_audit_insert_gpt.py'
+      - 'deployment/cloudflare/tests/test_r193_f21_approved_delete_gpt.py'
       - '.github/workflows/f21-schema-gpt.yml'
   workflow_dispatch:
 
@@ -22,11 +23,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Execute F21 schema regressions R187-R190
+      - name: Execute F21 schema regressions R187-R190 and R193
         shell: bash
         run: |
           set -euo pipefail
           python -m unittest discover -s deployment/cloudflare/tests -p 'test_r18*_f21*_gpt.py' -v
           python -m unittest discover -s deployment/cloudflare/tests -p 'test_r190_f21_audit_insert_gpt.py' -v
+          python -m unittest discover -s deployment/cloudflare/tests -p 'test_r193_f21_approved_delete_gpt.py' -v
       - name: State scope of evidence
         run: echo 'Synthetic SQLite tests only. No D1 migration, session, MatterACL, lawyer UI, or Cloudflare signed-in E2E is validated.'
