@@ -1,3 +1,21 @@
+## R197 — Verify R195 final-head state-contract CI (2026-11-19 VN)
+
+- Verified PR #246 HEAD `c258bc1536923bd1c037d40f64d26deaa2e43e54`, base PR #245 HEAD `217392ee81738bd43cae2525e68965d20e233a89`. GitHub Actions #44455067545 completed SUCCESS; inspected raw job #135327997950, checkout PR merge `c0f5c68dfe314d0cb4ada2d0ee0b7ae567c4eb09`: **2/2 synthetic state-contract tests PASS**, `Ran 2 tests in 0.010s`, exit 0. This proves the mismatch is reproducible, **not** that it has been resolved.
+- Confirmed concrete blocker: source-only F21 transition expects `pending_review` while QA schema permits `draft`/`approved`; do not silently alias or mark F21 DONE. D1 migration NOT_APPLIED, real atomic adapter, session, Tenant/MatterACL, qualified lawyer, API/UI and signed-in E2E NOT_RUN/BLOCKED; R126 BLOCKED/NOT_RUN.
+- No schema/API/UI change, customer data, signing, OAuth retry, merge or production deployment. SRS v1.1.15 frozen; PCS revision 140 and protected `AL-R0-DEPLOY-001` unchanged. CI on this documentation commit must be checked separately.
+
+## R196 — Fix R195 CI zero-test discovery failure (2026-11-19 VN)
+
+- Read real GitHub Actions run #44448991129, job #135307995317: FAILED exit 5, `Ran 0 tests / NO TESTS RAN`. Root cause: Python unittest discovery could not import dotted filename `r195_f21_state_contract_gpt.test.py`.
+- Fixed CI invocation to execute test script directly in commit `f162b1b`; new HEAD CI NOT_VERIFIED until workflow finishes and logs inspected. Issue #156 comment 6999233822. No schema, API, UI, migration or production changes.
+- F21 PARTIAL; pending_review vs persisted draft/approved blocker unresolved; R126 BLOCKED/NOT_RUN. Preserve SRS v1.1.15, PCS revision 140, protected `AL-R0-DEPLOY-001`, 36 Fxx target excluding signing. No customer data, OAuth retry, merge or deploy.
+
+## R195 — F21 state compatibility blocker reproduced in test source (2026-11-19 VN)
+
+- Draft PR #246 stacked on #245; test-first commit 7d57da0 adds two synthetic regression cases and commit 3c7ff00 wires no-secret CI. The existing source-only F21 transition requests `expectedStatus:'pending_review'`, but R187 QA persistence schema allows only `draft`/`approved`. Directly persisting pending_review is rejected by schema CHECK; draft is not equivalent to review-ready.
+- This is a **specific D1 adapter integration blocker**, not evidence that F21 approval works. Resolve via SRS-traced state model and atomic D1 authorization/transition/audit, including verified session, Tenant/MatterACL allow-minus-deny, qualified lawyer and assignment; do not silently alias states. R195 CI **NOT_VERIFIED** at commit time, no migration applied and no signed-in E2E. F21 PARTIAL; R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, PCS revision 140, protected AL-R0-DEPLOY-001 standalone-first and F01–F36 excluding signing unchanged. No customer data, OAuth retries, merge or production deployment.
+
 ## R194 — Verify R193 actual CI (2026-11-19 VN)
 
 - Verified GitHub Actions run #44433660707 job #135257025026 completed SUCCESS; inspected raw job logs. R187–R189 8/8 PASS, R190 2/2 PASS, R193 approved-delete with foreign_keys=OFF and draft cleanup 2/2 PASS: total **12/12 synthetic SQLite tests PASS**. This evidence applies to this workflow execution, not a live D1 transaction or necessarily the final documentation HEAD.
