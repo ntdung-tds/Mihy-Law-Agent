@@ -104,3 +104,10 @@ WHEN NOT EXISTS (
    AND NEW.action='approved'
 )
 BEGIN SELECT RAISE(ABORT,'F21_AUDIT_EVENT_NOT_BACKED_BY_APPROVAL'); END;
+
+-- R193: preserve approved output and audit linkage independently of connection
+-- foreign_keys settings. Draft cleanup remains possible; no production migration applied.
+CREATE TRIGGER IF NOT EXISTS trg_qa_f21_approved_no_delete
+BEFORE DELETE ON qa_approval_outputs
+WHEN OLD.state='approved'
+BEGIN SELECT RAISE(ABORT,'F21_APPROVED_DELETE_FORBIDDEN'); END;

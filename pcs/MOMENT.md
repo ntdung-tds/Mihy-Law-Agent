@@ -1,3 +1,15 @@
+## R194 — Verify R193 actual CI (2026-11-19 VN)
+
+- Verified GitHub Actions run #44433660707 job #135257025026 completed SUCCESS; inspected raw job logs. R187–R189 8/8 PASS, R190 2/2 PASS, R193 approved-delete with foreign_keys=OFF and draft cleanup 2/2 PASS: total **12/12 synthetic SQLite tests PASS**. This evidence applies to this workflow execution, not a live D1 transaction or necessarily the final documentation HEAD.
+- F21 remains PARTIAL; QA D1 migration NOT_APPLIED, verified session, Tenant/MatterACL, qualified lawyer, atomic approval adapter, API/UI and signed-in E2E NOT_RUN/BLOCKED. R126 remains BLOCKED/NOT_RUN. Next distinct code slice must integrate a fail-closed D1 adapter with same-transaction authorization and audit, rather than another isolated trigger.
+- SRS v1.1.15 frozen, PCS revision 140 and AL-R0-DEPLOY-001 preserved; all F01–F36 except signing remain target. No OAuth retries, customer data, merge or production deploy.
+
+## R193 — F21 approved output deletion guard (2026-11-19 VN)
+
+- Draft PR #245 stacked on #244. Test-first commit 622ce40 adds two synthetic SQLite cases: approved output must not be deletable when foreign_keys=OFF (protect audit linkage), while draft cleanup remains permitted. Fix f950d2c adds BEFORE DELETE guard independent of connection PRAGMA; workflow registration 7cf5def.
+- This is a QA schema safety slice, **not** a deployed D1 migration or real transactional adapter. CI at final HEAD **NOT_VERIFIED** until run and raw logs inspected. F21 PARTIAL: verified session, Tenant/MatterACL allow-minus-deny, qualified lawyer, atomic D1 adapter, API/UI and signed-in E2E remain NOT_RUN. R126 BLOCKED/NOT_RUN.
+- PCS revision 140 and protected `AL-R0-DEPLOY-001` unchanged; SRS v1.1.15 frozen, F01–F36 target excluding all signing. No OAuth retries, real customer data, merge or production deploy.
+
 ## R192 — Verify R191 F21 CI evidence (2026-11-19 VN)
 
 - Verified final PR #244 HEAD `7c7e3d31f3b032e385bad89a2bc1c7f53b5dfc9b`: GitHub Actions `F21 QA approval schema contracts` run #44417092314 completed SUCCESS, job #135200113135 SUCCESS. Inspected raw job logs: R187-R189 **8/8 PASS** and R190 **2/2 PASS**, total **10/10 synthetic SQLite schema tests PASS**. The checkout used PR merge ref `c22456080b0d8dc4a8d32c2c5b46fdaa3e8dc520`; DOCX POC run #44417092299 also SUCCESS. No skipped synthetic F21 cases in this job.
