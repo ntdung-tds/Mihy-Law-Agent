@@ -1,3 +1,9 @@
+## R197 — Verify R195 final-head state-contract CI (2026-11-19 VN)
+
+- Verified PR #246 HEAD `c258bc1536923bd1c037d40f64d26deaa2e43e54`, base PR #245 HEAD `217392ee81738bd43cae2525e68965d20e233a89`. GitHub Actions #44455067545 completed SUCCESS; inspected raw job #135327997950, checkout PR merge `c0f5c68dfe314d0cb4ada2d0ee0b7ae567c4eb09`: **2/2 synthetic state-contract tests PASS**, `Ran 2 tests in 0.010s`, exit 0. This proves the mismatch is reproducible, **not** that it has been resolved.
+- Confirmed concrete blocker: source-only F21 transition expects `pending_review` while QA schema permits `draft`/`approved`; do not silently alias or mark F21 DONE. D1 migration NOT_APPLIED, real atomic adapter, session, Tenant/MatterACL, qualified lawyer, API/UI and signed-in E2E NOT_RUN/BLOCKED; R126 BLOCKED/NOT_RUN.
+- No schema/API/UI change, customer data, signing, OAuth retry, merge or production deployment. SRS v1.1.15 frozen; PCS revision 140 and protected `AL-R0-DEPLOY-001` unchanged. CI on this documentation commit must be checked separately.
+
 ## R196 — Fix R195 CI zero-test discovery failure (2026-11-19 VN)
 
 - Read real GitHub Actions run #44448991129, job #135307995317: FAILED exit 5, `Ran 0 tests / NO TESTS RAN`. Root cause: Python unittest discovery could not import dotted filename `r195_f21_state_contract_gpt.test.py`.
