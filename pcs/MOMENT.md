@@ -1,3 +1,9 @@
+## R195 — F21 state compatibility blocker reproduced in test source (2026-11-19 VN)
+
+- Draft PR #246 stacked on #245; test-first commit 7d57da0 adds two synthetic regression cases and commit 3c7ff00 wires no-secret CI. The existing source-only F21 transition requests `expectedStatus:'pending_review'`, but R187 QA persistence schema allows only `draft`/`approved`. Directly persisting pending_review is rejected by schema CHECK; draft is not equivalent to review-ready.
+- This is a **specific D1 adapter integration blocker**, not evidence that F21 approval works. Resolve via SRS-traced state model and atomic D1 authorization/transition/audit, including verified session, Tenant/MatterACL allow-minus-deny, qualified lawyer and assignment; do not silently alias states. R195 CI **NOT_VERIFIED** at commit time, no migration applied and no signed-in E2E. F21 PARTIAL; R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, PCS revision 140, protected AL-R0-DEPLOY-001 standalone-first and F01–F36 excluding signing unchanged. No customer data, OAuth retries, merge or production deployment.
+
 ## R194 — Verify R193 actual CI (2026-11-19 VN)
 
 - Verified GitHub Actions run #44433660707 job #135257025026 completed SUCCESS; inspected raw job logs. R187–R189 8/8 PASS, R190 2/2 PASS, R193 approved-delete with foreign_keys=OFF and draft cleanup 2/2 PASS: total **12/12 synthetic SQLite tests PASS**. This evidence applies to this workflow execution, not a live D1 transaction or necessarily the final documentation HEAD.
