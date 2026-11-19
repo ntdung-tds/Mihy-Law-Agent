@@ -15,4 +15,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Reproduce incompatible F21 states (synthetic, not D1)
-        run: python3 -m unittest discover -s deployment/cloudflare/tests -p 'r195_f21_state_contract_gpt.test.py' -v
+        run: python3 deployment/cloudflare/tests/r195_f21_state_contract_gpt.test.py -v
