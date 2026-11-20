@@ -1,0 +1,19 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {nextReviewState,REVIEW_STATES} from '../src/f21_review_state_gpt.mjs';
+test('explicit three-state contract',()=>{
+ assert.deepEqual(REVIEW_STATES,['draft','pending_review','approved']);
+ assert.deepEqual(nextReviewState({from:'draft',to:'pending_review',version:1}),{
+  expectedStatus:'draft',nextStatus:'pending_review',expectedVersion:1,nextVersion:2});
+ assert.deepEqual(nextReviewState({from:'pending_review',to:'approved',version:2,authorId:'a',reviewerId:'b'}),{
+  expectedStatus:'pending_review',nextStatus:'approved',expectedVersion:2,nextVersion:3});
+});
+test('reject direct draft approval, backwards transitions and repeat approval',()=>{
+ for(const [from,to] of [['draft','approved'],['pending_review','draft'],['approved','approved'],['approved','draft']])
+  assert.equal(nextReviewState({from,to,version:2,authorId:'a',reviewerId:'b'}),null);
+});
+test('reject self-approval and invalid versions',()=>{
+ assert.equal(nextReviewState({from:'pending_review',to:'approved',version:2,authorId:'a',reviewerId:'a'}),null);
+ for(const version of [0,-1,1.5,Number.MAX_SAFE_INTEGER,NaN])
+  assert.equal(nextReviewState({from:'draft',to:'pending_review',version}),null);
+});
