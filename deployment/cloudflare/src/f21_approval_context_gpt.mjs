@@ -4,7 +4,13 @@
  * This does not replace an atomic D1 transaction or enable issuance.
  */
 export function mayApproveMatterOutput(context) {
- if (!context || typeof context !== 'object') return false;
+ if (!context || typeof context !== 'object' || Array.isArray(context)) return false;
+ // Reject inherited authorization flags: every gate must be explicitly supplied
+ // by the trusted server-side context builder, not its prototype chain.
+ const required = ['sessionVerified','sessionActive','tenantMatches','matterMatches',
+  'membershipActive','lawyerQualified','reviewerAssigned','aclAllow','aclDeny',
+  'systemAdministrator','reviewerId','authorId'];
+ if (!required.every(key => Object.hasOwn(context,key))) return false;
  const {sessionVerified,sessionActive,tenantMatches,matterMatches,
         membershipActive,lawyerQualified,reviewerAssigned,
         aclAllow,aclDeny,systemAdministrator,reviewerId,authorId} = context;
