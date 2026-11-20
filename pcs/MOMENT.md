@@ -1,3 +1,9 @@
+## R212 — F21 audit insertion integrity guard (2026-11-21 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS register, issue #156, open stacked PRs including #255 and R187 schema; avoid changes to protected AL-R0-DEPLOY-001 and frozen SRS v1.1.15.
+- Test-first synthetic SQLite regression adds four cases for forged audit before approval, legitimate legacy atomic approval, mismatched version/actor and cross-tenant insertion. Additive QA migration adds BEFORE INSERT audit guard matching approved output state/version/reviewer/time; no migration applied to D1.
+- **CI NOT_VERIFIED** until R212 final HEAD workflow runs and logs checked. F21 PARTIAL: pending_review schema and trigger incompatibilities remain; verified session/qualified lawyer/MatterACL atomic approval and signed-in E2E NOT_RUN; R126 BLOCKED/NOT_RUN. No signing, OAuth retry, customer data, merge or production deploy.
+
 ## R210 — F21 receipt accessor fail-closed (2026-11-20 VN)
 
 - Read PCS STATE/MOMENT/scope/SRS register at #253 HEAD, issue #156, current PR #253 HEAD/base and open parallel PRs. R209 final HEAD 890d5b6 Actions #44749654051 completed SUCCESS (source-only).
