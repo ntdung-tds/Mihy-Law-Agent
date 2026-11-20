@@ -1,0 +1,17 @@
+name: F21 R211 review-ready trigger blocker contract
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/migrations/r187_f21_approval_gpt.sql'
+      - 'deployment/cloudflare/tests/r211_f21_trigger_blocker_gpt.test.py'
+      - '.github/workflows/f21-r211-trigger-gpt.yml'
+  workflow_dispatch:
+jobs:
+  trigger-blocker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s deployment/cloudflare/tests -p 'r211_f21_trigger_blocker_gpt.test.py' -v
