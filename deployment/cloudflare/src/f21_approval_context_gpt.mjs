@@ -26,6 +26,6 @@ export function mayApproveMatterOutput(context) {
      reviewerAssigned !== true || aclAllow !== true ||
      aclDeny !== false || systemAdministrator !== false) return false;
  const safeId = x => typeof x === 'string' && x.length > 0 && x.length <= 128 &&
-   x.trim() === x && !/[\u0000-\u001f\u007f-\u009f\u2028\u2029\p{Cf}]/u.test(x);
+   x.trim() === x && x.normalize('NFC') === x && !/[\u0000-\u001f\u007f-\u009f\u2028\u2029\p{Cf}]/u.test(x);
  return safeId(reviewerId) && safeId(authorId) && reviewerId !== authorId;
 }
