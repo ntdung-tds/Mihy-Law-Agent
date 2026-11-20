@@ -1,3 +1,9 @@
+## R201 — F21 explicit review lifecycle source contract (2026-11-20 VN)
+
+- Read latest PCS STATE/MOMENT/scope/SRS register, PR #247 HEAD/base, open stacked PRs and issue #156 before changes. Created Draft PR #248 stacked on #247, source-only three-state helper draft → pending_review → approved with optimistic version boundaries, rejection of draft direct approval/backwards/self-approval and synthetic Node tests plus no-secret CI.
+- **CI NOT_VERIFIED** until actual run/log checked. The helper is not wired into Worker/D1; existing R187 schema still allows only draft/approved. F21 PARTIAL; migration NOT_APPLIED; verified session, Tenant/MatterACL, lawyer qualification, assignment, atomic audit adapter, signed-in desktop/mobile E2E NOT_RUN. R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen; PCS revision 140 and protected AL-R0-DEPLOY-001 unchanged. No signing, customer data, OAuth retries, merge or production deploy.
+
 ## R199 — F21 persisted version bound (2026-11-19 VN)
 
 - Read PCS STATE/MOMENT/scope/SRS changes, PR #246 HEAD/base, issue #156 and parallel open PRs before editing. Draft PR #247 stacked on #246; distinct test-first source guard fixes `outputVersion=0` previously accepted by source transition despite R187 QA SQLite requiring `version>=1`.
