@@ -29,3 +29,13 @@ test('R202: draft submission cannot smuggle an approval reviewer',()=>{
  assert.equal(nextReviewState({from:'draft',to:'pending_review',version:1,reviewerId:'b'}),null);
  assert.equal(nextReviewState({from:'draft',to:'pending_review',version:1,reviewerId:null})?.nextStatus,'pending_review');
 });
+
+test('R208: lifecycle rejects Unicode-equivalent self approval before persistence',()=>{
+ const composed='reviewer-\u00e9';
+ const decomposed='reviewer-e\u0301';
+ const transition=(authorId,reviewerId)=>nextReviewState({from:'pending_review',to:'approved',version:2,authorId,reviewerId});
+ assert.equal(transition(composed,decomposed),null);
+ assert.equal(transition(decomposed,composed),null);
+ assert.equal(transition('author-a',decomposed),null);
+ assert.equal(transition(composed,'reviewer-b')?.nextStatus,'approved');
+});
