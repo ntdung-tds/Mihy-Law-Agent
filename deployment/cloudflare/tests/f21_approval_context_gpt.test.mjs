@@ -34,3 +34,12 @@ test('R204 negative: no self approval, invalid identities or client-controlled n
   assert.equal(mayApproveMatterOutput({...allowed(),reviewerId}),false);
  assert.equal(mayApproveMatterOutput({...allowed(),authorId:undefined}),false);
 });
+
+// R205 regression: inherited or accessor-controlled flags must not grant approval.
+test('R205 negative: prototype-inherited approval flags never authorize',()=>{
+ const inherited=Object.create(allowed());
+ assert.equal(mayApproveMatterOutput(inherited),false);
+ const partial=Object.create(allowed());
+ partial.reviewerId='reviewer-b';
+ assert.equal(mayApproveMatterOutput(partial),false);
+});
