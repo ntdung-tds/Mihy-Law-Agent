@@ -1,3 +1,16 @@
+## R203 — Fix R202 CI fixture escape (2026-11-20 VN)
+
+- Inspected PR #249 HEAD/base, PCS STATE/MOMENT/scope/SRS change register, issue #156 and parallel PRs. Real workflow #44650958810 FAILED (contract 4/5; job #136005409442) while general CI #44650958778 SUCCESS with private QA jobs SKIPPED.
+- Root cause: negative-test fixtures used double-escaped `\\n` and `\\u200b`/`\\u202e`/`\\u007f`, yielding literal backslash text rather than control/format characters. Fixed test literals on existing Draft PR #249 at commit `14adc549c57de7d622369c508f5560ceb4e592a3` without weakening production guard; re-run/final-head CI must be checked. Test-first intent retained, FAIL recorded honestly.
+- F21 PARTIAL, D1 NOT_APPLIED, R126 BLOCKED/NOT_RUN. SRS v1.1.15 frozen; PCS revision 140 and AL-R0-DEPLOY-001 unchanged; no signing, customer data, merge, OAuth retries or production deployment.
+
+## R202 — F21 canonical reviewer identity guard (2026-11-20 VN)
+
+- Read current PCS STATE/MOMENT/scope/SRS register, Draft PR #248 HEAD/base, issue #156 and parallel stacked PRs. R201 workflow #44643064695 completed SUCCESS (contract job); this proves only source tests.
+- Test-first Draft PR #249 stacked on #248: reject noncanonical reviewer/author IDs (whitespace, controls, Unicode format chars, >128), reject reviewer identity on draft submission, retain valid pending_review → approved and version checks. New source/test changes, no Worker/D1 wiring.
+- **CI R202 NOT_VERIFIED** pending final-head GitHub Actions run/log; no PASS claim for new tests. F21 PARTIAL; R187 QA schema still draft/approved, D1 NOT_APPLIED, atomic session/Tenant/MatterACL/qualified lawyer/assignment/audit and signed-in E2E NOT_RUN. R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen; PCS revision 140 and AL-R0-DEPLOY-001 unchanged. No signing, customer data, OAuth retries, merge or production deploy.
+
 ## R201 — F21 explicit review lifecycle source contract (2026-11-20 VN)
 
 - Read latest PCS STATE/MOMENT/scope/SRS register, PR #247 HEAD/base, open stacked PRs and issue #156 before changes. Created Draft PR #248 stacked on #247, source-only three-state helper draft → pending_review → approved with optimistic version boundaries, rejection of draft direct approval/backwards/self-approval and synthetic Node tests plus no-secret CI.
