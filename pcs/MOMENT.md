@@ -1,3 +1,9 @@
+## R210 — F21 receipt accessor fail-closed (2026-11-20 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS register at #253 HEAD, issue #156, current PR #253 HEAD/base and open parallel PRs. R209 final HEAD 890d5b6 Actions #44749654051 completed SUCCESS (source-only).
+- Draft PR #254 stacked on #253: test-first commits 65a7cb4 and 6ef8bf1 add negative regression against getter-forged receipt flags; fix 3ee85e6 requires own data descriptors for changed/auditWritten without executing accessors; workflow ac4e64f. **R210 CI NOT_VERIFIED** until final-head workflow jobs/logs checked.
+- F21 PARTIAL. D1 pending_review schema mismatch, migration NOT_APPLIED, transactional ACL/qualification/assignment/audit and real signed-in E2E NOT_RUN; R126 BLOCKED/NOT_RUN. No live approval or release. Preserve SRS v1.1.15, PCS revision140, AL-R0-DEPLOY-001. No signing, customer data, OAuth retries, merge or production deploy.
+
 ## R209 — F21 transition boundary NFC input guard (2026-11-20 VN)
 
 - Read four PCS files, issue #156, PR #252 HEAD/base, parallel PRs and R187 schema. Existing approval transition boundary lacked NFC validation even though R207/R208 lifecycle/context rejected non-NFC identities.
