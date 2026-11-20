@@ -10,10 +10,16 @@ export function mayApproveMatterOutput(context) {
  const required = ['sessionVerified','sessionActive','tenantMatches','matterMatches',
   'membershipActive','lawyerQualified','reviewerAssigned','aclAllow','aclDeny',
   'systemAdministrator','reviewerId','authorId'];
- if (!required.every(key => Object.hasOwn(context,key))) return false;
+ // Read own data descriptors only; never execute a getter during authorization.
+ let values;
+ try {
+  const descriptors = Object.getOwnPropertyDescriptors(context);
+  if (!required.every(key => Object.hasOwn(descriptors,key) && Object.hasOwn(descriptors[key],'value'))) return false;
+  values = Object.fromEntries(required.map(key => [key,descriptors[key].value]));
+ } catch { return false; }
  const {sessionVerified,sessionActive,tenantMatches,matterMatches,
         membershipActive,lawyerQualified,reviewerAssigned,
-        aclAllow,aclDeny,systemAdministrator,reviewerId,authorId} = context;
+        aclAllow,aclDeny,systemAdministrator,reviewerId,authorId} = values;
  if (sessionVerified !== true || sessionActive !== true ||
      tenantMatches !== true || matterMatches !== true ||
      membershipActive !== true || lawyerQualified !== true ||
