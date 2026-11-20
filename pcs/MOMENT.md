@@ -1,3 +1,9 @@
+## R209 — F21 transition boundary NFC input guard (2026-11-20 VN)
+
+- Read four PCS files, issue #156, PR #252 HEAD/base, parallel PRs and R187 schema. Existing approval transition boundary lacked NFC validation even though R207/R208 lifecycle/context rejected non-NFC identities.
+- Draft PR #253 stacked on #252: test-first commit b349a11 adds two synthetic negative tests covering actor/tenant/output IDs before store reads; fix e5c68f6 enforces NFC at transition input boundary; CI workflow commit 19c1867. **Final HEAD CI NOT_VERIFIED** until GitHub Actions jobs/logs are checked. No claim of live E2E PASS.
+- F21 PARTIAL; R187 schema permits draft/approved only, pending_review integration remains BLOCKED; D1 migration NOT_APPLIED; atomic authorization/audit and signed-in E2E NOT_RUN; R126 BLOCKED/NOT_RUN. Preserve SRS v1.1.15, PCS revision140 and AL-R0-DEPLOY-001. No signing, customer data, OAuth retries, merge or production deploy.
+
 ## R208 — F21 lifecycle Unicode identity parity (2026-11-20 VN)
 
 - Read PCS STATE/MOMENT/scope/SRS register, PR #251 HEAD/base and CI, issue #156, open parallel PRs and PR #187. R207 final HEAD 2161e1b workflows #44692139855 and #44692140121 completed SUCCESS (source-only).
