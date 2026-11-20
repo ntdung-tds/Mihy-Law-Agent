@@ -1,3 +1,10 @@
+## R208 — F21 lifecycle Unicode identity parity (2026-11-20 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS register, PR #251 HEAD/base and CI, issue #156, open parallel PRs and PR #187. R207 final HEAD 2161e1b workflows #44692139855 and #44692140121 completed SUCCESS (source-only).
+- Found distinct mismatch: F21 authorization context rejects non-NFC identities, but F21 lifecycle nextReviewState still accepted canonically equivalent author/reviewer strings as distinct, allowing a self-review bypass if called without the context guard. Reproduced with Node using U+00E9 versus e + U+0301.
+- Draft PR #252 stacked on #251: test-first commit cfe4d525, fix 054b5d2 enforces NFC in lifecycle validId; no Worker/D1 integration. **R208 final-head CI NOT_VERIFIED** pending real run/log inspection.
+- F21 PARTIAL; pending_review schema mismatch, atomic server authorization/audit and signed-in E2E remain; D1 NOT_APPLIED, R126 BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140, AL-R0-DEPLOY-001 protected. No signing, customer data, OAuth retry, merge or production deploy.
+
 ## R206 — F21 own accessor authorization regression (2026-11-20 VN)
 
 - Read PCS STATE/MOMENT/scope/SRS change register, Draft PR #250 HEAD/base, issue #156 and parallel PRs. Verified prior R205 final HEAD f49b813 workflow #44678024727 SUCCESS (source-only).
