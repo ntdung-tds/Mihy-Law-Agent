@@ -1,3 +1,10 @@
+## R206 — F21 own accessor authorization regression (2026-11-20 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS change register, Draft PR #250 HEAD/base, issue #156 and parallel PRs. Verified prior R205 final HEAD f49b813 workflow #44678024727 SUCCESS (source-only).
+- Created Draft PR #251 stacked on #250: test-first commit 41aa32b checks own getter-supplied approval flags are rejected without invoking getter; fix 9b1600c reads only own data property descriptors and rejects accessors. No Worker/D1 integration or release path.
+- **R206 CI NOT_VERIFIED** until final-head workflow logs inspected. F21 PARTIAL; D1 migration NOT_APPLIED, pending_review/schema blocker and atomic server-side authorization/audit remain; R126 signed-in E2E BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, PCS revision 140 and AL-R0-DEPLOY-001 unchanged. No signing, customer data, OAuth retries, merge or production deployment.
+
 ## R205 — F21 prototype-inherited authorization gates (2026-11-20 VN)
 
 - Re-read PCS STATE/MOMENT/scope/SRS register, Draft PR #250 HEAD/base, issue #156 and open parallel PRs. Verified R204 code HEAD c5d1f860: workflow #44671245510 SUCCESS; actual source-contract job #136072473279 shows 4/4 PASS. General workflow #44671245665 SUCCESS; these are source tests only.
