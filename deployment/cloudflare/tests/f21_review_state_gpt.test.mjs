@@ -19,9 +19,9 @@ test('reject self-approval and invalid versions',()=>{
 });
 
 test('R202: reviewer identity must be canonical and free of control characters',()=>{
- for(const reviewerId of [' a','a ','a\\n','a\\u200b','a\\u202e','a\\u007f','', 'x'.repeat(129)])
+ for(const reviewerId of [' a','a ','a\n','a\u200b','a\u202e','a\u007f','', 'x'.repeat(129)])
   assert.equal(nextReviewState({from:'pending_review',to:'approved',version:2,authorId:'a',reviewerId}),null);
- for(const authorId of [' a','a ','a\\n','a\\u200b','a\\u202e','a\\u007f','', 'x'.repeat(129)])
+ for(const authorId of [' a','a ','a\n','a\u200b','a\u202e','a\u007f','', 'x'.repeat(129)])
   assert.equal(nextReviewState({from:'pending_review',to:'approved',version:2,authorId,reviewerId:'b'}),null);
  assert.equal(nextReviewState({from:'pending_review',to:'approved',version:2,authorId:'a',reviewerId:'b'})?.nextStatus,'approved');
 });
