@@ -1,3 +1,9 @@
+## R214 — F21 legacy approved preservation regression (2026-11-21 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS change register, issue #156, PR #257 HEAD/base and open parallel PRs. R213 code HEAD b090bb74 workflow #44826047899 SUCCESS for seven isolated SQLite tests only.
+- Draft PR #258 stacked on #257 adds synthetic pre-migration R187 approved-output regression: preserve approved state/version/reviewer/time and approval audit event through R213 table rebuild, foreign_key_check and immutable approved row. Commit 35c4cdd; **R214 final HEAD CI NOT_VERIFIED** until jobs/logs complete.
+- F21 PARTIAL, migration NOT_APPLIED to D1, real Worker authorization/atomic audit and signed-in E2E NOT_RUN; R126 BLOCKED/NOT_RUN. Preserve frozen SRS v1.1.15, PCS revision140, AL-R0-DEPLOY-001. No signing, OAuth retries, customer data, merge or production deploy.
+
 ## R213 — F21 QA pending_review schema migration (2026-11-21 VN)
 
 - Read four PCS files, issue #156, PR #256 HEAD/base, stacked PRs and R187 schema; checked R212 final-head Actions #44816019768 SUCCESS (synthetic tests only). R187 already includes audit insertion guard R190; R212 adds overlapping guard, not proof of live integration.
