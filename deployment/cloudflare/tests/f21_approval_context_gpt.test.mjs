@@ -43,3 +43,13 @@ test('R205 negative: prototype-inherited approval flags never authorize',()=>{
  partial.reviewerId='reviewer-b';
  assert.equal(mayApproveMatterOutput(partial),false);
 });
+
+// R206: own accessor properties must never be invoked for authorization.
+test('R206 negative: own getters and proxies cannot supply approval gates',()=>{
+ const getter=allowed();let invoked=0;
+ Object.defineProperty(getter,'sessionVerified',{enumerable:true,get(){invoked++;return true;}});
+ assert.equal(mayApproveMatterOutput(getter),false);
+ assert.equal(invoked,0,'authorization getter must not execute');
+ const identity=allowed();Object.defineProperty(identity,'reviewerId',{get(){throw Error('untrusted getter executed');}});
+ assert.equal(mayApproveMatterOutput(identity),false);
+});
