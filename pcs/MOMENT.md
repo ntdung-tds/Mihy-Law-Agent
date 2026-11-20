@@ -1,3 +1,17 @@
+## R205 — F21 prototype-inherited authorization gates (2026-11-20 VN)
+
+- Re-read PCS STATE/MOMENT/scope/SRS register, Draft PR #250 HEAD/base, issue #156 and open parallel PRs. Verified R204 code HEAD c5d1f860: workflow #44671245510 SUCCESS; actual source-contract job #136072473279 shows 4/4 PASS. General workflow #44671245665 SUCCESS; these are source tests only.
+- Test-first regression commit d97e729b adds inherited-context negative cases; fix commit db111d98 requires all approval gate/identity fields to be own properties, rejecting prototype-inherited authorization flags. No changes to real Worker routes, schema or production migration. Existing Draft PR #250 retained, no merge.
+- **R205 final-head CI NOT_VERIFIED** until run/log inspected. F21 PARTIAL; pending_review D1 schema mismatch, atomic adapter/audit and signed-in E2E NOT_RUN; D1 NOT_APPLIED, R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, PCS revision 140 and protected AL-R0-DEPLOY-001 unchanged. No signing, customer data, OAuth retries or production deployment.
+
+## R204 — F21 fail-closed approval authorization context (2026-11-20 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS change register, PR #249 HEAD/base and CI, issue #156 and parallel PRs. R203 final HEAD 33403799 workflows #44657669640 and #44657669645 completed SUCCESS; this proves source CI only.
+- Created Draft PR #250 stacked on #249: source-only `mayApproveMatterOutput` requires verified active session, matching Tenant/Matter, active membership, qualified lawyer, active reviewer assignment, MatterACL explicit allow and no deny, explicit System Admin exclusion, canonical distinct reviewer/author. Four synthetic positive/negative Node tests and dedicated CI. Inputs MUST come from server-side verification, never request body.
+- **CI R204 NOT_VERIFIED** at this update (no workflow runs yet on code HEAD 81804411). No D1 integration, live ACL/transaction, audit, browser E2E or issuance. F21 PARTIAL, D1 NOT_APPLIED, R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen; PCS revision 140 and AL-R0-DEPLOY-001 unchanged; no signing, customer data, OAuth retry, merge or production deployment.
+
 ## R203 — Fix R202 CI fixture escape (2026-11-20 VN)
 
 - Inspected PR #249 HEAD/base, PCS STATE/MOMENT/scope/SRS change register, issue #156 and parallel PRs. Real workflow #44650958810 FAILED (contract 4/5; job #136005409442) while general CI #44650958778 SUCCESS with private QA jobs SKIPPED.

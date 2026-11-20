@@ -1,0 +1,19 @@
+name: F21 R204 approval context contract
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/src/f21_approval_context_gpt.mjs'
+      - 'deployment/cloudflare/tests/f21_approval_context_gpt.test.mjs'
+      - '.github/workflows/f21-r204-approval-context-gpt.yml'
+  workflow_dispatch:
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test deployment/cloudflare/tests/f21_approval_context_gpt.test.mjs
