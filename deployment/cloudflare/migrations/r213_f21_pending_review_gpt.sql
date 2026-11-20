@@ -9,6 +9,9 @@ DROP TRIGGER IF EXISTS trg_qa_f21_approved_immutable;
 DROP TRIGGER IF EXISTS trg_qa_f21_no_preapproved_insert;
 DROP TRIGGER IF EXISTS trg_qa_f21_identity_immutable;
 DROP TRIGGER IF EXISTS trg_qa_f21_approved_no_delete;
+-- Drop event triggers referencing the rebuilt table; restore them below.
+DROP TRIGGER IF EXISTS trg_qa_f21_event_insert_guard;
+DROP TRIGGER IF EXISTS trg_qa_f21_event_requires_approval;
 CREATE TABLE qa_approval_outputs_f21_next (
  installation_id TEXT NOT NULL, tenant_id TEXT NOT NULL, matter_id TEXT NOT NULL,
  output_id TEXT NOT NULL, author_id TEXT NOT NULL,
@@ -80,6 +83,29 @@ CREATE TRIGGER trg_qa_f21_version_guard
 BEFORE UPDATE OF version ON qa_approval_outputs
 WHEN NEW.version<>OLD.version AND NEW.state=OLD.state
 BEGIN SELECT RAISE(ABORT,'F21_VERSION_REQUIRES_TRANSITION'); END;
+-- Restore both legacy R190 and R212 event guards after table rebuild.
+CREATE TRIGGER trg_qa_f21_event_insert_guard
+BEFORE INSERT ON qa_approval_events
+WHEN NOT EXISTS (
+ SELECT 1 FROM qa_approval_outputs o
+ WHERE o.installation_id=NEW.installation_id
+ AND o.tenant_id=NEW.tenant_id AND o.matter_id=NEW.matter_id
+ AND o.output_id=NEW.output_id AND o.state='approved'
+ AND o.version=NEW.version AND o.approved_by=NEW.actor_id
+ AND o.approved_at=NEW.occurred_at AND NEW.action='approved'
+)
+BEGIN SELECT RAISE(ABORT,'F21_AUDIT_EVENT_NOT_BACKED_BY_APPROVAL'); END;
+CREATE TRIGGER trg_qa_f21_event_requires_approval
+BEFORE INSERT ON qa_approval_events
+BEGIN
+ SELECT RAISE(ABORT,'F21_AUDIT_NO_APPROVAL') WHERE NOT EXISTS (
+ SELECT 1 FROM qa_approval_outputs o
+ WHERE o.installation_id=NEW.installation_id
+ AND o.tenant_id=NEW.tenant_id AND o.matter_id=NEW.matter_id
+ AND o.output_id=NEW.output_id AND o.state='approved'
+ AND o.version=NEW.version AND o.approved_by=NEW.actor_id
+ AND o.approved_at=NEW.occurred_at);
+END;
 COMMIT;
 PRAGMA foreign_keys=ON;
 PRAGMA foreign_key_check;
