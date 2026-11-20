@@ -38,6 +38,35 @@ class PendingReviewMigration(unittest.TestCase):
   self.assertEqual(self.state(),('draft',1))
   self.assertEqual(self.db.execute("SELECT reviewer_id FROM qa_approval_assignments").fetchone()[0],'reviewer')
   self.assertEqual(self.db.execute("PRAGMA foreign_key_check").fetchall(),[])
+ def test_migration_preserves_preexisting_approved_output_and_audit(self):
+  # A separate pre-migration fixture: R187 permits draft -> approved.
+  db=sqlite3.connect(":memory:",isolation_level=None)
+  try:
+   db.executescript(BASE+LEGACY+R212)
+   db.execute("""INSERT INTO qa_approval_outputs
+    (installation_id,tenant_id,matter_id,output_id,author_id,created_at)
+    VALUES('i','t','m','legacy-approved','author',1)""")
+   db.execute("""INSERT INTO qa_approval_assignments
+    VALUES('i','t','m','legacy-approved','reviewer',1)""")
+   db.execute("""UPDATE qa_approval_outputs
+    SET state='approved',version=2,approved_by='reviewer',approved_at=2
+    WHERE output_id='legacy-approved'""")
+   before=db.execute("""SELECT state,version,approved_by,approved_at
+    FROM qa_approval_outputs WHERE output_id='legacy-approved'""").fetchone()
+   events_before=db.execute("""SELECT version,actor_id,action,occurred_at
+    FROM qa_approval_events WHERE output_id='legacy-approved'""").fetchall()
+   self.assertEqual(before,('approved',2,'reviewer',2))
+   self.assertEqual(events_before,[(2,'reviewer','approved',2)])
+   db.executescript(MIG)
+   self.assertEqual(db.execute("""SELECT state,version,approved_by,approved_at
+    FROM qa_approval_outputs WHERE output_id='legacy-approved'""").fetchone(),before)
+   self.assertEqual(db.execute("""SELECT version,actor_id,action,occurred_at
+    FROM qa_approval_events WHERE output_id='legacy-approved'""").fetchall(),events_before)
+   self.assertEqual(db.execute("PRAGMA foreign_key_check").fetchall(),[])
+   with self.assertRaises(sqlite3.IntegrityError):
+    db.execute("DELETE FROM qa_approval_outputs WHERE output_id='legacy-approved'")
+  finally:
+   db.close()
  def test_three_state_atomic_audit(self):
   self.submit()
   self.assertEqual(self.state(),('pending_review',2))
