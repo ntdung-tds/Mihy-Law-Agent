@@ -1,0 +1,17 @@
+name: F21 R213 pending review schema contract
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/migrations/r213_f21_pending_review_gpt.sql'
+      - 'deployment/cloudflare/tests/test_r213_f21_pending_review_gpt.py'
+      - '.github/workflows/f21-r213-pending-review-gpt.yml'
+  workflow_dispatch:
+jobs:
+  pending-review-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r213_f21_pending_review_gpt.py' -v
