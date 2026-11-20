@@ -5,7 +5,7 @@
 export const REVIEW_STATES=Object.freeze(['draft','pending_review','approved']);
 const safeVersion=v=>Number.isSafeInteger(v)&&v>=1&&v<Number.MAX_SAFE_INTEGER;
 const validId=x=>typeof x==='string'&&x.length>0&&x.length<=128&&
- x.trim()===x&&!/[\u0000-\u001f\u007f-\u009f\u2028\u2029\p{Cf}]/u.test(x);
+ x.trim()===x&&x.normalize('NFC')===x&&!/[\u0000-\u001f\u007f-\u009f\u2028\u2029\p{Cf}]/u.test(x);
 export function nextReviewState({from,to,version,reviewerId,authorId}={}){
  if(!safeVersion(version)||typeof from!=='string'||typeof to!=='string')return null;
  if(from==='draft'&&to==='pending_review'){
