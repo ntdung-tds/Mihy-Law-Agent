@@ -10,16 +10,22 @@ export function mayApproveMatterOutput(context) {
  const required = ['sessionVerified','sessionActive','tenantMatches','matterMatches',
   'membershipActive','lawyerQualified','reviewerAssigned','aclAllow','aclDeny',
   'systemAdministrator','reviewerId','authorId'];
- if (!required.every(key => Object.hasOwn(context,key))) return false;
+ // Read own data descriptors only; never execute a getter during authorization.
+ let values;
+ try {
+  const descriptors = Object.getOwnPropertyDescriptors(context);
+  if (!required.every(key => Object.hasOwn(descriptors,key) && Object.hasOwn(descriptors[key],'value'))) return false;
+  values = Object.fromEntries(required.map(key => [key,descriptors[key].value]));
+ } catch { return false; }
  const {sessionVerified,sessionActive,tenantMatches,matterMatches,
         membershipActive,lawyerQualified,reviewerAssigned,
-        aclAllow,aclDeny,systemAdministrator,reviewerId,authorId} = context;
+        aclAllow,aclDeny,systemAdministrator,reviewerId,authorId} = values;
  if (sessionVerified !== true || sessionActive !== true ||
      tenantMatches !== true || matterMatches !== true ||
      membershipActive !== true || lawyerQualified !== true ||
      reviewerAssigned !== true || aclAllow !== true ||
      aclDeny !== false || systemAdministrator !== false) return false;
  const safeId = x => typeof x === 'string' && x.length > 0 && x.length <= 128 &&
-   x.trim() === x && !/[\u0000-\u001f\u007f-\u009f\u2028\u2029\p{Cf}]/u.test(x);
+   x.trim() === x && x.normalize('NFC') === x && !/[\u0000-\u001f\u007f-\u009f\u2028\u2029\p{Cf}]/u.test(x);
  return safeId(reviewerId) && safeId(authorId) && reviewerId !== authorId;
 }

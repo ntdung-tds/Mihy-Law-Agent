@@ -43,3 +43,22 @@ test('R205 negative: prototype-inherited approval flags never authorize',()=>{
  partial.reviewerId='reviewer-b';
  assert.equal(mayApproveMatterOutput(partial),false);
 });
+
+// R206: own accessor properties must never be invoked for authorization.
+test('R206 negative: own getters and proxies cannot supply approval gates',()=>{
+ const getter=allowed();let invoked=0;
+ Object.defineProperty(getter,'sessionVerified',{enumerable:true,get(){invoked++;return true;}});
+ assert.equal(mayApproveMatterOutput(getter),false);
+ assert.equal(invoked,0,'authorization getter must not execute');
+ const identity=allowed();Object.defineProperty(identity,'reviewerId',{get(){throw Error('untrusted getter executed');}});
+ assert.equal(mayApproveMatterOutput(identity),false);
+});
+
+// R207: Unicode-equivalent identities cannot bypass the self-review prohibition.
+test('R207 negative: reject noncanonical identities and Unicode-equivalent self approval',()=>{
+ const composed='reviewer-\u00e9';
+ const decomposed='reviewer-e\u0301';
+ assert.equal(mayApproveMatterOutput({...allowed(),reviewerId:composed,authorId:decomposed}),false);
+ assert.equal(mayApproveMatterOutput({...allowed(),reviewerId:decomposed,authorId:'author-a'}),false);
+ assert.equal(mayApproveMatterOutput({...allowed(),reviewerId:composed,authorId:'author-a'}),true);
+});

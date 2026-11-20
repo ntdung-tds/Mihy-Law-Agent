@@ -1,3 +1,10 @@
+## R206 — F21 own accessor authorization regression (2026-11-20 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS change register, Draft PR #250 HEAD/base, issue #156 and parallel PRs. Verified prior R205 final HEAD f49b813 workflow #44678024727 SUCCESS (source-only).
+- Created Draft PR #251 stacked on #250: test-first commit 41aa32b checks own getter-supplied approval flags are rejected without invoking getter; fix 9b1600c reads only own data property descriptors and rejects accessors. No Worker/D1 integration or release path.
+- **R206 CI NOT_VERIFIED** until final-head workflow logs inspected. F21 PARTIAL; D1 migration NOT_APPLIED, pending_review/schema blocker and atomic server-side authorization/audit remain; R126 signed-in E2E BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, PCS revision 140 and AL-R0-DEPLOY-001 unchanged. No signing, customer data, OAuth retries, merge or production deployment.
+
 ## R205 — F21 prototype-inherited authorization gates (2026-11-20 VN)
 
 - Re-read PCS STATE/MOMENT/scope/SRS register, Draft PR #250 HEAD/base, issue #156 and open parallel PRs. Verified R204 code HEAD c5d1f860: workflow #44671245510 SUCCESS; actual source-contract job #136072473279 shows 4/4 PASS. General workflow #44671245665 SUCCESS; these are source tests only.
@@ -1233,3 +1240,9 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - [Draft PR #231](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/231) stacked on #230. Test-first commit `722f6ce5`, implementation `f2c2a71b`. F21 pure policy now requires server-verified output Tenant/Matter/author IDs to match the current Tenant/Matter and author; missing/mismatched values deny approval. This closes a policy-helper gap where a valid reviewer context could be paired with an unrelated output.
 - **Local isolated Node reproduction PASS 3/3** with synthetic positive/negative cases (not a repository checkout and not GitHub CI). GitHub Actions for exact code HEAD `f2c2a71b4e0bc59256e5e15d4833fea21211ffa9` **NOT_RUN/not yet returned by workflow lookup** at checkpoint. Do not mark CI PASS without actual job logs.
 - **F21 remains PARTIAL:** no live API/D1/audit/UI/qualification verification or issuance, no desktop/mobile E2E. R126 real signed-in Cloudflare dual-account QA BLOCKED/NOT_RUN; F20 filename-only PARTIAL. SRS v1.1.15 frozen, 36 Fxx target without signing, standalone-first active_task `AL-R0-DEPLOY-001` unchanged. No customer data, merge, OAuth retry or production deploy.
+
+## R207 — F21 Unicode canonical reviewer identity regression (2026-11-20 VN)
+
+- Draft PR #251 continuation, test-first commit `afd1084` and source fix `e5e1acf`. Negative test rejects reviewer and author IDs that are Unicode-equivalent but byte-distinct (NFC versus decomposed), preventing a self-review comparison bypass. Non-NFC identities fail closed; canonical distinct reviewer remains permitted.
+- R206 exact-head Actions #44685031443 and #44685031304 completed success; this does **not** prove R207. R207 CI at latest code HEAD pending verification; do not mark PASS until logs checked.
+- F21 remains PARTIAL: D1 schema still excludes `pending_review`, adapter transaction, Tenant/MatterACL real verification and signed-in E2E NOT_RUN. R126 BLOCKED/NOT_RUN. Preserve PCS revision 140, `AL-R0-DEPLOY-001`, frozen SRS v1.1.15, standalone-first and F01–F36 except signing. No customer data, OAuth retry, merge or production deploy.
