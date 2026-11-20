@@ -1,3 +1,10 @@
+## R204 — F21 fail-closed approval authorization context (2026-11-20 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS change register, PR #249 HEAD/base and CI, issue #156 and parallel PRs. R203 final HEAD 33403799 workflows #44657669640 and #44657669645 completed SUCCESS; this proves source CI only.
+- Created Draft PR #250 stacked on #249: source-only `mayApproveMatterOutput` requires verified active session, matching Tenant/Matter, active membership, qualified lawyer, active reviewer assignment, MatterACL explicit allow and no deny, explicit System Admin exclusion, canonical distinct reviewer/author. Four synthetic positive/negative Node tests and dedicated CI. Inputs MUST come from server-side verification, never request body.
+- **CI R204 NOT_VERIFIED** at this update (no workflow runs yet on code HEAD 81804411). No D1 integration, live ACL/transaction, audit, browser E2E or issuance. F21 PARTIAL, D1 NOT_APPLIED, R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen; PCS revision 140 and AL-R0-DEPLOY-001 unchanged; no signing, customer data, OAuth retry, merge or production deployment.
+
 ## R203 — Fix R202 CI fixture escape (2026-11-20 VN)
 
 - Inspected PR #249 HEAD/base, PCS STATE/MOMENT/scope/SRS change register, issue #156 and parallel PRs. Real workflow #44650958810 FAILED (contract 4/5; job #136005409442) while general CI #44650958778 SUCCESS with private QA jobs SKIPPED.
