@@ -53,3 +53,12 @@ test('R206 negative: own getters and proxies cannot supply approval gates',()=>{
  const identity=allowed();Object.defineProperty(identity,'reviewerId',{get(){throw Error('untrusted getter executed');}});
  assert.equal(mayApproveMatterOutput(identity),false);
 });
+
+// R207: Unicode-equivalent identities cannot bypass the self-review prohibition.
+test('R207 negative: reject noncanonical identities and Unicode-equivalent self approval',()=>{
+ const composed='reviewer-\u00e9';
+ const decomposed='reviewer-e\u0301';
+ assert.equal(mayApproveMatterOutput({...allowed(),reviewerId:composed,authorId:decomposed}),false);
+ assert.equal(mayApproveMatterOutput({...allowed(),reviewerId:decomposed,authorId:'author-a'}),false);
+ assert.equal(mayApproveMatterOutput({...allowed(),reviewerId:composed,authorId:'author-a'}),true);
+});
