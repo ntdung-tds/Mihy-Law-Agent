@@ -31,8 +31,12 @@ export async function approveMatterOutput(args={}){
   const receipt=await store.approveWithAudit({
    outputId:input.outputId,actorId:session.actorId,tenantId:session.tenantId,
    matterId:c.matterId,expectedVersion:c.outputVersion,expectedStatus:'pending_review'});
-  return receipt!=null&&Object.hasOwn(receipt,'changed')&&Object.hasOwn(receipt,'auditWritten')&&
-   receipt.changed===true&&receipt.auditWritten===true
+  const changed=receipt!=null&&typeof receipt==='object'?
+   Object.getOwnPropertyDescriptor(receipt,'changed'):null;
+  const audit=receipt!=null&&typeof receipt==='object'?
+   Object.getOwnPropertyDescriptor(receipt,'auditWritten'):null;
+  return changed!=null&&audit!=null&&Object.hasOwn(changed,'value')&&Object.hasOwn(audit,'value')&&
+   changed.value===true&&audit.value===true
    ?{status:'APPROVED'}:{status:'CONFLICT_OR_AUDIT_FAILURE'};
  }catch{
   // Malformed transport accessors and DB errors must fail closed without leaking data.
