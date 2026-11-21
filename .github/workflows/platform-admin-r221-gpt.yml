@@ -1,0 +1,17 @@
+name: platform-admin-r221-gpt
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/platform_admin_api_gpt.mjs'
+      - 'deployment/cloudflare/tests/platform_admin_r221_gpt.test.mjs'
+      - '.github/workflows/platform-admin-r221-gpt.yml'
+  workflow_dispatch:
+jobs:
+  platform-admin-browser-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test deployment/cloudflare/tests/platform_admin_r221_gpt.test.mjs
