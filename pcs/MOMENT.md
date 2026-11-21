@@ -1,3 +1,9 @@
+## R219 — System Admin bounded tenant-service list (2026-11-21 VN)
+
+- Draft PR #263 stacked on #262. Implemented missing `listTenantServices` for R218 mobile UI contract in R217 control-plane service. Requires verified System Admin principal, rejects Tenant Admin/impersonation, reads only four explicit service metadata columns, stable ordering and LIMIT 100; strips any unexpected fields from DB results. No customer matters/documents/clients or tokens.
+- Five new Node contract tests (test-first) and isolated CI. Test rounds 1/5, fix rounds 0/5; **R219 HEAD CI NOT_VERIFIED** until Actions logs inspected. R218 final code-head Actions 44869118914/44869118880 completed SUCCESS (isolated contracts, not real app E2E).
+- Platform Admin PARTIAL: HTTP Worker authenticated adapter, audit ID generation, live D1 migration, mobile mounting and OWNER_REAL_DEVICE_QA NOT_RUN. SRS v1.1.15 frozen, AL-R0-DEPLOY-001 preserved, no signing/merge/production/customer data.
+
 ## R218 — Platform Admin mobile-first control-plane view (2026-11-21 VN)
 
 - Draft PR stacked on #261. Added DOM-safe responsive System Admin UI module with metadata-only injected API (plans, tenant service status, state transition), reason-code validation, revocation confirmation, stale-request/dispose guard, accessible status feedback, mobile 44px controls and empty/error/loading states. UI is **not yet mounted** in Worker; verified session/HTTP API and D1 migration still required. No tenant business data, impersonation or signing.
