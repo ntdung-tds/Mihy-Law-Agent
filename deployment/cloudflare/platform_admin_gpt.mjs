@@ -12,6 +12,25 @@ function requireDb(db) {
   if (!db || typeof db.prepare !== 'function' || typeof db.batch !== 'function')
     throw new Error('PLATFORM_DB_UNAVAILABLE');
 }
+// Calendar-valid expiry metadata: a shape-only regex accepts impossible dates (e.g. February 31).
+function validExpiry(value) {
+  if (value === null) return true;
+  if (typeof value !== 'string' || value.length > 40) return false;
+  const m = /^(\\d{4})-(\\d{2})-(\\d{2})(?:[ T](\\d{2}):(\\d{2}):(\\d{2})(?:\\.(\\d{1,6}))?(Z|[+-]\\d{2}:\\d{2})?)?$/.exec(value);
+  if (!m) return false;
+  const year=Number(m[1]), month=Number(m[2]), day=Number(m[3]);
+  if (year < 1 || month < 1 || month > 12) return false;
+  const leap=year%4===0 && (year%100!==0 || year%400===0);
+  const days=[31,leap?29:28,31,30,31,30,31,31,30,31,30,31];
+  if (day < 1 || day > days[month-1]) return false;
+  if (m[4] === undefined) return true;
+  if (+m[4]>23 || +m[5]>59 || +m[6]>59) return false;
+  if (m[8] && m[8]!=='Z') {
+    const hh=+m[8].slice(1,3), mm=+m[8].slice(4,6);
+    if (hh>23 || mm>59) return false;
+  }
+  return true;
+}
 function requireId(value) {
   if (typeof value !== 'string' || !ID.test(value)) throw new Error('PLATFORM_BAD_ID');
 }
@@ -69,10 +88,7 @@ export async function listTenantServices(db, principal) {
     if (!row || typeof row.tenant_id !== 'string' || !ID.test(row.tenant_id) ||
         typeof row.plan_id !== 'string' || !ID.test(row.plan_id) ||
         !STATUS.has(row.service_status) ||
-        (row.license_expires_at !== null &&
-         (typeof row.license_expires_at !== 'string' ||
-          row.license_expires_at.length > 40 ||
-          !/^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})?)?$/.test(row.license_expires_at))))
+        !validExpiry(row.license_expires_at))
       throw new Error('PLATFORM_INVALID_RESULT');
     return {tenant_id:row.tenant_id, plan_id:row.plan_id,
       service_status:row.service_status, license_expires_at:row.license_expires_at};

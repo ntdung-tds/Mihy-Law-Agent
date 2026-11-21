@@ -1,3 +1,8 @@
+## R230 — Calendar-valid platform license expiry (2026-11-21 VN)
+
+- Verified R229 HEAD `3899d2ef`: 7/7 GitHub PR workflows SUCCESS. Fixed a concrete metadata integrity gap: date-shape regex accepted impossible dates and out-of-range times. The service now rejects invalid leap days, months, times and timezone offsets while retaining legitimate ISO dates. Added five synthetic Node tests and dedicated PR CI; new HEAD CI not yet verified. Test rounds 1/5 authored; fix rounds 1/5 (corrected guard syntax before PR). This does not establish live Worker integration or atomic audit rollback.
+- Platform Admin PARTIAL; authenticated Worker mount, D1 migration, transactional audit and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Keep active task AL-R0-DEPLOY-001 and frozen SRS v1.1.15; no signing, merge, production deploy or customer data.
+
 ## R229 — Repair R219 stale fixture and expiry date regex (2026-11-21 VN)
 
 - R228 HEAD `677db0ab` CI R219 FAILURE (4/5), six other workflows SUCCESS. R219 fixture expected malformed tenant service metadata to be normalized to null; R228 intentionally rejects it. Updated assertion to expect `PLATFORM_INVALID_RESULT` (no production validation relaxation).
