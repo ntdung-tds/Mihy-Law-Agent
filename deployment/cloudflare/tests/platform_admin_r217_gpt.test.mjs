@@ -5,7 +5,7 @@ const admin = {verified:true,kind:'system_admin',id:'sys-1'};
 function fakeDb(changes=1) {
   const statements=[];
   const db={statements,prepare(sql) {
-    const s={sql,args:[],bind(...args){this.args=args;return this;},async all(){return {results:[{plan_id:'solo'}]};}};
+    const s={sql,args:[],bind(...args){this.args=args;return this;},async all(){return {results:[{plan_id:'solo',plan_name:'Solo',status:'active',max_users:1,max_storage_bytes:0}]};}};
     statements.push(s);return s;
   },async batch(items){return [{meta:{changes}}, {meta:{changes}}];}};
   return db;
