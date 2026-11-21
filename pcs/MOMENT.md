@@ -1343,3 +1343,9 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - Draft PR #251 continuation, test-first commit `afd1084` and source fix `e5e1acf`. Negative test rejects reviewer and author IDs that are Unicode-equivalent but byte-distinct (NFC versus decomposed), preventing a self-review comparison bypass. Non-NFC identities fail closed; canonical distinct reviewer remains permitted.
 - R206 exact-head Actions #44685031443 and #44685031304 completed success; this does **not** prove R207. R207 CI at latest code HEAD pending verification; do not mark PASS until logs checked.
 - F21 remains PARTIAL: D1 schema still excludes `pending_review`, adapter transaction, Tenant/MatterACL real verification and signed-in E2E NOT_RUN. R126 BLOCKED/NOT_RUN. Preserve PCS revision 140, `AL-R0-DEPLOY-001`, frozen SRS v1.1.15, standalone-first and F01–F36 except signing. No customer data, OAuth retry, merge or production deploy.
+
+## R226 — Platform plan metadata fail-closed boundary (2026-11-21 VN)
+
+- Stacked on R225 PR #269. Added explicit five-field allowlist to `listPlatformPlans` at server service boundary, strict shape/quota/status checks and 100-row cap. Five Node regression cases plus independent GitHub workflow; no customer data or credentials.
+- R225 audit-row check is **not proof of transactional rollback**; real D1 audit atomicity remains BLOCKED/NOT_RUN. R226 CI at latest HEAD pending verification, no synthetic PASS claim. Platform admin remains PARTIAL; real Worker session/API/UI integration and D1 migration NOT_RUN.
+- Preserve `state.current.active_task=AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, F01–F36 plus separate platform administration, no signing. No merge/production deployment. Local test rounds 0/5, fix rounds 0/5; OWNER_REAL_DEVICE_QA remains NOT_RUN.
