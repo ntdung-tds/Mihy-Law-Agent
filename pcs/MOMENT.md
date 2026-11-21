@@ -1,3 +1,8 @@
+## R224 — Platform Admin same-origin mutation gate (2026-11-21 VN)
+
+- Draft PR stacked on #267. dispatchPlatformAdmin now requires mutation Origin to match the Worker request origin and rejects null or cross-site Fetch Metadata, in addition to server session and CSRF checks. No reliance on client-supplied role/tenant/forwarded headers. GET unchanged. Five new synthetic Node tests and isolated CI workflow; test rounds 1/5 authored, fix rounds 1/5, CI at final HEAD pending. This is security hardening, not live Worker integration.
+- Platform Admin PARTIAL; Worker session provider not yet mounted, D1 migration and signed-in mobile/desktop/OWNER_REAL_DEVICE_QA NOT_RUN/BLOCKED. Preserve SRS v1.1.15 and AL-R0-DEPLOY-001; no merge or production deploy.
+
 ## R223 — Trusted System Admin Worker session dispatcher (2026-11-21 VN)
 
 - Draft PR #267 stacked on #266. Added isolated `dispatchPlatformAdmin` bridge requiring trusted server-side resolveSession, verifyCsrf and newAuditId; fail closed for missing dependencies, unverified/Tenant Admin/impersonation and invalid CSRF. Unrelated routes are untouched. Five synthetic Node contracts and isolated workflow.
