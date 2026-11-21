@@ -1,3 +1,8 @@
+## R225 — Audit receipt integrity for platform service transitions (2026-11-21 VN)
+
+- Stacked on R224 PR #268. Hardened `changeTenantService` to require exactly one audit insert when one service row is changed; missing/zero/duplicate audit result now fails closed instead of reporting success. Five synthetic Node cases and targeted CI workflow. This is a control-plane correctness/security fix, not live Worker integration. Test rounds 1/5 (authored, CI HEAD pending), fix rounds 1/5.
+- Known limitation: fail-closed response alone does not guarantee database rollback if D1 batch commits a zero-row audit insert; transactional audit enforcement and live D1 verification remain outstanding. Platform Admin PARTIAL; Worker session mounting, D1 migration and OWNER_REAL_DEVICE_QA NOT_RUN/BLOCKED. SRS v1.1.15 frozen; AL-R0-DEPLOY-001 preserved. No signing, merge, production deployment or customer data.
+
 ## R224 — Platform Admin same-origin mutation gate (2026-11-21 VN)
 
 - Draft PR stacked on #267. dispatchPlatformAdmin now requires mutation Origin to match the Worker request origin and rejects null or cross-site Fetch Metadata, in addition to server session and CSRF checks. No reliance on client-supplied role/tenant/forwarded headers. GET unchanged. Five new synthetic Node tests and isolated CI workflow; test rounds 1/5 authored, fix rounds 1/5, CI at final HEAD pending. This is security hardening, not live Worker integration.

@@ -40,6 +40,9 @@ export async function changeTenantService(db, principal, input) {
   // D1 batch transactions roll back together on SQL error. Never expose tenant business data.
   const results = await db.batch([update, audit]);
   if (results?.[0]?.meta?.changes !== 1) return {changed:false};
+  // Never report a successful service mutation without exactly one durable audit row.
+  // A zero-row INSERT can otherwise silently succeed while leaving an unaudited change.
+  if (results?.[1]?.meta?.changes !== 1) throw new Error('PLATFORM_AUDIT_INCOMPLETE');
   return {changed:true, tenantId, status};
 }
 
