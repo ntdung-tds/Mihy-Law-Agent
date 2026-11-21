@@ -1,3 +1,10 @@
+## R233 — Detect truncated platform metadata lists (2026-11-22 VN)
+
+- Read latest PCS STATE/MOMENT/scope/change register, issue #156 and open PR stack through #276. Based on R232 HEAD b9dfeb0b; preserved active_task AL-R0-DEPLOY-001 and SRS v1.1.15 frozen.
+- Fixed actual SQL correctness gap: LIMIT 100 returned exactly 100 rows even when more existed, misleading System Admin into believing a metadata list was complete. Both plan and tenant-service queries now request LIMIT 101; existing >100 fail-closed guards reject overflow. No business data access added.
+- Five synthetic Node tests authored (100 and 101 boundaries for both lists, SQL overflow sentinel), isolated CI workflow. Test rounds 1/5 authored, execution CI HEAD NOT_VERIFIED; fix rounds 1/5. No false PASS.
+- Platform Admin PARTIAL; Worker verified-session mount, D1 migration, atomic audit rollback and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. No signing, merge, production deploy or customer data.
+
 ## R232 — Platform license timezone offset validation (2026-11-22 VN)
 
 - Read PCS STATE/MOMENT/scope/change register, issue #156, latest PR #275 HEAD/base and open PR stack. Preserve active_task AL-R0-DEPLOY-001 and frozen SRS v1.1.15.
