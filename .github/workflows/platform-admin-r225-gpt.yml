@@ -1,11 +1,11 @@
-name: Platform Admin R225 origin boundary
+name: Platform Admin R225 audit integrity
 on:
   push:
     branches:
-      - 'feature/r225-platform-origin-guard-gpt'
+      - 'agent/r225-platform-audit-gpt'
   pull_request:
     paths:
-      - 'deployment/cloudflare/platform_admin_session_gpt.mjs'
+      - 'deployment/cloudflare/platform_admin_gpt.mjs'
       - 'deployment/cloudflare/tests/platform_admin_r225_gpt.test.mjs'
       - '.github/workflows/platform-admin-r225-gpt.yml'
 jobs:
@@ -16,4 +16,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test deployment/cloudflare/tests/platform_admin_r223_gpt.test.mjs deployment/cloudflare/tests/platform_admin_r225_gpt.test.mjs
+      - run: node --test deployment/cloudflare/tests/platform_admin_r217_gpt.test.mjs deployment/cloudflare/tests/platform_admin_r225_gpt.test.mjs
