@@ -1,3 +1,9 @@
+## R228 — Fail closed on invalid tenant service metadata (2026-11-21 VN)
+
+- Stacked on R227 PR #271. The System Admin tenant-service list previously converted malformed tenant/plan/status/expiry values to null or passed arbitrary status strings through to the UI. Added strict metadata validation and a hard 100-row result cap, preserving four-field output allowlist; rejects malformed rows rather than silently presenting false administrative state.
+- Added five synthetic Node regression cases and focused CI workflow. Test rounds: 1/5 (CI HEAD pending), fix rounds: 0/5. This is a security/correctness boundary improvement, **not** live Worker integration or D1 rollback evidence.
+- Platform Admin PARTIAL; signed-in Worker mounting, D1 migration, transactional audit guarantee and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve active task AL-R0-DEPLOY-001, frozen SRS v1.1.15 and all F01–F36; no signing, merge, production deploy or customer data.
+
 ## R227 — Repair stale R217 plan fixture after R226 validation (2026-11-21 VN)
 
 - R226 final HEAD `d4b3e544` CI: R226 plan contract SUCCESS, but R217 and R225 workflows FAILURE; both run R217 test suite. Found R217 synthetic `all()` fixture returned only `plan_id`, while R226 service now requires `plan_name`, `status`, `max_users`, `max_storage_bytes`. Updated synthetic fixture to valid metadata, preserving strict production validation rather than weakening it. This is a concrete CI blocker fix, not an app feature.
