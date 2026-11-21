@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {dispatchPlatformAdmin} from '../platform_admin_session_gpt.mjs';
+const db={prepare(){return {all:async()=>({results:[]})}},batch:async()=>[]};
+const deps={db,newAuditId:()=> 'audit_1',resolveSession:async()=>({id:'sys_1',kind:'system_admin',verified:true}),verifyCsrf:async()=>true};
+const mutation=(headers={})=>new Request('https://qa.example.test/api/platform/tenant-services',{method:'PATCH',headers});
+test('missing Origin rejects before handler',async()=>assert.equal((await dispatchPlatformAdmin(mutation(),deps)).status,403));
+test('cross-site Origin rejects',async()=>assert.equal((await dispatchPlatformAdmin(mutation({origin:'https://evil.example'}),deps)).status,403));
+test('null Origin rejects',async()=>assert.equal((await dispatchPlatformAdmin(mutation({origin:'null'}),deps)).status,403));
+test('cross-site Fetch Metadata rejects even matching Origin',async()=>assert.equal((await dispatchPlatformAdmin(mutation({origin:'https://qa.example.test','sec-fetch-site':'cross-site'}),deps)).status,403));
+test('same-origin request reaches HTTP handler; unsupported media type is 415',async()=>assert.equal((await dispatchPlatformAdmin(mutation({origin:'https://qa.example.test','sec-fetch-site':'same-origin'}),deps)).status,415));

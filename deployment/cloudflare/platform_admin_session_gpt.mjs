@@ -21,6 +21,12 @@ export async function dispatchPlatformAdmin(request,{db,resolveSession,verifyCsr
    const principal=Object.freeze({id:session.id,kind:'system_admin',verified:true,impersonating:false});
    let csrfVerified=false;
    if(request.method!=='GET'){
+     // Mutations are browser same-origin only, in addition to session-bound CSRF.
+     // Do not trust X-Forwarded-* or a client-provided role/tenant header.
+     const origin=request.headers.get('origin');
+     const fetchSite=request.headers.get('sec-fetch-site');
+     if(!origin||origin==='null'||origin!==url.origin||fetchSite==='cross-site')
+       return reject(403,'ORIGIN_FORBIDDEN');
      csrfVerified=(await verifyCsrf(request,session))===true;
      if(!csrfVerified) return reject(403,'CSRF_FORBIDDEN');
    }
