@@ -16,7 +16,7 @@ function requireDb(db) {
 function validExpiry(value) {
   if (value === null) return true;
   if (typeof value !== 'string' || value.length > 40) return false;
-  const m = /^(\\d{4})-(\\d{2})-(\\d{2})(?:[ T](\\d{2}):(\\d{2}):(\\d{2})(?:\\.(\\d{1,6}))?(Z|[+-]\\d{2}:\\d{2})?)?$/.exec(value);
+  const m = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,6}))?(Z|[+-]\d{2}:\d{2})?)?$/.exec(value);
   if (!m) return false;
   const year=Number(m[1]), month=Number(m[2]), day=Number(m[3]);
   if (year < 1 || month < 1 || month > 12) return false;
