@@ -1,3 +1,9 @@
+## R220 — Platform Admin isolated HTTP adapter (2026-11-21 VN)
+
+- Draft PR stacked on #263: added metadata-only HTTP boundary for GET plans/services and PATCH service status. Requires server-injected verified System Admin principal, server-verified CSRF and server-generated audit ID. Explicit allowlisted responses, no-store, bounded JSON, no client-supplied audit ID, no business-data endpoints. Five Node tests and dedicated workflow.
+- **PARTIAL**: this adapter is deliberately not mounted in Worker until trusted session/CSRF integration is verified; no D1 migration, signed-in E2E or mobile device test. R219 final HEAD 1a740f3 Actions 44873609599, 44873609581, 44873609578 completed SUCCESS; R220 HEAD CI NOT_VERIFIED. R220 local test rounds 0/5 (CI pending), fix rounds 0/5.
+- SRS v1.1.15 frozen, protected AL-R0-DEPLOY-001, no signing, customer data, merge or production deploy.
+
 ## R219 — System Admin bounded tenant-service list (2026-11-21 VN)
 
 - Draft PR #263 stacked on #262. Implemented missing `listTenantServices` for R218 mobile UI contract in R217 control-plane service. Requires verified System Admin principal, rejects Tenant Admin/impersonation, reads only four explicit service metadata columns, stable ordering and LIMIT 100; strips any unexpected fields from DB results. No customer matters/documents/clients or tokens.
