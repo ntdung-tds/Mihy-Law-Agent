@@ -34,5 +34,5 @@ test('missing database rejects before query',async()=>{
 });
 test('malformed result fails closed without exposing unexpected fields',async()=>{
   const store=db([{tenant_id:'t',service_status:'active',matter_content:'SECRET'}]);
-  assert.deepEqual(await listTenantServices(store,admin),[{tenant_id:'t',plan_id:null,service_status:'active',license_expires_at:null}]);
+  await assert.rejects(listTenantServices(store,admin),/PLATFORM_INVALID_RESULT/);
 });

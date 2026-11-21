@@ -72,7 +72,7 @@ export async function listTenantServices(db, principal) {
         (row.license_expires_at !== null &&
          (typeof row.license_expires_at !== 'string' ||
           row.license_expires_at.length > 40 ||
-          !/^\\d{4}-\\d{2}-\\d{2}(?:[ T]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|[+-]\\d{2}:\\d{2})?)?$/.test(row.license_expires_at))))
+          !/^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})?)?$/.test(row.license_expires_at))))
       throw new Error('PLATFORM_INVALID_RESULT');
     return {tenant_id:row.tenant_id, plan_id:row.plan_id,
       service_status:row.service_status, license_expires_at:row.license_expires_at};
