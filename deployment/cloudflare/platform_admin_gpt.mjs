@@ -42,3 +42,19 @@ export async function changeTenantService(db, principal, input) {
   if (results?.[0]?.meta?.changes !== 1) return {changed:false};
   return {changed:true, tenantId, status};
 }
+
+// R219: System Admin control-plane list for the mobile view; explicit metadata allowlist.
+// Caller must provide a verified server-side principal. Never SELECT * or join tenant data.
+export async function listTenantServices(db, principal) {
+  requireAdmin(principal); requireDb(db);
+  const result = await db.prepare(
+    'SELECT tenant_id, plan_id, service_status, license_expires_at FROM platform_tenant_services ORDER BY tenant_id LIMIT 100'
+  ).all();
+  if (!Array.isArray(result?.results)) throw new Error('PLATFORM_INVALID_RESULT');
+  return result.results.map(row => ({
+    tenant_id: typeof row?.tenant_id === 'string' ? row.tenant_id : null,
+    plan_id: typeof row?.plan_id === 'string' ? row.plan_id : null,
+    service_status: typeof row?.service_status === 'string' ? row.service_status : null,
+    license_expires_at: typeof row?.license_expires_at === 'string' ? row.license_expires_at : null
+  }));
+}
