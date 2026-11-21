@@ -37,7 +37,7 @@ function requireId(value) {
 export async function listPlatformPlans(db, principal) {
   requireAdmin(principal); requireDb(db);
   const result = await db.prepare(
-    'SELECT plan_id, plan_name, status, max_users, max_storage_bytes FROM platform_service_plans ORDER BY plan_id LIMIT 100'
+    'SELECT plan_id, plan_name, status, max_users, max_storage_bytes FROM platform_service_plans ORDER BY plan_id LIMIT 101'
   ).all();
   if (!Array.isArray(result?.results) || result.results.length > 100) throw new Error('PLATFORM_INVALID_RESULT');
   return result.results.map(row => {
@@ -75,12 +75,13 @@ export async function changeTenantService(db, principal, input) {
   return {changed:true, tenantId, status};
 }
 
+// Fetch one extra row so an oversized result cannot silently masquerade as a complete list.
 // R219: System Admin control-plane list for the mobile view; explicit metadata allowlist.
 // Caller must provide a verified server-side principal. Never SELECT * or join tenant data.
 export async function listTenantServices(db, principal) {
   requireAdmin(principal); requireDb(db);
   const result = await db.prepare(
-    'SELECT tenant_id, plan_id, service_status, license_expires_at FROM platform_tenant_services ORDER BY tenant_id LIMIT 100'
+    'SELECT tenant_id, plan_id, service_status, license_expires_at FROM platform_tenant_services ORDER BY tenant_id LIMIT 101'
   ).all();
   if (!Array.isArray(result?.results) || result.results.length > 100)
     throw new Error('PLATFORM_INVALID_RESULT');
