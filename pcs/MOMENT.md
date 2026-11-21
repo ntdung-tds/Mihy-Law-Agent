@@ -1,3 +1,7 @@
+## R234 — Platform HTTP adapter foundation (2026-11-22 VN)
+
+- Stacked on R233 PR #277 HEAD 497b7b5d. Added `deployment/cloudflare/platform_http_gpt.mjs` HTTP adapter with injected server-verified principal, metadata-only GET, origin/CSRF checks for mutation, no-store responses and non-disclosing errors. Added five synthetic Node tests. **Not yet mounted into live Worker**: session resolver, CSRF verifier, D1 migration and atomic audit remain BLOCKED. Test round 1/5 authored, execution NOT_RUN; fix round 0/5. Owner mobile QA NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15; no signing, merge, production deployment or customer data.
+
 ## R233 — Detect truncated platform metadata lists (2026-11-22 VN)
 
 - Read latest PCS STATE/MOMENT/scope/change register, issue #156 and open PR stack through #276. Based on R232 HEAD b9dfeb0b; preserved active_task AL-R0-DEPLOY-001 and SRS v1.1.15 frozen.

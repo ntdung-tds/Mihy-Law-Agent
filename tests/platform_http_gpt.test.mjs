@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {handlePlatformAdminRequest as handle} from '../deployment/cloudflare/platform_http_gpt.mjs';
+const url='https://example.test/api/platform/services';
+const principal={verified:true,kind:'system_admin',id:'sys1'};
+const db={prepare(sql){return {all:async()=>({results:[]})}},batch:async()=>[]};
+test('anonymous access denied before DB',async()=>{const r=await handle(new Request(url),{DB:db},async()=>null);assert.equal(r.status,403)});
+test('tenant admin cannot use platform API',async()=>{const r=await handle(new Request(url),{DB:db},async()=>({...principal,kind:'tenant_admin'}));assert.equal(r.status,403)});
+test('cross-origin mutation denied',async()=>{const r=await handle(new Request(url,{method:'POST',headers:{origin:'https://evil.test','content-type':'application/json'},body:'{}'}),{DB:db},async()=>principal);assert.equal(r.status,403)});
+test('CSRF required on mutation',async()=>{const r=await handle(new Request(url,{method:'POST',headers:{origin:'https://example.test','content-type':'application/json'},body:'{}'}),{DB:db},async()=>principal);assert.equal(r.status,403)});
+test('metadata GET does not include cacheable responses',async()=>{const r=await handle(new Request(url),{DB:db},async()=>principal);assert.equal(r.status,200);assert.equal(r.headers.get('cache-control'),'no-store');assert.deepEqual(await r.json(),{items:[]})});
