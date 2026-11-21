@@ -20,7 +20,17 @@ export async function listPlatformPlans(db, principal) {
   const result = await db.prepare(
     'SELECT plan_id, plan_name, status, max_users, max_storage_bytes FROM platform_service_plans ORDER BY plan_id LIMIT 100'
   ).all();
-  return result.results ?? [];
+  if (!Array.isArray(result?.results) || result.results.length > 100) throw new Error('PLATFORM_INVALID_RESULT');
+  return result.results.map(row => {
+    if (!row || typeof row.plan_id !== 'string' || !ID.test(row.plan_id) ||
+        typeof row.plan_name !== 'string' || row.plan_name.trim().length === 0 || row.plan_name.length > 120 ||
+        !['active', 'retired'].includes(row.status) ||
+        !Number.isSafeInteger(row.max_users) || row.max_users < 1 ||
+        !Number.isSafeInteger(row.max_storage_bytes) || row.max_storage_bytes < 0)
+      throw new Error('PLATFORM_INVALID_RESULT');
+    return {plan_id:row.plan_id, plan_name:row.plan_name, status:row.status,
+      max_users:row.max_users, max_storage_bytes:row.max_storage_bytes};
+  });
 }
 export async function changeTenantService(db, principal, input) {
   requireAdmin(principal); requireDb(db);
