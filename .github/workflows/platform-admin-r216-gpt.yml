@@ -1,0 +1,17 @@
+name: R216 platform admin schema contract
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/migrations/r216_platform_admin_gpt.sql'
+      - 'deployment/cloudflare/tests/test_r216_platform_admin_gpt.py'
+      - '.github/workflows/platform-admin-r216-gpt.yml'
+  workflow_dispatch:
+jobs:
+  platform-admin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s deployment/cloudflare/tests -p 'test_r216_platform_admin_gpt.py' -v

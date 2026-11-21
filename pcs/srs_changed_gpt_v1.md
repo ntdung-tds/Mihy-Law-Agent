@@ -29,3 +29,10 @@
 - **Bước triển khai ưu tiên sau đăng ký:** đối chiếu từng F thuộc P0 với SRS và mã; mở task triển khai kiểm thử đầu–cuối nhỏ theo phụ thuộc; kiểm tra F07–F10, F18–F22, F32–F36 và trục quyền/nguồn trước khi gọi DONE. Không đưa ký số/ký điện tử vào backlog, màn hình hay endpoint.
 
 **Tham chiếu:** `pcs/mihy_scope_gpt_v1.json`. Hồ sơ này là nhật ký thay đổi phạm vi, **không thay thế SRS đã chốt**.
+
+## R216 — Owner 21/11/2026: Quản trị nền tảng (ngoài danh mục F01–F36)
+
+- Owner yêu cầu hoàn thiện phân hệ System Administrator đã phân tích: cấu hình nền tảng, gói/giấy phép/thuê bao/hạn mức, trạng thái dịch vụ, metadata Tenant phi nghiệp vụ, vận hành, khôi phục tài khoản sau xác minh và giao diện desktop/mobile.
+- **Ranh giới bắt buộc:** System Admin không được xem/đọc/sửa/xóa/tìm/xuất dữ liệu nghiệp vụ Tenant, không đăng nhập thay, không đổi chủ sở hữu; Tenant Admin khác System Admin. Không thêm ký số.
+- R216 PR #260: bước triển khai đầu tiên là schema control-plane tách biệt và audit bất biến; 5 synthetic SQLite tests. Chưa tích hợp Worker, UI, D1 thật; trạng thái PARTIAL. Các vòng test cục bộ tối đa 5 và sửa tối đa 5, QA thiết bị thật dành cho Owner ở giai đoạn cuối.
+- Giữ nguyên SRS v1.1.15 frozen; mục này ghi nhận chỉ đạo phạm vi bổ sung, **không tuyên bố đã đối chiếu toàn bộ SRS hoặc hoàn thành phân hệ**.
