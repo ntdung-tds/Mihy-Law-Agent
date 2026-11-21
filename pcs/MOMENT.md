@@ -1,3 +1,8 @@
+## R227 — Repair stale R217 plan fixture after R226 validation (2026-11-21 VN)
+
+- R226 final HEAD `d4b3e544` CI: R226 plan contract SUCCESS, but R217 and R225 workflows FAILURE; both run R217 test suite. Found R217 synthetic `all()` fixture returned only `plan_id`, while R226 service now requires `plan_name`, `status`, `max_users`, `max_storage_bytes`. Updated synthetic fixture to valid metadata, preserving strict production validation rather than weakening it. This is a concrete CI blocker fix, not an app feature.
+- Test rounds: 1/5 (GitHub CI pending at new HEAD); fix rounds: 1/5. Platform Admin PARTIAL; Worker signed-in route, D1 migration, transactional audit guarantee and OWNER_REAL_DEVICE_QA still BLOCKED/NOT_RUN. Keep `AL-R0-DEPLOY-001`, SRS v1.1.15 frozen; no signing, merge, production deploy or customer data.
+
 ## R225 — Audit receipt integrity for platform service transitions (2026-11-21 VN)
 
 - Stacked on R224 PR #268. Hardened `changeTenantService` to require exactly one audit insert when one service row is changed; missing/zero/duplicate audit result now fails closed instead of reporting success. Five synthetic Node cases and targeted CI workflow. This is a control-plane correctness/security fix, not live Worker integration. Test rounds 1/5 (authored, CI HEAD pending), fix rounds 1/5.
