@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {dispatchPlatformAdmin} from '../platform_admin_session_gpt.mjs';
+const db={prepare(){return {all:async()=>({results:[]})}},batch:async()=>[]};
+const base={db,newAuditId:()=> 'audit_1',resolveSession:async()=>({id:'sys_1',kind:'system_admin',verified:true}),verifyCsrf:async()=>true};
+const req=(path='/api/platform/plans',method='GET')=>new Request('https://qa.example.test'+path,{method});
+test('unrelated route bypasses platform dispatcher',async()=>assert.equal(await dispatchPlatformAdmin(req('/api/qa/documents'),base),null));
+test('missing trusted resolver is unavailable, not client-role fallback',async()=>{const r=await dispatchPlatformAdmin(req(),{db});assert.equal(r.status,503)});
+test('tenant admin and unverified sessions denied',async()=>{for(const s of [{id:'x',kind:'tenant_admin',verified:true},{id:'x',kind:'system_admin',verified:false}]){const r=await dispatchPlatformAdmin(req(),{...base,resolveSession:async()=>s});assert.equal(r.status,403)}});
+test('mutation denied before HTTP handler when CSRF invalid',async()=>{const r=await dispatchPlatformAdmin(req('/api/platform/tenant-services','PATCH'),{...base,verifyCsrf:async()=>false});assert.equal(r.status,403)});
+test('verified admin GET reaches metadata-only HTTP handler',async()=>{const r=await dispatchPlatformAdmin(req(),base);assert.equal(r.status,200);assert.deepEqual(await r.json(),{items:[]});assert.equal(r.headers.get('cache-control'),'no-store')});
