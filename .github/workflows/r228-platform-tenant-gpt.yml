@@ -1,0 +1,17 @@
+name: R228 platform tenant metadata list
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/platform_admin_gpt.mjs'
+      - 'tests/platform_tenant_list_gpt.test.mjs'
+      - '.github/workflows/r228-platform-tenant-gpt.yml'
+  workflow_dispatch:
+jobs:
+  node-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/platform_tenant_list_gpt.test.mjs
