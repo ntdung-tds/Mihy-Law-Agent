@@ -1,3 +1,9 @@
+## R215 — F21 approval audit rollback regression (2026-11-21 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS change register, issue #156, PR #258 HEAD/base, open parallel PRs. R214 final-head Actions #44840627518 SUCCESS for eight synthetic SQLite tests only.
+- Draft PR #259 stacked on #258 adds three distinct synthetic SQLite tests: audit insertion failure aborts approval update without partial state, explicit transaction rollback restores pending_review and audit, and successful approval emits exactly one event. Added isolated CI workflow. **R215 final HEAD CI NOT_VERIFIED** until jobs/logs inspected.
+- F21 PARTIAL, D1 migration NOT_APPLIED, Worker session/qualified lawyer/Tenant/MatterACL and signed-in E2E NOT_RUN; R126 BLOCKED/NOT_RUN. Preserve frozen SRS v1.1.15, PCS revision140, AL-R0-DEPLOY-001. No signing, OAuth retry, customer data, merge or production deploy.
+
 ## R214 — F21 legacy approved preservation regression (2026-11-21 VN)
 
 - Read PCS STATE/MOMENT/scope/SRS change register, issue #156, PR #257 HEAD/base and open parallel PRs. R213 code HEAD b090bb74 workflow #44826047899 SUCCESS for seven isolated SQLite tests only.
