@@ -63,11 +63,18 @@ export async function listTenantServices(db, principal) {
   const result = await db.prepare(
     'SELECT tenant_id, plan_id, service_status, license_expires_at FROM platform_tenant_services ORDER BY tenant_id LIMIT 100'
   ).all();
-  if (!Array.isArray(result?.results)) throw new Error('PLATFORM_INVALID_RESULT');
-  return result.results.map(row => ({
-    tenant_id: typeof row?.tenant_id === 'string' ? row.tenant_id : null,
-    plan_id: typeof row?.plan_id === 'string' ? row.plan_id : null,
-    service_status: typeof row?.service_status === 'string' ? row.service_status : null,
-    license_expires_at: typeof row?.license_expires_at === 'string' ? row.license_expires_at : null
-  }));
+  if (!Array.isArray(result?.results) || result.results.length > 100)
+    throw new Error('PLATFORM_INVALID_RESULT');
+  return result.results.map(row => {
+    if (!row || typeof row.tenant_id !== 'string' || !ID.test(row.tenant_id) ||
+        typeof row.plan_id !== 'string' || !ID.test(row.plan_id) ||
+        !STATUS.has(row.service_status) ||
+        (row.license_expires_at !== null &&
+         (typeof row.license_expires_at !== 'string' ||
+          row.license_expires_at.length > 40 ||
+          !/^\\d{4}-\\d{2}-\\d{2}(?:[ T]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|[+-]\\d{2}:\\d{2})?)?$/.test(row.license_expires_at))))
+      throw new Error('PLATFORM_INVALID_RESULT');
+    return {tenant_id:row.tenant_id, plan_id:row.plan_id,
+      service_status:row.service_status, license_expires_at:row.license_expires_at};
+  });
 }
