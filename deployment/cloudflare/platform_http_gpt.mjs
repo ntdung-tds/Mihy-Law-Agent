@@ -45,7 +45,12 @@ export async function handlePlatformAdminRequest(request, env, resolveVerifiedPr
       input = JSON.parse(raw);
     } catch { return error(400,'BAD_JSON'); }
     if (!input || Array.isArray(input) || typeof input !== 'object') return error(400,'BAD_INPUT');
-    // Exact mutation schema: reject extra fields rather than silently accepting\n    // unreviewed client instructions or prototype-polluting JSON properties.\n    const allowed = new Set(['tenantId','status','auditId','reasonCode']);\n    if (Object.keys(input).length !== allowed.size ||\n        Object.keys(input).some(key => !allowed.has(key))) return error(400,'BAD_INPUT');\n    const result = await changeTenantService(env.DB,principal,input);
+    // Exact mutation schema: reject extra fields rather than silently accepting
+    // unreviewed client instructions or prototype-polluting JSON properties.
+    const allowed = new Set(['tenantId','status','auditId','reasonCode']);
+    if (Object.keys(input).length !== allowed.size ||
+        Object.keys(input).some(key => !allowed.has(key))) return error(400,'BAD_INPUT');
+    const result = await changeTenantService(env.DB,principal,input);
     return json(result);
   } catch (e) {
     const code = typeof e?.message === 'string' ? e.message : '';

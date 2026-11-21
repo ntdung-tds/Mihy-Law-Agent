@@ -1,3 +1,8 @@
+## R236 — Restore executable platform HTTP schema guard (2026-11-22 VN)
+
+- Reviewed latest PR #279 HEAD `59d21731`, PCS STATE/MOMENT/scope/change register, issue #156 and workflow runs. Found concrete R235 defect: literal `\\n` sequences inside JavaScript `//` comments cause the newly added allowlist guard and mutation call to be commented out, yielding undefined response for valid POST. Replaced escaped sequences with real newlines so the allowlist and call are executable. This is a security/correctness fix, not a scope expansion.
+- **Test round 1/5 authored in R235, execution on R236 NOT_VERIFIED; fix round 1/5.** CI must be checked at R236 HEAD; no synthetic PASS claimed. Platform Admin PARTIAL; live Worker/session/CSRF, D1 migration, atomic audit, mobile QA BLOCKED/NOT_RUN. `OWNER_REAL_DEVICE_QA` NOT_RUN. Active task `AL-R0-DEPLOY-001` preserved. SRS v1.1.15 frozen; no merge, production deploy or customer data.
+
 ## R235 — Fail-closed HTTP mutation schema (2026-11-22 VN)
 
 - Based on R234 draft PR #278. Platform HTTP POST now rejects unknown/missing keys before DB access (including prototype-like properties), instead of silently ignoring unreviewed fields. Added five synthetic Node HTTP tests; authored only, execution NOT_RUN and CI HEAD NOT_VERIFIED. Test round 1/5 authored; fix round 1/5.
