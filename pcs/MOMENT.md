@@ -1,3 +1,8 @@
+## R229 — Repair R219 stale fixture and expiry date regex (2026-11-21 VN)
+
+- R228 HEAD `677db0ab` CI R219 FAILURE (4/5), six other workflows SUCCESS. R219 fixture expected malformed tenant service metadata to be normalized to null; R228 intentionally rejects it. Updated assertion to expect `PLATFORM_INVALID_RESULT` (no production validation relaxation).
+- Corrected date-pattern escaping in `listTenantServices` so a normal ISO date can match. Added positive and negative date regression cases. Synthetic checks only; Worker signed-in integration, D1 migration and atomic audit rollback remain BLOCKED/NOT_RUN. Test rounds 1/5; fix rounds 1/5. Platform Admin PARTIAL, OWNER_REAL_DEVICE_QA NOT_RUN. Preserve AL-R0-DEPLOY-001 and frozen SRS v1.1.15; no merge, signing, production deploy or customer data.
+
 ## R228 — Fail closed on invalid tenant service metadata (2026-11-21 VN)
 
 - Stacked on R227 PR #271. The System Admin tenant-service list previously converted malformed tenant/plan/status/expiry values to null or passed arbitrary status strings through to the UI. Added strict metadata validation and a hard 100-row result cap, preserving four-field output allowlist; rejects malformed rows rather than silently presenting false administrative state.
