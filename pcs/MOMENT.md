@@ -1,3 +1,9 @@
+## R232 — Platform license timezone offset validation (2026-11-22 VN)
+
+- Read PCS STATE/MOMENT/scope/change register, issue #156, latest PR #275 HEAD/base and open PR stack. Preserve active_task AL-R0-DEPLOY-001 and frozen SRS v1.1.15.
+- Fixed a concrete validation gap in metadata-only platform tenant service list: UTC offsets above +14:00 and offsets such as +14:01 were accepted even though not valid ISO 8601 offsets. Keep legitimate offsets including +14:00 and -12:45. Added five synthetic Node tests and isolated CI workflow.
+- Test rounds: 1/5 authored, execution CI HEAD NOT_VERIFIED; fix rounds: 1/5. Platform Admin PARTIAL; signed-in Worker mount, D1 migration, atomic audit rollback and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. No signing, merge, production deploy or customer data.
+
 ## R231 — Repair R230 expiry regex CI regression (2026-11-22 VN)
 
 - Verified R230 HEAD `22eea2ff`: 6/8 workflows SUCCESS; R230 expiry calendar and R228 tenant metadata FAILED. Root cause: R230 date regex accidentally contained doubled backslashes (`\\d` in regex literal), so valid ISO expiry dates were rejected. Corrected regex literal digit/dot escapes in production source without relaxing calendar validation. Test rounds 1/5 (GitHub CI pending), fix rounds 1/5.

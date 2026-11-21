@@ -27,7 +27,7 @@ function validExpiry(value) {
   if (+m[4]>23 || +m[5]>59 || +m[6]>59) return false;
   if (m[8] && m[8]!=='Z') {
     const hh=+m[8].slice(1,3), mm=+m[8].slice(4,6);
-    if (hh>23 || mm>59) return false;
+    if (hh>14 || mm>59 || (hh===14 && mm!==0)) return false;
   }
   return true;
 }
