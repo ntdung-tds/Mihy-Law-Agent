@@ -1,3 +1,8 @@
+## R231 — Repair R230 expiry regex CI regression (2026-11-22 VN)
+
+- Verified R230 HEAD `22eea2ff`: 6/8 workflows SUCCESS; R230 expiry calendar and R228 tenant metadata FAILED. Root cause: R230 date regex accidentally contained doubled backslashes (`\\d` in regex literal), so valid ISO expiry dates were rejected. Corrected regex literal digit/dot escapes in production source without relaxing calendar validation. Test rounds 1/5 (GitHub CI pending), fix rounds 1/5.
+- Platform Admin PARTIAL. Worker authenticated mounting, D1 migration, atomic audit rollback and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15 frozen, F01–F36 plus separate platform administration. No signing, merge, production deploy or customer data.
+
 ## R230 — Calendar-valid platform license expiry (2026-11-21 VN)
 
 - Verified R229 HEAD `3899d2ef`: 7/7 GitHub PR workflows SUCCESS. Fixed a concrete metadata integrity gap: date-shape regex accepted impossible dates and out-of-range times. The service now rejects invalid leap days, months, times and timezone offsets while retaining legitimate ISO dates. Added five synthetic Node tests and dedicated PR CI; new HEAD CI not yet verified. Test rounds 1/5 authored; fix rounds 1/5 (corrected guard syntax before PR). This does not establish live Worker integration or atomic audit rollback.
