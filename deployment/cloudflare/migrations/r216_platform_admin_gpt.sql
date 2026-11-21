@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS platform_tenant_services (
 );
 CREATE TABLE IF NOT EXISTS platform_admin_audit (
  audit_id TEXT PRIMARY KEY CHECK(length(audit_id) BETWEEN 1 AND 120),
- actor_id TEXT NOT NULL CHECK(length(actor_id) BETWEEN 0 AND 120),
+ actor_id TEXT NOT NULL CHECK(length(actor_id) BETWEEN 1 AND 120),
  tenant_id TEXT,
  action TEXT NOT NULL CHECK(action IN ('plan_create','plan_retire','service_activate','service_suspend','service_revoke','license_update','account_recovery_request')),
  occurred_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
