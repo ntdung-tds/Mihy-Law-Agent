@@ -1,3 +1,8 @@
+## R222 — Platform Admin browser metadata boundary (2026-11-21 VN)
+
+- Draft PR #266 stacked on #265; browser GET plan/tenant-service responses now explicitly allowlist metadata fields, discard unexpected business/customer/credential fields, reject malformed shapes, unsafe quotas and >100 items rather than silently accepting them. Five new synthetic Node tests + isolated CI workflow. This hardens an isolated browser module; it does **not** grant System Admin access to tenant business data or prove the Worker route is mounted.
+- Test rounds 1/5 (contracts authored, CI HEAD pending), fix rounds 0/5. Platform Admin PARTIAL; live D1 migration, verified Worker session/CSRF integration, desktop/mobile signed-in E2E and OWNER_REAL_DEVICE_QA remain NOT_RUN/BLOCKED as previously. SRS v1.1.15 frozen; AL-R0-DEPLOY-001 protected; no signing, customer data, merge or production deploy.
+
 ## R221 — Platform Admin browser API transport (2026-11-21 VN)
 
 - Draft PR #265 stacked on #264. Added actual browser transport module for R218 UI and R220 HTTP adapter with same-origin credentials, no-store, redirect rejection, trusted-host CSRF token injection, explicit request payload and fail-closed mutation receipt. Five new Node tests and isolated CI workflow. Not mounted until verified Worker session/CSRF; no live D1 migration, no mobile-device QA.
