@@ -1,3 +1,8 @@
+## R235 — Fail-closed HTTP mutation schema (2026-11-22 VN)
+
+- Based on R234 draft PR #278. Platform HTTP POST now rejects unknown/missing keys before DB access (including prototype-like properties), instead of silently ignoring unreviewed fields. Added five synthetic Node HTTP tests; authored only, execution NOT_RUN and CI HEAD NOT_VERIFIED. Test round 1/5 authored; fix round 1/5.
+- **PARTIAL**: adapter still not mounted in live Worker; verified session/CSRF integration, D1 migration, atomic audit proof, desktop/mobile real QA BLOCKED/NOT_RUN. OWNER_REAL_DEVICE_QA remains NOT_RUN. Active task AL-R0-DEPLOY-001 preserved; SRS v1.1.15 frozen; no signing, merge, production deploy, or customer data.
+
 ## R234 — Platform HTTP adapter foundation (2026-11-22 VN)
 
 - Stacked on R233 PR #277 HEAD 497b7b5d. Added `deployment/cloudflare/platform_http_gpt.mjs` HTTP adapter with injected server-verified principal, metadata-only GET, origin/CSRF checks for mutation, no-store responses and non-disclosing errors. Added five synthetic Node tests. **Not yet mounted into live Worker**: session resolver, CSRF verifier, D1 migration and atomic audit remain BLOCKED. Test round 1/5 authored, execution NOT_RUN; fix round 0/5. Owner mobile QA NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15; no signing, merge, production deployment or customer data.
