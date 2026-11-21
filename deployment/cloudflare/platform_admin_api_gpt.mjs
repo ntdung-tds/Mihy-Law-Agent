@@ -5,6 +5,25 @@ const PATH='/api/platform/';
 const STATUS=new Set(['active','suspended','revoked']);
 const ID=/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,119}$/;
 const REASON=/^[A-Z][A-Z0-9_]{1,79}$/;
+const PLAN_FIELDS=['plan_id','plan_name','status','max_users','max_storage_bytes'];
+const SERVICE_FIELDS=['tenant_id','plan_id','service_status','license_expires_at'];
+function safeList(items,fields) {
+  if (!Array.isArray(items)||items.length>100) throw new Error('PLATFORM_INVALID_RESPONSE');
+  return items.map(item=>{
+    if (!item||typeof item!=='object'||Array.isArray(item)) throw new Error('PLATFORM_INVALID_RESPONSE');
+    const clean=Object.create(null);
+    for(const field of fields){
+      const value=item[field];
+      if (field==='max_users'||field==='max_storage_bytes') {
+        if (!Number.isSafeInteger(value)||value<0) throw new Error('PLATFORM_INVALID_RESPONSE');
+      } else if (field==='license_expires_at') {
+        if (value!==null&&typeof value!=='string') throw new Error('PLATFORM_INVALID_RESPONSE');
+      } else if (typeof value!=='string'||value.length>256) throw new Error('PLATFORM_INVALID_RESPONSE');
+      clean[field]=value;
+    }
+    return clean;
+  });
+}
 export function createPlatformAdminApi({fetchImpl=globalThis.fetch,csrfToken}={}) {
   if (typeof fetchImpl!=='function' || typeof csrfToken!=='function') throw new Error('PLATFORM_TRANSPORT_UNAVAILABLE');
   async function call(path,options={}) {
@@ -21,8 +40,8 @@ export function createPlatformAdminApi({fetchImpl=globalThis.fetch,csrfToken}={}
     return data;
   }
   return Object.freeze({
-    async listPlans(){return (await call('plans')).items;},
-    async listTenantServices(){return (await call('tenant-services')).items;},
+    async listPlans(){return safeList((await call('plans')).items,PLAN_FIELDS);},
+    async listTenantServices(){return safeList((await call('tenant-services')).items,SERVICE_FIELDS);},
     async changeService({tenantId,status,reasonCode}={}) {
       if (typeof tenantId!=='string'||!ID.test(tenantId)||!STATUS.has(status)||
           typeof reasonCode!=='string'||!REASON.test(reasonCode))
