@@ -88,7 +88,7 @@ export async function listTenantServices(db, principal) {
     if (!row || typeof row.tenant_id !== 'string' || !ID.test(row.tenant_id) ||
         typeof row.plan_id !== 'string' || !ID.test(row.plan_id) ||
         !STATUS.has(row.service_status) ||
-        !validExpiry(row.license_expires_at)
+        !validExpiry(row.license_expires_at))
       throw new Error('PLATFORM_INVALID_RESULT');
     return {tenant_id:row.tenant_id, plan_id:row.plan_id,
       service_status:row.service_status, license_expires_at:row.license_expires_at};
