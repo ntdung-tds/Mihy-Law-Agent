@@ -1,3 +1,8 @@
+## R218 — Platform Admin mobile-first control-plane view (2026-11-21 VN)
+
+- Draft PR stacked on #261. Added DOM-safe responsive System Admin UI module with metadata-only injected API (plans, tenant service status, state transition), reason-code validation, revocation confirmation, stale-request/dispose guard, accessible status feedback, mobile 44px controls and empty/error/loading states. UI is **not yet mounted** in Worker; verified session/HTTP API and D1 migration still required. No tenant business data, impersonation or signing.
+- Five source contract tests and dedicated CI; local V8 source checks 16/16 PASS, Node CI final HEAD pending. Platform Admin PARTIAL; test rounds 1/5, fix rounds 0/5; OWNER_REAL_DEVICE_QA NOT_RUN. SRS v1.1.15 frozen; AL-R0-DEPLOY-001 unchanged. No merge/deploy/real customer data.
+
 ## R217 — System Admin metadata-only service boundary (2026-11-21 VN)
 
 - Draft PR #261 stacked on #260: real D1-query service module for plan listing and Tenant service state transitions with audit batch, no tenant business data reads. Verified server-side principal required by contract; **not yet wired to Worker session/router**. Five Node contract tests and isolated CI workflow. Status PARTIAL.
