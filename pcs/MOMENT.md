@@ -1,3 +1,9 @@
+## R221 — Platform Admin browser API transport (2026-11-21 VN)
+
+- Draft PR #265 stacked on #264. Added actual browser transport module for R218 UI and R220 HTTP adapter with same-origin credentials, no-store, redirect rejection, trusted-host CSRF token injection, explicit request payload and fail-closed mutation receipt. Five new Node tests and isolated CI workflow. Not mounted until verified Worker session/CSRF; no live D1 migration, no mobile-device QA.
+- R220 final HEAD c10a69f Actions 44878004177 and 44878004211 completed SUCCESS. R221 final HEAD CI NOT_VERIFIED until latest Actions run checked. Test rounds 1/5 (new contracts authored, execution pending); fix rounds 0/5. Platform Admin PARTIAL; OWNER_REAL_DEVICE_QA NOT_RUN.
+- SRS v1.1.15 frozen, protected AL-R0-DEPLOY-001 unchanged, no signing, real customer data, merge or production deploy.
+
 ## R220 — Platform Admin isolated HTTP adapter (2026-11-21 VN)
 
 - Draft PR stacked on #263: added metadata-only HTTP boundary for GET plans/services and PATCH service status. Requires server-injected verified System Admin principal, server-verified CSRF and server-generated audit ID. Explicit allowlisted responses, no-store, bounded JSON, no client-supplied audit ID, no business-data endpoints. Five Node tests and dedicated workflow.
