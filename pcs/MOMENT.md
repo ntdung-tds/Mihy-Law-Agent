@@ -1,3 +1,8 @@
+## R217 — System Admin metadata-only service boundary (2026-11-21 VN)
+
+- Draft PR #261 stacked on #260: real D1-query service module for plan listing and Tenant service state transitions with audit batch, no tenant business data reads. Verified server-side principal required by contract; **not yet wired to Worker session/router**. Five Node contract tests and isolated CI workflow. Status PARTIAL.
+- R216 HEAD 6913b6f workflow runs 44858677177 and 44858677334 completed SUCCESS; R217 HEAD CI pending verification. Limit 1/5 local test rounds planned, 0/5 fix rounds; real-device QA OWNER_REAL_DEVICE_QA NOT_RUN. SRS v1.1.15 frozen, active_task AL-R0-DEPLOY-001 preserved; no signing, merge, deploy, real grants or customer data.
+
 ## R216 — Platform admin foundation (2026-11-21 VN)
 
 - Draft PR #260 stacked on #259. Added isolated D1-compatible metadata-only service plan, tenant service and append-only audit schema, plus 5 synthetic SQLite tests and CI workflow. No Worker/API/UI or live D1 deployment; PARTIAL.
