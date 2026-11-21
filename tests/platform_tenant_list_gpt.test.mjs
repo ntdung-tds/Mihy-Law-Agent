@@ -25,3 +25,15 @@ test('rejects tenant admin before database query',async()=>{
  await assert.rejects(listTenantServices(denied,{verified:true,kind:'tenant_admin',id:'x'}),/PLATFORM_FORBIDDEN/);
  assert.equal(touched,false);
 });
+
+test('accepts ISO calendar date and timestamp expiry metadata',async()=>{
+ for (const date of ['2026-12-31','2026-12-31T23:59:59Z','2026-12-31 23:59:59+07:00']) {
+   const row={...valid,license_expires_at:date};
+   assert.deepEqual(await listTenantServices(db([row]),admin),[row]);
+ }
+});
+test('rejects non-ISO expiry metadata',async()=>{
+ for (const date of ['tomorrow','2026/12/31','2026-12-31T23:59:59+0700']) {
+   await assert.rejects(listTenantServices(db([{...valid,license_expires_at:date}]),admin),/PLATFORM_INVALID_RESULT/);
+ }
+});
