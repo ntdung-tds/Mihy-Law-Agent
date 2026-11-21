@@ -1,3 +1,8 @@
+## R216 — Platform admin foundation (2026-11-21 VN)
+
+- Draft PR #260 stacked on #259. Added isolated D1-compatible metadata-only service plan, tenant service and append-only audit schema, plus 5 synthetic SQLite tests and CI workflow. No Worker/API/UI or live D1 deployment; PARTIAL.
+- Owner priority: finish all 36 Fxx and System Admin, complete mobile, defer owner real-device QA; 5 local test / 5 fix rounds max per function. R126 BLOCKED/NOT_RUN, no signing, no customer data, no merge/production. Protected active_task AL-R0-DEPLOY-001 and SRS v1.1.15 unchanged.
+
 ## R215 — F21 approval audit rollback regression (2026-11-21 VN)
 
 - Read PCS STATE/MOMENT/scope/SRS change register, issue #156, PR #258 HEAD/base, open parallel PRs. R214 final-head Actions #44840627518 SUCCESS for eight synthetic SQLite tests only.
