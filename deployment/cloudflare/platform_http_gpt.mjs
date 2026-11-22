@@ -40,9 +40,31 @@ export async function handlePlatformAdminRequest(request, env, resolveVerifiedPr
         await env.verifyPlatformCsrf(request,principal,csrf) !== true) return error(403,'CSRF_INVALID');
     let input;
     try {
-      const raw = await request.text();
-      if (raw.length > 2048) return error(413,'PAYLOAD_TOO_LARGE');
-      input = JSON.parse(raw);
+      // Bound the incoming stream BEFORE materializing JSON in memory.
+      // A post-read string-length check alone permits unbounded request bodies.
+      const declared = request.headers.get('content-length');
+      if (declared && (!/^\d+$/.test(declared) || Number(declared) > 2048))
+        return error(413,'PAYLOAD_TOO_LARGE');
+      if (!request.body) return error(400,'BAD_JSON');
+      const reader = request.body.getReader();
+      const chunks = [];
+      let bytes = 0;
+      try {
+        while (true) {
+          const {done, value} = await reader.read();
+          if (done) break;
+          bytes += value.byteLength;
+          if (bytes > 2048) {
+            await reader.cancel();
+            return error(413,'PAYLOAD_TOO_LARGE');
+          }
+          chunks.push(value);
+        }
+      } finally { reader.releaseLock(); }
+      const buffer = new Uint8Array(bytes);
+      let offset = 0;
+      for (const chunk of chunks) { buffer.set(chunk, offset); offset += chunk.byteLength; }
+      input = JSON.parse(new TextDecoder('utf-8', {fatal:true}).decode(buffer));
     } catch { return error(400,'BAD_JSON'); }
     if (!input || Array.isArray(input) || typeof input !== 'object') return error(400,'BAD_INPUT');
     // Exact mutation schema: reject extra fields rather than silently accepting
