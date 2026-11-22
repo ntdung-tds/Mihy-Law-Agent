@@ -1,3 +1,9 @@
+## R239 — Bound the older platform PATCH adapter (2026-11-22 VN)
+
+- Read PCS STATE/MOMENT/scope/change register, issue #156, latest PR #282 and CI HEAD. R238 HEAD CI: 2 completed SUCCESS workflows. Found a second, older platform HTTP adapter (`platform_admin_http_gpt.mjs`) still calling unbounded `request.text()`, with permissive Content-Type. Corrected this actual security gap with 2048-byte streaming cap, fatal UTF-8 decoding, Content-Length early rejection and strict JSON media type. No change to session/MatterACL or tenant business-data access.
+- Test/fix round: test 0/5 executed (CI at new HEAD NOT_VERIFIED), fix 1/5. Platform Admin PARTIAL; actual Worker session mounting, D1 migration/atomic audit and responsive UI remain BLOCKED/NOT_RUN; OWNER_REAL_DEVICE_QA NOT_RUN.
+- Preserve AL-R0-DEPLOY-001, SRS v1.1.15 frozen, F01–F36 and separate Platform Admin. No signing, merge, production deployment or customer data.
+
 ## R237 — Bound platform HTTP request bytes before JSON parsing (2026-11-22 VN)
 
 - Read PCS STATE/MOMENT/scope/change register and latest PR #280, issue #156, CI HEAD. Security defect: POST previously used unbounded request.text() before a 2048-character check, allowing large bodies to be buffered and multi-byte payloads to exceed the intended limit. Replaced with byte-counted stream reader capped at 2048 bytes, early Content-Length rejection, fatal UTF-8 decoding, and retained fail-closed schema/CSRF guards.
