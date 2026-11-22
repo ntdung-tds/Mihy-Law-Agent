@@ -1,3 +1,9 @@
+## R253 — Repair confirmed R217 CI fixture mismatch (2026-11-22 VN)
+
+- Read current stacked PR #296, PCS STATE/MOMENT/scope/SRS change register, issue #156, and exact R252 HEAD `90986ef2e6fad52a2093b9433c577ab0a830cb35` workflow runs. R252 scoped CI SUCCESS; R217 contract CI FAILED 3/5 (run #45035775287), with other workflows also FAILED. No full CI PASS claim.
+- Repaired R217 synthetic D1 fixtures to return `success:true` for `.all()` and both `.batch()` statements, and aligned bounded SELECT assertion to `LIMIT 101` (100 rows plus overflow sentinel). Production security checks unchanged. This directly addresses three confirmed R217 failures; new HEAD CI NOT_VERIFIED, local NOT_RUN. Test 1/5 observed; fix 1/5.
+- Platform Admin PARTIAL; verified Worker session, D1 migration/atomic rollback, desktop/mobile, and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 and separate platform admin; no signing, merge, production deploy or customer data.
+
 ## R252 — Reject ambiguous duplicate platform metadata rows (2026-11-22 VN)
 
 - Read latest PCS STATE/MOMENT/scope/SRS change register from PR #295 branch, checked open PR stack, issue #156, and exact R251 HEAD cc8923170653e2911147b7662b4abf32e6379dd6 CI (two completed SUCCESS workflows: R220 and DOCX POC only). No claim of full CI PASS.

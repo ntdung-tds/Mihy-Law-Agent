@@ -5,9 +5,9 @@ const admin = {verified:true,kind:'system_admin',id:'sys-1'};
 function fakeDb(changes=1) {
   const statements=[];
   const db={statements,prepare(sql) {
-    const s={sql,args:[],bind(...args){this.args=args;return this;},async all(){return {results:[{plan_id:'solo',plan_name:'Solo',status:'active',max_users:1,max_storage_bytes:0}]};}};
+    const s={sql,args:[],bind(...args){this.args=args;return this;},async all(){return {success:true,results:[{plan_id:'solo',plan_name:'Solo',status:'active',max_users:1,max_storage_bytes:0}]};}};
     statements.push(s);return s;
-  },async batch(items){return [{meta:{changes}}, {meta:{changes}}];}};
+  },async batch(items){return [{success:true,meta:{changes}}, {success:true,meta:{changes}}];}};
   return db;
 }
 test('unverified and tenant admins cannot access control plane',async()=>{
@@ -16,7 +16,7 @@ test('unverified and tenant admins cannot access control plane',async()=>{
 });
 test('plans query is metadata-only and bounded',async()=>{
   const db=fakeDb();assert.equal((await listPlatformPlans(db,admin))[0].plan_id,'solo');
-  assert.match(db.statements[0].sql,/LIMIT 100/);
+  assert.match(db.statements[0].sql,/LIMIT 101/);
   assert.doesNotMatch(db.statements[0].sql,/matter|document|client|file_content/i);
 });
 test('rejects invalid IDs status and reasons before any SQL',async()=>{
