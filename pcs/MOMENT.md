@@ -1,3 +1,9 @@
+## R259 — Align missing D1 audit metadata regression with batch fail-closed contract (2026-11-23 VN)
+
+- Read PCS STATE/MOMENT/scope/change register at R258 HEAD f3ea77b3; reviewed open stacked PR #302, issue #156 and exact R258 HEAD CI. R222 and DOCX POC SUCCESS, R225 FAILED 1/13 in workflow #45069946807; this is scoped CI, not app E2E.
+- Examined R225 job #137354448001: missing audit metadata returns PLATFORM_BATCH_INCOMPLETE before the narrower audit-count validation. Corrected one synthetic test expectation to the actual stronger fail-closed D1 batch contract. No production security validation weakened. This fixes a confirmed CI contract mismatch, not real D1 rollback proof.
+- CI observation 1/5, fixture repair 1/5; local Node NOT_RUN, R259 HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; Worker authentication, D1 migration/rollback, complete desktop/mobile and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve state.current.active_task=AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 plus platform admin. No signing, merge, production deployment or customer data.
+
 ## R258 — Repair confirmed R225 D1 batch contract fixture (2026-11-23 VN)
 
 - Read PCS STATE/MOMENT/scope/SRS change register from latest PR #301 branch, checked issue #156, stacked open PRs and exact R257 HEAD ea29f66c6d603745b764362b6c284d7c4d59ba54 CI: R232, R219 and DOCX POC all completed SUCCESS (three scoped workflows). No broad app E2E inferred.
