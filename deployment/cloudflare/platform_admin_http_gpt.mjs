@@ -35,12 +35,34 @@ export async function handlePlatformAdminRequest(request, {db, principal, csrfVe
     if (request.method !== 'PATCH' || url.pathname !== '/api/platform/tenant-services')
       return reply(405,{error:'METHOD_NOT_ALLOWED'});
     if (csrfVerified !== true) return reply(403,{error:'CSRF_FORBIDDEN'});
-    if (!/^application\/json(?:\s*;|$)/i.test(request.headers.get('content-type')||''))
+    // Reject unsupported media types and cap bytes before allocating the JSON body.
+    // Reject unsupported media types and cap bytes before allocating the JSON body.
+    const contentType=request.headers.get('content-type')||'';
+    if (!/^application\/json(?:\s*;\s*charset\s*=\s*(?:utf-8|"utf-8")\s*)?$/i.test(contentType))
       return reply(415,{error:'UNSUPPORTED_MEDIA_TYPE'});
-    const raw = await request.text();
-    if (raw.length > 2048) return reply(413,{error:'PAYLOAD_TOO_LARGE'});
+    const declared=request.headers.get('content-length');
+    if (declared && (!/^\d+$/.test(declared) || Number(declared)>2048))
+      return reply(413,{error:'PAYLOAD_TOO_LARGE'});
+    if (!request.body) return reply(400,{error:'INVALID_JSON'});
     let data;
-    try { data=JSON.parse(raw); } catch { return reply(400,{error:'INVALID_JSON'}); }
+    try {
+      const reader=request.body.getReader();
+      const chunks=[];
+      let bytes=0;
+      try {
+        while (true) {
+          const {done,value}=await reader.read();
+          if (done) break;
+          bytes+=value.byteLength;
+          if (bytes>2048) { await reader.cancel(); return reply(413,{error:'PAYLOAD_TOO_LARGE'}); }
+          chunks.push(value);
+        }
+      } finally { reader.releaseLock(); }
+      const buffer=new Uint8Array(bytes);
+      let offset=0;
+      for (const chunk of chunks) { buffer.set(chunk,offset); offset+=chunk.byteLength; }
+      data=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(buffer));
+    } catch { return reply(400,{error:'INVALID_JSON'}); }
     if (!data || Array.isArray(data) || typeof data !== 'object' ||
         Object.keys(data).sort().join(',') !== 'reasonCode,status,tenantId')
       return reply(400,{error:'BAD_INPUT'});
