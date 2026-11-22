@@ -54,3 +54,13 @@ test('incomplete or unsuccessful D1 batches never report a successful mutation',
     await assert.rejects(changeTenantService(db,admin,input),/PLATFORM_BATCH_INCOMPLETE|PLATFORM_AUDIT_INCOMPLETE/);
   }
 });
+
+test('platform plan names reject control characters before reaching desktop/mobile UI',async()=>{
+  for (const name of ['Solo\nInjected','Solo\rInjected','Solo\u0000Injected','Solo\u007fInjected','Solo\u0085Injected']) {
+    const db=fakeDb();
+    db.prepare=()=>({async all(){return {success:true,results:[{plan_id:'solo',plan_name:name,status:'active',max_users:1,max_storage_bytes:0}]};}});
+    await assert.rejects(listPlatformPlans(db,admin),/PLATFORM_INVALID_RESULT/);
+  }
+  const db=fakeDb();
+  assert.equal((await listPlatformPlans(db,admin))[0].plan_name,'Solo');
+});
