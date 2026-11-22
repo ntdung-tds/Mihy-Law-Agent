@@ -68,7 +68,17 @@ export async function changeTenantService(db, principal, input) {
   ).bind(auditId, principal.id, tenantId, ACTION[status], reasonCode);
   // D1 batch transactions roll back together on SQL error. Never expose tenant business data.
   const results = await db.batch([update, audit]);
-  if (results?.[0]?.meta?.changes !== 1) return {changed:false};
+  // D1 must return a complete, successful result for BOTH statements.
+  // Missing/partial batch metadata is an infrastructure failure, not a no-op.
+  if (!Array.isArray(results) || results.length !== 2 ||
+      results.some(item => !item || item.success !== true ||
+        !Number.isSafeInteger(item.meta?.changes) || item.meta.changes < 0))
+    throw new Error('PLATFORM_BATCH_INCOMPLETE');
+  if (results[0].meta.changes !== 1) {
+    if (results[0].meta.changes !== 0 || results[1].meta.changes !== 0)
+      throw new Error('PLATFORM_BATCH_INCOMPLETE');
+    return {changed:false};
+  }
   // Never report a successful service mutation without exactly one durable audit row.
   // A zero-row INSERT can otherwise silently succeed while leaving an unaudited change.
   if (results?.[1]?.meta?.changes !== 1) throw new Error('PLATFORM_AUDIT_INCOMPLETE');
