@@ -1,3 +1,9 @@
+## R247 — Reject accessor mutation inputs at platform service boundary (2026-11-22 VN)
+
+- Read PCS STATE/MOMENT/scope/change register at R246 HEAD, issue #156 and latest stacked PR #290; checked exact R246 HEAD 1a8bca0bcf0da6a7405c745a190ddd6b8832f1dd: five pull-request workflows SUCCESS (DOCX POC, R226, R222, R220, R228). This is synthetic CI only.
+- Fixed platform service input guard: own accessor properties previously passed own-key validation and executed getter code on destructuring. Require four own enumerable writable data descriptors before reading values, without expanding permitted fields or weakening System Admin authorization. Added four Node regression cases and a scoped workflow.
+- Local test NOT_RUN; R247 HEAD CI NOT_VERIFIED until Actions finishes. Test 1/5 authored; fix 1/5. Platform Admin PARTIAL. Real Worker verified session, D1 rollback atomicity, migration, full mobile UI and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15, F01-F36 and platform control-plane separation. No merge/deploy/signing/customer data.
+
 ## R246 — Repair confirmed D1 list fixture failures (2026-11-22 VN)
 
 - Read latest PCS STATE/MOMENT/scope/SRS change register, PR #289 and issue #156; checked R245 HEAD c9fef867 CI. Twelve workflows completed: ten FAIL, two SUCCESS. Inspected actual failing job logs for R226, R220 and R228: positive synthetic D1 fixtures omit mandatory `success:true` introduced in R245, so expected successful reads fail closed (PLATFORM_INVALID_RESULT / HTTP 503).
