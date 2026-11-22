@@ -1,3 +1,9 @@
+## R241 — Platform audit transaction regression gate (2026-11-22 VN)
+
+- Based on R240 PR #284. Read PCS STATE/MOMENT/scope/change register and issue #156, checked latest open PR stack. Added five synthetic Node test cases for same-batch service update + audit, no-transition, missing audit confirmation, D1 batch failure and tenant-admin denial; added scoped CI workflow. These are **authored only**, local execution NOT_RUN and new HEAD CI NOT_VERIFIED; test round 1/5 authored, fix 0/5.
+- Important remaining risk: an audit INSERT returning zero rows after a successful UPDATE may not automatically roll back the already committed D1 batch. Current application throws but rollback is NOT_PROVEN. Must verify transactional rollback with real D1/staging and enforce DB-level failure/atomicity before any production use. Do not claim atomic audit complete from mocks.
+- Platform Admin PARTIAL. Worker verified session mounting, migration, full responsive UI, Fxx SRS trace and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15 frozen, no signing, no merge/deploy/customer data.
+
 ## R240 — Repair failing CI and legacy service response allowlist (2026-11-22 VN)
 
 - Read current PCS STATE/MOMENT/scope/change register, PR #283 and issue #156. Actual HEAD b62a070f CI workflow platform-admin-r220-gpt FAILED (4/5 tests): stale test expected SQL LIMIT 100, while R233 deliberately uses LIMIT 101 to detect overflow. Updated assertion to LIMIT 101, preserving fail-closed overflow behavior. Existing synthetic fixture also exposed an actual privacy risk: legacy GET tenant-services returned raw rows without allowlisting. Restrict response to tenant_id, plan_id, service_status and license_expires_at, dropping extra DB columns. Remove duplicated comment.
