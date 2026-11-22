@@ -1,3 +1,10 @@
+## R252 — Reject ambiguous duplicate platform metadata rows (2026-11-22 VN)
+
+- Read latest PCS STATE/MOMENT/scope/SRS change register from PR #295 branch, checked open PR stack, issue #156, and exact R251 HEAD cc8923170653e2911147b7662b4abf32e6379dd6 CI (two completed SUCCESS workflows: R220 and DOCX POC only). No claim of full CI PASS.
+- Fixed platform control-plane plan/tenant listing to fail closed when D1 returns duplicate plan_id or tenant_id rows, rather than presenting contradictory service status/plan metadata. No tenant business data is selected or serialized.
+- Added four synthetic Node regression cases and scoped GitHub Actions workflow. Local tests NOT_RUN; new HEAD CI NOT_VERIFIED. Test round 1/5 authored; fix round 1/5. Platform Admin PARTIAL; Worker verified session, D1 migration/atomic audit rollback, desktop/mobile and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN.
+- Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 plus separate platform admin, no signing, merge, production deploy or customer data.
+
 ## R251 — Trusted audit generator exceptions (2026-11-22 VN)
 
 - Read latest STATE/MOMENT/scope/SRS register, issue #156, open PR stack through #294 and exact R250 HEAD f09efa47 CI: two workflows SUCCESS (R220, DOCX POC); these do not prove new tests or real deployment.
