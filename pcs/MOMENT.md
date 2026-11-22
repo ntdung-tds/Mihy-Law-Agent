@@ -1,3 +1,9 @@
+## R251 — Trusted audit generator exceptions (2026-11-22 VN)
+
+- Read latest STATE/MOMENT/scope/SRS register, issue #156, open PR stack through #294 and exact R250 HEAD f09efa47 CI: two workflows SUCCESS (R220, DOCX POC); these do not prove new tests or real deployment.
+- Fixed PATCH HTTP adapter so throwing trusted audit ID generator returns 503 AUDIT_UNAVAILABLE, without leaking exception content or attempting D1 writes. Added three synthetic Node regression cases. Local execution NOT_RUN; new HEAD CI NOT_VERIFIED. Test 1/5 authored; fix 1/5.
+- Platform Admin PARTIAL; Worker session, D1 atomic rollback proof, migrations, responsive mobile and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15 and F01–F36. No signing, merge, production deploy or customer data.
+
 ## R250 — Trusted audit ID fail-closed at HTTP boundary (2026-11-22 VN)
 
 - Read latest PCS STATE/MOMENT/scope/SRS change register on PR #293 HEAD 26b8e493, issue #156, and open stacked PRs. Exact HEAD CI: R233 metadata overflow and DOCX POC workflows SUCCESS; synthetic only.
