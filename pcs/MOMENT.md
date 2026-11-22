@@ -1,3 +1,9 @@
+## R256 — Block bidi spoofing in platform plan display metadata (2026-11-23 VN)
+
+- Read current STATE/MOMENT/scope/SRS change register and issue #156, checked open stacked PRs through #299 and R255 exact HEAD workflow lookup (no matching pull-request workflow runs returned). Continue from R255 without changing PR #187 or merging.
+- Real service fix: metadata-only plan_name now rejects Unicode bidi direction overrides, embedding controls, isolates and marks (U+061C, U+200E/U+200F, U+202A–U+202E, U+2066–U+2069), preventing deceptive visual reordering in desktop/mobile admin listings. Added 12 synthetic negative cases and a Vietnamese positive display control. This does not access tenant business data.
+- Local Node suite NOT_RUN (connector-only execution); R256 HEAD CI NOT_VERIFIED. Test cases authored 1/5; fix 1/5. Platform Admin PARTIAL; authenticated Worker session, D1 migration/atomic rollback proof, complete responsive UI and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15 frozen, F01–F36 plus separate platform administration. No signing, customer data, merge or production deployment.
+
 ## R255 — Validate plan display metadata for control characters (2026-11-23 VN)
 
 - Read current stacked PR #298 and its HEAD 222bb7b51c40a0314fafd9b88ad0dbf58010a029, current PCS STATE/MOMENT/scope/SRS change register, and issue #156. Exact R254 HEAD pull-request workflow list returned no runs; CI NOT_VERIFIED, not PASS. No production deployment.

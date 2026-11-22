@@ -64,3 +64,15 @@ test('platform plan names reject control characters before reaching desktop/mobi
   const db=fakeDb();
   assert.equal((await listPlatformPlans(db,admin))[0].plan_name,'Solo');
 });
+
+test('plan display rejects Unicode bidi override and isolation controls',async()=>{
+  const controls=['\u061c','\u200e','\u200f','\u202a','\u202b','\u202c','\u202d','\u202e','\u2066','\u2067','\u2068','\u2069'];
+  for (const control of controls) {
+    const db=fakeDb();
+    db.prepare=()=>({async all(){return {success:true,results:[{plan_id:'solo',plan_name:'Solo'+control+'Admin',status:'active',max_users:1,max_storage_bytes:0}]};}});
+    await assert.rejects(listPlatformPlans(db,admin),/PLATFORM_INVALID_RESULT/);
+  }
+  const db=fakeDb();
+  db.prepare=()=>({async all(){return {success:true,results:[{plan_id:'solo',plan_name:'Gói cá nhân',status:'active',max_users:1,max_storage_bytes:0}]};}});
+  assert.equal((await listPlatformPlans(db,admin))[0].plan_name,'Gói cá nhân');
+});
