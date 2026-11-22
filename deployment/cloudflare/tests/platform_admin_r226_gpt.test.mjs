@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {listPlatformPlans} from '../platform_admin_gpt.mjs';
 const principal={id:'sys_1',kind:'system_admin',verified:true};
 const good={plan_id:'basic',plan_name:'Basic',status:'active',max_users:5,max_storage_bytes:1024};
-const db=rows=>({prepare(){return {async all(){return {results:rows}}}},batch(){}});
+const db=rows=>({prepare(){return {async all(){return {success:true,results:rows}}}},batch(){}});
 test('returns only control-plane allowlisted fields',async()=>{
  const rows=await listPlatformPlans(db([{...good,secret:'DO_NOT_EXPOSE',tenant_case:'private'}]),principal);
  assert.deepEqual(rows,[good]);
