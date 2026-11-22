@@ -44,6 +44,7 @@ export async function listPlatformPlans(db, principal) {
   return result.results.map(row => {
     if (!row || typeof row.plan_id !== 'string' || !ID.test(row.plan_id) ||
         typeof row.plan_name !== 'string' || row.plan_name.trim().length === 0 || row.plan_name.length > 120 ||
+        /[\u0000-\u001F\u007F-\u009F]/u.test(row.plan_name) ||
         !['active', 'retired'].includes(row.status) ||
         !Number.isSafeInteger(row.max_users) || row.max_users < 1 ||
         !Number.isSafeInteger(row.max_storage_bytes) || row.max_storage_bytes < 0)
