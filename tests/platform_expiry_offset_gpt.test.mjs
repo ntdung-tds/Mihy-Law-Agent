@@ -7,7 +7,7 @@ function db(expiry) {
   return {
     prepare(sql) {
       assert.match(sql,/SELECT tenant_id, plan_id, service_status, license_expires_at/);
-      return {async all(){return {results:[{tenant_id:'tenant-qa',plan_id:'plan-qa',service_status:'active',license_expires_at:expiry}]}}};
+      return {async all(){return {success:true,results:[{tenant_id:'tenant-qa',plan_id:'plan-qa',service_status:'active',license_expires_at:expiry}]}}};
     },
     async batch(){throw new Error('No writes expected');}
   };
