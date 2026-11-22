@@ -58,8 +58,13 @@ export async function changeTenantService(db, principal, input) {
   if (!input || typeof input !== 'object' || Array.isArray(input) ||
       ![Object.prototype, null].includes(Object.getPrototypeOf(input)) ||
       Reflect.ownKeys(input).length !== 4 ||
-      !['tenantId','status','auditId','reasonCode'].every(key =>
-        Object.prototype.hasOwnProperty.call(input, key)))
+      !['tenantId','status','auditId','reasonCode'].every(key => {
+        const descriptor = Object.getOwnPropertyDescriptor(input, key);
+        // Accessor properties can execute arbitrary caller code during destructuring.
+        // Only accept own, enumerable, writable data properties at this boundary.
+        return descriptor && Object.prototype.hasOwnProperty.call(descriptor, 'value') &&
+          descriptor.enumerable === true && descriptor.writable === true;
+      }))
     throw new Error('PLATFORM_BAD_INPUT');
   const {tenantId, status, auditId, reasonCode} = input;
   requireId(tenantId); requireId(auditId);
