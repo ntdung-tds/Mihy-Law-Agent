@@ -36,3 +36,21 @@ test('service update and audit share a single batch and use bound values',async(
 test('no-op transition reports unchanged',async()=>{
   assert.deepEqual(await changeTenantService(fakeDb(0),admin,{tenantId:'t',status:'active',auditId:'a',reasonCode:'REVIEW'}),{changed:false});
 });
+
+test('incomplete or unsuccessful D1 batches never report a successful mutation',async()=>{
+  const input={tenantId:'tenant-1',status:'suspended',auditId:'audit-2',reasonCode:'POLICY'};
+  const cases=[
+    null,[],[{success:true,meta:{changes:1}}],
+    [{success:false,meta:{changes:1}},{success:true,meta:{changes:1}}],
+    [{success:true,meta:{changes:1}},{success:false,meta:{changes:1}}],
+    [{success:true,meta:{changes:1}},{success:true,meta:{changes:0}}],
+    [{success:true,meta:{changes:0}},{success:true,meta:{changes:1}}],
+    [{success:true,meta:{changes:2}},{success:true,meta:{changes:1}}],
+    [{success:true,meta:{}},{success:true,meta:{changes:1}}]
+  ];
+  for (const result of cases) {
+    const db=fakeDb();
+    db.batch=async()=>result;
+    await assert.rejects(changeTenantService(db,admin,input),/PLATFORM_BATCH_INCOMPLETE|PLATFORM_AUDIT_INCOMPLETE/);
+  }
+});

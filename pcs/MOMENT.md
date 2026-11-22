@@ -1,3 +1,9 @@
+## R254 — Guard regression for D1 atomic service/audit results (2026-11-22 VN)
+
+- Read STATE/MOMENT/scope/SRS change register and issue #156; checked PR #297 HEAD 61ca6b2e21b66e52eca6f2e02296f647e3fcdec4 and stacked open PRs. Exact R253 HEAD CI R217 and DOCX POC SUCCESS (2 scoped workflows), not full app E2E.
+- Added nine synthetic D1 batch outcome regressions for failed/partial results, missing metadata, unexpected row counts and audit-not-inserted. Service must fail closed rather than report success when mutation/audit are inconsistent. No production code changed. Local NOT_RUN; R254 HEAD CI NOT_VERIFIED. Test authored 1/5, fix 0/5.
+- Platform Admin PARTIAL; real Worker verified session, D1 migration and atomic rollback, responsive UI and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 plus platform admin; no signing, merge, production deploy or customer data.
+
 ## R253 — Repair confirmed R217 CI fixture mismatch (2026-11-22 VN)
 
 - Read current stacked PR #296, PCS STATE/MOMENT/scope/SRS change register, issue #156, and exact R252 HEAD `90986ef2e6fad52a2093b9433c577ab0a830cb35` workflow runs. R252 scoped CI SUCCESS; R217 contract CI FAILED 3/5 (run #45035775287), with other workflows also FAILED. No full CI PASS claim.
