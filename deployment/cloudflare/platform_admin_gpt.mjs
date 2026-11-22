@@ -53,7 +53,14 @@ export async function listPlatformPlans(db, principal) {
 }
 export async function changeTenantService(db, principal, input) {
   requireAdmin(principal); requireDb(db);
-  if (!input || typeof input !== 'object') throw new Error('PLATFORM_BAD_INPUT');
+  // The service boundary must reject unexpected keys even when a caller bypasses HTTP.
+  // Do not accept arrays, inherited properties, symbols or prototype-manipulated objects.
+  if (!input || typeof input !== 'object' || Array.isArray(input) ||
+      ![Object.prototype, null].includes(Object.getPrototypeOf(input)) ||
+      Reflect.ownKeys(input).length !== 4 ||
+      !['tenantId','status','auditId','reasonCode'].every(key =>
+        Object.prototype.hasOwnProperty.call(input, key)))
+    throw new Error('PLATFORM_BAD_INPUT');
   const {tenantId, status, auditId, reasonCode} = input;
   requireId(tenantId); requireId(auditId);
   if (!STATUS.has(status) || status === 'pending') throw new Error('PLATFORM_BAD_STATUS');

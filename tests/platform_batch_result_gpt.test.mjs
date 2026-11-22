@@ -23,3 +23,28 @@ test('inconsistent no-op and missing audit fail closed',async()=>{
   await assert.rejects(changeTenantService(db([row(0),row(1)]),principal,input),/PLATFORM_BATCH_INCOMPLETE/);
   await assert.rejects(changeTenantService(db([row(1),row(0)]),principal,input),/PLATFORM_AUDIT_INCOMPLETE/);
 });
+
+test('rejects unexpected metadata at service boundary before DB access',async()=>{
+  let called=false; const guarded={prepare(){called=true;throw Error('unexpected DB access')},batch(){called=true;}};
+  await assert.rejects(changeTenantService(guarded,principal,{...input,client_name:'secret'}),/PLATFORM_BAD_INPUT/);
+  assert.equal(called,false);
+});
+test('rejects array payloads before database access',async()=>{
+  await assert.rejects(changeTenantService(db([]),principal,[input]),/PLATFORM_BAD_INPUT/);
+});
+test('rejects inherited mutation fields',async()=>{
+  const inherited=Object.create({reasonCode:'OWNER_REQUEST'});
+  Object.assign(inherited,{tenantId:'tenant-qa',status:'active',auditId:'audit-qa'});
+  await assert.rejects(changeTenantService(db([]),principal,inherited),/PLATFORM_BAD_INPUT/);
+});
+test('rejects prototype pollution keys and symbols',async()=>{
+  const polluted=Object.assign(Object.create(null),input);
+  Object.defineProperty(polluted,'__proto__',{value:{admin:true},enumerable:true});
+  await assert.rejects(changeTenantService(db([]),principal,polluted),/PLATFORM_BAD_INPUT/);
+  const symbol={...input,[Symbol('hidden')]:'secret'};
+  await assert.rejects(changeTenantService(db([]),principal,symbol),/PLATFORM_BAD_INPUT/);
+});
+test('allows exact null-prototype payload with no audit on no-op',async()=>{
+  const exact=Object.assign(Object.create(null),input);
+  assert.deepEqual(await changeTenantService(db([row(0),row(0)]),principal,exact),{changed:false});
+});
