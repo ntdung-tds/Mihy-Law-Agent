@@ -1431,3 +1431,9 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 
 - Stack after R237 PR #281. Fixed HTTP POST Content-Type parser to accept only application/json with optional UTF-8 charset; reject arbitrary parameters or unsupported charsets before mutation. Five synthetic Node cases and dedicated CI workflow authored. This is a narrow security fix, not Worker integration.
 - Test rounds 1/5 authored, execution NOT_VERIFIED; fix rounds 1/5. Platform Admin PARTIAL; verified Worker session, D1 migration, atomic audit, desktop/mobile and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. No SRS v1.1.15 edits, no signing, customer data, merge or production deploy. Preserve state.current.active_task=AL-R0-DEPLOY-001.
+
+## R242 — Platform D1 batch result fail-closed guard (2026-11-22 VN)
+
+- Stacked on R241 PR #285. Fixed `changeTenantService` so absent/truncated/failed D1 batch results cannot be interpreted as a harmless no-op; both statements must report successful, nonnegative integer change counts. A no-op requires zero audit rows. An update with missing audit still raises an error; this does **not** establish real D1 rollback, which remains BLOCKED/NOT_RUN.
+- Added five Node synthetic tests and a dedicated CI workflow. Tests authored, execution NOT_VERIFIED; test round 1/5 authored, fix round 1/5. Real Worker session, D1 migration, atomic rollback proof and desktop/mobile Owner QA remain BLOCKED/NOT_RUN. Platform Admin PARTIAL.
+- Preserve `state.current.active_task=AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, 36 Fxx plus separate platform admin; no signing, merge, production deployment or customer data.
