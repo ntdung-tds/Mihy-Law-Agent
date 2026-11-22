@@ -1,3 +1,9 @@
+## R250 — Trusted audit ID fail-closed at HTTP boundary (2026-11-22 VN)
+
+- Read latest PCS STATE/MOMENT/scope/SRS change register on PR #293 HEAD 26b8e493, issue #156, and open stacked PRs. Exact HEAD CI: R233 metadata overflow and DOCX POC workflows SUCCESS; synthetic only.
+- Fixed platform PATCH adapter: missing/malformed trusted `newAuditId()` result now yields 503 AUDIT_UNAVAILABLE before D1 mutation, rather than misclassifying infrastructure failure as 400 BAD_INPUT. Added eight synthetic Node negative cases requiring zero DB writes. Local execution NOT_RUN; new HEAD CI NOT_VERIFIED. Test 1/5 authored; fix 1/5.
+- Platform Admin PARTIAL. Worker verified session, D1 atomic rollback, migration, responsive mobile and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 and platform control-plane separation; no signing, merge, production deployment or customer data.
+
 ## R249 — Repair confirmed R233 metadata overflow fixture (2026-11-22 VN)
 
 - Read PCS STATE/MOMENT/scope/change register on R248 stack, PR #292 and issue #156; checked R248 exact HEAD 7298f9c6: two workflows SUCCESS (R230 calendar, DOCX POC). Checked R247 HEAD da93d6ef R233 overflow workflow #45010657040: 3/5 FAILED because positive synthetic D1 `.all()` fixtures omitted required `success:true` after fail-closed service change; 101-row negative checks passed, but could pass for the wrong reason.
