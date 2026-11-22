@@ -6,7 +6,7 @@ const admin={verified:true,kind:'system_admin',id:'sys-1'};
 function db(rows) {
   const calls=[];
   return {calls,prepare(sql) {
-    const stmt={sql,async all(){return {results:rows};}};
+    const stmt={sql,async all(){return {success:true,results:rows};}};
     calls.push(stmt);return stmt;
   },async batch(){return [];}};
 }
