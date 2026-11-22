@@ -1,3 +1,9 @@
+## R237 — Bound platform HTTP request bytes before JSON parsing (2026-11-22 VN)
+
+- Read PCS STATE/MOMENT/scope/change register and latest PR #280, issue #156, CI HEAD. Security defect: POST previously used unbounded request.text() before a 2048-character check, allowing large bodies to be buffered and multi-byte payloads to exceed the intended limit. Replaced with byte-counted stream reader capped at 2048 bytes, early Content-Length rejection, fatal UTF-8 decoding, and retained fail-closed schema/CSRF guards.
+- Five synthetic Node regression tests **AUTHORED**, execution **NOT_RUN**; test round 1/5, fix round 1/5 (digit regex corrected before PR). New HEAD CI **NOT_VERIFIED**. No PASS claim. Platform Admin **PARTIAL**: Worker session integration, D1 migration, atomic audit rollback and real mobile QA remain BLOCKED/NOT_RUN; OWNER_REAL_DEVICE_QA NOT_RUN.
+- SRS v1.1.15 frozen, F01–F36 plus separate Platform Admin, active task AL-R0-DEPLOY-001 preserved. No merge, production deployment, signing or customer data.
+
 ## R236 — Restore executable platform HTTP schema guard (2026-11-22 VN)
 
 - Reviewed latest PR #279 HEAD `59d21731`, PCS STATE/MOMENT/scope/change register, issue #156 and workflow runs. Found concrete R235 defect: literal `\\n` sequences inside JavaScript `//` comments cause the newly added allowlist guard and mutation call to be commented out, yielding undefined response for valid POST. Replaced escaped sequences with real newlines so the allowlist and call are executable. This is a security/correctness fix, not a scope expansion.
