@@ -1,3 +1,9 @@
+## R246 — Repair confirmed D1 list fixture failures (2026-11-22 VN)
+
+- Read latest PCS STATE/MOMENT/scope/SRS change register, PR #289 and issue #156; checked R245 HEAD c9fef867 CI. Twelve workflows completed: ten FAIL, two SUCCESS. Inspected actual failing job logs for R226, R220 and R228: positive synthetic D1 fixtures omit mandatory `success:true` introduced in R245, so expected successful reads fail closed (PLATFORM_INVALID_RESULT / HTTP 503).
+- Updated three test fixtures to model successful D1 `.all()` responses with `success:true`, preserving production fail-closed logic. This is a confirmed CI regression repair, not a real D1/Worker/mobile acceptance. CI on R246 HEAD NOT_VERIFIED; local execution NOT_RUN. Observed CI test 1/5, fix 1/5. Other R245 CI failures remain to investigate, not declared fixed.
+- Platform Admin PARTIAL, verified Worker session / atomic audit rollback / migration / responsive UI / OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve `AL-R0-DEPLOY-001`, frozen SRS v1.1.15, F01-F36 plus platform admin; no signing, merge, production deployment or customer data.
+
 ## R245 — Fail closed on D1 metadata list errors (2026-11-22 VN)
 
 - Read PCS STATE/MOMENT/scope/change register, PR #288 and issue #156; checked latest draft stack and CI on R244 HEAD 7dc7ec1c: five workflows completed SUCCESS (R219, R220, synthetic audit, R222, DOCX POC). This is not real Cloudflare authenticated E2E.
