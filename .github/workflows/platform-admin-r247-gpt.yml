@@ -1,0 +1,17 @@
+name: Platform Admin R247 accessor guard
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/platform_admin_gpt.mjs'
+      - 'tests/platform_admin_accessor_gpt.test.mjs'
+      - '.github/workflows/platform-admin-r247-gpt.yml'
+  workflow_dispatch:
+jobs:
+  accessor-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/platform_admin_accessor_gpt.test.mjs
