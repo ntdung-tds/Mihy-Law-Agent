@@ -1,3 +1,9 @@
+## R245 — Fail closed on D1 metadata list errors (2026-11-22 VN)
+
+- Read PCS STATE/MOMENT/scope/change register, PR #288 and issue #156; checked latest draft stack and CI on R244 HEAD 7dc7ec1c: five workflows completed SUCCESS (R219, R220, synthetic audit, R222, DOCX POC). This is not real Cloudflare authenticated E2E.
+- Fixed two platform control-plane list functions to reject D1 responses with success:false or missing success, even when results:[] exists. Previously these could silently display an empty plan/service list during a database failure. Added six Node synthetic regression cases. New HEAD CI NOT_VERIFIED; local execution NOT_RUN. Test authored 1/5, fix 1/5.
+- Platform Admin PARTIAL. Verified Worker session, real D1 atomic rollback, migration, mobile and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15 frozen, 36 Fxx plus platform admin, no signing/merge/production/customer data.
+
 ## R244 — Repair three confirmed CI contract/fixture failures (2026-11-22 VN)
 
 - Read latest PCS STATE/MOMENT/scope/SRS-change register, PR #287, issue #156, and actual CI on HEAD 2e74c550. Confirmed failures: R219 stale LIMIT 100 expectation (real query LIMIT 101 for overflow), R220 mock D1 batch omitted `success:true` (HTTP returned 503), atomic audit fixture omitted `success:true` (3/5 failures). Updated only tests/fixtures, preserving strict fail-closed production checks; three files changed.

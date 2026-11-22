@@ -39,7 +39,7 @@ export async function listPlatformPlans(db, principal) {
   const result = await db.prepare(
     'SELECT plan_id, plan_name, status, max_users, max_storage_bytes FROM platform_service_plans ORDER BY plan_id LIMIT 101'
   ).all();
-  if (!Array.isArray(result?.results) || result.results.length > 100) throw new Error('PLATFORM_INVALID_RESULT');
+  if (result?.success !== true || !Array.isArray(result?.results) || result.results.length > 100) throw new Error('PLATFORM_INVALID_RESULT');
   return result.results.map(row => {
     if (!row || typeof row.plan_id !== 'string' || !ID.test(row.plan_id) ||
         typeof row.plan_name !== 'string' || row.plan_name.trim().length === 0 || row.plan_name.length > 120 ||
@@ -100,7 +100,7 @@ export async function listTenantServices(db, principal) {
   const result = await db.prepare(
     'SELECT tenant_id, plan_id, service_status, license_expires_at FROM platform_tenant_services ORDER BY tenant_id LIMIT 101'
   ).all();
-  if (!Array.isArray(result?.results) || result.results.length > 100)
+  if (result?.success !== true || !Array.isArray(result?.results) || result.results.length > 100)
     throw new Error('PLATFORM_INVALID_RESULT');
   return result.results.map(row => {
     if (!row || typeof row.tenant_id !== 'string' || !ID.test(row.tenant_id) ||
