@@ -30,12 +30,16 @@ export async function handlePlatformAdminRequest(request, {db, principal, csrfVe
           max_users:x.max_users,max_storage_bytes:x.max_storage_bytes
         }))});
       }
-      return reply(200,{items:await listTenantServices(db,principal)});
+      const rows = await listTenantServices(db,principal);
+      // Never serialize unexpected business-data columns, even on a faulty DB adapter.
+      return reply(200,{items:rows.map(x=>({
+        tenant_id:x.tenant_id,plan_id:x.plan_id,service_status:x.service_status,
+        license_expires_at:x.license_expires_at
+      }))});
     }
     if (request.method !== 'PATCH' || url.pathname !== '/api/platform/tenant-services')
       return reply(405,{error:'METHOD_NOT_ALLOWED'});
     if (csrfVerified !== true) return reply(403,{error:'CSRF_FORBIDDEN'});
-    // Reject unsupported media types and cap bytes before allocating the JSON body.
     // Reject unsupported media types and cap bytes before allocating the JSON body.
     const contentType=request.headers.get('content-type')||'';
     if (!/^application\/json(?:\s*;\s*charset\s*=\s*(?:utf-8|"utf-8")\s*)?$/i.test(contentType))
