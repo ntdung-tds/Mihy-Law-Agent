@@ -1,3 +1,9 @@
+## R255 — Validate plan display metadata for control characters (2026-11-23 VN)
+
+- Read current stacked PR #298 and its HEAD 222bb7b51c40a0314fafd9b88ad0dbf58010a029, current PCS STATE/MOMENT/scope/SRS change register, and issue #156. Exact R254 HEAD pull-request workflow list returned no runs; CI NOT_VERIFIED, not PASS. No production deployment.
+- Hardened metadata-only platform plan listing to reject ASCII/C1 control characters in plan_name before exposing the value to desktop/mobile UI. Added five synthetic negative inputs and one positive assertion in R217 Node test. This is a real service-layer validation change, not a claim of a complete admin UI.
+- Local execution NOT_RUN; R255 HEAD CI NOT_VERIFIED. Test authored 1/5, fix 1/5. Platform Admin PARTIAL; real authenticated Worker session, D1 migration/atomic rollback proof, responsive UI and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 and separate platform admin; no signing, merge, production deploy or customer data.
+
 ## R254 — Guard regression for D1 atomic service/audit results (2026-11-22 VN)
 
 - Read STATE/MOMENT/scope/SRS change register and issue #156; checked PR #297 HEAD 61ca6b2e21b66e52eca6f2e02296f647e3fcdec4 and stacked open PRs. Exact R253 HEAD CI R217 and DOCX POC SUCCESS (2 scoped workflows), not full app E2E.
