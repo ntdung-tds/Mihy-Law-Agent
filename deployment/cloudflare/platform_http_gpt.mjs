@@ -34,7 +34,7 @@ export async function handlePlatformAdminRequest(request, env, resolveVerifiedPr
     const site = request.headers.get('sec-fetch-site');
     if (!origin || origin !== url.origin || site === 'cross-site') return error(403,'CROSS_ORIGIN');
     const contentType = request.headers.get('content-type') || '';
-    if (!/^application\/json(?:\s*;|$)/i.test(contentType)) return error(415,'UNSUPPORTED_MEDIA_TYPE');
+    if (!/^application\/json(?:\s*;\s*charset\s*=\s*(?:utf-8|"utf-8")\s*)?$/i.test(contentType)) return error(415,'UNSUPPORTED_MEDIA_TYPE');
     const csrf = request.headers.get('x-csrf-token');
     if (!csrf || typeof env.verifyPlatformCsrf !== 'function' ||
         await env.verifyPlatformCsrf(request,principal,csrf) !== true) return error(403,'CSRF_INVALID');
