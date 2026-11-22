@@ -1,3 +1,9 @@
+## R258 — Repair confirmed R225 D1 batch contract fixture (2026-11-23 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS change register from latest PR #301 branch, checked issue #156, stacked open PRs and exact R257 HEAD ea29f66c6d603745b764362b6c284d7c4d59ba54 CI: R232, R219 and DOCX POC all completed SUCCESS (three scoped workflows). No broad app E2E inferred.
+- Inspected R225 failing workflow #45058339809 (PR #300 merge checkout): 5/13 FAILED. Root cause: synthetic db.batch() fixture returned metadata without D1 `success:true`, so all five R225 cases failed at PLATFORM_BATCH_INCOMPLETE before their intended assertions. Corrected only R225 fixture to mark both synthetic batch results successful; retained service fail-closed validation and unchanged negative change-count assertions. This is a real regression-fixture repair, not proof of D1 atomic rollback.
+- R225 test observation 1/5; repair 1/5; local execution NOT_RUN; new HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; authenticated Worker session, D1 migration, atomic rollback, desktop/mobile and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15 frozen, F01–F36 plus separate platform administration; no signing, merge, production deploy or customer data.
+
 ## R256 — Block bidi spoofing in platform plan display metadata (2026-11-23 VN)
 
 - Read current STATE/MOMENT/scope/SRS change register and issue #156, checked open stacked PRs through #299 and R255 exact HEAD workflow lookup (no matching pull-request workflow runs returned). Continue from R255 without changing PR #187 or merging.

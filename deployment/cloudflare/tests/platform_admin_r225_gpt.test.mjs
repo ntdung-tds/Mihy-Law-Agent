@@ -4,7 +4,7 @@ import {changeTenantService} from '../platform_admin_gpt.mjs';
 const principal={id:'sys_1',kind:'system_admin',verified:true};
 const input={tenantId:'tenant_1',status:'suspended',auditId:'audit_1',reasonCode:'POLICY'};
 function db(updateChanges,auditChanges) {
- return {prepare(){return {bind(){return this}}},async batch(){return [{meta:{changes:updateChanges}},{meta:{changes:auditChanges}}]}};
+ return {prepare(){return {bind(){return this}}},async batch(){return [{success:true,meta:{changes:updateChanges}},{success:true,meta:{changes:auditChanges}}]}};
 }
 test('one update and one audit row confirms mutation',async()=>{
  assert.deepEqual(await changeTenantService(db(1,1),principal,input),{changed:true,tenantId:'tenant_1',status:'suspended'});
