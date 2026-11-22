@@ -13,7 +13,7 @@ function db(rows) {
 test('verified system admin can list bounded control-plane service metadata',async()=>{
   const store=db([{tenant_id:'tenant-1',plan_id:'solo',service_status:'active',license_expires_at:null}]);
   assert.deepEqual(await listTenantServices(store,admin),[{tenant_id:'tenant-1',plan_id:'solo',service_status:'active',license_expires_at:null}]);
-  assert.match(store.calls[0].sql,/LIMIT 100/);
+  assert.match(store.calls[0].sql,/LIMIT 101/);
   assert.match(store.calls[0].sql,/ORDER BY tenant_id/);
 });
 test('deny unverified, tenant admin and impersonating principal before DB read',async()=>{
