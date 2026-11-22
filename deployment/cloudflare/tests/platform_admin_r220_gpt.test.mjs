@@ -5,7 +5,7 @@ const admin={verified:true,kind:'system_admin',id:'sys-1'};
 function store(rows=[]) {
   const calls=[];
   return {calls,prepare(sql){const q={sql,bind(...args){q.args=args;return q;},async all(){return {results:rows};}};calls.push(q);return q;},
-    async batch(items){return [{meta:{changes:1}},{meta:{changes:1}}];}};
+    async batch(items){return [{success:true,meta:{changes:1}},{success:true,meta:{changes:1}}];}};
 }
 const req=(path,init)=>new Request('https://example.test'+path,init);
 test('unauthenticated and tenant-admin requests fail before DB read',async()=>{
