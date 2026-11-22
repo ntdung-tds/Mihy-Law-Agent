@@ -1,3 +1,8 @@
+## R240 — Repair failing CI and legacy service response allowlist (2026-11-22 VN)
+
+- Read current PCS STATE/MOMENT/scope/change register, PR #283 and issue #156. Actual HEAD b62a070f CI workflow platform-admin-r220-gpt FAILED (4/5 tests): stale test expected SQL LIMIT 100, while R233 deliberately uses LIMIT 101 to detect overflow. Updated assertion to LIMIT 101, preserving fail-closed overflow behavior. Existing synthetic fixture also exposed an actual privacy risk: legacy GET tenant-services returned raw rows without allowlisting. Restrict response to tenant_id, plan_id, service_status and license_expires_at, dropping extra DB columns. Remove duplicated comment.
+- Test/fix: one observed CI failure, fix 1/5; new HEAD CI NOT_VERIFIED until workflow completes. This is not real Worker/IdP/D1 integration. Platform Admin PARTIAL; OWNER_REAL_DEVICE_QA NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15, 36 Fxx, signing exclusion, no merge/production deployment.
+
 ## R239 — Bound the older platform PATCH adapter (2026-11-22 VN)
 
 - Read PCS STATE/MOMENT/scope/change register, issue #156, latest PR #282 and CI HEAD. R238 HEAD CI: 2 completed SUCCESS workflows. Found a second, older platform HTTP adapter (`platform_admin_http_gpt.mjs`) still calling unbounded `request.text()`, with permissive Content-Type. Corrected this actual security gap with 2048-byte streaming cap, fatal UTF-8 decoding, Content-Length early rejection and strict JSON media type. No change to session/MatterACL or tenant business-data access.
