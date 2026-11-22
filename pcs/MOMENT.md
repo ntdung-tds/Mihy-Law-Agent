@@ -1,3 +1,9 @@
+## R249 — Repair confirmed R233 metadata overflow fixture (2026-11-22 VN)
+
+- Read PCS STATE/MOMENT/scope/change register on R248 stack, PR #292 and issue #156; checked R248 exact HEAD 7298f9c6: two workflows SUCCESS (R230 calendar, DOCX POC). Checked R247 HEAD da93d6ef R233 overflow workflow #45010657040: 3/5 FAILED because positive synthetic D1 `.all()` fixtures omitted required `success:true` after fail-closed service change; 101-row negative checks passed, but could pass for the wrong reason.
+- Updated only `tests/platform_list_overflow_gpt.test.mjs` D1 mock responses to include `success:true` for both populated and empty results. Retains actual 100/101-row overflow assertions and SQL LIMIT 101 checks; no production guard relaxed. Local execution NOT_RUN; new HEAD CI NOT_VERIFIED. Observed CI test 1/5; fix 1/5. Other R247 failures remain open.
+- Platform Admin PARTIAL. Worker verified session, D1 audit rollback atomicity, migration, responsive UI and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve `AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, F01–F36 plus platform administration. No signing, merge, production deploy or customer data.
+
 ## R247 — Reject accessor mutation inputs at platform service boundary (2026-11-22 VN)
 
 - Read PCS STATE/MOMENT/scope/change register at R246 HEAD, issue #156 and latest stacked PR #290; checked exact R246 HEAD 1a8bca0bcf0da6a7405c745a190ddd6b8832f1dd: five pull-request workflows SUCCESS (DOCX POC, R226, R222, R220, R228). This is synthetic CI only.
