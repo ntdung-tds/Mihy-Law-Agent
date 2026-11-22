@@ -12,8 +12,8 @@ test('one update and one audit row confirms mutation',async()=>{
 test('updated row without audit row fails closed',async()=>{
  await assert.rejects(changeTenantService(db(1,0),principal,input),/PLATFORM_AUDIT_INCOMPLETE/);
 });
-test('missing audit metadata fails closed',async()=>{
- await assert.rejects(changeTenantService(db(1,undefined),principal,input),/PLATFORM_AUDIT_INCOMPLETE/);
+test('missing audit metadata is rejected as incomplete D1 batch',async()=>{
+ await assert.rejects(changeTenantService(db(1,undefined),principal,input),/PLATFORM_BATCH_INCOMPLETE/);
 });
 test('unexpected duplicate audit count fails closed',async()=>{
  await assert.rejects(changeTenantService(db(1,2),principal,input),/PLATFORM_AUDIT_INCOMPLETE/);
