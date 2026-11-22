@@ -1,3 +1,9 @@
+## R244 — Repair three confirmed CI contract/fixture failures (2026-11-22 VN)
+
+- Read latest PCS STATE/MOMENT/scope/SRS-change register, PR #287, issue #156, and actual CI on HEAD 2e74c550. Confirmed failures: R219 stale LIMIT 100 expectation (real query LIMIT 101 for overflow), R220 mock D1 batch omitted `success:true` (HTTP returned 503), atomic audit fixture omitted `success:true` (3/5 failures). Updated only tests/fixtures, preserving strict fail-closed production checks; three files changed.
+- CI at R243 HEAD: R219 FAIL, R220 FAIL, atomic audit FAIL; multiple other workflows PASS. New HEAD CI pending verification. Local execution NOT_RUN; observed CI test round 1/5, fixture repair round 1/5. No real D1 rollback proof or Worker session/mobile completion claim.
+- Platform Admin PARTIAL, OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 + separate platform administration, no signing, no merge/deploy/customer data.
+
 ## R243 — Guard direct platform service mutation input (2026-11-22 VN)
 
 - Stacked on PR #286, new draft branch; read PCS STATE/MOMENT/scope/change register and issue #156. Fixed `changeTenantService` to reject arrays, inherited/prototype-mutated objects, symbol keys and unexpected business fields at the domain-service boundary before DB access. HTTP-only validation was insufficient for other callers.
