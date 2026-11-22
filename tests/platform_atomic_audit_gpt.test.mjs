@@ -13,7 +13,7 @@ function dbFixture({updateChanges=1,auditChanges=1,throwBatch=false,rows=[]}={})
     },
     async batch(batch) {
       if(throwBatch) throw Error('synthetic D1 transaction failed');
-      return [{meta:{changes:updateChanges}},{meta:{changes:auditChanges}}];
+      return [{success:true,meta:{changes:updateChanges}},{success:true,meta:{changes:auditChanges}}];
     }
   };
   return {db,statements};
