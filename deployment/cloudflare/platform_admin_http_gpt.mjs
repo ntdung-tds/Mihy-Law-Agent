@@ -36,6 +36,7 @@ export async function handlePlatformAdminRequest(request, {db, principal, csrfVe
       return reply(405,{error:'METHOD_NOT_ALLOWED'});
     if (csrfVerified !== true) return reply(403,{error:'CSRF_FORBIDDEN'});
     // Reject unsupported media types and cap bytes before allocating the JSON body.
+    // Reject unsupported media types and cap bytes before allocating the JSON body.
     const contentType=request.headers.get('content-type')||'';
     if (!/^application\/json(?:\s*;\s*charset\s*=\s*(?:utf-8|"utf-8")\s*)?$/i.test(contentType))
       return reply(415,{error:'UNSUPPORTED_MEDIA_TYPE'});
