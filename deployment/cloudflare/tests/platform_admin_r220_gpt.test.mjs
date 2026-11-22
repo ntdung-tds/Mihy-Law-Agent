@@ -4,7 +4,7 @@ import {handlePlatformAdminRequest as handle} from '../platform_admin_http_gpt.m
 const admin={verified:true,kind:'system_admin',id:'sys-1'};
 function store(rows=[]) {
   const calls=[];
-  return {calls,prepare(sql){const q={sql,bind(...args){q.args=args;return q;},async all(){return {results:rows};}};calls.push(q);return q;},
+  return {calls,prepare(sql){const q={sql,bind(...args){q.args=args;return q;},async all(){return {success:true,results:rows};}};calls.push(q);return q;},
     async batch(items){return [{success:true,meta:{changes:1}},{success:true,meta:{changes:1}}];}};
 }
 const req=(path,init)=>new Request('https://example.test'+path,init);
