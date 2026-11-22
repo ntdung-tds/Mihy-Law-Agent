@@ -43,7 +43,7 @@ export async function handlePlatformAdminRequest(request, env, resolveVerifiedPr
       // Bound the incoming stream BEFORE materializing JSON in memory.
       // A post-read string-length check alone permits unbounded request bodies.
       const declared = request.headers.get('content-length');
-      if (declared && (!/^\\d+$/.test(declared) || Number(declared) > 2048))
+      if (declared && (!/^\d+$/.test(declared) || Number(declared) > 2048))
         return error(413,'PAYLOAD_TOO_LARGE');
       if (!request.body) return error(400,'BAD_JSON');
       const reader = request.body.getReader();
