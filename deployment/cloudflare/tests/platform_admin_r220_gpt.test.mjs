@@ -24,7 +24,7 @@ test('GET tenant services only exposes bounded metadata',async()=>{
   const db=store([{tenant_id:'t1',plan_id:'solo',service_status:'active',license_expires_at:null,client_name:'LEAK'}]);
   const r=await handle(req('/api/platform/tenant-services'),{db,principal:admin});
   assert.equal(r.status,200);assert.doesNotMatch(await r.text(),/LEAK|client_name/);
-  assert.match(db.calls[0].sql,/LIMIT 100/);
+  assert.match(db.calls[0].sql,/LIMIT 101/);
 });
 test('PATCH requires CSRF and rejects client audit identifiers before DB writes',async()=>{
   const db=store();const init={method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({tenantId:'t1',status:'active',reasonCode:'POLICY_REVIEW',auditId:'forged'})};
