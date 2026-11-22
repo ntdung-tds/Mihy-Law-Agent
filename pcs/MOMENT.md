@@ -1,3 +1,9 @@
+## R243 — Guard direct platform service mutation input (2026-11-22 VN)
+
+- Stacked on PR #286, new draft branch; read PCS STATE/MOMENT/scope/change register and issue #156. Fixed `changeTenantService` to reject arrays, inherited/prototype-mutated objects, symbol keys and unexpected business fields at the domain-service boundary before DB access. HTTP-only validation was insufficient for other callers.
+- Added five Node regression cases in the existing platform batch suite; execution and exact HEAD CI NOT_VERIFIED. Test round 1/5 authored; fix round 1/5. No production claim.
+- Atomic rollback on real D1, verified Worker System Admin session, migration, desktop/mobile and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Platform Admin PARTIAL. Preserve `state.current.active_task=AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, F01–F36 plus separate platform admin, no signing/merge/deploy/customer data.
+
 ## R241 — Platform audit transaction regression gate (2026-11-22 VN)
 
 - Based on R240 PR #284. Read PCS STATE/MOMENT/scope/change register and issue #156, checked latest open PR stack. Added five synthetic Node test cases for same-batch service update + audit, no-transition, missing audit confirmation, D1 batch failure and tenant-admin denial; added scoped CI workflow. These are **authored only**, local execution NOT_RUN and new HEAD CI NOT_VERIFIED; test round 1/5 authored, fix 0/5.
