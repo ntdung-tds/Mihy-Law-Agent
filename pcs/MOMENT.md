@@ -1408,3 +1408,9 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - Stacked on R225 PR #269. Added explicit five-field allowlist to `listPlatformPlans` at server service boundary, strict shape/quota/status checks and 100-row cap. Five Node regression cases plus independent GitHub workflow; no customer data or credentials.
 - R225 audit-row check is **not proof of transactional rollback**; real D1 audit atomicity remains BLOCKED/NOT_RUN. R226 CI at latest HEAD pending verification, no synthetic PASS claim. Platform admin remains PARTIAL; real Worker session/API/UI integration and D1 migration NOT_RUN.
 - Preserve `state.current.active_task=AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, F01–F36 plus separate platform administration, no signing. No merge/production deployment. Local test rounds 0/5, fix rounds 0/5; OWNER_REAL_DEVICE_QA remains NOT_RUN.
+
+
+## R238 — Platform JSON media type fail-closed (2026-11-22 VN)
+
+- Stack after R237 PR #281. Fixed HTTP POST Content-Type parser to accept only application/json with optional UTF-8 charset; reject arbitrary parameters or unsupported charsets before mutation. Five synthetic Node cases and dedicated CI workflow authored. This is a narrow security fix, not Worker integration.
+- Test rounds 1/5 authored, execution NOT_VERIFIED; fix rounds 1/5. Platform Admin PARTIAL; verified Worker session, D1 migration, atomic audit, desktop/mobile and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. No SRS v1.1.15 edits, no signing, customer data, merge or production deploy. Preserve state.current.active_task=AL-R0-DEPLOY-001.
