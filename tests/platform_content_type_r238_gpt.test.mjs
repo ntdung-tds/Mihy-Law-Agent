@@ -8,7 +8,7 @@ function request(contentType) {
     method:'POST',
     headers:{origin:'https://example.test','sec-fetch-site':'same-origin',
       'content-type':contentType,'x-csrf-token':'synthetic'},
-    body:JSON.stringify({tenantId:'tenant-qa',status:'active',auditId:'audit-qa',reasonCode:'TEST_CHANGE'})
+    body:JSON.stringify({tenantId:'tenant-qa',status:'active',reasonCode:'TEST_CHANGE'})
   });
 }
 const env={DB:{prepare(){throw Error('DB_MUST_NOT_BE_CALLED');}},
@@ -26,3 +26,15 @@ for (const [mediaType,expected] of [
     if(expected===415) assert.deepEqual(await response.json(),{error:'UNSUPPORTED_MEDIA_TYPE'});
   });
 }
+
+// A caller-supplied audit ID must still be rejected by the trusted adapter.
+test('platform rejects caller-provided auditId after valid media type',async()=>{
+  const r=new Request('https://example.test/api/platform/services',{
+    method:'POST',headers:{origin:'https://example.test','sec-fetch-site':'same-origin',
+      'content-type':'application/json','x-csrf-token':'synthetic'},
+    body:JSON.stringify({tenantId:'tenant-qa',status:'active',reasonCode:'TEST_CHANGE',auditId:'forged'})
+  });
+  const response=await handlePlatformAdminRequest(r,env,async()=>principal);
+  assert.equal(response.status,400);
+  assert.deepEqual(await response.json(),{error:'BAD_INPUT'});
+});
