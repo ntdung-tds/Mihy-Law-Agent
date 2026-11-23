@@ -6,7 +6,12 @@ import {listPlatformPlans, listTenantServices, changeTenantService} from './plat
 const JSON_HEADERS = {'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'};
 const PATHS = new Set(['/api/platform/plans','/api/platform/tenant-services']);
 function reply(status, body) {
-  return new Response(JSON.stringify(body), {status, headers:JSON_HEADERS});
+  const payload=JSON.stringify(body);
+  // Bound responses at the server, not only in the browser client. Fail closed
+  // without returning a truncated JSON document or partial tenant metadata.
+  if (new TextEncoder().encode(payload).byteLength > 65536)
+    return new Response(JSON.stringify({error:'RESPONSE_TOO_LARGE'}), {status:503,headers:JSON_HEADERS});
+  return new Response(payload, {status, headers:JSON_HEADERS});
 }
 function permitted(principal) {
   return principal?.verified === true && principal.kind === 'system_admin' &&
