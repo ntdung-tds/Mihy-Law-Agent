@@ -1,3 +1,9 @@
+## R263 — Repair valid Content-Length rejection (2026-11-23 VN)
+
+- Reviewed latest stacked draft PR #304 HEAD 1a29a229, four PCS source files, issue #156 and parallel PRs. Exact R262 HEAD scoped workflows R262, R222, R221 and DOCX POC completed SUCCESS; not application E2E.
+- Found a real browser transport regression: R262 Content-Length regular expression contained an escaped backslash and rejected legitimate decimal headers. Replaced with explicit ASCII digit matching and safe integer bound; added two positive/negative synthetic regression tests. No tenant business data, authentication bypass or scope expansion.
+- Local Node NOT_RUN; new HEAD CI NOT_VERIFIED. Test authored 1/5, fix 1/5. Platform Admin PARTIAL; Worker auth mount, D1 migrations/atomic audit rollback, desktop/mobile completion and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 and separate platform admin. No signing, merge, production deploy or customer data.
+
 ## R262 — Bound platform browser response parsing (2026-11-23 VN)
 
 - Read PCS STATE/MOMENT/scope/change register at stacked R259 PR #303, issue #156, and exact R259 HEAD CI: DOCX POC, R222 and R225 SUCCESS. Inspected repository tree to locate actual Worker and platform modules; prior R260/R261 path discovery blocker resolved. R260 branch exists but has no confirmed code change; this branch starts from latest PR #303 to avoid parallel overlap.
