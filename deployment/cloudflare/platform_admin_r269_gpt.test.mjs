@@ -17,7 +17,7 @@ test('R269 bounded normal metadata response remains readable',async()=>{
 });
 test('R269 oversized UTF-8 metadata fails closed with no partial list',async()=>{
   const rows=Array.from({length:100},(_,i)=>({
-    plan_id:'p'+i,plan_name:'😀'.repeat(120),status:'active',
+    plan_id:'p'+i,plan_name:'漢'.repeat(120),status:'active',
     max_users:100,max_storage_bytes:1000
   }));
   const response=await handlePlatformAdminRequest(new Request('https://example.invalid/api/platform/plans'),{db:dbFor(rows),principal});
