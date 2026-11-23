@@ -1,3 +1,9 @@
+## R278 — Same-origin platform administration client boundary (2026-11-24 VN)
+
+- Read STATE, MOMENT, scope and SRS change register on latest draft #319 HEAD; active_task AL-R0-DEPLOY-001 unchanged. Reviewed issue #156 and stacked PRs; R277 exact HEAD d5e30d19 had seven scoped GitHub Actions workflows SUCCESS (synthetic only).
+- Added browser API client for platform plans, tenant service metadata and activate/suspend/revoke operations. Same-origin session cookies, no-store, no redirects, explicit CSRF for PATCH, strict input and response allowlists, bounded JSON, redacted HTTP failures. No business-data access, impersonation or signing. This is a reusable client module, NOT a mounted Worker route or completed UI.
+- Seven synthetic Node tests authored and scoped CI workflow. Test iteration 1/5, fix iteration 1/5; local NOT_RUN; new HEAD CI NOT_VERIFIED. Platform Admin PARTIAL. Worker verified-session mount, real D1 atomic audit, desktop/mobile rendering and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Frozen SRS v1.1.15 and F01–F36 preserved; no merge, production deployment or customer data.
+
 ## R277 — Platform HTTP method guard before D1 (2026-11-23 VN)
 
 - Reviewed latest draft #318, issue #156 and PCS STATE/MOMENT/scope/change files on the stacked branch. Scope/change files exist on the draft stack (main returned 404); SRS v1.1.15 frozen, F01–F36 intact, active task AL-R0-DEPLOY-001 preserved.
