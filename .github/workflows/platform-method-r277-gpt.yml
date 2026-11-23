@@ -1,0 +1,17 @@
+name: Platform method boundary R277
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/platform_admin_http_gpt.mjs'
+      - 'tests/platform_method_guard_r277_gpt.test.mjs'
+      - '.github/workflows/platform-method-r277-gpt.yml'
+  workflow_dispatch:
+jobs:
+  platform-method:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/platform_method_guard_r277_gpt.test.mjs
