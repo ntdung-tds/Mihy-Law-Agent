@@ -67,7 +67,7 @@ export async function handlePlatformAdminRequest(request, {db, principal, csrfVe
           const {done,value}=await reader.read();
           if (done) break;
           bytes+=value.byteLength;
-          if (bytes>2048) { await reader.cancel(); return reply(413,{error:'PAYLOAD_TOO_LARGE'}); }
+          if (bytes>2048) { try { await reader.cancel(); } catch { /* best-effort cleanup */ } return reply(413,{error:'PAYLOAD_TOO_LARGE'}); }
           chunks.push(value);
         }
       } finally { reader.releaseLock(); }
