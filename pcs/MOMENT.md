@@ -1641,3 +1641,10 @@ Synthetic preview source and public-safe PCS notes only. No internal SRS, genuin
 - Stacked on R272 PR #314, branch `gpt/r273-platform-stream-cancel`. In `platform_http_gpt.mjs`, oversized request stream cancellation may reject; previously this escaped to `BAD_JSON` HTTP 400 instead of the intended fail-closed 413. Cancellation is now best-effort and the 2048-byte cap remains enforced before parsing or DB/audit mutation.
 - Added `tests/platform_stream_cancel_gpt.test.mjs` using a synthetic stream whose `cancel()` throws; expected 413 and `PAYLOAD_TOO_LARGE`. Authenticated Worker mount, real D1 rollback and mobile UI remain incomplete. Test authored 1/5, fix 1/5; local execution NOT_RUN, HEAD CI NOT_VERIFIED. OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN.
 - Preserve `state.current.active_task=AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, F01–F36 (18 P0/16 P1/2 P2) and separate platform admin. No signing, customer data, merge or production deploy.
+
+
+## R279 — Responsive platform administration DOM panel (2026-11-24 VN)
+
+- Stacked on R278 draft PR #320. Added opt-in `deployment/cloudflare/platform_admin_view_gpt.mjs`: responsive plans/tenant-service metadata cards, explicit refresh, empty/loading/error states, reason-code validation, suspend/activate/revoke controls, confirmation for revocation, no `innerHTML`, no tenant business fields, and safe failure feedback. Client still uses same-origin cookies and CSRF from R278; panel MUST be mounted only after real Worker-verified System Admin session.
+- Four synthetic DOM tests authored, dedicated Node CI workflow. Local tests NOT_RUN; exact HEAD CI NOT_VERIFIED until Actions completes. Test authored round 1/5, fix round 0/5. Platform Admin PARTIAL: not yet wired into authenticated Worker app, real D1 audit rollback, recovery flows and mobile device QA remain BLOCKED/NOT_RUN. This UI does not establish authorization.
+- Preserve `state.current.active_task=AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, F01–F36 (18 P0/16 P1/2 P2) and separate platform admin. No signing, customer data, merge or production deployment.
