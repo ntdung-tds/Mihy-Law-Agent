@@ -72,7 +72,9 @@ export async function handlePlatformAdminRequest(request, env, resolveVerifiedPr
     const allowed = new Set(['tenantId','status','reasonCode']);
     if (Object.keys(input).length !== allowed.size ||
         Object.keys(input).some(key => !allowed.has(key))) return error(400,'BAD_INPUT');
-    // Audit identifiers are trusted server-generated values, never client-controlled.\n    const auditId = crypto.randomUUID();\n    const result = await changeTenantService(env.DB,principal,{...input,auditId});
+    // Audit identifiers are trusted server-generated values, never client-controlled.
+    const auditId = crypto.randomUUID();
+    const result = await changeTenantService(env.DB,principal,{...input,auditId});
     return json(result);
   } catch (e) {
     const code = typeof e?.message === 'string' ? e.message : '';
