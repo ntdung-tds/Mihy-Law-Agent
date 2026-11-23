@@ -1,0 +1,17 @@
+name: Platform browser client R278
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/platform_admin_client_gpt.mjs'
+      - 'tests/platform_client_r278_gpt.test.mjs'
+      - '.github/workflows/platform-client-r278-gpt.yml'
+  workflow_dispatch:
+jobs:
+  platform-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/platform_client_r278_gpt.test.mjs
