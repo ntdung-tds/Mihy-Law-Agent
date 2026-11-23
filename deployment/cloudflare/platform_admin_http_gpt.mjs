@@ -45,7 +45,7 @@ export async function handlePlatformAdminRequest(request, {db, principal, csrfVe
     if (!/^application\/json(?:\s*;\s*charset\s*=\s*(?:utf-8|"utf-8")\s*)?$/i.test(contentType))
       return reply(415,{error:'UNSUPPORTED_MEDIA_TYPE'});
     const declared=request.headers.get('content-length');
-    if (declared && (!/^\d+$/.test(declared) || Number(declared)>2048))
+    if (declared && (!/^[0-9]+$/.test(declared) || !Number.isSafeInteger(Number(declared)) || Number(declared)>2048))
       return reply(413,{error:'PAYLOAD_TOO_LARGE'});
     if (!request.body) return reply(400,{error:'INVALID_JSON'});
     let data;

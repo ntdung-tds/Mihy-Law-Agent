@@ -1,3 +1,9 @@
+## R264 — Repair Worker HTTP Content-Length validation (2026-11-23 VN)
+
+- Read four PCS files at latest stacked PR #305, checked issue #156, open PR stack and current Worker HTTP adapter. Found a real repeated defect: the server HTTP adapter regex for Content-Length used a literal backslash and rejected valid decimal lengths. Corrected to ASCII decimal digits and safe-integer validation before JSON allocation.
+- Added three synthetic Node regression cases (valid decimal, oversized, nondecimal); local execution NOT_RUN, exact new HEAD CI NOT_VERIFIED. Test authored 1/5; fix 1/5. This is a server HTTP boundary fix, not evidence of authenticated Worker route integration, D1 rollback, complete mobile UI, or Owner QA.
+- Platform Admin PARTIAL; OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15 frozen, F01–F36, separate control plane and strict tenant-data isolation. No signing, merge, production deploy, or customer data.
+
 ## R263 — Repair valid Content-Length rejection (2026-11-23 VN)
 
 - Reviewed latest stacked draft PR #304 HEAD 1a29a229, four PCS source files, issue #156 and parallel PRs. Exact R262 HEAD scoped workflows R262, R222, R221 and DOCX POC completed SUCCESS; not application E2E.
