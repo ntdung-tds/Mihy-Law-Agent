@@ -22,3 +22,13 @@ test('rejects invalid UTF-8 in JSON response',async()=>{
  const client=api(async()=>new Response(Uint8Array.from([0xff,0xfe]),{headers}));
  await assert.rejects(client.listPlans(),/PLATFORM_INVALID_RESPONSE/);
 });
+
+test('accepts valid numeric content-length metadata',async()=>{
+ const payload=JSON.stringify({items:[plan]});
+ const client=api(async()=>new Response(payload,{headers:{...headers,'content-length':String(new TextEncoder().encode(payload).byteLength)}}));
+ assert.equal((await client.listPlans())[0].plan_id,'basic');
+});
+test('rejects malformed content-length metadata',async()=>{
+ const client=api(async()=>new Response('{"items":[]}',{headers:{...headers,'content-length':'not-a-number'}}));
+ await assert.rejects(client.listPlans(),/PLATFORM_INVALID_RESPONSE/);
+});

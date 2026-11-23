@@ -37,7 +37,7 @@ export function createPlatformAdminApi({fetchImpl=globalThis.fetch,csrfToken}={}
     // Bound untrusted response bytes before JSON parsing. A compromised or misrouted
     // endpoint must not force an unbounded browser allocation.
     const declared=response.headers.get('content-length');
-    if (declared && (!/^\\d+$/.test(declared) || Number(declared)>65536))
+    if (declared && (!/^[0-9]+$/.test(declared) || !Number.isSafeInteger(Number(declared)) || Number(declared)>65536))
       throw new Error('PLATFORM_INVALID_RESPONSE');
     if (!response.body || typeof response.body.getReader!=='function')
       throw new Error('PLATFORM_INVALID_RESPONSE');
