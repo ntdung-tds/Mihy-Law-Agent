@@ -36,5 +36,5 @@ test('platform rejects caller-provided auditId after valid media type',async()=>
   });
   const response=await handlePlatformAdminRequest(r,env,async()=>principal);
   assert.equal(response.status,400);
-  assert.deepEqual(await response.json(),{error:'INVALID_FIELDS'});
+  assert.deepEqual(await response.json(),{error:'BAD_INPUT'});
 });
