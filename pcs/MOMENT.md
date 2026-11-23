@@ -1,3 +1,9 @@
+## R274 — Alternate HTTP adapter preserves 413 on stream cancellation failure (2026-11-23 VN)
+
+- Reviewed latest R273 stack PR #315, four PCS sources, issue #156 and exact R273 HEAD CI: four workflows SUCCESS. Active task remains AL-R0-DEPLOY-001; no change to frozen SRS v1.1.15, F01–F36 or signing exclusion.
+- Fixed the second platform HTTP adapter `deployment/cloudflare/platform_admin_http_gpt.mjs`: cancellation failure on a >2048-byte PATCH body no longer converts 413 PAYLOAD_TOO_LARGE to 400 INVALID_JSON. Cleanup is best effort; reject before audit ID or D1 operations.
+- Added one synthetic negative regression and dedicated Node CI workflow. Test authored 1/5; fix 1/5; local NOT_RUN; new HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; authenticated Worker mount, real D1 atomic rollback and responsive app still incomplete. OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. No merge, production deploy or customer data.
+
 ## R272 — Repair R238 CI fixture after trusted audit-ID boundary (2026-11-23 VN)
 
 - Read STATE/MOMENT/scope/change register at R271 PR #313 HEAD; active task AL-R0-DEPLOY-001 retained. Checked issue #156, open stacked PRs and exact R271 HEAD CI: platform-admin-r270, platform-http-r271 and DOCX POC SUCCESS; R238 content-type workflow FAILURE (run 45151586103, 3/5 tests passing).
