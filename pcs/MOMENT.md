@@ -1,3 +1,9 @@
+## R271 — Alternate platform HTTP fail-closed boundary (2026-11-23 VN)
+
+- Read latest STATE, MOMENT, scope and SRS change register at R270 HEAD; checked open stacked PRs through #312 and issue #156. STATE revision 140, active task AL-R0-DEPLOY-001 retained; no changes to frozen SRS.
+- Repaired alternate HTTP adapter: require verified System Admin ID; reject transformed content, unsafe/mismatched Content-Length and invalid mutation fields before audit ID and D1; cap serialized metadata response at 32 KiB. Added five synthetic Node negative cases and scoped workflow. No business data access or signing paths.
+- Tests authored 1/5, fixes 1/5; local NOT_RUN; exact new HEAD CI NOT_VERIFIED. Platform Admin PARTIAL. Authenticated Worker mount, real D1 migration/atomic rollback and responsive UI remain outstanding. OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. No merge, production deploy or customer data.
+
 ## R270 — Reject caller-supplied audit IDs in alternate platform adapter (2026-11-23 VN)
 
 - Read STATE, MOMENT, scope, change register at PR #311 HEAD; reviewed open PR stack, issue #156, Worker routes and both platform HTTP adapters. Exact R269 HEAD f5c021e8: five scoped workflows SUCCESS; these are not live E2E.
