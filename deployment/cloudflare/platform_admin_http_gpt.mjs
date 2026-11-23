@@ -62,7 +62,9 @@ export async function handlePlatformAdminRequest(request, {db, principal, csrfVe
           chunks.push(value);
         }
       } finally { reader.releaseLock(); }
-      // A declared length that differs from the streamed body is malformed; fail before mutation.\n      if (declared !== null && bytes !== Number(declared)) return reply(400,{error:'INVALID_BODY_LENGTH'});\n      const buffer=new Uint8Array(bytes);
+      // A declared length that differs from the streamed body is malformed; fail before mutation.
+      if (declared !== null && bytes !== Number(declared)) return reply(400,{error:'INVALID_BODY_LENGTH'});
+      const buffer=new Uint8Array(bytes);
       let offset=0;
       for (const chunk of chunks) { buffer.set(chunk,offset); offset+=chunk.byteLength; }
       data=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(buffer));
