@@ -3,10 +3,15 @@
 // Never derive the principal from request headers, cookies alone, or JSON body.
 import {listPlatformPlans, listTenantServices, changeTenantService} from './platform_admin_gpt.mjs';
 
-const json = (data, status=200) => new Response(JSON.stringify(data), {
+const json = (data, status=200) => {
+  const payload = JSON.stringify(data);
+  if (new TextEncoder().encode(payload).byteLength > 32768)
+    return new Response(JSON.stringify({error:'RESPONSE_TOO_LARGE'}), {status:503,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'}});
+  return new Response(payload, {
   status, headers: {'content-type':'application/json; charset=utf-8','cache-control':'no-store',
     'x-content-type-options':'nosniff'}
 });
+};
 const error = (status, code) => json({error:code},status);
 const paths = new Set(['/api/platform/plans','/api/platform/services']);
 export async function handlePlatformAdminRequest(request, env, resolveVerifiedPrincipal) {
@@ -21,7 +26,8 @@ export async function handlePlatformAdminRequest(request, env, resolveVerifiedPr
   try { principal = await resolveVerifiedPrincipal(request,env); }
   catch { return error(401,'UNAUTHORIZED'); }
   if (!principal || principal.verified !== true || principal.kind !== 'system_admin' ||
-      principal.impersonating === true) return error(403,'FORBIDDEN');
+      principal.impersonating === true || typeof principal.id !== 'string' ||
+      !/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,119}$/.test(principal.id)) return error(403,'FORBIDDEN');
   try {
     if (request.method === 'GET') {
       const result = url.pathname === '/api/platform/plans'
@@ -33,6 +39,9 @@ export async function handlePlatformAdminRequest(request, env, resolveVerifiedPr
     const origin = request.headers.get('origin');
     const site = request.headers.get('sec-fetch-site');
     if (!origin || origin !== url.origin || site === 'cross-site') return error(403,'CROSS_ORIGIN');
+    const contentEncoding = request.headers.get('content-encoding');
+    if (contentEncoding && contentEncoding.trim().toLowerCase() !== 'identity')
+      return error(415,'UNSUPPORTED_CONTENT_ENCODING');
     const contentType = request.headers.get('content-type') || '';
     if (!/^application\/json(?:\s*;\s*charset\s*=\s*(?:utf-8|"utf-8")\s*)?$/i.test(contentType)) return error(415,'UNSUPPORTED_MEDIA_TYPE');
     const csrf = request.headers.get('x-csrf-token');
@@ -43,7 +52,7 @@ export async function handlePlatformAdminRequest(request, env, resolveVerifiedPr
       // Bound the incoming stream BEFORE materializing JSON in memory.
       // A post-read string-length check alone permits unbounded request bodies.
       const declared = request.headers.get('content-length');
-      if (declared && (!/^\d+$/.test(declared) || Number(declared) > 2048))
+      if (declared !== null && (!/^[0-9]+$/.test(declared) || !Number.isSafeInteger(Number(declared)) || Number(declared) > 2048))
         return error(413,'PAYLOAD_TOO_LARGE');
       if (!request.body) return error(400,'BAD_JSON');
       const reader = request.body.getReader();
@@ -61,6 +70,7 @@ export async function handlePlatformAdminRequest(request, env, resolveVerifiedPr
           chunks.push(value);
         }
       } finally { reader.releaseLock(); }
+      if (declared !== null && bytes !== Number(declared)) return error(400,'INVALID_BODY_LENGTH');
       const buffer = new Uint8Array(bytes);
       let offset = 0;
       for (const chunk of chunks) { buffer.set(chunk, offset); offset += chunk.byteLength; }
@@ -73,6 +83,10 @@ export async function handlePlatformAdminRequest(request, env, resolveVerifiedPr
     if (Object.keys(input).length !== allowed.size ||
         Object.keys(input).some(key => !allowed.has(key))) return error(400,'BAD_INPUT');
     // Audit identifiers are trusted server-generated values, never client-controlled.
+    const validId = value => typeof value === 'string' && /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,119}$/.test(value);
+    if (!validId(input.tenantId) || !['active','suspended','revoked'].includes(input.status) ||
+        typeof input.reasonCode !== 'string' || !/^[A-Z][A-Z0-9_]{1,79}$/.test(input.reasonCode))
+      return error(400,'BAD_INPUT');
     const auditId = crypto.randomUUID();
     const result = await changeTenantService(env.DB,principal,{...input,auditId});
     return json(result);
