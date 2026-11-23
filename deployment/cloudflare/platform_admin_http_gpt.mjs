@@ -9,7 +9,7 @@ function reply(status, body) {
   const payload=JSON.stringify(body);
   // Bound responses at the server, not only in the browser client. Fail closed
   // without returning a truncated JSON document or partial tenant metadata.
-  if (new TextEncoder().encode(payload).byteLength > 65536)
+  if (new TextEncoder().encode(payload).byteLength > 32768)
     return new Response(JSON.stringify({error:'RESPONSE_TOO_LARGE'}), {status:503,headers:JSON_HEADERS});
   return new Response(payload, {status, headers:JSON_HEADERS});
 }
