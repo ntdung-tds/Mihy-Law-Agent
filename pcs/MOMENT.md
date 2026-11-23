@@ -1,3 +1,10 @@
+## R283 — Associate platform admin mobile form labels (2026-11-24 VN)
+
+- Read current STATE/MOMENT/scope/change register on draft #324, issue #156, open PR stack and exact R282 HEAD `3140148c` CI: 2/2 workflows SUCCESS (synthetic only). Preserve `state.current.active_task=AL-R0-DEPLOY-001`.
+- Fixed a real accessibility/usability gap in the opt-in platform administration form: status and reason labels were adjacent text rather than natively associated with their select/input. Labels now contain their respective controls, improving touch-target and assistive-technology semantics on mobile. No authorization, tenant data, endpoint or SRS changes.
+- Added one synthetic DOM regression for both label/control associations. Authored test 1/5; code fix 1/5; local execution NOT_RUN; R283 exact HEAD CI NOT_VERIFIED pending workflow. Platform Admin PARTIAL; authenticated Worker mount, atomic D1/audit, account recovery, and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN.
+- Frozen SRS v1.1.15, F01–F36, no signing, no customer data, no merge and no production deployment.
+
 ## R282 — Fix R281 platform CI test expectation (2026-11-24 VN)
 
 - Read four latest PCS files on PR #323 stack, reviewed issue #156 and PR #323 base/head; exact R281 HEAD `bd6738b2` CI: DOCX POC SUCCESS, Platform mobile view R279 FAILURE (run 45255076779; 12/13 synthetic tests pass). The failing R280 empty-reason regression selected the *unchanged* `active` status. R281 correctly short-circuited before reason validation, so the fixture assertion was stale; production no-op guard remains intact.

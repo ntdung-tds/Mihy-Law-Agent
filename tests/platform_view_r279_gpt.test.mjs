@@ -92,3 +92,19 @@ test('R281 unchanged service state never sends PATCH or requests confirmation',a
  assert.ok(walk(root).some(x=>x.textContent==='Trạng thái không thay đổi.'));
  view.dispose();
 });
+
+test('R283 mobile form labels wrap the correct native controls',async()=>{
+ const {root,view}=setup(async path=>json(path.endsWith('/plans')?plans:services));
+ await view.refresh(true);
+ const labels=walk(root).filter(x=>x.tag==='label');
+ assert.equal(labels.length,2);
+ assert.equal(labels[0].textContent,'Trạng thái mới');
+ assert.equal(labels[0].children.length,1);
+ assert.equal(labels[0].children[0].tag,'select');
+ assert.equal(labels[1].textContent,'Mã lý do (chữ hoa, dấu gạch dưới)');
+ assert.equal(labels[1].children.length,1);
+ assert.equal(labels[1].children[0].tag,'input');
+ assert.equal(walk(root).filter(x=>x.tag==='input').length,1);
+ assert.equal(walk(root).filter(x=>x.tag==='select').length,1);
+ view.dispose();
+});
