@@ -69,10 +69,10 @@ export async function handlePlatformAdminRequest(request, env, resolveVerifiedPr
     if (!input || Array.isArray(input) || typeof input !== 'object') return error(400,'BAD_INPUT');
     // Exact mutation schema: reject extra fields rather than silently accepting
     // unreviewed client instructions or prototype-polluting JSON properties.
-    const allowed = new Set(['tenantId','status','auditId','reasonCode']);
+    const allowed = new Set(['tenantId','status','reasonCode']);
     if (Object.keys(input).length !== allowed.size ||
         Object.keys(input).some(key => !allowed.has(key))) return error(400,'BAD_INPUT');
-    const result = await changeTenantService(env.DB,principal,input);
+    // Audit identifiers are trusted server-generated values, never client-controlled.\n    const auditId = crypto.randomUUID();\n    const result = await changeTenantService(env.DB,principal,{...input,auditId});
     return json(result);
   } catch (e) {
     const code = typeof e?.message === 'string' ? e.message : '';
