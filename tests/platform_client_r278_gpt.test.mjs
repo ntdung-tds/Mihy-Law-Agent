@@ -55,3 +55,30 @@ test('R278 server errors are redacted',async()=>{
   const client=createPlatformAdminClient({fetchImpl:async()=>json({detail:'private-data'},403)});
   await assert.rejects(client.listPlans(),e=>e.message==='HTTP_403' && !e.message.includes('private-data'));
 });
+
+test('R284 aborts oversized streamed metadata before buffering full response',async()=>{
+  let pulled=0,cancelled=false;
+  const stream=new ReadableStream({
+    pull(controller) {
+      pulled++;
+      controller.enqueue(new Uint8Array(17000));
+      if (pulled>10) controller.close();
+    },
+    cancel(){cancelled=true;}
+  },{highWaterMark:0});
+  const client=createPlatformAdminClient({fetchImpl:async()=>new Response(stream,{
+    headers:{'content-type':'application/json'}
+  })});
+  await assert.rejects(client.listPlans(),/INVALID_RESPONSE/);
+  assert.equal(pulled,2);
+  assert.equal(cancelled,true);
+});
+test('R284 rejects oversized declared content length without reading stream',async()=>{
+  let pulled=0;
+  const stream=new ReadableStream({pull(){pulled++;}},{highWaterMark:0});
+  const client=createPlatformAdminClient({fetchImpl:async()=>new Response(stream,{
+    headers:{'content-type':'application/json','content-length':'999999'}
+  })});
+  await assert.rejects(client.listServices(),/INVALID_RESPONSE/);
+  assert.equal(pulled,0);
+});

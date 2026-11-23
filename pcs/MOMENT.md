@@ -1,3 +1,10 @@
+## R284 — Bound platform metadata stream during read (2026-11-24 VN)
+
+- Read latest STATE/MOMENT/scope/SRS change register on draft #325, issue #156, open PR stack and exact R283 HEAD `473cb415` CI (2/2 GitHub workflows SUCCESS; synthetic only). Keep active_task AL-R0-DEPLOY-001.
+- Repaired a concrete memory/cost exposure in the System Admin metadata browser client: the old 32 KiB limit was checked only after `response.text()` had already buffered the entire response. Now enforce Content-Length precheck when present, read streamed chunks with an in-flight 32 KiB ceiling, cancel oversized streams best-effort, and reject malformed UTF-8. Preserve strict metadata allowlists, same-origin session and CSRF. Mock response.text() fallback remains for synthetic fixtures.
+- Added two synthetic negative regressions: oversized streamed response must stop after two 17,000-byte chunks and cancel; oversized declared Content-Length must reject before reading. Test authored 1/5, fix 1/5; local execution NOT_RUN; R284 HEAD CI NOT_VERIFIED until workflows complete.
+- Platform Admin PARTIAL; authenticated Worker mount, atomic D1/audit, recovery and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Frozen SRS v1.1.15, F01–F36, no signing; no merge, production deploy or customer data.
+
 ## R283 — Associate platform admin mobile form labels (2026-11-24 VN)
 
 - Read current STATE/MOMENT/scope/change register on draft #324, issue #156, open PR stack and exact R282 HEAD `3140148c` CI: 2/2 workflows SUCCESS (synthetic only). Preserve `state.current.active_task=AL-R0-DEPLOY-001`.

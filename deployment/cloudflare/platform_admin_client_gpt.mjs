@@ -50,8 +50,38 @@ export function createPlatformAdminClient({fetchImpl,csrfToken}={}) {
     }
     const type=response.headers?.get?.('content-type')||'';
     if (!/^application\/json(?:\s*;|\s*$)/i.test(type)) throw new Error('INVALID_RESPONSE');
-    const text=await response.text();
-    if (new TextEncoder().encode(text).byteLength>32768) throw new Error('INVALID_RESPONSE');
+    // Bound memory while reading; checking after response.text() is too late for a large stream.
+    const limit=32768;
+    const declared=response.headers?.get?.('content-length');
+    if (declared!==null && declared!==undefined && declared!=='' &&
+        (!/^\\d+$/.test(declared) || Number(declared)>limit))
+      throw new Error('INVALID_RESPONSE');
+    let text;
+    if (response.body?.getReader) {
+      const reader=response.body.getReader();
+      const chunks=[];let size=0;
+      try {
+        while (true) {
+          const {done,value}=await reader.read();
+          if (done) break;
+          if (!(value instanceof Uint8Array)) throw new Error('INVALID_RESPONSE');
+          size+=value.byteLength;
+          if (size>limit) throw new Error('INVALID_RESPONSE');
+          chunks.push(value);
+        }
+        const bytes=new Uint8Array(size);
+        let offset=0;
+        for (const chunk of chunks) {bytes.set(chunk,offset);offset+=chunk.byteLength;}
+        text=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
+      } catch {
+        try {await reader.cancel();} catch {} // cleanup must not mask the size error
+        throw new Error('INVALID_RESPONSE');
+      } finally {reader.releaseLock();}
+    } else {
+      // Compatibility for injected fetch mocks without a ReadableStream.
+      text=await response.text();
+      if (new TextEncoder().encode(text).byteLength>limit) throw new Error('INVALID_RESPONSE');
+    }
     let result;
     try { result=JSON.parse(text); } catch { throw new Error('INVALID_RESPONSE'); }
     return result;
