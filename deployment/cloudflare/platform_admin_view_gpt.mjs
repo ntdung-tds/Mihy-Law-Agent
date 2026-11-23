@@ -76,6 +76,9 @@ export function mountPlatformAdmin(root,{fetchImpl,csrfToken,documentImpl}={}) {
     save.addEventListener('click',async()=>{
       if (disposed || busy) return;
       const wanted=select.value,reasonCode=reason.value.trim();
+      if (wanted===service.service_status) {
+        localStatus.textContent='Trạng thái không thay đổi.';return;
+      }
       if (!/^[A-Z][A-Z0-9_]{1,79}$/.test(reasonCode)) {
         localStatus.textContent='Mã lý do không hợp lệ.';return;
       }
