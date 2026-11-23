@@ -64,7 +64,8 @@ export async function handlePlatformAdminRequest(request, env, resolveVerifiedPr
           if (done) break;
           bytes += value.byteLength;
           if (bytes > 2048) {
-            await reader.cancel();
+            // Cancellation is best-effort; a rejecting source must not mask the size violation.
+            try { await reader.cancel(); } catch { /* preserve 413 */ }
             return error(413,'PAYLOAD_TOO_LARGE');
           }
           chunks.push(value);
