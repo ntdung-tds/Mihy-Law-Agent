@@ -1,3 +1,9 @@
+## R277 — Platform HTTP method guard before D1 (2026-11-23 VN)
+
+- Reviewed latest draft #318, issue #156 and PCS STATE/MOMENT/scope/change files on the stacked branch. Scope/change files exist on the draft stack (main returned 404); SRS v1.1.15 frozen, F01–F36 intact, active task AL-R0-DEPLOY-001 preserved.
+- Reject unsupported methods and PATCH to read-only /api/platform/plans with 405 before probing D1; preserve verified System Admin principal boundary. Added five synthetic Node regression cases and dedicated CI workflow. No business-data access, no signing.
+- Test authored 1/5; fix 1/5; local NOT_RUN; exact R277 HEAD CI NOT_VERIFIED. Platform Admin PARTIAL, real Worker authenticated mount, D1 migration/atomic audit and responsive UI outstanding. OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. No merge, production deploy or customer data.
+
 ## R275 — Platform metadata HTTP response allowlist (2026-11-23 VN)
 
 - Read four PCS sources at R274 HEAD, latest draft #316 and issue #156; checked open stacked PRs and exact R274 HEAD CI: six workflows completed SUCCESS. Active task AL-R0-DEPLOY-001 unchanged; frozen SRS v1.1.15 and F01–F36 unchanged.

@@ -23,6 +23,12 @@ export async function handlePlatformAdminRequest(request, {db, principal, csrfVe
   const url = new URL(request.url);
   if (!PATHS.has(url.pathname)) return reply(404,{error:'NOT_FOUND'});
   if (!permitted(principal)) return reply(403,{error:'FORBIDDEN'});
+  // Unsupported methods must not touch D1 or generate audit identifiers.
+  // In particular, a PATCH to the read-only plans endpoint is never a mutation.
+  if (request.method !== 'GET' && request.method !== 'PATCH')
+    return reply(405,{error:'METHOD_NOT_ALLOWED'});
+  if (request.method === 'PATCH' && url.pathname !== '/api/platform/tenant-services')
+    return reply(405,{error:'METHOD_NOT_ALLOWED'});
   if (!db || typeof db.prepare !== 'function' || typeof db.batch !== 'function') return reply(503,{error:'SERVICE_UNAVAILABLE'});
   if (url.search) return reply(400,{error:'QUERY_NOT_SUPPORTED'});
   try {
