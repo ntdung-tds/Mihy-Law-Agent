@@ -1,3 +1,9 @@
+## R282 — Fix R281 platform CI test expectation (2026-11-24 VN)
+
+- Read four latest PCS files on PR #323 stack, reviewed issue #156 and PR #323 base/head; exact R281 HEAD `bd6738b2` CI: DOCX POC SUCCESS, Platform mobile view R279 FAILURE (run 45255076779; 12/13 synthetic tests pass). The failing R280 empty-reason regression selected the *unchanged* `active` status. R281 correctly short-circuited before reason validation, so the fixture assertion was stale; production no-op guard remains intact.
+- Updated the negative fixture to select `suspended` before clicking with an empty reason. This tests the intended invalid-reason branch without a PATCH. No production security relaxation. One test-fix cycle 1/5; local NOT_RUN, new exact HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; Worker verified-session mount, D1 atomic audit and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN.
+- Frozen SRS v1.1.15, F01–F36, no-signing exclusion, and `state.current.active_task=AL-R0-DEPLOY-001` preserved. No merge, production deploy, or customer data.
+
 ## R281 — Prevent redundant platform service status mutations (2026-11-24 VN)
 
 - Read latest PCS STATE/MOMENT/scope/change register on stacked PR #322, issue #156, PR stack and exact R280 HEAD CI: 2/2 workflow SUCCESS (synthetic), commit 70e2ba59. Active task remains AL-R0-DEPLOY-001.

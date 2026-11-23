@@ -68,6 +68,8 @@ test('R280 empty reason input is rejected without network mutation',async()=>{
  await view.refresh(true);
  const all=walk(root);
  assert.equal(all.find(x=>x.tag==='input').value,'');
+ // Select an actual transition: unchanged status is intentionally rejected first (R281).
+ all.find(x=>x.tag==='select').value='suspended';
  await all.find(x=>x.textContent==='Cập nhật trạng thái').listeners.click();
  assert.equal(patches,0);
  assert.ok(walk(root).some(x=>x.textContent==='Mã lý do không hợp lệ.'));
