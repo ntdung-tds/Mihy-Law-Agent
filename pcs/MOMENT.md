@@ -1,3 +1,10 @@
+## R268 — Preflight platform mutation fields (2026-11-23 VN)
+
+- Read four PCS files, open PR stack through #309, issue #156, exact R267 HEAD CI: three workflows SUCCESS (scoped synthetic checks only).
+- Real Worker HTTP adapter now rejects invalid tenantId/status/reasonCode before allocating an audit ID or touching D1. Domain validation remains in place. Seven negative regression tests and scoped CI workflow added.
+- Test cases authored 1/5; fix 1/5; local NOT_RUN; R268 HEAD CI NOT_VERIFIED. Platform Admin PARTIAL. OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen; F01–F36, AL-R0-DEPLOY-001 and signing exclusion unchanged. No merge, production deployment, real grants or customer data.
+
 ## R267 — Reject transformed platform mutation bodies (2026-11-23 VN)
 
 - Read latest four PCS files, PR #308 HEAD/base, issue #156, open stacked PRs and exact R266 HEAD CI (platform-admin-r220-gpt and DOCX POC SUCCESS; not application E2E). STATE remains revision 140, active task AL-R0-DEPLOY-001 retained.
