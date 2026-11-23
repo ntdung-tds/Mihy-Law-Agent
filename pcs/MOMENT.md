@@ -1,3 +1,9 @@
+## R266 — Restore executable streamed-length validation (2026-11-23 VN)
+
+- Read PCS STATE/MOMENT/scope/change register at R265 HEAD, issue #156 and open stacked PRs. Discovered R265 Worker HTTP adapter accidentally included literal backslash-n sequences inside a line comment: the Content-Length mismatch guard and buffer declaration were commented out, breaking PATCH parsing. Fixed real adapter by restoring newlines; no authentication or authorization boundary relaxed.
+- Added 3 synthetic Node regression cases exercising shorter, longer and matching Content-Length via actual adapter. Test authored 1/5, fix 1/5; local NOT_RUN, new HEAD CI NOT_VERIFIED. Draft PR #308 stacked on #307. Platform Admin PARTIAL; authenticated Worker integration, D1 migration/atomic rollback, desktop/mobile and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN.
+- Preserve SRS v1.1.15 frozen, F01–F36, state.current.active_task=AL-R0-DEPLOY-001; no signing, customer data, merge or production deployment.
+
 ## R265 — Enforce streamed platform request length consistency (2026-11-23 VN)
 
 - Read PCS STATE/MOMENT/scope/SRS change register at PR #306 HEAD, checked issue #156 and open stacked PRs. Exact PR #306 HEAD 50982581: platform-admin-r220 and DOCX POC scoped workflows SUCCESS; not app E2E.
