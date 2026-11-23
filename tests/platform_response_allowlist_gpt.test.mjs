@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {handlePlatformAdminRequest} from '../deployment/cloudflare/platform_http_gpt.mjs';
 const principal={verified:true,kind:'system_admin',id:'qa-admin',impersonating:false};
-function dbFor(rows){return {prepare(sql){return {async all(){return {success:true,results:rows};}};}};}
+function dbFor(rows){return {batch:async()=>{throw Error('GET must never mutate DB');},prepare(sql){return {async all(){return {success:true,results:rows};}};}};}
 async function get(path,rows,identity=principal){
   return handlePlatformAdminRequest(new Request('https://example.test'+path),{DB:dbFor(rows)},async()=>identity);
 }

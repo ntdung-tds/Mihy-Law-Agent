@@ -459,6 +459,13 @@
 
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R276 — Repair R275 failing CI fixture (2026-11-23 VN)
+
+- Exact R275 HEAD `e95f7c0428f6f43a26bfb5f3ad704ab3f6340a92`: five workflow runs; R275 response allowlist FAILED (`45190224131`), four other runs SUCCESS. Root cause: R275 synthetic GET fixture omitted `batch()`, but `requireDb()` correctly requires both `prepare()` and `batch()` before any read. Its valid GET cases therefore received 503 instead of 200. Fixed fixture to expose a `batch()` that throws if a read unexpectedly mutates DB; production authorization and D1 service code unchanged.
+- Read PCS STATE and MOMENT on #317 HEAD; `state.current.active_task=AL-R0-DEPLOY-001`. Required `pcs/mihy_scope_gpt_v1.json` and `pcs/srs_changed_gpt_v1.md` returned 404 on this branch: cannot claim these were reviewed; source-location blocker remains OPEN. Issue #156 reviewed. PR #317 draft stacked on #316; do not overwrite #187.
+- Test/fix iteration 1/5 each for this CI regression. Local test NOT_RUN; exact new HEAD CI NOT_VERIFIED until GitHub reports. Platform Admin PARTIAL; OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen, F01–F36 unchanged; no signing, merge, production deploy or customer data.
+
+
 ## R180 — F21 adapter receipt attestation ownership (2026-11-18 VN)
 
 - Test-first `1f2119a`: added negative regression requiring CAS `changed` and audit `auditWritten` attestations to be own properties of the adapter receipt, not inherited from a prototype. Prior code accepted inherited true flags; synthetic test designed to fail before fix.
