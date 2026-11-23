@@ -1,3 +1,9 @@
+## R281 — Prevent redundant platform service status mutations (2026-11-24 VN)
+
+- Read latest PCS STATE/MOMENT/scope/change register on stacked PR #322, issue #156, PR stack and exact R280 HEAD CI: 2/2 workflow SUCCESS (synthetic), commit 70e2ba59. Active task remains AL-R0-DEPLOY-001.
+- Platform Admin UI now refuses a status update when the requested status equals current tenant service status, before CSRF/PATCH/confirmation. Displays a non-sensitive no-change message. Added one synthetic DOM regression proving zero PATCH and zero confirmation. No tenant business-data access or authentication relaxation.
+- R281 test authored 1/5, fix 1/5, local NOT_RUN; exact R281 HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; verified-session Worker mounting, D1 atomic audit and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Frozen SRS v1.1.15, F01-F36 and no-signing policy unchanged. No merge, production deploy or customer data.
+
 ## R280 — Repair platform view CI DOM fixture (2026-11-24 VN)
 
 - Read latest four PCS files on PR #321 head, reviewed #156 and stacked PRs. STATE active_task remains AL-R0-DEPLOY-001. Exact R279 HEAD `67291670`: DOCX POC SUCCESS, Platform mobile view R279 FAILURE (run 45233709022; 10/11 tests pass).
