@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mountPlatformAdmin} from '../deployment/cloudflare/platform_admin_view_gpt.mjs';
 class FakeElement {
-  constructor(tag,doc){this.tag=tag;this.ownerDocument=doc;this.children=[];this.listeners={};this.textContent='';this.disabled=false;}
+  constructor(tag,doc){this.tag=tag;this.ownerDocument=doc;this.children=[];this.listeners={};this.textContent='';this.value='';this.disabled=false;}
   append(...xs){this.children.push(...xs);}
   replaceChildren(...xs){this.children=[...xs];}
   setAttribute(k,v){this[k]=v;}
@@ -60,4 +60,16 @@ test('R279 revoked status requires confirmation before PATCH',async()=>{
  all.find(x=>x.tag==='select').value='revoked';
  await all.find(x=>x.textContent==='Cập nhật trạng thái').listeners.click();
  assert.equal(patches,0);
+});
+
+test('R280 empty reason input is rejected without network mutation',async()=>{
+ let patches=0;
+ const {root,view}=setup(async(path,init)=>{if(init?.method==='PATCH') patches++;return json(path.endsWith('/plans')?plans:services);});
+ await view.refresh(true);
+ const all=walk(root);
+ assert.equal(all.find(x=>x.tag==='input').value,'');
+ await all.find(x=>x.textContent==='Cập nhật trạng thái').listeners.click();
+ assert.equal(patches,0);
+ assert.ok(walk(root).some(x=>x.textContent==='Mã lý do không hợp lệ.'));
+ view.dispose();
 });
