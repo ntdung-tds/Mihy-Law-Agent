@@ -1,3 +1,9 @@
+## R265 — Enforce streamed platform request length consistency (2026-11-23 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS change register at PR #306 HEAD, checked issue #156 and open stacked PRs. Exact PR #306 HEAD 50982581: platform-admin-r220 and DOCX POC scoped workflows SUCCESS; not app E2E.
+- Changed real Worker platform HTTP adapter to reject mismatched declared Content-Length versus actual streamed body before JSON parsing, audit-ID generation or D1 mutation. Added three synthetic regression cases for shorter/longer declarations and matching-length malformed JSON.
+- Local Node NOT_RUN; new exact HEAD CI NOT_VERIFIED. Tests authored 1/5, fixes 1/5. Platform Admin PARTIAL, Worker authenticated mount/D1 migration/atomic audit rollback/mobile still pending; OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen, F01–F36 and AL-R0-DEPLOY-001 preserved; no signing, merge, production deploy or customer data.
+
 ## R264 — Repair Worker HTTP Content-Length validation (2026-11-23 VN)
 
 - Read four PCS files at latest stacked PR #305, checked issue #156, open PR stack and current Worker HTTP adapter. Found a real repeated defect: the server HTTP adapter regex for Content-Length used a literal backslash and rejected valid decimal lengths. Corrected to ASCII decimal digits and safe-integer validation before JSON allocation.
