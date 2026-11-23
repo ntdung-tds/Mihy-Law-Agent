@@ -1,3 +1,10 @@
+## R270 — Reject caller-supplied audit IDs in alternate platform adapter (2026-11-23 VN)
+
+- Read STATE, MOMENT, scope, change register at PR #311 HEAD; reviewed open PR stack, issue #156, Worker routes and both platform HTTP adapters. Exact R269 HEAD f5c021e8: five scoped workflows SUCCESS; these are not live E2E.
+- Found a second platform adapter `deployment/cloudflare/platform_http_gpt.mjs` accepting client-provided `auditId`, inconsistent with the trusted audit boundary. Changed the alternate adapter to accept only tenantId/status/reasonCode and generate audit ID on the server. Three negative synthetic regression cases and scoped CI authored. This adapter remains unmounted; authentication and CSRF are still resolver-dependent.
+- Tests authored 1/5; fixes 1/5; local NOT_RUN; exact R270 HEAD CI NOT_VERIFIED. Platform Admin PARTIAL, OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Worker authenticated mount, D1 migration and atomic rollback, desktop/mobile outstanding.
+- SRS v1.1.15 frozen, F01–F36, AL-R0-DEPLOY-001, no signing, no tenant business access unchanged. No merge, production deployment or customer data.
+
 ## R269 — Bound Worker platform metadata responses (2026-11-23 VN)
 
 - Read latest PCS STATE/MOMENT/scope/change register at PR #310 HEAD; active task AL-R0-DEPLOY-001 retained; issue #156 and stacked PRs checked. R268 HEAD CI: four workflows SUCCESS (synthetic only).
