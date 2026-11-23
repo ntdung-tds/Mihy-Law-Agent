@@ -1,3 +1,9 @@
+## R280 — Repair platform view CI DOM fixture (2026-11-24 VN)
+
+- Read latest four PCS files on PR #321 head, reviewed #156 and stacked PRs. STATE active_task remains AL-R0-DEPLOY-001. Exact R279 HEAD `67291670`: DOCX POC SUCCESS, Platform mobile view R279 FAILURE (run 45233709022; 10/11 tests pass).
+- Root cause: synthetic FakeElement lacked browser-standard empty-string `input.value`; click handler `.trim()` threw on undefined. Updated synthetic DOM fixture to initialize value='' and added negative regression verifying empty reason blocks PATCH. Production validation unchanged. One fix cycle 1/5, one authored test cycle 1/5; local NOT_RUN, R280 CI NOT_VERIFIED.
+- Platform admin PARTIAL; authenticated Worker mounting, D1 atomic audit, mobile/desktop real QA and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Frozen SRS v1.1.15, F01-F36 and no-signing exclusion unchanged. No merge, production deploy or customer data.
+
 ## R278 — Same-origin platform administration client boundary (2026-11-24 VN)
 
 - Read STATE, MOMENT, scope and SRS change register on latest draft #319 HEAD; active_task AL-R0-DEPLOY-001 unchanged. Reviewed issue #156 and stacked PRs; R277 exact HEAD d5e30d19 had seven scoped GitHub Actions workflows SUCCESS (synthetic only).
