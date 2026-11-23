@@ -1,3 +1,10 @@
+## R267 — Reject transformed platform mutation bodies (2026-11-23 VN)
+
+- Read latest four PCS files, PR #308 HEAD/base, issue #156, open stacked PRs and exact R266 HEAD CI (platform-admin-r220-gpt and DOCX POC SUCCESS; not application E2E). STATE remains revision 140, active task AL-R0-DEPLOY-001 retained.
+- Real Worker platform HTTP adapter now rejects non-identity Content-Encoding on PATCH before reading request body, generating audit IDs or touching D1. This avoids accepting compressed/transformed JSON with ambiguous byte-length accounting. Added four synthetic Node cases and dedicated R267 CI workflow.
+- Tests authored 1/5; fixes 1/5; local NOT_RUN, exact new HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; authenticated Worker mount, D1 migration and atomic audit rollback, desktop/mobile remain outstanding. OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, F01–F36 and no-signing exclusion unchanged. No customer data, merge or production deploy.
+
 ## R266 — Restore executable streamed-length validation (2026-11-23 VN)
 
 - Read PCS STATE/MOMENT/scope/change register at R265 HEAD, issue #156 and open stacked PRs. Discovered R265 Worker HTTP adapter accidentally included literal backslash-n sequences inside a line comment: the Content-Length mismatch guard and buffer declaration were commented out, breaking PATCH parsing. Fixed real adapter by restoring newlines; no authentication or authorization boundary relaxed.
