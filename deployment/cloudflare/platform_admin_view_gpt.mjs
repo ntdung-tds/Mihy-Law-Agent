@@ -68,9 +68,11 @@ export function mountPlatformAdmin(root,{fetchImpl,csrfToken,documentImpl}={}) {
       const option=node('option',value);option.value=value;select.append(option);
     }
     select.value=service.service_status==='pending'?'active':service.service_status;
+    label.append(select); // Native label association supports touch and assistive technology.
     const reasonLabel=node('label','Mã lý do (chữ hoa, dấu gạch dưới)');
     const reason=node('input');reason.type='text';reason.maxLength=80;
     reason.placeholder='ADMIN_REQUEST';reason.autocomplete='off';
+    reasonLabel.append(reason);
     const save=node('button','Cập nhật trạng thái');save.type='button';
     const localStatus=node('p','', 'notice');localStatus.setAttribute('role','status');
     save.addEventListener('click',async()=>{
@@ -91,7 +93,7 @@ export function mountPlatformAdmin(root,{fetchImpl,csrfToken,documentImpl}={}) {
         if (!disposed) localStatus.textContent='Không cập nhật được. Không có xác nhận thay đổi.';
       } finally {if (!disposed){setBusy(false);save.disabled=false;}}
     });
-    card.append(label,select,reasonLabel,reason,save,localStatus);
+    card.append(label,reasonLabel,save,localStatus);
     services.append(card);
   };
   async function refresh(force=false) {
