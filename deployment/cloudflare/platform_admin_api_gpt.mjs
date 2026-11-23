@@ -34,7 +34,34 @@ export function createPlatformAdminApi({fetchImpl=globalThis.fetch,csrfToken}={}
     if (!response || !response.ok) throw new Error('PLATFORM_REQUEST_FAILED');
     if (!(response.headers.get('content-type')||'').toLowerCase().startsWith('application/json'))
       throw new Error('PLATFORM_INVALID_RESPONSE');
-    const data=await response.json();
+    // Bound untrusted response bytes before JSON parsing. A compromised or misrouted
+    // endpoint must not force an unbounded browser allocation.
+    const declared=response.headers.get('content-length');
+    if (declared && (!/^\\d+$/.test(declared) || Number(declared)>65536))
+      throw new Error('PLATFORM_INVALID_RESPONSE');
+    if (!response.body || typeof response.body.getReader!=='function')
+      throw new Error('PLATFORM_INVALID_RESPONSE');
+    const reader=response.body.getReader();
+    const chunks=[];
+    let bytes=0;
+    try {
+      while (true) {
+        const {done,value}=await reader.read();
+        if (done) break;
+        bytes+=value.byteLength;
+        if (bytes>65536) {
+          await reader.cancel();
+          throw new Error('PLATFORM_INVALID_RESPONSE');
+        }
+        chunks.push(value);
+      }
+    } finally { reader.releaseLock(); }
+    const buffer=new Uint8Array(bytes);
+    let offset=0;
+    for (const chunk of chunks) {buffer.set(chunk,offset);offset+=chunk.byteLength;}
+    let data;
+    try {data=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(buffer));}
+    catch {throw new Error('PLATFORM_INVALID_RESPONSE');}
     if (!data || !Array.isArray(data.items) && options.method!=='PATCH')
       throw new Error('PLATFORM_INVALID_RESPONSE');
     return data;
