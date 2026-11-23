@@ -1,0 +1,17 @@
+name: Platform mobile view R279
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/platform_admin_view_gpt.mjs'
+      - 'deployment/cloudflare/platform_admin_client_gpt.mjs'
+      - 'tests/platform_view_r279_gpt.test.mjs'
+      - '.github/workflows/platform-view-r279-gpt.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/platform_view_r279_gpt.test.mjs tests/platform_client_r278_gpt.test.mjs
