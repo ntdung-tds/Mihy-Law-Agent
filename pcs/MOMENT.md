@@ -1,3 +1,9 @@
+## R275 — Platform metadata HTTP response allowlist (2026-11-23 VN)
+
+- Read four PCS sources at R274 HEAD, latest draft #316 and issue #156; checked open stacked PRs and exact R274 HEAD CI: six workflows completed SUCCESS. Active task AL-R0-DEPLOY-001 unchanged; frozen SRS v1.1.15 and F01–F36 unchanged.
+- Hardened alternate platform HTTP adapter GET plans/services: independent response field allowlist prevents unexpected business-data columns from being serialized even if the domain service later changes. No System Admin access to tenant business data.
+- Added three synthetic regression cases and dedicated Node CI. Tests authored 1/5; fix 1/5; local NOT_RUN, new HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; real authenticated Worker mount, D1 migration/atomic audit, desktop/mobile and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. No merge, production deploy, signing or customer data.
+
 ## R274 — Alternate HTTP adapter preserves 413 on stream cancellation failure (2026-11-23 VN)
 
 - Reviewed latest R273 stack PR #315, four PCS sources, issue #156 and exact R273 HEAD CI: four workflows SUCCESS. Active task remains AL-R0-DEPLOY-001; no change to frozen SRS v1.1.15, F01–F36 or signing exclusion.

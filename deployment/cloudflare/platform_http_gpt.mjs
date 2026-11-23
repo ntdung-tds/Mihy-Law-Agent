@@ -33,7 +33,14 @@ export async function handlePlatformAdminRequest(request, env, resolveVerifiedPr
       const result = url.pathname === '/api/platform/plans'
         ? await listPlatformPlans(env.DB,principal)
         : await listTenantServices(env.DB,principal);
-      return json({items:result});
+      // HTTP response boundary independently allowlists control-plane metadata.
+      // Never serialize extra fields returned by a compromised or faulty service adapter.
+      const items = url.pathname === '/api/platform/plans'
+        ? result.map(row => ({plan_id:row.plan_id,plan_name:row.plan_name,
+            status:row.status,max_users:row.max_users,max_storage_bytes:row.max_storage_bytes}))
+        : result.map(row => ({tenant_id:row.tenant_id,plan_id:row.plan_id,
+            service_status:row.service_status,license_expires_at:row.license_expires_at}));
+      return json({items});
     }
     // Origin and Fetch Metadata are defense-in-depth; actual session + CSRF is mandatory.
     const origin = request.headers.get('origin');
