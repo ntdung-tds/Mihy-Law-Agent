@@ -1,3 +1,10 @@
+## R269 — Bound Worker platform metadata responses (2026-11-23 VN)
+
+- Read latest PCS STATE/MOMENT/scope/change register at PR #310 HEAD; active task AL-R0-DEPLOY-001 retained; issue #156 and stacked PRs checked. R268 HEAD CI: four workflows SUCCESS (synthetic only).
+- Worker HTTP adapter now caps UTF-8 JSON responses at 32 KiB (below the browser's 64 KiB limit), returning a no-store 503 error rather than a partial or unbounded metadata list. Tenant data allowlist and auth checks unchanged. Three Node regression cases and scoped CI authored.
+- Tests authored 1/5, fixes 1/5; local NOT_RUN, R269 HEAD CI NOT_VERIFIED until runs complete. Platform Admin PARTIAL; authenticated Worker mount, D1 migration, atomic audit verification, mobile UI remain outstanding. OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, F01–F36, signing exclusion, standalone-first and no tenant business data access preserved. No merge, production deployment or customer data.
+
 ## R268 — Preflight platform mutation fields (2026-11-23 VN)
 
 - Read four PCS files, open PR stack through #309, issue #156, exact R267 HEAD CI: three workflows SUCCESS (scoped synthetic checks only).
