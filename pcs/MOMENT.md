@@ -1,3 +1,9 @@
+## R272 — Repair R238 CI fixture after trusted audit-ID boundary (2026-11-23 VN)
+
+- Read STATE/MOMENT/scope/change register at R271 PR #313 HEAD; active task AL-R0-DEPLOY-001 retained. Checked issue #156, open stacked PRs and exact R271 HEAD CI: platform-admin-r270, platform-http-r271 and DOCX POC SUCCESS; R238 content-type workflow FAILURE (run 45151586103, 3/5 tests passing).
+- Retrieved failed job logs: valid Content-Type cases expected downstream 503 but test fixture still sent caller-controlled auditId, correctly rejected as 400 by R270 trusted audit boundary. Removed auditId from valid fixtures; added explicit negative regression asserting forged auditId returns 400 BAD_INPUT. No security checks relaxed. Six synthetic tests authored, local NOT_RUN; new HEAD CI NOT_VERIFIED. Test cycle 1/5, fix cycle 1/5.
+- Platform Admin PARTIAL; Worker authenticated mount, real D1 migration/atomic rollback, desktop/mobile outstanding; OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen; F01–F36, signing exclusion and tenant business isolation unchanged. No merge, production deploy or customer data.
+
 ## R271 — Alternate platform HTTP fail-closed boundary (2026-11-23 VN)
 
 - Read latest STATE, MOMENT, scope and SRS change register at R270 HEAD; checked open stacked PRs through #312 and issue #156. STATE revision 140, active task AL-R0-DEPLOY-001 retained; no changes to frozen SRS.
