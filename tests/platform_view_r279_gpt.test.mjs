@@ -73,3 +73,20 @@ test('R280 empty reason input is rejected without network mutation',async()=>{
  assert.ok(walk(root).some(x=>x.textContent==='Mã lý do không hợp lệ.'));
  view.dispose();
 });
+
+
+test('R281 unchanged service state never sends PATCH or requests confirmation',async()=>{
+ let patches=0,confirms=0;
+ const {root,view}=setup(async(path,init)=>{
+   if(init?.method==='PATCH') patches++;
+   return json(path.endsWith('/plans')?plans:services);
+ },()=>{confirms++;return true;});
+ await view.refresh(true);
+ const all=walk(root);
+ all.find(x=>x.tag==='input').value='ADMIN_REQUEST';
+ assert.equal(all.find(x=>x.tag==='select').value,'active');
+ await all.find(x=>x.textContent==='Cập nhật trạng thái').listeners.click();
+ assert.equal(patches,0);assert.equal(confirms,0);
+ assert.ok(walk(root).some(x=>x.textContent==='Trạng thái không thay đổi.'));
+ view.dispose();
+});
