@@ -1,3 +1,9 @@
+## R285 — Repair bounded Content-Length acceptance (2026-11-24 VN)
+
+- Read latest STATE/MOMENT/scope/SRS change register on R284 draft #326, issue #156, open PR stack and exact R284 HEAD `ff30ce98` CI: 3/3 workflows SUCCESS (synthetic only). Active task remains AL-R0-DEPLOY-001; no change to frozen SRS or F01–F36.
+- Fixed concrete R284 regression: JavaScript regex `/^\\d+$/` matched a literal backslash followed by d, rejecting **every valid numeric Content-Length**, including normal server responses. Corrected to `/^\d+$/`; oversized or malformed values remain rejected. Added positive bounded numeric header and negative malformed header regressions to existing Node test suite.
+- R285 test authored 1/5; fix 1/5; local NOT_RUN; new HEAD CI NOT_VERIFIED until GitHub workflow completes. Platform Admin PARTIAL; authenticated Worker mount, atomic D1/audit, recovery and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. No signing, merge, production deploy, real grants or customer data.
+
 ## R284 — Bound platform metadata stream during read (2026-11-24 VN)
 
 - Read latest STATE/MOMENT/scope/SRS change register on draft #325, issue #156, open PR stack and exact R283 HEAD `473cb415` CI (2/2 GitHub workflows SUCCESS; synthetic only). Keep active_task AL-R0-DEPLOY-001.
