@@ -54,7 +54,7 @@ export function createPlatformAdminClient({fetchImpl,csrfToken}={}) {
     const limit=32768;
     const declared=response.headers?.get?.('content-length');
     if (declared!==null && declared!==undefined && declared!=='' &&
-        (!/^\\d+$/.test(declared) || Number(declared)>limit))
+        (!/^\d+$/.test(declared) || Number(declared)>limit))
       throw new Error('INVALID_RESPONSE');
     let text;
     if (response.body?.getReader) {
