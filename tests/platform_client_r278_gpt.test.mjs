@@ -13,9 +13,9 @@ test('R278 GET uses same-origin session, no-store, and metadata allowlist',async
   }});
   assert.equal((await client.listPlans())[0].plan_id,'basic');assert.equal(calls,1);
 });
-test('R278 PATCH uses only approved fields and CSRF, no tenant data',async()=>{
+test('R278 POST uses only approved fields and CSRF, no tenant data',async()=>{
   const client=createPlatformAdminClient({csrfToken:'qa-token',fetchImpl:async(path,init)=>{
-    assert.equal(path,'/api/platform/tenant-services');assert.equal(init.method,'PATCH');
+    assert.equal(path,'/api/platform/services');assert.equal(init.method,'POST');
     assert.equal(init.headers['x-csrf-token'],'qa-token');
     assert.equal(init.credentials,'same-origin');
     assert.deepEqual(JSON.parse(init.body),{tenantId:'tenant-1',status:'suspended',reasonCode:'ADMIN_REQUEST'});
@@ -95,4 +95,16 @@ test('R285 rejects malformed Content-Length even if response is otherwise valid'
     headers:{'content-type':'application/json','content-length':'12junk'}
   })});
   await assert.rejects(client.listPlans(),/INVALID_RESPONSE/);
+});
+
+// R286 exercise the actual HTTP adapter rather than a mocked URL contract.
+import {handlePlatformAdminRequest} from '../deployment/cloudflare/platform_http_gpt.mjs';
+test('R286 client and server agree on service list and mutation wire contract',async()=>{
+  let batches=0;
+  const db={prepare(sql){return {bind(){return this;},async all(){return {success:true,results:[{tenant_id:'t',plan_id:'p',service_status:'active',license_expires_at:null}]};}};},async batch(){batches++;return [{success:true,meta:{changes:1}},{success:true,meta:{changes:1}}];}};
+  const principal={verified:true,kind:'system_admin',id:'admin'};
+  const client=createPlatformAdminClient({csrfToken:'qa',fetchImpl:(path,init)=>handlePlatformAdminRequest(new Request('https://qa.invalid'+path,{...init,headers:{...init.headers,origin:'https://qa.invalid'}}),{DB:db,verifyPlatformCsrf:async(_r,_p,token)=>token==='qa'},async()=>principal)});
+  assert.equal((await client.listServices())[0].tenant_id,'t');
+  assert.equal((await client.changeService({tenantId:'t',status:'suspended',reasonCode:'ADMIN_REQUEST'})).changed,true);
+  assert.equal(batches,1);
 });
