@@ -13,9 +13,9 @@ test('R278 GET uses same-origin session, no-store, and metadata allowlist',async
   }});
   assert.equal((await client.listPlans())[0].plan_id,'basic');assert.equal(calls,1);
 });
-test('R278 PATCH uses only approved fields and CSRF, no tenant data',async()=>{
+test('R278 POST uses only approved fields and CSRF, no tenant data',async()=>{
   const client=createPlatformAdminClient({csrfToken:'qa-token',fetchImpl:async(path,init)=>{
-    assert.equal(path,'/api/platform/tenant-services');assert.equal(init.method,'PATCH');
+    assert.equal(path,'/api/platform/services');assert.equal(init.method,'POST');
     assert.equal(init.headers['x-csrf-token'],'qa-token');
     assert.equal(init.credentials,'same-origin');
     assert.deepEqual(JSON.parse(init.body),{tenantId:'tenant-1',status:'suspended',reasonCode:'ADMIN_REQUEST'});
