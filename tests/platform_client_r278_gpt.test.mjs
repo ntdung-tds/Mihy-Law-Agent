@@ -82,3 +82,17 @@ test('R284 rejects oversized declared content length without reading stream',asy
   await assert.rejects(client.listServices(),/INVALID_RESPONSE/);
   assert.equal(pulled,0);
 });
+
+test('R285 accepts valid bounded numeric Content-Length and still validates JSON',async()=>{
+  const payload=JSON.stringify({items:[{plan_id:'basic',plan_name:'Basic',status:'active',max_users:2,max_storage_bytes:100}]});
+  const client=createPlatformAdminClient({fetchImpl:async()=>new Response(payload,{
+    headers:{'content-type':'application/json','content-length':String(new TextEncoder().encode(payload).byteLength)}
+  })});
+  assert.equal((await client.listPlans())[0].plan_id,'basic');
+});
+test('R285 rejects malformed Content-Length even if response is otherwise valid',async()=>{
+  const client=createPlatformAdminClient({fetchImpl:async()=>new Response('{"items":[]}',{
+    headers:{'content-type':'application/json','content-length':'12junk'}
+  })});
+  await assert.rejects(client.listPlans(),/INVALID_RESPONSE/);
+});
