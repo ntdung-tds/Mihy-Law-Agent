@@ -4,7 +4,7 @@
 const ID=/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,119}$/;
 const REASON=/^[A-Z][A-Z0-9_]{1,79}$/;
 const STATUSES=new Set(['active','suspended','revoked']);
-const ENDPOINTS={plans:'/api/platform/plans',services:'/api/platform/tenant-services'};
+const ENDPOINTS={plans:'/api/platform/plans',services:'/api/platform/services'};
 function assertMetadata(items,kind) {
   if (!Array.isArray(items) || items.length>100) throw new Error('INVALID_RESPONSE');
   const keys=kind==='plans'
@@ -31,7 +31,7 @@ export function createPlatformAdminClient({fetchImpl,csrfToken}={}) {
   if (typeof fetchImpl!=='function') throw new TypeError('fetchImpl required');
   async function send(path,method,body,signal) {
     const headers={'accept':'application/json'};
-    if (method==='PATCH') {
+    if (method==='POST') {
       if (typeof csrfToken!=='string' || !csrfToken || /[\r\n]/.test(csrfToken))
         throw new Error('CSRF_UNAVAILABLE');
       headers['content-type']='application/json';
@@ -101,7 +101,7 @@ export function createPlatformAdminClient({fetchImpl,csrfToken}={}) {
       if (typeof tenantId!=='string' || !ID.test(tenantId) ||
           !STATUSES.has(status) || typeof reasonCode!=='string' || !REASON.test(reasonCode))
         throw new Error('BAD_INPUT');
-      const result=await send(ENDPOINTS.services,'PATCH',{tenantId,status,reasonCode},signal);
+      const result=await send(ENDPOINTS.services,'POST',{tenantId,status,reasonCode},signal);
       if (!result || result.changed!==true || result.tenantId!==tenantId || result.status!==status ||
           Object.keys(result).sort().join('|')!=='changed|status|tenantId')
         throw new Error('INVALID_RESPONSE');
