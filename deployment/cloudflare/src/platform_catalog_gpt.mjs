@@ -33,7 +33,7 @@ function normalize(v){
  return null;
 }
 // Recheck current token and active principal inside the write statement, not just in a prior read.
-const INSERT="INSERT INTO platform_catalog_events(event_id,installation_id,actor_id,action,object_id,plan_id,plan_name,max_users,max_storage_bytes,license_expires_at,reason_code,event_at) SELECT ?,s.installation_id,s.actor_id,?,?,?,?,?,?,?,?,? FROM platform_admin_sessions s JOIN platform_admin_principals p ON p.installation_id=s.installation_id AND p.actor_id=s.actor_id WHERE s.installation_id=? AND s.token_hash=? AND s.actor_id=? AND s.revoked_at IS NULL AND s.expires_at>? AND p.status='active'";
+const INSERT="INSERT INTO platform_catalog_events(event_id,installation_id,actor_id,action,object_id,plan_id,plan_name,max_users,max_storage_bytes,license_expires_at,reason_code,event_at) SELECT ?,s.installation_id,s.actor_id,?,?,?,?,?,?,?,?,? FROM platform_admin_sessions s JOIN platform_admin_principals p ON p.installation_id=s.installation_id AND p.actor_id=s.actor_id WHERE s.installation_id=? AND s.token_hash=? AND s.actor_id=? AND s.revoked_at IS NULL AND s.expires_at>? AND p.status='active' RETURNING event_id";
 export async function platformCatalogApi(req,env,context){
  const {actor,tokenHash,csrf,now}=context||{};
  if(!validId(actor)||!HASH.test(tokenHash||'')||!HASH.test(csrf||'')||!Number.isSafeInteger(now))return json(403,{error:'FORBIDDEN'});
@@ -50,8 +50,8 @@ export async function platformCatalogApi(req,env,context){
  if(!values)return json(400,{error:'BAD_INPUT'});
  try{
   const eventId=crypto.randomUUID();
-  const r=await env.DB.prepare(INSERT).bind(eventId,...values,now,env.INSTALLATION_ID,tokenHash,actor,now).run();
-  if(r?.success!==true||r.meta?.changes!==1)return json(403,{error:'FORBIDDEN'});
+  const r=await env.DB.prepare(INSERT).bind(eventId,...values,now,env.INSTALLATION_ID,tokenHash,actor,now).first();
+  if(r?.event_id!==eventId)return json(403,{error:'FORBIDDEN'});
   return json(201,{ok:true,eventId});
  }catch(e){
   // Do not expose raw SQL or database error text. Known SQLite constraints are safe generic conflicts.
