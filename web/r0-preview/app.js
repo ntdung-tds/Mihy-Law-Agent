@@ -169,7 +169,7 @@
   $('#modal-close').addEventListener('click', closeModal);
   $('#modal-ack').addEventListener('click', closeModal);
   $('#modal-backdrop').addEventListener('click', (event) => { if (event.target.id === 'modal-backdrop') closeModal(); });
-  $('#upload-btn').addEventListener('click', () => { goto('documents'); $('#matter-title').focus(); });
+  $('#upload-btn').addEventListener('click', () => { location.assign('/case-detail/new'); });
   $('#local-file').addEventListener('change', event => {
     const file = event.target.files?.[0];
     if (file) openModal('Đã chọn tệp trên thiết bị', 'Ứng dụng chỉ đọc tên tệp để minh họa thao tác chọn tài liệu. Tệp không được tải lên, đọc nội dung hay lưu trữ trên máy chủ.', `Tên tệp: ${file.name} · ${Math.round(file.size / 1024)} KB`);

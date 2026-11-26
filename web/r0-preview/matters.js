@@ -94,6 +94,7 @@
         });
         actions.append(editButton);
       }
+      const view=document.createElement('a');view.className='matter-edit-button';view.textContent='Xem chi tiết';view.href='/case-detail/'+encodeURIComponent(m.id);actions.append(view);
       row.append(detail,actions);list.append(row);
     });
     $('#matter-empty').hidden=matching.length>0;

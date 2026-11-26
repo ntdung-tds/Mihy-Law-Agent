@@ -2,9 +2,10 @@
  * Only synthetic QA metadata on isolated Cloudflare Free D1.
  * No real client files, legal text, OAuth, AI or production IAM.
  */
+import {validCaseDetails,caseInsertStatement} from './case_metadata_gpt.mjs';
 import {mobileSession} from './mobile_auth.mjs';
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
-const MAX_BODY=1024;
+const MAX_BODY=6000;
 const json=(status,data)=>new Response(JSON.stringify(data),{status,headers:{
   'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
   'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY',
@@ -84,7 +85,9 @@ async function create(req,env,identity,now){
  try{
   const raw=await req.text();if(raw.length>MAX_BODY)return bad();data=JSON.parse(raw);
  }catch{return bad();}
- if(!data||typeof data.title!=='string')return bad();
+ if(!data||typeof data.title!=='string'||Object.keys(data).some(k=>!['title','details'].includes(k)))return bad();
+ const hasDetails=Object.hasOwn(data,'details');
+ if(hasDetails&&!validCaseDetails(data.details))return bad();
  const title=data.title.trim().normalize('NFC');
  if(title.length<3||title.length>100||/[\u0000-\u001f\u007f<>]/u.test(title))return bad();
  // No bulk importing or real case content in this QA-only module.
@@ -108,6 +111,7 @@ async function create(req,env,identity,now){
    installation_id,tenant_id,event_id,matter_id,actor_id,action,created_at)
    VALUES(?,?,?,?,?,?,?)`).bind(env.INSTALLATION_ID,identity.tenant_id,eid,id,identity.user_id,'created',now)
  ];
+ if(hasDetails)sql.push(caseInsertStatement(env,identity,id,data.details,now));
  await env.DB.batch(sql);
  return json(201,{id,title,created_at:now});
 }
