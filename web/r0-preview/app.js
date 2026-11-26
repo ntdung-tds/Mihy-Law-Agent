@@ -114,6 +114,18 @@
     goto(n.dataset.drawerView); closeFunctionDrawer(false);
   }));
   $$('[data-feature-jump]').forEach(n => n.addEventListener('click', () => {
+    // Open the requested UC directly in the authenticated, source-only QA
+    // workflow panel; avoid routing the owner through an informational card.
+    const selected = $('#legal-qa-uc');
+    if (selected && [...selected.options].some(opt => opt.value === n.dataset.featureJump)) {
+      selected.value = n.dataset.featureJump;
+      selected.dispatchEvent(new Event('change'));
+      goto('assistant');
+      closeFunctionDrawer(false);
+      window.dispatchEvent(new Event('ai-law:legal-open'));
+      $('#legal-qa-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
     const target = $('[data-feature="' + n.dataset.featureJump + '"]');
     goto('overview'); closeFunctionDrawer(false);
     if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); target.focus({ preventScroll: true }); }
@@ -157,7 +169,7 @@
   $('#modal-close').addEventListener('click', closeModal);
   $('#modal-ack').addEventListener('click', closeModal);
   $('#modal-backdrop').addEventListener('click', (event) => { if (event.target.id === 'modal-backdrop') closeModal(); });
-  $('#upload-btn').addEventListener('click', () => { goto('documents'); $('#matter-title').focus(); });
+  $('#upload-btn').addEventListener('click', () => { location.assign('/case-detail/new'); });
   $('#local-file').addEventListener('change', event => {
     const file = event.target.files?.[0];
     if (file) openModal('Đã chọn tệp trên thiết bị', 'Ứng dụng chỉ đọc tên tệp để minh họa thao tác chọn tài liệu. Tệp không được tải lên, đọc nội dung hay lưu trữ trên máy chủ.', `Tên tệp: ${file.name} · ${Math.round(file.size / 1024)} KB`);

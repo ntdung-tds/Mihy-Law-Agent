@@ -4,10 +4,13 @@
 import { GoogleDriveAdapter } from "./google_drive.mjs";
 import { mobileApi } from "./mobile_auth.mjs";
 import { accountApi } from "./account_profile.mjs";
+import { caseMetadataApi } from './case_metadata_gpt.mjs';
 import { matterApi } from "./matter_workspace.mjs";
+import { legalApi, documentExtractApi } from "./qa_legal_workflows.mjs";
 import { documentsApi } from "./qa_documents.mjs";
 import { oauthDriveApi } from "./oauth_drive.mjs";
 import { MOBILE_CSS, MOBILE_JS } from "./mobile_assets.mjs";
+import { platformSessionApi } from "./platform_session_gpt.mjs";
 
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const result=(status,data)=>new Response(JSON.stringify(data),{status,headers:{
@@ -97,6 +100,7 @@ const params=(env,session,id,now)=>[
 ];
 export async function handle(request,env,options={}){
   const url=new URL(request.url);
+  if(url.pathname.startsWith("/api/platform/"))return platformSessionApi(request,env,options);
   if(url.pathname==="/" && request.method==="GET"){
     // R98: Only one customer-facing QA entry point. The Worker still serves
     // tenant auth, document APIs and the Google OAuth callback on this host.
@@ -113,7 +117,10 @@ export async function handle(request,env,options={}){
     return new Response(MOBILE_JS,{headers:{"Content-Type":"application/javascript; charset=utf-8","Cache-Control":"public, max-age=300","X-Content-Type-Options":"nosniff"}});
   if(url.pathname==="/api/qa/profile"||url.pathname==="/api/qa/profile/avatar")
     return accountApi(request,env,options);
-  if(url.pathname==="/api/qa/matters")return matterApi(request,env,options);
+  if(url.pathname==="/api/qa/legal/run")return legalApi(request,env,options);
+  if(url.pathname==="/api/qa/legal/extract")return documentExtractApi(request,env,options);
+  if(url.pathname.startsWith("/api/qa/case-info/"))return caseMetadataApi(request,env,options);
+  if(url.pathname==="/api/qa/matters"||/^\/api\/qa\/matters\/[0-9a-f-]{36}$/.test(url.pathname))return matterApi(request,env,options);
   if(["/api/qa/drive/connect","/api/qa/drive/disconnect","/api/qa/drive/status","/api/qa/drive/callback"].includes(url.pathname))
     return oauthDriveApi(request,env,options);
   if(url.pathname==="/api/qa/documents"||

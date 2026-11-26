@@ -1,0 +1,63 @@
+{
+  "schema": "ai-law-qa-evidence-v1",
+  "version": 4,
+  "date": "2026-11-10",
+  "package": "R126 unified QA acceptance",
+  "scope": "REAL public QA HTTPS browser responsive+signed-out deny checks; independent from private signed-in E2E",
+  "branch": "qa/r126-dual-login-gpt",
+  "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/208",
+  "files": [
+    "deployment/cloudflare/tests/r126_live_public_browser_gpt.py",
+    ".github/workflows/tests.yml"
+  ],
+  "source_commit": "2abc3e23f257f8401b85f06d05acbd8436642120",
+  "workflow": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42749341971",
+  "job_id": 129608986251,
+  "result": "PASS_18_OF_18",
+  "verified_live_browser": "GitHub Actions Ubuntu 24.04, installed Chromium Playwright 1.55, actual HTTPS to ai-law-web-qa.iaict-platform.workers.dev",
+  "checks": [
+    "public_login_responsive_320",
+    "anonymous_app_denied_320",
+    "public_login_responsive_390",
+    "password_visibility_toggle_390",
+    "anonymous_app_denied_390",
+    "public_login_responsive_430",
+    "anonymous_app_denied_430",
+    "public_login_responsive_768",
+    "anonymous_app_denied_768",
+    "public_login_responsive_1440",
+    "password_visibility_toggle_1440",
+    "anonymous_app_denied_1440",
+    "api_401_session",
+    "api_401_workspaces",
+    "api_401_matters",
+    "api_401_profile",
+    "anonymous_account_denied",
+    "nonproduction_health"
+  ],
+  "secret_handling": {
+    "password_submitted": false,
+    "sid_created": false,
+    "customer_data_used": false,
+    "screen_capture": false,
+    "credential_files_in_repo": false
+  },
+  "QA_D1_read_only_after": {
+    "active_R125_accounts": 2,
+    "active_R125_sessions": 0,
+    "quota_rows": 2,
+    "quota_cumulative_requests": 4,
+    "rows_written": 0,
+    "changed_db": false
+  },
+  "remaining_gate": {
+    "live_positive_login": "NOT_RUN",
+    "live_tenant_rotation": "NOT_RUN",
+    "live_cross_user_private_MatterACL_API": "NOT_RUN",
+    "live_AI_provider_quota": "NOT_RUN",
+    "signed_in_mobile_browser": "NOT_RUN",
+    "signed_in_desktop_browser": "NOT_RUN",
+    "owner_acceptance": "NOT_RUN"
+  },
+  "notes": "This evidence is a real public mobile/desktop browser QA gate, NOT proof of signed-in user flow, legal model accuracy or customer isolation beyond signed-out denial. Keep previous R126 evidence v1/v2/v3; no product code, customer data, OAuth/Drive or production changes. SRS v1.1.15 unchanged."
+}

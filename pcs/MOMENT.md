@@ -1,12 +1,921 @@
+## R291–R292 — Combined platform and case implementation (2026-11-26 VN)
+
+- R290 corrected code CI 45802926858 SUCCESS. R291 PR #333: audited platform plan create/update/retire, pending service metadata, license/plan change, UI and SQLite tests. Code head 87ebb0a4 CI 45804242321 SUCCESS.
+- R292 PR #334: older R126 case branch diverged from later AI/platform chain; restore compatible R116 metadata schema and create/detail/edit/mobile flow without changing paused file storage. Customer/counterparty labels, priority/status/deadline, immutable changed-field audit, soft hide invalidates ACL version without physical deletion. Separate title rename retained; not full CRM/calendar. R290 session confirmation changed to RETURNING to avoid D1 trigger change counts. Code head 4ae12c7b CI 45804654201 queued on observation. No live migration or device QA.
+- PCS revision 143. Main remains ancestor (787 commits behind R292 source head, 225 changed paths). Prepare consolidated integration draft for whole-stack CI; do not merge/deploy automatically. SRS v1.1.15, 36 target functions + platform scope, no signing and storage pause preserved. Continue actual code; no new product acceptance.
+
+## R290 — Isolated platform QA login (2026-11-26 VN)
+
+- PR #332: separate System Administrator login/logout, random 256-bit QA credential plus independent HMAC server pepper, hashed 30-minute session, CSRF and origin checks, rate cap, audit/revocation triggers, responsive login UI, and offline private credential generator for an existing approved principal. No automatic principal creation, no tenant business-data access. Initial PBKDF2 approach was replaced before deployment due to Workers runtime compatibility concerns; generated credentials only, not a general human-password issuer.
+- Initial exact source head f515b5e7 workflow 45802703582 PASS. Corrected source/test head 203e6c6c workflow 45802926858 queued on inspection; do not mark final tests PASS until verified. Local clone blocked by DNS; no live D1 migration, QA grants, pepper provisioning, or physical-device acceptance.
+- PCS revision 142; next: verify CI, fix failures, complete verified principal/recovery lifecycle and isolated authenticated QA. No production or auto-merge. SRS v1.1.15, F01–F36, platform scope and no-signing constraint unchanged.
+
+## R289 — Reconcile function inventory (2026-11-26 VN)
+
+- Owner agreed to resume PCS review and completion. Main remains at 7bddde32 (07 Nov); latest inspected development PR #330 R288 head b3bcbdcb (26 Nov). Exact R288 head has four successful workflow runs: 45798433006, 45798432993, 45798432916, 45798424454. No claim of actual deployed E2E.
+- Added [function inventory](function_audit_gpt_v1.md) with all 36 existing target functions plus platform administration, provisional source-level gaps, and next execution sequence. Preserve SRS v1.1.15, no signing, paused storage integration, public-safe metadata only. No new scope or SRS amendment.
+- PCS revision 141; AL-R0-DEPLOY-001 remains active. Next code package: isolated platform session issuance/login and controlled provisioning/revocation/recovery. Actual QA D1 and real-device verification remain NOT_RUN. No automatic merge, production deployment or customer data. This checkpoint changed documentation only.
+
+## R288 — Platform Worker session isolation and mount (2026-11-26 VN)
+
+- R287 exact HEAD b191aa2b: GitHub Actions mobile view and DOCX POC both SUCCESS. R288 implements separate hashed platform session store, active principal verification, session-bound CSRF, and mounted platform routes on QA API Worker and same-origin site relay. No tenant role can grant platform access. No automatic seed or real grant. No change to business-data routes, frozen SRS v1.1.15 or F01–F36.
+- Added synthetic Node route tests and real SQLite schema/session tests; CI pending. Mounted separate responsive /platform page and protected module assets via site build; added full site→Worker→SQLite smoke covering successful mutation, forced audit rollback, expired/disabled/forged sessions. Dedicated platform session issuer/login, recovery, actual D1 migration and real-device verification remain incomplete. No production deployment, merge, customer data or acceptance.
+
+## R287 — Platform mobile contract regression repair (2026-11-26 VN)
+
+- Owner prioritizes complete System Admin, mobile UI and authenticated Worker/D1 integration. R286 PR #328 CI mobile 18/19: stale PATCH fixture after POST contract change. Updated positive and negative tests to observe POST and explicitly exercise invalid reason on a changed status. No production authorization relaxed. Test observation 1/5, fixture repair 1/5; local NOT_RUN, new CI NOT_VERIFIED. Platform remains PARTIAL; authenticated Worker mount, D1 and full UI outstanding. AL-R0-DEPLOY-001 and frozen SRS unchanged; no merge/deploy.
+
+## R285 — Repair bounded Content-Length acceptance (2026-11-24 VN)
+
+- Read latest STATE/MOMENT/scope/SRS change register on R284 draft #326, issue #156, open PR stack and exact R284 HEAD `ff30ce98` CI: 3/3 workflows SUCCESS (synthetic only). Active task remains AL-R0-DEPLOY-001; no change to frozen SRS or F01–F36.
+- Fixed concrete R284 regression: JavaScript regex `/^\\d+$/` matched a literal backslash followed by d, rejecting **every valid numeric Content-Length**, including normal server responses. Corrected to `/^\d+$/`; oversized or malformed values remain rejected. Added positive bounded numeric header and negative malformed header regressions to existing Node test suite.
+- R285 test authored 1/5; fix 1/5; local NOT_RUN; new HEAD CI NOT_VERIFIED until GitHub workflow completes. Platform Admin PARTIAL; authenticated Worker mount, atomic D1/audit, recovery and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. No signing, merge, production deploy, real grants or customer data.
+
+## R284 — Bound platform metadata stream during read (2026-11-24 VN)
+
+- Read latest STATE/MOMENT/scope/SRS change register on draft #325, issue #156, open PR stack and exact R283 HEAD `473cb415` CI (2/2 GitHub workflows SUCCESS; synthetic only). Keep active_task AL-R0-DEPLOY-001.
+- Repaired a concrete memory/cost exposure in the System Admin metadata browser client: the old 32 KiB limit was checked only after `response.text()` had already buffered the entire response. Now enforce Content-Length precheck when present, read streamed chunks with an in-flight 32 KiB ceiling, cancel oversized streams best-effort, and reject malformed UTF-8. Preserve strict metadata allowlists, same-origin session and CSRF. Mock response.text() fallback remains for synthetic fixtures.
+- Added two synthetic negative regressions: oversized streamed response must stop after two 17,000-byte chunks and cancel; oversized declared Content-Length must reject before reading. Test authored 1/5, fix 1/5; local execution NOT_RUN; R284 HEAD CI NOT_VERIFIED until workflows complete.
+- Platform Admin PARTIAL; authenticated Worker mount, atomic D1/audit, recovery and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Frozen SRS v1.1.15, F01–F36, no signing; no merge, production deploy or customer data.
+
+## R283 — Associate platform admin mobile form labels (2026-11-24 VN)
+
+- Read current STATE/MOMENT/scope/change register on draft #324, issue #156, open PR stack and exact R282 HEAD `3140148c` CI: 2/2 workflows SUCCESS (synthetic only). Preserve `state.current.active_task=AL-R0-DEPLOY-001`.
+- Fixed a real accessibility/usability gap in the opt-in platform administration form: status and reason labels were adjacent text rather than natively associated with their select/input. Labels now contain their respective controls, improving touch-target and assistive-technology semantics on mobile. No authorization, tenant data, endpoint or SRS changes.
+- Added one synthetic DOM regression for both label/control associations. Authored test 1/5; code fix 1/5; local execution NOT_RUN; R283 exact HEAD CI NOT_VERIFIED pending workflow. Platform Admin PARTIAL; authenticated Worker mount, atomic D1/audit, account recovery, and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN.
+- Frozen SRS v1.1.15, F01–F36, no signing, no customer data, no merge and no production deployment.
+
+## R282 — Fix R281 platform CI test expectation (2026-11-24 VN)
+
+- Read four latest PCS files on PR #323 stack, reviewed issue #156 and PR #323 base/head; exact R281 HEAD `bd6738b2` CI: DOCX POC SUCCESS, Platform mobile view R279 FAILURE (run 45255076779; 12/13 synthetic tests pass). The failing R280 empty-reason regression selected the *unchanged* `active` status. R281 correctly short-circuited before reason validation, so the fixture assertion was stale; production no-op guard remains intact.
+- Updated the negative fixture to select `suspended` before clicking with an empty reason. This tests the intended invalid-reason branch without a PATCH. No production security relaxation. One test-fix cycle 1/5; local NOT_RUN, new exact HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; Worker verified-session mount, D1 atomic audit and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN.
+- Frozen SRS v1.1.15, F01–F36, no-signing exclusion, and `state.current.active_task=AL-R0-DEPLOY-001` preserved. No merge, production deploy, or customer data.
+
+## R281 — Prevent redundant platform service status mutations (2026-11-24 VN)
+
+- Read latest PCS STATE/MOMENT/scope/change register on stacked PR #322, issue #156, PR stack and exact R280 HEAD CI: 2/2 workflow SUCCESS (synthetic), commit 70e2ba59. Active task remains AL-R0-DEPLOY-001.
+- Platform Admin UI now refuses a status update when the requested status equals current tenant service status, before CSRF/PATCH/confirmation. Displays a non-sensitive no-change message. Added one synthetic DOM regression proving zero PATCH and zero confirmation. No tenant business-data access or authentication relaxation.
+- R281 test authored 1/5, fix 1/5, local NOT_RUN; exact R281 HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; verified-session Worker mounting, D1 atomic audit and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Frozen SRS v1.1.15, F01-F36 and no-signing policy unchanged. No merge, production deploy or customer data.
+
+## R280 — Repair platform view CI DOM fixture (2026-11-24 VN)
+
+- Read latest four PCS files on PR #321 head, reviewed #156 and stacked PRs. STATE active_task remains AL-R0-DEPLOY-001. Exact R279 HEAD `67291670`: DOCX POC SUCCESS, Platform mobile view R279 FAILURE (run 45233709022; 10/11 tests pass).
+- Root cause: synthetic FakeElement lacked browser-standard empty-string `input.value`; click handler `.trim()` threw on undefined. Updated synthetic DOM fixture to initialize value='' and added negative regression verifying empty reason blocks PATCH. Production validation unchanged. One fix cycle 1/5, one authored test cycle 1/5; local NOT_RUN, R280 CI NOT_VERIFIED.
+- Platform admin PARTIAL; authenticated Worker mounting, D1 atomic audit, mobile/desktop real QA and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Frozen SRS v1.1.15, F01-F36 and no-signing exclusion unchanged. No merge, production deploy or customer data.
+
+## R278 — Same-origin platform administration client boundary (2026-11-24 VN)
+
+- Read STATE, MOMENT, scope and SRS change register on latest draft #319 HEAD; active_task AL-R0-DEPLOY-001 unchanged. Reviewed issue #156 and stacked PRs; R277 exact HEAD d5e30d19 had seven scoped GitHub Actions workflows SUCCESS (synthetic only).
+- Added browser API client for platform plans, tenant service metadata and activate/suspend/revoke operations. Same-origin session cookies, no-store, no redirects, explicit CSRF for PATCH, strict input and response allowlists, bounded JSON, redacted HTTP failures. No business-data access, impersonation or signing. This is a reusable client module, NOT a mounted Worker route or completed UI.
+- Seven synthetic Node tests authored and scoped CI workflow. Test iteration 1/5, fix iteration 1/5; local NOT_RUN; new HEAD CI NOT_VERIFIED. Platform Admin PARTIAL. Worker verified-session mount, real D1 atomic audit, desktop/mobile rendering and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Frozen SRS v1.1.15 and F01–F36 preserved; no merge, production deployment or customer data.
+
+## R277 — Platform HTTP method guard before D1 (2026-11-23 VN)
+
+- Reviewed latest draft #318, issue #156 and PCS STATE/MOMENT/scope/change files on the stacked branch. Scope/change files exist on the draft stack (main returned 404); SRS v1.1.15 frozen, F01–F36 intact, active task AL-R0-DEPLOY-001 preserved.
+- Reject unsupported methods and PATCH to read-only /api/platform/plans with 405 before probing D1; preserve verified System Admin principal boundary. Added five synthetic Node regression cases and dedicated CI workflow. No business-data access, no signing.
+- Test authored 1/5; fix 1/5; local NOT_RUN; exact R277 HEAD CI NOT_VERIFIED. Platform Admin PARTIAL, real Worker authenticated mount, D1 migration/atomic audit and responsive UI outstanding. OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. No merge, production deploy or customer data.
+
+## R275 — Platform metadata HTTP response allowlist (2026-11-23 VN)
+
+- Read four PCS sources at R274 HEAD, latest draft #316 and issue #156; checked open stacked PRs and exact R274 HEAD CI: six workflows completed SUCCESS. Active task AL-R0-DEPLOY-001 unchanged; frozen SRS v1.1.15 and F01–F36 unchanged.
+- Hardened alternate platform HTTP adapter GET plans/services: independent response field allowlist prevents unexpected business-data columns from being serialized even if the domain service later changes. No System Admin access to tenant business data.
+- Added three synthetic regression cases and dedicated Node CI. Tests authored 1/5; fix 1/5; local NOT_RUN, new HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; real authenticated Worker mount, D1 migration/atomic audit, desktop/mobile and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. No merge, production deploy, signing or customer data.
+
+## R274 — Alternate HTTP adapter preserves 413 on stream cancellation failure (2026-11-23 VN)
+
+- Reviewed latest R273 stack PR #315, four PCS sources, issue #156 and exact R273 HEAD CI: four workflows SUCCESS. Active task remains AL-R0-DEPLOY-001; no change to frozen SRS v1.1.15, F01–F36 or signing exclusion.
+- Fixed the second platform HTTP adapter `deployment/cloudflare/platform_admin_http_gpt.mjs`: cancellation failure on a >2048-byte PATCH body no longer converts 413 PAYLOAD_TOO_LARGE to 400 INVALID_JSON. Cleanup is best effort; reject before audit ID or D1 operations.
+- Added one synthetic negative regression and dedicated Node CI workflow. Test authored 1/5; fix 1/5; local NOT_RUN; new HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; authenticated Worker mount, real D1 atomic rollback and responsive app still incomplete. OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. No merge, production deploy or customer data.
+
+## R272 — Repair R238 CI fixture after trusted audit-ID boundary (2026-11-23 VN)
+
+- Read STATE/MOMENT/scope/change register at R271 PR #313 HEAD; active task AL-R0-DEPLOY-001 retained. Checked issue #156, open stacked PRs and exact R271 HEAD CI: platform-admin-r270, platform-http-r271 and DOCX POC SUCCESS; R238 content-type workflow FAILURE (run 45151586103, 3/5 tests passing).
+- Retrieved failed job logs: valid Content-Type cases expected downstream 503 but test fixture still sent caller-controlled auditId, correctly rejected as 400 by R270 trusted audit boundary. Removed auditId from valid fixtures; added explicit negative regression asserting forged auditId returns 400 BAD_INPUT. No security checks relaxed. Six synthetic tests authored, local NOT_RUN; new HEAD CI NOT_VERIFIED. Test cycle 1/5, fix cycle 1/5.
+- Platform Admin PARTIAL; Worker authenticated mount, real D1 migration/atomic rollback, desktop/mobile outstanding; OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen; F01–F36, signing exclusion and tenant business isolation unchanged. No merge, production deploy or customer data.
+
+## R271 — Alternate platform HTTP fail-closed boundary (2026-11-23 VN)
+
+- Read latest STATE, MOMENT, scope and SRS change register at R270 HEAD; checked open stacked PRs through #312 and issue #156. STATE revision 140, active task AL-R0-DEPLOY-001 retained; no changes to frozen SRS.
+- Repaired alternate HTTP adapter: require verified System Admin ID; reject transformed content, unsafe/mismatched Content-Length and invalid mutation fields before audit ID and D1; cap serialized metadata response at 32 KiB. Added five synthetic Node negative cases and scoped workflow. No business data access or signing paths.
+- Tests authored 1/5, fixes 1/5; local NOT_RUN; exact new HEAD CI NOT_VERIFIED. Platform Admin PARTIAL. Authenticated Worker mount, real D1 migration/atomic rollback and responsive UI remain outstanding. OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. No merge, production deploy or customer data.
+
+## R270 — Reject caller-supplied audit IDs in alternate platform adapter (2026-11-23 VN)
+
+- Read STATE, MOMENT, scope, change register at PR #311 HEAD; reviewed open PR stack, issue #156, Worker routes and both platform HTTP adapters. Exact R269 HEAD f5c021e8: five scoped workflows SUCCESS; these are not live E2E.
+- Found a second platform adapter `deployment/cloudflare/platform_http_gpt.mjs` accepting client-provided `auditId`, inconsistent with the trusted audit boundary. Changed the alternate adapter to accept only tenantId/status/reasonCode and generate audit ID on the server. Three negative synthetic regression cases and scoped CI authored. This adapter remains unmounted; authentication and CSRF are still resolver-dependent.
+- Tests authored 1/5; fixes 1/5; local NOT_RUN; exact R270 HEAD CI NOT_VERIFIED. Platform Admin PARTIAL, OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Worker authenticated mount, D1 migration and atomic rollback, desktop/mobile outstanding.
+- SRS v1.1.15 frozen, F01–F36, AL-R0-DEPLOY-001, no signing, no tenant business access unchanged. No merge, production deployment or customer data.
+
+## R269 — Bound Worker platform metadata responses (2026-11-23 VN)
+
+- Read latest PCS STATE/MOMENT/scope/change register at PR #310 HEAD; active task AL-R0-DEPLOY-001 retained; issue #156 and stacked PRs checked. R268 HEAD CI: four workflows SUCCESS (synthetic only).
+- Worker HTTP adapter now caps UTF-8 JSON responses at 32 KiB (below the browser's 64 KiB limit), returning a no-store 503 error rather than a partial or unbounded metadata list. Tenant data allowlist and auth checks unchanged. Three Node regression cases and scoped CI authored.
+- Tests authored 1/5, fixes 1/5; local NOT_RUN, R269 HEAD CI NOT_VERIFIED until runs complete. Platform Admin PARTIAL; authenticated Worker mount, D1 migration, atomic audit verification, mobile UI remain outstanding. OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, F01–F36, signing exclusion, standalone-first and no tenant business data access preserved. No merge, production deployment or customer data.
+
+## R268 — Preflight platform mutation fields (2026-11-23 VN)
+
+- Read four PCS files, open PR stack through #309, issue #156, exact R267 HEAD CI: three workflows SUCCESS (scoped synthetic checks only).
+- Real Worker HTTP adapter now rejects invalid tenantId/status/reasonCode before allocating an audit ID or touching D1. Domain validation remains in place. Seven negative regression tests and scoped CI workflow added.
+- Test cases authored 1/5; fix 1/5; local NOT_RUN; R268 HEAD CI NOT_VERIFIED. Platform Admin PARTIAL. OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen; F01–F36, AL-R0-DEPLOY-001 and signing exclusion unchanged. No merge, production deployment, real grants or customer data.
+
+## R267 — Reject transformed platform mutation bodies (2026-11-23 VN)
+
+- Read latest four PCS files, PR #308 HEAD/base, issue #156, open stacked PRs and exact R266 HEAD CI (platform-admin-r220-gpt and DOCX POC SUCCESS; not application E2E). STATE remains revision 140, active task AL-R0-DEPLOY-001 retained.
+- Real Worker platform HTTP adapter now rejects non-identity Content-Encoding on PATCH before reading request body, generating audit IDs or touching D1. This avoids accepting compressed/transformed JSON with ambiguous byte-length accounting. Added four synthetic Node cases and dedicated R267 CI workflow.
+- Tests authored 1/5; fixes 1/5; local NOT_RUN, exact new HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; authenticated Worker mount, D1 migration and atomic audit rollback, desktop/mobile remain outstanding. OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, F01–F36 and no-signing exclusion unchanged. No customer data, merge or production deploy.
+
+## R266 — Restore executable streamed-length validation (2026-11-23 VN)
+
+- Read PCS STATE/MOMENT/scope/change register at R265 HEAD, issue #156 and open stacked PRs. Discovered R265 Worker HTTP adapter accidentally included literal backslash-n sequences inside a line comment: the Content-Length mismatch guard and buffer declaration were commented out, breaking PATCH parsing. Fixed real adapter by restoring newlines; no authentication or authorization boundary relaxed.
+- Added 3 synthetic Node regression cases exercising shorter, longer and matching Content-Length via actual adapter. Test authored 1/5, fix 1/5; local NOT_RUN, new HEAD CI NOT_VERIFIED. Draft PR #308 stacked on #307. Platform Admin PARTIAL; authenticated Worker integration, D1 migration/atomic rollback, desktop/mobile and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN.
+- Preserve SRS v1.1.15 frozen, F01–F36, state.current.active_task=AL-R0-DEPLOY-001; no signing, customer data, merge or production deployment.
+
+## R265 — Enforce streamed platform request length consistency (2026-11-23 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS change register at PR #306 HEAD, checked issue #156 and open stacked PRs. Exact PR #306 HEAD 50982581: platform-admin-r220 and DOCX POC scoped workflows SUCCESS; not app E2E.
+- Changed real Worker platform HTTP adapter to reject mismatched declared Content-Length versus actual streamed body before JSON parsing, audit-ID generation or D1 mutation. Added three synthetic regression cases for shorter/longer declarations and matching-length malformed JSON.
+- Local Node NOT_RUN; new exact HEAD CI NOT_VERIFIED. Tests authored 1/5, fixes 1/5. Platform Admin PARTIAL, Worker authenticated mount/D1 migration/atomic audit rollback/mobile still pending; OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen, F01–F36 and AL-R0-DEPLOY-001 preserved; no signing, merge, production deploy or customer data.
+
+## R264 — Repair Worker HTTP Content-Length validation (2026-11-23 VN)
+
+- Read four PCS files at latest stacked PR #305, checked issue #156, open PR stack and current Worker HTTP adapter. Found a real repeated defect: the server HTTP adapter regex for Content-Length used a literal backslash and rejected valid decimal lengths. Corrected to ASCII decimal digits and safe-integer validation before JSON allocation.
+- Added three synthetic Node regression cases (valid decimal, oversized, nondecimal); local execution NOT_RUN, exact new HEAD CI NOT_VERIFIED. Test authored 1/5; fix 1/5. This is a server HTTP boundary fix, not evidence of authenticated Worker route integration, D1 rollback, complete mobile UI, or Owner QA.
+- Platform Admin PARTIAL; OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15 frozen, F01–F36, separate control plane and strict tenant-data isolation. No signing, merge, production deploy, or customer data.
+
+## R263 — Repair valid Content-Length rejection (2026-11-23 VN)
+
+- Reviewed latest stacked draft PR #304 HEAD 1a29a229, four PCS source files, issue #156 and parallel PRs. Exact R262 HEAD scoped workflows R262, R222, R221 and DOCX POC completed SUCCESS; not application E2E.
+- Found a real browser transport regression: R262 Content-Length regular expression contained an escaped backslash and rejected legitimate decimal headers. Replaced with explicit ASCII digit matching and safe integer bound; added two positive/negative synthetic regression tests. No tenant business data, authentication bypass or scope expansion.
+- Local Node NOT_RUN; new HEAD CI NOT_VERIFIED. Test authored 1/5, fix 1/5. Platform Admin PARTIAL; Worker auth mount, D1 migrations/atomic audit rollback, desktop/mobile completion and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 and separate platform admin. No signing, merge, production deploy or customer data.
+
+## R262 — Bound platform browser response parsing (2026-11-23 VN)
+
+- Read PCS STATE/MOMENT/scope/change register at stacked R259 PR #303, issue #156, and exact R259 HEAD CI: DOCX POC, R222 and R225 SUCCESS. Inspected repository tree to locate actual Worker and platform modules; prior R260/R261 path discovery blocker resolved. R260 branch exists but has no confirmed code change; this branch starts from latest PR #303 to avoid parallel overlap.
+- Changed real browser transport `deployment/cloudflare/platform_admin_api_gpt.mjs` to reject responses with declared or streamed bodies over 64 KiB before JSON allocation, and reject malformed UTF-8. Added four synthetic Node cases and scoped CI workflow. This is a bounded transport improvement, not verified Worker session integration or full admin UI.
+- Local Node NOT_RUN; new exact HEAD CI NOT_VERIFIED. Test cases authored 1/5; fix 1/5. Platform Admin PARTIAL; verified Worker session integration, D1 migration/atomic audit rollback, complete desktop/mobile, and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve `AL-R0-DEPLOY-001`, frozen SRS v1.1.15, F01–F36 and separate platform administration. No signing, merge, production deployment, or customer data.
+
+## R259 — Align missing D1 audit metadata regression with batch fail-closed contract (2026-11-23 VN)
+
+- Read PCS STATE/MOMENT/scope/change register at R258 HEAD f3ea77b3; reviewed open stacked PR #302, issue #156 and exact R258 HEAD CI. R222 and DOCX POC SUCCESS, R225 FAILED 1/13 in workflow #45069946807; this is scoped CI, not app E2E.
+- Examined R225 job #137354448001: missing audit metadata returns PLATFORM_BATCH_INCOMPLETE before the narrower audit-count validation. Corrected one synthetic test expectation to the actual stronger fail-closed D1 batch contract. No production security validation weakened. This fixes a confirmed CI contract mismatch, not real D1 rollback proof.
+- CI observation 1/5, fixture repair 1/5; local Node NOT_RUN, R259 HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; Worker authentication, D1 migration/rollback, complete desktop/mobile and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve state.current.active_task=AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 plus platform admin. No signing, merge, production deployment or customer data.
+
+## R258 — Repair confirmed R225 D1 batch contract fixture (2026-11-23 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS change register from latest PR #301 branch, checked issue #156, stacked open PRs and exact R257 HEAD ea29f66c6d603745b764362b6c284d7c4d59ba54 CI: R232, R219 and DOCX POC all completed SUCCESS (three scoped workflows). No broad app E2E inferred.
+- Inspected R225 failing workflow #45058339809 (PR #300 merge checkout): 5/13 FAILED. Root cause: synthetic db.batch() fixture returned metadata without D1 `success:true`, so all five R225 cases failed at PLATFORM_BATCH_INCOMPLETE before their intended assertions. Corrected only R225 fixture to mark both synthetic batch results successful; retained service fail-closed validation and unchanged negative change-count assertions. This is a real regression-fixture repair, not proof of D1 atomic rollback.
+- R225 test observation 1/5; repair 1/5; local execution NOT_RUN; new HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; authenticated Worker session, D1 migration, atomic rollback, desktop/mobile and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15 frozen, F01–F36 plus separate platform administration; no signing, merge, production deploy or customer data.
+
+## R256 — Block bidi spoofing in platform plan display metadata (2026-11-23 VN)
+
+- Read current STATE/MOMENT/scope/SRS change register and issue #156, checked open stacked PRs through #299 and R255 exact HEAD workflow lookup (no matching pull-request workflow runs returned). Continue from R255 without changing PR #187 or merging.
+- Real service fix: metadata-only plan_name now rejects Unicode bidi direction overrides, embedding controls, isolates and marks (U+061C, U+200E/U+200F, U+202A–U+202E, U+2066–U+2069), preventing deceptive visual reordering in desktop/mobile admin listings. Added 12 synthetic negative cases and a Vietnamese positive display control. This does not access tenant business data.
+- Local Node suite NOT_RUN (connector-only execution); R256 HEAD CI NOT_VERIFIED. Test cases authored 1/5; fix 1/5. Platform Admin PARTIAL; authenticated Worker session, D1 migration/atomic rollback proof, complete responsive UI and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15 frozen, F01–F36 plus separate platform administration. No signing, customer data, merge or production deployment.
+
+## R255 — Validate plan display metadata for control characters (2026-11-23 VN)
+
+- Read current stacked PR #298 and its HEAD 222bb7b51c40a0314fafd9b88ad0dbf58010a029, current PCS STATE/MOMENT/scope/SRS change register, and issue #156. Exact R254 HEAD pull-request workflow list returned no runs; CI NOT_VERIFIED, not PASS. No production deployment.
+- Hardened metadata-only platform plan listing to reject ASCII/C1 control characters in plan_name before exposing the value to desktop/mobile UI. Added five synthetic negative inputs and one positive assertion in R217 Node test. This is a real service-layer validation change, not a claim of a complete admin UI.
+- Local execution NOT_RUN; R255 HEAD CI NOT_VERIFIED. Test authored 1/5, fix 1/5. Platform Admin PARTIAL; real authenticated Worker session, D1 migration/atomic rollback proof, responsive UI and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 and separate platform admin; no signing, merge, production deploy or customer data.
+
+## R254 — Guard regression for D1 atomic service/audit results (2026-11-22 VN)
+
+- Read STATE/MOMENT/scope/SRS change register and issue #156; checked PR #297 HEAD 61ca6b2e21b66e52eca6f2e02296f647e3fcdec4 and stacked open PRs. Exact R253 HEAD CI R217 and DOCX POC SUCCESS (2 scoped workflows), not full app E2E.
+- Added nine synthetic D1 batch outcome regressions for failed/partial results, missing metadata, unexpected row counts and audit-not-inserted. Service must fail closed rather than report success when mutation/audit are inconsistent. No production code changed. Local NOT_RUN; R254 HEAD CI NOT_VERIFIED. Test authored 1/5, fix 0/5.
+- Platform Admin PARTIAL; real Worker verified session, D1 migration and atomic rollback, responsive UI and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 plus platform admin; no signing, merge, production deploy or customer data.
+
+## R253 — Repair confirmed R217 CI fixture mismatch (2026-11-22 VN)
+
+- Read current stacked PR #296, PCS STATE/MOMENT/scope/SRS change register, issue #156, and exact R252 HEAD `90986ef2e6fad52a2093b9433c577ab0a830cb35` workflow runs. R252 scoped CI SUCCESS; R217 contract CI FAILED 3/5 (run #45035775287), with other workflows also FAILED. No full CI PASS claim.
+- Repaired R217 synthetic D1 fixtures to return `success:true` for `.all()` and both `.batch()` statements, and aligned bounded SELECT assertion to `LIMIT 101` (100 rows plus overflow sentinel). Production security checks unchanged. This directly addresses three confirmed R217 failures; new HEAD CI NOT_VERIFIED, local NOT_RUN. Test 1/5 observed; fix 1/5.
+- Platform Admin PARTIAL; verified Worker session, D1 migration/atomic rollback, desktop/mobile, and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 and separate platform admin; no signing, merge, production deploy or customer data.
+
+## R252 — Reject ambiguous duplicate platform metadata rows (2026-11-22 VN)
+
+- Read latest PCS STATE/MOMENT/scope/SRS change register from PR #295 branch, checked open PR stack, issue #156, and exact R251 HEAD cc8923170653e2911147b7662b4abf32e6379dd6 CI (two completed SUCCESS workflows: R220 and DOCX POC only). No claim of full CI PASS.
+- Fixed platform control-plane plan/tenant listing to fail closed when D1 returns duplicate plan_id or tenant_id rows, rather than presenting contradictory service status/plan metadata. No tenant business data is selected or serialized.
+- Added four synthetic Node regression cases and scoped GitHub Actions workflow. Local tests NOT_RUN; new HEAD CI NOT_VERIFIED. Test round 1/5 authored; fix round 1/5. Platform Admin PARTIAL; Worker verified session, D1 migration/atomic audit rollback, desktop/mobile and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN.
+- Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 plus separate platform admin, no signing, merge, production deploy or customer data.
+
+## R251 — Trusted audit generator exceptions (2026-11-22 VN)
+
+- Read latest STATE/MOMENT/scope/SRS register, issue #156, open PR stack through #294 and exact R250 HEAD f09efa47 CI: two workflows SUCCESS (R220, DOCX POC); these do not prove new tests or real deployment.
+- Fixed PATCH HTTP adapter so throwing trusted audit ID generator returns 503 AUDIT_UNAVAILABLE, without leaking exception content or attempting D1 writes. Added three synthetic Node regression cases. Local execution NOT_RUN; new HEAD CI NOT_VERIFIED. Test 1/5 authored; fix 1/5.
+- Platform Admin PARTIAL; Worker session, D1 atomic rollback proof, migrations, responsive mobile and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15 and F01–F36. No signing, merge, production deploy or customer data.
+
+## R250 — Trusted audit ID fail-closed at HTTP boundary (2026-11-22 VN)
+
+- Read latest PCS STATE/MOMENT/scope/SRS change register on PR #293 HEAD 26b8e493, issue #156, and open stacked PRs. Exact HEAD CI: R233 metadata overflow and DOCX POC workflows SUCCESS; synthetic only.
+- Fixed platform PATCH adapter: missing/malformed trusted `newAuditId()` result now yields 503 AUDIT_UNAVAILABLE before D1 mutation, rather than misclassifying infrastructure failure as 400 BAD_INPUT. Added eight synthetic Node negative cases requiring zero DB writes. Local execution NOT_RUN; new HEAD CI NOT_VERIFIED. Test 1/5 authored; fix 1/5.
+- Platform Admin PARTIAL. Worker verified session, D1 atomic rollback, migration, responsive mobile and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 and platform control-plane separation; no signing, merge, production deployment or customer data.
+
+## R249 — Repair confirmed R233 metadata overflow fixture (2026-11-22 VN)
+
+- Read PCS STATE/MOMENT/scope/change register on R248 stack, PR #292 and issue #156; checked R248 exact HEAD 7298f9c6: two workflows SUCCESS (R230 calendar, DOCX POC). Checked R247 HEAD da93d6ef R233 overflow workflow #45010657040: 3/5 FAILED because positive synthetic D1 `.all()` fixtures omitted required `success:true` after fail-closed service change; 101-row negative checks passed, but could pass for the wrong reason.
+- Updated only `tests/platform_list_overflow_gpt.test.mjs` D1 mock responses to include `success:true` for both populated and empty results. Retains actual 100/101-row overflow assertions and SQL LIMIT 101 checks; no production guard relaxed. Local execution NOT_RUN; new HEAD CI NOT_VERIFIED. Observed CI test 1/5; fix 1/5. Other R247 failures remain open.
+- Platform Admin PARTIAL. Worker verified session, D1 audit rollback atomicity, migration, responsive UI and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve `AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, F01–F36 plus platform administration. No signing, merge, production deploy or customer data.
+
+## R247 — Reject accessor mutation inputs at platform service boundary (2026-11-22 VN)
+
+- Read PCS STATE/MOMENT/scope/change register at R246 HEAD, issue #156 and latest stacked PR #290; checked exact R246 HEAD 1a8bca0bcf0da6a7405c745a190ddd6b8832f1dd: five pull-request workflows SUCCESS (DOCX POC, R226, R222, R220, R228). This is synthetic CI only.
+- Fixed platform service input guard: own accessor properties previously passed own-key validation and executed getter code on destructuring. Require four own enumerable writable data descriptors before reading values, without expanding permitted fields or weakening System Admin authorization. Added four Node regression cases and a scoped workflow.
+- Local test NOT_RUN; R247 HEAD CI NOT_VERIFIED until Actions finishes. Test 1/5 authored; fix 1/5. Platform Admin PARTIAL. Real Worker verified session, D1 rollback atomicity, migration, full mobile UI and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15, F01-F36 and platform control-plane separation. No merge/deploy/signing/customer data.
+
+## R246 — Repair confirmed D1 list fixture failures (2026-11-22 VN)
+
+- Read latest PCS STATE/MOMENT/scope/SRS change register, PR #289 and issue #156; checked R245 HEAD c9fef867 CI. Twelve workflows completed: ten FAIL, two SUCCESS. Inspected actual failing job logs for R226, R220 and R228: positive synthetic D1 fixtures omit mandatory `success:true` introduced in R245, so expected successful reads fail closed (PLATFORM_INVALID_RESULT / HTTP 503).
+- Updated three test fixtures to model successful D1 `.all()` responses with `success:true`, preserving production fail-closed logic. This is a confirmed CI regression repair, not a real D1/Worker/mobile acceptance. CI on R246 HEAD NOT_VERIFIED; local execution NOT_RUN. Observed CI test 1/5, fix 1/5. Other R245 CI failures remain to investigate, not declared fixed.
+- Platform Admin PARTIAL, verified Worker session / atomic audit rollback / migration / responsive UI / OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve `AL-R0-DEPLOY-001`, frozen SRS v1.1.15, F01-F36 plus platform admin; no signing, merge, production deployment or customer data.
+
+## R245 — Fail closed on D1 metadata list errors (2026-11-22 VN)
+
+- Read PCS STATE/MOMENT/scope/change register, PR #288 and issue #156; checked latest draft stack and CI on R244 HEAD 7dc7ec1c: five workflows completed SUCCESS (R219, R220, synthetic audit, R222, DOCX POC). This is not real Cloudflare authenticated E2E.
+- Fixed two platform control-plane list functions to reject D1 responses with success:false or missing success, even when results:[] exists. Previously these could silently display an empty plan/service list during a database failure. Added six Node synthetic regression cases. New HEAD CI NOT_VERIFIED; local execution NOT_RUN. Test authored 1/5, fix 1/5.
+- Platform Admin PARTIAL. Verified Worker session, real D1 atomic rollback, migration, mobile and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15 frozen, 36 Fxx plus platform admin, no signing/merge/production/customer data.
+
+## R244 — Repair three confirmed CI contract/fixture failures (2026-11-22 VN)
+
+- Read latest PCS STATE/MOMENT/scope/SRS-change register, PR #287, issue #156, and actual CI on HEAD 2e74c550. Confirmed failures: R219 stale LIMIT 100 expectation (real query LIMIT 101 for overflow), R220 mock D1 batch omitted `success:true` (HTTP returned 503), atomic audit fixture omitted `success:true` (3/5 failures). Updated only tests/fixtures, preserving strict fail-closed production checks; three files changed.
+- CI at R243 HEAD: R219 FAIL, R220 FAIL, atomic audit FAIL; multiple other workflows PASS. New HEAD CI pending verification. Local execution NOT_RUN; observed CI test round 1/5, fixture repair round 1/5. No real D1 rollback proof or Worker session/mobile completion claim.
+- Platform Admin PARTIAL, OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15, F01–F36 + separate platform administration, no signing, no merge/deploy/customer data.
+
+## R243 — Guard direct platform service mutation input (2026-11-22 VN)
+
+- Stacked on PR #286, new draft branch; read PCS STATE/MOMENT/scope/change register and issue #156. Fixed `changeTenantService` to reject arrays, inherited/prototype-mutated objects, symbol keys and unexpected business fields at the domain-service boundary before DB access. HTTP-only validation was insufficient for other callers.
+- Added five Node regression cases in the existing platform batch suite; execution and exact HEAD CI NOT_VERIFIED. Test round 1/5 authored; fix round 1/5. No production claim.
+- Atomic rollback on real D1, verified Worker System Admin session, migration, desktop/mobile and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Platform Admin PARTIAL. Preserve `state.current.active_task=AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, F01–F36 plus separate platform admin, no signing/merge/deploy/customer data.
+
+## R241 — Platform audit transaction regression gate (2026-11-22 VN)
+
+- Based on R240 PR #284. Read PCS STATE/MOMENT/scope/change register and issue #156, checked latest open PR stack. Added five synthetic Node test cases for same-batch service update + audit, no-transition, missing audit confirmation, D1 batch failure and tenant-admin denial; added scoped CI workflow. These are **authored only**, local execution NOT_RUN and new HEAD CI NOT_VERIFIED; test round 1/5 authored, fix 0/5.
+- Important remaining risk: an audit INSERT returning zero rows after a successful UPDATE may not automatically roll back the already committed D1 batch. Current application throws but rollback is NOT_PROVEN. Must verify transactional rollback with real D1/staging and enforce DB-level failure/atomicity before any production use. Do not claim atomic audit complete from mocks.
+- Platform Admin PARTIAL. Worker verified session mounting, migration, full responsive UI, Fxx SRS trace and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15 frozen, no signing, no merge/deploy/customer data.
+
+## R240 — Repair failing CI and legacy service response allowlist (2026-11-22 VN)
+
+- Read current PCS STATE/MOMENT/scope/change register, PR #283 and issue #156. Actual HEAD b62a070f CI workflow platform-admin-r220-gpt FAILED (4/5 tests): stale test expected SQL LIMIT 100, while R233 deliberately uses LIMIT 101 to detect overflow. Updated assertion to LIMIT 101, preserving fail-closed overflow behavior. Existing synthetic fixture also exposed an actual privacy risk: legacy GET tenant-services returned raw rows without allowlisting. Restrict response to tenant_id, plan_id, service_status and license_expires_at, dropping extra DB columns. Remove duplicated comment.
+- Test/fix: one observed CI failure, fix 1/5; new HEAD CI NOT_VERIFIED until workflow completes. This is not real Worker/IdP/D1 integration. Platform Admin PARTIAL; OWNER_REAL_DEVICE_QA NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15, 36 Fxx, signing exclusion, no merge/production deployment.
+
+## R239 — Bound the older platform PATCH adapter (2026-11-22 VN)
+
+- Read PCS STATE/MOMENT/scope/change register, issue #156, latest PR #282 and CI HEAD. R238 HEAD CI: 2 completed SUCCESS workflows. Found a second, older platform HTTP adapter (`platform_admin_http_gpt.mjs`) still calling unbounded `request.text()`, with permissive Content-Type. Corrected this actual security gap with 2048-byte streaming cap, fatal UTF-8 decoding, Content-Length early rejection and strict JSON media type. No change to session/MatterACL or tenant business-data access.
+- Test/fix round: test 0/5 executed (CI at new HEAD NOT_VERIFIED), fix 1/5. Platform Admin PARTIAL; actual Worker session mounting, D1 migration/atomic audit and responsive UI remain BLOCKED/NOT_RUN; OWNER_REAL_DEVICE_QA NOT_RUN.
+- Preserve AL-R0-DEPLOY-001, SRS v1.1.15 frozen, F01–F36 and separate Platform Admin. No signing, merge, production deployment or customer data.
+
+## R237 — Bound platform HTTP request bytes before JSON parsing (2026-11-22 VN)
+
+- Read PCS STATE/MOMENT/scope/change register and latest PR #280, issue #156, CI HEAD. Security defect: POST previously used unbounded request.text() before a 2048-character check, allowing large bodies to be buffered and multi-byte payloads to exceed the intended limit. Replaced with byte-counted stream reader capped at 2048 bytes, early Content-Length rejection, fatal UTF-8 decoding, and retained fail-closed schema/CSRF guards.
+- Five synthetic Node regression tests **AUTHORED**, execution **NOT_RUN**; test round 1/5, fix round 1/5 (digit regex corrected before PR). New HEAD CI **NOT_VERIFIED**. No PASS claim. Platform Admin **PARTIAL**: Worker session integration, D1 migration, atomic audit rollback and real mobile QA remain BLOCKED/NOT_RUN; OWNER_REAL_DEVICE_QA NOT_RUN.
+- SRS v1.1.15 frozen, F01–F36 plus separate Platform Admin, active task AL-R0-DEPLOY-001 preserved. No merge, production deployment, signing or customer data.
+
+## R236 — Restore executable platform HTTP schema guard (2026-11-22 VN)
+
+- Reviewed latest PR #279 HEAD `59d21731`, PCS STATE/MOMENT/scope/change register, issue #156 and workflow runs. Found concrete R235 defect: literal `\\n` sequences inside JavaScript `//` comments cause the newly added allowlist guard and mutation call to be commented out, yielding undefined response for valid POST. Replaced escaped sequences with real newlines so the allowlist and call are executable. This is a security/correctness fix, not a scope expansion.
+- **Test round 1/5 authored in R235, execution on R236 NOT_VERIFIED; fix round 1/5.** CI must be checked at R236 HEAD; no synthetic PASS claimed. Platform Admin PARTIAL; live Worker/session/CSRF, D1 migration, atomic audit, mobile QA BLOCKED/NOT_RUN. `OWNER_REAL_DEVICE_QA` NOT_RUN. Active task `AL-R0-DEPLOY-001` preserved. SRS v1.1.15 frozen; no merge, production deploy or customer data.
+
+## R235 — Fail-closed HTTP mutation schema (2026-11-22 VN)
+
+- Based on R234 draft PR #278. Platform HTTP POST now rejects unknown/missing keys before DB access (including prototype-like properties), instead of silently ignoring unreviewed fields. Added five synthetic Node HTTP tests; authored only, execution NOT_RUN and CI HEAD NOT_VERIFIED. Test round 1/5 authored; fix round 1/5.
+- **PARTIAL**: adapter still not mounted in live Worker; verified session/CSRF integration, D1 migration, atomic audit proof, desktop/mobile real QA BLOCKED/NOT_RUN. OWNER_REAL_DEVICE_QA remains NOT_RUN. Active task AL-R0-DEPLOY-001 preserved; SRS v1.1.15 frozen; no signing, merge, production deploy, or customer data.
+
+## R234 — Platform HTTP adapter foundation (2026-11-22 VN)
+
+- Stacked on R233 PR #277 HEAD 497b7b5d. Added `deployment/cloudflare/platform_http_gpt.mjs` HTTP adapter with injected server-verified principal, metadata-only GET, origin/CSRF checks for mutation, no-store responses and non-disclosing errors. Added five synthetic Node tests. **Not yet mounted into live Worker**: session resolver, CSRF verifier, D1 migration and atomic audit remain BLOCKED. Test round 1/5 authored, execution NOT_RUN; fix round 0/5. Owner mobile QA NOT_RUN. Preserve AL-R0-DEPLOY-001, frozen SRS v1.1.15; no signing, merge, production deployment or customer data.
+
+## R233 — Detect truncated platform metadata lists (2026-11-22 VN)
+
+- Read latest PCS STATE/MOMENT/scope/change register, issue #156 and open PR stack through #276. Based on R232 HEAD b9dfeb0b; preserved active_task AL-R0-DEPLOY-001 and SRS v1.1.15 frozen.
+- Fixed actual SQL correctness gap: LIMIT 100 returned exactly 100 rows even when more existed, misleading System Admin into believing a metadata list was complete. Both plan and tenant-service queries now request LIMIT 101; existing >100 fail-closed guards reject overflow. No business data access added.
+- Five synthetic Node tests authored (100 and 101 boundaries for both lists, SQL overflow sentinel), isolated CI workflow. Test rounds 1/5 authored, execution CI HEAD NOT_VERIFIED; fix rounds 1/5. No false PASS.
+- Platform Admin PARTIAL; Worker verified-session mount, D1 migration, atomic audit rollback and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. No signing, merge, production deploy or customer data.
+
+## R232 — Platform license timezone offset validation (2026-11-22 VN)
+
+- Read PCS STATE/MOMENT/scope/change register, issue #156, latest PR #275 HEAD/base and open PR stack. Preserve active_task AL-R0-DEPLOY-001 and frozen SRS v1.1.15.
+- Fixed a concrete validation gap in metadata-only platform tenant service list: UTC offsets above +14:00 and offsets such as +14:01 were accepted even though not valid ISO 8601 offsets. Keep legitimate offsets including +14:00 and -12:45. Added five synthetic Node tests and isolated CI workflow.
+- Test rounds: 1/5 authored, execution CI HEAD NOT_VERIFIED; fix rounds: 1/5. Platform Admin PARTIAL; signed-in Worker mount, D1 migration, atomic audit rollback and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. No signing, merge, production deploy or customer data.
+
+## R231 — Repair R230 expiry regex CI regression (2026-11-22 VN)
+
+- Verified R230 HEAD `22eea2ff`: 6/8 workflows SUCCESS; R230 expiry calendar and R228 tenant metadata FAILED. Root cause: R230 date regex accidentally contained doubled backslashes (`\\d` in regex literal), so valid ISO expiry dates were rejected. Corrected regex literal digit/dot escapes in production source without relaxing calendar validation. Test rounds 1/5 (GitHub CI pending), fix rounds 1/5.
+- Platform Admin PARTIAL. Worker authenticated mounting, D1 migration, atomic audit rollback and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve AL-R0-DEPLOY-001, SRS v1.1.15 frozen, F01–F36 plus separate platform administration. No signing, merge, production deploy or customer data.
+
+## R230 — Calendar-valid platform license expiry (2026-11-21 VN)
+
+- Verified R229 HEAD `3899d2ef`: 7/7 GitHub PR workflows SUCCESS. Fixed a concrete metadata integrity gap: date-shape regex accepted impossible dates and out-of-range times. The service now rejects invalid leap days, months, times and timezone offsets while retaining legitimate ISO dates. Added five synthetic Node tests and dedicated PR CI; new HEAD CI not yet verified. Test rounds 1/5 authored; fix rounds 1/5 (corrected guard syntax before PR). This does not establish live Worker integration or atomic audit rollback.
+- Platform Admin PARTIAL; authenticated Worker mount, D1 migration, transactional audit and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Keep active task AL-R0-DEPLOY-001 and frozen SRS v1.1.15; no signing, merge, production deploy or customer data.
+
+## R229 — Repair R219 stale fixture and expiry date regex (2026-11-21 VN)
+
+- R228 HEAD `677db0ab` CI R219 FAILURE (4/5), six other workflows SUCCESS. R219 fixture expected malformed tenant service metadata to be normalized to null; R228 intentionally rejects it. Updated assertion to expect `PLATFORM_INVALID_RESULT` (no production validation relaxation).
+- Corrected date-pattern escaping in `listTenantServices` so a normal ISO date can match. Added positive and negative date regression cases. Synthetic checks only; Worker signed-in integration, D1 migration and atomic audit rollback remain BLOCKED/NOT_RUN. Test rounds 1/5; fix rounds 1/5. Platform Admin PARTIAL, OWNER_REAL_DEVICE_QA NOT_RUN. Preserve AL-R0-DEPLOY-001 and frozen SRS v1.1.15; no merge, signing, production deploy or customer data.
+
+## R228 — Fail closed on invalid tenant service metadata (2026-11-21 VN)
+
+- Stacked on R227 PR #271. The System Admin tenant-service list previously converted malformed tenant/plan/status/expiry values to null or passed arbitrary status strings through to the UI. Added strict metadata validation and a hard 100-row result cap, preserving four-field output allowlist; rejects malformed rows rather than silently presenting false administrative state.
+- Added five synthetic Node regression cases and focused CI workflow. Test rounds: 1/5 (CI HEAD pending), fix rounds: 0/5. This is a security/correctness boundary improvement, **not** live Worker integration or D1 rollback evidence.
+- Platform Admin PARTIAL; signed-in Worker mounting, D1 migration, transactional audit guarantee and OWNER_REAL_DEVICE_QA remain BLOCKED/NOT_RUN. Preserve active task AL-R0-DEPLOY-001, frozen SRS v1.1.15 and all F01–F36; no signing, merge, production deploy or customer data.
+
+## R227 — Repair stale R217 plan fixture after R226 validation (2026-11-21 VN)
+
+- R226 final HEAD `d4b3e544` CI: R226 plan contract SUCCESS, but R217 and R225 workflows FAILURE; both run R217 test suite. Found R217 synthetic `all()` fixture returned only `plan_id`, while R226 service now requires `plan_name`, `status`, `max_users`, `max_storage_bytes`. Updated synthetic fixture to valid metadata, preserving strict production validation rather than weakening it. This is a concrete CI blocker fix, not an app feature.
+- Test rounds: 1/5 (GitHub CI pending at new HEAD); fix rounds: 1/5. Platform Admin PARTIAL; Worker signed-in route, D1 migration, transactional audit guarantee and OWNER_REAL_DEVICE_QA still BLOCKED/NOT_RUN. Keep `AL-R0-DEPLOY-001`, SRS v1.1.15 frozen; no signing, merge, production deploy or customer data.
+
+## R225 — Audit receipt integrity for platform service transitions (2026-11-21 VN)
+
+- Stacked on R224 PR #268. Hardened `changeTenantService` to require exactly one audit insert when one service row is changed; missing/zero/duplicate audit result now fails closed instead of reporting success. Five synthetic Node cases and targeted CI workflow. This is a control-plane correctness/security fix, not live Worker integration. Test rounds 1/5 (authored, CI HEAD pending), fix rounds 1/5.
+- Known limitation: fail-closed response alone does not guarantee database rollback if D1 batch commits a zero-row audit insert; transactional audit enforcement and live D1 verification remain outstanding. Platform Admin PARTIAL; Worker session mounting, D1 migration and OWNER_REAL_DEVICE_QA NOT_RUN/BLOCKED. SRS v1.1.15 frozen; AL-R0-DEPLOY-001 preserved. No signing, merge, production deployment or customer data.
+
+## R224 — Platform Admin same-origin mutation gate (2026-11-21 VN)
+
+- Draft PR stacked on #267. dispatchPlatformAdmin now requires mutation Origin to match the Worker request origin and rejects null or cross-site Fetch Metadata, in addition to server session and CSRF checks. No reliance on client-supplied role/tenant/forwarded headers. GET unchanged. Five new synthetic Node tests and isolated CI workflow; test rounds 1/5 authored, fix rounds 1/5, CI at final HEAD pending. This is security hardening, not live Worker integration.
+- Platform Admin PARTIAL; Worker session provider not yet mounted, D1 migration and signed-in mobile/desktop/OWNER_REAL_DEVICE_QA NOT_RUN/BLOCKED. Preserve SRS v1.1.15 and AL-R0-DEPLOY-001; no merge or production deploy.
+
+## R223 — Trusted System Admin Worker session dispatcher (2026-11-21 VN)
+
+- Draft PR #267 stacked on #266. Added isolated `dispatchPlatformAdmin` bridge requiring trusted server-side resolveSession, verifyCsrf and newAuditId; fail closed for missing dependencies, unverified/Tenant Admin/impersonation and invalid CSRF. Unrelated routes are untouched. Five synthetic Node contracts and isolated workflow.
+- R222 final HEAD ecd1819 Actions 44887441650, 44887441657, 44887441633 all completed SUCCESS. R223 test rounds 1/5 (contracts authored, CI HEAD pending), fix rounds 0/5. Platform Admin PARTIAL; **not mounted** into Worker until its real session/CSRF provider is inspected and integrated. Live D1 migration, signed-in desktop/mobile E2E and OWNER_REAL_DEVICE_QA NOT_RUN/BLOCKED.
+- SRS v1.1.15 frozen; protected AL-R0-DEPLOY-001 unchanged. No signing, real customer data, merge or production deploy.
+
+## R222 — Platform Admin browser metadata boundary (2026-11-21 VN)
+
+- Draft PR #266 stacked on #265; browser GET plan/tenant-service responses now explicitly allowlist metadata fields, discard unexpected business/customer/credential fields, reject malformed shapes, unsafe quotas and >100 items rather than silently accepting them. Five new synthetic Node tests + isolated CI workflow. This hardens an isolated browser module; it does **not** grant System Admin access to tenant business data or prove the Worker route is mounted.
+- Test rounds 1/5 (contracts authored, CI HEAD pending), fix rounds 0/5. Platform Admin PARTIAL; live D1 migration, verified Worker session/CSRF integration, desktop/mobile signed-in E2E and OWNER_REAL_DEVICE_QA remain NOT_RUN/BLOCKED as previously. SRS v1.1.15 frozen; AL-R0-DEPLOY-001 protected; no signing, customer data, merge or production deploy.
+
+## R221 — Platform Admin browser API transport (2026-11-21 VN)
+
+- Draft PR #265 stacked on #264. Added actual browser transport module for R218 UI and R220 HTTP adapter with same-origin credentials, no-store, redirect rejection, trusted-host CSRF token injection, explicit request payload and fail-closed mutation receipt. Five new Node tests and isolated CI workflow. Not mounted until verified Worker session/CSRF; no live D1 migration, no mobile-device QA.
+- R220 final HEAD c10a69f Actions 44878004177 and 44878004211 completed SUCCESS. R221 final HEAD CI NOT_VERIFIED until latest Actions run checked. Test rounds 1/5 (new contracts authored, execution pending); fix rounds 0/5. Platform Admin PARTIAL; OWNER_REAL_DEVICE_QA NOT_RUN.
+- SRS v1.1.15 frozen, protected AL-R0-DEPLOY-001 unchanged, no signing, real customer data, merge or production deploy.
+
+## R220 — Platform Admin isolated HTTP adapter (2026-11-21 VN)
+
+- Draft PR stacked on #263: added metadata-only HTTP boundary for GET plans/services and PATCH service status. Requires server-injected verified System Admin principal, server-verified CSRF and server-generated audit ID. Explicit allowlisted responses, no-store, bounded JSON, no client-supplied audit ID, no business-data endpoints. Five Node tests and dedicated workflow.
+- **PARTIAL**: this adapter is deliberately not mounted in Worker until trusted session/CSRF integration is verified; no D1 migration, signed-in E2E or mobile device test. R219 final HEAD 1a740f3 Actions 44873609599, 44873609581, 44873609578 completed SUCCESS; R220 HEAD CI NOT_VERIFIED. R220 local test rounds 0/5 (CI pending), fix rounds 0/5.
+- SRS v1.1.15 frozen, protected AL-R0-DEPLOY-001, no signing, customer data, merge or production deploy.
+
+## R219 — System Admin bounded tenant-service list (2026-11-21 VN)
+
+- Draft PR #263 stacked on #262. Implemented missing `listTenantServices` for R218 mobile UI contract in R217 control-plane service. Requires verified System Admin principal, rejects Tenant Admin/impersonation, reads only four explicit service metadata columns, stable ordering and LIMIT 100; strips any unexpected fields from DB results. No customer matters/documents/clients or tokens.
+- Five new Node contract tests (test-first) and isolated CI. Test rounds 1/5, fix rounds 0/5; **R219 HEAD CI NOT_VERIFIED** until Actions logs inspected. R218 final code-head Actions 44869118914/44869118880 completed SUCCESS (isolated contracts, not real app E2E).
+- Platform Admin PARTIAL: HTTP Worker authenticated adapter, audit ID generation, live D1 migration, mobile mounting and OWNER_REAL_DEVICE_QA NOT_RUN. SRS v1.1.15 frozen, AL-R0-DEPLOY-001 preserved, no signing/merge/production/customer data.
+
+## R218 — Platform Admin mobile-first control-plane view (2026-11-21 VN)
+
+- Draft PR stacked on #261. Added DOM-safe responsive System Admin UI module with metadata-only injected API (plans, tenant service status, state transition), reason-code validation, revocation confirmation, stale-request/dispose guard, accessible status feedback, mobile 44px controls and empty/error/loading states. UI is **not yet mounted** in Worker; verified session/HTTP API and D1 migration still required. No tenant business data, impersonation or signing.
+- Five source contract tests and dedicated CI; local V8 source checks 16/16 PASS, Node CI final HEAD pending. Platform Admin PARTIAL; test rounds 1/5, fix rounds 0/5; OWNER_REAL_DEVICE_QA NOT_RUN. SRS v1.1.15 frozen; AL-R0-DEPLOY-001 unchanged. No merge/deploy/real customer data.
+
+## R217 — System Admin metadata-only service boundary (2026-11-21 VN)
+
+- Draft PR #261 stacked on #260: real D1-query service module for plan listing and Tenant service state transitions with audit batch, no tenant business data reads. Verified server-side principal required by contract; **not yet wired to Worker session/router**. Five Node contract tests and isolated CI workflow. Status PARTIAL.
+- R216 HEAD 6913b6f workflow runs 44858677177 and 44858677334 completed SUCCESS; R217 HEAD CI pending verification. Limit 1/5 local test rounds planned, 0/5 fix rounds; real-device QA OWNER_REAL_DEVICE_QA NOT_RUN. SRS v1.1.15 frozen, active_task AL-R0-DEPLOY-001 preserved; no signing, merge, deploy, real grants or customer data.
+
+## R216 — Platform admin foundation (2026-11-21 VN)
+
+- Draft PR #260 stacked on #259. Added isolated D1-compatible metadata-only service plan, tenant service and append-only audit schema, plus 5 synthetic SQLite tests and CI workflow. No Worker/API/UI or live D1 deployment; PARTIAL.
+- Owner priority: finish all 36 Fxx and System Admin, complete mobile, defer owner real-device QA; 5 local test / 5 fix rounds max per function. R126 BLOCKED/NOT_RUN, no signing, no customer data, no merge/production. Protected active_task AL-R0-DEPLOY-001 and SRS v1.1.15 unchanged.
+
+## R215 — F21 approval audit rollback regression (2026-11-21 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS change register, issue #156, PR #258 HEAD/base, open parallel PRs. R214 final-head Actions #44840627518 SUCCESS for eight synthetic SQLite tests only.
+- Draft PR #259 stacked on #258 adds three distinct synthetic SQLite tests: audit insertion failure aborts approval update without partial state, explicit transaction rollback restores pending_review and audit, and successful approval emits exactly one event. Added isolated CI workflow. **R215 final HEAD CI NOT_VERIFIED** until jobs/logs inspected.
+- F21 PARTIAL, D1 migration NOT_APPLIED, Worker session/qualified lawyer/Tenant/MatterACL and signed-in E2E NOT_RUN; R126 BLOCKED/NOT_RUN. Preserve frozen SRS v1.1.15, PCS revision140, AL-R0-DEPLOY-001. No signing, OAuth retry, customer data, merge or production deploy.
+
+## R214 — F21 legacy approved preservation regression (2026-11-21 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS change register, issue #156, PR #257 HEAD/base and open parallel PRs. R213 code HEAD b090bb74 workflow #44826047899 SUCCESS for seven isolated SQLite tests only.
+- Draft PR #258 stacked on #257 adds synthetic pre-migration R187 approved-output regression: preserve approved state/version/reviewer/time and approval audit event through R213 table rebuild, foreign_key_check and immutable approved row. Commit 35c4cdd; **R214 final HEAD CI NOT_VERIFIED** until jobs/logs complete.
+- F21 PARTIAL, migration NOT_APPLIED to D1, real Worker authorization/atomic audit and signed-in E2E NOT_RUN; R126 BLOCKED/NOT_RUN. Preserve frozen SRS v1.1.15, PCS revision140, AL-R0-DEPLOY-001. No signing, OAuth retries, customer data, merge or production deploy.
+
+## R213 — F21 QA pending_review schema migration (2026-11-21 VN)
+
+- Read four PCS files, issue #156, PR #256 HEAD/base, stacked PRs and R187 schema; checked R212 final-head Actions #44816019768 SUCCESS (synthetic tests only). R187 already includes audit insertion guard R190; R212 adds overlapping guard, not proof of live integration.
+- Draft PR #257 stacked on #256 adds isolated QA SQLite migration for draft → pending_review → approved with table rebuild, guard/audit trigger update, immutable approval, optimistic version and legacy row preservation. Seven synthetic tests and CI workflow added. **R213 final-head CI NOT_VERIFIED**; no D1 migration applied or live Worker adapter.
+- F21 PARTIAL; real verified session, qualified lawyer, active membership, MatterACL allow-minus-deny, assignment in same transaction, signed-in desktop/mobile E2E NOT_RUN. R126 BLOCKED/NOT_RUN. Frozen SRS v1.1.15, PCS revision140, protected AL-R0-DEPLOY-001; no signing, OAuth retries, customer data, merge or production deploy.
+
+## R212 — F21 audit insertion integrity guard (2026-11-21 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS register, issue #156, open stacked PRs including #255 and R187 schema; avoid changes to protected AL-R0-DEPLOY-001 and frozen SRS v1.1.15.
+- Test-first synthetic SQLite regression adds four cases for forged audit before approval, legitimate legacy atomic approval, mismatched version/actor and cross-tenant insertion. Additive QA migration adds BEFORE INSERT audit guard matching approved output state/version/reviewer/time; no migration applied to D1.
+- **CI NOT_VERIFIED** until R212 final HEAD workflow runs and logs checked. F21 PARTIAL: pending_review schema and trigger incompatibilities remain; verified session/qualified lawyer/MatterACL atomic approval and signed-in E2E NOT_RUN; R126 BLOCKED/NOT_RUN. No signing, OAuth retry, customer data, merge or production deploy.
+
+## R210 — F21 receipt accessor fail-closed (2026-11-20 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS register at #253 HEAD, issue #156, current PR #253 HEAD/base and open parallel PRs. R209 final HEAD 890d5b6 Actions #44749654051 completed SUCCESS (source-only).
+- Draft PR #254 stacked on #253: test-first commits 65a7cb4 and 6ef8bf1 add negative regression against getter-forged receipt flags; fix 3ee85e6 requires own data descriptors for changed/auditWritten without executing accessors; workflow ac4e64f. **R210 CI NOT_VERIFIED** until final-head workflow jobs/logs checked.
+- F21 PARTIAL. D1 pending_review schema mismatch, migration NOT_APPLIED, transactional ACL/qualification/assignment/audit and real signed-in E2E NOT_RUN; R126 BLOCKED/NOT_RUN. No live approval or release. Preserve SRS v1.1.15, PCS revision140, AL-R0-DEPLOY-001. No signing, customer data, OAuth retries, merge or production deploy.
+
+## R209 — F21 transition boundary NFC input guard (2026-11-20 VN)
+
+- Read four PCS files, issue #156, PR #252 HEAD/base, parallel PRs and R187 schema. Existing approval transition boundary lacked NFC validation even though R207/R208 lifecycle/context rejected non-NFC identities.
+- Draft PR #253 stacked on #252: test-first commit b349a11 adds two synthetic negative tests covering actor/tenant/output IDs before store reads; fix e5c68f6 enforces NFC at transition input boundary; CI workflow commit 19c1867. **Final HEAD CI NOT_VERIFIED** until GitHub Actions jobs/logs are checked. No claim of live E2E PASS.
+- F21 PARTIAL; R187 schema permits draft/approved only, pending_review integration remains BLOCKED; D1 migration NOT_APPLIED; atomic authorization/audit and signed-in E2E NOT_RUN; R126 BLOCKED/NOT_RUN. Preserve SRS v1.1.15, PCS revision140 and AL-R0-DEPLOY-001. No signing, customer data, OAuth retries, merge or production deploy.
+
+## R208 — F21 lifecycle Unicode identity parity (2026-11-20 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS register, PR #251 HEAD/base and CI, issue #156, open parallel PRs and PR #187. R207 final HEAD 2161e1b workflows #44692139855 and #44692140121 completed SUCCESS (source-only).
+- Found distinct mismatch: F21 authorization context rejects non-NFC identities, but F21 lifecycle nextReviewState still accepted canonically equivalent author/reviewer strings as distinct, allowing a self-review bypass if called without the context guard. Reproduced with Node using U+00E9 versus e + U+0301.
+- Draft PR #252 stacked on #251: test-first commit cfe4d525, fix 054b5d2 enforces NFC in lifecycle validId; no Worker/D1 integration. **R208 final-head CI NOT_VERIFIED** pending real run/log inspection.
+- F21 PARTIAL; pending_review schema mismatch, atomic server authorization/audit and signed-in E2E remain; D1 NOT_APPLIED, R126 BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140, AL-R0-DEPLOY-001 protected. No signing, customer data, OAuth retry, merge or production deploy.
+
+## R206 — F21 own accessor authorization regression (2026-11-20 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS change register, Draft PR #250 HEAD/base, issue #156 and parallel PRs. Verified prior R205 final HEAD f49b813 workflow #44678024727 SUCCESS (source-only).
+- Created Draft PR #251 stacked on #250: test-first commit 41aa32b checks own getter-supplied approval flags are rejected without invoking getter; fix 9b1600c reads only own data property descriptors and rejects accessors. No Worker/D1 integration or release path.
+- **R206 CI NOT_VERIFIED** until final-head workflow logs inspected. F21 PARTIAL; D1 migration NOT_APPLIED, pending_review/schema blocker and atomic server-side authorization/audit remain; R126 signed-in E2E BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, PCS revision 140 and AL-R0-DEPLOY-001 unchanged. No signing, customer data, OAuth retries, merge or production deployment.
+
+## R205 — F21 prototype-inherited authorization gates (2026-11-20 VN)
+
+- Re-read PCS STATE/MOMENT/scope/SRS register, Draft PR #250 HEAD/base, issue #156 and open parallel PRs. Verified R204 code HEAD c5d1f860: workflow #44671245510 SUCCESS; actual source-contract job #136072473279 shows 4/4 PASS. General workflow #44671245665 SUCCESS; these are source tests only.
+- Test-first regression commit d97e729b adds inherited-context negative cases; fix commit db111d98 requires all approval gate/identity fields to be own properties, rejecting prototype-inherited authorization flags. No changes to real Worker routes, schema or production migration. Existing Draft PR #250 retained, no merge.
+- **R205 final-head CI NOT_VERIFIED** until run/log inspected. F21 PARTIAL; pending_review D1 schema mismatch, atomic adapter/audit and signed-in E2E NOT_RUN; D1 NOT_APPLIED, R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, PCS revision 140 and protected AL-R0-DEPLOY-001 unchanged. No signing, customer data, OAuth retries or production deployment.
+
+## R204 — F21 fail-closed approval authorization context (2026-11-20 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS change register, PR #249 HEAD/base and CI, issue #156 and parallel PRs. R203 final HEAD 33403799 workflows #44657669640 and #44657669645 completed SUCCESS; this proves source CI only.
+- Created Draft PR #250 stacked on #249: source-only `mayApproveMatterOutput` requires verified active session, matching Tenant/Matter, active membership, qualified lawyer, active reviewer assignment, MatterACL explicit allow and no deny, explicit System Admin exclusion, canonical distinct reviewer/author. Four synthetic positive/negative Node tests and dedicated CI. Inputs MUST come from server-side verification, never request body.
+- **CI R204 NOT_VERIFIED** at this update (no workflow runs yet on code HEAD 81804411). No D1 integration, live ACL/transaction, audit, browser E2E or issuance. F21 PARTIAL, D1 NOT_APPLIED, R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen; PCS revision 140 and AL-R0-DEPLOY-001 unchanged; no signing, customer data, OAuth retry, merge or production deployment.
+
+## R203 — Fix R202 CI fixture escape (2026-11-20 VN)
+
+- Inspected PR #249 HEAD/base, PCS STATE/MOMENT/scope/SRS change register, issue #156 and parallel PRs. Real workflow #44650958810 FAILED (contract 4/5; job #136005409442) while general CI #44650958778 SUCCESS with private QA jobs SKIPPED.
+- Root cause: negative-test fixtures used double-escaped `\\n` and `\\u200b`/`\\u202e`/`\\u007f`, yielding literal backslash text rather than control/format characters. Fixed test literals on existing Draft PR #249 at commit `14adc549c57de7d622369c508f5560ceb4e592a3` without weakening production guard; re-run/final-head CI must be checked. Test-first intent retained, FAIL recorded honestly.
+- F21 PARTIAL, D1 NOT_APPLIED, R126 BLOCKED/NOT_RUN. SRS v1.1.15 frozen; PCS revision 140 and AL-R0-DEPLOY-001 unchanged; no signing, customer data, merge, OAuth retries or production deployment.
+
+## R202 — F21 canonical reviewer identity guard (2026-11-20 VN)
+
+- Read current PCS STATE/MOMENT/scope/SRS register, Draft PR #248 HEAD/base, issue #156 and parallel stacked PRs. R201 workflow #44643064695 completed SUCCESS (contract job); this proves only source tests.
+- Test-first Draft PR #249 stacked on #248: reject noncanonical reviewer/author IDs (whitespace, controls, Unicode format chars, >128), reject reviewer identity on draft submission, retain valid pending_review → approved and version checks. New source/test changes, no Worker/D1 wiring.
+- **CI R202 NOT_VERIFIED** pending final-head GitHub Actions run/log; no PASS claim for new tests. F21 PARTIAL; R187 QA schema still draft/approved, D1 NOT_APPLIED, atomic session/Tenant/MatterACL/qualified lawyer/assignment/audit and signed-in E2E NOT_RUN. R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen; PCS revision 140 and AL-R0-DEPLOY-001 unchanged. No signing, customer data, OAuth retries, merge or production deploy.
+
+## R201 — F21 explicit review lifecycle source contract (2026-11-20 VN)
+
+- Read latest PCS STATE/MOMENT/scope/SRS register, PR #247 HEAD/base, open stacked PRs and issue #156 before changes. Created Draft PR #248 stacked on #247, source-only three-state helper draft → pending_review → approved with optimistic version boundaries, rejection of draft direct approval/backwards/self-approval and synthetic Node tests plus no-secret CI.
+- **CI NOT_VERIFIED** until actual run/log checked. The helper is not wired into Worker/D1; existing R187 schema still allows only draft/approved. F21 PARTIAL; migration NOT_APPLIED; verified session, Tenant/MatterACL, lawyer qualification, assignment, atomic audit adapter, signed-in desktop/mobile E2E NOT_RUN. R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen; PCS revision 140 and protected AL-R0-DEPLOY-001 unchanged. No signing, customer data, OAuth retries, merge or production deploy.
+
+## R199 — F21 persisted version bound (2026-11-19 VN)
+
+- Read PCS STATE/MOMENT/scope/SRS changes, PR #246 HEAD/base, issue #156 and parallel open PRs before editing. Draft PR #247 stacked on #246; distinct test-first source guard fixes `outputVersion=0` previously accepted by source transition despite R187 QA SQLite requiring `version>=1`.
+- New `r199_f21_version_bound_gpt.test.py` checks positive version contract; source `f21_approval_transition_gpt.mjs` now rejects version <1. No-secret workflow added. **CI NOT_VERIFIED** pending actual run/log inspection; no claim of functional approval.
+- **F21 PARTIAL**: `pending_review` vs QA `draft/approved` unresolved, D1 migration NOT_APPLIED, atomic authorization/MatterACL/qualified lawyer/audit adapter and browser E2E NOT_RUN. R126 BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140, protected `AL-R0-DEPLOY-001` unchanged; no signing, OAuth retry, customer data, merge or production deployment.
+
+## R197 — Verify R195 final-head state-contract CI (2026-11-19 VN)
+
+- Verified PR #246 HEAD `c258bc1536923bd1c037d40f64d26deaa2e43e54`, base PR #245 HEAD `217392ee81738bd43cae2525e68965d20e233a89`. GitHub Actions #44455067545 completed SUCCESS; inspected raw job #135327997950, checkout PR merge `c0f5c68dfe314d0cb4ada2d0ee0b7ae567c4eb09`: **2/2 synthetic state-contract tests PASS**, `Ran 2 tests in 0.010s`, exit 0. This proves the mismatch is reproducible, **not** that it has been resolved.
+- Confirmed concrete blocker: source-only F21 transition expects `pending_review` while QA schema permits `draft`/`approved`; do not silently alias or mark F21 DONE. D1 migration NOT_APPLIED, real atomic adapter, session, Tenant/MatterACL, qualified lawyer, API/UI and signed-in E2E NOT_RUN/BLOCKED; R126 BLOCKED/NOT_RUN.
+- No schema/API/UI change, customer data, signing, OAuth retry, merge or production deployment. SRS v1.1.15 frozen; PCS revision 140 and protected `AL-R0-DEPLOY-001` unchanged. CI on this documentation commit must be checked separately.
+
+## R196 — Fix R195 CI zero-test discovery failure (2026-11-19 VN)
+
+- Read real GitHub Actions run #44448991129, job #135307995317: FAILED exit 5, `Ran 0 tests / NO TESTS RAN`. Root cause: Python unittest discovery could not import dotted filename `r195_f21_state_contract_gpt.test.py`.
+- Fixed CI invocation to execute test script directly in commit `f162b1b`; new HEAD CI NOT_VERIFIED until workflow finishes and logs inspected. Issue #156 comment 6999233822. No schema, API, UI, migration or production changes.
+- F21 PARTIAL; pending_review vs persisted draft/approved blocker unresolved; R126 BLOCKED/NOT_RUN. Preserve SRS v1.1.15, PCS revision 140, protected `AL-R0-DEPLOY-001`, 36 Fxx target excluding signing. No customer data, OAuth retry, merge or deploy.
+
+## R195 — F21 state compatibility blocker reproduced in test source (2026-11-19 VN)
+
+- Draft PR #246 stacked on #245; test-first commit 7d57da0 adds two synthetic regression cases and commit 3c7ff00 wires no-secret CI. The existing source-only F21 transition requests `expectedStatus:'pending_review'`, but R187 QA persistence schema allows only `draft`/`approved`. Directly persisting pending_review is rejected by schema CHECK; draft is not equivalent to review-ready.
+- This is a **specific D1 adapter integration blocker**, not evidence that F21 approval works. Resolve via SRS-traced state model and atomic D1 authorization/transition/audit, including verified session, Tenant/MatterACL allow-minus-deny, qualified lawyer and assignment; do not silently alias states. R195 CI **NOT_VERIFIED** at commit time, no migration applied and no signed-in E2E. F21 PARTIAL; R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, PCS revision 140, protected AL-R0-DEPLOY-001 standalone-first and F01–F36 excluding signing unchanged. No customer data, OAuth retries, merge or production deployment.
+
+## R194 — Verify R193 actual CI (2026-11-19 VN)
+
+- Verified GitHub Actions run #44433660707 job #135257025026 completed SUCCESS; inspected raw job logs. R187–R189 8/8 PASS, R190 2/2 PASS, R193 approved-delete with foreign_keys=OFF and draft cleanup 2/2 PASS: total **12/12 synthetic SQLite tests PASS**. This evidence applies to this workflow execution, not a live D1 transaction or necessarily the final documentation HEAD.
+- F21 remains PARTIAL; QA D1 migration NOT_APPLIED, verified session, Tenant/MatterACL, qualified lawyer, atomic approval adapter, API/UI and signed-in E2E NOT_RUN/BLOCKED. R126 remains BLOCKED/NOT_RUN. Next distinct code slice must integrate a fail-closed D1 adapter with same-transaction authorization and audit, rather than another isolated trigger.
+- SRS v1.1.15 frozen, PCS revision 140 and AL-R0-DEPLOY-001 preserved; all F01–F36 except signing remain target. No OAuth retries, customer data, merge or production deploy.
+
+## R193 — F21 approved output deletion guard (2026-11-19 VN)
+
+- Draft PR #245 stacked on #244. Test-first commit 622ce40 adds two synthetic SQLite cases: approved output must not be deletable when foreign_keys=OFF (protect audit linkage), while draft cleanup remains permitted. Fix f950d2c adds BEFORE DELETE guard independent of connection PRAGMA; workflow registration 7cf5def.
+- This is a QA schema safety slice, **not** a deployed D1 migration or real transactional adapter. CI at final HEAD **NOT_VERIFIED** until run and raw logs inspected. F21 PARTIAL: verified session, Tenant/MatterACL allow-minus-deny, qualified lawyer, atomic D1 adapter, API/UI and signed-in E2E remain NOT_RUN. R126 BLOCKED/NOT_RUN.
+- PCS revision 140 and protected `AL-R0-DEPLOY-001` unchanged; SRS v1.1.15 frozen, F01–F36 target excluding all signing. No OAuth retries, real customer data, merge or production deploy.
+
+## R192 — Verify R191 F21 CI evidence (2026-11-19 VN)
+
+- Verified final PR #244 HEAD `7c7e3d31f3b032e385bad89a2bc1c7f53b5dfc9b`: GitHub Actions `F21 QA approval schema contracts` run #44417092314 completed SUCCESS, job #135200113135 SUCCESS. Inspected raw job logs: R187-R189 **8/8 PASS** and R190 **2/2 PASS**, total **10/10 synthetic SQLite schema tests PASS**. The checkout used PR merge ref `c22456080b0d8dc4a8d32c2c5b46fdaa3e8dc520`; DOCX POC run #44417092299 also SUCCESS. No skipped synthetic F21 cases in this job.
+- Evidence is limited to synthetic SQLite migration invariants; **D1 migration NOT_APPLIED**, live D1 adapter, verified session/Tenant/MatterACL, qualified lawyer, API/UI and signed-in browser E2E remain NOT_RUN/BLOCKED. F21 PARTIAL; R126 BLOCKED/NOT_RUN. No Fxx marked DONE and no Owner acceptance.
+- Preserve PCS revision 140, frozen SRS v1.1.15, `AL-R0-DEPLOY-001` standalone-first and F01-F36 excluding signing. No OAuth retry, customer data, merge or production deploy.
+
+## R191 — F21 synthetic approval schema tests wired into CI (2026-11-19 VN)
+
+- Draft PR #244 stacked on #243, commit cc4314d: added a no-secret, path-scoped GitHub Actions workflow running synthetic SQLite tests R187–R190 on PR changes. Prior tests were authored but not registered in CI; this addresses the specific execution-evidence gap rather than repeating an unverified PASS claim.
+- At creation, final HEAD CI NOT_VERIFIED (no workflow runs returned for cc4314d). No migration applied, no live D1/session/Tenant/MatterACL/lawyer qualification/API/UI or signed-in browser E2E. F21 PARTIAL; R126 BLOCKED/NOT_RUN.
+- Preserve PCS revision 140, SRS v1.1.15 frozen, protected AL-R0-DEPLOY-001 standalone-first, F01–F36 excluding signing. No OAuth retry, customer data, merge or production deployment.
+
+## R190 — F21 approval event INSERT consistency guard (2026-11-19 VN)
+
+- Test-first commit `c420518`: two synthetic SQLite negative regressions for forged audit INSERT against a draft and forged version/actor after legitimate approval.
+- Fix commit `28155a1`: BEFORE INSERT trigger on `qa_approval_events` requires matching persisted approved output, version, actor and timestamp; normal AFTER UPDATE audit insertion remains permitted. This closes the direct forged-event gap noted in issue #156 without enabling a production approval endpoint.
+- **Tests NOT_RUN, final-head CI NOT_VERIFIED** until execution/log inspection; migration NOT_APPLIED. R190 only protects QA metadata. Real D1 adapter with transactional session, lawyer qualification, Tenant/MatterACL allow-minus-deny, API/UI and signed-in E2E still missing. F21 PARTIAL; R126 BLOCKED/NOT_RUN.
+- Preserve PCS revision 140, SRS v1.1.15 frozen, `AL-R0-DEPLOY-001` standalone-first and F01–F36 excluding all signing. No OAuth retries, customer data, merge or production deployment.
+
+## R189 — F21 direct approved INSERT audit bypass (2026-11-19 VN)
+
+- Draft PR #242 stacked on #241. Test-first regression commit 8976bda adds two synthetic SQLite cases: pre-approved output INSERT must be rejected without audit, while draft INSERT remains allowed. Fix commit c6b9f30 adds a BEFORE INSERT trigger rejecting non-draft state; previously the audit trigger only ran on draft-to-approved UPDATE, permitting an approved row to appear without an approval event.
+- Local tests NOT_RUN (GitHub DNS unavailable in container); final HEAD CI NOT_VERIFIED; migration NOT_APPLIED. This is isolated QA schema protection, NOT a verified D1 adapter/session/MatterACL authorization transaction, qualified-lawyer approval, API/UI or real E2E. F21 PARTIAL; R126 BLOCKED/NOT_RUN.
+- Preserve PCS revision 140, SRS v1.1.15 frozen, AL-R0-DEPLOY-001 standalone-first, all F01–F36 excluding signing. No OAuth retries, customer data, merge or production deploy.
+
+## R188 — F21 persisted author/output identity guard (2026-11-19 VN)
+
+- Draft PR #241 stacked on #240. Test-first negative regression commit 2e750c3 demonstrates intended invariant: draft author_id and output_id must not be rewritten before approval. Fix commit 6f2a474 adds SQLite trigger preventing persisted author, installation/Tenant/Matter/output identity and created_at rewrites. Prevents reattribution bypass of author/reviewer separation in QA schema.
+- New tests 2 cases; local execution NOT_RUN and final HEAD CI NOT_VERIFIED. Migration NOT_APPLIED. This is not the D1 adapter, session/MatterACL transactional recheck, qualified lawyer check, API/UI or real E2E. F21 PARTIAL; R126 BLOCKED/NOT_RUN.
+- Preserve SRS v1.1.15 frozen, PCS revision 140, AL-R0-DEPLOY-001 standalone-first, F01–F36 excluding signing. No customer data, OAuth retry, merge or production deploy.
+
+## R187 — F21 isolated QA approval persistence schema (2026-11-19 VN)
+
+- Draft PR #240 stacked on #239, commits 574b031 and ddfc2e6: added isolated QA D1/SQLite tables for F21 output revision, reviewer assignment and immutable approval audit; trigger makes state update and audit insert one SQLite statement. Four synthetic SQLite positive/negative tests authored (local equivalent PASS 4/4); GitHub CI at final HEAD NOT_VERIFIED and test not yet registered in CI. Migration NOT_APPLIED.
+- **PARTIAL**: schema is not a real approval adapter; qualified lawyer, session, Tenant/MatterACL allow-minus-deny and authorization recheck in the same transaction, API/UI and actual signed-in E2E are NOT_RUN. Do not treat SQLite triggers as complete authorization. R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen; PCS revision 140 and protected AL-R0-DEPLOY-001 standalone-first unchanged; F01–F36 target with signing excluded. No OAuth retry, customer data, merge or production deployment.
+
 # Mihy Law AI Agent — PCS Chat Solo MOMENT
 
+## R276 — Repair R275 failing CI fixture (2026-11-23 VN)
+
+- Exact R275 HEAD `e95f7c0428f6f43a26bfb5f3ad704ab3f6340a92`: five workflow runs; R275 response allowlist FAILED (`45190224131`), four other runs SUCCESS. Root cause: R275 synthetic GET fixture omitted `batch()`, but `requireDb()` correctly requires both `prepare()` and `batch()` before any read. Its valid GET cases therefore received 503 instead of 200. Fixed fixture to expose a `batch()` that throws if a read unexpectedly mutates DB; production authorization and D1 service code unchanged.
+- Read PCS STATE and MOMENT on #317 HEAD; `state.current.active_task=AL-R0-DEPLOY-001`. Required `pcs/mihy_scope_gpt_v1.json` and `pcs/srs_changed_gpt_v1.md` returned 404 on this branch: cannot claim these were reviewed; source-location blocker remains OPEN. Issue #156 reviewed. PR #317 draft stacked on #316; do not overwrite #187.
+- Test/fix iteration 1/5 each for this CI regression. Local test NOT_RUN; exact new HEAD CI NOT_VERIFIED until GitHub reports. Platform Admin PARTIAL; OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen, F01–F36 unchanged; no signing, merge, production deploy or customer data.
+
+
+## R180 — F21 adapter receipt attestation ownership (2026-11-18 VN)
+
+- Test-first `1f2119a`: added negative regression requiring CAS `changed` and audit `auditWritten` attestations to be own properties of the adapter receipt, not inherited from a prototype. Prior code accepted inherited true flags; synthetic test designed to fail before fix.
+- Fix `a20c543`: approval transition now rejects inherited receipt flags and returns `CONFLICT_OR_AUDIT_FAILURE` rather than `APPROVED`. This hardens an adapter trust boundary, **not** a real D1 atomic CAS/audit implementation.
+- CI at final HEAD **NOT_VERIFIED** pending GitHub Actions. F21 PARTIAL; R126 BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140, protected AL-R0-DEPLOY-001 standalone-first; F01–F36 target, signing excluded. No OAuth retries, customer data, merge or production deployment.
+
+
+## R179 — F21 persisted output CAS fields fail closed (2026-11-18 VN)
+
+- Test-first `6cbbfca`: synthetic adapter context inheriting `outputId` or `outputVersion` must be DENIED without CAS/audit write.
+- Fix `3ba1aa2`: require own persisted output identity and CAS version before approval transition. This is an input trust-boundary fix only, NOT a D1 adapter.
+- F21 PARTIAL (D1 atomic CAS/audit, API/UI and human E2E absent); R126 BLOCKED/NOT_RUN. CI at final HEAD NOT_VERIFIED pending run. SRS v1.1.15 frozen; PCS revision 140 and AL-R0-DEPLOY-001 standalone-first unchanged; F01–F36 target, signing excluded. No OAuth retry, real customer data, merge or production deploy.
+
+## R178 — F21 inherited transport identity fail-closed (2026-11-18 VN)
+
+- Test-first regression commit `3a56fc4`: synthetic session or input with identifiers inherited from a prototype must be DENIED before any adapter read or CAS/audit write.
+- Fix commit `3ecc2ea`: approval transition requires own actorId/tenantId on session and own outputId on input. This hardens a transport trust boundary; it does not create a verified session or D1 transaction.
+- F21 PARTIAL: real D1 CAS+audit, API/UI and lawyer E2E not implemented. R126 BLOCKED/NOT_RUN. CI for final HEAD pending independent verification. SRS v1.1.15 frozen; PCS revision 140, AL-R0-DEPLOY-001 standalone-first unchanged. No signing, OAuth retries, customer data, merge or production deploy.
+
+
+## R177 — F21 inherited approval context fail-closed (2026-11-18 VN)
+
+- Test-first regression commit `1e87909a`: a synthetic adapter context inheriting all approval identities and policy flags from its prototype must be `DENIED`, with zero CAS/audit writes. The pre-fix guard accepted inherited properties; this is a security boundary hardening, not a D1 adapter implementation.
+- Fix commit `198feebe`: `canApproveMatterOutput` requires own properties for all persisted identity, scope and approval policy fields before evaluation. CI run #44153307141 queued at first inspection; **final HEAD CI NOT_VERIFIED**. No live D1/human E2E PASS claimed.
+- F21 PARTIAL (transactional D1 CAS/audit adapter/API/UI still absent); R126 BLOCKED/NOT_RUN. PCS revision 140 and protected `AL-R0-DEPLOY-001` unchanged. SRS v1.1.15 frozen; standalone-first, F01–F36 target, signing excluded; no OAuth retry, customer data, merge or production deployment.
+
+## R176 — F21 top-level accessor fail-closed (2026-11-17 VN)
+
+- Test-first: added R176 negative regression to registered R169 Cloudflare contract suite. A hostile top-level argument Proxy throwing on `store`, `session`, or `input` must yield `DENIED` with zero adapter reads/writes. Test commit `6addb77c`.
+- Fixed approval entrypoint by moving argument destructuring inside `try` (commit `c3c100f`), so hostile property access cannot escape as rejected Promise before fail-closed handling. **CI at final HEAD NOT_VERIFIED** pending Actions; no production/human E2E PASS claimed.
+- F21 PARTIAL: D1 transactional CAS+audit adapter/API/UI/human approval remain missing; R126 signed-in dual-account QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140 and `AL-R0-DEPLOY-001` protected; no signing, OAuth retry, customer data, merge or production deploy.
+
+
+## R175 — F21 malformed transport accessor fail-closed (2026-11-17 VN)
+
+- Test-first regression in registered R169 suite: synthetic throwing session/input accessors must return DENIED with zero DB reads/writes. Updated F21 transition preflight to catch accessor errors, distinguish preflight DENIED from transactional CONFLICT_OR_AUDIT_FAILURE. Commits 362c01c, b06a42a, f738e75, dc3e819, aba0c154; issue #156 comment 6941124018.
+- Final HEAD CI **NOT_VERIFIED**; no PASS claim. F21 remains PARTIAL (no verified D1 atomic CAS+audit adapter/API/UI/human E2E), R126 Cloudflare dual-account QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140, protected AL-R0-DEPLOY-001 standalone-first. F01-F36 target, signing excluded. No customer data, OAuth retry, merge or production deploy.
+
+## R173 — F21 evidence reconciliation and D1 blocker (2026-11-15 VN)
+
+- Verified PR #239 HEAD `b5d06da71b7fc325c642392c76d97ef9e51fea0d` (base `feature/r168-f21-trusted-matter-id-gpt`), Actions #43706823693 completed SUCCESS: 9 executed jobs SUCCESS, 21 SKIPPED. This establishes CI contract checks only, **not** live D1 CAS/audit or human approval. Previous R172 NOT_VERIFIED is superseded **for that exact HEAD only**.
+- Examined F21 transition and guard: `loadVerifiedApprovalContext` / `approveWithAudit` remain abstract adapter calls. No trustworthy D1 approval-output/reviewer/audit table definitions located from repository code-search; do not invent a schema or report real transactional approval PASS. F21 PARTIAL; R126 signed-in dual-account QA BLOCKED/NOT_RUN.
+- No product code changed in this evidence-only reconciliation. Next engineering slice requires reading canonical D1 migrations and integrating a real atomic CAS+audit adapter with synthetic SQLite positive/negative tests; preserve MatterACL and separation-of-duties. SRS v1.1.15 frozen; PCS revision 140, protected `AL-R0-DEPLOY-001`, standalone-first and signing excluded. No merge/deploy/customer data.
+
+## R172 — F21 CAS version overflow guard (2026-11-15 VN)
+
+- Test-first negative regression on existing Draft PR #239: persisted outputVersion at `Number.MAX_SAFE_INTEGER` must be DENIED before any CAS/audit adapter write, because the successor is not a safe integer; also deny out-of-range, negative and fractional versions. Test commit `fa1545a2`, implementation commit `97efc35d`.
+- Narrow change only in F21 transition boundary. **CI at final HEAD NOT_VERIFIED** until Actions result is inspected; no claim of real D1 persistence or lawyer approval. F21 PARTIAL, R126 BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, PCS revision 140, `AL-R0-DEPLOY-001` protected, standalone-first, F01–F36 excluding all signing. No OAuth retry, customer data, merge or production deployment.
+
+
+## R171 — F21 invisible Unicode format identifier guard (2026-11-15 VN)
+
+- Test-first regression added to existing PR #239: persisted approval author/output-author IDs containing Unicode format controls (zero-width, bidi marks/overrides/isolates, BOM) must be DENIED with zero CAS/audit writes. Commit `9aec25ee`.
+- Both F21 guard and transition identifier validators now reject Unicode `General_Category=Format (Cf)` in addition to existing C0/C1/line separators; commits `c1d428fc`, `7de7c46b`. Local Node v22 regex/representative-input smoke PASS; **GitHub final-HEAD CI NOT_VERIFIED** until checked. No D1 adapter, API, UI, lawyer E2E; F21 PARTIAL. R126 BLOCKED/NOT_RUN.
+- Preserve SRS v1.1.15 frozen, PCS revision 140, protected `AL-R0-DEPLOY-001`, standalone-first, all F01–F36 excluding signing; no production merge/deploy, customer data, or OAuth retry.
+
+
 - **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
-- **PCS revision:** `99` (source of truth `pcs/STATE.json`).
-- **Updated:** `2026-11-07T09:22:00.000Z`.
+- **PCS revision:** `140` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-14T04:03:00+07:00`.
 - **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
 - **SRS:** v1.1.15 remains private and unchanged.
 
 
+
+
+## R170 — F21 approval guard parser fix (2026-11-15 VN)
+
+- Discovered a concrete JavaScript syntax defect in `deployment/cloudflare/src/f21_approval_guard_gpt.mjs`: literal backslash-n tokens outside strings and doubly escaped Unicode control regex. This can prevent the module from loading and incorrectly validate control-bearing IDs.
+- Test-first regression added to existing R169 CI test `r169_f21_persisted_identity_gpt.test.mjs` (guard import, valid ID and control/Unicode rejection). Fixed guard parsing and regex on the **existing** Draft PR #239 branch; no duplicate PR. Commits `f271d8b7`, `568f11d0`, `daca17db`.
+- **CI final HEAD NOT_VERIFIED** until Actions finishes. F21 remains **PARTIAL**: no D1 CAS+atomic audit, API, UI or lawyer E2E. R126 signed-in Cloudflare QA remains **BLOCKED/NOT_RUN**. SRS v1.1.15 frozen; PCS revision 140; `AL-R0-DEPLOY-001` preserved. No signing, real customer data, merge or production deployment.
+
+## R169 — F21 persisted identity/scope validation (2026-11-15 VN)
+
+- [Draft PR #239](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/239) stacked on #238. Test-first `r169_f21_persisted_identity_gpt.test.mjs` rejects malformed persisted author, output, reviewer assignment and Tenant/Matter scope identifiers before any approval/audit write; Cloudflare contract CI registered. No client trust or real D1 adapter.
+- **F21 PARTIAL; human E2E NOT_RUN.** R126 dual-account Cloudflare QA BLOCKED/NOT_RUN. SRS v1.1.15 frozen, PCS revision 140, `AL-R0-DEPLOY-001` standalone-first preserved. No signing, customer data, merge or production deployment.
+
+## R168 — F21 reject unsafe persisted Matter identifiers (2026-11-15 VN)
+
+- [Draft PR #238](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/238) stacked on #237. Test-first negative regression `r168_f21_trusted_matter_id_gpt.test.mjs` rejects persisted Matter identifiers containing control/Unicode separator characters, surrounding whitespace, or >128 characters before any approval/audit adapter call. Transition now checks `validId(c.matterId)`; Cloudflare contract workflow registers test. No client-supplied Matter accepted.
+- R167 HEAD `e3040e8b` [Actions #43650671068](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43650671068) verified **9 SUCCESS / 21 SKIPPED**; R168 final HEAD CI pending verification.
+- **F21 PARTIAL; real QA NOT_RUN.** No real D1 adapter, atomic CAS+audit transaction, API, UI or lawyer approval. R126 signed-in Cloudflare two-account E2E BLOCKED/NOT_RUN. Preserve SRS v1.1.15, PCS revision 140 and `AL-R0-DEPLOY-001` standalone-first; no signing, real customer data, merge, production deploy or blind OAuth retry.
+
+## R167 — F21 persisted revision and Matter-scoped CAS boundary (2026-11-15 VN)
+
+- Stacked on Draft PR #236; test-first R167 synthetic regression requires server-loaded nonnegative safe integer `outputVersion` and forwards trusted `matterId` + `expectedVersion` to `approveWithAudit`, ignoring any client-supplied versions/Matter selector. Rejects missing, negative, fractional, unsafe or string revisions before write. Existing R164/R165 fixture updated and CI test registered.
+- **PARTIAL / real QA NOT_RUN:** no D1 implementation, atomic CAS+audit transaction, API, UI or real lawyer approval. Adapter must recheck Tenant/MatterACL, reviewer assignment, source and revision in the same DB transaction. Synthetic receipt is not durable proof. R126 signed-in Cloudflare two-account QA remains BLOCKED/NOT_RUN.
+- SRS v1.1.15 frozen, PCS revision 140, `AL-R0-DEPLOY-001` standalone-first protected, 36 Fxx targets excluding signing. No merge/deploy, real customer data, secret changes or OAuth retry. CI final HEAD pending verification.
+
+## R166 CI failure fix (2026-11-15 VN)
+
+- Verified [Actions #43635450380](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43635450380): **cloudflare-contract FAIL**, 8 other executing jobs SUCCESS, 21 SKIPPED. Inspected actual source: `validId` contained literal `\\n` between JS tokens and double-escaped Unicode regex sequences, breaking JavaScript parsing and control-character detection.
+- Fixed both defects in commit `90cc2c4d72f8f9833dbff164d3e56958988cfe28` on Draft PR #236. **Post-fix CI NOT_RUN/NOT_VERIFIED** at time of this note; do not claim PASS. F21 remains PARTIAL; no real DB transaction/API/audit/UI; R126 BLOCKED/NOT_RUN. PCS revision 140 and protected active task unchanged.
+
+## R166 — F21 reject control-bearing approval identifiers (2026-11-15 VN)
+
+- [Draft PR #236](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/236) stacked on #235. Test-first regression `9a64bc1` covers C0/C1, DEL and Unicode line separators in requested output ID and verified session actor/Tenant IDs; `81725d4` rejects before adapter read; `dfa2407` registers GitHub CI.
+- **F21 PARTIAL; R126 BLOCKED/NOT_RUN.** This is identifier validation only, not an actual D1 transaction, audit, endpoint, UI or lawyer approval. CI at final HEAD requires verification; do not claim PASS until completed. Preserve SRS v1.1.15, PCS revision 140, protected `AL-R0-DEPLOY-001`, standalone-first, all F01–F36 except signing. No merge, production deploy, customer data or blind OAuth retries.
+
+## R165 — F21 persisted output identity binding (2026-11-15 VN)
+
+- [Draft PR #235](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/235) stacked on #234. Test-first negative contract commit `a8bf0203` and guard fix `95238425`: approval must bind server-loaded `outputId` exactly to the requested output ID; absent or mismatched persisted identity denies before transition. This prevents a valid approval context for one output from authorizing a different output.
+- **F21 PARTIAL / real QA NOT_RUN:** no D1 adapter, transaction/audit persistence, endpoint, UI, or human lawyer acceptance. CI final HEAD must be verified independently. R126 signed-in Cloudflare two-account E2E BLOCKED/NOT_RUN. Preserve SRS v1.1.15, `AL-R0-DEPLOY-001` standalone-first, all 36 Fxx targets excluding signing. No merge, production deploy, real customer data, or blind OAuth retry.
+
+## R164 — F21 server-trusted approval transition boundary (2026-11-15 VN)
+
+- [Draft PR #234](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/234) stacked on #233. Test-first synthetic Node negative contract `8ca757f`, fail-closed transition module `7adb683`, CI registration `e57549a`. Reject caller-supplied policy flags, bind verified session actor/Tenant to trusted store context; require atomic compare-and-swap plus audit receipt from future DB adapter.
+- **F21 PARTIAL / QA NOT_RUN:** no actual store adapter, D1 atomic transaction, HTTP endpoint, UI, issuance, or human lawyer acceptance. CI new HEAD pending independent verification. Never count synthetic adapter receipts as real audit. R126 signed-in Cloudflare dual-account QA remains BLOCKED/NOT_RUN. SRS v1.1.15 frozen; `AL-R0-DEPLOY-001` standalone-first protected; 36 Fxx remain target without signing. No merge, production deploy, customer data, or OAuth retry.
+
+## R163 — F21 bind reviewer assignment to verified session actor (2026-11-14 VN)
+
+- [Draft PR #233](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/233) stacked on #232. Test-first negative contract for wrong/missing reviewer identity (fb27b813); guard requires trusted persisted assignment reviewer identity equal verified session actor (5d5c9de9). Updated earlier synthetic fixture (e66fd1b) and registered R163 Node test in CI (9df5d89). Assignment identity must be read from server-trusted record, never request input.
+- **F21 PARTIAL / real QA NOT_RUN**: no integrated API, D1, audit, UI, lawyer approval or issuance. CI final HEAD pending independent verification. R126 two-account signed-in E2E BLOCKED/NOT_RUN. Preserve SRS v1.1.15, standalone-first `AL-R0-DEPLOY-001`, 36 Fxx target without signing. No merge/deploy/customer data.
+
+## R162 — F21 reviewer assignment bound to Tenant/Matter (2026-11-14 VN)
+
+- [Draft PR #232](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/232) stacked on #231. Test-first: negative cases for assignment from another Tenant/Matter, missing or invalid assignment scope; guard now requires `reviewerAssignmentTenantId === tenantId` and `reviewerAssignmentMatterId === matterId` in addition to existing F21 independent qualified lawyer, output ownership and MatterACL controls. Assignment IDs must be loaded from server-trusted persisted assignment records; never trust request-supplied values.
+- **F21 PARTIAL / application QA NOT_RUN**: pure policy only, not API, D1, audit, reviewer workflow or actual lawyer approval. CI final HEAD to be verified independently. R126 signed-in Cloudflare two-account E2E BLOCKED/NOT_RUN. SRS v1.1.15 frozen; 36 Fxx target not accepted; no signing, customer data, OAuth retry, merge or production deploy. Preserve `AL-R0-DEPLOY-001` standalone-first.
+
+## R155 — F20 tìm tên tệp lưu theo MatterACL, không tìm nội dung (2026-11-13 VN)
+
+- **Implementation:** [Draft PR #225](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/225), stacked on #224. Existing `qa_file_links` / `qa_document_receipts` already link uploaded document receipts with a Matter. Added `GET /api/qa/documents?matter_id=UUID&q=text` to filter *filename metadata only*, after existing verified session, allowed role, Tenant and MatterACL read allow-minus-deny. Bounded parameterized SQLite `instr(lower(file_name),lower(?))` avoids SQL wildcard expansion; 2–80 chars, duplicate/control input rejected, at most 50 records and `has_more` for more matches. Without q, preserve existing list.
+- **UI:** QA documents screen now has explicitly labelled filename-only search, button / Enter; request cancellation, race filtering after query/Matter/Tenant changes, and reset query when switching Matters. HTML/text is not rendered from untrusted receipt names. Cached older HTML lacking new search controls leaves existing upload/download UI working (tested after first CI caught 25 previous UI fixture regressions). No Drive token required merely to search existing D1 receipt metadata and no new storage provider introduced.
+- **Actual test loop:** Initial [Actions #43375893398](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43375893398) cloudflare-contract **FAIL**: new UI required new HTML controls, causing 25 failures of legacy `r75_drive_connect_ui` fixture; fixed conditional fallbacks in `documents.js`, preserving old workflows. Subsequent [Actions #43376326061](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43376326061) Cloudflare contract **PASS**, 6/6 new SQL/ACL cases plus 4/4 browser source-script VM cases, legacy R75 PASS. Added fifth test for Matter change clearing filters; [Actions #43376705145](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43376705145) at code HEAD `11fbc296452f2ab041a4137b8c2a257946888baf` completed **SUCCESS 9/9 executing jobs** (21 optional skipped). Cloudflare contract **PASS: 6/6 new SQL/ACL tests, 5/5 real browser-script VM tests and old R75 regressions**. PCS rev138 is docs-only follow-up; confirm final-head CI separately rather than assuming PASS.
+- **Scope/gates:** F20 full SRS **NOT_DONE**. Metadata search is NOT OCR, AI fulltext legal case search, file content storage/indexing or an accepted workflow. Existing Google Drive upload/OAuth path remains blocked/unverified in live QA; no blind retries. R126 real signed-in dual-tenant Cloudflare E2E, actual PDF/DOCX read fidelity, lawyer approval and Owner acceptance NOT_RUN/BLOCKED. No data from real customers, signing, PR merge or production deploy; protected standalone-first `active_task=AL-R0-DEPLOY-001` unchanged.
+
+## R154 — F07 đọc nhiều PDF/DOCX QA (1–3 tệp) có kiểm soát (2026-11-13 VN)
+
+- **Code:** [Draft PR #224](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/224), stacked on #223 R153 F09 refusal consistency. File picker now selects **1–3 PDF/DOCX fictional samples, 1.5MB each**; no upload on selection. User must select authorized Matter and explicitly agree before pressing Read; files are converted *sequentially* via existing /api/qa/legal/extract with R150/151 ACL/session post-conversion rechecks; each file costs one existing daily AI QA quota. No new backend batch persistence.
+- **Fail closed/all-or-none review:** every file must return safe 30–5000-character plaintext; combined source A max 5000 characters. Invalid count/name/size/duplicate filenames rejected before requests; failures or limit overruns discard all partial conversions and never enable source approval. Stop before any unnecessary next conversion once combined size exceeds limit. Preview displays file labels only to humans; source A contains only ordered extracted paragraphs. Second user click loads source A and resets separate AI consent. Source not persisted; model does not auto-run.
+- **Safety:** workspace/Tenant, UC, Matter rotation and withdrawn fictitious consent suppress stale conversions, clear preview and unlock the read control; extracted text rendered as inert text. No customer data.
+- **Tests:** Existing actual source JS VM browser contract file `deployment/cloudflare/tests/r142_uc03_dom_gpt.test.mjs` contains **7 new R154 multi-file negative/positive tests**, including first-success/second-error, >3 files, duplicate names, overall size, halt third request, tenant switch, consent revoked mid-conversion. [Actions #43364173960](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43364173960) at code HEAD `4343af271e81d5f76e3d18de992b04bbb47fc27d` completed **SUCCESS 9/9 executing jobs** (21 optional skipped); cloudflare-contract logs confirmed **7/7 new R154 real source-JS VM** checks PASS and inherited backend auth/multipart regression. PCS rev136 documentation-only final-head CI needs separate verification. Source-only/unit/VM PASS is not real browser Cloudflare account QA.
+- **Still NOT_DONE:** F07 full SRS (stored multi-file intake, OCR scans, actual PDF/DOCX extraction accuracy, cross-tenant authenticated live QA, audit/versioning), F09 Matter-linked retrieval and all 36 Fxx. R126 two-account live E2E BLOCKED/NOT_RUN. All PRs remain Draft, no merge/deploy production or signing. PCS rev135 preserves protected standalone-first active_task=AL-R0-DEPLOY-001; Owner final acceptance only.
+
+## R152 — F09 hỏi đáp theo hồ sơ có trích dẫn nguồn và trả lời không đủ căn cứ (2026-11-13 VN)
+
+- **Source code:** [Draft PR #222](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/222) stacked on #221 R151 security. Added `qa_f09_answer_gpt.mjs` deterministic parser for `TRANG_THAI: CO_CAN_CU / KHONG_DU_CAN_CU`, tentative answer, verification question, and per-[A#] literal `TRICH` from original paragraph. Missing/duplicate/false/mismatched citations or inconsistent refusal flagged. Literal byte matches never verify legal correctness, claim relevance, current laws or absence of evidence.
+- **Browser/UI:** UC09 labelled F09 QA; source, question, model reply, verification question and exact citation vs original paragraph shown as inert text on mobile/desktop. Invalid or missing structured review blocks one-click copy. Tenant switch clears previous result. F07 review-only PDF/DOCX route now also accepts UC09 as a source after explicit read, preview and separate model consent, no automatic legal AI call.
+- **QA evidence:** Initial [Actions #43351051659](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43351051659) code-head SUCCESS 9/9 executed jobs including 6 helper, 3 API, 2 actual browser-source VM, 1 PDF converter tests (all fictional). Follow-up fixes: explicit valid refusal does not trigger generic "citation missing" false alarm; source-invalid F09 disables one-click copy. Latest source HEAD `14fd89e20e973c35904e84b06eba9a244ce2ee0c` [Actions #43351393652](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43351393652) **completed SUCCESS: 9/9 executing jobs PASS**, 21 optional skipped. Cloudflare-contract logs verified 6/6 helper, 3/3 synthetic authorized API, 2/2 JS VM and 1/1 PDF/DOCX review-only conversion tests. PCS rev134 docs-only final-HEAD CI needs separate verification; do not claim production/live signed-in E2E.
+- **Security lineage:** [PR #220](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/220) tests MatterACL expiration after extraction; [PR #221](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/221) revalidates revoked login session; source CI #43348613287 SUCCESS 9/9. All remain draft, unmerged. Real signed-in two-account Cloudflare R126 E2E remains BLOCKED; do not claim live deployment.
+- **Unmet SRS F09:** Matter-linked *stored* file indexing, official legal source/time validity, complete multi-file answers, lawyer final approval, audit, live client account E2E, Owner acceptance. The 36 Owner-directed F01–F36 except signing are NOT DONE. No customer data, no signing, no automatic production merge/deploy.
+
+## R149 — F07 đọc PDF/DOCX QA xem trước, có xác nhận trước khi dùng nguồn (2026-11-13 VN)
+
+- **Implementation:** [Draft PR #219](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/219), stacked on #218. Selective port (not merge) of prior [PR #187](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/187) document-preview endpoint into latest R148: new `/api/qa/legal/extract` POST, bounded multipart 1.5MB PDF/DOCX signatures, same-origin, authorized lawyer/tenant_admin, MatterACL before + after conversion, existing quota, `env.AI.toMarkdown` text only, no original file/text persistence. Allow F08 in addition to UC03/04/07. Worker/site relay routed.
+- **Manual-approval UI:** choosing file performs no HTTP transfer; pressing Read requires a Matter + fictional-data consent; conversion only produces a text preview without calling legal AI or populating source. A separate Use action fills source A and resets AI consent. Clear stale preview on tenant/UC/Matter rotation, no HTML interpretation. Responsive 1.5MB bounded file selection and scrollable text preview. No automatic legal review, upload persistence, or publish.
+- **Tests:** ported original synthetic multipart/ACL/quota/revocation test suite to `r149_doc_intake_gpt.test.mjs`, additional F08 preview case, browser-side source-script VM positive/negative delayed-tenant tests; CI updated. [Actions #43317844290](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43317844290) at code HEAD `0fd924d14dea524d07da1f532b3a64af97463ab6` completed SUCCESS **9/9 executed jobs**, 21 optional SKIPPED. Cloudflare contract logs confirmed 5/5 multipart API (including F08, ACL/quota/revoke) and 2/2 browser source-script VM cases PASS. PCS rev132 documentation-only final-head CI requires separate verification.
+- **Gates:** Actual Cloudflare provider `toMarkdown`, true PDF/DOCX visual fidelity, scan OCR, file history/search/persistence and two-account real login/MatterACL E2E (R126), lawyer audit/approval and Owner acceptance remain BLOCKED/NOT_RUN. No signing, customer files, automatic merge or production deploy. F07, F08 and all 36 full features NOT_DONE.
+
+## R148 — F08 trích xuất chủ thể, nghĩa vụ, số tiền và thời hạn (2026-11-13 VN)
+
+- **Implemented source-only QA vertical slice** in [Draft PR #218](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/218) stacked on #217. F08 is selectable in the existing authenticated Matter-bound AI QA form. The model is asked for per-[A#] `CHU_THE/NGHIA_VU/SO_TIEN/THOI_HAN` with literal source `TRICH` and exact `GIA_TRI`; server-side deterministic parsing/quote matching warns on fabricated amount, cross-paragraph source, duplicates, empty-claim conflicts, invalid/missing labels. Desktop/mobile renders inert source/quote/value and warnings; clears results on tenant switch; no original document modification or D1 source persistence.
+- **CI & evidence:** `deployment/cloudflare/tests/r148_f08_extraction_gpt.test.mjs` (six bounded unit tests), authorized synthetic HTTP/API tests appended to `r109_qa_legal_workflows.test.mjs`, real browser-script VM cases appended to `r142_uc03_dom_gpt.test.mjs`; CI job added. Read actual [PR #218 Actions](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/218/checks) and logs before claiming PASS. [Actions #43315989785](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43315989785) at code HEAD `736e33a263a71c26d2725f8b210e70f73e9feef2` completed SUCCESS: 9/9 executed jobs PASS, 21 optional skipped. Cloudflare contract log confirmed 6/6 helper, 2/2 authenticated synthetic API and 2/2 real source-JS VM F08 tests PASS. PCS revision 130 is documentation-only follow-up; final-head CI must be checked separately.
+- **Limits:** F08 full SRS function **NOT DONE**, 36 Fxx **NOT DONE**. Real PDF/DOCX/scan OCR, multi-file, persistent document model, actual tenant 2-account Cloudflare E2E (R126), lawyer approval and Owner acceptance NOT_RUN/BLOCKED. Literal match does NOT prove legal accuracy or data extraction completeness. No signing, OAuth retries, production merge/deploy, real customer data.
+- **Protected baseline:** `active_task=AL-R0-DEPLOY-001` preserved; F01–F36 catalog `NOT_ASSESSED` until full functional audit and acceptance.
+
+## R147 — Owner 36 chức năng F01–F36, loại trừ ký số (2026-11-13 VN)
+
+- **Owner directive:** “Làm đủ nhé, trừ ký số”. Original 3-page file `mihy_chucnang_gpt_v1.docx` (SHA-256 `2bc8d9f3774334807bba7b42de0a5aac65bf3b0446b8cd63603ae5e59c12d374`) explicitly identifies 36 **high-level proposed** features across A–G, 18 P0 / 16 P1 / 2 P2; **the file says it is NOT an SRS**. Scope is now recorded, not falsely declared implemented.
+- **Implementation in [Draft PR #217](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/217):** machine-readable `pcs/mihy_scope_gpt_v1.json` captures each F01–F36 title, group, priority and individual/office applicability; `pcs/srs_changed_gpt_v1.md` records authorized scope change while SRS v1.1.15 remains frozen. F31 retains email/calendar/Word/storage/external API but **EXCLUDES electronic/digital signatures, certificates and any signing flow**. F35 remains a future target; prior Drive/OneDrive/OAuth QA failures do not vanish.
+- **QA:** 6 real source-derived contract tests in `deployment/cloudflare/tests/r147_scope_gpt.test.mjs` added to Cloudflare contract Actions. [CI #43310316716](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43310316716) at code HEAD `065b007318780b042340694e6542e3730b6496c8` completed SUCCESS, **9/9 executing jobs PASS, 21 optional skipped**, including 6/6 scope regression tests read from Cloudflare-contract logs. This proves only the source-derived catalog and the explicit signing exclusion were registered, NOT that 36 functions were implemented. PCS rev128 follow-up needs final-head CI separately. Further documentation commits need independent final-HEAD CI; read actual jobs and logs. Scope test PASS does not imply any business Fxx is implemented.
+- **Gates:** all Fxx `implementation=NOT_ASSESSED`, `verification=NOT_RUN`, `acceptance=OWNER_PENDING`; SRS trace pending decomposition. Current source-only UC01–UC11 QA is not a substitute for 36 complete end-to-end workflows. R126 multi-account authenticated Cloudflare E2E BLOCKED, official legal sources, effective-date legal checks, real DOCX/PDF/OCR, lawyer approval workflow and Owner final acceptance still NOT_RUN.
+- **Governance:** preserve `state.current.active_task=AL-R0-DEPLOY-001` (standalone-first) and SaaS SysAdmin zero access to customer business data. Existing hourly automation is enabled; update it to the 36-feature owner directive without duplicate schedule. No signing. No merge/production deploy/customer data.
+
+## R146 — UC01 source-grounded clause drafting QA (2026-11-13 VN)
+
+- **Implementation:** [Draft PR #216](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/216), stacked on #215, adds synthetic source-to-draft links for UC01. AI is asked for literal [A#] source quote, suggested clause and a lawyer verification question. Deterministic diagnostics warn on missing/duplicate/incomplete/unknown labels, wrong-paragraph quote and numeric tokens added in a proposed clause that do not appear within its source paragraph. No source/draft is persisted. Quote match or unchanged numbers are not substantive legal verification.
+- **QA UI:** Desktop/mobile source, quoted evidence, draft clause and verification question review rows; inert textContent, clear on workspace change, missing structured API data is a warning. No original Word/PDF editing, no approval/execution.
+- **Tests:** Pure helper, existing authenticated synthetic API and real source-script browser VM negative tests added in CI. Code HEAD `4b86aa40b0f21f9f20e27b926182c5f4828ffb54` [Actions #43308352589](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43308352589) completed **SUCCESS: 9/9 actual jobs PASS**, 21 optional jobs SKIPPED. Read Cloudflare-contract logs: R146 5/5 helper, 2/2 authorized synthetic API, 2/2 browser JS VM PASS. This is NOT the signed-in live two-account Cloudflare E2E. Later PCS document-only HEAD CI is separate.
+- **Previous:** PR #215 UC02 final-head `a10b2bafa1a70114c7922a37ba306f0ed024d766` [Actions #43306969972](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43306969972) completed SUCCESS 9/9 executing jobs, 21 optional skipped.
+- **Still blocked:** R126 live signed-in Cloudflare two-account MatterACL/browser QA, official legal corpus, actual user PDF/DOCX, provider quality/approval, production and Owner acceptance NOT_RUN/BLOCKED. SRS v1.1.15 frozen, task `active_task=AL-R0-DEPLOY-001` protected. No merge/deploy and do not resume Drive/OneDrive/OAuth.
+
+## R145 — UC02 source-exact contract clause evidence QA (2026-11-13 VN)
+
+- **Implementation:** [Draft PR #215](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/215), stacked on #214, adds model-requested review of each source clause [A#] with an exact quote, provisional note and question for a human lawyer. A deterministic, tenant-scoped API output checks the quote against only that source paragraph and flags missing/duplicate/incomplete, unknown or wrong-paragraph quotations. This prevents falsely presenting an unrelated model quotation as a verified source, but cannot assess legal correctness of any observations.
+- **UI/tests:** Text-only source/quote/note/question cards under UC02 desktop+mobile, model text inserted with textContent and cleared on tenant rotation. New actual helper, authenticated API fake-data and browser-JS VM checks. [Actions #43306356358](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43306356358) at code HEAD `62d276671ee1707e9fabbdadad13b4dc10d50feb` completed **SUCCESS 9/9 executing jobs**, including actual 5/5 helper, 2/2 API and 2/2 source-JS VM UC02 tests; 21 optional jobs skipped. PCS-only HEAD revision 124 still needs separately confirmed CI. No real Cloudflare account E2E.
+- **Prior UC07 completed code/source CI:** [Actions #43305252972](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43305252972) on PR #214 last HEAD `c89e1bbec8fd6e5fd06cec33962f86c3e231f69a` completed **SUCCESS**, 9 executing jobs PASS; original regex and PCS protected-task regression were fixed. This is source-level QA, not real signed-in/real-legal-document acceptance.
+- **Gates:** SRS v1.1.15 frozen/private. R126 real signed-in multi-account Cloudflare/browser E2E BLOCKED/NOT_RUN; actual DOCX/PDF/Word fidelity, official legal corpus, provider quality and Owner final acceptance NOT_RUN. PRs remain draft, no merge or production deploy. Existing hourly task remains enabled; no duplicate.
+
+## R144 — UC07 paragraph-level grammar-review QA (2026-11-13 VN)
+
+- **Status:** [Draft PR #214](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/214), stacked on #213, adds per-[A#] source/proposed grammar reviews, unchanged/changed/missing/duplicate statuses, strict **per-paragraph** numeric comparison, safe source/proposal textContent rendering on desktop/mobile and workspace-switch clearing. Purely synthetic source-only AI QA; never modifies a DOCX or claims legal equivalence/approved redline.
+- **Verified at handoff:** Initial [Actions #43304512580](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43304512580) cloudflare-contract FAIL from double-backslash UI anchor regexp; test caught missing review row. Corrected source at commit `228b90f42b51acc3f610dc13cd0e47be6d6ad60b`. [Retest #43304706691](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43304706691) cloudflare-contract PASS; code-head overall CI must be separately checked. The subsequent PCS revision121 update changed the protected standalone-first `active_task` and the Python unit contract caught it in [Actions #43304950101](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43304950101) (FAIL). This was corrected in PCS revision122 (standalone-first task restored); do not mark final-head CI PASS until fetched.
+- **Autonomy:** Existing hourly task is enabled, not cancelled. Read branch/HEAD and PCS before each change; avoid overlapping [PR #187](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/187) PDF/DOCX intake until integration conflicts are reconciled.
+- **Still NOT_RUN/BLOCKED:** live multi-account signed-in Cloudflare QA (R126), actual DOCX/PDF source editing and approved Word Track Changes, provider quality, official legal source verification, final Owner E2E and production. All PRs remain Draft/unmerged.
+
+## R142 — UC03 source-to-translation bilingual QA review (2026-11-10)
+
+- **Scheduling history (not current status):** Owner first cancelled the hourly "Thực thi AI Law" task. On the subsequent explicit instruction **"Bật lịch tự động để bạn tự làm"**, Owner re-enabled it; the existing task was verified `is_enabled=true` with no duplicate. Do not cancel it based on the old R142 handoff.
+- **Implementation:** [Draft PR #213](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/213), stacked on #212, adds source-anchor-labelled UC03 translation request, a deterministic parser that pairs [A1]/[A2] to source segments and warns on missing, duplicate and unstructured output, and a safe text-only bilingual review UI (desktop side-by-side/mobile stacked). Clear review rows and old output on workspace switch. No DOCX/PDF visual fidelity, official legal verification or implicit approval.
+- **Evidence:** [Actions #42816413502](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42816413502) at code HEAD `115f03d81a67c34b0142c691ab674807acfe7c6e` completed **9/9 executing jobs PASS**, 21 optional jobs skipped. Specific real-source Node tests 4 helper PASS + 2 browser VM PASS + integrated authenticated synthetic API PASS. PCS revision 120 is a docs-only follow-up; final-head CI should be read separately.
+- **Gates:** Cloudflare real signed-in two-account remote QA remains BLOCKED/NOT_RUN, UC03 source rendering with real Word/PDF files/AI provider legal quality NOT_RUN, no customer data or OAuth/Drive/OneDrive. Neither PR #208 nor stacked #209–#213 has been merged or deployed production. SRS v1.1.15 unchanged. Owner acceptance pending.
+
+## R141 — UC04 explicitly uncited source-paragraph evidence (2026-11-10)
+
+- Draft [PR #212](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/212), stacked on #211; true source-only QA UC04 summary results now return `evidence_diagnostics.segment_coverage`: exact A paragraph count, number with citation IDs and list of IDs not cited. Source text is not returned in the coverage object or persisted. The UI shows the reviewer missing IDs and an explicit reminder that anchor mention is NOT proof of summary quality/completeness.
+- Pure helper and actual API synthetic tests verify partial/full citation coverage. Initial [CI #42813680633](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42813680633) FAIL due to a legacy expected-flags mismatch, corrected; [CI #42813941624](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42813941624) final code HEAD SUCCESS 9/9 executing jobs. Source SRS v1.1.15 unchanged.
+- Prior R140 [CI #42812986365](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42812986365) completed SUCCESS 9/9 jobs at documented branch HEAD, no QA/production deploy. Live private Cloudflare auth and real file E2E still BLOCKED/NOT_RUN; Owner final acceptance pending.
+
+## R139–R140 — 11 UC evidence guard and local TXT input (2026-11-10)
+
+- **Owner directive:** implement all eleven legal workflows under frozen private SRS v1.1.15; this is not a declaration of UC completion. Keep **P0 R0 UC03/UC04/UC07**, followed by R1 UC01/UC02/UC05/UC06/UC08/UC09/UC10/UC11. Existing source-only QA legal endpoint is not a full legal/research/document service.
+- **R139:** [Draft PR #210](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/210) adds server response `evidence_diagnostics` across all eleven UC codes, including missing source-anchor citation flags for analytical drafts, conservative number-preservation warnings for UC03/UC07, explicit UC10/UC11 local sample-only scope, and fail-closed max-token-truncated model output. UI uses textContent for all warnings and still requires independent legal review. [CI #42811334883](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42811334883) completed success 9/9 executing jobs. No user source or draft persistence; model citation ID checks do NOT verify factual correctness.
+- **R140:** [Draft PR #211](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/211), stacked on #210, adds TXT A/B selection on device, strict 30–5000 chars, <=20 KB, .txt, safe characters; no HTTP request at selection. Existing authorized Matter + explicit synthetic consent remain prerequisites for posting content. Generation invalidation prevents stale local reads from old tenant; switching UC06/UC08 to single-source clears B and avoids transmitting hidden source. Local real-source VM regression 4/4 PASS in [CI #42812630272](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42812630272); final [CI #42812986365](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42812986365) 9/9 executing jobs PASS.
+- **Required gates remain:** actual Cloudflare QA signed-in two-account HTTP/browser E2E (R126) BLOCKED; true PDF/DOCX/OCR source integration and user file QA, official legal corpus/time-valid citations, workflow-specific approval/audit/exports, production and Owner acceptance NOT_RUN. No storage/OAuth provider work or customer files. PRs are Draft stacked, do not merge/publish before gates.
+
+## R138 — 11 UC source-only QA privacy guard and direct menu selection (2026-11-10)
+
+- **Owner directive:** Complete all 11 legal UC01–UC11 strictly per private SRS v1.1.15. Existing R109 endpoint has eleven synthetic-text handlers and local sample-only UC10/UC11, but **this does not make any UC a completed SRS workflow**. Do not claim official legal corpus, Word/PDF fidelity, actual customer AI processing, or Owner acceptance.
+- **Implementation:** Draft [PR #209](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/209) is stacked on **Draft #208** rather than modifying R126 acceptance. `web/r0-preview/legal.js` now cancels and generation-guards in-flight legal model requests and tenant matter list fetches on workspace rotation or UC change, ignores stale 200/401 and delayed JSON, and clears private output immediately. `web/r0-preview/app.js` opens the selected UC directly from each of eleven mobile feature-menu choices.
+- **Regression:** `deployment/cloudflare/tests/r138_legal_tenant_gpt.test.mjs` runs actual legal.js with delayed/ignored-abort transport. Initial [Actions #42808425713](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42808425713) `cloudflare-contract` PASS; `unit` and `standalone-browser` FAIL due to real typo in edited app.js, where `$` (querySelectorAll) became `# Mihy Law AI Agent — PCS Chat Solo MOMENT
+
+- **Repository:** `ntdung-tds/Mihy-Law-Agent` (public).
+- **PCS revision:** `115` (source of truth `pcs/STATE.json`).
+- **Updated:** `2026-11-10T11:39:16.313Z`.
+- **Phase:** R0 REAL IMPLEMENTATION. D01 OWNER_APPROVED; the current standalone installation treats IAICT as one ordinary organization customer. IAICT-hosted SaaS is deferred by Owner. R31 static synthetic UI/PG fixtures do not satisfy role-based real customer login acceptance. Actual IdP-backed demo user accounts and TC12A/B app E2E NOT_RUN; production and customer data remain separately gated.
+- **SRS:** v1.1.15 remains private and unchanged.
+
+
+
+ (querySelector). Fixed with commit `ae516803fd051b79cff067beff57fe23dff58d9f` and must independently verify CI; prior failed job is not retroactively PASS.
+- **Final code & documentation CI readback:** [Actions #42809293021](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42809293021) at commit `2d08221f5427f1c9432c2c64ade4d312f193406d` completed **9/9 executing jobs SUCCESS**, 21 optional jobs SKIPPED. All four R138 source VM tests PASS, both prior unit and standalone-browser failures resolved. This rev116 PCS-only update still requires its own final HEAD CI verification; never conflate source CI with remote authenticated QA.\n- **Gates:** This is draft code not deployed QA/production; R126 live authenticated two-account Cloudflare QA remains BLOCKED, positive remote UC AI/tenant E2E and legal review NOT_RUN. No actual customer data, passwords, D1 writes, OAuth/Drive/OneDrive, SRS change or merge.
+- **Continuity:** Existing hourly `Thực thi AI Law` automation was updated by Owner request to prioritize completion of **all eleven SRS UCs** while maintaining privacy gates and leaving R126 BLOCKED without repetitive fake QA. Owner retains final signoff.
+
+## R120 — Final-head CI verification and QA connectivity (2026-11-09)
+
+- **Read-first:** `pcs/STATE.json` revision 102 and latest branch `pcs/MOMENT.md`; PR #157 OPEN draft, #158 CLOSED draft (do not restore), #159 OPEN draft, #198 OPEN draft.
+- **Final-head verification:** PR #198 commit `b218c8e8f3e080ad20a2d8545ac2c4128c9b64f6`, [Actions #42606137403](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42606137403) **PASS**: 9/9 executed jobs success, 21 optional live/deploy jobs skipped. `cloudflare-contract` job `129122511436` log directly confirms **11/11 synthetic SQLite MatterACL tests PASS**, including expired and foreign-tenant deny cases. This evidence covers the final HEAD before this documentation-only commit; CI for this new documentation commit remains **NOT_RUN** until checked separately.
+- **QA connectivity:** Direct HTTPS HEAD to `ai-law-web-qa.iaict-platform.workers.dev/app` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev/app` both **BLOCKED** by DNS `curl (6)` from this runtime. Authenticated API/D1/browser QA and 11-UC E2E **NOT_RUN**; no live PASS claim.
+- **Changes:** PCS evidence only, no product code change, no merge/deploy. Next independent task: test-first tenant/MatterACL source denial regression or verify QA from reachable environment. Keep only `/app#assistant`, no Drive/OneDrive/OAuth, no production, SRS v1.1.15 unchanged.
+
+## R119 — Scope of deny grants (2026-11-09)
+
+- **Test-first:** PR #198 (`b0a47ccd`) adds two synthetic SQLite cases executing the exported `LEGAL_MATTER_ACCESS_SQL`: expired deny must not override active allow; deny from another tenant must not override active allow. No product change.
+- **CI:** NOT_RUN at commit creation; verify the PR HEAD workflow and actual test count before marking PASS. Prior R118 CI #42583079116 PASS (9 jobs) applies only to prior commit.
+- **Verified CI 2026-11-09:** PR #198 branch HEAD `406df70511b8769ab9d52f811fc9f39f065f6dda`, [Actions #42597937720](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42597937720) completed SUCCESS; **9/9 executed jobs PASS**, remaining optional live/deploy jobs SKIPPED. `cloudflare-contract` job `129095065795` log explicitly runs `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v`: **11/11 SQLite SQL tests PASS**, including expired deny and foreign-tenant deny. This is synthetic SQL/CI only, not D1/API/browser QA or legal acceptance. This PCS documentation commit itself requires a separate final-HEAD CI verification.
+
+- **QA/E2E:** BLOCKED/NOT_RUN pending reachable live QA API/browser and safe synthetic D1 isolation checks. No merge/deploy; `/app#assistant` only, PR #158 remains closed. SRS v1.1.15 unchanged.
+
+## R126 — Stale tenant matter response privacy fix (2026-11-10)
+
+- **Read-first:** PR #208 was Draft at `1fbee9a3a8b1c89919c5382c500124b6baf2ce78`; PCS branch revision 113, main revision 99. The private signed-in Cloudflare QA gate remains BLOCKED (local DNS unavailable, no authenticated secret-backed GitHub runner), so do not pretend local SQL/browser fixtures count as remote login.
+- **Actual product defect fixed in-place:** In `web/r0-preview/matters.js`, a slow GET `/api/qa/matters` from tenant A could finish *after* `ai-law:workspace-switch` purged the old list, incorrectly repainting tenant A's private matter metadata while the new tenant was loading. The server ACL was not bypassed; this was a client-side stale-response leak. Added request-generation invalidation plus `AbortController`, guarded both HTTP response and delayed JSON parse, and ignored obsolete 401 redirects, with immediate list/recent/counters/feedback scrub.
+- **Real source regression:** Added `deployment/cloudflare/tests/r126_stale_tenant_dom_gpt.test.mjs` to always run in `cloudflare-contract`: four deterministic VM tests execute actual `matters.js` with simulated delayed network replies, including ignored-abort late 200, stale 401 after tenant switch, late JSON body, and current-session 401 redirect. All **4/4 PASS** in [Actions #42764184621](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42764184621) `cloudflare-contract`.
+- **Fix-test loop:** First CI source run [#42763873580](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42763873580) showed four new tests PASS but two older R60 VM tests FAIL, because the test sandbox lacked the real browser's `AbortController` global. Updated only `deployment/cloudflare/tests/session_ui_r60.test.mjs` VM context to provide Node's standard `AbortController`; both R60 cases now PASS, no product auth behavior downgraded. Do not silently classify the initial CI as PASS.
+- **Evidence:** `tests/evidence/AL-R126-E2E-gpt-v7.json` (versions v1–v6 retained); branch PCS revision 114. Connected nonproduction Cloudflare D1 read-only after run: **2 active R125 synthetic QA logins, 0 live sessions, AI quota 2 rows/4 cumulative requests; rows_written=0**. Change on draft PR #208 only. Final documentation HEAD CI must be checked separately.
+- **Acceptance boundary:** The frontend fix has **not been deployed to Cloudflare QA**. Signed-in Cloudflare QA two-account HTTP, remote browser E2E, actual model provider side effects, and Owner final signoff remain NOT_RUN/PENDING. No merge/production or QA deploy, no real customer data, OAuth/Drive/OneDrive or frozen SRS v1.1.15 scope change.
+
+## R126 — Chromium signed-in mobile/desktop browser on isolated Worker QA (2026-11-10)
+
+- **Owner direction:** Continue autonomously, no extra work package. Read PR #208 HEAD `6d790e6215bdf195f4168e9601783e8b9f0e3734`, PCS draft rev112 and main rev99. The only Cloudflare signed-in QA path remains BLOCKED by lack of an approved secret-backed reachable runner, so continue *other independent tests* without pretending a browser mock is remote production QA.
+- **Test implementation:** Added `deployment/cloudflare/tests/r126_browser_server_gpt.mjs` and `deployment/cloudflare/tests/r126_logged_in_local_browser_gpt.py` into existing #208. GitHub Actions job `r126-qa-public-browser` first runs the remote anonymous Chromium suite (18/18 PASS) and then launches a TLS-only `127.0.0.1` self-signed disposable Node 22 server hosting the **actual generated website Worker and actual API Worker with D1-compatible Node SQLite**. All synthetic QA principals, sample matter titles, passwords and model outputs are generated in isolated fixture; no Owner test password, client record or real model provider used. Source application code untouched.
+- **Real browser proof:** At source HEAD `dc5d7e209e82fa64ff7c1721fa2b8bf1495b6f8a`, [Actions #42762139802](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42762139802) job `r126-qa-public-browser` directly printed `R126_LOCAL_AUTH_CHROMIUM {status: PASS, checks:45, mobile:390x844, desktop:1440x900, website_and_backend:REAL_CODE, qa_database:DISPOSABLE_SQLITE, live_cloudflare_password_login:NOT_RUN}`. Chrome tested A mobile personal login, B desktop org admin login, actual rendered per-user matter lists, denied cross-user UC04, no quota/AI on deny, mobile workspace drawer select to organization, rotated SID and old session 401, allowed local UC10 for both with no AI/quota, desktop/mobile logout and session revocation. This is **45/45 local signed-in browser checks PASS**; separate remote Cloudflare *anonymous* browser checks remain 18/18 PASS.
+- **Debug loop:** Initial browser job failed at `A_mobile_switch_to_org`: Python Playwright `select_option(label=compiled_regular_expression)` TypeError in test harness, not app. Replaced with the actual option value selected from rendered dropdown; repeat `r126-qa-public-browser` job PASS. Earlier site Worker->backend Node SQLite integrated service-binding test also PASS.
+- **Evidence:** `tests/evidence/AL-R126-E2E-gpt-v6.json` (v1–v5 retained); PCS draft rev113; final HEAD CI for this documentation commit separately must be checked before full success claim. User-visible server/session credentials were never logged; self-signed local TLS key not saved in repo.
+- **Still outstanding:** Actual **Cloudflare QA** positive password login with the Owner's existing two R125 test accounts; remote signed-in mobile/desktop, real D1 quota after authorized requests, provider trace, full legal SRS acceptance and Owner final signoff NOT_RUN/BLOCKED. Do not equate local browser pass with live Cloudflare QA acceptance; no merge/QA or production deploy, no real client data, no SRS v1.1.15, Drive/OneDrive/OAuth scope change. Existing hourly task continues to pick up work without asking routine questions.
+
+## R126 — Website relay to backend SQLite integrated two-user QA (2026-11-10)
+
+- **Goal and scope:** Continue Owner-consolidated R126 inside Draft PR #208/issue #156 without new backlog, external customer data, OAuth/Drive or product changes. Read main PCS rev99 and latest draft branch rev111 before editing; PR #208 was draft at `a0ff150e9b37293a4779c9cb1d2434ad73ada195`. Private live password login was blocked by network+secret handling; independently exercise **actual site Worker and API Worker together with D1-compatible SQL** instead of repeating handler-only mocks. This is a disposable in-memory test, not deployed Cloudflare E2E.
+- **Implementation:** Added `deployment/cloudflare/tests/r126_site_to_d1_gpt.test.mjs` (Node 22 `node:sqlite`). It assembles 0001/0002/0003/R108/R109 SQL schema, two synthetic QA users, personal+shared tenants, three synthetic matters and explicit private MatterACL; builds actual website modules using the existing `node tools/build_cf_site.mjs`. The generated site Worker calls the *actual* backend Worker through simulated `QA_AUTH.fetch`, which executes real `mobile_auth`, `matter_workspace` and `qa_legal_workflows` against in-memory D1-compatible SQL. No real passwords, public network, QA D1 writes or model provider call.
+- **Verified path:** Anonymous /app redirects and API session rejects; two successful synthetic password logins via site Worker with distinct Strict/HttpOnly/Secure cookies; site private /app/app.js/account becomes available; source-defined default personal tenant for A; A switches to shared organization and again to personal, rotating SID and invalidating old cookie; matter lists for A and B show only own private matters, B `tenant_admin` cannot bypass ACL; reciprocal UC04 requests 404 without AI calls/quota change; authorized UC10 source-only search makes no AI call/charge; foreign-Origin request is stopped at website before backend fetch; authorized UC04 with a stub model creates **exactly one quota row** under correct B tenant/user; both logouts revoke protected access. Asserts the *actual exported* `MATTER_LIST_SQL`, `LEGAL_MATTER_ACCESS_SQL`, and `LEGAL_QUOTA_SQL` queries were executed.
+- **Test/debug loop:** Initial CI failed because `site_worker.mjs` imports generated HTML bundles not checked into source. Added existing site build step to `cloudflare-contract` and changed test to import generated website Worker. Corrected test expectation for source-defined tenant order (`personal` first). No product source defect established by these two initial test-harness failures.
+- **Proof:** Test commit `fd0442877b52ad9d07fabf1c6f4c8861ee379def`, [GitHub Actions #42759935247](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42759935247), `cloudflare-contract` job `129642984435`, direct log `ok 1 - R126 website relay -> backend real SQLite: two cookie users, tenant ACL, quota, logout` = **PASS**. Previous live unsigned public Chromium 18/18 PASS retained, but actual password-positive Cloudflare HTTP remains **NOT_RUN**. Latest evidence `tests/evidence/AL-R126-E2E-gpt-v5.json` preserves v1–v4; branch PCS rev112. Full documentation HEAD CI must be checked separately before reporting final 10/10.
+- **Acceptance boundary:** Still need real QA secure credential delivery to reachable runner, authenticated tenant/MatterACL/AI side-effect verification, logged-in mobile/desktop QA, accurate legal 11-UC acceptance and Owner signoff. **Do not turn integration CI PASS into live HTTP acceptance.** No merge, deploy QA/production, OAuth/storage or frozen SRS v1.1.15 edits; main PCS unchanged rev99.
+
+## R126 — Real public Chromium QA mobile/desktop gate (2026-11-10)
+
+- **In-place continuation of the Owner's merged R126 QA package:** Kept one draft PR [#208](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/208) and umbrella issue #156; no extra R127 task or PR, no merge or app deployment.
+- **ACTUAL live Cloudflare QA HTTP + Chromium:** Added `deployment/cloudflare/tests/r126_live_public_browser_gpt.py` and one branch-limited `r126-qa-public-browser` GitHub Actions job using Playwright 1.55 on Ubuntu, *no credentials*. At commit `2abc3e23f257f8401b85f06d05acbd8436642120`, [Actions #42749341971](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42749341971), job `129608986251` printed direct summary **`R126_PUBLIC_BROWSER PASS count=18`**: responsive public login with no horizontal overflow at 320/390/430/768/1440; password visibility toggle 390/1440; anonymous `/app#assistant` redirects to login at all 5 widths; unauthorized GET session/workspaces/matters/profile each returns 401; `/account` redirects 302; `/health` confirms nonproduction. This is REAL remote browser QA, not synthetic UI, but signed-out only.
+- **Real D1 read-only after browser test:** 2 R125 active QA logins, 0 active user sessions, quota unchanged **2 rows/4 cumulative requests**; `rows_written=0`, no client files or model calls. QA frontend/source deployment parity and legal semantics remain NOT_VERIFIED.
+- **Automation:** Existing hourly `Thực thi AI Law` automation updated (not duplicated) to continue SRS tasks autonomously without asking for routine decisions, read latest PCS/issue/PR, and preserve full PASS/FAIL/BLOCKED/NOT_RUN plus Owner final acceptance. This is a scheduled continuation, not a claim that future steps already executed.
+- **Evidence:** `tests/evidence/AL-R126-E2E-gpt-v4.json` (preserve versions 1–3), PCS branch revision 111. Full CI for final documentation HEAD must still be checked after this commit; do not conflate earlier source commit with final documentation commit.
+- **NOT_RUN / BLOCKED:** Real positive HTTP password login A/B and tenant switch, private matter authorizations with session cookies, Workers AI side-effect/accurate quota, logged-in mobile and desktop E2E and Owner acceptance. Blocker remains missing approved *network-accessible* private-secret QA runner (local runtime DNS fails, opt-in GitHub Actions secret gate SKIPPED). Do not bypass login or manually inject D1 sessions. Frozen SRS v1.1.15 unchanged; no product code, production/QA deployment, customer data or Drive/OneDrive/OAuth work.
+
+## R126 — Two-account real HTTP QA gate plus live D1 cross-user proof (2026-11-10)
+
+- **Owner-directed continuation in same consolidated R126 package (2026-11-10):** Added a secure alternative to the blocked GitHub Secrets setup: `MIHY_QA_R126_CREDENTIAL_FILE=/absolute/path/mihy_qa_gpt_v1.txt` permits the *same* R126 test runner on an authorized network-reachable QA computer. The file **must be 0600, regular, non-symlink, outside repository**, contain exactly QA-A/QA-B synthetic entries; mixed sources and unsafe permissions fail closed. No passwords, raw responses or cookies printed. Updated owner-private conversation file permissions to 0600 without changing its content. New offline tests for 0600 acceptance, 0644 denial, symlink rejection and source ambiguity: **10/10 R126 offline unit cases PASS**, GitHub unit job in [Actions #42747314595](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42747314595). This does not make the live private HTTP gate pass.
+- **Live read-only QA recheck:** Existing two R125 QA logins remain active; **0** current R125 sessions; AI quota **2 rows / 4 cumulative requests**; D1 query `rows_written=0`. Cloudflare Browser Rendering public login page at **390×844 mobile** exposes login/email/password/submit controls, but independent **1440×900 desktop** call returned Cloudflare Browser Rendering API **429**. These are public anonymous UI checks, not authenticated mobile/desktop E2E. Local runtime QA DNS remains unresolved; real signed-in HTTP and provider call/quota effects **BLOCKED/NOT_RUN**.
+- **Updated evidence:** `tests/evidence/AL-R126-E2E-gpt-v3.json` is a new version (v1 and v2 preserved). Branch PCS revision 110. Github Actions secret-gated job remains disabled, no extra accounts, product code, QA/production deployment, OAuth/Drive or SRS scope change; no merge. One consolidated Owner acceptance checklist stays in issue #156 and Draft PR #208, not new tasks.
+
+- **Purpose:** Continue after R125 by using both already provisioned, strictly synthetic QA identities in normal signed-in HTTP to verify tenant isolation, MatterACL and account logout, without exposing credentials or modifying production.
+- **Credential integrity:** The owner-private file `mihy_qa_gpt_v1.txt` exists in this runtime with permissions `0600`; both QA-A and QA-B password values were compared locally via PBKDF2-HMAC-SHA256 with the corresponding live QA D1 salted verifier prefixes: **2/2 PASS**. No password was logged or committed. Direct container DNS still cannot resolve the QA Workers; browser rendering can view GET login but page CSP blocked injected browser scripts. Cloudflare Secrets Store/GitHub secrets are still not configured, so positive HTTP login remains NOT_RUN rather than guessing credentials or bypassing authentication.
+- **Live D1 check:** Re-ran actual bound MatterACL read SQL on nonproduction D1 for the 3 R125 synthetic cases and 2 users: **6/6 PASS** (A owns personal+org; A denied B private; B owns its private; B `tenant_admin` denied A private; B denied A personal). Read-only throughout; 0 active sessions for these identities, global QA AI quota 2 rows / 4 cumulative requests. No live AI model request.
+- **Test-first implementation:** [Draft PR #208](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/208), stacked on evidence-only #207, adds `deployment/cloudflare/tests/r126_live_dual_gpt.py` and `tests/test_r126_dual_login_gpt.py`. The normal HTTPS gate uses two approved QA credentials from repository secrets (never printed), validates Secure/HttpOnly/SameSite cookies, sessions and tenant memberships, private matter listings for each user, reciprocal UC04 404 with no source echo, authorized UC10 local-only responses, B cannot enter A personal tenant, A org→personal switch rotates SID and makes the old cookie 401, personal matter isolation, and finally logout/session revocation for both users. 6 offline fake-transport tests in GitHub CI (positive lifecycle, cross-user leakage, insecure cookie, failed logout, no-secrets blocked, and preservation of FAIL when logout also fails). The last case identified and fixed a test-harness issue: a failed logout must not mask an earlier security FAIL. Source-only code/test commits `a6c65ad4` and `f1aeaed9`; current HEAD CI needs separate verification. Application code is unchanged.
+- **Secret gate:** Added `r126-qa-private-dual` CI job, opt-in ONLY on push to `qa/r126-dual-login-gpt` when owner repo variable `MIHY_QA_R126_ENABLED=true`, consuming four private GitHub secrets; PR and main do not run it. **Current result SKIPPED/NOT_RUN**, not live acceptance, because private GitHub Actions secrets and enable flag are absent. No insecure temporary public endpoint or direct D1 session injection used.
+- **Evidence:** `tests/evidence/AL-R126-E2E-gpt.json` (v1) and `tests/evidence/AL-R126-E2E-gpt-v2.json` (latest), PCS draft branch revision 109. Real signed-in Cloudflare two-user browser/API and actual provider call/quota trace, full 11-UC legal and mobile owner E2E remain NOT_RUN. No merge, QA or production deployment, real customer data, OAuth/Drive, or SRS v1.1.15 change. Main PCS revision 99. Owner final acceptance pending.
+
+## R125 — Provisioned isolated Cloudflare QA accounts and ACL fixtures (2026-11-10)
+
+- **Owner authorization:** Owner explicitly requested the agent create QA credentials and store them. This step completed *account provisioning* in the existing standalone nonproduction Cloudflare D1 without touching customer data or production. The owner-only credential file is `mihy_qa_gpt_v1.txt`, a private downloadable conversation attachment **not in the public GitHub repository**. Cloudflare Secrets Store was examined but **write was blocked by connector safety checks**, so do not claim vault storage there.
+- **Account fixtures:** Two new synthetic QA identities with independent 28-character random passwords, stored only as 100,000-iteration PBKDF2-HMAC-SHA256 salted verifiers in D1: QA-A `mihy.r125.gpt.a@qa.invalid` (role lawyer, personal + organization test tenants), QA-B `mihy.r125.gpt.b@qa.invalid` (role tenant_admin in shared organization test tenant). Created 2 QA tenants, 3 explicitly titled synthetic matters and 3 specific read-allow ACL grants. No direct session creation, no real names/files/content, no OAuth/Drive, no model invocation, no SRS or app/deployment change.
+- **Real Cloudflare D1 provisioning:** Single 18-statement D1 batch **SUCCESS**; returned metadata 55 written rows including schema audit trigger effects. Local PBKDF2 verifier consistency **2/2 PASS**, D1 account status checks 2 active verifiers, QA-A 2 memberships, QA-B 1 membership, 0 sessions created by provisioning.
+- **Live D1 MatterACL proof:** Executed the actual exported read ACL SQL with parameter binding on connected D1 against synthetic QA fixtures: **6/6 PASS**. QA-A can read its own personal and organization matters but not B's private org matter; QA-B can read its own org matter but cannot read QA-A's organization matter *despite tenant_admin role*, or A's personal matter. All verification queries read-only, quota remains 2 rows / 4 requests (no AI charges).
+- **Evidence:** `tests/evidence/AL-R125-QA-gpt.json` and draft evidence-only PR stacked on R124. Public evidence must omit actual passwords, password salts/hashes, user IDs, cookies and private tenant/matter IDs. The credentials file is transferred privately via ChatGPT artifact, must be downloaded and kept in Owner's password vault, and should never be uploaded to GitHub.
+- **Still NOT_RUN:** Real HTTP login with the new credentials, browser-authorized tenant switching, application path MatterACL denial after signed-in HTTP, actual Workers AI invocation/usage trace, full mobile 11-UC E2E, deployed source parity, Owner final acceptance. Existing R124 private-secret GitHub job is still disabled/SKIPPED; no GitHub Actions secrets were created. Keep SRS v1.1.15 unchanged. Main PCS rev99; R125 branch rev108; no PR merge/QA or production deployment.
+
+## R124 — Secure live QA credential gate and actual test-account blocker (2026-11-10)
+
+- **Read-first and boundary:** Main PCS remains revision 99, latest stacked security QA branch #204 revision 106. R123 live *negative* HTTP gates PASS 11/11 and historical final CI 9/9; this does not prove successful authorized login.
+- **Actual Cloudflare QA D1 read-only preflight:** **2 active login verifiers**, **12 active memberships**, **zero live sessions** at check time, **one multi-tenant membership identity** in the database but **zero identities that both have an active verifier and at least two active memberships**. 4 allow-read MatterACL grants; 2 AI quota rows unchanged. Therefore a positive *real* login→authorized tenant-switch test is not currently executable with the provisioned QA login population; do not fabricate a PASS or inject a QA session into D1.
+- **Implementation:** [Draft PR #206](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/206), stacked on #204, adds a *disabled-by-default* private-credential live HTTPS test runner `deployment/cloudflare/tests/r124_live_qa_auth_gpt.py`, five offline unit tests `tests/test_r124_live_qa_auth_gpt.py`, and owner-controlled opt-in CI job `r124-qa-private-login`. It requires a dedicated branch push, repository variable `MIHY_QA_R124_ENABLED=true` and approved private GitHub secrets `MIHY_QA_R124_EMAIL`/`MIHY_QA_R124_PASSWORD` — secrets are never echoed or committed and PR jobs cannot invoke this live step. One valid password login attempt only (no brute force), Secure/HttpOnly/SameSite cookie, authenticated session/workspaces/matters listing, synthetic random foreign matter denial without source disclosure, authorized tenant switch + SID rotation + old SID rejection, then logout. Missing credentials BLOCKED; one available tenant PARTIAL; true PASS only after actual live successful login and switch.
+- **QA unit evidence:** Existing CI `unit` job in [Actions #42731313992](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42731313992) executes 5 R124 tests and all PASS (no-credentials blocked, dual-tenant positive mock, single-tenant PARTIAL, denied-source leak fail-closed, insecure cookie rejected). The actual opt-in `r124-qa-private-login` job is **SKIPPED**, not a live PASS. Full final-HEAD workflow must be separately verified once complete.
+- **Evidence:** `tests/evidence/AL-R124-AUTH-gpt.json`. Real Cloudflare password login, tenant switch, authenticated user/tenant MatterACL API, true Workers AI provider side effects, deployed source parity, owner Android browser and full 11-UC E2E remain **NOT_RUN/NOT_VERIFIED**. Prerequisite is a permitted QA test principal with a correctly provisioned verifier and two authorized tenant memberships, along with its credential supplied through private secrets, not chat/public repo.
+- **Constraints:** No new product functionality, SRS v1.1.15 or API changes; no QA/production deployment, merge, account creation, D1 writes, real client records, Google Drive/OneDrive/OAuth or production changes. Owner final acceptance pending. Keep PR stack in Draft.
+
+## R123 — Live signed-out and invalid-cookie QA HTTP boundaries (2026-11-10)
+
+- **Scope:** [Draft PR #204](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/204) stacked on R122 PR #202. Test-only authenticated-boundary follow-up, not a new application or storage workflow. Attempted to establish a permitted positive login path; **no approved private QA test account/password** was available in this tool context. We deliberately **did not bypass password authentication by injecting sessions directly into D1**, nor read/export user credentials or real customer records.
+- **Actual QA HTTP tests:** Dedicated GitHub Actions `cloudflare-contract` job `129384787555`, [Actions #42683712434](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42683712434), commit `f24e8837ac7158dfdb259e62f9bcb6f75364c273`: **PASS 11/11** live HTTP negative security requests to the deployed `ai-law-web-qa` Worker via independent runner: no-cookie workspaces/matters/profile 401, random unrecognized cookie workspaces 401, protected /account 302 to /login, no-cookie tenant switch and password change 401, legal AI API with unknown SID 401, invalid-format login 401, and foreign Origin switch/legal requests 403. The legal source marker did not echo in denied responses. No brute-force password attempts.
+- **Real D1 quota corroboration:** Connected QA D1 aggregate read-only before/after remained **2 quota rows and 4 cumulative requests**, `rows_written=0` in each read; consistent with no new quota charges from the denied HTTP checks. This does **not** independently trace the Workers AI provider or prove per-user accounting.
+- **QA control plane:** Both backend and website Workers have active 100% deployments and expected bindings; Cloudflare API version metadata can be read, but raw deployed source readback returned unavailable/undefined, therefore **source parity NOT_VERIFIED**. Provider Browser Rendering can sometimes redirect an invalid cookie to login but also returned provider HTTP 429 or 422 in previous attempts. No disabling rate limits or changing security controls.
+- **Evidence:** `deployment/cloudflare/tests/r123_live_auth_denials_gpt.py`, `tests/evidence/AL-R123-DENY-gpt.json`, branch-limited CI step. Live **positive** password login, actual authorized tenant switch, multi-user MatterACL legal POST, model provider side-effect trace, 11-UC signed-in browser/Android E2E and Owner acceptance **NOT_RUN**. The prior R122 full synthetic SQLite handler integration PASS must not be represented as live Cloudflare login proof.
+- **Change limits:** No application code, SQL writes, QA deploy, production, Drive/OneDrive/OAuth, real files or frozen SRS v1.1.15 change; no PR merge. Main PCS rev99; this draft branch rev106. Next: use an explicitly authorized isolated QA test account/session through normal login, then compare live D1 quota and tenant isolation; no direct session creation to bypass auth.
+
+## R122 — Full synthetic authenticated cookie → tenant → MatterACL → AI quota integration (2026-11-09)
+
+- **Scope:** [Draft PR #202](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/202) stacked on R121 draft PR #200, test-only. Exercised actual `mobileApi` (PBKDF2 QA password login, real SQL cookie session, membership, tenant switching) plus actual `legalApi` and exported `LEGAL_MATTER_ACCESS_SQL`/`LEGAL_QUOTA_SQL` using one disposable Node 22 `node:sqlite` database. Two synthetic accounts, independent tenants/matters and role memberships. No live QA D1 mutation or real user/login credentials.
+- **Behavior tested:** Distinct secure HttpOnly cookies; unauthorized cross-tenant switch 404 preserves session, authorized switch rotates SID and invalidates old SID; no cross-tenant source access before switch; no same-tenant other-user private MatterACL read; tenant_admin cannot bypass MatterACL by role; positive authorized UC10 local source-only retrieval; authorized UC04 AI draft increments exactly one quota row scoped to the correct user/tenant. Every rejected request causes **zero** additional model calls or quota charges; UC10 local search also invokes neither AI nor quota. The model was a synthetic stub—no Workers AI provider call or billing.
+- **Test-fix loop:** Initial R122 GitHub CI failed on test-only JavaScript identifier `URL` shadowing global URL constructor; second failed on comparing Node SQLite's null-prototype row objects to plain objects despite matching values. Both were fixed in the test file; product source unchanged.
+- **Executed proof:** Test commit `0340abae34d1b2dce4cc0024397858ddac1db4e7`, [Actions #42623840843](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42623840843), `cloudflare-contract` job `129182436414`: **PASS** with direct `ok 1 - R122 real cookie+SQLite: two users, tenant switch, MatterACL, local search, AI quota` and 0 failures. Full workflow for latest docs HEAD is a separate gate; do not infer PASS until verified.
+- **Evidence:** `deployment/cloudflare/tests/r122_auth_legal_sql_gpt.test.mjs`, `tests/evidence/AL-R122-AUTH-gpt.json`, and CI test step. This is **local synthetic integration**, not live signed-in Cloudflare HTTP/browser QA; real account/tenant API, actual AI provider usage traces and 11 legal UC mobile E2E remain **NOT_RUN**. Main PCS remains revision 99, branch PCS revision 105. SRS v1.1.15 unchanged; no app code, merge/deploy, production, OAuth/Drive or real documents. Owner final acceptance pending.
+
+## R121 — Live anonymous QA HTTP and Browser Rendering 429 separation (2026-11-09)
+
+- **Problem:** Earlier Cloudflare Browser Rendering QA calls returned HTTP 429 (provider rate-limited), with a later injected-browser attempt returning provider HTTP 422 (network closed). A separate, plain public login HTML render succeeded once. These provider errors are **not evidence of an AI Law app 429 defect**; no rate limit was disabled or bypassed.
+- **Real end-to-end network boundary, unauthenticated only:** [Draft PR #200](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/200), dedicated GitHub Actions runner real HTTPS QA smoke. `cloudflare-contract` job on source commit `9485dd54a1d2346e1fbfcdc9f74994976b52e572`, [Actions #42617358184](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42617358184): **PASS 7/7** actual anonymous HTTP status checks: backend /health 200; website /health 200; public /login 200; /app redirects 302 to /login; no-cookie /api/qa/session 401; no-cookie POST /api/qa/legal/run 401; foreign Origin POST rejected 403 by website relay. No passwords, cookies, customer data, storage or model requests deliberately authorized.
+- **Actual fix-loop:** Initial test-only check expected backend 400 on foreign Origin, but website relay correctly responds 403 **before** backend. The first CI step failed only on that mistaken assertion; expected 403 after source inspection, then live retest PASS. Application code unchanged. External DNS failures are reported BLOCKED, never PASS.
+- **D1 read-only corroboration:** QA `qa_legal_ai_quota` aggregate remained 2 rows / 4 requests across the final anonymous smoke; no D1 writes in read-only verification. This alone does not prove the actual Workers AI provider did not receive a call, but code authorization ordering and HTTP denials are consistent with no quota use.
+- **Evidence:** `deployment/cloudflare/tests/r121_live_anonymous_http_gpt.py` plus `tests/evidence/AL-R121-HTTP-gpt.json`; CI invokes the live script only on the R121 QA branch. Full CI on latest PCS documentation HEAD is a separate gate.
+- **Limits:** Actual authenticated user login, tenant switching, user-vs-user denial, verified no-AI/no-quota per request and mobile/11-UC E2E remain **NOT_RUN**. Do not call this full owner acceptance. Keep SRS v1.1.15 unchanged, no merge, production, Drive/OneDrive/OAuth or real legal documents. Main PCS revision 99 until independently reviewed integration.
+
+## R120 — Cloudflare D1 read-only and anonymous QA reachability (2026-11-09)
+
+- **Scope:** Actual connected Cloudflare nonproduction account; QA backend `ai-law-standalone-cf-qa` and QA website `ai-law-web-qa` both have 100% active deployments. Worker settings confirm `DB` binding points to the QA D1 database and a Workers AI binding exists. No credentials/secrets/client content exported. No application source changes.
+- **Real D1 SQL outcome:** **PASS 7/7** direct read-only Cloudflare D1 SQL using the exported `LEGAL_MATTER_ACCESS_SQL`: valid existing read grant, cross-installation, cross-tenant, cross-matter, cross-user denial, bound SQL-injection string, and time before earliest grant validity. Verified 0 written rows, `changed_db=false`; initial/final QA counts unchanged (4 matters, 8 ACL rows, 2 quota rows). Preliminary future-clock negative assumption was invalid for an open-ended grant, corrected to a valid pre-grant boundary. Do **not** treat the initial mismatch as a product bug.
+- **Reachability:** Cloudflare Browser Rendering `/health` returned `{"status":"configured","scope":"nonprod_qa_only"}` **PASS**. Anonymous QA website browser access **BLOCKED HTTP 429**; public web fetch was also inaccessible. Authenticated QA HTTP API and Android/browser application E2E remain **NOT_RUN/BLOCKED**, as do actual AI/no-quota side-effect checks; D1 SQL PASS is not application authorization acceptance.
+- **Evidence:** `tests/evidence/AL-R120-CF-D1-gpt.json` on QA evidence branch, draft PR to review. Existing PR stack must not be automatically merged; keep SRS v1.1.15 unchanged, Google Drive/OneDrive paused, no production deploy or customer data. Owner acceptance pending. Main PCS revision remains 99 until a reviewed merge.
+
+## R113 — Tenant/MatterACL deny must not spend AI quota (2026-11-09)
+
+- **Scope:** Regression-only extension of existing draft PR #175, synthetic data, no product/source change. Three denial paths: missing session (401), revoked/foreign MatterACL (404), viewer role (403). Every denial must make zero AI provider calls and zero quota SQL calls.
+- **Test-first commit:** `1e9a61f92f6b98aa838d384e25e93866d1d6d698`, `deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs`. CI **NOT_RUN / pending verification** at time of writing; do not count this case as PASS until CI actually executes it.
+- **QA:** Both Cloudflare QA hostnames remain DNS-unresolvable from this execution environment (curl error 6); authenticated API/browser and E2E **BLOCKED**. No QA or production deploy, no merge. SRS v1.1.15 and single `/app#assistant` UI unchanged; PR #158 remains closed.
+
+## R110 — Reject invented source anchors and oversized streaming AI inputs (2026-11-08)
+
+- **Scope:** Source-only security hardening of the **existing** R109 11-UC QA panel and `/api/qa/legal/run`, not a second application. Duplicate PR #158 was closed unmerged and never deployed; R109 PR #157 remains the canonical UI.
+- **Source + tests:** [PR #159](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/159). Bound request **stream bytes** to 36KB even if Content-Length is absent, and fail closed if a model response explicitly cites an invented `[A99]`, `[B12]` or longer anchor not present in the source map. Accept safe object-shaped `{answer}` from provider. This validation checks anchor existence, **not factual/legal correctness**.
+- **CI:** [Actions #42407576294](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42407576294) **PASS 9/9**, including source security tests, real SQLite quota regression, account/tenant, Chromium synthetic standalone and install kit.
+- **QA surgical deployment:** `ai-law-standalone-cf-qa` deployment `301ecbe7-5a2e-47f9-9962-56b44ad2b26f`, **100%** traffic. Exactly `qa_legal_workflows.mjs` changed among 10 modules; guarded before/after source readback PASS, the other 9 source modules and all existing AI/D1/OAuth binding names/types preserved. Website unchanged (still 27 R109 modules). Browser-rendered /health online; read-only D1 retained 1 existing QA matter and 1 AI quota row.
+- **Outstanding gates:** signed-in Owner mobile/desktop 11-UC model flow, hallucination/meaning checks, exact private SRS v1.1.15 clause mapping, legal review and final acceptance **NOT_RUN**. All legal AI outputs remain *drafts with human review*. Google Drive/OneDrive paused, production untouched.
+
+## R109 — Eleven legal workflows: source-limited QA draft and local retrieval (2026-11-08)
+
+- **Owner directive:** Complete all other AI Law functions, without reopening Google Drive/OneDrive. No production or real client legal documents. Source branch `feat/r109-qa-legal-text-workflows`, stacked on R108, [draft PR #157](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/157). Exact private SRS v1.1.15 clause mapping unavailable; baseline untouched.
+- **Delivered narrow QA slice:** `/api/qa/legal/run` requires signed-in principal, active tenant/read MatterACL with deny-overrides, same-origin POST, explicit fictional-source checkbox, strict input size and allowed UC set. UC01,02,03,04,05,06,07,08,09 produce **AI drafts requiring legal review** from user-pasted sample text only. UC10 and UC11 return **deterministic local search results only inside pasted sample**; **no** official court decision/statute database, verified law citations or legal effect claims. No DOCX/PDF file bytes or document storage in this task.
+- **Safety:** AI request allowance bounded to **12 per user/day** using D1 `qa_legal_ai_quota` table (five numeric/ID columns, no source text or model output). MatterACL is enforced server-side for each request; model output/source anchors are displayed only in memory, no app persistence. Input and output are explicitly labeled QA synthetic/unverified; provider failure returns 503 rather than fabricated text.
+- **Real infrastructure:** Cloudflare Workers AI `AI` binding added to standalone QA, 10 old OAuth/D1/secret bindings preserved. Live model smoke with fictional Vietnamese contract returned a useful summary. QA D1 migration applied once, 0 quota rows at installation, 1 existing synthetic matter intact.
+- **QA deployment:** backend `ai-law-standalone-cf-qa` deployment `8cee0745-05a1-45a1-bf36-1bdd934bc223` (10 modules: 1 new legal engine + 1 patched route), web `ai-law-web-qa` deployment `132f1e4d-44c7-40a3-ad74-bc0d9d1e51b4` (27 modules; protected form, compact responsive CSS and JS). Content/route readback PASS, all unrelated OAuth/Drive and QA_AUTH/Picker bindings unchanged. Public /health browser PASS; authenticated Browser Rendering blocked HTTP 429.
+- **CI:** Source [Actions #42397098574](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42397098574) **9/9 PASS** including Node legal task/ACL, real SQLite quota and existing PG/Chromium regressions. Latest docs/final-head CI must be checked separately.
+- **Owner QA link:** [AI Law — Trợ lý AI](https://ai-law-web-qa.iaict-platform.workers.dev/app#assistant), then **Nạp ví dụ QA**, select matter, check fictional-source consent, run. Full [11-UC synthetic QA checklist](../deployment/cloudflare/QA_R109_LEGAL_TEXT.md).
+- **Acceptance gates:** Real signed-in Owner phone/mobile E2E NOT_RUN, original input DOCX/PDF/Word flow NOT_IMPLEMENTED, official law and judgments search NOT_IMPLEMENTED, legal accuracy/references NOT_VERIFIED. Do NOT claim all 11 UC product requirements complete. Production untouched; Owner accepts last.
+
+## R108 — Non-storage functions: matter rename with ACL, version and audit (2026-11-07)
+
+- **Owner direction:** Skip Google Drive/OneDrive and finish remaining AI Law functions. **No further Google/OneDrive debugging, no OAuth/Drive mutation, no production release.** Full non-storage backlog by UC and acceptance gates: [issue #156](https://github.com/ntdung-tds/Mihy-Law-Agent/issues/156).
+- **Delivered QA source:** [PR #155](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/155) (draft, branched independently from `main`). Authenticated QA case title can be edited inline on desktop/mobile. API requires current tenant + active write MatterACL with deny-overrides, optimistic `version`, bounded title/CSRF input; SQL update is atomic with an append-only audit trigger. A conflict triggers refresh, not a silent overwrite. No case file is changed.
+- **Real database:** D1 QA R108 migration applied on existing table, `version/updated_at/updated_by` columns + `qa_matter_title_events` and `trg_qa_matter_title_audit` verified; existing **1** QA case remains intact at version 1. No customer identities/titles exported.
+- **Source CI:** [Actions run #42394048779](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42394048779) **9/9 PASS**, including actual SQLite migrations/audit/deny-overrides, Node API validation and existing login/browser regression.
+- **QA deployment:** backend `ai-law-standalone-cf-qa` deployment `b806d232-14c4-46df-a38e-b840b1e30a63` (9 modules, 2 surgically changed), website `ai-law-web-qa` deployment `fa3c8962-fd7f-4abe-a701-f65a593ec335` (26 modules, 3 surgically changed), both 100%. Readback exactly matched intended case modules and preserved every unrelated module + all prior OAuth/D1/QA_AUTH/Picker binding names/types. Anonymous /health Cloudflare browser PASS; a second /login browser probe was BLOCKED 429 by browser-rendering rate limits.
+- **Remaining verification:** Authenticated Owner phone/browser case rename/reload/denied role **NOT_RUN**. None of 11 legal AI UCs is accepted by this slice. Original private SRS v1.1.15 remains unchanged; exact SRS mapping is NOT_VERIFIED in this chat. Production untouched; Owner acceptance PENDING.
 
 ## R102 — Stop forcing Google account consent at every document save (2026-11-07)
 
@@ -641,3 +1550,171 @@ Continue functional R0 slices on separate task branches while retaining the save
 ## Publication boundary
 
 Synthetic preview source and public-safe PCS notes only. No internal SRS, genuine legal/client data, secrets, screenshots or private Drive identifiers.
+
+
+### R112 — 2026-11-08 · Invalid UTF-8 source regression (branch-only checkpoint)
+- **PASS:** Read `pcs/STATE.json` and `pcs/MOMENT.md` (base revision 99), checked PR #157 OPEN, #158 CLOSED (never reimplement), #159 OPEN, #160 OPEN and #163 OPEN. Reviewed PR #163's fail-closed streaming patch and existing `TextDecoder('utf-8',{fatal:true})` in the QA legal API.
+- **PASS (change authored):** Draft PR #175 adds a synthetic malformed-UTF-8 request test asserting HTTP 400, no MatterACL query, no quota consumption, no Workers AI invocation, and no leaked source content. Only a test file changed; no production code or UI change.
+- **NOT_RUN:** New PR #175 head `aa0888ef893859b938be72bdacb18254d4b31648` has no associated PR workflow runs at initial check; the test is not yet proven executed. Existing CI green on other PRs does not prove this test passed. QA real API/browser E2E NOT_RUN.
+- **BLOCKED:** QA deployment gated on dedicated Node test actually running and passing, reviewed integration order for #159/#160/#163, and real API/browser proof.
+- **Next:** Ensure `.github/workflows/tests.yml` from PR #160 explicitly runs `deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs`; run red/green Node test and CI on integration branch, then only consider QA deploy. SRS v1.1.15 frozen; no Drive/OneDrive/OAuth, real customer data or production changes. Owner final acceptance remains pending.
+
+
+### R112 follow-up — 2026-11-08 (test assertion correction)
+- **PASS (committed):** PR #175 branch `test/r112-qa-invalid-utf8-failclosed` commit `422833fbe4de9bea796343226913ddcd4da1f0dd` corrects the response-leak assertion from a literal backslash sequence to regex `/\uFFFD|source_text/`, detecting the actual U+FFFD replacement character. Only synthetic test changed; no UI, server logic, Drive/OAuth or production change.
+- **PASS (previous CI only):** Original PR #175 commit `6bc161a992695fc34d057fe06669e684aaa152f5` has completed successful workflow run `42473712712`; this does not prove the corrected assertion executed.
+- **NOT_RUN:** No GitHub PR workflow run yet associated with corrected commit at first check; dedicated R112 test execution and live API/browser E2E unverified.
+- **BLOCKED:** QA deployment pending CI with dedicated test, MatterACL checks and QA reachability. Keep PR draft and no merge until evidence.
+
+
+## R113 — Wire R112 security test into CI (2026-11-08)
+
+- Read `main` PCS STATE/MOMENT: revision 99. Checked PR #157 OPEN, #158 CLOSED (never redeploy), #159 OPEN, #160 OPEN, #163 OPEN, #175 OPEN. Single 11-UC UI remains `/app#assistant`.
+- **FAIL (coverage gap):** PR #175 prior HEAD `d28db9c` workflow run `42483291372` reported success (9 executed jobs, deployment jobs skipped), but `cloudflare-contract` job logs did **not** invoke `deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs`; thus R112 malformed UTF-8 assertion was not executed. CI success was not R112 PASS.
+- **FIX (test-first):** Added an explicit `cloudflare-contract` step running `node --test deployment/cloudflare/tests/r109_qa_legal_workflows.test.mjs` on PR #175 head, commit `2bc7df85e191224b336779f7827b2ef86027b032`. Existing R112 test remains unchanged.
+- **NOT_RUN:** CI result for the new commit pending; no claim of R112 PASS until job logs confirm the exact test and successful result. **BLOCKED:** real remote QA API/browser and full E2E not verified. No deploy, no production, no storage/OAuth changes. Only synthetic fixtures.
+- Next: inspect new Actions job output, fix any failures on this draft branch, then check MatterACL/source tests and QA reachability before safe promotion. SRS v1.1.15 unchanged; Owner final acceptance required.
+
+
+### R113 CI verification — 2026-11-08
+- **PASS:** Actions run [42487816242](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42487816242), `cloudflare-contract` job `128753434091`, step 16 **R112 legal AI synthetic source, tenant ACL and malformed UTF-8 regression** completed `success`. Nine executed jobs passed; 21 deployment/conditional jobs skipped. This resolves prior R112 CI coverage gap on PR #175 branch, but is not proof of deployed QA behavior or legal acceptance.
+- **PASS:** Re-read `main` PCS revision 99 and MOMENT; PR #157/#159/#160/#163/#175 OPEN, PR #158 CLOSED, not merged. PR #175 remains draft; no UI/production/storage change.
+- **NOT_RUN:** Remote QA authenticated API, browser E2E, complete 11 UC acceptance and legal review. **BLOCKED:** QA reachability/authenticated proof not established in this run. Do not deploy or merge on CI alone.
+- **Next:** Review integration dependency order #159/#160/#163/#175 and test tenant/MatterACL/source failures with synthetic fixtures on an isolated branch; only promote QA after safe code/deploy review and live verification. Owner final sign-off remains required.
+
+## R112 — 2026-11-08 23:56 ICT: verified latest CI and QA reachability
+
+- **PASS CI:** PR #175 HEAD `41d18aab5d59dc788619d7e3e097079419b85354`, GitHub Actions run [#42492702659](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42492702659) completed success; 9 executed jobs successful. `cloudflare-contract` step 16 explicitly executed `R112 legal AI synthetic source, tenant ACL and malformed UTF-8 regression` and succeeded. This is synthetic contract evidence only, not deployed E2E or legal validation.
+- **PASS status read:** main PCS revision 99; PR #157/#159/#160/#163/#175 OPEN draft; PR #158 CLOSED and not redeployed. UI stays at `/app#assistant` with 11 UC.
+- **BLOCKED QA:** fresh HEAD requests to `ai-law-web-qa.iaict-platform.workers.dev/app#assistant` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev/` fail DNS resolution (curl error 6, HTTP 000). Authenticated API, browser E2E, live MatterACL and source verification remain NOT_RUN. No QA deployment attempted because live verification cannot complete.
+- **Next:** Review dependency/order of PR #157 → #159/#160/#163 → #175, then independently add a missing synthetic tenant/MatterACL denial regression test first. Do not merge/deploy until safe and live QA reachable. No production, OAuth, Drive/OneDrive or customer data touched.
+
+
+## R112 follow-up — latest head CI and QA connectivity (2026-11-09)
+
+- **Baseline:** main PCS revision 99; branch MOMENT identifies revision 102. PR #157/#159/#160/#163/#175 OPEN; duplicate PR #158 CLOSED and not redeployed. SRS v1.1.15 unchanged.
+- **PASS (CI):** PR #175 head `2b8da7bc9c1a4b37d613b7712061bb7864b7b149`, [Actions run #42502504092](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42502504092): 9/9 executed jobs success, 21 conditional/live jobs skipped. `cloudflare-contract` job 128798095212 includes successful step `R112 legal AI synthetic source, tenant ACL and malformed UTF-8 regression`. This is synthetic CI evidence only, not live tenant E2E or legal validation.
+- **BLOCKED (QA):** `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` both fail DNS resolution from this execution environment (`curl: (6) Could not resolve host`); no authenticated live API/browser proof. Do not deploy QA or production on this evidence.
+- **NOT_RUN:** live MatterACL negative-path and source provider E2E; all 11 workflows full acceptance, owner signoff. No new product code or merge in this follow-up. Next independent task: review tenant/MatterACL negative tests and branch integration order (#157 → #159; #160/#163 siblings; #175 based on #163), test-first.
+
+
+## R114 — SQL-backed MatterACL regression (2026-11-09)
+
+- **PR:** #190 draft, branch `test/r114-sql-matteracl-gpt`, test-first commit `281b6593d5cb78379a08e0e919710fc1619d8208`; based on existing #175 stack, not merge-ready against `main` (stacked changes).
+- **Scope:** Seven Python unittest cases execute the exported `LEGAL_MATTER_ACCESS_SQL` against in-memory SQLite with only synthetic tenant/matter/user rows: positive read allow, cross-tenant ACL, cross-tenant matter, explicit deny, stale ACL version, expired/future grant and write-only permission.
+- **Status:** test committed; CI **NOT_RUN/unverified** at time of this note (no workflow returned for commit). Live Cloudflare D1/QA authenticated API and browser **BLOCKED/NOT_RUN**; 11-UC E2E **NOT_RUN**. SQLite test is not proof of live D1 isolation or legal acceptance.
+- **Boundary:** no product source, UI, storage/OAuth, production or SRS change. PR #158 stays closed; `/app#assistant` remains sole 11-UC UI. Next: confirm CI, fix failures, then D1/API and browser synthetic E2E after safe QA access.
+
+
+## R115 — Wire R114 SQLite MatterACL regression into CI (2026-11-09)
+
+- **PASS:** Reviewed main PCS revision 99 and PR #157/#158/#159, PR #190, and prior run #42538153269 (9 executed jobs success). PR #158 remains CLOSED.
+- **FAIL (prior gap):** R114's 7 SQL tests were absent from the `cloudflare-contract` workflow; green R114 CI did not demonstrate these tests ran.
+- **PASS (code change):** Draft PR #191 on separate branch `test/r115-r114-ci-gpt`, commit `cfd7b2b25eb553944915e94de6d67c798255497e`, adds explicit `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v` step. No product code modified.
+- **NOT_RUN:** New commit's workflow job execution not yet returned; no assertion of R114 CI PASS. QA D1/API/browser and 11-UC E2E NOT_RUN/BLOCKED; legal acceptance NOT_RUN.
+- **Integration:** PR #191 depends on draft PR #190 (which itself contains inherited changes). Do not merge directly to main. No QA/production deploy, Drive/OneDrive/OAuth changes, or customer data.
+- **Next:** Verify job step in run logs and repair any failure; then D1/API QA denial/no-AI/no-quota and browser E2E when safe.
+
+## R115 — CI executes R114 SQL MatterACL regression (2026-11-09)
+
+- **Evidence:** [GitHub Actions #42542897370](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42542897370), head `ef7aef24cf2bee1550d41c930211748e783105bc`, 9/9 executing jobs SUCCESS. `cloudflare-contract` step 16 `R114 execute synthetic SQL MatterACL tenant isolation regression` SUCCESS; workflow invokes `python -m unittest discover -s tests -p 'test_r114_sql_matteracl_gpt.py' -v` (7 synthetic SQLite scenarios). PASS is restricted to SQL regression, not live D1/API/browser.
+- **Integration:** Draft PR #191 stacked on #190, both unmerged; avoid direct merge to main. QA authenticated D1/API cross-tenant, no-AI/no-quota side effects, full 11-UC E2E and legal acceptance remain NOT_RUN/BLOCKED pending safe environment verification. No deploy, customer data, Drive/OAuth, production, or SRS/UI changes.
+
+
+## R116 — Cross-user / cross-installation MatterACL regression (2026-11-09)
+
+- **Test-first branch:** [draft PR #193](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/193), based on R115 draft PR #191; commit `283678780699852123e5fa53fc7f40d6554d2010`. Adds two synthetic SQLite tests using the exported real SQL, denying grants assigned to a different user or installation. Product code/UI unchanged; sole UI `/app#assistant` preserved, PR #158 stays closed.
+- **Prior CI evidence:** [run #42542897370](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42542897370), `cloudflare-contract` job `128921540378`, log explicitly shows all seven R114 tests executed and PASS. This does not prove R116 or live QA.
+- **Gates:** R116 CI **NOT_RUN / no workflow associated with test commit at first lookup**; D1/API and authenticated Chromium E2E **NOT_RUN**; live QA reachability **BLOCKED pending verified access**; legal review **NOT_RUN**. Do not merge/deploy production or claim acceptance. Next check PR #193 CI and test SQL-backed API denial side effects using synthetic accounts only.
+
+
+## R116 CI verification — 2026-11-09
+
+- **PASS (synthetic CI):** PR #193 head `129f1074ed959a5971c9b23c184b65fc017da1b7`, [Actions #42564559088](https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42564559088) completed success, 9/9 executed jobs success. `cloudflare-contract` step 16, `R114 execute synthetic SQL MatterACL tenant isolation regression`, completed success; R114 file on this head has nine tests (original seven plus R116 cross-user and cross-installation). Workflow explicitly invokes Python unittest discovery for that file. This is CI-step success evidence, not an independently inspected individual test transcript or D1 proof.
+- **PASS (scope):** Reviewed branch PCS revision 102, PR #157/#159 OPEN and #158 CLOSED unmerged; #190/#191/#193 are draft stacked PRs. No new UI; sole 11-UC route `/app#assistant` unchanged.
+- **BLOCKED (live QA):** Fresh `curl -IL` to `ai-law-web-qa.iaict-platform.workers.dev` and `ai-law-standalone-cf-qa.iaict-platform.workers.dev` failed DNS resolution (curl 6; HTTP 000). Authenticated D1/API/browser MatterACL negative paths and zero-AI/zero-quota side effects **NOT_RUN**; 11-UC E2E **NOT_RUN**. No QA or production deployment; no Drive/OneDrive/OAuth or customer data touched.
+- **Next:** Independently strengthen synthetic deny/no-quota regression if gaps remain, then verify D1/API/browser with synthetic accounts only when QA connectivity and safe deploy prerequisites are satisfied. No merge of draft stack until dependency review; Owner signs off only after technical evidence.
+
+## R117 — UC10/UC11 local-only retrieval authz regression (2026-11-09)
+
+- **PR:** #195 (draft; stacked on #193). Synthetic-only, test-first commit `484237272e2f648ac516418524fcf62b9f99e000`; added one Node test with six denial scenarios across UC10 and UC11 (401 missing session, 403 viewer, 404 missing/foreign MatterACL). Each asserts no findings leak, no AI provider call and no quota SQL.
+- **Evidence:** Static test addition PASS; CI for R117 **NOT_RUN / awaiting verified workflow logs**. Earlier R116 Actions #42564559088 9/9 jobs PASS but does not establish R117 success.
+- **QA:** D1/API authenticated and browser E2E **BLOCKED / NOT_RUN**; QA DNS previously failed from runner, not re-established here. Do not claim tenant isolation E2E. No merge, deploy, SRS/UI change or Drive/OneDrive/OAuth modification. Next: verify CI HEAD #195 and QA host availability, then run synthetic live authz tests if safely available.
+
+## R118 — UC10/UC11 cross-origin fail-closed regression (2026-11-09)
+
+- **Baseline:** PCS STATE revision 102 on R117 stack; main revision 99. PR #157/#159 OPEN, PR #158 CLOSED; R117 PR #195 OPEN. R117 Actions #42576820758 9/9 executed jobs success; CI evidence, not D1/browser E2E.
+- **Change:** PR #196 draft on separate branch test/r118-local-search-origin-gpt, test-first commit d50fe364b07ff8fb159108fbe111855524fb5fe1. Two synthetic UC10/UC11 hostile-Origin regression cases assert HTTP 400, no source/findings disclosure, no MatterACL query, no quota SQL and no AI call. No production code or UI changed.
+- **Evidence:** Test source committed PASS; new-head CI NOT_RUN / awaiting workflow verification. QA host probes 2026-11-09: both ai-law-web-qa.iaict-platform.workers.dev and ai-law-standalone-cf-qa.iaict-platform.workers.dev failed DNS (curl 6, HTTP 000): live D1/API/browser BLOCKED, 11-UC E2E NOT_RUN.
+- **Constraints:** No merge, QA/production deploy, customer data, Drive/OneDrive/OAuth or SRS changes. Sole 11-UC UI remains /app#assistant.
+- **Next:** Verify PR #196 HEAD CI and actual Node test execution, fix FAIL if present; attempt safe synthetic D1/API/browser QA only after connectivity and deployment review. No legal acceptance claims.
+
+## R158 — F20 ACL revocation recheck (2026-11-14 VN)
+
+- Draft PR #228 stacked on #227; test-first `528bbbe` and fix `29268aa`. Recheck MatterACL after scoped filename metadata scan and before responding, returning generic 404 on revoked read for ASCII and Unicode paths. Synthetic negative test exercises grant then revoke between the two checks. Not an atomic DB transaction; live QA and race timing remain NOT_RUN.
+- CI at code HEAD not yet observed; **NOT_RUN/pending**, never mark PASS until exact final HEAD workflow completes. F20 remains filename-only PARTIAL, no fulltext/OCR/Drive proof. R126 dual-account signed-in Cloudflare remains BLOCKED/NOT_RUN. SRS v1.1.15 frozen; `AL-R0-DEPLOY-001` protected, standalone first. No signing, customer data, merge or production deploy.
+
+## R159 — F20 ambiguous Matter selector rejection (2026-11-14 VN)
+
+- [Draft PR #229](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/229) stacked on #228. Test-first negative regression for duplicate `matter_id` parameters and code change rejecting ambiguous selectors with HTTP 400 before receipt SQL. No new storage, OAuth, or fulltext feature.
+- **QA:** synthetic regression committed; final-head CI NOT_RUN/pending verification. F20 remains filename-only PARTIAL; R126 real signed-in dual-account E2E BLOCKED/NOT_RUN. Protected `AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, no signing/customer data/merge/production deploy.
+
+## R160 — F21 lawyer approval policy primitive (2026-11-14 VN)
+
+- [Draft PR #230](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/230) stacked on #229. Test-first synthetic negative contract, then pure fail-closed policy helper; CI workflow explicitly invokes new Node test. Rejects self-approval, cross-Tenant, System Admin, missing MatterACL approve/read, denied access, missing reviewer assignment/qualification, unverified source and wrong output status.
+- **F21 PARTIAL/NOT_RUN for real product:** helper is NOT wired to HTTP, D1 persistence, audit, actual professional qualification, lawyer issuance, office approval levels, mobile/desktop E2E. Synthetic CI for R160 pending exact HEAD check. No release/acceptance claim.
+- SRS v1.1.15 frozen; PCS active_task `AL-R0-DEPLOY-001` preserved. F01–F36 target without signing; standalone-first; R126 live dual-account Cloudflare BLOCKED/NOT_RUN. No customer data, OAuth retries, merge or production deploy.
+
+## R161 — F21 persisted output identity binding (2026-11-14 VN)
+
+- [Draft PR #231](https://github.com/ntdung-tds/Mihy-Law-Agent/pull/231) stacked on #230. Test-first commit `722f6ce5`, implementation `f2c2a71b`. F21 pure policy now requires server-verified output Tenant/Matter/author IDs to match the current Tenant/Matter and author; missing/mismatched values deny approval. This closes a policy-helper gap where a valid reviewer context could be paired with an unrelated output.
+- **Local isolated Node reproduction PASS 3/3** with synthetic positive/negative cases (not a repository checkout and not GitHub CI). GitHub Actions for exact code HEAD `f2c2a71b4e0bc59256e5e15d4833fea21211ffa9` **NOT_RUN/not yet returned by workflow lookup** at checkpoint. Do not mark CI PASS without actual job logs.
+- **F21 remains PARTIAL:** no live API/D1/audit/UI/qualification verification or issuance, no desktop/mobile E2E. R126 real signed-in Cloudflare dual-account QA BLOCKED/NOT_RUN; F20 filename-only PARTIAL. SRS v1.1.15 frozen, 36 Fxx target without signing, standalone-first active_task `AL-R0-DEPLOY-001` unchanged. No customer data, merge, OAuth retry or production deploy.
+
+## R207 — F21 Unicode canonical reviewer identity regression (2026-11-20 VN)
+
+- Draft PR #251 continuation, test-first commit `afd1084` and source fix `e5e1acf`. Negative test rejects reviewer and author IDs that are Unicode-equivalent but byte-distinct (NFC versus decomposed), preventing a self-review comparison bypass. Non-NFC identities fail closed; canonical distinct reviewer remains permitted.
+- R206 exact-head Actions #44685031443 and #44685031304 completed success; this does **not** prove R207. R207 CI at latest code HEAD pending verification; do not mark PASS until logs checked.
+- F21 remains PARTIAL: D1 schema still excludes `pending_review`, adapter transaction, Tenant/MatterACL real verification and signed-in E2E NOT_RUN. R126 BLOCKED/NOT_RUN. Preserve PCS revision 140, `AL-R0-DEPLOY-001`, frozen SRS v1.1.15, standalone-first and F01–F36 except signing. No customer data, OAuth retry, merge or production deploy.
+
+## R226 — Platform plan metadata fail-closed boundary (2026-11-21 VN)
+
+- Stacked on R225 PR #269. Added explicit five-field allowlist to `listPlatformPlans` at server service boundary, strict shape/quota/status checks and 100-row cap. Five Node regression cases plus independent GitHub workflow; no customer data or credentials.
+- R225 audit-row check is **not proof of transactional rollback**; real D1 audit atomicity remains BLOCKED/NOT_RUN. R226 CI at latest HEAD pending verification, no synthetic PASS claim. Platform admin remains PARTIAL; real Worker session/API/UI integration and D1 migration NOT_RUN.
+- Preserve `state.current.active_task=AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, F01–F36 plus separate platform administration, no signing. No merge/production deployment. Local test rounds 0/5, fix rounds 0/5; OWNER_REAL_DEVICE_QA remains NOT_RUN.
+
+
+## R238 — Platform JSON media type fail-closed (2026-11-22 VN)
+
+- Stack after R237 PR #281. Fixed HTTP POST Content-Type parser to accept only application/json with optional UTF-8 charset; reject arbitrary parameters or unsupported charsets before mutation. Five synthetic Node cases and dedicated CI workflow authored. This is a narrow security fix, not Worker integration.
+- Test rounds 1/5 authored, execution NOT_VERIFIED; fix rounds 1/5. Platform Admin PARTIAL; verified Worker session, D1 migration, atomic audit, desktop/mobile and OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. No SRS v1.1.15 edits, no signing, customer data, merge or production deploy. Preserve state.current.active_task=AL-R0-DEPLOY-001.
+
+## R242 — Platform D1 batch result fail-closed guard (2026-11-22 VN)
+
+- Stacked on R241 PR #285. Fixed `changeTenantService` so absent/truncated/failed D1 batch results cannot be interpreted as a harmless no-op; both statements must report successful, nonnegative integer change counts. A no-op requires zero audit rows. An update with missing audit still raises an error; this does **not** establish real D1 rollback, which remains BLOCKED/NOT_RUN.
+- Added five Node synthetic tests and a dedicated CI workflow. Tests authored, execution NOT_VERIFIED; test round 1/5 authored, fix round 1/5. Real Worker session, D1 migration, atomic rollback proof and desktop/mobile Owner QA remain BLOCKED/NOT_RUN. Platform Admin PARTIAL.
+- Preserve `state.current.active_task=AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, 36 Fxx plus separate platform admin; no signing, merge, production deployment or customer data.
+
+
+## R257 — Fix two failing platform D1 fixture contracts (2026-11-23 VN)
+
+- Observed PR #300 exact HEAD `6bc96389b53b115057321e142f0d2fb3799bf6e0` CI: R232 expiry offset workflow #45058339777 FAILED 2/5 and R219 service-list workflow #45058340059 FAILED 2/5. Logs show positive cases throw `PLATFORM_INVALID_RESULT` because synthetic D1 `all()` response lacks required `success:true` envelope. Fixed only fixtures in `tests/platform_expiry_offset_gpt.test.mjs` and `deployment/cloudflare/tests/platform_admin_r219_gpt.test.mjs`; application fail-closed validation unchanged. Other failing R225 workflow #45058339809 remains outstanding, not claimed fixed.
+- Test observation 1/5, fix 1/5 for each affected fixture; local execution NOT_RUN, new HEAD CI NOT_VERIFIED pending Actions. This is CI fixture repair, not live Worker/D1 proof. Platform Admin PARTIAL; OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve `state.current.active_task=AL-R0-DEPLOY-001`, frozen SRS v1.1.15, F01–F36 and separate platform admin, no signing, no customer data, merge or production deploy.
+
+## R273 — Preserve oversize HTTP status if stream cancellation fails (2026-11-23 VN)
+
+- Stacked on R272 PR #314, branch `gpt/r273-platform-stream-cancel`. In `platform_http_gpt.mjs`, oversized request stream cancellation may reject; previously this escaped to `BAD_JSON` HTTP 400 instead of the intended fail-closed 413. Cancellation is now best-effort and the 2048-byte cap remains enforced before parsing or DB/audit mutation.
+- Added `tests/platform_stream_cancel_gpt.test.mjs` using a synthetic stream whose `cancel()` throws; expected 413 and `PAYLOAD_TOO_LARGE`. Authenticated Worker mount, real D1 rollback and mobile UI remain incomplete. Test authored 1/5, fix 1/5; local execution NOT_RUN, HEAD CI NOT_VERIFIED. OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN.
+- Preserve `state.current.active_task=AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, F01–F36 (18 P0/16 P1/2 P2) and separate platform admin. No signing, customer data, merge or production deploy.
+
+
+## R279 — Responsive platform administration DOM panel (2026-11-24 VN)
+
+- Stacked on R278 draft PR #320. Added opt-in `deployment/cloudflare/platform_admin_view_gpt.mjs`: responsive plans/tenant-service metadata cards, explicit refresh, empty/loading/error states, reason-code validation, suspend/activate/revoke controls, confirmation for revocation, no `innerHTML`, no tenant business fields, and safe failure feedback. Client still uses same-origin cookies and CSRF from R278; panel MUST be mounted only after real Worker-verified System Admin session.
+- Four synthetic DOM tests authored, dedicated Node CI workflow. Local tests NOT_RUN; exact HEAD CI NOT_VERIFIED until Actions completes. Test authored round 1/5, fix round 0/5. Platform Admin PARTIAL: not yet wired into authenticated Worker app, real D1 audit rollback, recovery flows and mobile device QA remain BLOCKED/NOT_RUN. This UI does not establish authorization.
+- Preserve `state.current.active_task=AL-R0-DEPLOY-001`, SRS v1.1.15 frozen, F01–F36 (18 P0/16 P1/2 P2) and separate platform admin. No signing, customer data, merge or production deployment.
+
+## R286 — Connect browser client to existing HTTP wire contract (2026-11-24 VN)
+
+- R285 exact HEAD 15ca17c0: Actions 45293697151, 45293697150, 45293697158 SUCCESS. Found actual client/server mismatch: client used PATCH /api/platform/tenant-services while adapter accepts POST /api/platform/services. Align client and tests with existing server route/method; preserve CSRF and metadata allowlist. Added cross-module regression with synthetic D1 and injected principal; not real Worker authentication.
+- Test authored 1 round, local execution NOT_RUN, fix 1 round; cumulative per-feature budget not verified, no reset implied. New HEAD CI NOT_VERIFIED. Platform Admin PARTIAL; Worker mount, real D1 atomicity, recovery, OWNER_REAL_DEVICE_QA BLOCKED/NOT_RUN. Preserve active_task AL-R0-DEPLOY-001, frozen SRS, F01–F36, no signing, merge, production deploy or customer data.

@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 99,
-  "updated_at": "2026-11-07T09:22:00.000Z",
+  "revision": 143,
+  "updated_at": "2026-11-26T17:48:00+07:00",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -29,7 +29,7 @@
     ],
     "product_map": {
       "status": "PARTIAL",
-      "summary": "AI support for 11 Vietnam legal workflows per Owner-supplied SRS v1.1.15 candidate; source archive hashes verified. Baseline not yet formally Owner-signed; no new scope."
+      "summary": "AI support for 11 Vietnam legal workflows per Owner-supplied SRS v1.1.15 candidate; source archive hashes verified. Baseline not yet formally Owner-signed; no new scope. Owner-approved target F01–F36 plus R216 platform administration; R289 inventory is provisional source-level assessment, not SRS mapping or product acceptance."
     },
     "architecture_map": {
       "status": "POC_ONLY",
@@ -1821,6 +1821,502 @@
           "Google Drive API enablement, refresh grant and signed-in PDF/DOCX E2E not yet independently verified"
         ],
         "owner_acceptance": "PENDING"
+      },
+      {
+        "id": "AL-R0-MATTER-R108-RENAME",
+        "title": "R108 versioned matter title management with deny-overrides MatterACL and append-only audit",
+        "status": "QA_DEPLOYED_SOURCE_CI_PASS_OWNER_REAL_E2E_NOT_RUN",
+        "priority": "P1",
+        "scope": "QA synthetic matter metadata only; no Google/OneDrive/OAuth changes, no legal file content, no production. Private SRS v1.1.15 mapping not available in this run.",
+        "acceptance": [
+          "Authenticated writer may rename only a matter within the current tenant and current ACL version",
+          "Explicit deny and revoked write grants override allow; cross-tenant and anonymous requests fail closed",
+          "Optimistic version conflict produces 409, not stale overwrite",
+          "SQLite title update and immutable audit-event trigger are in the same transaction",
+          "Mobile and desktop inline rename, cancel, validation and conflict-refresh work",
+          "Owner verifies real QA login, rename, reload, denial and audit before final acceptance"
+        ],
+        "test_results": {
+          "ci": "PASS_9_OF_9_EXECUTED",
+          "ci_run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42394048779",
+          "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/155",
+          "source_contract": "PASS",
+          "sqlite_real_migration_acl_audit": "PASS",
+          "standalone_browser_simulated": "PASS",
+          "live_qa_migration": "PASS_ONE_EXISTING_MATTER_PRESERVED",
+          "qa_web_deployment": "fa3c8962-fd7f-4abe-a701-f65a593ec335_100_PERCENT",
+          "qa_backend_deployment": "b806d232-14c4-46df-a38e-b840b1e30a63_100_PERCENT",
+          "qa_bindings_and_unrelated_modules": "PASS_VERIFIED_BY_READBACK",
+          "anonymous_qa_health": "PASS",
+          "authenticated_owner_rename_e2e": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "blockers": [
+          "Real authenticated mobile/desktop rename, UI conflict and role denial have not been exercised by an Owner-signed-in browser.",
+          "Original private SRS v1.1.15 artifact not available for exact mapping; do not infer acceptance of all 11 UC."
+        ],
+        "owner_acceptance": "PENDING"
+      },
+      {
+        "id": "AL-R0-LEGAL-R109-001",
+        "title": "R109: synthetic text QA workflows for 11 legal UCs with Workers AI, MatterACL and no file storage",
+        "status": "QA_DEPLOYED_SOURCE_CI_PASS_PROVIDER_SMOKE_PASS_OWNER_E2E_NOT_RUN",
+        "priority": "P1",
+        "scope": "Only fictional pasted text, 9 unverified AI drafts and 2 local sample-text searches. No Google Drive/OneDrive, real client data, official law/case corpus or production release.",
+        "acceptance": [
+          "Signed-in user with current MatterACL may submit only explicit fictional sample for one of 11 known UC codes",
+          "POST same-origin/CSRF and denial across tenant, revoked ACL, expired sessions, unsupported roles",
+          "R0 UC03/04/07 and R1 UC01/02/05/06/08/09 return bounded AI draft only, requiring human review",
+          "UC10/11 search ONLY provided local text, never fabricate official case/statute results",
+          "Quota 12 model calls/user/day in D1 with no source/answer persistence",
+          "Provider failure returns honest error, no fake AI/legal citations",
+          "Mobile and desktop source comparison and copy work; real owner account acceptance still required"
+        ],
+        "test_results": {
+          "source_ci_pre_docs": "PASS_9_OF_9_RUN_42397098574",
+          "latest_head_ci": "PENDING_POST_DOCS_AND_SAMPLE",
+          "provider_smoke_synthetic": "PASS_REAL_CLOUDFLARE_AI_TEXT_VIETNAMESE",
+          "cf_ai_binding": "PASS_BACKEND_QA_AI_NAMED_BINDING_PRESERVED_10_OLD_BINDINGS",
+          "qa_d1_migration": "PASS_QUOTA_TABLE_5_COLUMNS_EMPTY_AT_INSTALL_ONE_OLD_MATTER_PRESERVED",
+          "qa_backend": "PASS_100_PERCENT_DEPLOY_8cee0745-05a1-45a1-bf36-1bdd934bc223_10_MODULES",
+          "qa_web": "PASS_100_PERCENT_DEPLOY_132f1e4d-44c7-40a3-ad74-bc0d9d1e51b4_27_MODULES",
+          "qa_source_readback": "PASS_UNRELATED_OAUTH_DRIVE_AND_ACCOUNT_MODULES_PRESERVED",
+          "qa_health": "PASS_REAL_BROWSER_RENDERING",
+          "authenticated_mobile_ai_11_uc": "NOT_RUN",
+          "verified_official_legal_research": "NOT_IMPLEMENTED",
+          "docx_pdf_file_workflow": "NOT_IMPLEMENTED_PAUSED_STORAGE",
+          "production": "UNTOUCHED"
+        },
+        "blockers": [
+          "Owner authenticated real Android and desktop AI QA E2E NOT_RUN because browser-rendering /login and /app probes are HTTP 429; CI is not Owner acceptance.",
+          "No verified official legal statute/judgment corpus or temporal validity; UC10 and UC11 only local sample search.",
+          "Original private SRS v1.1.15 not available for exact clause/test-ID mapping; do not claim all 11 UCs complete.",
+          "No real DOCX Track Changes/Word UI acceptance or PDF/DOCX integrated upload. Google/OneDrive paused by Owner."
+        ],
+        "owner_acceptance": "PENDING"
+      },
+      {
+        "id": "AL-R0-LEGAL-R110-001",
+        "title": "R110 secure source-anchored QA AI drafts and size-bound streaming without duplicate UI",
+        "status": "QA_DEPLOYED_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "priority": "P1",
+        "scope": "Hardening the already deployed R109 11-UC synthetic-text QA API only; no new app, no Drive/OneDrive, no client files and no production.",
+        "acceptance": [
+          "When a model draft cites [A###] or [B###], the cited anchor must exist in the supplied QA source map or the entire output fails closed",
+          "Source JSON stream is byte bounded at 36KB even without Content-Length; excess input cannot reach model or quota",
+          "Cloudflare Workers AI object-shaped {answer} response is accepted only with bounded, valid plain text",
+          "Existing per-Matter read ACL, 12/day/model-user quota and QA session security remain unchanged",
+          "QA content-only deploy preserves all 9 unrelated modules, AI/D1/OAuth bindings, existing matters and quotas",
+          "Owner authenticated browser QA and legal reviewer checks still require human acceptance"
+        ],
+        "test_results": {
+          "ci": "PASS_9_OF_9",
+          "ci_run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42407576294",
+          "source_anchor_qa_node": "PASS_FAKE_AND_GENUINE_REFERENCES",
+          "stream_no_content_length": "PASS_36KB_BOUND",
+          "source_and_quota_regressions": "PASS",
+          "live_backend": "QA_DEPLOYED_301ecbe7-5a2e-47f9-9962-56b44ad2b26f",
+          "unchanged_modules": "PASS_9_OF_9",
+          "bindings_preserved": "PASS",
+          "qa_health": "PASS_BROWSER_RENDERING",
+          "live_d1": "PASS_ONE_MATTER_ONE_AI_QUOTA_ROW_RETAINED",
+          "owner_real_authenticated_ai_e2e": "NOT_RUN",
+          "independent_legal_accuracy": "NOT_RUN",
+          "production": "UNTOUCHED"
+        },
+        "blockers": [
+          "Model-supported draft conclusions remain unverified for legal accuracy even when explicit source anchor IDs exist.",
+          "No real Owner signed-in Android/desktop 11-UC E2E; user acceptance remains pending.",
+          "SRS v1.1.15 private baseline requires exact mapping before full release claim."
+        ],
+        "owner_acceptance": "PENDING"
+      },
+      {
+        "id": "AL-R0-LEGAL-R138-001",
+        "title": "R138 legal QA UI prevents previous-tenant AI responses for all UC01–UC11 and directly opens workflow from function menu",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "priority": "P0",
+        "scope": "Source-only synthetic QA workflow hardening for all 11 existing UC text paths; no official legal source corpus, customer file processing or expanded SRS scope.",
+        "acceptance": [
+          "Late previous-tenant /api/qa/legal/run responses, including 200, 401 and delayed JSON, never repaint, trigger redirect or leak/copy previous AI text after workspace rotation.",
+          "Late previous-tenant /api/qa/matters option list or 401 cannot contaminate active tenant selection.",
+          "All 11 function menu buttons open the corresponding UC option directly, without showing false product-readiness claims.",
+          "Actual browser and tenant-session E2E, model provider traces, SRS acceptance and Owner signoff remain separate gates."
+        ],
+        "tests": {
+          "source_node_vm": "PASS_4_CASES_ON_INITIAL_CLOUDFLARE_CONTRACT_CI_42808425713",
+          "initial_full_ci": "FAIL_42808425713_UNIT_AND_BROWSER_AFTER_DROPPED_QUERYSELECTORALL_DOLLAR",
+          "repair": "FIXED_SOURCE_COMMIT_ae516803fd051b79cff067beff57fe23dff58d9f",
+          "post_fix_full_ci": "PASS_9_OF_9_EXECUTING_JOBS_AT_PREVIOUS_DOC_HEAD_2d08221f5427f1c9432c2c64ade4d312f193406d_ACTIONS_42809293021",
+          "authenticated_remote_browser": "NOT_RUN_R126_GATE_BLOCKED",
+          "provider_and_legal_e2e": "NOT_RUN",
+          "remote_provider_and_owner_acceptance": "NOT_RUN"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/209",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42808425713",
+          "deployment/cloudflare/tests/r138_legal_tenant_gpt.test.mjs",
+          "web/r0-preview/legal.js",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42809293021"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "All 11 UC endpoints on stacked QA code are source-only text drafts/local searches with synthetic consent, not 11 completed SRS workflows. Production and QA deploy not performed."
+      },
+      {
+        "id": "AL-R0-LEGAL-R139-001",
+        "title": "R139 all eleven UC QA source citations, numeric evidence and model truncation diagnostics",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "priority": "P0",
+        "scope": "Evidence warnings and fail-closed truncated model results for existing source-only synthetic QA workflows; does not verify legal facts.",
+        "acceptance": [
+          "All 11 UC QA responses carry evidence diagnostics without exposing source text or numerical values in metadata.",
+          "Source-based model tasks flag missing A/B citations; UC03/07 flag numeric changes; UC10/11 are sample-only local search.",
+          "Explicit provider max-token truncation cannot return a misleading successful draft."
+        ],
+        "tests": {
+          "all_11_uc_api": "PASS_CLOUDFLARE_CONTRACT",
+          "source_node": "PASS_R139_REGRESSION",
+          "final_head_ci": "PASS_ACTIONS_42811334883",
+          "qa_signed_in": "NOT_RUN",
+          "legal_approval": "NOT_RUN"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/210",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42811334883"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "Draft branch only; no QA/production deployment; no official corpus, PDF/DOCX E2E or legal verification."
+      },
+      {
+        "id": "AL-R0-LEGAL-R140-001",
+        "title": "R140 local TXT source A/B ingestion into eleven UC QA workflows without provider storage",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "priority": "P0",
+        "scope": "User-selected local UTF-8 TXT (30–5000 characters and <=20 KB) becomes pasted source text only; PDF/DOCX and cloud-provider uploads remain separate.",
+        "acceptance": [
+          "Selected file remains on-device until explicit Matter + affirmative consent + submit.",
+          "Invalid, oversized or undecodable text is rejected without truncation.",
+          "Old tenant delayed local reads cannot repopulate source; hidden source B is never transmitted on other UC."
+        ],
+        "tests": {
+          "source_node_vm": "PASS_4_OF_4_ACTIONS_42812630272_CLOUDFLARE_CONTRACT",
+          "full_ci": "PASS_9_OF_9_ACTIONS_42812986365",
+          "remote_mobile_browser": "NOT_RUN",
+          "actual_customer_data": "PROHIBITED"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/211",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42812630272"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "Draft branch only; no persistent source storage; no QA/production deploy or SRS changes."
+      },
+      {
+        "id": "AL-R0-UC04-R141-001",
+        "title": "R141 UC04 summary paragraph citation coverage and uncited source review UI",
+        "priority": "P0",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "scope": "For user-provided source-only synthetic QA summary, show which A paragraph anchors appear in generated text; does not claim semantic completeness.",
+        "acceptance": [
+          "UC04 response reports total/cited/uncited A anchor IDs without exposing raw source in diagnostics.",
+          "UC04 displays explicit incomplete coverage warning for reviewer; no unsupported legal verification claim.",
+          "Synthetic source tests for partial/full references and API results pass in CI."
+        ],
+        "tests": {
+          "pure_node": "PASS_ACTIONS_42813941624",
+          "api": "PASS_ACTIONS_42813941624",
+          "browser_qa_authenticated": "NOT_RUN_R126_GATE_BLOCKED",
+          "legal_review": "NOT_RUN"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/212",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42813680633"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "UC04 substantive document/PDF/Word and semantic coverage approval remain NOT_RUN; no merge/deploy/secret/customer data."
+      },
+      {
+        "id": "AL-R0-UC03-R142-001",
+        "title": "R142 UC03 review source vs translated paragraphs with per-anchor QA pairing and missing/duplicate alarms",
+        "priority": "P0",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "scope": "Existing authorized user-pasted synthetic source-only UC03; no PDF/DOCX Word layout fidelity, legal certification, provider acceptance or expanded SRS.",
+        "acceptance": [
+          "Model receives a strict per-source-anchor [A#] draft format and API provides ordered source vs suggested translation review rows.",
+          "Missing/duplicate/unstructured/unknown paragraph labels never become silently matched or approved translations.",
+          "Mobile UI displays two-column desktop/single-column mobile review; only plain text is rendered; switching tenants clears source and draft immediately.",
+          "Actual signed-in Cloudflare browser/provider/file and Owner legal quality acceptance remain separate release gates."
+        ],
+        "tests": {
+          "helper_unit": "PASS_4_OF_4_ACTIONS_42816413502_CLOUDFLARE_CONTRACT",
+          "browser_source_vm": "PASS_2_OF_2_ACTIONS_42816413502_CLOUDFLARE_CONTRACT",
+          "authenticated_api_synthetic": "PASS_ACTIONS_42816413502_CLOUDFLARE_CONTRACT",
+          "entire_ci": "PASS_9_OF_9_ACTIONS_42816413502_CODE_HEAD_115f03d81a67c34b0142c691ab674807acfe7c6e",
+          "live_provider_and_tenant_e2e": "NOT_RUN_R126_BLOCKED",
+          "customer_data": "PROHIBITED"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/213",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42816413502"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "R142 code HEAD CI PASS 9/9; current PCS update is docs-only and still needs final-head CI. Draft, no merge/deploy or user acceptance."
+      },
+      {
+        "id": "AL-R0-UC07-R144-001",
+        "title": "R144 UC07 text-only source-to-grammar proposed edits per paragraph and literal numeric change QA",
+        "priority": "P0",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "scope": "Existing authenticated source-only synthetic-text UC07; no Word file mutation, DOCX Track Changes, PDF, legal accuracy approval or SRS expansion.",
+        "acceptance": [
+          "For each [A#] paragraph, display original and proposed grammar with missing/duplicate/unstructured warnings rather than treating arbitrary output as a complete revision.",
+          "Review exact numbers by paragraph so swapping numbers across source segments triggers a warning even if global token totals match.",
+          "Treat model text as inert, distinguish unchanged/changed and never modify customer source or file automatically; clear results on workspace switch.",
+          "All real signed-in Cloudflare two-account and Word-document E2E and Owner acceptance remain gated."
+        ],
+        "tests": {
+          "helper_unit": "PENDING_CURRENT_CI_43304706691",
+          "authenticated_api_synthetic": "PASS_FIRST_CI_43304512580",
+          "browser_source_vm": "FAIL_FIRST_CI_43304512580_ANCHOR_REGEX_FIXED_228b90f4_PENDING_CURRENT_CI",
+          "full_ci": "PASS_9_OF_9_ACTIONS_43305252972_FINAL_HEAD_c89e1bbec8fd6e5fd06cec33962f86c3e231f69a",
+          "live_cloudflare_signed_in": "NOT_RUN_R126_BLOCKED",
+          "actual_docx_pdf": "NOT_RUN"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/214",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43304512580",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43304706691"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "R144 original CI caught doubled UI regex, fixed; PCS active task protected, corrected; final-head PR214 CI #43305252972 SUCCESS 9/9 code/source jobs. No live signed-in E2E or customer data, no merge/deploy."
+      },
+      {
+        "id": "AL-R1-UC02-R145-001",
+        "title": "R145 UC02 source-anchored contract clause review with exact quote check per paragraph",
+        "priority": "R1",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "scope": "Existing authorized QA user-pasted fictional text, not official legal corpus, actual Word/PDF contract ingestion, legal advice or full SRS UC acceptance.",
+        "acceptance": [
+          "For every source [A#] paragraph request one literal quote, provisional observation and lawyer verification question.",
+          "Flag omissions, duplicates, incomplete output, unknown labels, and quotes from a different source paragraph; exact quote match is NOT proof of correct legal risk claim.",
+          "Show original clause, quote, observation and question on mobile/desktop as inert text; clear on tenant workspace changes.",
+          "Preserve existing MatterACL/session/quota and no source/AI result DB persistence; no cross-tenant E2E claims."
+        ],
+        "tests": {
+          "helper_unit": "PASS_5_OF_5_CLOUDFLARE_CONTRACT_43306356358",
+          "authenticated_api_synthetic": "PASS_2_CASES_CLOUDFLARE_CONTRACT_43306356358",
+          "browser_source_vm": "PASS_2_CASES_CLOUDFLARE_CONTRACT_43306356358",
+          "full_ci": "PASS_9_OF_9_CODE_HEAD_62d276671ee1707e9fabbdadad13b4dc10d50feb_ACTIONS_43306356358",
+          "real_multiaccount_cloudflare": "BLOCKED_NOT_RUN_R126",
+          "user_uploaded_docx_pdf": "NOT_RUN"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/215",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43306356358"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "R145 code HEAD CI 9/9 SUCCESS; PCS-only revision 124 follow-up needs its own final-head verification. No real Cloudflare signed-in or legal document acceptance, all PRs remain Draft."
+      },
+      {
+        "id": "AL-R1-UC01-R146-001",
+        "title": "R146 UC01 source-grounded drafting review, literal quotes and no newly invented numeric clauses",
+        "priority": "R1",
+        "status": "SOURCE_CI_PASS_OWNER_AUTH_E2E_NOT_RUN",
+        "scope": "Authorized synthetic-pasted source QA only, not full SRS drafting, approved contract, Word/PDF edit or official legal corpus.",
+        "acceptance": [
+          "Require each [A#] source paragraph to map to a proposed clause, exact source excerpt and independent question requiring lawyer verification.",
+          "Flag absent, duplicate, incomplete, unstructured, unknown and wrong-paragraph citations, plus numeric tokens invented within each proposed clause.",
+          "Preserve existing authenticated MatterACL/session/quota; avoid D1 persisting source text or draft and only render inert text on desktop/mobile.",
+          "No silent success for omitted structured metadata, no automatic document edit and no previous-tenant results on workspace rotation."
+        ],
+        "tests": {
+          "helper_unit": "PASS_5_OF_5_CLOUDFLARE_CONTRACT_43308352589",
+          "authenticated_api_synthetic": "PASS_2_CLOUDFLARE_CONTRACT_43308352589",
+          "browser_source_vm": "PASS_2_CLOUDFLARE_CONTRACT_43308352589",
+          "full_ci": "PASS_9_OF_9_SOURCE_CODE_HEAD_4b86aa40b0f21f9f20e27b926182c5f4828ffb54_ACTIONS_43308352589",
+          "live_cloudflare_two_account": "BLOCKED_NOT_RUN_R126",
+          "actual_docx_pdf": "NOT_RUN"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/216"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "Source code HEAD CI #43308352589 COMPLETED SUCCESS 9 executing jobs, 21 optional SKIPPED. No source or owner acceptance, real Cloudflare signed-in and legal Word/PDF E2E NOT_RUN. PCS documentation-only new HEAD CI separate."
+      },
+      {
+        "id": "AL-SCOPE-R147-001",
+        "title": "R147 Owner-requested 36-feature F01–F36 register and explicit exclusion of digital/electronic signing",
+        "priority": "P0",
+        "status": "SCOPE_REGISTERED_CONTRACT_CI_PASS_FEATURES_NOT_RUN",
+        "scope": "All F01–F36 in Owner-provided Mihy Law functional catalog; F31 excludes digital/electronic signing and certificate workflows but retains email/calendar/Word/storage/API; detailed private SRS v1.1.15 not changed.",
+        "acceptance": [
+          "Exactly 36 codes; P0 18, P1 16, P2 2; 7 source groups and personal/office mode cells transcribed without dropping any function.",
+          "F31 remains in scope for non-signing integrations, signing-related components explicitly out of scope; all F01–F36 statuses NOT_ASSESSED and tests NOT_RUN until implemented.",
+          "Changes registered in srs_changed_gpt_v1.md, source exact sha256 traced, no unapproved SRS revision.",
+          "P0 security gates preserve Tenant isolation, no SaaS SysAdmin business-data visibility, lawyer review prior publication; Owner final acceptance last."
+        ],
+        "tests": {
+          "catalog_contract": "PASS_6_OF_6_CLOUDFLARE_CONTRACT_ACTIONS_43310316716",
+          "feature_live_e2e": "NOT_RUN_FOR_ALL_36_PENDING_SRS_MAPPING",
+          "authorized_multiaccount_e2e": "BLOCKED_NOT_RUN_R126",
+          "customer_data": "PROHIBITED_UNTIL_GATES",
+          "full_ci": "PASS_9_OF_9_CODE_HEAD_065b007318780b042340694e6542e3730b6496c8_ACTIONS_43310316716",
+          "final_pcs_head_ci": "PENDING_REV128_DOCS_ONLY"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/217",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43310316716",
+          "pcs/mihy_scope_gpt_v1.json",
+          "pcs/srs_changed_gpt_v1.md"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "Owner 36-feature target and no-signature exception recorded; full code-head CI #43310316716 PASS 9/9, 21 optional jobs skipped. None of the 36 business features was accepted by this scope-only test. PCS rev128 docs-only CI separate."
+      },
+      {
+        "id": "AL-P0-F08-R148-001",
+        "title": "R148 F08 P0 source-anchored legal data extraction (subject/obligation/money/deadline) fictional text vertical slice",
+        "priority": "P0",
+        "status": "SOURCE_CI_PASS_F08_FULL_E2E_NOT_RUN",
+        "scope": "Authenticated user-provided fictional text QA, one Matter, no PDF/DOCX scan OCR, no structured persistent files or evidence management.",
+        "acceptance": [
+          "F08 is selectable and scoped to MatterACL and session; quota is charged only to authorized AI requests and no source/draft is persisted to D1.",
+          "Server requires per-source A# literal quotes and exact extracted values for CHU_THE/NGHIA_VU/SO_TIEN/THOI_HAN; detect fabricated amounts, cross-segment quotes, invalid/duplicate/missing fields.",
+          "QA UI renders inert sourced extraction data and warnings, clears on tenant switch, does not treat missing review metadata as passed.",
+          "F08 as a complete SRS feature remains NOT_RUN/NOT_ACCEPTED until real documents, multi-source/scan OCR, legal quality, lawyer approval and owner two-account E2E."
+        ],
+        "tests": {
+          "helper_unit": "PASS_6_OF_6_ACTIONS_43315989785_CLOUDFLARE_CONTRACT",
+          "authenticated_api_synthetic": "PASS_2_OF_2_ACTIONS_43315989785_CLOUDFLARE_CONTRACT",
+          "browser_source_vm": "PASS_2_OF_2_ACTIONS_43315989785_CLOUDFLARE_CONTRACT",
+          "full_ci": "PASS_9_OF_9_ACTIONS_43315989785_CODE_HEAD_736e33a263a71c26d2725f8b210e70f73e9feef2",
+          "real_signed_in_cloudflare": "BLOCKED_NOT_RUN_R126",
+          "pdf_docx_scan_ocr": "NOT_RUN",
+          "owner_acceptance": "PENDING"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/218",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43315989785"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "R148 source-only code CI SUCCESS 9/9, helper 6/6, authorized synthetic API 2/2, browser source JS VM 2/2. Full F08 is NOT DONE; Owner signed-in and PDF/DOCX/OCR E2E NOT_RUN. Post-ci PCS change requires independent final HEAD CI confirmation."
+      },
+      {
+        "id": "AL-P0-F07-R149-001",
+        "title": "R149 F07 authenticated PDF/DOCX in-memory preview and explicit approved source A handoff",
+        "priority": "P0",
+        "status": "SOURCE_CI_PASS_F07_FULL_E2E_NOT_RUN",
+        "scope": "Fictional QA PDF/DOCX <=1.5MB, UC03/04/07/F08, no persistent upload, no real customer files, no scan OCR promise.",
+        "acceptance": [
+          "Bounded multipart bytes, extension/MIME/magic, role+MatterACL before and after conversion, quota and no file content persistence.",
+          "UI reads file only on explicit read click after Matter selection and fictional-data consent, previews text without triggering AI, second action populates source A and resets model consent.",
+          "Stale conversion responses cannot reveal extracted text after tenant/workspace, task or Matter change; only inert plain text render.",
+          "Negative tests for unauthorized access, quota, malformed/oversized files, provider failure and revocation; actual signed-in Cloudflare and genuine PDF/DOCX OCR QA remain NOT_RUN."
+        ],
+        "tests": {
+          "multipart_node": "PASS_5_OF_5_ACTIONS_43317844290_CLOUDFLARE_CONTRACT",
+          "real_browser_source_vm": "PASS_2_OF_2_ACTIONS_43317844290_CLOUDFLARE_CONTRACT",
+          "full_ci": "PASS_9_OF_9_ACTIONS_43317844290_CODE_HEAD_0fd924d14dea524d07da1f532b3a64af97463ab6",
+          "provider_live_conversion": "NOT_RUN",
+          "real_signed_in_cloudflare": "BLOCKED_NOT_RUN_R126",
+          "scan_ocr_accuracy": "NOT_RUN",
+          "owner_acceptance": "PENDING"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/219",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43317844290",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/187"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "Actual code CI PASS 9/9 at 0fd924d1, multipart 5/5 and source browser VM 2/2. Docs-only PCS final-head CI requires separate verification. Full F07, provider live and R126 2-account E2E NOT_RUN; no production merge/deploy."
+      },
+      {
+        "id": "AL-P0-F09-R152-001",
+        "title": "R152 F09 P0 matter source question answering with literal citations and explicit insufficient evidence",
+        "priority": "P0",
+        "status": "SOURCE_CI_PASS_F09_FULL_E2E_NOT_RUN",
+        "scope": "One authorized Matter / user-supplied fictional text; reuse manual PDF/DOCX review-only source import, not full per-file case document search/index, legal source validation, audit or lawyer approval.",
+        "acceptance": [
+          "UC09 structured answer and independent check question; model must cite exact excerpts from corresponding [A#] paragraphs, or explicitly say KHÔNG ĐỦ CĂN CỨ without inventing citations.",
+          "Deterministic negative flags for wrong-paragraph quote, fabricated citation, missing/duplicate/unstructured evidence, contradictory refusal; literal quote match must not be treated as semantic/legal certainty.",
+          "Source-to-answer review visible on mobile/desktop as inert text. Missing or mismatched review blocks one-click copy; tenant/workspace switching clears previous output.",
+          "F07 approved PDF/DOCX preview can be used as source A for UC09 only after separate consent; no automatic model call or source persistence.",
+          "Permission, rate limit and model provider cases tested with synthetic fixtures, live signed-in real account E2E remains BLOCKED/NOT_RUN and legal completeness must be lawyer/Owner checked."
+        ],
+        "tests": {
+          "helper_unit": "PASS_6_OF_6_ACTIONS_43351393652_CLOUDFLARE_CONTRACT",
+          "authenticated_api_synthetic": "PASS_3_OF_3_ACTIONS_43351393652_CLOUDFLARE_CONTRACT",
+          "browser_source_vm": "PASS_2_OF_2_ACTIONS_43351393652_CLOUDFLARE_CONTRACT",
+          "pdf_docx_source_preview": "PASS_1_OF_1_ACTIONS_43351393652_CLOUDFLARE_CONTRACT",
+          "full_ci": "PASS_9_OF_9_ACTIONS_43351393652_CODE_HEAD_14fd89e20e973c35904e84b06eba9a244ce2ee0c",
+          "live_signed_in_two_accounts": "BLOCKED_NOT_RUN_R126",
+          "official_law_sources_and_case_files": "NOT_RUN",
+          "owner_acceptance": "PENDING"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/222",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43351051659",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43351393652"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "R152 code HEAD completed 9/9 SUCCESS, 21 optional skipped. 6 helper, 3 API, 2 real JS browser VM, 1 PDF review-only conversion synthetic tests PASS. Valid explicit refusal no false citation-missing flag; unsupported F09 one-click copy disabled. Not complete F09: real signed-in/cloud/OCR/official sources/audit/Owner E2E NOT_RUN. PCS docs-only follow-up requires final-head CI separately."
+      },
+      {
+        "id": "AL-P0-F07-R154-001",
+        "title": "R154 F07 P0 multi-file 1–3 PDF/DOCX QA manual review, bounded all-or-none source intake",
+        "priority": "P0",
+        "status": "SOURCE_CI_PASS_F07_FULL_E2E_NOT_RUN",
+        "scope": "Authorized fictional PDF/DOCX files only; existing per-file cloud conversion and tenant MatterACL; no permanent attachment storage, true scan OCR, official legal evidence or full document fidelity.",
+        "acceptance": [
+          "One user selection accepts 1–3 files up to 1.5MB each, unique names; file selection itself does no network request.",
+          "Explicit Matter plus QA fictional consent before sequential existing authorized extraction API per file; each conversion costs one normal daily QA allowance.",
+          "Keep partial conversions ephemeral; show/allow source A only when all selected files convert successfully and combined body <=5000 characters; do not send filename labels to model as legal facts.",
+          "Reject first error and stop remaining file conversions; stop as soon as aggregate source exceeds limit, avoiding further quota charges.",
+          "Retain independent user approval after preview and separate AI-run consent; tenant/Matter/UC switch and consent revocation must discard or suppress stale output.",
+          "Cross-account real Cloudflare E2E, genuine PDF/DOCX and scan/OCR/legal fidelity, Owner acceptance are pending independent release gates."
+        ],
+        "tests": {
+          "browser_source_vm": "PASS_7_OF_7_NEW_R154_ACTIONS_43364173960_CLOUDFLARE_CONTRACT",
+          "inherited_backend_multipart_acl": "PASS_ACTIONS_43364173960_CLOUDFLARE_CONTRACT_REGRESSION",
+          "full_ci": "PASS_9_OF_9_CODE_HEAD_4343af271e81d5f76e3d18de992b04bbb47fc27d_ACTIONS_43364173960",
+          "real_signed_in_cloudflare_two_accounts": "BLOCKED_NOT_RUN_R126",
+          "actual_pdf_docx_scan_ocr": "NOT_RUN",
+          "owner_acceptance": "PENDING"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/224",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43364173960"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "R154 code CI #43364173960 completed SUCCESS 9/9 executed jobs, 21 skipped. 7 new real source-browser VM multi-file tests passed (including quota-saving early abort, tenant switch, consent revoke). F07 and F09 remain incomplete pending real tenant/account OCR/file persistence and Owner acceptance. PCS doc-only final-head verification remains separately pending."
+      },
+      {
+        "id": "AL-P0-F20-R155-001",
+        "title": "R155 F20 filename-only lookup for existing Matter-linked document receipts with Tenant/MatterACL guards",
+        "priority": "P0",
+        "status": "SOURCE_CI_PASS_F20_FULL_E2E_NOT_RUN",
+        "scope": "Existing synthetic QA qa_document_receipts joined to qa_file_links; search receipt file names only. No PDF/DOCX full-content index, new provider grant, file import or SRS scope expansion.",
+        "acceptance": [
+          "Endpoint lists/searches only existing receipts by current authorized Matter with active read allow-minus-deny ACL and tenant scope, no query cross-tenant.",
+          "Bounded 2–80 character literal name search with parameterized SQLite instr; wildcard characters are literal, no SQL interpolation.",
+          "At most 50 rows returned; signal whether another result exists instead of silently implying exhaustiveness.",
+          "QA documents UI labels filename-only search clearly, offers explicit button/Enter, and suppresses stale results upon changing query, Matter or tenant; preserves previous UI under cached-HTML asset skew.",
+          "F20 full functionality, provider upload/recovery, legal case full-text search, audit and real signed-in two-account E2E remain NOT_RUN/BLOCKED; no customer data or automatic deployment."
+        ],
+        "tests": {
+          "backend_filename_sql_and_acl": "PASS_6_OF_6_ACTIONS_43376705145_CLOUDFLARE_CONTRACT",
+          "browser_source_vm": "PASS_5_OF_5_ACTIONS_43376705145_CLOUDFLARE_CONTRACT",
+          "previous_document_ui_regression": "PASS_ACTIONS_43376705145_CLOUDFLARE_CONTRACT",
+          "full_ci": "PASS_9_OF_9_CODE_HEAD_11fbc296452f2ab041a4137b8c2a257946888baf_ACTIONS_43376705145",
+          "real_d1_and_drive_after_grant": "NOT_RUN",
+          "cross_tenant_live_signed_in": "BLOCKED_NOT_RUN_R126",
+          "owner_acceptance": "PENDING"
+        },
+        "evidence": [
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/225",
+          "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/43376705145"
+        ],
+        "owner_acceptance": "PENDING",
+        "notes": "R155 code HEAD CI #43376705145 SUCCESS 9/9 executing jobs, 21 optional skipped; 6 backend SQL/ACL synthetic tests and 5 browser-script VM tests PASS, existing R75 Google Drive UI regression PASS after cached HTML fix. Filename metadata only, not fulltext/real stored provider E2E. PCS-only follow-up needs separate final-head CI."
       }
     ],
     "features": [
@@ -2447,12 +2943,32 @@
       {
         "path": "web/qa/drive-inline.js",
         "visibility": "PUBLIC_SAFE_JS_BROWSER_ONLY_NO_TOKENS"
+      },
+      {
+        "path": "pcs/function_audit_gpt_v1.md",
+        "visibility": "PUBLIC_SAFE_TECHNICAL_METADATA_ONLY"
+      },
+      {
+        "path": "deployment/cloudflare/src/platform_login_gpt.mjs",
+        "visibility": "PUBLIC_SAFE_CODE_ONLY"
+      },
+      {
+        "path": "deployment/cloudflare/tools/provision_platform_qa_gpt.py",
+        "visibility": "PUBLIC_SAFE_CODE_ONLY_NO_CREDENTIALS"
+      },
+      {
+        "path": "deployment/cloudflare/src/platform_catalog_gpt.mjs",
+        "visibility": "PUBLIC_SAFE_CODE_ONLY"
+      },
+      {
+        "path": "deployment/cloudflare/src/case_metadata_gpt.mjs",
+        "visibility": "PUBLIC_SAFE_CODE_ONLY"
       }
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R102 Owner showed Google account chooser every time selecting Save, despite organization Drive connection showing success and disconnect. Reviewed QA browser GIS: client.requestAccessToken({prompt:'consent'}) explicitly re-forced Google consent when browser token expired, page reloaded or workspace switched. Organizational server-side Drive OAuth grant and browser-scoped direct-upload access token are distinct; cannot expose tenant refresh token to browser. PR #147 merged c1206d31e5b8904044a9894f655b82589a5f5f3b, final CI #42358969331 PASS 9/9. Browser GIS now requests prompt:'' (Google saved-grant reuse), continues using in-memory token within expiry; regression simulates two successive uploads with one token request and no forced chooser. Cloudflare website QA deployment fbbdc99d-136f-4ad3-92b1-22b9fc8ac1ab 100%, 26 modules, QA_AUTH preserved, backend OAuth/Drive/D1 and production unchanged. Anonymous Browser Rendering /app#documents login gate PASS; Owner signed-in real Google popup suppression E2E NOT_RUN. SRS v1.1.15 unchanged.",
-      "next_action": "Owner test only at https://ai-law-web-qa.iaict-platform.workers.dev/app#documents after reloading website once: select a synthetic PDF/DOCX and save twice to same QA matter, verify Google account chooser not repeatedly forced, confirm two independent receipts in D1 and Drive and ability to download. If Google still prompts despite prompt:'', report whether tab/page was refreshed, whether browser switched workspace, and account chooser details; investigate Google session restrictions or same OAuth client user mismatch. Existing tenant Connect/Disconnect still control backend refresh grant; never export it to users. Preserve file size <=1.5MB, ACL, no production/customer data; Owner acceptance pending.",
+      "last_completed_step": "R291 PR #333 implements QA plans create/update/retire, pending subscription and license change, append-only transactional catalog audit and responsive UI; exact code head 87ebb0a4 workflow 45804242321 SUCCESS. R292 PR #334 selectively restores R116 case metadata (without paused storage), complete create and separate responsive detail page, field update/version checks, immutable field-name audit, hide tombstone invalidating existing ACL version; R290 trigger-safe session issuance/logout and bounded matter body hardening. Exact code head 4ae12c7b CI 45804654201 queued when checked.",
+      "next_action": "Verify R292 and full consolidated integration CI, fix regressions, then implement remaining F18/F19/F22/F32/F33/F36 and platform verified account recovery/administration in larger cohesive packages. Keep explicit storage pause; no signing, real data, automatic main merge or production deployment. Do not overwrite newer AI/security code with older R126 branch.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -2490,7 +3006,11 @@
         "R66 as of 2026-11-06: QA password-change UI/API deployed and source/readback PASS but owner real password rotation NOT_RUN, so exposed credential remains potentially usable for new sessions. Prior 3 sessions revoked; no confirmation old denied/new accepted. Cloudflare Browser Rendering limited follow-up via HTTP429. R65 PR89 still OPEN/unmerged; separate credentials/roles/MatterACL testing BLOCKED.",
         "R68-01: DOCX source helper merged PR93 PASS but still not invoked by Cloudflare Worker; original SRS v1.1.15 ZIP not mounted; backend storage, upload, PDF/OCR and AI E2E separate tasks.",
         "R69+R70: source PDF/DOCX extraction and integrity guards are CI-PASS and merged, but NOT integrated with Cloudflare QA Worker or Google Drive; no real authenticated upload/read, OCR or UC03/04/07 AI E2E. Original private SRS 1.1.15 ZIP inaccessible for exact mapping; do not claim full PDF/Word display parity.",
-        "R72-R80 Google Drive QA has one existing grant and new disconnect UI/API deployed; local disconnect/reconnect real browser NOT_RUN due to Owner-only destructive grant action. Zero uploaded file receipts. Signed-in synthetic file E2E and full cross-tenant ACL still NOT_RUN; production not deployed."
+        "R72-R80 Google Drive QA has one existing grant and new disconnect UI/API deployed; local disconnect/reconnect real browser NOT_RUN due to Owner-only destructive grant action. Zero uploaded file receipts. Signed-in synthetic file E2E and full cross-tenant ACL still NOT_RUN; production not deployed.",
+        "2026-11-07 Owner paused Google Drive/OneDrive and instructed completion of all other functions. Storage work remains OPEN/NOT_ACCEPTED but excluded from active implementation and QA changes; no Drive retry.",
+        "R289: private SRS exact FR/TC trace unavailable; R288 platform issuer/login, actual D1 migration, authenticated real-device QA and Owner acceptance not yet verified. Main is older than stacked open PRs; do not restart or auto-merge.",
+        "R290: no live QA D1 migration or real platform principal/credential created; opt-in flag and independent secret pepper not configured. Shared QA rate cap may deny all logins temporarily; production IdP/MFA/edge throttling and verified recovery unfinished. Local git clone blocked by DNS; use exact-head CI. No real-device QA yet.",
+        "R292: main is ancestor 787 commits behind current development code; R126 matter/R2 branch diverged (199 vs 729 commits at R291); selective metadata integration only, full R2/files and UI convergence pending. Local clone DNS unavailable. Actual Cloudflare D1 migration, authenticated QA and physical-device tests NOT_RUN; Cloudflare account has 10 D1 databases, existing dedicated QA DB must not be blindly changed. Full FR/TC trace and remaining F01–F36 remain incomplete."
       ]
     },
     "policy": {

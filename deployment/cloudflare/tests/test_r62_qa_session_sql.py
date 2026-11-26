@@ -50,6 +50,7 @@ class RealSQLiteSessionAuthTest(unittest.TestCase):
             "0001_cf_qa_metadata.sql",
             "0002_cf_qa_mobile_login.sql",
             "0003_cf_qa_matter_catalog.sql",
+            "r108_qa_matter_rename.sql",
         ):
             self.db.executescript(
                 (ROOT / "deployment/cloudflare/migrations" / migration)
@@ -165,13 +166,13 @@ class RealSQLiteSessionAuthTest(unittest.TestCase):
                                    (FOREIGN_TENANT, "matter-other", OUTSIDER)):
             self.db.execute("INSERT INTO qa_matters VALUES(?,?,?,1)",
                             (INSTALL, tenant, id_))
-            self.db.execute("INSERT INTO qa_matter_catalog VALUES(?,?,?,?,?,?)",
+            self.db.execute("INSERT INTO qa_matter_catalog(installation_id,tenant_id,matter_id,title,created_by,created_at) VALUES(?,?,?,?,?,?)",
                             (INSTALL, tenant, id_, "Synthetic " + id_, owner, NOW))
             self.db.execute("INSERT INTO qa_matter_acl VALUES(?,?,?,?,?,?,?,?,?)",
                             (INSTALL, tenant, id_, owner, "read", "allow", 1, NOW-10, None))
         def list_for(tenant, user):
             return self.db.execute(read_sql, (
-                INSTALL, tenant, user, NOW, NOW, user, NOW, NOW
+                user, NOW, NOW, user, NOW, NOW, INSTALL, tenant, user, NOW, NOW, user, NOW, NOW
             )).fetchall()
         self.assertEqual([r[0] for r in list_for(ORG, USER)], ["matter-own"])
         self.assertEqual(list_for(FOREIGN_TENANT, USER), [])

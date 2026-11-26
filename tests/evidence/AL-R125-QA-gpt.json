@@ -1,0 +1,103 @@
+{
+  "schema": "ai-law-qa-evidence-v1",
+  "milestone": "R125 — dedicated synthetic QA identities provisioned",
+  "date": "2026-11-10",
+  "scope": "Existing Cloudflare standalone nonproduction QA D1 only. User expressly requested creation and storage of test accounts.",
+  "status": "PROVISIONED_D1__LIVE_PASSWORD_HTTP_NOT_RUN",
+  "accounts": [
+    {
+      "alias": "QA-A",
+      "email": "mihy.r125.gpt.a@qa.invalid",
+      "status": "active",
+      "role": "lawyer",
+      "memberships": [
+        "synthetic personal QA tenant",
+        "synthetic organization QA tenant"
+      ],
+      "plaintext_password_in_repo": false
+    },
+    {
+      "alias": "QA-B",
+      "email": "mihy.r125.gpt.b@qa.invalid",
+      "status": "active",
+      "role": "tenant_admin",
+      "memberships": [
+        "synthetic organization QA tenant"
+      ],
+      "plaintext_password_in_repo": false
+    }
+  ],
+  "fixtures": {
+    "new_test_users": 2,
+    "new_test_tenants": 2,
+    "new_synthetic_matters": 3,
+    "read_acl_allow_grants": 3
+  },
+  "authentication": {
+    "verifier": "PBKDF2-HMAC-SHA256",
+    "iterations": 100000,
+    "salts": "random independent 16-byte salts",
+    "plaintext_passwords_in_database": false,
+    "local_credential_hash_parity": "2/2 PASS",
+    "credential_handoff": "Separate owner-only downloadable file mihy_qa_gpt_v1.txt; never committed to public repository",
+    "cloudflare_secrets_store": "NOT_SAVED: connector write was blocked by safety checks; do not claim otherwise"
+  },
+  "backend": {
+    "database": "existing isolated Cloudflare D1 QA",
+    "create_statement_count": 18,
+    "overall_api_success": true,
+    "extra_written_rows_from_schema_triggers_included_in_reported_metadata": 55,
+    "signed_in_sessions_inserted_directly": 0,
+    "real_customer_data_used": false,
+    "synthetic_source_data_only": true,
+    "deployment_changes": false
+  },
+  "actual_D1_acl_checks": [
+    {
+      "test": "QA-A own personal matter",
+      "result": "PASS_ALLOWS"
+    },
+    {
+      "test": "QA-A own organization matter",
+      "result": "PASS_ALLOWS"
+    },
+    {
+      "test": "QA-A cannot read QA-B private organization matter",
+      "result": "PASS_DENIES"
+    },
+    {
+      "test": "QA-B own organization matter",
+      "result": "PASS_ALLOWS"
+    },
+    {
+      "test": "QA-B tenant_admin cannot read QA-A private organization matter",
+      "result": "PASS_DENIES"
+    },
+    {
+      "test": "QA-B cannot read QA-A personal tenant matter",
+      "result": "PASS_DENIES"
+    }
+  ],
+  "security": {
+    "cases_passed": 6,
+    "cases_failed": 0,
+    "local_PBKDF2_checks_passed": 2,
+    "quota_rows_after": 2,
+    "total_AI_quota_requests_after": 4,
+    "quota_delta": 0,
+    "user_session_cookie_generated_for_test": false,
+    "use_of_real_AI_provider": false,
+    "credential_bruteforce": false,
+    "external_storage_OAuth_not_changed": true,
+    "qa_source_parity_with_GitHub": "NOT_VERIFIED"
+  },
+  "acceptance": {
+    "actual_password_login_through_web_QA": "NOT_RUN: runner DNS unavailable and browser service limited",
+    "authorized_workspace_switch_over_real_authenticated_HTTP": "NOT_RUN",
+    "API_matter_authorization_after_actual_login": "NOT_RUN",
+    "live_AI_provider_side_effects": "NOT_RUN",
+    "owner_final_signoff": "NOT_RUN"
+  },
+  "SRS": "v1.1.15 unchanged",
+  "notes": "This file intentionally omits passwords, password hashes, salts, user identifiers, tenant identifiers, session tokens and private source content. Credential handoff is a separate owner-only artifact, not a GitHub file."
+}

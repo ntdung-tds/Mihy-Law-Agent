@@ -1,0 +1,137 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {approveMatterOutput} from '../src/f21_approval_transition_gpt.mjs';
+
+const context={outputId:'out-1',tenantId:'tenant-a',matterTenantId:'tenant-a',matterId:'matter-a',
+ actorId:'lawyer-b',authorId:'lawyer-a',role:'lawyer',matterRead:true,
+ outputTenantId:'tenant-a',outputMatterId:'matter-a',outputAuthorId:'lawyer-a',
+ reviewerAssignmentTenantId:'tenant-a',reviewerAssignmentMatterId:'matter-a',
+ reviewerAssignmentActorId:'lawyer-b',matterApprove:true,denied:false,
+ qualifiedLawyer:true,assignedReviewer:true,outputStatus:'pending_review',sourceVerified:true,
+ outputVersion:3};
+
+test('R169: reject malformed persisted identity and scope before CAS/audit',async()=>{
+ for(const field of ['authorId','outputAuthorId','matterTenantId','outputTenantId',
+  'outputMatterId','reviewerAssignmentTenantId','reviewerAssignmentMatterId',
+  'reviewerAssignmentActorId']){
+  for(const invalid of [' actor','actor\nother','actor\u2028other','x'.repeat(129)]){
+   let writes=0;
+   const c={...context,[field]:invalid};
+   const store={loadVerifiedApprovalContext:async()=>c,
+    approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}};
+   const result=await approveMatterOutput({store,session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}});
+   assert.equal(result.status,'DENIED',field);
+   assert.equal(writes,0,field);
+  }
+ }
+});
+
+
+test('R170: approval guard module loads and rejects Unicode control IDs', async () => {
+ const {validApprovalId}=await import('../src/f21_approval_guard_gpt.mjs');
+ assert.equal(validApprovalId('lawyer-b'),true);
+ for(const id of ['lawyer\nother','lawyer\u2028other','lawyer\u0000other',' lawyer','x'.repeat(129)])
+  assert.equal(validApprovalId(id),false);
+});
+
+// R171: invisible format controls must not enter persisted approval identities.
+test('R171: reject invisible format controls before CAS/audit',async()=>{
+ const {validApprovalId}=await import('../src/f21_approval_guard_gpt.mjs');
+ for(const id of ['lawyer\u200bother','lawyer\u200eother','lawyer\u202eother','lawyer\u2066other','lawyer\ufeffother']){
+  assert.equal(validApprovalId(id),false,'format control');
+  let writes=0;
+  const store={loadVerifiedApprovalContext:async()=>({...context,authorId:id,outputAuthorId:id}),approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}};
+  assert.equal((await approveMatterOutput({store,session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}})).status,'DENIED');
+  assert.equal(writes,0);
+ }
+});
+
+// R172: CAS version must have a safe successor; never write with exhausted version.
+test('R172: reject exhausted output version before CAS/audit',async()=>{
+ for(const version of [Number.MAX_SAFE_INTEGER,Number.MAX_SAFE_INTEGER+1,-1,1.5]){
+  let writes=0;
+  const store={loadVerifiedApprovalContext:async()=>({...context,outputVersion:version}),
+   approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}};
+  const result=await approveMatterOutput({store,session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}});
+  assert.equal(result.status,'DENIED',String(version));
+  assert.equal(writes,0,String(version));
+ }
+});
+
+// R175: hostile transport accessors must not escape the fail-closed approval boundary.
+test('R175: malformed session/input accessors deny without DB reads or writes',async()=>{
+ for(const field of ['session','input']){
+  let reads=0,writes=0;
+  const args={session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'},
+   store:{loadVerifiedApprovalContext:async()=>{reads++;return context;},
+    approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}}};
+  args[field]=new Proxy({}, {get(){throw Error('synthetic accessor failure');}});
+  assert.equal((await approveMatterOutput(args)).status,'DENIED');
+  assert.equal(reads,0);assert.equal(writes,0);
+ }
+});
+
+// R176: hostile top-level argument destructuring must fail closed before any store access.
+test('R176: throwing top-level argument accessors deny without DB operations',async()=>{
+ for(const key of ['store','session','input']){
+  let reads=0,writes=0;
+  const args={store:{loadVerifiedApprovalContext:async()=>{reads++;return context;},approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}},session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}};
+  const hostile=new Proxy(args,{get(target,property){if(property===key)throw Error('synthetic top-level accessor');return Reflect.get(target,property);}});
+  assert.equal((await approveMatterOutput(hostile)).status,'DENIED',key);
+  assert.equal(reads,0);assert.equal(writes,0);
+ }
+});
+
+// R177: adapter context must not inherit policy decisions from a prototype.
+test('R177: inherited persisted approval fields fail closed before CAS/audit',async()=>{
+ let writes=0;
+ const inherited=Object.create(context);
+ const store={loadVerifiedApprovalContext:async()=>inherited,
+  approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}};
+ const result=await approveMatterOutput({store,session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}});
+ assert.equal(result.status,'DENIED');
+ assert.equal(writes,0);
+});
+
+// R178: transport identifiers must be owned by the verified session/request envelope.
+test('R178: inherited session or input identifiers deny before DB access',async()=>{
+ for(const field of ['session','input']){
+  let reads=0,writes=0;
+  const args={store:{loadVerifiedApprovalContext:async()=>{reads++;return context;},
+   approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}},
+   session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}};
+  args[field]=Object.create(args[field]);
+  assert.equal((await approveMatterOutput(args)).status,'DENIED',field);
+  assert.equal(reads,0,field);assert.equal(writes,0,field);
+ }
+});
+
+
+// R179: adapter-supplied output identity/version must be owned fields, not prototype defaults.
+test('R179: inherited outputId or outputVersion deny before CAS/audit',async()=>{
+ for(const field of ['outputId','outputVersion']){
+  let writes=0;
+  const c={...context};
+  delete c[field];
+  Object.setPrototypeOf(c,{[field]:context[field]});
+  const store={loadVerifiedApprovalContext:async()=>c,
+   approveWithAudit:async()=>{writes++;return {changed:true,auditWritten:true};}};
+  assert.equal((await approveMatterOutput({store,session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}})).status,'DENIED',field);
+  assert.equal(writes,0,field);
+ }
+});
+
+// R180: untrusted adapter receipt must explicitly own both transaction attestations.
+test('R180: inherited CAS/audit receipt flags never report approval',async()=>{
+ for(const field of ['changed','auditWritten']){
+  const receipt={changed:true,auditWritten:true};
+  delete receipt[field];
+  Object.setPrototypeOf(receipt,{[field]:true});
+  let writes=0;
+  const store={loadVerifiedApprovalContext:async()=>({...context}),
+   approveWithAudit:async()=>{writes++;return receipt;}};
+  const result=await approveMatterOutput({store,session:{actorId:'lawyer-b',tenantId:'tenant-a'},input:{outputId:'out-1'}});
+  assert.equal(writes,1,field);
+  assert.equal(result.status,'CONFLICT_OR_AUDIT_FAILURE',field);
+ }
+});

@@ -1,0 +1,19 @@
+name: Platform atomic audit synthetic checks GPT
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/platform_admin_gpt.mjs'
+      - 'tests/platform_atomic_audit_gpt.test.mjs'
+      - '.github/workflows/platform-atomic-audit-gpt.yml'
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/platform_atomic_audit_gpt.test.mjs

@@ -18,3 +18,8 @@ binding = "DB"
 database_name = "ai-law-standalone-cf-qa"
 database_id = "REPLACE_WITH_D1_QA_DB_UUID"
 migrations_dir = "migrations"
+
+# R109: optional QA-only Workers AI binding for fictional text drafts.
+# No secrets. Deploy only after validating AI model quota and consent gating.
+[ai]
+binding = "AI"

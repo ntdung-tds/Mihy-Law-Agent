@@ -1,0 +1,19 @@
+name: Platform Admin R224 origin boundary
+on:
+  push:
+    branches:
+      - 'feature/r224-platform-origin-guard-gpt'
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/platform_admin_session_gpt.mjs'
+      - 'deployment/cloudflare/tests/platform_admin_r224_gpt.test.mjs'
+      - '.github/workflows/platform-admin-r224-gpt.yml'
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test deployment/cloudflare/tests/platform_admin_r223_gpt.test.mjs deployment/cloudflare/tests/platform_admin_r224_gpt.test.mjs

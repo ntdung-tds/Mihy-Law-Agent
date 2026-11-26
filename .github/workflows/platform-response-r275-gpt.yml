@@ -1,0 +1,16 @@
+name: R275 platform response allowlist
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/platform_http_gpt.mjs'
+      - 'tests/platform_response_allowlist_gpt.test.mjs'
+      - '.github/workflows/platform-response-r275-gpt.yml'
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/platform_response_allowlist_gpt.test.mjs

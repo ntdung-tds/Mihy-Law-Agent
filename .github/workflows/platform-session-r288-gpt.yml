@@ -1,0 +1,24 @@
+name: Platform Worker session R288
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/**'
+      - 'web/platform/**'
+      - 'web/case-detail/**'
+      - 'web/r0-preview/**'
+      - 'tools/build_cf_site.mjs'
+      - '.github/workflows/platform-session-r288-gpt.yml'
+permissions:
+  contents: read
+jobs:
+  platform-session:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tools/build_cf_site.mjs
+      - run: node --test deployment/cloudflare/tests/platform_session_r288_gpt.test.mjs deployment/cloudflare/tests/platform_site_r288_gpt.test.mjs tests/platform_view_r279_gpt.test.mjs deployment/cloudflare/tests/platform_login_r290_gpt.test.mjs deployment/cloudflare/tests/platform_catalog_r291_gpt.test.mjs deployment/cloudflare/tests/case_metadata_r292_gpt.test.mjs
+      - run: python -m unittest discover -s deployment/cloudflare/tests -p test_r288_platform_session_gpt.py -v
+      - run: python -m unittest discover -s deployment/cloudflare/tests -p test_r290_platform_provision_gpt.py -v

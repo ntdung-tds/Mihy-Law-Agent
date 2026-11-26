@@ -1,0 +1,59 @@
+{
+  "schema": "ai-law-qa-evidence-v1",
+  "step": "R124",
+  "date": "2026-11-10",
+  "scope": "Isolated QA private-credential live login readiness; no product changes",
+  "pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/206",
+  "source_files": [
+    "deployment/cloudflare/tests/r124_live_qa_auth_gpt.py",
+    "tests/test_r124_live_qa_auth_gpt.py",
+    ".github/workflows/tests.yml"
+  ],
+  "qa_d1_control_plane_readonly": {
+    "login_verifiers_total": 2,
+    "active_verifiers": 2,
+    "active_memberships": 12,
+    "live_sessions_at_preflight": 0,
+    "multi_tenant_memberships_aggregate": 1,
+    "eligible_multi_tenant_verified_accounts": 0,
+    "qa_quota_rows": 2,
+    "rows_written": 0,
+    "interpretation": "No currently active QA login verifier has two active memberships. A successful real tenant-switch positive control cannot be executed with existing login accounts until an approved test fixture is provisioned."
+  },
+  "unit_test_results": {
+    "status": "PASS",
+    "tests": 5,
+    "suite_summary": "R124 offline five cases all passed in GitHub unit workflow",
+    "workflow_run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42731313992",
+    "checks": [
+      "missing private secrets BLOCKED without network",
+      "authorized double membership rotates session and logs out",
+      "one workspace PARTIAL and logs out",
+      "denied source leak FAIL and logs out",
+      "insecure HttpOnly/Secure/SameSite cookie rejected"
+    ]
+  },
+  "live_auth_gate": {
+    "status": "SKIPPED_NOT_RUN",
+    "enable_condition": "push to qa/r124-live-login-gpt AND repo variable MIHY_QA_R124_ENABLED == true",
+    "secrets_required": [
+      "MIHY_QA_R124_EMAIL",
+      "MIHY_QA_R124_PASSWORD"
+    ],
+    "no_credential_guessing": true,
+    "one_login_attempt_only": true,
+    "no_direct_D1_session_injection": true,
+    "automatic_logout": true,
+    "statuses": "PASS only after true signed-in HTTP, PARTIAL if no second membership, BLOCKED if credentials/network unavailable"
+  },
+  "outstanding": {
+    "authorized_live_login": "NOT_RUN",
+    "authorized_tenant_switch": "NOT_RUN",
+    "authenticated_cross_user_MatterACL": "NOT_RUN",
+    "no_AI_provider_call_trace": "NOT_RUN",
+    "full_11_UC_mobile_E2E": "NOT_RUN",
+    "source_parity_deployed_worker": "NOT_VERIFIED"
+  },
+  "controls": "No production, QA deployment, D1 writes, customer data, account creation, OAuth/Drive, or SRS change; Owner final approval required.",
+  "SRS": "v1.1.15 unchanged"
+}

@@ -1,0 +1,17 @@
+name: F21 R210 receipt accessor guard
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/src/f21_approval_transition_gpt.mjs'
+      - 'deployment/cloudflare/tests/r210_f21_receipt_accessor_gpt.test.mjs'
+      - '.github/workflows/f21-r210-receipt-gpt.yml'
+  workflow_dispatch:
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: R210 receipt accessor regression
+        run: node --test deployment/cloudflare/tests/r210_f21_receipt_accessor_gpt.test.mjs

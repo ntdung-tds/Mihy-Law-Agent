@@ -1,0 +1,16 @@
+name: R274 alternate platform stream cancellation
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/platform_admin_http_gpt.mjs'
+      - 'tests/platform_alt_stream_cancel_gpt.test.mjs'
+      - '.github/workflows/platform-alt-stream-r274-gpt.yml'
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/platform_alt_stream_cancel_gpt.test.mjs

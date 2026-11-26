@@ -1,0 +1,17 @@
+name: R232 platform expiry timezone boundaries
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/platform_admin_gpt.mjs'
+      - 'tests/platform_expiry_offset_gpt.test.mjs'
+      - '.github/workflows/r232-platform-expiry-offset-gpt.yml'
+  workflow_dispatch:
+jobs:
+  node-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/platform_expiry_offset_gpt.test.mjs

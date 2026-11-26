@@ -1,0 +1,17 @@
+name: F21 R199 persisted version contract
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/tests/r199_f21_version_bound_gpt.test.py'
+      - 'deployment/cloudflare/src/f21_approval_transition_gpt.mjs'
+      - '.github/workflows/f21-r199-version-gpt.yml'
+  workflow_dispatch:
+jobs:
+  synthetic-version-contract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check F21 persisted version boundary
+        run: python3 deployment/cloudflare/tests/r199_f21_version_bound_gpt.test.py -v

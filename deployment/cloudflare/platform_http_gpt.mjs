@@ -1,0 +1,108 @@
+// R234: platform-only HTTP adapter. Mount only behind a server-side session resolver.
+// The resolver MUST validate the session against the server's session store.
+// Never derive the principal from request headers, cookies alone, or JSON body.
+import {listPlatformPlans, listTenantServices, changeTenantService} from './platform_admin_gpt.mjs';
+
+const json = (data, status=200) => {
+  const payload = JSON.stringify(data);
+  if (new TextEncoder().encode(payload).byteLength > 32768)
+    return new Response(JSON.stringify({error:'RESPONSE_TOO_LARGE'}), {status:503,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'}});
+  return new Response(payload, {
+  status, headers: {'content-type':'application/json; charset=utf-8','cache-control':'no-store',
+    'x-content-type-options':'nosniff'}
+});
+};
+const error = (status, code) => json({error:code},status);
+const paths = new Set(['/api/platform/plans','/api/platform/services']);
+export async function handlePlatformAdminRequest(request, env, resolveVerifiedPrincipal) {
+  let url;
+  try { url = new URL(request.url); } catch { return error(400,'BAD_REQUEST'); }
+  if (!paths.has(url.pathname)) return error(404,'NOT_FOUND');
+  if (request.method !== 'GET' && request.method !== 'POST') return error(405,'METHOD_NOT_ALLOWED');
+  if (request.method === 'POST' && url.pathname !== '/api/platform/services') return error(405,'METHOD_NOT_ALLOWED');
+  if (url.search) return error(400,'BAD_REQUEST');
+  if (!env?.DB || typeof resolveVerifiedPrincipal !== 'function') return error(503,'UNAVAILABLE');
+  let principal;
+  try { principal = await resolveVerifiedPrincipal(request,env); }
+  catch { return error(401,'UNAUTHORIZED'); }
+  if (!principal || principal.verified !== true || principal.kind !== 'system_admin' ||
+      principal.impersonating === true || typeof principal.id !== 'string' ||
+      !/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,119}$/.test(principal.id)) return error(403,'FORBIDDEN');
+  try {
+    if (request.method === 'GET') {
+      const result = url.pathname === '/api/platform/plans'
+        ? await listPlatformPlans(env.DB,principal)
+        : await listTenantServices(env.DB,principal);
+      // HTTP response boundary independently allowlists control-plane metadata.
+      // Never serialize extra fields returned by a compromised or faulty service adapter.
+      const items = url.pathname === '/api/platform/plans'
+        ? result.map(row => ({plan_id:row.plan_id,plan_name:row.plan_name,
+            status:row.status,max_users:row.max_users,max_storage_bytes:row.max_storage_bytes}))
+        : result.map(row => ({tenant_id:row.tenant_id,plan_id:row.plan_id,
+            service_status:row.service_status,license_expires_at:row.license_expires_at}));
+      return json({items});
+    }
+    // Origin and Fetch Metadata are defense-in-depth; actual session + CSRF is mandatory.
+    const origin = request.headers.get('origin');
+    const site = request.headers.get('sec-fetch-site');
+    if (!origin || origin !== url.origin || site === 'cross-site') return error(403,'CROSS_ORIGIN');
+    const contentEncoding = request.headers.get('content-encoding');
+    if (contentEncoding && contentEncoding.trim().toLowerCase() !== 'identity')
+      return error(415,'UNSUPPORTED_CONTENT_ENCODING');
+    const contentType = request.headers.get('content-type') || '';
+    if (!/^application\/json(?:\s*;\s*charset\s*=\s*(?:utf-8|"utf-8")\s*)?$/i.test(contentType)) return error(415,'UNSUPPORTED_MEDIA_TYPE');
+    const csrf = request.headers.get('x-csrf-token');
+    if (!csrf || typeof env.verifyPlatformCsrf !== 'function' ||
+        await env.verifyPlatformCsrf(request,principal,csrf) !== true) return error(403,'CSRF_INVALID');
+    let input;
+    try {
+      // Bound the incoming stream BEFORE materializing JSON in memory.
+      // A post-read string-length check alone permits unbounded request bodies.
+      const declared = request.headers.get('content-length');
+      if (declared !== null && (!/^[0-9]+$/.test(declared) || !Number.isSafeInteger(Number(declared)) || Number(declared) > 2048))
+        return error(413,'PAYLOAD_TOO_LARGE');
+      if (!request.body) return error(400,'BAD_JSON');
+      const reader = request.body.getReader();
+      const chunks = [];
+      let bytes = 0;
+      try {
+        while (true) {
+          const {done, value} = await reader.read();
+          if (done) break;
+          bytes += value.byteLength;
+          if (bytes > 2048) {
+            // Cancellation is best-effort; a rejecting source must not mask the size violation.
+            try { await reader.cancel(); } catch { /* preserve 413 */ }
+            return error(413,'PAYLOAD_TOO_LARGE');
+          }
+          chunks.push(value);
+        }
+      } finally { reader.releaseLock(); }
+      if (declared !== null && bytes !== Number(declared)) return error(400,'INVALID_BODY_LENGTH');
+      const buffer = new Uint8Array(bytes);
+      let offset = 0;
+      for (const chunk of chunks) { buffer.set(chunk, offset); offset += chunk.byteLength; }
+      input = JSON.parse(new TextDecoder('utf-8', {fatal:true}).decode(buffer));
+    } catch { return error(400,'BAD_JSON'); }
+    if (!input || Array.isArray(input) || typeof input !== 'object') return error(400,'BAD_INPUT');
+    // Exact mutation schema: reject extra fields rather than silently accepting
+    // unreviewed client instructions or prototype-polluting JSON properties.
+    const allowed = new Set(['tenantId','status','reasonCode']);
+    if (Object.keys(input).length !== allowed.size ||
+        Object.keys(input).some(key => !allowed.has(key))) return error(400,'BAD_INPUT');
+    // Audit identifiers are trusted server-generated values, never client-controlled.
+    const validId = value => typeof value === 'string' && /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,119}$/.test(value);
+    if (!validId(input.tenantId) || !['active','suspended','revoked'].includes(input.status) ||
+        typeof input.reasonCode !== 'string' || !/^[A-Z][A-Z0-9_]{1,79}$/.test(input.reasonCode))
+      return error(400,'BAD_INPUT');
+    const auditId = crypto.randomUUID();
+    const result = await changeTenantService(env.DB,principal,{...input,auditId});
+    return json(result);
+  } catch (e) {
+    const code = typeof e?.message === 'string' ? e.message : '';
+    if (code === 'PLATFORM_FORBIDDEN') return error(403,'FORBIDDEN');
+    if (code.startsWith('PLATFORM_BAD_')) return error(400,'BAD_INPUT');
+    // Do not disclose SQL, tenant identifiers, session details or audit internals.
+    return error(503,'PLATFORM_UNAVAILABLE');
+  }
+}

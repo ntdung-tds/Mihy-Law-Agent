@@ -1,0 +1,88 @@
+{
+  "schema": "ai-law-qa-evidence-v1",
+  "step": "R126",
+  "date": "2026-11-10",
+  "scope": "2 existing synthetic R125 QA accounts; no new credentials, no real client data",
+  "draft_pr": "https://github.com/ntdung-tds/Mihy-Law-Agent/pull/208",
+  "code": [
+    "deployment/cloudflare/tests/r126_live_dual_gpt.py",
+    "tests/test_r126_dual_login_gpt.py",
+    ".github/workflows/tests.yml"
+  ],
+  "qa_verifier_file_in_private_runtime": {
+    "present": true,
+    "mode": "0600",
+    "password_hash_matches_connected_D1": {
+      "A": true,
+      "B": true
+    },
+    "password_values_committed_to_repo": false,
+    "external_secret_store_connected": false
+  },
+  "live_cloudflare_d1": {
+    "result": "PASS_6_OF_6",
+    "checks": [
+      "A can read own personal matter",
+      "A can read own shared organization matter",
+      "A cannot read B private organization matter",
+      "B can read own organization matter",
+      "B tenant_admin cannot read A private organization matter",
+      "B cannot read A personal matter"
+    ],
+    "read_only": true,
+    "rows_written": 0,
+    "active_r125_sessions": 0,
+    "quota_aggregate": {
+      "rows": 2,
+      "requests": 4
+    },
+    "id_or_private_content_exported": false
+  },
+  "offline_two_user_transport_unit_tests": {
+    "pass": 6,
+    "failures": 0,
+    "checks": [
+      "positive A+B login/tenant switch/isolated matter lifecycle/logout",
+      "cross-user matter leakage detected and both logouts attempted",
+      "insecure session cookie rejected",
+      "logout failure cannot claim PASS",
+      "no private secrets -> BLOCKED without network",
+      "security ACL leak remains FAIL even if logout also fails"
+    ]
+  },
+  "actual_signed_in_qa_http": {
+    "state": "NOT_RUN",
+    "reason": "no external runner with private QA login credentials configured; local sandbox DNS unavailable",
+    "runner_gate": "r126-qa-private-dual",
+    "run_only_if": "push to qa/r126-dual-login-gpt and owner repository variable MIHY_QA_R126_ENABLED=true",
+    "required_secrets": [
+      "MIHY_QA_R124_EMAIL",
+      "MIHY_QA_R124_PASSWORD",
+      "MIHY_QA_R126_B_EMAIL",
+      "MIHY_QA_R126_B_PASSWORD"
+    ],
+    "account_password_guessing": false,
+    "direct_d1_session_injection": false,
+    "real_api_matter_acl": "NOT_RUN",
+    "worker_AI_provider_trace": "NOT_RUN"
+  },
+  "controls": {
+    "app_code_changed": false,
+    "cloudflare_qa_deployed": false,
+    "production_deployed": false,
+    "oauth_drive_changed": false,
+    "SRS": "v1.1.15 unchanged",
+    "owner_accepted": false
+  },
+  "version": 2,
+  "test_safety_fix": {
+    "before": "Logout failure overwrote an earlier MatterACL leak FAIL with BLOCKED",
+    "after": "Original security FAIL preserved; logout failure included in reason",
+    "code_commit": "a6c65ad4d48b69da7513bcd181feeb0df9db1859",
+    "regression_commit": "f1aeaed970613a724050b2d3d0c2f28e938da8f7",
+    "app_code_changed": false
+  },
+  "tested_branch_sha": "f1aeaed970613a724050b2d3d0c2f28e938da8f7",
+  "ci_run": "https://github.com/ntdung-tds/Mihy-Law-Agent/actions/runs/42740394085",
+  "ci_status_at_creation": "pending_verification"
+}

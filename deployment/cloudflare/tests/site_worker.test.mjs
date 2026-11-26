@@ -364,3 +364,57 @@ test('R100 download relay preserves exact verified bytes, file type, length and 
  assert.match(result.headers.get('Content-Disposition'),/filename\*/);
  assert.deepEqual(new Uint8Array(await result.arrayBuffer()),content);
 });
+
+test('R109 AI QA endpoint is same-origin POST-only and protected from anonymous app access',async()=>{
+ const calls=[];
+ const backend={QA_AUTH:{async fetch(req){
+  calls.push({route:new URL(req.url).pathname,method:req.method,
+   origin:req.headers.get('Origin'),cookie:req.headers.get('Cookie')});
+  return Response.json({error:'unit fixture intentionally has no provider'},{status:503});
+ }}};
+ const route=ORIGIN+'/api/qa/legal/run';
+ assert.equal((await handleSite(new Request(route),backend)).status,404);
+ assert.equal(calls.length,0);
+ assert.equal((await handleSite(new Request(route,{method:'POST',
+  headers:{Origin:'https://attacker.invalid','Content-Type':'application/json'},
+  body:'{}'}),backend)).status,403);
+ assert.equal(calls.length,0,'cross-site requests must not reach AI service binding');
+ const authorized=await handleSite(new Request(route,{method:'POST',
+  headers:{Origin:ORIGIN,'Sec-Fetch-Site':'same-origin','Content-Type':'application/json',
+   Cookie:'al_qa_session=unit-test'},
+  body:'{"synthetic_consent":true}'}),backend);
+ assert.equal(authorized.status,503,'upstream provider failure is not misreported as AI success');
+ assert.deepEqual(calls,[{route:'/api/qa/legal/run',method:'POST',
+  origin:'https://ai-law-standalone-cf-qa.iaict-platform.workers.dev',
+  cookie:'al_qa_session=unit-test'}]);
+ logged=false;
+ const anonymous=await get('/app');
+ assert.equal(anonymous.status,302);
+ const privateJs=await get('/app.js');
+ assert.equal(privateJs.status,401);
+ logged=true;
+ const site=await get('/app');
+ const html=await site.text();
+ for(const id of ['legal-qa-form','legal-qa-uc','legal-qa-source','legal-qa-consent','legal-qa-result'])
+  assert.match(html,new RegExp('id="'+id+'"'),'QA legal task editor should be integrated into authenticated app');
+ assert.doesNotMatch((await get('/')).headers.get('Content-Security-Policy')||'',/unsafe-eval/);
+});
+
+test('R109 fictional text QA browser assets are private, safe and loadable',async()=>{
+ logged=false;
+ assert.equal((await get('/legal.js')).status,401,'anonymous caller must not download task JS');
+ logged=true;
+ const r=await get('/legal.js');
+ assert.equal(r.status,200);
+ const code=await r.text();
+ assert.match(code,/\/api\/qa\/legal\/run/);
+ assert.match(code,/legal-qa-example/);
+ assert.match(code,/synthetic_consent:true/);
+ assert.doesNotMatch(code,/localStorage|sessionStorage|eval\(/);
+ const app=await get('/app');
+ assert.equal(app.status,200);
+ const html=await app.text();
+ assert.match(html,/id="legal-qa-example"/);
+ assert.match(html,/src="\.\/legal\.js"/);
+ assert.match(html,/id="legal-qa-consent"/);
+});

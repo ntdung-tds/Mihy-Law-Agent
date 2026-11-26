@@ -1,0 +1,16 @@
+name: platform-http-r271-gpt
+on:
+  pull_request:
+    paths:
+      - 'deployment/cloudflare/platform_http_gpt.mjs'
+      - 'tests/platform_http_r271_gpt.test.mjs'
+      - '.github/workflows/platform-http-r271-gpt.yml'
+jobs:
+  negative-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/platform_http_r271_gpt.test.mjs
