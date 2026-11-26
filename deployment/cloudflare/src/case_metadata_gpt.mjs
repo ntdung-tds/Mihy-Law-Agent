@@ -22,9 +22,9 @@ function acl(permission){
  AND NOT EXISTS(SELECT 1 FROM qa_matter_acl d WHERE d.installation_id=m.installation_id AND d.tenant_id=m.tenant_id AND d.matter_id=m.matter_id AND d.user_id=? AND d.permission='${permission}' AND d.effect='deny' AND d.acl_version=m.acl_version AND d.valid_from<=? AND (d.valid_to IS NULL OR d.valid_to>?))`;
 }
 // Repeat the current session/membership + both ACL checks in the actual write, not only preflight.
-function access(env,p,matter,now,write=false){
+export function matterAccess(env,p,matter,now,write=false){
  const check=`FROM qa_matters m JOIN qa_matter_catalog c ON c.installation_id=m.installation_id AND c.tenant_id=m.tenant_id AND c.matter_id=m.matter_id
- WHERE m.installation_id=? AND m.tenant_id=? AND m.matter_id=?
+ WHERE m.installation_id=? AND m.tenant_id=?${matter===null?'':' AND m.matter_id=?'}
  AND NOT EXISTS(SELECT 1 FROM qa_matter_hides h WHERE h.installation_id=m.installation_id AND h.tenant_id=m.tenant_id AND h.matter_id=m.matter_id)
  AND EXISTS(SELECT 1 FROM qa_sessions s JOIN qa_principals q ON q.installation_id=s.installation_id AND q.user_id=s.user_id
  JOIN qa_memberships n ON n.installation_id=s.installation_id AND n.tenant_id=s.tenant_id AND n.user_id=s.user_id
@@ -33,9 +33,9 @@ function access(env,p,matter,now,write=false){
  AND s.revoked_at IS NULL AND s.expires_at>? AND q.status='active' AND n.status='active' AND n.role_key IN ('lawyer','tenant_admin') AND v.status='active')
  AND ${acl('read')}${write?' AND '+acl('write'):''}`;
  const a=[p.user_id,now,now,p.user_id,now,now];
- return {sql:check,args:[env.INSTALLATION_ID,p.tenant_id,matter,p.sid,env.JWT_ISSUER,p.subject,p.user_id,now,...a,...(write?a:[])]};
+ return {sql:check,args:[env.INSTALLATION_ID,p.tenant_id,...(matter===null?[]:[matter]),p.sid,env.JWT_ISSUER,p.subject,p.user_id,now,...a,...(write?a:[])]};
 }
-async function readJson(req,max=6000){
+export async function readCaseJson(req,max=6000){
  const l=req.headers.get('content-length');
  if(req.headers.get('origin')!==new URL(req.url).origin||req.headers.get('sec-fetch-site')==='cross-site'||req.headers.has('content-encoding')||!/^application\/json(?:\s*;\s*charset=utf-8)?$/i.test(req.headers.get('content-type')||'')||!req.body)throw Error('request');
  if(l!==null&&(!/^\d{1,5}$/.test(l)||Number(l)>max))throw Error('size');
@@ -55,7 +55,7 @@ export async function caseMetadataApi(req,env,opts={}){
   const now=opts.now??Math.floor(Date.now()/1000),p=await mobileSession(req,env,now);
   if(!p||!UUID.test(p.user_id)||!UUID.test(p.tenant_id))return json(401,{error:'Phiên đăng nhập không hợp lệ.'});
   if(!['lawyer','tenant_admin'].includes(p.role_key))return denied();
-  const read=access(env,p,matter,now),write=access(env,p,matter,now,true);
+  const read=matterAccess(env,p,matter,now),write=matterAccess(env,p,matter,now,true);
   if(req.method==='GET'){
    const row=await env.DB.prepare('SELECT c.title,c.version AS title_version '+read.sql).bind(...read.args).first();
    if(!row)return denied();
@@ -71,7 +71,7 @@ export async function caseMetadataApi(req,env,opts={}){
    const canWrite=!!await env.DB.prepare('SELECT 1 '+write.sql).bind(...write.args).first();
    return json(200,{id:matter,title:row.title,title_version:row.title_version,version:d?.version||0,details:Object.fromEntries(DETAIL_FIELDS.map(k=>[k,d?.[k]??DEFAULTS[k]])),can_write:canWrite});
   }
-  let body;try{body=await readJson(req);}catch{return bad();}
+  let body;try{body=await readCaseJson(req);}catch{return bad();}
   if(!await env.DB.prepare('SELECT 1 '+write.sql).bind(...write.args).first())return denied();
   if(op==='hide'){
    if(!body||Object.keys(body).sort().join(',')!=='expected_version'||!Number.isSafeInteger(body.expected_version)||body.expected_version<1)return bad();

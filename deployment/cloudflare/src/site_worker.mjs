@@ -32,6 +32,8 @@ import { DRIVE_INLINE_JS } from './drive_inline_js.mjs';
 import {PLATFORM_LOGIN_HTML} from './platform_login_html_gpt.mjs';
 import {PLATFORM_LOGIN_JS} from './platform_login_js_gpt.mjs';
 import {PLATFORM_CATALOG_JS} from './platform_catalog_js_gpt.mjs';
+import {CASE_WORK_HTML} from './case_work_html_gpt.mjs';
+import {CASE_WORK_JS} from './case_work_js_gpt.mjs';
 import {CASE_METADATA_HTML} from './case_metadata_html_gpt.mjs';
 import {CASE_METADATA_JS} from './case_metadata_js_gpt.mjs';
 import {CASE_METADATA_CSS} from './case_metadata_css_gpt.mjs';
@@ -121,7 +123,7 @@ async function relay(request,env,path){
  if(cookie)h.set('Cookie',cookie);
  const type=request.headers.get('Content-Type');
  if(type)h.set('Content-Type',type);
- if(PLATFORM_API.has(inbound.pathname)){
+ if(PLATFORM_API.has(inbound.pathname)||inbound.pathname.startsWith('/api/qa/case-info/')||inbound.pathname.startsWith('/api/qa/case-work/')||inbound.pathname==='/api/qa/matters'){
   for(const field of ['X-CSRF-Token','Content-Encoding','Content-Length']){
    const value=request.headers.get(field);if(value!==null)h.set(field,value);
   }
@@ -152,6 +154,15 @@ const app=WORKSPACE_HTML
  .replace('</head>','<script src="/drive-inline.js" defer></script></head>');
 export async function handleSite(req,env){
  const url=new URL(req.url),path=url.pathname;
+ const workPage=path==='/calendar'||/^\/case-work\/[0-9a-f-]{36}$/.test(path);
+ if(workPage||path==='/case-work.js'){
+  if(req.method!=='GET'||url.search)return missing();
+  try{const ok=await authenticated(req,env);if(ok===false)return redirect('/login');if(ok!==true)return unavailable();return workPage?respond(CASE_WORK_HTML):respond(CASE_WORK_JS,'application/javascript; charset=utf-8');}catch{return unavailable();}
+ }
+ if(path==='/api/qa/calendar'||/^\/api\/qa\/case-work\/[0-9a-f-]{36}(?:\/(?:contacts|activities)(?:\/[0-9a-f-]{36})?)?$/.test(path)){
+  if(url.search||!['GET','POST','PATCH'].includes(req.method))return missing();
+  try{return await relay(req,env,path);}catch{return unavailable();}
+ }
  const casePage=/^\/case-detail\/(?:new|[0-9a-f-]{36})$/.test(path);
  if(casePage||path==='/case-detail.js'||path==='/case-detail.css'){
   if(req.method!=='GET'||url.search)return missing();

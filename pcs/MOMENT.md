@@ -1,3 +1,9 @@
+## R293 — CRM contacts and work calendar (2026-11-26 VN)
+
+- PR #336: matter-scoped contacts/interaction history, appointments, hearings, tasks and deadlines; completion/cancellation; calendar and overdue indicators; separate responsive screens. Current session and deny-overrides read/write ACL are checked in SQL; hidden matters excluded. Immutable metadata-only audit. No content in audit.
+- R292 target CI 45804654201 PASS; cumulative R292 PR #335 has 37 successful, 2 failed, 10 pending workflow runs of 49 on inspection. R223 fixture missing required D1 success metadata corrected on R293, not a relaxation of security contract. R293 source 651c7ac3 targeted CI 45805404843 queued; corrective R223 CI 45805403776 queued.
+- PCS revision 144. F18/F21/F22 remain PARTIAL: no tenant-wide CRM, complete conflict screening, assignee workflow, external reminders or physical-device QA. QA caps 100 per matter/type and calendar first 100 entries. No real D1 migration, deployment, signing or storage changes.
+
 ## R291–R292 — Combined platform and case implementation (2026-11-26 VN)
 
 - R290 corrected code CI 45802926858 SUCCESS. R291 PR #333: audited platform plan create/update/retire, pending service metadata, license/plan change, UI and SQLite tests. Code head 87ebb0a4 CI 45804242321 SUCCESS.

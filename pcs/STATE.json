@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 143,
-  "updated_at": "2026-11-26T17:48:00+07:00",
+  "revision": 144,
+  "updated_at": "2026-11-26T10:52:42Z",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2963,12 +2963,20 @@
       {
         "path": "deployment/cloudflare/src/case_metadata_gpt.mjs",
         "visibility": "PUBLIC_SAFE_CODE_ONLY"
+      },
+      {
+        "path": "deployment/cloudflare/src/case_work_gpt.mjs",
+        "visibility": "PUBLIC_SAFE_CODE_ONLY"
+      },
+      {
+        "path": "deployment/cloudflare/tests/case_work_r293_gpt.test.mjs",
+        "visibility": "SYNTHETIC_TEST_ONLY"
       }
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R291 PR #333 implements QA plans create/update/retire, pending subscription and license change, append-only transactional catalog audit and responsive UI; exact code head 87ebb0a4 workflow 45804242321 SUCCESS. R292 PR #334 selectively restores R116 case metadata (without paused storage), complete create and separate responsive detail page, field update/version checks, immutable field-name audit, hide tombstone invalidating existing ACL version; R290 trigger-safe session issuance/logout and bounded matter body hardening. Exact code head 4ae12c7b CI 45804654201 queued when checked.",
-      "next_action": "Verify R292 and full consolidated integration CI, fix regressions, then implement remaining F18/F19/F22/F32/F33/F36 and platform verified account recovery/administration in larger cohesive packages. Keep explicit storage pause; no signing, real data, automatic main merge or production deployment. Do not overwrite newer AI/security code with older R126 branch.",
+      "last_completed_step": "R293 PR #336: implemented matter-scoped contacts (create/update/archive), customer interactions, tasks/appointments/hearings/deadlines, completion/cancellation, Vietnam date-based calendar and overdue indicators, immutable audit, separate responsive screens and SQL session + ACL rechecks. Added actual SQLite integration tests. R292 exact head 4ae12c7b CI 45804654201 PASS. Full integration PR #335 snapshot 1e2413e1: 37/49 workflow runs successful, 2 failed, 10 pending at observation. R223 obsolete D1 test fixture lacked success:true, corrected without relaxing application validation; R224 repeats R223 suite. Latest R293 source 651c7ac3, targeted CI 45805404843 queued; R223 45805403776 queued.",
+      "next_action": "Verify R293 and R223/R224 corrective CI, reconcile cumulative integration; then implement tenant-wide CRM and carefully scoped conflict screening, task assignment/review, evidence/timeline and identity/recovery. Keep all feature acceptance partial until source trace and live QA. No signing, storage retry, real customer data, auto main merge or production.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -3010,7 +3018,8 @@
         "2026-11-07 Owner paused Google Drive/OneDrive and instructed completion of all other functions. Storage work remains OPEN/NOT_ACCEPTED but excluded from active implementation and QA changes; no Drive retry.",
         "R289: private SRS exact FR/TC trace unavailable; R288 platform issuer/login, actual D1 migration, authenticated real-device QA and Owner acceptance not yet verified. Main is older than stacked open PRs; do not restart or auto-merge.",
         "R290: no live QA D1 migration or real platform principal/credential created; opt-in flag and independent secret pepper not configured. Shared QA rate cap may deny all logins temporarily; production IdP/MFA/edge throttling and verified recovery unfinished. Local git clone blocked by DNS; use exact-head CI. No real-device QA yet.",
-        "R292: main is ancestor 787 commits behind current development code; R126 matter/R2 branch diverged (199 vs 729 commits at R291); selective metadata integration only, full R2/files and UI convergence pending. Local clone DNS unavailable. Actual Cloudflare D1 migration, authenticated QA and physical-device tests NOT_RUN; Cloudflare account has 10 D1 databases, existing dedicated QA DB must not be blindly changed. Full FR/TC trace and remaining F01–F36 remain incomplete."
+        "R292: main is ancestor 787 commits behind current development code; R126 matter/R2 branch diverged (199 vs 729 commits at R291); selective metadata integration only, full R2/files and UI convergence pending. Local clone DNS unavailable. Actual Cloudflare D1 migration, authenticated QA and physical-device tests NOT_RUN; Cloudflare account has 10 D1 databases, existing dedicated QA DB must not be blindly changed. Full FR/TC trace and remaining F01–F36 remain incomplete.",
+        "R293: matter contacts/activities are not complete tenant CRM, firm-wide conflict checking, member assignment, or automated reminders. QA limits 100 records per matter/type and 100 visible upcoming/open calendar rows with truncation indication. Date-only overdue uses Vietnam UTC+7. No live migration, device tests, or provider notification integration. Exact SRS FR/TC unavailable."
       ]
     },
     "policy": {
