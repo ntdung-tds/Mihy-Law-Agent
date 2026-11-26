@@ -80,10 +80,15 @@ async function list(env,identity,now){
 }
 async function create(req,env,identity,now){
  if(!originOkay(req) || !req.headers.get('Content-Type')?.startsWith('application/json'))return bad();
- if(Number(req.headers.get('Content-Length')||0)>MAX_BODY)return bad();
+ const declared=req.headers.get('Content-Length');
+ if(req.headers.has('Content-Encoding')||!req.body||(declared!==null&&(!/^\d{1,5}$/.test(declared)||Number(declared)>MAX_BODY)))return bad();
  let data;
  try{
-  const raw=await req.text();if(raw.length>MAX_BODY)return bad();data=JSON.parse(raw);
+  const reader=req.body.getReader(),chunks=[];let n=0;
+  try{for(;;){const {done,value}=await reader.read();if(done)break;n+=value.byteLength;if(n>MAX_BODY){try{await reader.cancel();}catch{}return bad();}chunks.push(value);}}finally{reader.releaseLock();}
+  if(declared!==null&&Number(declared)!==n)return bad();
+  const bytes=new Uint8Array(n);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
+  data=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
  }catch{return bad();}
  if(!data||typeof data.title!=='string'||Object.keys(data).some(k=>!['title','details'].includes(k)))return bad();
  const hasDetails=Object.hasOwn(data,'details');

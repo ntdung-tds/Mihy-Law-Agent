@@ -12,7 +12,7 @@ const clean=(s,max)=>typeof s==='string'&&s.length<=max&&s===s.normalize('NFC')&
 const validDate=s=>{if(s==='')return true;if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s)||s.startsWith('0000'))return false;const d=new Date(s+'T00:00:00Z');return Number.isFinite(d.getTime())&&d.toISOString().slice(0,10)===s;};
 export function validCaseDetails(v){
  if(!v||Array.isArray(v)||typeof v!=='object'||Object.keys(v).sort().join(',')!==DETAIL_FIELDS.slice().sort().join(','))return false;
- if(Object.entries(limits).some(([k,max])=>!clean(v[k],max)))return false;
+ if(Object.entries(limits).some(([k,max])=>k==='summary'?(typeof v[k]!=='string'||v[k].length>max||!clean(v[k].replace(/[\n\t]/g,' '),max)):!clean(v[k],max)))return false;
  return ['open','in_progress','on_hold','closed'].includes(v.status)&&['low','normal','high'].includes(v.priority)&&validDate(v.deadline);
 }
 export const CASE_INSERT_SQL="INSERT INTO qa_case_details(installation_id,tenant_id,matter_id,reference,category,status,priority,client_label,counterparty_label,summary,deadline,assignee_user_id,version,updated_by,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,?,?)";
