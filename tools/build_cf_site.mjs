@@ -36,6 +36,7 @@ const modules=[
  ['account_js.mjs','web/account/app.js','ACCOUNT_JS'],
  ['platform_login_html_gpt.mjs','web/platform/login_gpt.html','PLATFORM_LOGIN_HTML'],
  ['platform_login_js_gpt.mjs','web/platform/login_gpt.mjs','PLATFORM_LOGIN_JS'],
+ ['platform_catalog_js_gpt.mjs','web/platform/catalog_gpt.mjs','PLATFORM_CATALOG_JS'],
  ['platform_html_gpt.mjs','web/platform/index_gpt.html','PLATFORM_HTML'],
  ['platform_js_gpt.mjs','web/platform/app_gpt.mjs','PLATFORM_JS'],
  ['platform_view_js_gpt.mjs','deployment/cloudflare/platform_admin_view_gpt.mjs','PLATFORM_VIEW_JS'],

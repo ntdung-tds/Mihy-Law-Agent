@@ -31,6 +31,7 @@ import { DRIVE_INLINE_JS } from './drive_inline_js.mjs';
 
 import {PLATFORM_LOGIN_HTML} from './platform_login_html_gpt.mjs';
 import {PLATFORM_LOGIN_JS} from './platform_login_js_gpt.mjs';
+import {PLATFORM_CATALOG_JS} from './platform_catalog_js_gpt.mjs';
 import {PLATFORM_HTML} from './platform_html_gpt.mjs';
 import {PLATFORM_JS} from './platform_js_gpt.mjs';
 import {PLATFORM_VIEW_JS} from './platform_view_js_gpt.mjs';
@@ -39,12 +40,13 @@ import {PLATFORM_CSS} from './platform_css_gpt.mjs';
 const platformAssets=new Map([
  ['/platform',[PLATFORM_HTML,'text/html; charset=utf-8']],
  ['/platform.css',[PLATFORM_CSS,'text/css; charset=utf-8']],
+ ['/platform_catalog_gpt.mjs',[PLATFORM_CATALOG_JS,'application/javascript; charset=utf-8']],
  ['/platform.js',[PLATFORM_JS,'application/javascript; charset=utf-8']],
  ['/platform_admin_view_gpt.mjs',[PLATFORM_VIEW_JS,'application/javascript; charset=utf-8']],
  ['/platform_admin_client_gpt.mjs',[PLATFORM_CLIENT_JS,'application/javascript; charset=utf-8']]
 ]);
 const AUTH_ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
-const PLATFORM_API=new Set(['/api/platform/session','/api/platform/plans','/api/platform/services','/api/platform/login','/api/platform/logout']);
+const PLATFORM_API=new Set(['/api/platform/session','/api/platform/plans','/api/platform/services','/api/platform/login','/api/platform/logout','/api/platform/catalog']);
 const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/legal/run','/api/qa/legal/extract','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile','/api/qa/profile/avatar','/api/qa/drive/status','/api/qa/drive/connect','/api/qa/drive/disconnect']);
 const privateAssets=new Map([
  ['/styles.css',[WORKSPACE_CSS,'text/css; charset=utf-8']],
@@ -169,7 +171,7 @@ export async function handleSite(req,env){
  if(PLATFORM_API.has(path)){
   if(url.search)return respond(JSON.stringify({error:'BAD_REQUEST'}),'application/json; charset=utf-8',400);
   const postOnly=['/api/platform/login','/api/platform/logout'].includes(path);
-  if(postOnly?req.method!=='POST':req.method!=='GET'&&!(req.method==='POST'&&path==='/api/platform/services'))return respond(JSON.stringify({error:'METHOD_NOT_ALLOWED'}),'application/json; charset=utf-8',405);
+  if(postOnly?req.method!=='POST':req.method!=='GET'&&!(req.method==='POST'&&['/api/platform/services','/api/platform/catalog'].includes(path)))return respond(JSON.stringify({error:'METHOD_NOT_ALLOWED'}),'application/json; charset=utf-8',405);
   try{return await relay(req,env,path);}catch{return unavailable();}
  }
  if(req.method!=='GET' && !API.has(path) && !isDocumentApi)return missing();
