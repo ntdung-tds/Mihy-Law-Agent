@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {dispatchPlatformAdmin} from '../platform_admin_session_gpt.mjs';
-const db={prepare(){return {all:async()=>({results:[]})}},batch:async()=>[]};
+const db={prepare(){return {all:async()=>({success:true,results:[]})}},batch:async()=>[]};
 const base={db,newAuditId:()=> 'audit_1',resolveSession:async()=>({id:'sys_1',kind:'system_admin',verified:true}),verifyCsrf:async()=>true};
 const req=(path='/api/platform/plans',method='GET')=>new Request('https://qa.example.test'+path,{method});
 test('unrelated route bypasses platform dispatcher',async()=>assert.equal(await dispatchPlatformAdmin(req('/api/qa/documents'),base),null));
