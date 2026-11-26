@@ -1,7 +1,7 @@
 // R279: opt-in System Admin metadata panel. Mount ONLY behind verified Worker session.
 // This is a DOM component, not an authentication or authorization boundary.
 import {createPlatformAdminClient} from './platform_admin_client_gpt.mjs';
-const STYLES=`
+export const PLATFORM_STYLES=`
 .mihy-platform{font:inherit;color:inherit;max-width:1100px;margin:auto;padding:1rem}
 .mihy-platform *{box-sizing:border-box}
 .mihy-platform .toolbar{display:flex;gap:.6rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
@@ -16,7 +16,7 @@ const STYLES=`
 .mihy-platform .actions{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem}
 @media(max-width:480px){.mihy-platform{padding:.5rem}.mihy-platform .cards{grid-template-columns:minmax(0,1fr)}}
 `;
-export function mountPlatformAdmin(root,{fetchImpl,csrfToken,documentImpl}={}) {
+export function mountPlatformAdmin(root,{fetchImpl,csrfToken,documentImpl,externalStyle=false}={}) {
   if (!root || typeof root.replaceChildren!=='function') throw new TypeError('root required');
   const doc=documentImpl || root.ownerDocument;
   if (!doc || typeof doc.createElement!=='function') throw new TypeError('document required');
@@ -30,7 +30,7 @@ export function mountPlatformAdmin(root,{fetchImpl,csrfToken,documentImpl}={}) {
   };
   const shell=node('section',undefined,'mihy-platform');
   shell.setAttribute('aria-label','Quản trị nền tảng');
-  const style=node('style',STYLES);
+  const style=externalStyle?null:node('style',PLATFORM_STYLES);
   const heading=node('h2','Quản trị nền tảng');
   const toolbar=node('div',undefined,'toolbar');
   const reload=node('button','Làm mới');
@@ -43,7 +43,8 @@ export function mountPlatformAdmin(root,{fetchImpl,csrfToken,documentImpl}={}) {
   const servicesTitle=node('h3','Dịch vụ tenant (chỉ metadata)');
   const services=node('div',undefined,'cards');
   toolbar.append(reload);
-  shell.append(style,heading,toolbar,status,plansTitle,plans,servicesTitle,services);
+  if(style)shell.append(style);
+  shell.append(heading,toolbar,status,plansTitle,plans,servicesTitle,services);
   root.replaceChildren(shell);
   const setBusy=value=>{busy=value;reload.disabled=value;};
   const showError=()=>{status.textContent='Không tải được metadata. Kiểm tra phiên quản trị hoặc thử lại.';};
