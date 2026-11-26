@@ -127,7 +127,7 @@ async function relay(request,env,path){
   body:request.method!=='GET'?request.body:undefined,duplex:'half',redirect:'manual'
  }));
  const out=new Headers(headers('application/json; charset=utf-8'));
- for(const field of ['Content-Type','Set-Cookie','Cache-Control','Cross-Origin-Resource-Policy','Content-Disposition','Content-Length']){
+ for(const field of ['Content-Type','Set-Cookie','Cache-Control','Cross-Origin-Resource-Policy','Content-Disposition','Content-Length','Retry-After']){
    const value=upstream.headers.get(field);
    if(value)out.set(field,value);
  }
@@ -158,7 +158,7 @@ export async function handleSite(req,env){
   if(req.method!=='GET'||url.search)return missing();
   try{
    const session=await relay(req,env,'/api/platform/session');
-   if(session.status===401||session.status===403)return respond('Phiên quản trị nền tảng không hợp lệ.','text/plain; charset=utf-8',session.status);
+   if(session.status===401||session.status===403)return path==='/platform'?respond('<!doctype html><html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quản trị nền tảng</title><p>Phiên quản trị không hợp lệ.</p><a href="/platform/login">Đăng nhập quản trị nền tảng</a></html>','text/html; charset=utf-8',session.status):respond('Phiên quản trị nền tảng không hợp lệ.','text/plain; charset=utf-8',session.status);
    if(session.status!==200)return unavailable();
    const verified=await session.json();
    if(verified.kind!=='system_admin')return unavailable();
