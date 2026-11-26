@@ -1,3 +1,9 @@
+## R290 — Isolated platform QA login (2026-11-26 VN)
+
+- PR #332: separate System Administrator login/logout, random 256-bit QA credential plus independent HMAC server pepper, hashed 30-minute session, CSRF and origin checks, rate cap, audit/revocation triggers, responsive login UI, and offline private credential generator for an existing approved principal. No automatic principal creation, no tenant business-data access. Initial PBKDF2 approach was replaced before deployment due to Workers runtime compatibility concerns; generated credentials only, not a general human-password issuer.
+- Initial exact source head f515b5e7 workflow 45802703582 PASS. Corrected source/test head 203e6c6c workflow 45802926858 queued on inspection; do not mark final tests PASS until verified. Local clone blocked by DNS; no live D1 migration, QA grants, pepper provisioning, or physical-device acceptance.
+- PCS revision 142; next: verify CI, fix failures, complete verified principal/recovery lifecycle and isolated authenticated QA. No production or auto-merge. SRS v1.1.15, F01–F36, platform scope and no-signing constraint unchanged.
+
 ## R289 — Reconcile function inventory (2026-11-26 VN)
 
 - Owner agreed to resume PCS review and completion. Main remains at 7bddde32 (07 Nov); latest inspected development PR #330 R288 head b3bcbdcb (26 Nov). Exact R288 head has four successful workflow runs: 45798433006, 45798432993, 45798432916, 45798424454. No claim of actual deployed E2E.
