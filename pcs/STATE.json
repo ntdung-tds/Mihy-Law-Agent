@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 140,
-  "updated_at": "2026-11-14T04:03:00+07:00",
+  "revision": 141,
+  "updated_at": "2026-11-26T17:24:00+07:00",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -29,7 +29,7 @@
     ],
     "product_map": {
       "status": "PARTIAL",
-      "summary": "AI support for 11 Vietnam legal workflows per Owner-supplied SRS v1.1.15 candidate; source archive hashes verified. Baseline not yet formally Owner-signed; no new scope."
+      "summary": "AI support for 11 Vietnam legal workflows per Owner-supplied SRS v1.1.15 candidate; source archive hashes verified. Baseline not yet formally Owner-signed; no new scope. Owner-approved target F01–F36 plus R216 platform administration; R289 inventory is provisional source-level assessment, not SRS mapping or product acceptance."
     },
     "architecture_map": {
       "status": "POC_ONLY",
@@ -2943,12 +2943,16 @@
       {
         "path": "web/qa/drive-inline.js",
         "visibility": "PUBLIC_SAFE_JS_BROWSER_ONLY_NO_TOKENS"
+      },
+      {
+        "path": "pcs/function_audit_gpt_v1.md",
+        "visibility": "PUBLIC_SAFE_TECHNICAL_METADATA_ONLY"
       }
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R143 verified PR #213 final-head CI #42817066883 success 9/9. R144 UC07 source-only implementation and regression tests committed in draft PR #214, first CI #43304512580 failed cloudflare-contract due wrongly double-escaped UI anchor regex; fixed in code HEAD 228b90f4 and retest #43304706691 pending.",
-      "next_action": "Owner: finish all F01–F36 excluding digital/electronic signing. Draft PR225 R155 F20 receipt filename-only search now exists, code CI #43376705145 latest pending for 9-job completion; verify and correct failed tests before recording PASS. Real persistent documents still depend on customer-authorized Google Drive, paused OAuth integration unresolved; filename search is not content index. Next distinct P0: add secure Matter-linked fulltext indexing only with properly specified source/perms/deletion, or address actual doc/Cloudflare E2E blocked gates; don't invent storage providers or merge. Preserve AL-R0-DEPLOY-001 standalone-first, Tenant privacy, human lawyer and Owner acceptance.",
+      "last_completed_step": "R289: reconciled main vs latest R288 PR #330 head b3bcbdcb. Four exact-head CI workflows successful (45798433006, 45798432993, 45798432916, 45798424454). Added PCS function inventory for F01–F36 plus platform administration; no new application code or E2E. Prior historical component evidence remains valid within its scope.",
+      "next_action": "Continue AL-R0-DEPLOY-001 on R288/R289 lineage: implement dedicated platform session issuer/login and controlled principal provisioning/revocation/recovery, then scoped authenticated QA integration, without tenant business-data access. Follow pcs/function_audit_gpt_v1.md; preserve storage pause, no signing and no automatic merge/production deployment.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -2987,7 +2991,8 @@
         "R68-01: DOCX source helper merged PR93 PASS but still not invoked by Cloudflare Worker; original SRS v1.1.15 ZIP not mounted; backend storage, upload, PDF/OCR and AI E2E separate tasks.",
         "R69+R70: source PDF/DOCX extraction and integrity guards are CI-PASS and merged, but NOT integrated with Cloudflare QA Worker or Google Drive; no real authenticated upload/read, OCR or UC03/04/07 AI E2E. Original private SRS 1.1.15 ZIP inaccessible for exact mapping; do not claim full PDF/Word display parity.",
         "R72-R80 Google Drive QA has one existing grant and new disconnect UI/API deployed; local disconnect/reconnect real browser NOT_RUN due to Owner-only destructive grant action. Zero uploaded file receipts. Signed-in synthetic file E2E and full cross-tenant ACL still NOT_RUN; production not deployed.",
-        "2026-11-07 Owner paused Google Drive/OneDrive and instructed completion of all other functions. Storage work remains OPEN/NOT_ACCEPTED but excluded from active implementation and QA changes; no Drive retry."
+        "2026-11-07 Owner paused Google Drive/OneDrive and instructed completion of all other functions. Storage work remains OPEN/NOT_ACCEPTED but excluded from active implementation and QA changes; no Drive retry.",
+        "R289: private SRS exact FR/TC trace unavailable; R288 platform issuer/login, actual D1 migration, authenticated real-device QA and Owner acceptance not yet verified. Main is older than stacked open PRs; do not restart or auto-merge."
       ]
     },
     "policy": {
