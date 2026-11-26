@@ -1,3 +1,8 @@
+## R288 — Platform Worker session isolation and mount (2026-11-26 VN)
+
+- R287 exact HEAD b191aa2b: GitHub Actions mobile view and DOCX POC both SUCCESS. R288 implements separate hashed platform session store, active principal verification, session-bound CSRF, and mounted platform routes on QA API Worker and same-origin site relay. No tenant role can grant platform access. No automatic seed or real grant. No change to business-data routes, frozen SRS v1.1.15 or F01–F36.
+- Added synthetic Node route tests and real SQLite schema/session tests; CI pending. Dedicated platform session issuer/login, UI mounting, recovery, actual D1 migration and real-device verification remain incomplete. No production deployment, merge, customer data or acceptance.
+
 ## R287 — Platform mobile contract regression repair (2026-11-26 VN)
 
 - Owner prioritizes complete System Admin, mobile UI and authenticated Worker/D1 integration. R286 PR #328 CI mobile 18/19: stale PATCH fixture after POST contract change. Updated positive and negative tests to observe POST and explicitly exercise invalid reason on a changed status. No production authorization relaxed. Test observation 1/5, fixture repair 1/5; local NOT_RUN, new CI NOT_VERIFIED. Platform remains PARTIAL; authenticated Worker mount, D1 and full UI outstanding. AL-R0-DEPLOY-001 and frozen SRS unchanged; no merge/deploy.
