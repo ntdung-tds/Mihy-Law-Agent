@@ -37,6 +37,8 @@ const modules=[
  ['platform_login_html_gpt.mjs','web/platform/login_gpt.html','PLATFORM_LOGIN_HTML'],
  ['platform_login_js_gpt.mjs','web/platform/login_gpt.mjs','PLATFORM_LOGIN_JS'],
  ['platform_catalog_js_gpt.mjs','web/platform/catalog_gpt.mjs','PLATFORM_CATALOG_JS'],
+ ['case_work_html_gpt.mjs','web/case-work/index_gpt.html','CASE_WORK_HTML'],
+ ['case_work_js_gpt.mjs','web/case-work/app_gpt.js','CASE_WORK_JS'],
  ['case_metadata_html_gpt.mjs','web/case-detail/index_gpt.html','CASE_METADATA_HTML'],
  ['case_metadata_js_gpt.mjs','web/case-detail/app_gpt.js','CASE_METADATA_JS'],
  ['case_metadata_css_gpt.mjs','web/case-detail/styles_gpt.css','CASE_METADATA_CSS'],
