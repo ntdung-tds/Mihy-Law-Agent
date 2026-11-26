@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS platform_admin_credentials (
  email TEXT NOT NULL CHECK(length(email) BETWEEN 3 AND 254 AND email=lower(email)),
  salt TEXT NOT NULL CHECK(length(salt)=32 AND salt NOT GLOB '*[^0-9a-f]*'),
  password_hash TEXT NOT NULL CHECK(length(password_hash)=64 AND password_hash NOT GLOB '*[^0-9a-f]*'),
- iterations INTEGER NOT NULL CHECK(iterations=600000),
+ scheme TEXT NOT NULL CHECK(scheme='hmac-sha256-random-v1'),
  PRIMARY KEY(installation_id,actor_id),
  UNIQUE(installation_id,email),
  FOREIGN KEY(installation_id,actor_id) REFERENCES platform_admin_principals(installation_id,actor_id) ON DELETE RESTRICT
