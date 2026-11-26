@@ -1,3 +1,9 @@
+## R291–R292 — Combined platform and case implementation (2026-11-26 VN)
+
+- R290 corrected code CI 45802926858 SUCCESS. R291 PR #333: audited platform plan create/update/retire, pending service metadata, license/plan change, UI and SQLite tests. Code head 87ebb0a4 CI 45804242321 SUCCESS.
+- R292 PR #334: older R126 case branch diverged from later AI/platform chain; restore compatible R116 metadata schema and create/detail/edit/mobile flow without changing paused file storage. Customer/counterparty labels, priority/status/deadline, immutable changed-field audit, soft hide invalidates ACL version without physical deletion. Separate title rename retained; not full CRM/calendar. R290 session confirmation changed to RETURNING to avoid D1 trigger change counts. Code head 4ae12c7b CI 45804654201 queued on observation. No live migration or device QA.
+- PCS revision 143. Main remains ancestor (787 commits behind R292 source head, 225 changed paths). Prepare consolidated integration draft for whole-stack CI; do not merge/deploy automatically. SRS v1.1.15, 36 target functions + platform scope, no signing and storage pause preserved. Continue actual code; no new product acceptance.
+
 ## R290 — Isolated platform QA login (2026-11-26 VN)
 
 - PR #332: separate System Administrator login/logout, random 256-bit QA credential plus independent HMAC server pepper, hashed 30-minute session, CSRF and origin checks, rate cap, audit/revocation triggers, responsive login UI, and offline private credential generator for an existing approved principal. No automatic principal creation, no tenant business-data access. Initial PBKDF2 approach was replaced before deployment due to Workers runtime compatibility concerns; generated credentials only, not a general human-password issuer.
