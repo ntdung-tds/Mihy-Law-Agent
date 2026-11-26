@@ -1,7 +1,7 @@
 {
   "schema": "pcs.solo.v1",
-  "revision": 141,
-  "updated_at": "2026-11-26T17:24:00+07:00",
+  "revision": 142,
+  "updated_at": "2026-11-26T17:40:00+07:00",
   "state": {
     "schema": "pcs.solo.project.v1",
     "version": "0.1.0",
@@ -2947,12 +2947,20 @@
       {
         "path": "pcs/function_audit_gpt_v1.md",
         "visibility": "PUBLIC_SAFE_TECHNICAL_METADATA_ONLY"
+      },
+      {
+        "path": "deployment/cloudflare/src/platform_login_gpt.mjs",
+        "visibility": "PUBLIC_SAFE_CODE_ONLY"
+      },
+      {
+        "path": "deployment/cloudflare/tools/provision_platform_qa_gpt.py",
+        "visibility": "PUBLIC_SAFE_CODE_ONLY_NO_CREDENTIALS"
       }
     ],
     "current": {
       "active_task": "AL-R0-DEPLOY-001",
-      "last_completed_step": "R289: reconciled main vs latest R288 PR #330 head b3bcbdcb. Four exact-head CI workflows successful (45798433006, 45798432993, 45798432916, 45798424454). Added PCS function inventory for F01–F36 plus platform administration; no new application code or E2E. Prior historical component evidence remains valid within its scope.",
-      "next_action": "Continue AL-R0-DEPLOY-001 on R288/R289 lineage: implement dedicated platform session issuer/login and controlled principal provisioning/revocation/recovery, then scoped authenticated QA integration, without tenant business-data access. Follow pcs/function_audit_gpt_v1.md; preserve storage pause, no signing and no automatic merge/production deployment.",
+      "last_completed_step": "R290 draft PR #332 implements isolated opt-in QA platform login/logout, 256-bit operator-generated random password and HMAC pepper, SHA256-hashed random session, 30-minute expiry, origin/CSRF, bounded request and login cap, session revocation/audit triggers, mobile login and offline credential generation only for an existing approved principal. Initial implementation CI 45802703582 succeeded on f515b5e7; corrected Workers-compatible source/test head 203e6c6c CI 45802926858 queued when checked, not yet verified.",
+      "next_action": "Verify R290 final code CI 45802926858, fix any failing tests, then proceed with controlled platform principal lifecycle and verified recovery; actual isolated QA D1 migration, secret configuration and authenticated mobile/desktop E2E only after reviewed authorization. Production IdP/MFA separate. Preserve no tenant business-data access, no signing, paused storage, no auto-merge.",
       "blockers": [
         "D01 policy OWNER_APPROVED. IAICT designated operator. The separate formal evidence/legal-data gates and actual identity/staging E2E are outstanding; do not reopen D01 approval.",
         "Cryptographic RS256/JWKS adapter and signed JWT/PG16 HTTP CI PASS R34; approved external IdP endpoint, persistent authenticated sessions/MFA and actual role-specific account login not yet integrated.",
@@ -2992,7 +3000,8 @@
         "R69+R70: source PDF/DOCX extraction and integrity guards are CI-PASS and merged, but NOT integrated with Cloudflare QA Worker or Google Drive; no real authenticated upload/read, OCR or UC03/04/07 AI E2E. Original private SRS 1.1.15 ZIP inaccessible for exact mapping; do not claim full PDF/Word display parity.",
         "R72-R80 Google Drive QA has one existing grant and new disconnect UI/API deployed; local disconnect/reconnect real browser NOT_RUN due to Owner-only destructive grant action. Zero uploaded file receipts. Signed-in synthetic file E2E and full cross-tenant ACL still NOT_RUN; production not deployed.",
         "2026-11-07 Owner paused Google Drive/OneDrive and instructed completion of all other functions. Storage work remains OPEN/NOT_ACCEPTED but excluded from active implementation and QA changes; no Drive retry.",
-        "R289: private SRS exact FR/TC trace unavailable; R288 platform issuer/login, actual D1 migration, authenticated real-device QA and Owner acceptance not yet verified. Main is older than stacked open PRs; do not restart or auto-merge."
+        "R289: private SRS exact FR/TC trace unavailable; R288 platform issuer/login, actual D1 migration, authenticated real-device QA and Owner acceptance not yet verified. Main is older than stacked open PRs; do not restart or auto-merge.",
+        "R290: no live QA D1 migration or real platform principal/credential created; opt-in flag and independent secret pepper not configured. Shared QA rate cap may deny all logins temporarily; production IdP/MFA/edge throttling and verified recovery unfinished. Local git clone blocked by DNS; use exact-head CI. No real-device QA yet."
       ]
     },
     "policy": {
