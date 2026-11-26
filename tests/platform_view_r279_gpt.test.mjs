@@ -36,23 +36,25 @@ test('R279 failed GET removes stale cards and displays generic error',async()=>{
  assert.ok(!all.some(x=>String(x.textContent).includes('private matter')));
  assert.ok(!all.some(x=>x.textContent==='Tenant: t1'));
 });
-test('R279 invalid reason prevents PATCH; successful update uses approved fields',async()=>{
+test('R279 invalid reason prevents POST; successful update uses approved fields',async()=>{
  let patches=0;
  const {root,view}=setup(async(path,init)=>{
-   if(init.method==='PATCH'){patches++;assert.deepEqual(JSON.parse(init.body),{tenantId:'t1',status:'suspended',reasonCode:'ADMIN_REQUEST'});return json({changed:true,tenantId:'t1',status:'suspended'});}
+   if(init.method==='POST'){patches++;assert.deepEqual(JSON.parse(init.body),{tenantId:'t1',status:'suspended',reasonCode:'ADMIN_REQUEST'});return json({changed:true,tenantId:'t1',status:'suspended'});}
    return json(path.endsWith('/plans')?plans:services);
  });
  await view.refresh(true);
  let all=walk(root),button=all.find(x=>x.textContent==='Cập nhật trạng thái');
+ all.find(x=>x.tag==='select').value='suspended';
  await button.listeners.click();assert.equal(patches,0);
+ assert.ok(walk(root).some(x=>x.textContent==='Mã lý do không hợp lệ.'));
  all=walk(root);all.find(x=>x.tag==='input').value='ADMIN_REQUEST';
  all.find(x=>x.tag==='select').value='suspended';
  await button.listeners.click();assert.equal(patches,1);
 });
-test('R279 revoked status requires confirmation before PATCH',async()=>{
+test('R279 revoked status requires confirmation before POST',async()=>{
  let patches=0;
  const {root,view}=setup(async(path,init)=>{
-   if(init.method==='PATCH'){patches++;return json({changed:true,tenantId:'t1',status:'revoked'});}
+   if(init.method==='POST'){patches++;return json({changed:true,tenantId:'t1',status:'revoked'});}
    return json(path.endsWith('/plans')?plans:services);
  },()=>false);
  await view.refresh(true);
@@ -64,7 +66,7 @@ test('R279 revoked status requires confirmation before PATCH',async()=>{
 
 test('R280 empty reason input is rejected without network mutation',async()=>{
  let patches=0;
- const {root,view}=setup(async(path,init)=>{if(init?.method==='PATCH') patches++;return json(path.endsWith('/plans')?plans:services);});
+ const {root,view}=setup(async(path,init)=>{if(init?.method==='POST') patches++;return json(path.endsWith('/plans')?plans:services);});
  await view.refresh(true);
  const all=walk(root);
  assert.equal(all.find(x=>x.tag==='input').value,'');
@@ -77,10 +79,10 @@ test('R280 empty reason input is rejected without network mutation',async()=>{
 });
 
 
-test('R281 unchanged service state never sends PATCH or requests confirmation',async()=>{
+test('R281 unchanged service state never sends POST or requests confirmation',async()=>{
  let patches=0,confirms=0;
  const {root,view}=setup(async(path,init)=>{
-   if(init?.method==='PATCH') patches++;
+   if(init?.method==='POST') patches++;
    return json(path.endsWith('/plans')?plans:services);
  },()=>{confirms++;return true;});
  await view.refresh(true);
