@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {PLATFORM_STYLES} from '../deployment/cloudflare/platform_admin_view_gpt.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const out=path.resolve(process.argv[2]||path.join(root,'build','ai-law-web'));
 fs.mkdirSync(out,{recursive:true});
@@ -32,10 +33,16 @@ const modules=[
  ['drive_inline_js.mjs','web/qa/drive-inline.js','DRIVE_INLINE_JS'],
  ['account_html.mjs','web/account/index.html','ACCOUNT_HTML'],
  ['account_css.mjs','web/account/styles.css','ACCOUNT_CSS'],
- ['account_js.mjs','web/account/app.js','ACCOUNT_JS']
+ ['account_js.mjs','web/account/app.js','ACCOUNT_JS'],
+ ['platform_html_gpt.mjs','web/platform/index_gpt.html','PLATFORM_HTML'],
+ ['platform_js_gpt.mjs','web/platform/app_gpt.mjs','PLATFORM_JS'],
+ ['platform_view_js_gpt.mjs','deployment/cloudflare/platform_admin_view_gpt.mjs','PLATFORM_VIEW_JS'],
+ ['platform_client_js_gpt.mjs','deployment/cloudflare/platform_admin_client_gpt.mjs','PLATFORM_CLIENT_JS']
 ];
 for(const [name,src,exported] of modules){
  const text=fs.readFileSync(path.join(root,src),'utf8');
  fs.writeFileSync(path.join(out,name),exported?('export const '+exported+'='+JSON.stringify(text)+';\n'):text);
 }
+const platformCss='body{margin:0;font:16px system-ui,sans-serif;background:#faf9ff;color:#26233c}.platform-header{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:1rem;background:#26233c;color:white}.platform-header span{font-size:.875rem}main{max-width:1100px;margin:auto;padding:1rem}'+PLATFORM_STYLES;
+fs.writeFileSync(path.join(out,'platform_css_gpt.mjs'),'export const PLATFORM_CSS='+JSON.stringify(platformCss)+';\n');
 console.log('Mihy Law AI Agent website QA modules prepared: '+modules.length);

@@ -9,6 +9,7 @@ import { legalApi, documentExtractApi } from "./qa_legal_workflows.mjs";
 import { documentsApi } from "./qa_documents.mjs";
 import { oauthDriveApi } from "./oauth_drive.mjs";
 import { MOBILE_CSS, MOBILE_JS } from "./mobile_assets.mjs";
+import { platformSessionApi } from "./platform_session_gpt.mjs";
 
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const result=(status,data)=>new Response(JSON.stringify(data),{status,headers:{
@@ -98,6 +99,7 @@ const params=(env,session,id,now)=>[
 ];
 export async function handle(request,env,options={}){
   const url=new URL(request.url);
+  if(url.pathname.startsWith("/api/platform/"))return platformSessionApi(request,env,options);
   if(url.pathname==="/" && request.method==="GET"){
     // R98: Only one customer-facing QA entry point. The Worker still serves
     // tenant auth, document APIs and the Google OAuth callback on this host.
