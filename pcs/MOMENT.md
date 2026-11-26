@@ -1,3 +1,7 @@
+## R287 — Platform mobile contract regression repair (2026-11-26 VN)
+
+- Owner prioritizes complete System Admin, mobile UI and authenticated Worker/D1 integration. R286 PR #328 CI mobile 18/19: stale PATCH fixture after POST contract change. Updated positive and negative tests to observe POST and explicitly exercise invalid reason on a changed status. No production authorization relaxed. Test observation 1/5, fixture repair 1/5; local NOT_RUN, new CI NOT_VERIFIED. Platform remains PARTIAL; authenticated Worker mount, D1 and full UI outstanding. AL-R0-DEPLOY-001 and frozen SRS unchanged; no merge/deploy.
+
 ## R285 — Repair bounded Content-Length acceptance (2026-11-24 VN)
 
 - Read latest STATE/MOMENT/scope/SRS change register on R284 draft #326, issue #156, open PR stack and exact R284 HEAD `ff30ce98` CI: 3/3 workflows SUCCESS (synthetic only). Active task remains AL-R0-DEPLOY-001; no change to frozen SRS or F01–F36.
