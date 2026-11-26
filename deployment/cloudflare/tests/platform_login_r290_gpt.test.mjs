@@ -1,22 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createHash,pbkdf2Sync} from 'node:crypto';
+import {createHash,createHmac} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {DatabaseSync} from 'node:sqlite';
 import {handleSite} from '../../../build/ai-law-web/site_worker.mjs';
 import {handle} from '../src/worker.mjs';
 const I='11111111-1111-4111-8111-111111111111',NOW=1800000000,WEB='https://ai-law-web-qa.iaict-platform.workers.dev';
-const email='synthetic@example.invalid',password='synthetic-test-only-password',salt='ab'.repeat(16);
-const verifier=pbkdf2Sync(password,Buffer.from(salt,'hex'),600000,32,'sha256').toString('hex');
+const email='synthetic@example.invalid',password='de'.repeat(32),salt='ab'.repeat(16),pepper='ef'.repeat(32);
+const verifier=createHmac('sha256',pepper).update('mihy-platform-login-v1:'+salt+':'+password).digest('hex');
 function fixture(){
  const db=new DatabaseSync(':memory:');
  for(const f of ['r216_platform_admin_gpt.sql','r288_platform_session_gpt.sql','r290_platform_login_gpt.sql'])db.exec(readFileSync(new URL('../migrations/'+f,import.meta.url),'utf8'));
  db.prepare('INSERT INTO platform_admin_principals VALUES (?,?,?)').run(I,'synthetic-admin','active');
- db.prepare('INSERT INTO platform_admin_credentials VALUES (?,?,?,?,?,?)').run(I,'synthetic-admin',email,salt,verifier,600000);
+ db.prepare('INSERT INTO platform_admin_credentials VALUES (?,?,?,?,?,?)').run(I,'synthetic-admin',email,salt,verifier,'hmac-sha256-random-v1');
  const queries=[];
  function stmt(sql,args=[]){return {bind(...p){return stmt(sql,p);},async first(){queries.push(sql);return db.prepare(sql).get(...args)??null;},async all(){queries.push(sql);return {success:true,results:db.prepare(sql).all(...args)};},async run(){queries.push(sql);return {success:true,meta:{changes:Number(db.prepare(sql).run(...args).changes)}};}};}
  const DB={prepare:stmt,async batch(statements){db.exec('BEGIN');try{const out=[];for(const s of statements)out.push(await s.run());db.exec('COMMIT');return out;}catch(e){db.exec('ROLLBACK');throw e;}}};
- const env={AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,DB,PLATFORM_PASSWORD_LOGIN_GPT:'enabled-qa-only'};
+ const env={AI_LAW_CF_MODE:'isolated-qa-only',INSTALLATION_ID:I,DB,PLATFORM_PASSWORD_LOGIN_GPT:'enabled-qa-only',PLATFORM_LOGIN_PEPPER_GPT:pepper};
  const site={QA_AUTH:{fetch:req=>handle(req,env,{now:NOW})}};
  const request=(path,{method='GET',headers={},body}={})=>handleSite(new Request(WEB+path,{method,headers,body}),site);
  const login=(data={email,password},headers={})=>request('/api/platform/login',{method:'POST',headers:{origin:WEB,'content-type':'application/json',...headers},body:JSON.stringify(data)});
@@ -46,7 +46,7 @@ test('R290 public login, separate password issuer, secure session, logout and ap
 });
 test('R290 reject wrong credentials, unknown user, tenant role, unsafe origin, malformed body and disabled opt-in',async()=>{
  const f=fixture();try{
-  assert.equal((await f.login({email,password:'incorrect-test-password'})).status,401);
+  assert.equal((await f.login({email,password:'ab'.repeat(32)})).status,401);
   assert.equal((await f.login({email:'unknown@example.invalid',password},{'cookie':'al_qa_session='+I,'x-role':'system_admin'})).status,401);
   assert.equal((await f.login({email,password},{origin:'https://foreign.invalid'})).status,403);
   assert.equal((await f.login({email,password,role:'system_admin'})).status,400);
