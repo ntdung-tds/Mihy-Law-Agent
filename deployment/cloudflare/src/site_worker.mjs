@@ -29,6 +29,8 @@ import { DRIVE_BLOB_JS } from './drive_blob_js.mjs';
 import { DRIVE_INLINE_HTML } from './drive_inline_html.mjs';
 import { DRIVE_INLINE_JS } from './drive_inline_js.mjs';
 
+import {PLATFORM_LOGIN_HTML} from './platform_login_html_gpt.mjs';
+import {PLATFORM_LOGIN_JS} from './platform_login_js_gpt.mjs';
 import {PLATFORM_HTML} from './platform_html_gpt.mjs';
 import {PLATFORM_JS} from './platform_js_gpt.mjs';
 import {PLATFORM_VIEW_JS} from './platform_view_js_gpt.mjs';
@@ -42,7 +44,7 @@ const platformAssets=new Map([
  ['/platform_admin_client_gpt.mjs',[PLATFORM_CLIENT_JS,'application/javascript; charset=utf-8']]
 ]);
 const AUTH_ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
-const PLATFORM_API=new Set(['/api/platform/session','/api/platform/plans','/api/platform/services']);
+const PLATFORM_API=new Set(['/api/platform/session','/api/platform/plans','/api/platform/services','/api/platform/login','/api/platform/logout']);
 const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/legal/run','/api/qa/legal/extract','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile','/api/qa/profile/avatar','/api/qa/drive/status','/api/qa/drive/connect','/api/qa/drive/disconnect']);
 const privateAssets=new Map([
  ['/styles.css',[WORKSPACE_CSS,'text/css; charset=utf-8']],
@@ -125,7 +127,7 @@ async function relay(request,env,path){
   body:request.method!=='GET'?request.body:undefined,duplex:'half',redirect:'manual'
  }));
  const out=new Headers(headers('application/json; charset=utf-8'));
- for(const field of ['Content-Type','Set-Cookie','Cache-Control','Cross-Origin-Resource-Policy','Content-Disposition','Content-Length']){
+ for(const field of ['Content-Type','Set-Cookie','Cache-Control','Cross-Origin-Resource-Policy','Content-Disposition','Content-Length','Retry-After']){
    const value=upstream.headers.get(field);
    if(value)out.set(field,value);
  }
@@ -148,11 +150,15 @@ export async function handleSite(req,env){
  const isDocumentApi=path==='/api/qa/documents'||
   ['/api/qa/documents/upload/start','/api/qa/documents/upload/finish'].includes(path)||
   /^\/api\/qa\/documents\/[0-9a-f-]{36}\/download$/.test(path);
+ if(path==='/platform/login'||path==='/platform/login.js'){
+  if(req.method!=='GET'||url.search)return missing();
+  return path.endsWith('.js')?respond(PLATFORM_LOGIN_JS,'application/javascript; charset=utf-8'):respond(PLATFORM_LOGIN_HTML);
+ }
  if(platformAssets.has(path)){
   if(req.method!=='GET'||url.search)return missing();
   try{
    const session=await relay(req,env,'/api/platform/session');
-   if(session.status===401||session.status===403)return respond('Phiên quản trị nền tảng không hợp lệ.','text/plain; charset=utf-8',session.status);
+   if(session.status===401||session.status===403)return path==='/platform'?respond('<!doctype html><html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quản trị nền tảng</title><p>Phiên quản trị không hợp lệ.</p><a href="/platform/login">Đăng nhập quản trị nền tảng</a></html>','text/html; charset=utf-8',session.status):respond('Phiên quản trị nền tảng không hợp lệ.','text/plain; charset=utf-8',session.status);
    if(session.status!==200)return unavailable();
    const verified=await session.json();
    if(verified.kind!=='system_admin')return unavailable();
@@ -162,7 +168,8 @@ export async function handleSite(req,env){
  }
  if(PLATFORM_API.has(path)){
   if(url.search)return respond(JSON.stringify({error:'BAD_REQUEST'}),'application/json; charset=utf-8',400);
-  if(req.method!=='GET'&&!(req.method==='POST'&&path==='/api/platform/services'))return respond(JSON.stringify({error:'METHOD_NOT_ALLOWED'}),'application/json; charset=utf-8',405);
+  const postOnly=['/api/platform/login','/api/platform/logout'].includes(path);
+  if(postOnly?req.method!=='POST':req.method!=='GET'&&!(req.method==='POST'&&path==='/api/platform/services'))return respond(JSON.stringify({error:'METHOD_NOT_ALLOWED'}),'application/json; charset=utf-8',405);
   try{return await relay(req,env,path);}catch{return unavailable();}
  }
  if(req.method!=='GET' && !API.has(path) && !isDocumentApi)return missing();
