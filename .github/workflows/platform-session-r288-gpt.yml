@@ -19,3 +19,4 @@ jobs:
       - run: node tools/build_cf_site.mjs
       - run: node --test deployment/cloudflare/tests/platform_session_r288_gpt.test.mjs deployment/cloudflare/tests/platform_site_r288_gpt.test.mjs tests/platform_view_r279_gpt.test.mjs deployment/cloudflare/tests/platform_login_r290_gpt.test.mjs
       - run: python -m unittest discover -s deployment/cloudflare/tests -p test_r288_platform_session_gpt.py -v
+      - run: python -m unittest discover -s deployment/cloudflare/tests -p test_r290_platform_provision_gpt.py -v
