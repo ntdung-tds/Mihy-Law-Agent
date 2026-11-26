@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'deployment/cloudflare/**'
+      - 'web/platform/**'
+      - 'tools/build_cf_site.mjs'
       - '.github/workflows/platform-session-r288-gpt.yml'
 permissions:
   contents: read
@@ -14,5 +16,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test deployment/cloudflare/tests/platform_session_r288_gpt.test.mjs
+      - run: node tools/build_cf_site.mjs
+      - run: node --test deployment/cloudflare/tests/platform_session_r288_gpt.test.mjs deployment/cloudflare/tests/platform_site_r288_gpt.test.mjs tests/platform_view_r279_gpt.test.mjs
       - run: python -m unittest discover -s deployment/cloudflare/tests -p test_r288_platform_session_gpt.py -v
