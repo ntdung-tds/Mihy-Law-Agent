@@ -1,10 +1,11 @@
 // R288: isolated QA platform session boundary. Never use qa_memberships or tenant roles.
+import {loginPlatform,logoutPlatform} from './platform_login_gpt.mjs';
 import {handlePlatformAdminRequest} from '../platform_http_gpt.mjs';
 const TOKEN=/^[0-9a-f]{64}$/;
 const ID=/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,119}$/;
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const COOKIE='__Host-al_platform_session';
-const PATHS=new Set(['/api/platform/session','/api/platform/plans','/api/platform/services']);
+const PATHS=new Set(['/api/platform/session','/api/platform/plans','/api/platform/services','/api/platform/login','/api/platform/logout']);
 const headers={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer','cross-origin-resource-policy':'same-origin'};
 const reply=(status,data)=>new Response(JSON.stringify(data),{status,headers});
 export const PLATFORM_SESSION_SQL=[
@@ -30,19 +31,22 @@ export async function platformSessionApi(request,env,options={}){
   const url=new URL(request.url);
   if(!PATHS.has(url.pathname))return reply(404,{error:'NOT_FOUND'});
   if(url.protocol!=='https:'||url.search)return reply(400,{error:'BAD_REQUEST'});
-  if(request.method!=='GET'&&!(request.method==='POST'&&url.pathname==='/api/platform/services'))
+  const postOnly=['/api/platform/login','/api/platform/logout'].includes(url.pathname);
+  if(postOnly?request.method!=='POST':request.method!=='GET'&&!(request.method==='POST'&&url.pathname==='/api/platform/services'))
     return reply(405,{error:'METHOD_NOT_ALLOWED'});
   if(env?.AI_LAW_CF_MODE!=='isolated-qa-only'||!UUID.test(env.INSTALLATION_ID||'')||
      !env.DB||typeof env.DB.prepare!=='function'||typeof env.DB.batch!=='function')
     return reply(503,{error:'UNAVAILABLE'});
+  const now=options.now??Math.floor(Date.now()/1000);
+  if(url.pathname==='/api/platform/login')return loginPlatform(request,env,now);
   const token=tokenFrom(request);
   if(!token)return reply(401,{error:'UNAUTHORIZED'});
   try{
-    const now=options.now??Math.floor(Date.now()/1000);
     const row=await env.DB.prepare(PLATFORM_SESSION_SQL).bind(env.INSTALLATION_ID,await digest(token),now).first();
     if(!row||typeof row.actor_id!=='string'||!ID.test(row.actor_id))return reply(403,{error:'FORBIDDEN'});
     const principal=Object.freeze({verified:true,kind:'system_admin',id:row.actor_id,impersonating:false});
     const csrf=await digest('mihy-platform-csrf-v1:'+token);
+    if(url.pathname==='/api/platform/logout')return logoutPlatform(request,env,now,token,csrf);
     if(url.pathname==='/api/platform/session')return reply(200,{kind:'system_admin',csrfToken:csrf});
     // Only the validated platform session can produce the principal and CSRF verdict.
     // No client-provided role, tenant header or ordinary QA cookie is consulted.
