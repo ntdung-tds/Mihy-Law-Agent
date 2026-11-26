@@ -1,3 +1,4 @@
+import {mountPlatformCatalog} from './platform_catalog_gpt.mjs';
 import {mountPlatformAdmin} from './platform_admin_view_gpt.mjs';
 const root=document.getElementById('platform-root');
 try {
@@ -14,7 +15,9 @@ try {
     }catch{logout.disabled=false;logout.textContent='Đăng xuất chưa thành công — thử lại';}
   });
   document.querySelector('.platform-header').append(logout);
-  mountPlatformAdmin(root,{fetchImpl:fetch.bind(globalThis),csrfToken:session.csrfToken,externalStyle:true});
+  const catalogRoot=document.createElement('section');root.after(catalogRoot);
+  const view=mountPlatformAdmin(root,{fetchImpl:fetch.bind(globalThis),csrfToken:session.csrfToken,externalStyle:true});
+  mountPlatformCatalog(catalogRoot,{csrf:session.csrfToken,refresh:()=>view.refresh(true)});
 } catch {
   root.textContent='Không xác minh được phiên quản trị nền tảng. ';
   const link=document.createElement('a');link.href='/platform/login';link.textContent='Đăng nhập lại';root.append(link);
