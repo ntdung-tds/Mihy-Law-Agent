@@ -30,6 +30,7 @@ import { DRIVE_INLINE_HTML } from './drive_inline_html.mjs';
 import { DRIVE_INLINE_JS } from './drive_inline_js.mjs';
 
 const AUTH_ORIGIN='https://ai-law-standalone-cf-qa.iaict-platform.workers.dev';
+const PLATFORM_API=new Set(['/api/platform/session','/api/platform/plans','/api/platform/services']);
 const API=new Set(['/api/qa/session','/api/qa/login','/api/qa/logout','/api/qa/matters','/api/qa/legal/run','/api/qa/legal/extract','/api/qa/workspaces','/api/qa/switch-workspace','/api/qa/change-password','/api/qa/profile','/api/qa/profile/avatar','/api/qa/drive/status','/api/qa/drive/connect','/api/qa/drive/disconnect']);
 const privateAssets=new Map([
  ['/styles.css',[WORKSPACE_CSS,'text/css; charset=utf-8']],
@@ -101,6 +102,11 @@ async function relay(request,env,path){
  if(cookie)h.set('Cookie',cookie);
  const type=request.headers.get('Content-Type');
  if(type)h.set('Content-Type',type);
+ if(PLATFORM_API.has(inbound.pathname)){
+  for(const field of ['X-CSRF-Token','Content-Encoding','Content-Length']){
+   const value=request.headers.get(field);if(value!==null)h.set(field,value);
+  }
+ }
  if(request.method!=='GET'){h.set('Origin',target.origin);h.set('Sec-Fetch-Site','same-origin');}
  const upstream=await env.QA_AUTH.fetch(new Request(target,{
   method:request.method,headers:h,
@@ -130,6 +136,11 @@ export async function handleSite(req,env){
  const isDocumentApi=path==='/api/qa/documents'||
   ['/api/qa/documents/upload/start','/api/qa/documents/upload/finish'].includes(path)||
   /^\/api\/qa\/documents\/[0-9a-f-]{36}\/download$/.test(path);
+ if(PLATFORM_API.has(path)){
+  if(url.search)return respond(JSON.stringify({error:'BAD_REQUEST'}),'application/json; charset=utf-8',400);
+  if(req.method!=='GET'&&!(req.method==='POST'&&path==='/api/platform/services'))return respond(JSON.stringify({error:'METHOD_NOT_ALLOWED'}),'application/json; charset=utf-8',405);
+  try{return await relay(req,env,path);}catch{return unavailable();}
+ }
  if(req.method!=='GET' && !API.has(path) && !isDocumentApi)return missing();
  // R90 isolated QA-only page. Cloudflare serves static bytes ONLY; the browser
  // obtains a short-lived Google token itself and POSTs a Blob directly to Google.
