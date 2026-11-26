@@ -2,9 +2,9 @@
 <html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><title>Đăng nhập quản trị nền tảng | Mihy Law AI Agent</title><link rel="stylesheet" href="/site.css"><script src="/platform/login.js" defer></script></head>
 <body class="login-page"><header class="login-header"><div class="container login-header-inner"><strong>Mihy Law AI Agent</strong><a class="back-home" href="/">Trang chủ</a></div></header>
 <main class="login-main"><section class="login-story"><div class="login-story-inner"><p class="kicker kicker-light">SYSTEM ADMIN · QA</p><h1>Quản trị nền tảng.</h1><p>Không gian quản lý dịch vụ, tách biệt hoàn toàn với hồ sơ và dữ liệu nghiệp vụ của khách hàng.</p></div></section>
-<section class="login-form-section" aria-labelledby="login-title"><div class="login-card"><h2 id="login-title">Đăng nhập quản trị</h2><p class="login-lead">Chỉ sử dụng tài khoản System Administrator đã được cấp riêng.</p>
+<section class="login-form-section" aria-labelledby="login-title"><div class="login-card"><h2 id="login-title">Đăng nhập quản trị</h2><p class="login-lead">Sử dụng tài khoản System Administrator và mật khẩu QA ngẫu nhiên 64 ký tự đã được cấp riêng.</p>
 <form id="platform-login-form" action="/api/platform/login" method="post">
 <label for="email">Email</label><input id="email" type="email" autocomplete="username" autocapitalize="none" maxlength="254" required>
-<label for="password">Mật khẩu</label><input id="password" type="password" autocomplete="current-password" minlength="12" maxlength="256" required>
+<label for="password">Mật khẩu</label><input id="password" type="password" autocomplete="current-password" minlength="64" maxlength="64" pattern="[0-9a-f]{64}" required>
 <p class="login-error" id="login-error" role="alert" hidden></p><button id="submit" class="button button-dark login-submit" type="submit">Đăng nhập</button></form>
 <noscript>Cần bật JavaScript để đăng nhập an toàn.</noscript><p class="login-disclaimer">Môi trường QA. Không sử dụng tài khoản hoặc dữ liệu khách hàng.</p></div></section></main></body></html>
