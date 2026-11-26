@@ -1,3 +1,9 @@
+## R289 — Reconcile function inventory (2026-11-26 VN)
+
+- Owner agreed to resume PCS review and completion. Main remains at 7bddde32 (07 Nov); latest inspected development PR #330 R288 head b3bcbdcb (26 Nov). Exact R288 head has four successful workflow runs: 45798433006, 45798432993, 45798432916, 45798424454. No claim of actual deployed E2E.
+- Added [function inventory](function_audit_gpt_v1.md) with all 36 existing target functions plus platform administration, provisional source-level gaps, and next execution sequence. Preserve SRS v1.1.15, no signing, paused storage integration, public-safe metadata only. No new scope or SRS amendment.
+- PCS revision 141; AL-R0-DEPLOY-001 remains active. Next code package: isolated platform session issuance/login and controlled provisioning/revocation/recovery. Actual QA D1 and real-device verification remain NOT_RUN. No automatic merge, production deployment or customer data. This checkpoint changed documentation only.
+
 ## R288 — Platform Worker session isolation and mount (2026-11-26 VN)
 
 - R287 exact HEAD b191aa2b: GitHub Actions mobile view and DOCX POC both SUCCESS. R288 implements separate hashed platform session store, active principal verification, session-bound CSRF, and mounted platform routes on QA API Worker and same-origin site relay. No tenant role can grant platform access. No automatic seed or real grant. No change to business-data routes, frozen SRS v1.1.15 or F01–F36.
