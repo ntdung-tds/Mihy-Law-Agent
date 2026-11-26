@@ -31,7 +31,7 @@ async function readBody(req){
 }
 const RATE_SQL="INSERT INTO platform_admin_login_rate(installation_id,window_start,attempts) VALUES(?,?,1) ON CONFLICT(installation_id) DO UPDATE SET attempts=CASE WHEN window_start=excluded.window_start THEN MIN(21,attempts+1) ELSE 1 END,window_start=excluded.window_start RETURNING attempts";
 const CREDENTIAL_SQL="SELECT c.actor_id,c.salt,c.password_hash,c.scheme FROM platform_admin_credentials c JOIN platform_admin_principals p ON p.installation_id=c.installation_id AND p.actor_id=c.actor_id WHERE c.installation_id=? AND c.email=? AND p.status='active'";
-const ISSUE_SQL="INSERT INTO platform_admin_sessions(installation_id,token_hash,actor_id,expires_at,revoked_at) SELECT c.installation_id,?,c.actor_id,?,NULL FROM platform_admin_credentials c JOIN platform_admin_principals p ON p.installation_id=c.installation_id AND p.actor_id=c.actor_id WHERE c.installation_id=? AND c.email=? AND c.actor_id=? AND c.salt=? AND c.password_hash=? AND c.scheme=? AND p.status='active'";
+const ISSUE_SQL="INSERT INTO platform_admin_sessions(installation_id,token_hash,actor_id,expires_at,revoked_at) SELECT c.installation_id,?,c.actor_id,?,NULL FROM platform_admin_credentials c JOIN platform_admin_principals p ON p.installation_id=c.installation_id AND p.actor_id=c.actor_id WHERE c.installation_id=? AND c.email=? AND c.actor_id=? AND c.salt=? AND c.password_hash=? AND c.scheme=? AND p.status='active' RETURNING token_hash";
 export async function loginPlatform(req,env,now){
  if(!sameOrigin(req))return reply(403,{error:'FORBIDDEN'});
  // QA only: operator-generated random 256-bit password, NOT a human-selected password.
@@ -57,8 +57,9 @@ export async function loginPlatform(req,env,now){
   if(!valid||!match)return deny();
   const token=hex(crypto.getRandomValues(new Uint8Array(32)));
   // Recheck credential version and active principal in the INSERT itself to close read/write races.
-  const result=await env.DB.prepare(ISSUE_SQL).bind(await digest(token),now+TTL,env.INSTALLATION_ID,email,row.actor_id,row.salt,row.password_hash,SCHEME).run();
-  if(result?.success!==true||result.meta?.changes!==1)return deny();
+  const tokenHash=await digest(token);
+  const result=await env.DB.prepare(ISSUE_SQL).bind(tokenHash,now+TTL,env.INSTALLATION_ID,email,row.actor_id,row.salt,row.password_hash,SCHEME).first();
+  if(result?.token_hash!==tokenHash)return deny();
   return reply(200,{ok:true,expires_in:TTL},{'set-cookie':cookie(token,TTL)});
  }catch{return reply(503,{error:'UNAVAILABLE'});}
 }
@@ -66,8 +67,9 @@ export async function logoutPlatform(req,env,now,token,csrf){
  if(!sameOrigin(req)||!HEX64.test(req.headers.get('x-csrf-token')||'')||!equal(req.headers.get('x-csrf-token'),csrf))
   return reply(403,{error:'FORBIDDEN'});
  try{
-  const r=await env.DB.prepare('UPDATE platform_admin_sessions SET revoked_at=? WHERE installation_id=? AND token_hash=? AND revoked_at IS NULL').bind(now,env.INSTALLATION_ID,await digest(token)).run();
-  if(r?.success!==true||r.meta?.changes!==1)return reply(403,{error:'FORBIDDEN'});
+  const tokenHash=await digest(token);
+  const r=await env.DB.prepare('UPDATE platform_admin_sessions SET revoked_at=? WHERE installation_id=? AND token_hash=? AND revoked_at IS NULL RETURNING token_hash').bind(now,env.INSTALLATION_ID,tokenHash).first();
+  if(r?.token_hash!==tokenHash)return reply(403,{error:'FORBIDDEN'});
   return reply(200,{ok:true},{'set-cookie':cookie('',0)});
  }catch{return reply(503,{error:'UNAVAILABLE'});}
 }

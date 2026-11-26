@@ -2,9 +2,10 @@
  * Only synthetic QA metadata on isolated Cloudflare Free D1.
  * No real client files, legal text, OAuth, AI or production IAM.
  */
+import {validCaseDetails,caseInsertStatement} from './case_metadata_gpt.mjs';
 import {mobileSession} from './mobile_auth.mjs';
 const UUID=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
-const MAX_BODY=1024;
+const MAX_BODY=6000;
 const json=(status,data)=>new Response(JSON.stringify(data),{status,headers:{
   'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
   'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY',
@@ -79,12 +80,19 @@ async function list(env,identity,now){
 }
 async function create(req,env,identity,now){
  if(!originOkay(req) || !req.headers.get('Content-Type')?.startsWith('application/json'))return bad();
- if(Number(req.headers.get('Content-Length')||0)>MAX_BODY)return bad();
+ const declared=req.headers.get('Content-Length');
+ if(req.headers.has('Content-Encoding')||!req.body||(declared!==null&&(!/^\d{1,5}$/.test(declared)||Number(declared)>MAX_BODY)))return bad();
  let data;
  try{
-  const raw=await req.text();if(raw.length>MAX_BODY)return bad();data=JSON.parse(raw);
+  const reader=req.body.getReader(),chunks=[];let n=0;
+  try{for(;;){const {done,value}=await reader.read();if(done)break;n+=value.byteLength;if(n>MAX_BODY){try{await reader.cancel();}catch{}return bad();}chunks.push(value);}}finally{reader.releaseLock();}
+  if(declared!==null&&Number(declared)!==n)return bad();
+  const bytes=new Uint8Array(n);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
+  data=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
  }catch{return bad();}
- if(!data||typeof data.title!=='string')return bad();
+ if(!data||typeof data.title!=='string'||Object.keys(data).some(k=>!['title','details'].includes(k)))return bad();
+ const hasDetails=Object.hasOwn(data,'details');
+ if(hasDetails&&!validCaseDetails(data.details))return bad();
  const title=data.title.trim().normalize('NFC');
  if(title.length<3||title.length>100||/[\u0000-\u001f\u007f<>]/u.test(title))return bad();
  // No bulk importing or real case content in this QA-only module.
@@ -108,6 +116,7 @@ async function create(req,env,identity,now){
    installation_id,tenant_id,event_id,matter_id,actor_id,action,created_at)
    VALUES(?,?,?,?,?,?,?)`).bind(env.INSTALLATION_ID,identity.tenant_id,eid,id,identity.user_id,'created',now)
  ];
+ if(hasDetails)sql.push(caseInsertStatement(env,identity,id,data.details,now));
  await env.DB.batch(sql);
  return json(201,{id,title,created_at:now});
 }

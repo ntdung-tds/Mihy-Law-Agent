@@ -32,6 +32,9 @@ import { DRIVE_INLINE_JS } from './drive_inline_js.mjs';
 import {PLATFORM_LOGIN_HTML} from './platform_login_html_gpt.mjs';
 import {PLATFORM_LOGIN_JS} from './platform_login_js_gpt.mjs';
 import {PLATFORM_CATALOG_JS} from './platform_catalog_js_gpt.mjs';
+import {CASE_METADATA_HTML} from './case_metadata_html_gpt.mjs';
+import {CASE_METADATA_JS} from './case_metadata_js_gpt.mjs';
+import {CASE_METADATA_CSS} from './case_metadata_css_gpt.mjs';
 import {PLATFORM_HTML} from './platform_html_gpt.mjs';
 import {PLATFORM_JS} from './platform_js_gpt.mjs';
 import {PLATFORM_VIEW_JS} from './platform_view_js_gpt.mjs';
@@ -149,6 +152,16 @@ const app=WORKSPACE_HTML
  .replace('</head>','<script src="/drive-inline.js" defer></script></head>');
 export async function handleSite(req,env){
  const url=new URL(req.url),path=url.pathname;
+ const casePage=/^\/case-detail\/(?:new|[0-9a-f-]{36})$/.test(path);
+ if(casePage||path==='/case-detail.js'||path==='/case-detail.css'){
+  if(req.method!=='GET'||url.search)return missing();
+  try{const ok=await authenticated(req,env);if(ok===false)return redirect('/login');if(ok!==true)return unavailable();
+   return casePage?respond(CASE_METADATA_HTML):path.endsWith('.js')?respond(CASE_METADATA_JS,'application/javascript; charset=utf-8'):respond(CASE_METADATA_CSS,'text/css; charset=utf-8');}catch{return unavailable();}
+ }
+ if(/^\/api\/qa\/case-info\/[0-9a-f-]{36}(?:\/(?:events|hide))?$/.test(path)){
+  if(url.search||!['GET','PATCH','POST'].includes(req.method))return missing();
+  try{return await relay(req,env,path);}catch{return unavailable();}
+ }
  const isDocumentApi=path==='/api/qa/documents'||
   ['/api/qa/documents/upload/start','/api/qa/documents/upload/finish'].includes(path)||
   /^\/api\/qa\/documents\/[0-9a-f-]{36}\/download$/.test(path);
